@@ -2,7 +2,7 @@
 const { _electron } = require('playwright');
 const fs = require('fs'), path = require('path');
 const dir = process.env.SMOKE_DIR || path.join(__dirname, 'dist', 'win-unpacked');
-const exe = process.env.SMOKE_EXE || path.join(dir, fs.readdirSync(dir).find(f => f.endsWith('.exe')));
+const exe = process.env.SMOKE_EXE || path.join(dir, fs.readdirSync(dir).find(f => f.endsWith('.exe') && !f.startsWith('Uninstall')));
 const launch = () => _electron.launch({ executablePath: exe, args: process.env.SMOKE_ARGS ? process.env.SMOKE_ARGS.split(' ') : [], cwd: dir, timeout: 60000 });
 (async () => {
   const errs = [];

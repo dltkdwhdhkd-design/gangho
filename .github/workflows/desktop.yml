@@ -24,6 +24,16 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright
           node smoke.cjs
+      - name: 설치판을 실제로 설치해 보기
+        working-directory: desktop
+        run: |
+          $setup = (Get-ChildItem dist/Gangho-Setup-*.exe).FullName
+          Start-Process -FilePath $setup -ArgumentList '/S' -Wait
+          $dir = (Get-ChildItem "$env:LOCALAPPDATA\Programs" -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'resources\app.asar') }).FullName
+          Write-Output "installed: $dir"
+          Get-ChildItem "$env:USERPROFILE\Desktop" -Filter *.lnk | ForEach-Object { Write-Output "shortcut: $($_.Name)" }
+          $env:SMOKE_DIR = $dir
+          node smoke.cjs
       - name: 시험 화면 보관
         if: always()
         uses: actions/upload-artifact@v4
