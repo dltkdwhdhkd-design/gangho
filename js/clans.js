@@ -22,22 +22,22 @@ async function talk(c) {
   const a = await choice(`${c.name} ${c.who}에게 비무를 청할까?`, ['비무를 청한다', '다음에 온다']);
   if (a) return;
   const won = await ctx.duel({ foes: [k], arena: c.group === '구파일방' ? 'court' : 'ring', bgm: 'boss', title: `${c.name} · ${c.who}`, yieldAt: .25, optional: true });
-  if (!won) { await say(k, '다시 오시오. 문은 열어 두겠소.'); return; }
+  if (!won) { await say(k, '다시 오시오.'); return; }
   F[k] = true;
   for (const l of c.win) l.length === 2 ? await say(l[0], l[1]) : await say(k, l[0]);
   c.gift.forEach(id => learn(id));
   if (c.heart && !G.S.hearts.includes(c.heart)) { G.S.hearts.push(c.heart); toast(`심법 ${HEARTS[c.heart].name}을(를) 익혔다`, 3); }
   if (c.note) ctx.note(c.note);
   await G.life.lootPick(c.who, LOOT[c.id]);
-  if (clansWon() === 15) { Sound.sfx('ok3'); await say(null, '구파일방과 오대세가의 대표가 모두 예를 표했다. 강호에 네 이름이 퍼지기 시작했다.'); ctx.note('열다섯 세력에게 모두 인정받았다.'); }
+  if (clansWon() === 15) { Sound.sfx('ok3'); await say(null, '구파일방과 오대세가의 대표가 모두 인정했다. 강호에 네 이름이 퍼지기 시작했다.'); ctx.note('열다섯 세력에게 모두 인정받았다.'); }
 }
 async function beggar() {
-  const c = await choice('개방 거지가 그릇을 내민다.', ['구파일방이 뭐예요?', '오대세가는요?', '정천맹은요?', '사파는요?', '그 말고 또 있어요?', '그만둔다'], 'clan_gaebang');
-  if (c === 0) await say('beggar', '소림, 무당, 화산, 종남, 아미, 곤륜, 공동, 점창, 청성. 이 아홉 문파에 우리 개방을 더해 구파일방이지. 거지가 끼어 있다고 웃지 마라.');
-  if (c === 1) await say('beggar', '남궁, 모용, 제갈, 사천당가, 하북팽가. 핏줄로 이어 온 다섯 가문이다. 돈은 저쪽이 많아.');
-  if (c === 2) await say('beggar', '구파일방과 오대세가가 맹약을 맺고 세운 게 정천맹이다. 맹주 연경추는 어느 쪽 출신도 아닌데 그 자리에 앉았어. 대단한 사람이지. 대단한 사람은 조심해야 하고.');
-  if (c === 3) await say('beggar', '흑도맹이다. 산의 녹림, 강의 수로채, 도박판의 하오문, 독쟁이 오독문, 살수 혈의방. 정파가 안 받아 준 놈들이 모여 맹주까지 뽑았지. 맹주는 패천도 사마웅. 거지 눈에는 정파나 사파나 밥 안 주는 건 똑같다.');
-  if (c === 4) await say('beggar', '…그건 밥 먹을 때 묻는 게 아니다. 서쪽 하늘이 붉으면 나도 그때 말해 주마.');
+  const c = await choice('개방 거지가 그릇을 내민다.', ['구파일방이 뭡니까', '오대세가는 뭡니까', '정천맹은 뭡니까', '사파는 어떻습니까', '그 밖에 또 있습니까', '그만둔다'], 'clan_gaebang');
+  if (c === 0) await say('beggar', '소림, 무당, 화산, 종남, 아미, 곤륜, 공동, 점창, 청성. 이 아홉 문파에 우리 개방을 더해서 구파일방이야. 거지가 낀다고 웃지 마라.');
+  if (c === 1) await say('beggar', '남궁, 모용, 제갈, 사천당가, 하북팽가. 대대로 내려오는 다섯 가문이지. 돈은 그쪽이 훨씬 많아.');
+  if (c === 2) await say('beggar', '구파일방이랑 오대세가가 맹약을 맺고 세운 게 정천맹이야. 맹주 연경추는 어느 쪽 출신도 아닌데 그 자리에 앉았으니 대단한 양반이지.');
+  if (c === 3) await say('beggar', '흑도맹이라고 있어. 산의 녹림, 강의 수로채, 도박판의 하오문, 독쟁이 오독문, 살수 혈의방이 모여서 맹주까지 뽑았지. 맹주는 패천도 사마웅이고.');
+  if (c === 4) await say('beggar', '그건 함부로 입에 올리는 게 아니야. 더 묻지 마라.');
 }
 Object.assign(WHO, { beggar: { name: '개방 거지', face: 'Gaebang' } });
 

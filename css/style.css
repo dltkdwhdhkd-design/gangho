@@ -55,13 +55,13 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 #vn .st.pix.l{left:18px}
 #vn .st.pix.r{right:18px}
 @keyframes stin{from{opacity:0;transform:translateY(10px)}}
-#dialog .box{position:absolute;left:232px;right:232px;bottom:16px;min-height:152px;color:#fbf1dc;padding:46px 12px 14px;font-size:23px;line-height:1.55;text-shadow:0 2px 0 #000;pointer-events:auto;cursor:pointer}
+#dialog .box{word-break:keep-all;position:absolute;left:232px;right:232px;bottom:16px;min-height:152px;color:#fbf1dc;padding:46px 12px 14px;font-size:23px;line-height:1.55;text-shadow:0 2px 0 #000;pointer-events:auto;cursor:pointer}
 #dialog .who{position:absolute;left:0;right:0;top:0;text-align:center;color:var(--gold);font-size:23px;font-family:Galmuri11Bold}
 #dialog .who::after{content:'';position:absolute;left:12%;right:12%;top:34px;height:1px;background:linear-gradient(90deg,transparent,rgba(251,241,220,.55),transparent)}
 #dialog .next{position:absolute;left:0;right:0;bottom:-4px;text-align:center;color:var(--gold);font-size:16px;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
 #dialog.over{z-index:10}
-#dialog .narr{white-space:pre-line;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fbf1dc;font-size:26px;line-height:1.9;padding:0 120px;text-shadow:0 3px 0 #000;pointer-events:auto;cursor:pointer}
+#dialog .narr{white-space:pre-line;word-break:keep-all;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fbf1dc;font-size:26px;line-height:1.9;padding:0 120px;text-shadow:0 3px 0 #000;pointer-events:auto;cursor:pointer}
 #dialog .choices{position:absolute;left:50%;transform:translateX(-50%);bottom:190px;display:flex;flex-direction:column;gap:10px;pointer-events:auto;align-items:stretch;min-width:380px}
 #dialog .choices .btn{text-align:left;font-size:20px}
 #dialog .choices .btn.on{background:var(--gold);outline:3px solid var(--red)}
