@@ -7,3 +7,4 @@ import './life.js';
 import './part1a.js';
 import './part1.js';
 import './part1b.js';
+import './routes.js';

@@ -1,7 +1,7 @@
 # 팩의 인물 그림을 색만 바꿔 세력 대표용 변형을 만든다
 import colorsys
 from PIL import Image
-PAIRS = [('Princess', 'Moyong', 205, True), ('Inspector', 'Jegal', 120, True), ('Cavegirl2', 'Dang', 300, True), ('Lion', 'Paeng', 195, False), ('RedNinja', 'Hwasan', 325, False), ('Villager3', 'Gaebang', 55, True), ('Monk2', 'Sodi', 80, True)]
+PAIRS = [('Samurai', 'Hyeok', 280, True), ('Lion', 'Samaung', 260, True), ('Princess', 'Moyong', 205, True), ('Inspector', 'Jegal', 120, True), ('Cavegirl2', 'Dang', 300, True), ('Lion', 'Paeng', 195, False), ('RedNinja', 'Hwasan', 325, False), ('Villager3', 'Gaebang', 55, True), ('Monk2', 'Sodi', 80, True)]
 def shift(path, out, deg, keep_skin):
     im = Image.open(path).convert('RGBA'); px = im.load()
     for y in range(im.height):

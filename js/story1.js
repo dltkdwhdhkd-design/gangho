@@ -7,7 +7,7 @@ import { WEAPONS } from './data.js';
 const S = () => G.S, F = () => G.S.flags, step = () => G.S.flags.step || 'p0', set = v => { G.S.flags.step = v; };
 const at = (...a) => a.includes(step());
 const after = v => ORDER.indexOf(step()) >= ORDER.indexOf(v);
-const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
+const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'sa1', 'sa2', 'ma1', 'ma2', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
 export { step, set, at, after };
 G.after = after;
 const overBlack = on => $('#dialog').classList.toggle('over', on);
@@ -219,6 +219,9 @@ async function lionFight() {
   await say('lion', '값을 낸 건 그놈들이지만, 서찰엔 창운검문 인장이 찍혀 있었다. 놀랍지? 정파 나리들이 말이야.');
   await say('lion', '이것도 가져가라. 놈들이 흘리고 간 쇳조각이다. 달 모양이라 뭔가 했지.');
   await say(null, '달 모양 쇠붙이를 얻었다. 객잔 우물 뚜껑의 구멍과 크기가 비슷하다.');
+  const c = await choice('맹호가 칼을 내려놓고 쓴웃음을 짓는다.', ['목숨값은 나중에 받겠다고 한다', '산적질을 그만두라고 한다']);
+  if (c === 0) { await say('lion', '하! 빚을 지웠군. 녹림은 빚을 잊지 않는다. 언젠가 받으러 와라.'); F().lion_debt = true; ctx.rep('sa', 2); }
+  else { await say('lion', '배부른 소리다. 이 산에 농사지을 땅이 있으면 내가 왜 칼을 들겠느냐.'); ctx.rep('jeong', 1); }
   ctx.silver(120);
   ctx.note('광사자 맹호: 흑의인은 무면회. 서찰에 창운검문 인장이 찍혀 있었다.');
   set('c1g'); ctx.goal('객잔 우물 뚜껑을 달 모양 쇠붙이로 열어 보기');
@@ -305,7 +308,7 @@ Story.providers.push(function content1(id) {
   if (id === 'cheongha' && F().burned) {
     n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, mark: () => at('c1a') && !F().c1boat, talk: talkTown.boat });
     n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, talk: async () => { await say('kid', '쟁반 또 던져 봐요! 그거 진짜 멋있었어요!'); } });
-    n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, talk: async () => { await say('town', after('c1h') ? '네가 흑풍채를 혼냈다며? 객잔 다시 지을 때 부르거라.' : '곽 아주머니가 그렇게 될 줄이야. 객잔 불은 우리가 껐다.'); } });
+    n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, talk: async () => { await say('town', F().plague ? '콜록… 물을… 물을 마시지 말게…' : S().side === 'ma' ? '자네가 마교로 갔다는 소문이 돌던데. 설마 아니겠지.' : S().side === 'sa' ? '흑도맹 사람이 됐다며. 그래도 여긴 자네 마을일세.' : after('c1h') ? '네가 흑풍채를 혼냈다며? 객잔 다시 지을 때 부르거라.' : '곽 아주머니가 그렇게 될 줄이야. 객잔 불은 우리가 껐다.'); } });
     n.push({ id: 'town2', spr: 'Villager4', x: 12, y: 16.8, dir: 3, talk: async () => { await say('town2', '그믐만 되면 낯선 사람이 객잔에 봉투를 두고 갔단다. 십 년도 넘었을걸.'); if (!F().note_env) { F().note_env = true; ctx.note('마을 아낙: 그믐마다 낯선 사람이 객잔에 봉투를 두고 갔다.'); } } });
     sp.push({ x: 24, y: 16, w: 1, h: 1, hint: '방 보기', act: wantedBoard });
     sp.push({ x: 41, y: 13, w: 1, h: 1, hint: '이정표', act: async () => { await say(null, '동쪽: 산길. 산길을 지나 북쪽은 흑풍채, 남쪽은 창운산.'); } });
@@ -322,7 +325,7 @@ Story.providers.push(function content1(id) {
   if (id === 'fort') {
     n.push({ id: 'lion', spr: 'Lion', x: 18, y: 19, dir: 2, mark: () => !after('c1g') && !!F().bruiser, when: () => !after('c1g'), talk: lionFight });
     n.push({ id: 'bruiser', spr: 'Caveman2', x: 10, y: 12, dir: 3, when: () => !F().bruiser, hint: '맞서기', talk: bruiser });
-    ro.push({ spr: 'chars/Villager2', x: 8, y: 9, foes: ['bandit', 'bandit'] }, { spr: 'chars/Samurai', x: 24, y: 12, foes: ['archer', 'archer', 'bandit'] }, { spr: 'chars/Villager2', x: 29, y: 19, foes: ['bandit', 'bandit', 'archer'] });
+    if (S().side !== 'sa') ro.push({ spr: 'chars/Villager2', x: 8, y: 9, foes: ['bandit', 'bandit'] }, { spr: 'chars/Samurai', x: 24, y: 12, foes: ['archer', 'archer', 'bandit'] }, { spr: 'chars/Villager2', x: 29, y: 19, foes: ['bandit', 'bandit', 'archer'] });
   }
   return { npcs: n, spots: sp, trigs: tr, roam: ro };
 });

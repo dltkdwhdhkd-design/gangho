@@ -12,7 +12,7 @@ function render(c) {
   const d = $('#dialog'); d.innerHTML = '';
   if (c.type === 'narr') {
     const n = el('div', 'narr'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c);
-    d.style.background = 'rgba(0,0,0,.72)'; return;
+    const pic = c.cg && ART.get('cg_' + c.cg); d.style.background = pic ? `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)), url(${pic.src}) center/cover` : 'rgba(0,0,0,.72)'; return;
   }
   d.style.background = '';
   const w = c.who ? (c.who === 'me' ? { name: G.S.name, face: G.S.look, art: 'me' } : (WHO[c.who] || { name: c.who })) : null;
@@ -30,7 +30,7 @@ function render(c) {
 function click(c) { Input.press('ok'); setTimeout(() => Input.release('ok'), 30); }
 const sub = s => s.replaceAll('{나}', G.S ? G.S.name : '').replaceAll('{호}', G.S ? G.S.title : '');
 export function say(who, text, expr) { return new Promise(res => { const c = { type: 'say', who, text: sub(text), expr, n: 0, res }; D.cur = c; render(c); }); }
-export function narr(text) { return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res }; D.cur = c; render(c); }); }
+export function narr(text, cg) { return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res, cg }; D.cur = c; render(c); }); }
 export function choice(q, opts, who) {
   return new Promise(res => {
     const c = { type: 'choice', who, text: sub(q || ''), n: 0, res, opts, sel: 0 }; D.cur = c; render(c);

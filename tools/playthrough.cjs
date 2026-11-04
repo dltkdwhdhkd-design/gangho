@@ -5,7 +5,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 400))); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); else if (m.text().startsWith('LOG')) console.log(m.text()); });
   await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForTimeout(1200);
-  const res = await p.evaluate(async ({ diff, skill, clans }) => {
+  const res = await p.evaluate(async ({ diff, skill, clans, route, alt }) => {
     const process_clans = clans; const G = __G, D = G.dbg; G.manual = true; G.auto = true; G.speedup = 2000; G.bot = { skill };
     const log = { push: t => console.log('LOG ' + t), join: () => '' }; const sleep = () => new Promise(r => setTimeout(r, 0));
     const pump = async (n = 3) => { for (let i = 0; i < n; i++) { G.fast(60); await sleep(); } };
@@ -20,8 +20,9 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       while (S.silver > 60 && S.potion < 6) { S.silver -= 12; S.potion++; }
       const usable = S.skills.filter(id => { const k = D.ctx.learn && window.__SK ? 1 : 1; return true; });
     };
-    const wantedMap = { p0a: ['inn', 8, 8], p3: () => !F.errand ? ['inn', 8, 8] : !F.e_yun ? ['clinic', 7, 8] : !F.e_smith ? ['smith', 7, 8] : !F.e_boat ? ['cheongha', 22, 25] : ['inn', 8, 8], p4: ['inn', 8, 8], c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], s1: ['cheongha', 22, 26], s2: ['cheongha', 22, 20], s3: ['bokun', 7, 8], s4: ['cheongha', 22, 20], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], t1: ['cloudmt', 22, 34], t2: ['shaolin', 19, 25], t3: ['sutra', 8, 8], t4: ['shaolin', 28, 16], t5: ['cliffcave', 8, 8], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
+    const wantedMap = { sa1: ['fort', 18, 22], ma1: ['shrine', 7, 8], sa2: () => !F.sa_job1 ? ['cheongha', 22, 25] : !F.sa_job2 ? ['hall2', 7, 8] : !F.sa_job3 ? ['ninehall', 9, 13] : ['fort', 18, 22], ma2: () => !F.ma_job1 ? ['inn2', 8, 8] : !F.ma_job2 ? ['library', 7, 9] : !F.ma_job3 ? ['cheongha', 22, 25] : ['shrine', 7, 8], p0a: ['inn', 8, 8], p3: () => !F.errand ? ['inn', 8, 8] : !F.e_yun ? ['clinic', 7, 8] : !F.e_smith ? ['smith', 7, 8] : !F.e_boat ? ['cheongha', 22, 25] : ['inn', 8, 8], p4: ['inn', 8, 8], c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], s1: ['cheongha', 22, 26], s2: ['cheongha', 22, 20], s3: ['bokun', 7, 8], s4: ['cheongha', 22, 20], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], t1: ['cloudmt', 22, 34], t2: ['shaolin', 19, 25], t3: ['sutra', 8, 8], t4: ['shaolin', 28, 16], t5: ['cliffcave', 8, 8], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
     let iter = 0, lastStep = '', stuck = 0, loses = 0;
+    G.autoPick = c => { if (String(c.text).includes('누구의 손')) return ['jeong', 'sa', 'ma', 'free'].indexOf(route); if (/쌀을|명령서를|혜각이|제단의 불|고진이|항아리|맹호가|부맹주|일곱 장|강호행/.test(c.text)) return alt; return 0; };
     while (iter++ < 3000) {
       await pump(2);
       if (G.scene === 'battle' && G.battle) { const B = G.battle, t0 = B.t; const name = B.cfg.title || B.cfg.foes.join(); let n = 0; while (G.scene === 'battle' && G.battle === B && n++ < 400) { G.fast(60); await sleep(); } log.push(`${S.flags.step} ${name} lv${S.lv} ${B.outcome} ${B.t.toFixed(0)}s hp${Math.round(B.p.hp / B.p.maxHp * 100)}% pot${S.potion}`); if (B.outcome === 'lose') { loses++; S.exp += D.stats ? 60 + S.lv * 20 : 0; if (S.exp > 18 * Math.pow(S.lv, 1.32)) { S.exp = 0; S.lv++; S.pts += 3; } } await pump(1); continue; }
@@ -60,8 +61,8 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       if (st === 'c2b') { const n = f.npcs.find(n => n.id === 'go'); if (n) { f.run(n.talk); continue; } }
       log.push('no action at ' + st + ' map ' + m.id); stuck += 10;
     }
-    return { log, lv: S.lv, step: S.flags.step, skills: S.skills, silver: S.silver, love: S.love, loses, time: S.time, flags: Object.keys(S.flags).length, pages: S.pages };
-  }, { diff, skill, clans: process.argv[4] === 'clans' });
+    return { log, lv: S.lv, side: S.side, ending: S.flags.ending, rep: S.rep, titles: S.titles.length, step: S.flags.step, skills: S.skills, silver: S.silver, love: S.love, loses, time: S.time, flags: Object.keys(S.flags).length, pages: S.pages };
+  }, { diff, skill, clans: process.argv[4] === 'clans', route: process.argv[5] || 'jeong', alt: +(process.argv[6] || 0) });
   delete res.log; console.log(JSON.stringify(res));
   console.log('ERR', errs.slice(0, 10).join('\n')); await b.close();
 })().catch(e => { console.log(String(e).slice(0, 1200)); process.exit(1); });

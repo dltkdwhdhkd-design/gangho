@@ -24,6 +24,7 @@ const { chromium } = require('playwright');
       for (const q of m.portals) if (!reach(q.x + q.w / 2, q.y + q.h / 2, 14)) res.push(`${id}: 포탈 ${q.to}에 닿을 수 없음`);
       const items = new Map();
       for (const st of ['p1', ...allFlags]) { G.S.flags = { step: st, burned: st !== 'p1' }; const c = D.Story.content(id); for (const n of c.npcs) items.set('사람 ' + n.id, [n.x * 16, n.y * 16]); for (const s of c.spots) items.set('지점 ' + s.hint, [(s.x + s.w / 2) * 16, (s.y + s.h / 2) * 16]); for (const t of c.trigs) items.set('사건', [(t.x + t.w / 2) * 16, (t.y + t.h / 2) * 16]); for (const r of c.roam) items.set('몹 ' + r.spr, [r.x * 16, r.y * 16]); }
+      for (const [sd, st] of [['sa', 'sa1'], ['sa', 'sa2'], ['ma', 'ma1'], ['ma', 'ma2']]) { G.S.side = sd; G.S.flags = { step: st, burned: true, lion_debt: true }; const c = D.Story.content(id); for (const n of c.npcs) items.set('사람 ' + n.id, [n.x * 16, n.y * 16]); G.S.side = null; }
       for (const [k, [x, y]] of items) { if (!reach(x, y)) res.push(`${id}: ${k}(${(x / 16).toFixed(1)},${(y / 16).toFixed(1)}) 닿을 수 없음`); }
     }
     return res;

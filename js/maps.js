@@ -193,10 +193,14 @@ export function buildMaps() {
   m = M('valley', 40, 30, { name: '청풍골', bgm: 'peaceful', biome: 'deep', arena: 'forest', ambient: 'leaf' });
   m.water(19, 0, 2, 30).fill(19, 13, 2, 3, 4).road(21, 14, 39, 14, 2).road(4, 14, 18, 14, 2);
   m.solids.push({ x: 0, y: -8, w: 40 * TS, h: 8 });
-  m.border(['grove_pine', 'tree_big', 'grove_green', 'tree_pine'], [[38, 13, 3, 5]], 3);
+  m.border(['grove_pine', 'tree_big', 'grove_green', 'tree_pine'], [[38, 13, 3, 5], [0, 13, 4, 4]], 3);
   for (const [nm, x, y] of [['tree_pine', 9, 5], ['tree_round', 14, 7], ['tree_big', 26, 4], ['tree_pine', 32, 11], ['plum_g', 14, 19], ['tree_round', 7, 22], ['tree_pine', 25, 24], ['tree_big', 34, 26], ['boulder', 23, 10], ['boulder', 15, 25], ['plum', 30, 17], ['tree_round', 5, 9]]) m.put(nm, x, y);
   m.scatter(['fern1', 'fern2', 'bush2', 'bush4', 'flower3'], 34, 41);
-  m.exit(39, 14, 1, 4, 'cheongha', 2, 15.5, 3);
+  m.exit(39, 14, 1, 4, 'cheongha', 2, 15.5, 3).exit(0, 13, 1, 4, 'shrine', 7, 8, 1, { when: 'ma_open', lock: '깎아지른 절벽뿐이다.' });
+  // 천마신교 분타: 청풍골 서쪽 절벽 안
+  m = M('shrine', 14, 11, { name: '흑운궁 분타', bgm: 'curse', room: true, roomStyle: 1, arena: 'moon', tint: 'rgba(70,6,20,.4)' });
+  m.put('statue', 6, 1).put('lantern', 1, 2).put('lantern', 12, 2).put('bookcase', 2, 1).put('bookcase', 10, 1);
+  m.exit(5, 10, 4, 1, 'valley', 3, 15, 3, { door: true });
   // 소림사: 숭산의 절
   m = M('shaolin', 40, 30, { name: '소림사', bgm: 'temple', biome: 'grass', arena: 'court', ambient: 'leaf' });
   m.fill(14, 8, 12, 14, 3).road(19, 22, 19, 29, 2).road(5, 15, 14, 15, 2).road(26, 15, 34, 15, 2);

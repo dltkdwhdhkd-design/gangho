@@ -23,6 +23,12 @@ export const TITLES = [
   { id: 'rich', name: '은자 주머니', how: '은자 삼천 냥을 모은다', ok: S => S.silver >= 3000 },
   { id: 'wed', name: '공처가', how: '혼인한다', ok: S => S.married },
   { id: 'bro', name: '밥값 내는 아우', how: '철우와 의형제를 맺는다', ok: S => S.sworn === 'cheol' },
+  { id: 'sa', name: '흑도맹의 칼', how: '흑도맹에 들어간다', ok: S => S.side === 'sa' },
+  { id: 'ma', name: '천마신교 호교사자', how: '천마신교에 들어간다', ok: S => S.side === 'ma' },
+  { id: 'free', name: '어디에도 없는 칼', how: '아무의 손도 잡지 않는다', ok: S => S.side === 'free' },
+  { id: 'sa_lord', name: '흑도맹주', how: '사마웅을 꺾고 맹주가 된다', ok: S => S.flags.ending === 'sa_lord' },
+  { id: 'ma_right', name: '천마의 오른손', how: '천마를 깨운다', ok: S => S.flags.ending === 'ma_awake' },
+  { id: 'ma_lord', name: '살아 있는 교주', how: '봉인을 잠그고 신교를 잇는다', ok: S => S.flags.ending === 'ma_lord' },
   { id: 'hero', name: '협객', how: '정파 평판 3', ok: S => S.rep.jeong >= 3 },
   { id: 'sapa', name: '사파의 벗', how: '사파 평판 3', ok: S => S.rep.sa >= 3 },
 ];

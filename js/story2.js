@@ -228,10 +228,7 @@ async function finalMatch() {
   await say('cheol', '시주들, 뒷문이오! 내가 부쉈소! 문 부수는 건 내 전공이오!');
   await say('so', '곽 호법이 월하곡에 있다면 가야지. 내 사부 일도 거기서 끝내겠어.');
   await say('boat', '이런, 먼 데까지 왔더니 네가 쫓기고 있구나. 타라! 곽 아주머니 국수값은 내가 갚는다.');
-  set('c4a');
-  await narr('제6부 · 달이 진 골짜기\n\n배는 밤새 강을 거슬러 올랐다.\n열일곱 해 만에 돌아온 곳이었다.');
-  ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
-  await ctx.warp('wolha', 22, 37, 1);
+  await G.route.crossroads();
 }
 // ── 4장 ──
 async function trace(k) {
@@ -273,31 +270,23 @@ async function foxBoss() {
   await say('fox', '직접 물어봐라. 칼로.');
   await ctx.duel({ foes: ['fox'], arena: 'moon', bgm: 'boss', title: '여우 가면' });
   await narr('가면이 갈라져 떨어졌다.\n거기에는, 곽 아주머니가 그토록 자주 들여다보던 위패 속 문주의 얼굴이 있었다.');
-  await say('cheon', '…너는 객잔에서 국수를 먹으며 컸더구나. 나는 여덟 살에 저 사람 손에 끌려가 사람 죽이는 법을 배웠다.');
+  await say('cheon', '…너도 개처럼 컸다더구나. 나는 여덟 살에 저 사람 손에 끌려가 사람 죽이는 법을 배웠다.');
   await say('me', '큰아이… 월천. 그럼 당신이…');
   await say('cheon', '피붙이라고는 부르지 마라. 그 말을 들으면 칼을 못 든다.');
+  await say('cheon', '하나만 알아 둬라. 북쪽 변경 마을에 불을 지른 건 전쟁이 아니다. 너를 찾던 무면당이다. 견대도 저 사람이 고아를 모으려고 만든 곳이고.');
+  await say('me', '…제 번호도요?');
+  await say('cheon', '그 마지막 임무도. 네가 살아 돌아온 것만 저 사람의 계산에 없었다.');
   await say('gwak', '천아! 이 못난 놈, 밥은 먹고 다니냐!');
   await say('cheon', '…아주머니.');
   await say('chief', '다들 모였구나. 쓸모가 다한 것도 함께.');
   await narr('연경추의 검이 월천의 등을 뚫었다.\n월천은 쓰러지면서도 맹주의 손목을 붙들었다.');
   await say('cheon', '가라… 달이… 뜰 때… 베어라…');
   set('c4d');
-  await say('so', '{나}! 내 사부 몫도 있어!');
-  await say('cheol', '시주, 이 문도 내가 부수겠소!');
-  await say('chief', '일곱 장이 다 모였구나. 고맙다. 이제 네 손을 놓거라.');
-  const won = clansWon(), allies = ['so_ally', 'cheol_ally'];
-  if (won >= 5) { await say('clan_shaolin', '아미타불. 소림이 십칠 년 묵은 빚을 갚으러 왔소.'); allies.push('hyegak_ally'); }
-  if (won >= 10) { await say('clan_namgung', '남궁의 검은 출신을 묻지 않기로 했다. 맹주, 당신의 출신은 물어야겠군.'); allies.push('namgung_ally'); }
-  if (won >= 15) { await narr('골짜기 위로 깃발이 하나둘 올라왔다.\n소림, 무당, 화산, 종남, 아미, 곤륜, 공동, 점창, 청성, 개방.\n남궁, 모용, 제갈, 당가, 팽가.\n열일곱 해 전 이곳을 둘러쌌던 깃발들이, 이번에는 맹주를 향해 섰다.'); await say('chief', '…점소이 하나에게 강호가 넘어갔단 말이냐.'); }
-  await ctx.duel({ foes: ['chief'], allies, foeHpMul: won >= 15 ? .8 : 1, arena: 'moon', bgm: 'boss', title: '정천맹주 연경추' });
-  await say('chief', '…왜지. 나는 다 익혔는데. 왜 네 달이 더 밝은 게냐.');
-  await say('me', '걸레질을 안 해 보셨잖아요.');
-  await say('chief', '하하… 그래도 늦었다. 일곱 장은 이미 천산을 향해 있다. 교주께서… 깨어나신다…');
-  await say('so', '천산? 교주? 저 사람 지금 무슨 소리를 하는 거야.');
-  await say('cheol', '…시주들. 달을 보시오.');
+  await G.route.chiefBattle();
   await ending();
 }
 async function ending() {
+  if (S().side && S().side !== 'jeong') return G.route.routeEnding();
   await narr('달이 떴다.\n강호는 맹주가 쓰러졌다는 소식으로 석 달을 시끄러웠고,\n월천의 무덤은 마흔아홉 위패 곁에 쉰 번째로 놓였다.');
   await narr('정천맹은 해체되었다.\n구파일방과 오대세가의 장문인들은 차례로 월하곡에 올라 향을 피웠다.\n열일곱 해가 늦은 향이었다.');
   await say('gwak', '방값은?');
