@@ -8,7 +8,7 @@ import { icon } from './icons.js';
 import { Story } from './story.js';
 import { CLANS, SAPA, clansWon } from './clandata.js';
 
-const LOOKS = [['BlueSamurai', '상투 머리'], ['Boy', '다홍 머리'], ['Villager3', '곱슬 머리'], ['GrayNinja', '머리띠'], ['DarkNinja', '검은 복면']];
+const LOOK = 'BlueSamurai'; // 주인공 도트는 일러스트에 맞춰 하나로 고정
 function titleBg(c) {
   c.setTransform(1, 0, 0, 1, 0, 0); const g = c.createLinearGradient(0, 0, 0, 720); g.addColorStop(0, '#1b2348'); g.addColorStop(.62, '#4b3560'); g.addColorStop(1, '#c0694a'); c.fillStyle = g; c.fillRect(0, 0, 1280, 720);
   c.fillStyle = '#f7eecb'; c.beginPath(); c.arc(960, 170, 76, 0, 7); c.fill(); c.fillStyle = 'rgba(247,238,203,.12)'; c.beginPath(); c.arc(960, 170, 120, 0, 7); c.fill();
@@ -21,19 +21,16 @@ export function showTitle() {
   $('#bNew').onclick = () => { Sound.init(); Sound.resume(); Sound.bgm('story'); showCreate(); };
   const l = $('#bLoad'); if (!hasSave()) l.disabled = true; else l.classList.add('pri'); (hasSave() ? l : $('#bNew')).focus(); l.onclick = () => { Sound.init(); G.S = load(); s.innerHTML = ''; Story.resume(); };
 }
-function drawLook(cv, key) { const x = cv.getContext('2d'); cv.width = 16; cv.height = 16; x.imageSmoothingEnabled = false; const im = IMG['chars/' + key]; if (im) x.drawImage(im, 0, 0, 16, 16, 0, 0, 16, 16); }
 function showCreate() {
-  const s = $('#screen'); let look = 0, diff = 'normal';
+  const s = $('#screen'); let diff = 'normal';
   s.innerHTML = `<div class="sheet"><div class="card"><h2>어떤 낭인입니까?</h2><div class="hint">군막에서는 번호로 불렸습니다. 이름 하나만은 잊지 않았습니다.</div>
   <div class="field"><span>이름</span><input id="nm" maxlength="6" placeholder="이름을 입력하세요" autocomplete="off"></div>
-  <div class="looks" id="lk"></div>
   <div class="field"><span>난이도</span><div class="seg" id="df"></div></div>
   <div class="hint">쉬움은 적이 약하고, 어려움은 적의 공격이 세고 체력도 많습니다. 나중에 바꿀 수 없습니다.</div>
   <div class="row"><button class="btn" id="back">돌아가기</button><button class="btn pri" id="go">시작</button></div></div></div>`;
-  LOOKS.forEach(([k, n], i) => { const b = el('button', 'look' + (i === 0 ? ' on' : '')), cv = document.createElement('canvas'); drawLook(cv, k); b.appendChild(cv); b.appendChild(document.createTextNode(n)); b.onclick = () => { look = i; $$('.look').forEach((e, j) => e.classList.toggle('on', j === i)); Sound.sfx('tick'); }; $('#lk').appendChild(b); });
   for (const k of ['easy', 'normal', 'hard']) { const b = el('button', 'btn' + (k === diff ? ' on' : ''), DIFF[k].name); b.onclick = () => { diff = k; $$('#df .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); }; $('#df').appendChild(b); }
   $('#back').onclick = showTitle;
-  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LOOKS[look][0], 'm', diff); s.innerHTML = ''; G.bgDraw = null; Story.begin(); };
+  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LOOK, 'm', diff); s.innerHTML = ''; G.bgDraw = null; Story.begin(); };
   setTimeout(() => $('#nm').focus(), 50);
 }
 // ── 메뉴 ──

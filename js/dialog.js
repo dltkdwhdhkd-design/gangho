@@ -20,6 +20,7 @@ function slot(side, who, expr) {
 }
 function stageShow(who, expr) {
   const st = $('#vn'); if (!st) return; st.classList.add('on');
+  const hint = $('#thint'); if (hint) hint.style.display = 'none';
   if (who === 'me') slot('l', 'me', expr); else if (!st.querySelector('.st.l')) slot('l', 'me');
   if (who && who !== 'me') slot('r', who, expr);
   st.querySelectorAll('.st').forEach(e => e.classList.toggle('talk', e.dataset.who === who));
