@@ -59,9 +59,9 @@ export const FOES = {
   puppet: F('독강시', 'chars/Skeleton', 240, 26, 12, 40, 60, 10, 1.3, ['venom', 'heavy'], { poise: 30 }),
   elder_wi: F('검각주 위문상', 'chars/Noble', 1560, 30, 10, 66, 420, 300, .85, ['double', 'cloud_flash', 'swallow_qi', 'fan5', 'heavy'], { wpn: 'Rapier', guard: .8, boss: 1, poise: 160, phases: [{ hp: .55, say: '제법이구나. 그럼 이건 어떠냐.', add: ['flurry', 'rain', 'summon2'], pause: .7 }], minion: 'shadow', scale: 1.3 }),
   // 3장
-  fighter_a: F('철장 곽충', 'chars/Monk', 460, 30, 9, 58, 110, 60, 1, ['iron_fist', 'chain_kick', 'earth_stomp'], { wpn: 'Club', guard: .6, poise: 50, elite: 1 }),
-  fighter_b: F('쌍도 마혜', 'chars/Cavegirl', 520, 32, 9, 74, 130, 70, .9, ['flurry', 'blood_fan', 'quick'], { wpn: 'Ninjaku', guard: .5, poise: 50, elite: 1 }),
-  fighter_c: F('유성추 등표', 'chars/GoldKnight', 640, 34, 12, 56, 160, 90, 1, ['heavy', 'spin', 'rain', 'one_point'], { wpn: 'Lance', guard: .5, poise: 80, elite: 1 }),
+  fighter_a: F('공동파 곽충', 'chars/Monk', 460, 30, 9, 58, 110, 60, 1, ['iron_fist', 'chain_kick', 'earth_stomp'], { wpn: 'Club', guard: .6, poise: 50, elite: 1 }),
+  fighter_b: F('팽가 마혜', 'chars/Cavegirl', 520, 32, 9, 74, 130, 70, .9, ['flurry', 'blood_fan', 'quick'], { wpn: 'Ninjaku', guard: .5, poise: 50, elite: 1 }),
+  fighter_c: F('곤륜파 등표', 'chars/GoldKnight', 640, 34, 12, 56, 160, 90, 1, ['heavy', 'spin', 'rain', 'one_point'], { wpn: 'Lance', guard: .5, poise: 80, elite: 1 }),
   cheolu_spar: F('철우', 'chars/Monk2', 700, 30, 14, 56, 170, 0, 1, ['iron_fist', 'chain_kick', 'earth_stomp', 'heavy'], { wpn: 'Club', guard: .8, boss: 1, poise: 120 }),
   so_final: F('소연하', 'chars/RedSamurai', 1500, 37, 11, 84, 460, 400, .8, ['flurry', 'cloud_flash', 'blink', 'fan5', 'wind_turn', 'moon3'], { wpn: 'Katana', guard: 1.2, boss: 1, poise: 170, phases: [{ hp: .5, say: '여기서부터 진심이야.', add: ['rain', 'sky_sword'], pause: .65 }] }),
   shadow2: F('무면회 살수', 'chars/DarkNinja', 300, 36, 9, 80, 80, 20, 1, ['quick', 'blink', 'dart3', 'lunge'], { wpn: 'Ninjaku', guard: .5 }),

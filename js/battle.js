@@ -28,14 +28,14 @@ export class Battle {
     const S = G.S, st = stats(S); this.st = st;
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;
-    (cfg.allies || []).forEach((id, i) => this.spawn(id, 0, this.W / 2 + (i ? 26 : -26), this.H * .72));
+    (cfg.allies || []).forEach((id, i, l) => this.spawn(id, 0, this.W / 2 + (i - (l.length - 1) / 2) * 34 + (l.length % 2 ? 20 : 0), this.H * .74 + (i % 2) * 10));
     const list = cfg.foes; list.forEach((id, i) => { const n = list.length, ox = (i - (n - 1) / 2) * 38; this.spawn(id, 1, this.W / 2 + ox, this.H * .3 + (i % 2) * 14); });
     this.camera(1);
     this.buildHud();
   }
   spawn(id, team, x, y) {
     const f = FOES[id], d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
-    const hp = Math.round(f.hp * (enemy ? d.foeHp : 1)), atk = f.atk * (enemy ? d.foeAtk : 1);
+    const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) : 1)), atk = f.atk * (enemy ? d.foeAtk : 1);
     const a = new Actor({ id, def_: f, team, name: f.name, spr: f.spr, x, y, maxHp: hp, hp, atk, def: f.def, spd: f.spd, crit: .02, boss: f.boss, elite: f.elite, mon: f.mon, big: f.big, r: f.r || 6, scale: f.scale || 1, wpn: f.wpn, moves: f.moves.slice(), pause: f.pause, poise: f.poise || 0, maxPoise: f.poise || 0, phase: 0, ax: 0, ay: 1, face: 0, dummy: f.dummy, atkCd: rnd(.6, 1.3) });
     if (team === 0) { a.hp = a.maxHp = hp * 1.4; a.atk = atk * .7; }
     this.actors.push(a); return a;
@@ -184,9 +184,11 @@ export class Battle {
     if (s.hit) { this.swingFx(a, s.hit); this.melee(a, s.hit, sk); }
     if (s.proj) this.shoot(a, s.proj, sk);
     if (s.zone) this.zone(a, s.zone, sk);
+    if (s.clearProj) this.proj = this.proj.filter(p => p.team === a.team);
+    if (s.selfhurt) { const v = Math.round(a.maxHp * s.selfhurt); a.hp = Math.max(1, a.hp - v); this.num(a.x, a.y - 18, v, '#ff7a6a', .8); }
     if (s.heal) { const h = Math.round(a.maxHp * s.heal.hp); a.hp = Math.min(a.maxHp, a.hp + h); a.mp = Math.min(a.maxMp, a.mp + a.maxMp * s.heal.mp); this.num(a.x, a.y - 18, '+' + h, '#7fe08a', 1); }
     if (s.buff) { a.buffs[s.buff.id] = s.buff.dur; this.say(a, sk.name, '#ffd27a'); }
-    if (s.counter) { a.counter = s.counter.dur; a.counterMul = s.counter.mul; a.counterKey = a.skKey; }
+    if (s.counter) { a.counter = s.counter.dur; a.counterMul = s.counter.mul; a.counterAll = s.counter.all; a.counterName = sk.name; a.counterKey = a.skKey; }
     if (s.pull) for (const o of this.foes(a)) { const dx = a.x - o.x, dy = a.y - o.y, d = hyp(dx, dy) || 1; if (d < s.pull.r) { o.kx = dx / d * s.pull.f; o.ky = dy / d * s.pull.f; o.kT = .3; } }
     if (s.slowfoes) for (const o of this.foes(a)) { o.slowT = s.slowfoes.dur; o.slowF = s.slowfoes.f; }
     if (s.moonstrike) { const list = this.foes(a); if (list.length) { const T = list[(a.msI = (a.msI || 0) + 1) % list.length]; a.x = clamp(T.x + rnd(-12, 12), this.left, this.right); a.y = clamp(T.y + rnd(-10, 10), this.top, this.floorB); a.ghostT = .1; this.addFx('cut', T.x, T.y - 6, s.moonstrike.big ? 3 : 1.5, rnd(6.28)); this.applyHit(a, T, { mul: s.moonstrike.mul, kb: 16, stun: .5, ub: true }, sk); } }
@@ -222,16 +224,17 @@ export class Battle {
     const T = this.near(a); const n = z.n || 1;
     for (let i = 0; i < n; i++) {
       let x = a.x, y = a.y;
+      if (z.at === 'ring') { const an = i / n * 6.283; x = clamp(a.x + Math.cos(an) * z.dist, 10, this.W - 10); y = clamp(a.y + Math.sin(an) * z.dist * .85, 20, this.H - 10); }
       if (z.at === 'target' && T) { x = clamp(T.x + (i ? rnd(-z.spread, z.spread) : 0), 10, this.W - 10); y = clamp(T.y + (i ? rnd(-z.spread, z.spread) : 0), 20, this.H - 10); }
-      this.zones.push({ x, y, r: z.r, left: z.delay + i * .08, tot: z.delay + i * .08, h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub }, owner: a, team: a.team, sk, fx: z.fx, sfx: z.sfx, player: z.player });
+      this.zones.push({ x, y, r: z.r, left: z.delay + (z.at === 'ring' ? 0 : i * .08), tot: z.delay + (z.at === 'ring' ? 0 : i * .08), h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub }, owner: a, team: a.team, sk, fx: z.fx, fxS: z.at === 'ring' ? 1 : 0, sfx: z.sfx, player: z.player });
     }
   }
   // 피해 처리
   applyHit(src, o, h, sk, proj) {
     const isP = o.isPlayer, inv = src.isPlayer;
     const dx = o.x - src.x, dy = o.y - src.y, d = hyp(dx, dy) || 1, nx = dx / d, ny = dy / d;
-    if (o.counter > 0 && !h.ub) { // 낙화유수
-      o.counter = 0; o.iframe = .4; const m = o.counterMul; this.addFx('double', src.x, src.y - 6, 1.6); this.say(o, '낙화유수!', '#ffd27a'); this.stop = .08; Sound.sfx('sword2'); this.applyHit(o, src, { mul: m, kb: 60, stun: .7, ub: true }, o.sk); return;
+    if (o.counter > 0 && (!h.ub || o.counterAll)) { // 낙화유수, 이화접목
+      o.counter = 0; o.iframe = .4; const m = o.counterMul; this.addFx('double', src.x, src.y - 6, 1.6); this.say(o, (o.counterName || '반격') + '!', '#ffd27a'); this.stop = .08; Sound.sfx('sword2'); this.applyHit(o, src, { mul: m, kb: 60, stun: .7, ub: true }, o.sk); return;
     }
     const front = (-nx * o.ax + -ny * o.ay) > -.1 || proj;
     if (o.st === 'guard' && front && !h.ub) {
@@ -340,7 +343,7 @@ export class Battle {
         if (o.team === p.team || o.dead || o.iframe > 0 || p.seen.has(o)) continue;
         if (hyp(o.x - p.x, o.y - 5 - p.y) < o.r + p.r) {
           p.seen.add(o);
-          this.applyHit(p.owner, o, { mul: p.mul, kb: p.kb ?? 22, stun: p.stun, ub: p.ub }, p.sk, p);
+          this.applyHit(p.owner, o, { mul: p.mul, kb: p.kb ?? 22, stun: p.stun, ub: p.ub, dot: p.dot }, p.sk, p);
           if (!p.pierce) p.age = 99;
           break;
         }
@@ -391,7 +394,7 @@ export class Battle {
       const opts = a.moves.map(m => MOVES[m]).filter(m => m && d <= m.range + 8 && (a.cd[m.id] || 0) <= 0);
       if (opts.length) {
         const m = pick(opts); a.ax = nx; a.ay = ny; a.face = faceOf(nx, ny);
-        this.start(a, m, m.id); a.cd[m.id] = m.once || (m.fromSkill ? Math.min(m.cd, 8) : 0) || (m.range > 90 ? 3 : .5);
+        this.start(a, m, m.id); a.cd[m.id] = m.once || (m.ult ? 16 : 0) || (m.fromSkill ? Math.min(m.cd, 8) : 0) || (m.range > 90 ? 3 : .5);
         a.atkCd = a.pause * rnd(.75, 1.3) + m.dur * .35; return;
       }
     }
@@ -497,6 +500,7 @@ export class Battle {
   drawProj(c, p) {
     c.save(); c.translate(p.x, p.y);
     if (p.img === 'tray') { c.rotate(p.age * 18); c.fillStyle = '#7a4a22'; c.beginPath(); c.ellipse(0, 0, 6, 3.4, 0, 0, 7); c.fill(); c.fillStyle = '#b57a3e'; c.beginPath(); c.ellipse(0, 0, 4.4, 2.2, 0, 0, 7); c.fill(); }
+    else if (p.img === 'plum') { c.rotate(p.age * 9); c.fillStyle = '#ffb7c8'; for (let i = 0; i < 5; i++) { const q = i * 1.2566; c.beginPath(); c.arc(Math.cos(q) * 2.4, Math.sin(q) * 2.4, 1.8, 0, 7); c.fill(); } c.fillStyle = '#ffe36a'; c.fillRect(-1, -1, 2, 2); }
     else if (p.img === 'crescent') { c.rotate(p.an); c.strokeStyle = '#eaf2ff'; c.lineWidth = 3; c.beginPath(); c.arc(-6, 0, 12, -1.1, 1.1); c.stroke(); c.strokeStyle = 'rgba(150,190,255,.6)'; c.lineWidth = 5; c.beginPath(); c.arc(-9, 0, 12, -1, 1); c.stroke(); }
     else { const d = PJ[p.img] || [16, 16, 1], im = IMG['fx/' + p.img], fr = Math.floor(p.age * 12) % d[2]; c.rotate(p.an); if (im) c.drawImage(im, fr * d[0], 0, d[0], d[1], -d[0] / 2, -d[1] / 2, d[0], d[1]); }
     c.restore();

@@ -74,12 +74,12 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .bname{color:#fff3d6;font-size:18px;text-shadow:0 2px 0 #000;margin-bottom:5px}
 .foe{position:absolute;right:18px;top:14px;width:300px}
 .foe .fi{margin-bottom:7px}.foe .fi .bname{font-size:15px;margin-bottom:2px;text-align:right}.foe .bar{height:12px;margin-bottom:0}
-.boss{position:absolute;left:50%;top:14px;transform:translateX(-50%);width:640px}
+.boss{position:absolute;left:462px;right:18px;top:14px}
 .boss .bname{text-align:center;font-size:21px}.boss .bar{height:20px}.boss .bar.pos{height:9px;margin-top:3px}.boss .bar.pos i.val{background:var(--gold)}
 .skills{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-end}
 .sk{width:84px;height:84px;background:rgba(24,18,14,.9);border:3px solid var(--paper2);position:relative;color:#fbf1dc;font-size:13px;text-align:center;overflow:hidden;box-shadow:0 0 0 2px #000}
 .sk.small{width:62px;height:62px;font-size:12px}
-.sk .nm{position:absolute;left:2px;right:2px;top:22px;line-height:1.2;word-break:keep-all}
+.sk .nm{position:absolute;left:2px;right:2px;top:20px;line-height:1.15;word-break:break-all}
 .sk .ky{position:absolute;left:0;top:0;background:var(--paper2);color:var(--ink);padding:1px 6px;font-size:13px}
 .sk .mp{position:absolute;right:3px;top:1px;color:#8fc0ff;font-size:12px}
 .sk .cd{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(0,0,0,.72)}

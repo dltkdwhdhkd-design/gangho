@@ -5,8 +5,8 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 400))); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); else if (m.text().startsWith('LOG')) console.log(m.text()); });
   await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForTimeout(1200);
-  const res = await p.evaluate(async ({ diff, skill }) => {
-    const G = __G, D = G.dbg; G.manual = true; G.auto = true; G.speedup = 2000; G.bot = { skill };
+  const res = await p.evaluate(async ({ diff, skill, clans }) => {
+    const process_clans = clans; const G = __G, D = G.dbg; G.manual = true; G.auto = true; G.speedup = 2000; G.bot = { skill };
     const log = { push: t => console.log('LOG ' + t), join: () => '' }; const sleep = () => new Promise(r => setTimeout(r, 0));
     const pump = async (n = 3) => { for (let i = 0; i < n; i++) { G.fast(60); await sleep(); } };
     G.S = D.newState('진소', 'BlueSamurai', 'm', diff); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null;
@@ -29,9 +29,17 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       upkeep();
       const st = S.flags.step; if (st === 'end') break;
       if (st === lastStep) stuck++; else { stuck = 0; lastStep = st; }
-      if (stuck > 60) { log.push('STUCK at ' + st + ' map ' + S.map + ' goal ' + S.goal); break; }
+      if (stuck > 400) { log.push('STUCK at ' + st + ' map ' + S.map + ' goal ' + S.goal); break; }
       const f = G.field, m = f.m;
       let mark = f.npcs.find(n => n.mark && n.mark());
+      if (st === 'c3b' && F.monk_met && (F.round || 0) >= 2 && process_clans) {
+        const left = ['shaolin', 'wudang', 'hwasan', 'jongnam', 'emei', 'gonryun', 'gongdong', 'jeomchang', 'cheongseong', 'gaebang', 'namgung', 'moyong', 'jegal', 'dang', 'paeng'].filter(k => !F['clan_' + k]);
+        if (left.length) {
+          const five = ['namgung', 'moyong', 'jegal', 'dang', 'paeng'].includes(left[0]), mid = five ? 'fiveclans' : 'ninehall';
+          if (m.id !== mid) { f.load(mid, five ? 37 : 2, five ? 12 : 10, 1); continue; }
+          const n = f.npcs.find(x => x.id === 'clan_' + left[0]); if (n) { f.run(n.talk); continue; }
+        }
+      }
       if (st === 'c3b' && !F.monk_met) { if (m.id !== 'inn2') { f.load('inn2', 8, 8, 1); continue; } }
       if (st === 'c3b' && F.monk_met) {
         const r = F.round || 0;
@@ -53,7 +61,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       log.push('no action at ' + st + ' map ' + m.id); stuck += 10;
     }
     return { log, lv: S.lv, step: S.flags.step, skills: S.skills, silver: S.silver, love: S.love, loses, time: S.time, flags: Object.keys(S.flags).length, pages: S.pages };
-  }, { diff, skill });
+  }, { diff, skill, clans: process.argv[4] === 'clans' });
   delete res.log; console.log(JSON.stringify(res));
   console.log('ERR', errs.slice(0, 10).join('\n')); await b.close();
 })().catch(e => { console.log(String(e).slice(0, 1200)); process.exit(1); });

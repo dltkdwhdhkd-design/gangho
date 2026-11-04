@@ -6,7 +6,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   for (const id of ids) {
     const url = await p.evaluate(async id => {
       const G = __G, m = G.dbg.MAPS[id]; const c = document.createElement('canvas'); c.width = m.w * 16 * 2; c.height = m.h * 16 * 2; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.scale(2, 2);
-      x.drawImage(m.canvas, 0, 0); const { drawStamp } = await import('/js/tiles.js');
+      x.drawImage(m.canvas, 0, 0); const { drawStamp } = await import(new URL('js/tiles.js', location.href).href);
       for (const s of [...m.objs].sort((a, b) => a.base - b.base)) drawStamp(x, s.name, s.x, s.y);
       x.strokeStyle = 'rgba(255,0,0,.6)'; x.lineWidth = .5; for (const s of m.solids) x.strokeRect(s.x, s.y, s.w, s.h);
       x.strokeStyle = 'rgba(0,160,255,.9)'; x.lineWidth = 1; for (const s of m.portals) x.strokeRect(s.x, s.y, s.w, s.h);

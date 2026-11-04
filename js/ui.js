@@ -3,6 +3,7 @@ import { G, IMG, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS } 
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, masteryLv, canEquip, DIFF, learn } from './state.js';
 import { Story } from './story.js';
+import { CLANS, clansWon } from './clandata.js';
 
 const LOOKS = [['BlueSamurai', '상투 머리'], ['Boy', '다홍 머리'], ['Villager3', '곱슬 머리'], ['Cavegirl2', '보랏빛 머리'], ['Woman', '금빛 머리'], ['Villager4', '단발 머리']];
 function titleBg(c) {
@@ -43,12 +44,12 @@ export function closeMenu() { G.menuOpen = false; $('#modal').classList.remove('
 function menuKey(e) { if (e.code === 'Escape' || e.code === 'KeyM') { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식 배치'], ['gear', '무기·심법'], ['note', '수첩'], ['love', '인연'], ['set', '설정']];
+  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식 배치'], ['gear', '무기·심법'], ['clan', '강호'], ['note', '수첩'], ['love', '인연'], ['set', '설정']];
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (Esc)</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, gear: tabGear, note: tabNote, love: tabLove, set: tabSet })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, gear: tabGear, clan: tabClan, note: tabNote, love: tabLove, set: tabSet })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
@@ -88,6 +89,10 @@ function tabGear(B) {
   B.innerHTML = h + '</div></div></div>';
   $$('[data-w]', B).forEach(b => b.onclick = () => { S.weapon = b.dataset.w; S.slots = S.slots.map(id => id); Sound.sfx('accept'); drawMenu(); });
   $$('[data-h]', B).forEach(b => b.onclick = () => { S.heart = b.dataset.h; Sound.sfx('accept'); drawMenu(); });
+}
+function tabClan(B) {
+  const S = G.S, row = c => { const w = S.flags['clan_' + c.id]; return `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400;font-size:18px">${c.name}</b> <small class="hint">${c.han}</small>${w ? '<span class="tag ult">인정받음</span>' : ''}<div class="hint" style="line-height:1.35">${c.desc}${S.flags.boat_guhwa || w ? ` 대표 ${c.who}.` : ''}${w ? ` 전수: ${c.gift.map(id => SKILLS[id].name).join(', ')}` : ''}</div></div>`; };
+  B.innerHTML = `<p class="hint">정천맹은 구파일방과 오대세가의 맹약으로 세워졌습니다. 인정받은 세력 ${clansWon()} / 15</p><div class="two"><div><h2>구파일방</h2>${CLANS.filter(c => c.group === '구파일방').map(row).join('')}</div><div><h2>오대세가</h2>${CLANS.filter(c => c.group === '오대세가').map(row).join('')}</div></div>`;
 }
 function tabNote(B) {
   const S = G.S, moon = ['moon1', 'moon2', 'moon3', 'moon4', 'moon5', 'moon6', 'moon7'];

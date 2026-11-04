@@ -27,6 +27,7 @@ class MapDef {
     return this;
   }
   exit(tx, ty, w, h, to, ex, ey, dir, o = {}) { this.portals.push({ x: tx * TS, y: ty * TS, w: w * TS, h: h * TS, to, tx: ex, ty: ey, dir, ...o }); return this; }
+  label(tx, ty, text) { (this.labels = this.labels || []).push({ x: tx, y: ty, text }); return this; }
   scatter(names, n, seed = 1) {
     let r = seed * 9301 + 49297; const R = () => (r = (r * 9301 + 49297) % 233280) / 233280;
     for (let i = 0; i < n * 4 && n > 0; i++) {
@@ -168,6 +169,33 @@ export function buildMaps() {
   m.put('plum', 5, 14).put('plum', 44, 26).put('plum_o', 4, 26).put('plum_o', 44, 5).put('statue', 19, 18).put('statue', 29, 18);
   m.put('jar', 15, 11).put('pot', 34, 11).put('pot', 35, 11);
   m.exit(23, 35, 4, 1, 'pass', 37.5, 18.5, 2, { when: 'never', lock: '이제 되돌아갈 수 없다.' });
+  m.solids = m.solids.filter(s => !((s.x === 47 * TS || s.x === 2 * TS) && s.y >= 18 * TS && s.y <= 20 * TS + 8));
+  m.stamps = m.stamps.filter(s => !(s.name === 'wall_h' && (s.x === 47 * TS || s.x === 2 * TS) && s.y >= 18 * TS && s.y <= 20 * TS));
+  m.fill(2, 18, 3, 3, 3).fill(46, 18, 3, 3, 3);
+  m.exit(48, 18, 1, 3, 'ninehall', 1.5, 10.5, 3).exit(1, 18, 1, 3, 'fiveclans', 37.5, 12.5, 2);
+  m.label(44.5, 17.2, '구파 회관 →').label(5.5, 17.2, '← 세가 거리');
+  // 구파 회관: 구파일방의 숙소가 늘어선 곳
+  m = M('ninehall', 44, 25, { name: '구파 회관', bgm: 'temple', biome: 'grass', arena: 'court' });
+  m.fill(0, 9, 44, 3, 3).fill(0, 19, 44, 3, 3).fill(1, 9, 2, 13, 3).fill(41, 9, 2, 13, 3).fill(21, 12, 2, 7, 3);
+  const nine = [['house_red', 4, 5, '소림사', 'tree_big', 'banner2'], ['hut_b', 12, 5, '무당파', 'tree_pine', 'banner4'], ['hut_o', 20, 5, '화산파', 'plum', 'banner1'], ['hut_o2', 28, 5, '종남파', 'tree_pine', 'banner3'], ['shop_green', 36, 5, '아미파', 'plum_w', 'banner6'],
+    ['wood_b', 4, 15, '곤륜파', 'tree_snow', 'banner4'], ['clay', 12.5, 15, '공동파', 'boulder', 'banner7'], ['wood_o', 20.5, 15, '점창파', 'tree_round', 'banner5'], ['hut_b', 28, 15, '청성파', 'bamboo', 'banner3'], ['straw', 36.5, 15.8, '개방', 'stump', 'banner7']];
+  for (const [st, x, y, nm, tr, ban] of nine) { m.put(st, x, y, { nosolid: false }).put(ban, x + 4, y + 1.4, { nosolid: true }).label(x + 2, y - .5, nm); m.put(tr, x - 2.4, y - .4 + (tr === 'plum' || tr === 'plum_w' ? -1 : 0)); }
+  m.solids.push({ x: 0, y: 0, w: 44 * TS, h: 3 * TS }, { x: 0, y: 23 * TS, w: 44 * TS, h: 2 * TS });
+  m.border(['grove_green', 'tree_big', 'grove_pine'], [[0, 8, 2, 5]], 3);
+  m.scatter(['flower1', 'flower3', 'fern1', 'bush2'], 22, 21);
+  m.exit(0, 9, 1, 3, 'guhwa', 46.5, 19.5, 2);
+  // 세가 거리: 오대세가의 별채
+  m = M('fiveclans', 42, 25, { name: '세가 거리', bgm: 'story', biome: 'deep', arena: 'ring' });
+  m.fill(1, 10, 41, 3, 3).fill(1, 19, 36, 3, 3).fill(36, 13, 3, 9, 3);
+  m.house('hall', 3, 1, 'fiveclans', 5, 10.5, 0, { when: 'never', lock: '남궁세가의 본채다. 함부로 들어갈 곳이 아니다.' }).label(5, .6, '남궁세가').put('banner4', 2, 6.4, { nosolid: true }).put('banner4', 7, 6.4, { nosolid: true });
+  m.put('lodge', 14, 3).label(16, 2.6, '모용세가').put('banner6', 13, 6.4, { nosolid: true }).put('banner6', 18, 6.4, { nosolid: true }).put('plum_w', 10, 4);
+  m.put('house_red', 26, 6).label(28, 5.5, '제갈세가').put('banner5', 25, 6.4, { nosolid: true }).put('banner5', 30, 6.4, { nosolid: true }).put('tree_pine', 22, 5).put('bamboo', 33, 5).put('bamboo', 34, 5.4).put('bamboo', 35, 5);
+  m.put('shop_green', 8, 15).label(10, 14.5, '사천당가').put('banner7', 7, 16.4, { nosolid: true }).put('banner7', 12, 16.4, { nosolid: true }).put('tree_dead', 4, 15).row('jar', 3, 18, 2, 1);
+  m.put('clay', 22, 15).label(24, 14.5, '하북팽가').put('banner2', 21, 16.4, { nosolid: true }).put('banner2', 25, 16.4, { nosolid: true }).put('stump', 17, 16).put('stump_o', 27, 16).put('pot', 19, 18);
+  m.solids.push({ x: 0, y: 23 * TS, w: 42 * TS, h: 2 * TS });
+  m.border(['grove_pine', 'tree_big', 'grove_green'], [[40, 9, 3, 5]], 3);
+  m.scatter(['fern1', 'fern2', 'bush2', 'bush4'], 20, 31);
+  m.exit(41, 10, 1, 3, 'guhwa', 3.5, 19.5, 3);
   // 구화성 객잔과 맹주관
   m = M('inn2', 18, 13, { name: '금봉 객잔', bgm: 'peaceful', room: true, arena: 'room' });
   m.put('counter', 1, 2).put('shelf', 5, 1).put('rack', 13, 2).put('longtable', 3, 6).put('longtable', 10, 6).put('bed', 12, 9).put('bed', 3, 9).row('stool', 3, 5, 3).row('stool', 10, 5, 3);

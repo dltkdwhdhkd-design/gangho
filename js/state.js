@@ -12,11 +12,16 @@ export function newState(name, look, gender, diff) {
 }
 export function stats(S = G.S) {
   const w = WEAPONS[S.weapon];
-  const atk = w.atk + S.str * 1.3, maxHp = 90 + S.con * 10 + S.lv * 5, maxMp = 40 + S.inn * 6, def = S.con * .6;
-  let regen = 1.8 + S.inn * .08, cdMul = Math.max(.75, 1 - S.agi * .004);
+  const atk = w.atk + S.str * 1.3, maxMp = 40 + S.inn * 6, def = S.con * .6;
+  let maxHp = 90 + S.con * 10 + S.lv * 5, regen = 1.8 + S.inn * .08, cdMul = Math.max(.75, 1 - S.agi * .004), power = 1 + S.inn * .02;
   if (S.heart === 'tonap') regen *= 1.3;
   if (S.heart === 'swift') cdMul *= .85;
-  return { atk, maxHp, maxMp, def, regen, cdMul, spd: 78 + S.agi * .7, crit: .03 + S.agi * .004, power: 1 + S.inn * .02, wtype: w.type };
+  if (S.heart === 'yigin') maxHp *= 1.15;
+  if (S.heart === 'taecheong') regen *= 1.5;
+  if (S.heart === 'jaha') power *= 1.12;
+  if (S.heart === 'changgung') { cdMul *= .9; maxHp *= 1.1; }
+  maxHp = Math.round(maxHp);
+  return { atk, maxHp, maxMp, def, regen, cdMul, spd: 78 + S.agi * .7, crit: .03 + S.agi * .004, power, wtype: w.type };
 }
 export const masteryLv = id => { const n = (G.S.mastery[id] || 0); return n >= 60 ? 5 : n >= 32 ? 4 : n >= 15 ? 3 : n >= 5 ? 2 : 1; };
 export function gainExp(n) {
