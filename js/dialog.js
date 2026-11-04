@@ -8,20 +8,32 @@ function faceCanvas(key, size = 228) {
   if (im) { const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(im, 0, 0); }
   return c;
 }
+// 대화 무대: 주인공은 왼쪽, 상대는 오른쪽에 서고 말하는 사람만 밝다
+const pic = (who, expr) => { const w = who === 'me' ? { face: G.S.look, art: 'me' } : WHO[who]; if (!w) return null; const k = w.art || who; return { w, art: ART.get(`${k}_${expr || 'n'}`) || ART.get(`${k}_n`) }; };
+function slot(side, who, expr) {
+  const st = $('#vn'), old = st.querySelector('.st.' + side), p = pic(who, expr), key = `${who}|${expr || 'n'}`;
+  if (!p || (!p.art && !p.w.face) || (old && old.dataset.key === key)) return;
+  if (old) old.remove();
+  const e = el('div', `st ${side} ${p.art ? 'art' : 'pix'}`); e.dataset.who = who; e.dataset.key = key;
+  if (p.art) { const im = new Image(); im.src = p.art.src; e.appendChild(im); } else e.appendChild(faceCanvas(p.w.face, 190));
+  st.appendChild(e);
+}
+function stageShow(who, expr) {
+  const st = $('#vn'); if (!st) return; st.classList.add('on');
+  if (who === 'me') slot('l', 'me', expr); else if (!st.querySelector('.st.l')) slot('l', 'me');
+  if (who && who !== 'me') slot('r', who, expr);
+  st.querySelectorAll('.st').forEach(e => e.classList.toggle('talk', e.dataset.who === who));
+}
+export function stageClear() { const st = $('#vn'); if (st) { st.classList.remove('on'); st.innerHTML = ''; } }
 function render(c) {
   const d = $('#dialog'); d.innerHTML = '';
   if (c.type === 'narr') {
-    const n = el('div', 'narr'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c);
+    stageClear(); const n = el('div', 'narr'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c);
     d.style.background = 'rgba(0,0,0,.72)'; return;
   }
-  d.style.background = '';
-  const w = c.who ? (c.who === 'me' ? { name: G.S.name, face: G.S.look, art: 'me' } : (WHO[c.who] || { name: c.who })) : null;
-  const expr = c.expr || 'n', art = w && (ART.get(`${w.art || c.who}_${expr}`) || ART.get(`${w.art || c.who}_n`));
+  d.style.background = ''; stageShow(c.who, c.expr);
+  const w = c.who ? (c.who === 'me' ? { name: G.S.name } : (WHO[c.who] || { name: c.who })) : null;
   const box = el('div', 'box');
-  if (w && art) {
-    const pf = el('div', 'pf art'), im = new Image(); im.src = art.src; im.style.height = '520px'; pf.appendChild(im); d.appendChild(pf); box.classList.add('artbox');
-  } else if (w && w.face) { const pf = el('div', 'pf'); pf.appendChild(faceCanvas(w.face, 244)); d.appendChild(pf); box.style.paddingLeft = '150px'; }
-  else box.classList.add('nopf');
   if (w) box.appendChild(el('div', 'who', esc(w.name)));
   const t = el('div', 'txt'); box.appendChild(t); c.txtEl = t;
   box.appendChild(el('div', 'next', '▼')); box.onclick = () => click(c);

@@ -8,6 +8,7 @@ import { openMenu } from './ui.js';
 import { DB } from './items.js';
 import { give } from './state.js';
 import { checkTitles } from './titles.js';
+import { stageClear } from './dialog.js';
 
 const DIRV = [[0, 1], [0, -1], [-1, 0], [1, 0]];
 export class Field {
@@ -39,7 +40,7 @@ export class Field {
   async run(fn) {
     if (this.busy) return; this.busy = true; Input.clear();
     try { await fn(); } catch (e) { console.error(e); }
-    this.busy = false; checkTitles(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x; G.S.py = this.p.y; G.S.dir = this.p.dir; save();
+    this.busy = false; stageClear(); checkTitles(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x; G.S.py = this.p.y; G.S.dir = this.p.dir; save();
   }
   async warp(id, tx, ty, dir = 0) {
     await fadeTo(1); this.load(id, tx, ty, dir); await wait(.08); await fadeTo(0);

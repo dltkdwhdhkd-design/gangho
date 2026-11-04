@@ -41,20 +41,28 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .row{display:flex;gap:12px;justify-content:flex-end;margin-top:18px}
 .hint{color:var(--muted);font-size:15px;line-height:1.6}
 /* 대화 */
-#dialog .box{position:absolute;left:150px;right:40px;bottom:22px;min-height:172px;background:rgba(24,18,14,.94);border:4px solid var(--paper2);box-shadow:0 0 0 4px var(--ink);color:#fbf1dc;padding:40px 30px 18px 150px;font-size:23px;line-height:1.5;pointer-events:auto;cursor:pointer}
-#dialog .box.nopf{padding-left:30px;left:40px}
-#dialog .who{position:absolute;left:150px;top:-22px;background:var(--red);color:#fff;padding:6px 16px;border:3px solid var(--paper2);font-size:20px;font-family:Galmuri11Bold}
-#dialog .box.nopf .who{left:30px}
-#dialog .next{position:absolute;right:16px;bottom:10px;color:var(--gold);font-size:18px;animation:blink 1s steps(2) infinite}
+#vn{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;transition:background .15s}
+#vn.on{background:rgba(10,8,14,.32)}
+#vn.on::after{content:'';position:absolute;left:0;right:0;bottom:0;height:250px;background:linear-gradient(transparent,rgba(12,9,8,.92) 46%)}
+#vn .st{position:absolute;bottom:0;filter:brightness(.5);transition:filter .12s;animation:stin .16s ease-out}
+#vn .st.talk{filter:none}
+#vn .st.art img{display:block;height:640px}
+#vn .st.art.l{left:44px}
+#vn .st.art.r{right:44px}
+#vn .st.art.r img{transform:scaleX(-1)}
+#vn .st.pix{bottom:20px;z-index:2;background:#2b2118;border:4px solid var(--paper2);box-shadow:0 0 0 4px var(--ink);width:190px;height:190px;overflow:hidden}
+#vn .st.pix canvas{display:block;image-rendering:pixelated}
+#vn .st.pix.l{left:18px}
+#vn .st.pix.r{right:18px}
+@keyframes stin{from{opacity:0;transform:translateY(10px)}}
+#dialog .box{position:absolute;left:232px;right:232px;bottom:16px;min-height:152px;color:#fbf1dc;padding:46px 12px 14px;font-size:23px;line-height:1.55;text-shadow:0 2px 0 #000;pointer-events:auto;cursor:pointer}
+#dialog .who{position:absolute;left:0;right:0;top:0;text-align:center;color:var(--gold);font-size:23px;font-family:Galmuri11Bold}
+#dialog .who::after{content:'';position:absolute;left:12%;right:12%;top:34px;height:1px;background:linear-gradient(90deg,transparent,rgba(251,241,220,.55),transparent)}
+#dialog .next{position:absolute;left:0;right:0;bottom:-4px;text-align:center;color:var(--gold);font-size:16px;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
-#dialog .pf{z-index:2;position:absolute;left:30px;bottom:22px;width:252px;height:252px;background:#2b2118;border:4px solid var(--paper2);box-shadow:0 0 0 4px var(--ink);display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
-#dialog .pf canvas,#dialog .pf img{image-rendering:pixelated;display:block}
-#dialog .pf.art{background:none;border:0;box-shadow:none;width:380px;height:520px;left:6px;bottom:0}
-#dialog .box.artbox{left:330px;padding-left:30px}
-#dialog .box.artbox .who{left:30px}
 #dialog.over{z-index:10}
 #dialog .narr{white-space:pre-line;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fbf1dc;font-size:26px;line-height:1.9;padding:0 120px;text-shadow:0 3px 0 #000;pointer-events:auto;cursor:pointer}
-#dialog .choices{position:absolute;right:60px;bottom:214px;display:flex;flex-direction:column;gap:10px;pointer-events:auto;align-items:stretch;min-width:380px}
+#dialog .choices{position:absolute;left:50%;transform:translateX(-50%);bottom:190px;display:flex;flex-direction:column;gap:10px;pointer-events:auto;align-items:stretch;min-width:380px}
 #dialog .choices .btn{text-align:left;font-size:20px}
 #dialog .choices .btn.on{background:var(--gold);outline:3px solid var(--red)}
 /* 현장 HUD */
