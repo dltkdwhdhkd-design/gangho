@@ -103,6 +103,7 @@ async function dangRecord() {
   await say('me', '가져간 사람이 누구예요?');
   await say('clan_dang', '맹주관 서기 위문상. 그때는 그런 자리에 있었나 봐요.');
   await narr('기록을 접는 순간 등 뒤에서 서랍 하나가 저절로 열렸다. 그 안쪽 벽이 통째로 밀려 나오더니 시퍼렇게 부은 것들이 걸어 나왔다.');
+  await say('myeon', '그 기록은 두고 가십시오. 번호 없는 사람이 볼 것이 아닙니다.');
   await ctx.duel({ foes: ['myeon', 'puppet', 'puppet'], allies: ['dang_ally'], arena: 'room', bgm: 'fight', title: '당가 독고' });
   await say('clan_dang', '이런 게 우리 독고 안에 있었다는 건 문중에 손님 편을 드는 사람이 있다는 얘기네요. 그 기록은 가져가요.');
   await say('me', '문중에서 곤란해지시는 거 아니에요?');

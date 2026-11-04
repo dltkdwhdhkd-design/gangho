@@ -168,6 +168,8 @@ async function tableScene() {
   await say('samaung', '여기 앉은 건 저 아줌마 국수 때문이다. 내 형제 열둘 일은 안 끝났어.');
   await say('clan_dang', '그 일이라면 제가 할 말이 있어요. 이십 년 전 그 술에 든 독은 일배혈이고, 우리 독고에서 나갔어요. 맹주관 서기가 가져갔고요.');
   await narr('젓가락 소리가 멎었다.');
+  await say('namhwa', '이십 년이네요. 독이 나왔다 하면 다들 오독문부터 쳐다본 세월이요. 당가 아가씨, 사과는 안 바라요. 오늘 국수값이나 내요.');
+  await say('clan_dang', '…그 값은 제가 낼게요.');
   if (F().hyegak_dead) {
     await say('jigaek', '소림은 혜각 대사님을 벤 사람이 나르는 국수는 먹지 않습니다.');
     const b = await choice('혜명이 내가 내려놓은 그릇을 밀어낸다.', ['그 자리에 무릎을 꿇는다', '그릇을 도로 집어 든다']);
@@ -179,6 +181,11 @@ async function tableScene() {
     good++;
     await say('samaung', '…국수 식는다. 앉아.');
   }
+  await say('guyang', '말 나온 김에 묻자. 칠십이채 애들 내려오면 입이 몇 갠 줄 아나. 쌀은 누가 대.');
+  await say('ogang', '쌀은 내 배로 실어 오지. 뱃삯은 남궁가 앞으로 달아 두고.');
+  await say('clan_namgung', '왜 남궁가 앞이냐.');
+  await say('ogang', '돈 있는 집이 내는 거지.');
+  await say('manhwa', '오늘 여기서 나온 얘기는 내일 아침이면 강호가 다 알아요. 값은 안 받을게요. 이런 소문은 공짜로 풀어야 잘 퍼지거든요.');
   await narr('그때 문밖에서 누군가 칼을 내려놓는 소리가 났다.');
   if (side() !== 'ma') {
     await say('hyeok', '칼은 두고 왔습니다. 문 앞에 쌓인 것을 보니 그래야 하는 것 같았습니다.');

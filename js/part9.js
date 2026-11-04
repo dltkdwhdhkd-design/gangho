@@ -108,6 +108,8 @@ async function siege() {
   ctx.cg('siege');
   await say('smith', '작살은 여든 자루다. 저번보다 많다.');
   await say('elder', '늙은이는 뒤에 있으라고들 하는데, 뒤가 어딘가. 여기가 맨 뒤일세.');
+  await say('guyang', '산길은 내 애들이 막았다. 쌀값은 이걸로 치른 거다.');
+  await say('namhwa', '나루 밖 우물은 제가 손봐 뒀어요. 저쪽 놈들이 마시면 그날로 끝이에요. 우리 쪽은 마시지 마세요.');
   if (F().wei_spared) await say('wei', '점소이, 국수 외상 갚으러 왔다. 배는 다 뒤집어 놨으니 강으로는 못 물러난다.');
   if (F().lion_debt) await say('lion', '산에서 내려왔다. 녹림 놈들은 빚지고는 못 산다고 했잖냐.');
   if (F().kids_saved) await narr('나무패를 벗은 아이들 서른한 명이 쟁반을 하나씩 들고 줄을 섰다. 말리는 사람이 없었다. 꼬마가 맨 앞에서 던지는 법을 가르치고 있었다.');

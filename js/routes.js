@@ -7,7 +7,7 @@ import { set, at, after } from './story1.js';
 import { clansWon } from './clandata.js';
 
 const S = () => G.S, F = () => G.S.flags, side = () => G.S.side || 'jeong';
-Object.assign(WHO, { samaung: { name: '패천도 사마웅', face: 'Samaung' }, hyeok: { name: '혁련하', face: 'Hyeok' }, hyeolma: { name: '혈마', face: 'Skeleton' }, makgo: { name: '혈수 막고', face: 'RedNinja' }, clerk: { name: '서기', face: 'Inspector' } });
+Object.assign(WHO, { samaung: { name: '패천도 사마웅', face: 'Samaung' }, hyeok: { name: '혁련하', face: 'Hyeok' }, hyeolma: { name: '혈마', face: 'Skeleton' }, makgo: { name: '혈수 막고', face: 'RedNinja' }, clerk: { name: '서기', face: 'Inspector' }, manhwa: { name: '만화부인', face: 'Woman' }, guyang: { name: '구양철', face: 'Caveman2' }, ogang: { name: '오강', face: 'Villager3' }, namhwa: { name: '남화', face: 'Woman' }, myeon: { name: '무면당 밀정', face: 'GrayNinja' } });
 const foe = (name, spr, hp, atk, def, spd, exp, silver, pause, moves, o = {}) => ({ name, spr, hp, atk, def, spd, exp, silver, pause, moves, ...o });
 Object.assign(FOES, {
   jeong_guard: foe('정천맹 순찰', 'chars/Knight', 420, 30, 9, 62, 80, 30, 1.05, ['double', 'lunge', 'heavy'], { wpn: 'Sword', guard: .5 }),
@@ -129,6 +129,11 @@ async function samaungMeet() {
   await say('makgo', '…');
   await ctx.duel({ foes: ['makgo'], arena: 'fort', bgm: 'boss', title: '혈수 막고', yieldAt: .25 });
   await say('makgo', '…됐습니다.');
+  await narr('막고가 칼을 거두자 안쪽 평상에서 박수 소리가 났다. 흑도맹 수뇌들이 술상을 받아 놓고 구경하고 있었다.');
+  await say('guyang', '남의 산채 마당을 잘도 파 놓는구나. 녹림 칠십이채 총채주 구양철이다. 마당값은 나중에 받으마.');
+  await say('ogang', '장강수로채 오강이다. 위충이 너 하나 때문에 배를 세 번 띄웠다지. 물에서 만나면 너부터 빠뜨리마.');
+  await say('namhwa', '오독문 남화예요. 그 잔은 내려놓으세요. 제가 따른 거라서요.');
+  await say('manhwa', '하오문 만화예요. 백랑이 물어 온 손님이 이분이구나. 값이 얼마나 나갈지 두고 볼게요.');
   await say('samaung', '좋아. 일이 세 개 있다. 순서는 알아서 해. 청하진 앞을 지나는 정천맹 군량선 털기, 구화성 객관 서고에서 제갈세가 명령서 빼 오기, 그리고 구파 회관의 혜각.');
   await say('me', '혜각 대사를 어쩌라고요?');
   await say('samaung', '죽이라는 거지. 혈의방에 들어온 의뢰다. 못 하겠으면 말해. 대신 그만큼 다른 데서 갚아야 한다.');
@@ -216,6 +221,8 @@ async function maRite() {
 async function jobSpy() {
   await ctx.chap(4, '붉은 초승달', '밀정');
   await narr('금봉 객잔 구석 자리에 국수를 시켜 놓고 한 젓가락도 먹지 않는 손님들이 앉아 있었다.');
+  await say('me', '국수 불어요.');
+  await say('myeon', '…번호를 대십시오.');
   await ctx.duel({ foes: ['myeon', 'myeon', 'myeon'], arena: 'room', bgm: 'fight', title: '무면당 밀정' });
   await say(null, '쓰러진 밀정의 품에서 낡은 나무패가 나왔다. 불에 지진 번호가 적혀 있었다.');
   await say('me', '이거 견대 번호패예요. 왜 이게 여기 있죠?');
