@@ -8,3 +8,5 @@ import './part1a.js';
 import './part1.js';
 import './part1b.js';
 import './routes.js';
+import './part4.js';
+import './bonds.js';

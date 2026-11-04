@@ -23,6 +23,7 @@ const A = (name, desc, fx) => ({ name, desc, fx });
 export const ACCS = {
   a_beads: A('항마염주', '체력 +12%', { hp: 12 }), a_taiji: A('태극패', '내력 회복 +30%', { regen: 30 }), a_plum: A('매화향낭', '치명타 +8%', { crit: 8 }), a_jongnam: A('종남옥패', '방어 +8', { def: 8 }), a_emei: A('아미 불진', '금창약 효과 +30%', { potion: 30 }),
   a_kunlun: A('설련화', '내력 +15%', { mp: 15 }), a_gong: A('칠상부', '공격력 +10%, 체력 -5%', { atk: 10, hp: -5 }), a_diancang: A('경풍화', '이동 속도 +10%', { spd: 10 }), a_qing: A('청성 찻잔', '초식 내력 소모 -12%', { mpCost: -12 }), a_gae: A('거지 표주박', '타격 피해의 2%를 체력으로', { lifeHit: 2 }),
+  b_yun: A('윤설의 약주머니', '금창약 효과 +25%', { potion: 25 }), b_so: A('벽수 매듭', '공격력 +6%, 치명타 +3%', { atk: 6, crit: 3 }), b_dang: A('이름 새긴 찻잔', '체력 +8%, 내력 회복 +15%', { hp: 8, regen: 15 }), b_mo: A('모용 손거울', '튕겨내기 시간 +0.04초, 초식 위력 +5%', { parry: .04, skill: 5 }), b_nam: A('피 밴 검끈', '평타 피해 +12%, 공격력 +4%', { basic: 12, atk: 4 }), b_bae: A('납 주사위', '치명타 +7%, 치명타 피해 +15%', { crit: 7, critDmg: 15 }), b_hyeok: A('달맞이 향낭', '내력 +12%, 쿨타임 -6%', { mp: 12, cd: -6 }), b_cheol: A('철우의 염주', '체력 +10%, 방어 +4', { hp: 10, def: 4 }),
   a_nam: A('창궁 패옥', '공격력 +8%, 치명타 +4%', { atk: 8, crit: 4 }), a_mo: A('모용 동경', '튕겨내기 시간 +0.05초', { parry: .05 }), a_je: A('제갈 금낭', '쿨타임 -10%', { cd: -10 }), a_dang: A('당가 독낭', '평타에 약한 독이 묻는다', { venom: 1 }), a_paeng: A('호랑이 허리띠', '평타 피해 +14%', { basic: 14 }),
 };
 const W = (name, type, atk, spr, desc) => ({ name, type, atk, spr, desc });

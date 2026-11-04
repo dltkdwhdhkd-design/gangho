@@ -7,7 +7,7 @@ import { WEAPONS } from './data.js';
 const S = () => G.S, F = () => G.S.flags, step = () => G.S.flags.step || 'p0', set = v => { G.S.flags.step = v; };
 const at = (...a) => a.includes(step());
 const after = v => ORDER.indexOf(step()) >= ORDER.indexOf(v);
-const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'sa1', 'sa2', 'ma1', 'ma2', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
+const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'sa1', 'sa2', 'ma1', 'ma2', 'jg1', 'jg2', 'jg3', 'fr1', 'fr2', 'sa3', 'ma3', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
 export { step, set, at, after };
 G.after = after;
 const overBlack = on => $('#dialog').classList.toggle('over', on);
@@ -302,7 +302,7 @@ Story.providers.push(function content1(id) {
   }
   if (id === 'clinic' && F().burned) {
     n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => at('c1b', 'c1d', 'c1h'), when: () => (!F().yun_join || at('end') || S().side === 'free' || S().side === 'ma') && S().married !== 'yun', talk: async () => { if (at('c1b')) await yunPaper(); else if (at('c1d')) await yunAfter(); else if (at('c1h')) await yunGo(); else if (F().c1yun2 || !after('c1e')) await say('yun', '금창약은 만물상보다 여기가 싸요. 넉넉히 사 가요.'); else { F().c1yun2 = true; await yunNight(); } } });
-    n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, talk: async () => { await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
+    n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, mark: () => !!G.ch.hook('doc'), talk: async () => { const h = G.ch.hook('doc'); if (h) return h(); await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
   }
   if (id === 'smith' && F().burned) n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => at('c1e') && !F().smith_gift, talk: talkTown.smith });
   if (id === 'shop') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: talkTown.shopk });

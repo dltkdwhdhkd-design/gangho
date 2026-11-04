@@ -25,7 +25,7 @@ export const ctx = {
     for (; ;) {
       await fadeTo(1); G.field.hideHud?.(); await fadeTo(0);
       const r = await fight(cfg);
-      if (r.outcome === 'win') { await showResult(r); if (cfg.bgm === 'boss') G.S.potion = Math.max(G.S.potion, G.S.potionMax); if (cfg.yieldAt) await G.life.lootAfter(cfg); restoreBgm(); G.field.showHud(); return true; }
+      if (r.outcome === 'win') { await showResult(r); if (cfg.bgm === 'boss') G.S.potion = Math.max(G.S.potion, G.S.potionMax); if (cfg.yieldAt && !cfg.noLoot) await G.life.lootAfter(cfg); restoreBgm(); G.field.showHud(); return true; }
       if (cfg.optional) { restoreBgm(); G.field.showHud(); return false; }
       G.S.potion = Math.max(G.S.potion, G.S.potionMax); await choiceLose();
     }

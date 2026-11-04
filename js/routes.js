@@ -60,7 +60,11 @@ export async function crossroads() {
   await say('yun', '지금 정천맹으로 돌아가면 다 죽어요. 어디로 갈지 정해요.');
   await fadeTo(1); F().night = true; G.field.load('valley', 23, 15, 2); await fadeTo(0);
   await narr('새벽녘에 갈대밭에 배를 댔다. 등불을 든 사람들이 먼저 와서 기다리고 있었다.');
-  await say('so', '월하곡으로 가자. 곽 호법부터 구하고 맹주가 한 짓을 강호에 다 까발리는 거야. 구파일방에도 말이 통하는 사람은 있을 거야.');
+  await say('so', '이제 어쩔 거야? 곽 호법이 월하곡에 있다며. 바로 가자.');
+  await say('boat', '못 가. 그 골짜기는 물안개가 막고 있어서 일 년에 딱 한 번, 가을 그믐밤에만 배가 들어가. 뱃사람들은 다 아는 얘기여.');
+  await say('me', '그게 언제인데요?');
+  await say('boat', '두 달 뒤구먼.');
+  await say('so', '그럼 두 달 동안 맹주가 한 짓을 강호에 다 까발리자. 구파일방에도 말이 통하는 사람은 있을 거야.');
   await say('baekrang', '역적이 되셨네요, {호}. 패천도가 보자고 하세요. 지금 맹주랑 맞붙을 사람은 그분밖에 없거든요.');
   await say('me', '사파에 들어오라는 얘기예요?');
   await say('baekrang', '정파가 뭘 해 줬는데요? 우리는 일한 만큼은 확실히 쳐줘요.');
@@ -69,23 +73,22 @@ export async function crossroads() {
   await say('me', '마교가 저를 돕겠다고요?');
   await say('hyeok', '월하문의 핏줄이 필요합니다. 봉인을 다룰 수 있는 사람은 당신뿐이니까요. 숨기지 않겠습니다.');
   await say('boat', '어디로 갈 거여? 배는 네가 가자는 대로 갈 텨.');
-  const c = await choice('누구의 손을 잡을까?', ['소연하와 월하곡으로 간다 (정파)', '백랑을 따라 흑도맹으로 간다 (사파)', '혁련하를 따라 서쪽으로 간다 (마교)', '아무의 손도 잡지 않는다 (낭인)']);
+  const c = await choice('누구의 손을 잡을까?', ['소연하와 맹주의 죄를 밝힌다 (정파)', '백랑을 따라 흑도맹으로 간다 (사파)', '혁련하를 따라 서쪽으로 간다 (마교)', '아무의 손도 잡지 않는다 (낭인)']);
   const go = [toJeong, toSa, toMa, toFree][c];
   await go();
 }
 export async function toWolha() {
   set('c4a'); F().night = false;
-  const road = { jeong: '그 뒤로 두 달을 쫓겨 다녔다. 나루마다 내 얼굴이 붙어 있어서 낮에는 갈대밭에 숨고 밤에만 움직였다. ', free: '그 뒤로 두 달을 혼자 떠돌았다. 나루마다 내 얼굴이 붙어 있어서 낮에는 갈대밭에 숨고 밤에만 움직였다. ' }[S().side] || '';
-  await narr(`제6부 · 달이 진 골짜기\n\n${road}달이 없는 밤에 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.`);
+  await narr('제6부 · 달이 진 골짜기\n\n가을 그믐밤, 물안개가 걷혔다. 달 없는 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.');
   ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
   await ctx.warp('wolha', 22, 37, 1);
 }
 async function toJeong() {
   S().side = 'jeong'; ctx.rep('jeong', 2);
-  await say('me', '월하곡으로 갈게요. 아주머니부터 찾아야죠.');
+  await say('me', '맹주부터 끌어내릴게요. 아주머니를 구해도 쫓기면 소용없으니까요.');
   await say('baekrang', '아쉽네요. 마음 바뀌면 복운전으로 와요.');
-  await say('hyeok', '그곳으로 가시는군요. 다음에는 칼을 들고 뵙게 되겠습니다.');
-  await toWolha();
+  await say('hyeok', '그렇습니까. 다음에는 칼을 들고 뵙게 되겠습니다.');
+  await G.ch.jeong4();
 }
 async function toFree() {
   S().side = 'free';
@@ -96,7 +99,7 @@ async function toFree() {
   await say('hyeok', '혼자서는 오래 못 가실 겁니다.');
   await say('yun', '저는 청하진으로 돌아갈게요. 몸조심해요. 살아서 와요.');
   await say('boat', '그려. 조심혀.');
-  await toWolha();
+  await G.ch.free4();
 }
 
 // ── 사파의 길 ──
@@ -171,9 +174,7 @@ async function saReturn() {
   if (F().sa_refused) { await say('samaung', '혜각이 살아 있다더군. 못 하겠으면 다른 데서 갚으라고 했지? 월하곡에서는 네가 맨 앞에 서라.'); await say('me', '알겠습니다.'); }
   else await say('samaung', '일 잘했다. 약속대로 맹주 앞까지는 데려다주마.');
   if (F().sa_rice) await say('baekrang', '쌀 풀었다면서요? 나루에서 욕하는 사람이 많이 줄었어요.');
-  await say('samaung', '연경추가 달 없는 밤에 월하곡으로 간다는 소식이 왔다. 우리도 간다.');
-  await say('yun', '붕대 많이 챙겼어요. 이번에는 다치지 마요.');
-  await toWolha();
+  await G.ch.sa5();
 }
 
 // ── 마교의 길 ──
@@ -252,8 +253,7 @@ async function maReturn() {
     await say('hyeok', '제가 혈마를 벤 셈이 되었습니다. 이제 저도 교단으로 돌아갈 수 없습니다.');
     ctx.love('hyeok', 2);
   } else if (F().plague) await say('hyeolma', '잘했다. 네 마을 기침 소리가 여기까지 들리는 것 같구나.');
-  await say('hyeok', '심마가 달 없는 밤에 월하곡으로 간다고 합니다. 그곳에서 끝내야 합니다.');
-  await toWolha();
+  await G.ch.ma5();
 }
 
 // ── 월하곡 결전 ──
@@ -264,8 +264,9 @@ export async function chiefBattle() {
     await say('cheol', '문은 내가 부수겠소!');
     await say('chief', '일곱 장이 다 모였군. 고맙네. 이제 그만 내놓게.');
     allies = ['so_ally', 'cheol_ally'];
-    if (won >= 5) { await say('clan_shaolin', '아미타불. 십칠 년 묵은 빚을 갚으러 왔소.'); allies.push('hyegak_ally'); }
-    if (won >= 10) { await say('clan_namgung', '맹주. 남궁세가도 할 말이 있다.'); allies.push('namgung_ally'); }
+    if (won >= 5 || F().jg_council) { await say('clan_shaolin', '아미타불. 십칠 년 묵은 빚을 갚으러 왔소.'); allies.push('hyegak_ally'); }
+    if (won >= 10 || F().kids_saved) { await say('clan_namgung', '맹주. 남궁세가도 할 말이 있다.'); allies.push('namgung_ally'); }
+    if (F().jg_samaung && F().lion_debt) { await say('lion', '나도 왔다! 빚 갚으러!'); allies.push('lion_ally'); }
     if (won >= 15) { await narr('골짜기 위로 깃발이 하나둘 올라왔다. 소림, 무당, 화산, 종남, 아미, 곤륜, 공동, 점창, 청성, 개방, 그리고 오대세가의 깃발까지. 십칠 년 전 이곳을 둘러쌌던 깃발들이 이번에는 맹주를 향해 있었다.'); mul = .8; }
   }
   if (s === 'sa') {
@@ -286,12 +287,14 @@ export async function chiefBattle() {
     await say('hyeok', '심마, 교의 이름으로 당신을 파문합니다.');
     allies = ['hyeok_ally'];
   }
+  if (s === 'sa' && F().sa_nam_spared) { await say('clan_namgung', '칼로 갚겠다고 했다. 비켜라.'); allies.push('namgung_ally'); }
   if (s === 'free') {
     await say('chief', '혼자 왔나. 곽란이 자네를 그렇게 가르쳤나 보군.');
     await say('me', '혼자 다니는 건 군막에서 배웠어.');
     if (S().sworn === 'cheol') { await say('cheol', '아우! 혼자 가면 어떡하오! 문은 내가 부수겠소!'); allies = ['cheol_ally']; }
     mul = .75;
   }
+  { const a = await G.bond.join(s, allies); if (a) allies.push(a); }
   await ctx.duel({ foes: ['chief'], allies, foeHpMul: mul, arena: 'moon', bgm: 'boss', title: '정천맹주 연경추' });
   await say('chief', '왜지… 나는 칠식을 다 익혔는데…');
   await say('me', '걸레질을 안 해 봤잖아.');
@@ -320,6 +323,7 @@ async function endSa() {
     F().ending = 'sa_lord'; await narr('그렇게 군적에서 지워진 낭인이 강호 절반을 쥔 맹주가 되었다.');
   }
   if (c === 2) { F().ending = 'sa_leave'; await say('baekrang', '돈도 자리도 싫다고요? 별난 사람이에요, 정말.'); await narr('나는 다시 길을 떠났다.'); }
+  await G.bond.ending();
   await hook('정파가 무너진 틈을 마교가 놓칠 리 없었다.');
   await finish();
 }
@@ -338,6 +342,7 @@ async function endMa() {
     await narr('천마신교는 삼백 년 만에 살아 있는 교주를 맞았다.', 'end_ma');
   }
   if (c === 2) { F().ending = 'ma_leave'; await say('hyeok', '그러실 줄 알았습니다. 문은 열어 두겠습니다.'); await narr('일곱 장을 태웠다. 그날부터 정파도 사파도 마교도 나를 쫓기 시작했다.', 'end_free'); }
+  await G.bond.ending();
   await hook(F().ending === 'ma_awake' ? '강호 사람들은 이제 그 달을 보며 잠들지 못했다.' : '심마가 남긴 무리는 아직 강호 곳곳에 숨어 있었다.');
   await finish(F().ending === 'ma_leave' ? 'cheongha' : 'shrine');
 }
@@ -355,6 +360,7 @@ async function endFree() {
   if (c === 0) await narr('일곱 장을 태웠다. 재는 강으로 날아갔고, 나는 다시 낭인으로 돌아갔다.', 'end_free');
   if (c === 1) { F().inn_rebuilt = true; await narr('달맞이 객잔이 다시 문을 열었다. 나는 가끔 들러 바닥을 닦고 간다.', 'end_jeong'); }
   if (c === 2) await narr('일곱 장을 품에 넣고 새벽에 길을 나섰다.', 'end_free');
+  await G.bond.ending();
   await hook('나는 아무 깃발도 없이 그 달 아래를 걸었다.');
   await finish();
 }
@@ -365,7 +371,7 @@ G.route = { crossroads, toWolha, chiefBattle, routeEnding, side, baekFate };
 const job = (o) => ({ dir: 0, mark: () => true, ...o });
 Story.providers.push(function routes(id) {
   const n = [], ro = [], sd = S().side, has = k => !F()[k];
-  if (id === 'guhwa' && after('c3b') && !after('c4a')) {
+  if (id === 'guhwa' && after('c3b') && (!after('c4a') || sd === 'free' || at('end'))) {
     n.push({ id: 'baekrang', spr: 'Cavegirl', x: 17, y: 27, dir: 3, mark: () => !F().gu_bae, talk: async () => { if (!F().gu_bae) await baeGuhwa(); else await say('baekrang', '또 봐요.'); } });
     n.push({ id: 'hyeok', spr: 'Hyeok', x: 33, y: 27, dir: 2, mark: () => !F().gu_hyeok, talk: async () => { if (!F().gu_hyeok) await hyeokGuhwa(); else await say('hyeok', '향이 필요하시면 말씀하십시오.'); } });
   }
@@ -391,6 +397,6 @@ Story.providers.push(function routes(id) {
       if (id === 'cheongha' && has('ma_job3')) n.push(job({ id: 'kid', spr: 'Child', x: 21, y: 23.5, hint: '우물가로 가기', talk: jobWell }));
     }
   }
-  if (id === 'guhwa' && (sd === 'sa' || sd === 'ma') && !at('end')) ro.push({ spr: 'chars/Knight', x: 24, y: 24, foes: ['jeong_guard', 'jeong_guard'] }, { spr: 'chars/Knight', x: 12, y: 16, foes: ['jeong_elite'] });
+  if (id === 'guhwa' && sd && !at('end')) ro.push({ spr: 'chars/Knight', x: 24, y: 24, foes: ['jeong_guard', 'jeong_guard'] }, { spr: 'chars/Knight', x: 12, y: 16, foes: ['jeong_elite'] });
   return { npcs: n, spots: [], trigs: [], roam: ro };
 });

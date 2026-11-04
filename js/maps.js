@@ -192,7 +192,7 @@ export function buildMaps() {
   m.fill(2, 18, 3, 3, 3).fill(46, 18, 3, 3, 3);
   m.exit(48, 18, 1, 3, 'ninehall', 1.5, 10.5, 3).exit(1, 18, 1, 3, 'fiveclans', 37.5, 12.5, 2);
   m.label(44.5, 17.2, '구파 회관 →').label(5.5, 17.2, '← 세가 거리');
-  m.place(25, 14, '비무대').place(27, 28, '남문 나루');
+  m.place(25, 14, '비무대').place(27, 28, '남문 나루').place(42, 13.6, '맹주 창고');
   // 청풍골: 사냥과 낚시, 벌목
   m = M('valley', 40, 30, { name: '청풍골', bgm: 'peaceful', biome: 'deep', arena: 'forest', ambient: 'leaf' });
   m.water(19, 0, 2, 30).fill(19, 13, 2, 3, 4).road(21, 14, 39, 14, 2).road(4, 14, 18, 14, 2);
