@@ -19,7 +19,7 @@ const { chromium } = require('playwright');
   console.log(errs.slice(0, 8).join('\n')); await b.close();
   const b2 = await chromium.launch(); const c = await b2.newContext({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 }); const q = await c.newPage();
   await q.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await q.waitForTimeout(1300);
-  await q.evaluate(() => { const G = __G; G.S = G.dbg.newState('진소', 'Woman', 'f', 'normal'); G.S.flags = { step: 'c1c', bamboo_open: true }; G.S.goal = '북쪽 대숲길의 석상을 찾기'; document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; G.scene = 'field'; G.field.load('cheongha', 24, 18, 1); });
+  await q.evaluate(() => { const G = __G; G.S = G.dbg.newState('진소', 'Boy', 'm', 'normal'); G.S.flags = { step: 'c1c', bamboo_open: true }; G.S.goal = '북쪽 대숲길의 석상을 찾기'; document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; G.scene = 'field'; G.field.load('cheongha', 24, 18, 1); });
   await q.waitForTimeout(500); await q.screenshot({ path: '/tmp/claude-0/shots/m1.png' });
   await q.evaluate(() => { __G.dbg.fight({ foes: ['bandit'], arena: 'village', noIntro: true }); }); await q.waitForTimeout(700); await q.screenshot({ path: '/tmp/claude-0/shots/m2.png' }); await b2.close();
 })().catch(e => { console.log(String(e).slice(0, 800)); process.exit(1); });

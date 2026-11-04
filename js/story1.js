@@ -9,6 +9,7 @@ const at = (...a) => a.includes(step());
 const after = v => ORDER.indexOf(step()) >= ORDER.indexOf(v);
 const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
 export { step, set, at, after };
+G.after = after;
 const overBlack = on => $('#dialog').classList.toggle('over', on);
 
 Story.scenes.opening = async () => {

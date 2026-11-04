@@ -128,7 +128,16 @@ async function monkMeet() {
   F().met_cheol = true; F().monk_met = true;
 }
 const ROUNDS = [['fighter_a', '공동파 곽충'], ['fighter_b', '팽가 방계 마혜'], ['fighter_c', '곤륜파 등표'], ['cheolu_spar', '소림 파계승 철우']];
+async function bracketName() {
+  await say('judge', '대진표를 쓰겠소. 이름은 적었고, 별호는 뭐요?');
+  await say('me', '별호요?');
+  await say('judge', '강호에 이름 석 자만 들고 나오는 사람은 없소. 없으면 지금 지으시오. 대진표에 오른 이름이 곧 강호에 도는 이름이오.');
+  S().title = await ctx.ask('별호 짓기', '대진표에 올릴 별호를 적으세요. 메뉴의 상태에서 언제든 다시 바꿀 수 있습니다.', S().title);
+  await say('judge', '{호} {나}. 적었소.');
+  F().title_free = true;
+}
 async function judge() {
+  if (!F().title_free) await bracketName();
   const r = F().round || 0;
   if (!F().monk_met) { await say('judge', '등록은 받았소. 그런데 객잔 소동부터 해결하고 오시오. 그쪽 사람들이 난리요.'); return; }
   if (r === 2 && !F().chief_met) { await say('judge', '맹주께서 찾으시오. 정천맹 객관으로 가 보시오.'); return; }
@@ -137,6 +146,7 @@ async function judge() {
   const [id, name] = ROUNDS[r];
   const c = await choice(`${r + 1}회전 상대는 ${name}. 올라가시겠소?`, ['올라간다', '조금 더 준비한다'], 'judge');
   if (c) return;
+  await say('judge', '{호} {나}, 비무대로 오르시오.');
   if (id === 'cheolu_spar') { await say('cheol', '시주! 빚은 빚이고 비무는 비무요. 힘껏 치시오. 내가 이기면 밥 한 끼 더 사시오.'); }
   await ctx.duel({ foes: [id], arena: 'ring', bgm: 'boss', title: `${r + 1}회전 · ${name}`, yieldAt: .25 });
   F().round = r + 1;
@@ -201,8 +211,8 @@ async function finalMatch() {
   const c = await choice(`결승 상대는 소연하. 끝나면 구화성을 떠나게 될 것 같다.${left ? ` (아직 비무하지 않은 세력 ${left}곳)` : ''}`, ['올라간다', '조금 더 준비한다'], 'judge'); if (c) return;
   await say('so', '말했지. 안 봐줘.');
   await ctx.duel({ foes: ['so_final'], arena: 'ring', bgm: 'boss', title: '결승 · 소연하', yieldAt: .2 });
-  await say('so', '…졌다. 분하네. 칼이 가벼워졌어, 점소이.');
-  await say('judge', '천하비무대회 우승자, {나}!');
+  await say('so', '…졌다. 분하네. 칼이 가벼워졌어, {호}.');
+  await say('judge', '천하비무대회 우승자, {호} {나}!');
   await narr('함성 속에서 맹주가 직접 달거울을 건넸다.\n그날 밤 정천맹 객관에서 구파일방과 오대세가의 장문인들이 모인 축하 연회가 열렸다.');
   await ctx.warp('hall2', 7, 8, 1);
   await say('chief', '잔을 들어라. 네 아버지도 술이 약했지.');
@@ -299,6 +309,7 @@ async function ending() {
   if (c === 2) { await narr('달맞이 객잔이 다시 문을 열었다.\n윤씨 약방이 장부를 들고 찾아오고,\n벽수궁의 검객이 국수를 먹고 가고,\n파계승은 오늘도 밥값이 없다.'); }
   if (F().baek_live) await say('baek', '점소이. 방값 가져왔다. 이자는 깎자.');
   { const q = S().married || S().partner; if (q) await say(q, G.life.pick(G.life.cand[q].chat)); }
+  await narr('강호에 이름 하나가 남았다.\n{호} {나}.');
   await narr('그해 겨울, 서쪽 하늘에 붉은 달이 떴다.\n개방의 거지들이 밥그릇을 엎었고,\n사파의 깃발 아래에서도 처음으로 침묵이 흘렀다.\n\n강호행 · 제1막 끝\n이야기는 제7부 ‘붉은 달’로 이어집니다.');
   set('end'); F().cleared = true; ctx.goal('');
   await ctx.warp('cheongha', 22.5, 16, 0);
@@ -309,7 +320,7 @@ Story.providers.push(function content2(id) {
   if (id === 'pass' && at('c2a')) { /* 창운산 가는 길 */ }
   if (id === 'cloudmt') {
     if (at('c2a')) tr.push({ x: 18, y: 28, w: 10, h: 6, when: () => at('c2a'), run: arrive });
-    n.push({ id: 'go', spr: 'Inspector', x: 22.5, y: 19, dir: 0, mark: () => at('c2b'), when: () => !after('c3a'), talk: async () => { if (at('c2b')) await exam(); else await say('go', `수련을 게을리하지 마라, ${S().gender === 'f' ? '사매' : '사제'}.`); } });
+    n.push({ id: 'go', spr: 'Inspector', x: 22.5, y: 19, dir: 0, mark: () => at('c2b'), when: () => !after('c3a'), talk: async () => { if (at('c2b')) await exam(); else await say('go', '수련을 게을리하지 마라, 사제.'); } });
     n.push({ id: 'disc', spr: 'GreenNinja', x: 15, y: 19, dir: 3, talk: async () => { const c = await choice('연무장에서 대련할까?', ['대련한다', '그만둔다'], 'disc'); if (c === 0) await ctx.duel({ foes: ['disciple', 'disciple'], arena: 'court', title: '대련', optional: true, bgm: 'fight' }); } });
     n.push({ id: 'smith2', spr: 'Caveman2', x: 32, y: 23, dir: 2, talk: async () => { await say('smith', '창운문 병기창이오. 값은 치르시오.'); await ctx.shop('창운문 병기창', [ctx.item.weapon('blue_sword'), ctx.item.weapon('ghost_blade'), ctx.item.weapon('dragon_spear'), ctx.item.weapon('iron_gauntlet'), ctx.item.potion()]); } });
     sp.push({ x: 39, y: 7, w: 3, h: 3, hint: '살펴보기', act: moss });
@@ -326,7 +337,7 @@ Story.providers.push(function content2(id) {
     n.push({ id: 'judge', spr: 'Inspector', x: 24.5, y: 15, dir: 0, mark: () => after('c3b') && !after('c4a'), when: () => !after('c4a'), talk: judge });
     n.push({ id: 'yun', spr: 'Princess', x: 13, y: 15, dir: 3, mark: () => (F().round || 0) >= 1 && !F().ev_lantern, when: () => !after('c4a') && S().married !== 'yun', talk: async () => { if ((F().round || 0) >= 1 && !F().ev_lantern) await lantern(); else await say('yun', '금창약은 넉넉해요? 값은 장부에.'); } });
     n.push({ id: 'so', spr: 'RedSamurai', x: 34, y: 15, dir: 2, mark: () => at('c3e') && !F().ev_soeve, when: () => (!after('c4a') || at('end')) && S().married !== 'so', talk: async () => { if (at('c3e') && !F().ev_soeve) await soEve(); else await say('so', '칼은 닦았어?'); } });
-    n.push({ id: 'cheol', spr: 'Monk2', x: 20, y: 22, dir: 3, mark: () => !!F().monk_met && !F().ev_cheol, when: () => !!F().monk_met && (!after('c4a') || at('end')) && S().married !== 'cheol', talk: async () => { if (!F().ev_cheol) await cheolDrink(); else await say('cheol', '나무아미… 저 만두 하나만.'); } });
+    n.push({ id: 'cheol', spr: 'Monk2', x: 20, y: 22, dir: 3, mark: () => !!F().monk_met && !F().ev_cheol, when: () => !!F().monk_met && (!after('c4a') || at('end')), talk: async () => { if (!F().ev_cheol) await cheolDrink(); else await say('cheol', '나무아미… 저 만두 하나만.'); } });
     n.push({ id: 'boat', spr: 'OldMan2', x: 26.5, y: 29, dir: 2, talk: async () => { const c = await choice('청하진으로 갈까?', ['간다', '그만둔다'], 'boat'); if (!c) await ctx.warp('cheongha', 22.5, 26, 1); } });
   }
   if (id === 'inn2') {

@@ -27,7 +27,7 @@ export const CLANS = [
   { id: 'gaebang', group: '구파일방', name: '개방', han: '丐幇', who: '홍두 장로', spr: 'Gaebang', tier: 2, wpn: 'Stick', moves: ['tagu', 'hangryong', 'chain_kick', 'quick'], gift: ['tagu', 'hangryong'], at: ['ninehall', 38.5, 19.4], desc: '천하의 거지가 모인 일방. 강호의 소문은 모두 여기로 흐른다.',
     intro: [['밥 한 술만… 농담이다. 네가 철우 밥값을 대신 냈다며?'], ['me', '그게 벌써 거기까지 갔어요?'], ['개방의 귀는 천 개다. 입은 만 개고. 한 판 하고 얘기하자.']], win: [['밥값은 받은 셈 치마. 하나 알려 주지. 맹주 창고로 들어가는 쌀이 맹에 있는 사람 수보다 많다.'], ['거기서 누가 먹고 있는지는 나도 모른다. 얼굴을 안 보여 주는 놈들이라.']] },
   { id: 'namgung', group: '오대세가', name: '남궁세가', han: '南宮世家', who: '남궁진', spr: 'Namgung', tier: 3, wpn: 'Rapier', moves: ['sky_sword', 'cloud_flash', 'flurry', 'wind_turn', 'fan5'], gift: ['sky_sword'], heart: 'changgung', at: ['fiveclans', 5, 10.4], desc: '천하제일 검가를 자처하는 명문. 자존심이 하늘을 찌른다.',
-    intro: [['출신 모를 자가 맹주 자리에 앉은 것도 불쾌한데, 이제 점소이가 비무대에 오르는군.'], ['me', '국수는 드셔 보셨어요?'], ['…뽑아라.']], win: [['사과하지. 남궁의 검은 이제부터 출신을 묻지 않겠다.']] },
+    intro: [['출신 모를 자가 맹주 자리에 앉은 것도 불쾌한데, 이제 {호}까지 비무대에 오르는군.'], ['me', '국수는 드셔 보셨어요?'], ['…뽑아라.']], win: [['사과하지. 남궁의 검은 이제부터 출신을 묻지 않겠다.']] },
   { id: 'moyong', group: '오대세가', name: '모용세가', han: '慕容世家', who: '모용설', spr: 'Moyong', tier: 3, wpn: 'Katana', moves: ['ihwa', 'blink', 'flurry', 'fan5'], gift: ['ihwa'], at: ['fiveclans', 16, 10.4], desc: '상대의 초식을 상대에게 돌려주는 기이한 가문.',
     intro: [['네 초식은 네게 돌려줄게. 모용의 예법이야.'], ['me', '받은 걸 돌려주는 건 좋은 예법이네요. 방값도 그렇게 해 주시면…'], ['무슨 소리야?']], win: [['돌려줄 수 없는 것도 있구나. 그 걸음은 뭐지?'], ['me', '걸레질이요.'], ['…장난치지 마.']] },
   { id: 'jegal', group: '오대세가', name: '제갈세가', han: '諸葛世家', who: '제갈현', spr: 'Jegal', tier: 3, wpn: 'Stick', moves: ['palmun', 'rain', 'ring8', 'fan5'], keep: 95, gift: ['palmun'], at: ['fiveclans', 28, 10.4], desc: '진법과 지략의 가문. 정천맹의 작전은 대개 이곳에서 나온다.',

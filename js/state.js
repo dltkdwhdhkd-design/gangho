@@ -6,7 +6,7 @@ const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
 export function newState(name, look, gender, diff) {
   return {
-    v: 2, name, look, gender, diff, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 20,
+    v: 3, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 20,
     weapon: 'stick', weapons: ['stick'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
     potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0 }, inv: {}, accs: [], tree: {}, tp: 0, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1,
   };
@@ -20,6 +20,7 @@ export function bonus(S = G.S) {
   if (S.acc && ACCS[S.acc]) add(ACCS[S.acc].fx);
   if (S.meal && S.meal.left > 0) add(DB[S.meal.id].meal);
   if (S.married && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
+  if (S.sworn && SPOUSE_FX[S.sworn]) add(SPOUSE_FX[S.sworn]);
   if (S.rested === S.day) add({ atk: 5 });
   return b;
 }
@@ -58,13 +59,20 @@ export function save(slient = true) {
 export function load() { try { const r = localStorage.getItem(KEY); return r ? fill(migrate(JSON.parse(r))) : null; } catch (e) { return null; } }
 // 예전 저장을 새 형식으로 옮긴다
 function migrate(S) {
-  if ((S.v || 1) >= 2) return S;
-  const d = newState(S.name, S.look, S.gender, S.diff);
-  for (const k in d) if (S[k] === undefined) S[k] = d[k];
-  for (const k in d.love) { if (S.love[k] === undefined) S.love[k] = 0; else S.love[k] *= 15; }
-  S.tp = S.lv - 1; S.v = 2; return S;
+  if ((S.v || 1) < 2) {
+    const d = newState(S.name, S.look, S.gender, S.diff);
+    for (const k in d) if (S[k] === undefined) S[k] = d[k];
+    for (const k in d.love) { if (S.love[k] === undefined) S.love[k] = 0; else S.love[k] *= 15; }
+    S.tp = S.lv - 1; S.v = 2;
+  }
+  if (S.v < 3) { // 주인공은 남성으로 고정, 철우는 인연에서 의형제로
+    S.gender = 'm'; if (['Cavegirl2', 'Woman', 'Villager4'].includes(S.look)) S.look = 'BlueSamurai';
+    if (S.married === 'cheol' || S.partner === 'cheol') { S.sworn = 'cheol'; if (S.married === 'cheol') S.married = null; if (S.partner === 'cheol') S.partner = null; }
+    S.v = 3;
+  }
+  return S;
 }
-function fill(S) { if (!S.rep) S.rep = { jeong: 0, sa: 0 }; return S; }
+function fill(S) { if (!S.rep) S.rep = { jeong: 0, sa: 0 }; if (!S.title) S.title = '떠돌이 낭인'; if (!S.titles) S.titles = ['ronin', 'dog']; if (S.sworn === undefined) S.sworn = null; return S; }
 export const have = id => (G.S.inv[id] || 0);
 export function give(id, n = 1) { G.S.inv[id] = have(id) + n; }
 export function take(id, n = 1) { G.S.inv[id] = have(id) - n; if (G.S.inv[id] <= 0) delete G.S.inv[id]; }

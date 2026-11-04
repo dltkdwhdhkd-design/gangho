@@ -1,5 +1,5 @@
 // 직접 조작 전투
-import { G, IMG, Input, Sound, $, $$, el, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait } from './core.js';
+import { G, IMG, Input, Sound, $, $$, el, esc, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait } from './core.js';
 import { SKILLS, BASIC, WEAPONS } from './data.js';
 import { MOVES, FOES } from './foes.js';
 import { arena, ARENA_W, ARENA_H, drawStamp, STAMPS } from './tiles.js';
@@ -536,7 +536,7 @@ export class Battle {
   buildHud() {
     const h = $('#hud'); h.innerHTML = '';
     const p = this.p, S = G.S;
-    h.innerHTML = `<div class="bars"><div class="bname">${p.name}</div><div class="bar"><i class="lag" id="hLag"></i><i class="val" id="hVal"></i><b id="hTxt"></b></div><div class="bar mp"><i class="val" id="mVal"></i><b id="mTxt"></b></div></div>`;
+    h.innerHTML = `<div class="bars"><div class="bname">${esc(S.title)} ${esc(p.name)}</div><div class="bar"><i class="lag" id="hLag"></i><i class="val" id="hVal"></i><b id="hTxt"></b></div><div class="bar mp"><i class="val" id="mVal"></i><b id="mTxt"></b></div></div>`;
     const bosses = this.actors.filter(a => a.boss && a.team === 1);
     if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.nameplate || b.name)}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
     const key = (i) => 'UIOP'[i];

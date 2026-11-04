@@ -28,7 +28,7 @@ function render(c) {
   d.appendChild(box);
 }
 function click(c) { Input.press('ok'); setTimeout(() => Input.release('ok'), 30); }
-const sub = s => s.replaceAll('{나}', G.S ? G.S.name : '');
+const sub = s => s.replaceAll('{나}', G.S ? G.S.name : '').replaceAll('{호}', G.S ? G.S.title : '');
 export function say(who, text, expr) { return new Promise(res => { const c = { type: 'say', who, text: sub(text), expr, n: 0, res }; D.cur = c; render(c); }); }
 export function narr(text) { return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res }; D.cur = c; render(c); }); }
 export function choice(q, opts, who) {
