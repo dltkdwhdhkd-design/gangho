@@ -1,5 +1,6 @@
 // 직접 조작 전투
 import { G, IMG, Input, Sound, $, $$, el, esc, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait } from './core.js';
+import { stageClear } from './dialog.js';
 import { SKILLS, BASIC, WEAPONS } from './data.js';
 import { MOVES, FOES } from './foes.js';
 import { arena, ARENA_W, ARENA_H, drawStamp, STAMPS } from './tiles.js';
@@ -572,6 +573,7 @@ export class Battle {
 
 // 전투 한 판을 치르고 결과를 돌려준다
 export function fight(cfg) {
+  stageClear();
   return new Promise(res => {
     const prev = G.scene;
     const B = new Battle(cfg);
