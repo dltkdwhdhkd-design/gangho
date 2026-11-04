@@ -5,7 +5,7 @@ import { newState, stats, save, load, hasSave, masteryLv, canEquip, DIFF, learn,
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
 import { Story } from './story.js';
-import { CLANS, clansWon } from './clandata.js';
+import { CLANS, SAPA, clansWon } from './clandata.js';
 
 const LOOKS = [['BlueSamurai', '상투 머리'], ['Boy', '다홍 머리'], ['Villager3', '곱슬 머리'], ['Cavegirl2', '보랏빛 머리'], ['Woman', '금빛 머리'], ['Villager4', '단발 머리']];
 function titleBg(c) {
@@ -120,7 +120,8 @@ function tabTree(B) {
 }
 function tabClan(B) {
   const S = G.S, row = c => { const w = S.flags['clan_' + c.id]; return `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400;font-size:18px">${c.name}</b> <small class="hint">${c.han}</small>${w ? '<span class="tag ult">인정받음</span>' : ''}<div class="hint" style="line-height:1.35">${c.desc}${S.flags.boat_guhwa || w ? ` 대표 ${c.who}.` : ''}${w ? ` 전수: ${c.gift.map(id => SKILLS[id].name).join(', ')}` : ''}</div></div>`; };
-  B.innerHTML = `<p class="hint">정천맹은 구파일방과 오대세가의 맹약으로 세워졌습니다. 인정받은 세력 ${clansWon()} / 15</p><div class="two"><div><h2>구파일방</h2>${CLANS.filter(c => c.group === '구파일방').map(row).join('')}</div><div><h2>오대세가</h2>${CLANS.filter(c => c.group === '오대세가').map(row).join('')}</div></div>`;
+  const sap = c => `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400;font-size:18px">${S.flags[c.open] ? c.name : '???'}</b> ${S.flags[c.open] ? `<small class="hint">${c.han}</small><div class="hint" style="line-height:1.35">${c.desc}</div>` : ''}</div>`, demon = S.flags.cleared ? '<b style="font-weight:400;font-size:18px">천마신교</b> <small class="hint">天魔神敎</small><div class="hint">천산 너머에서 달을 먹는다는 자들.</div>' : S.flags.demon_hint ? '<b style="font-weight:400;font-size:18px">세 번째 길</b><div class="hint">백랑은 이 이름을 말하면 혀가 잘린다고 했다.</div>' : '<b style="font-weight:400;font-size:18px">???</b>';
+  B.innerHTML = `<p class="hint">강호는 세 갈래다. 내 평판: 정파 ${S.rep.jeong} · 사파 ${S.rep.sa} · 인정받은 세력 ${clansWon()} / 15</p><div class="two"><div><h2>정파 · 구파일방</h2>${CLANS.filter(c => c.group === '구파일방').map(row).join('')}</div><div><h2>정파 · 오대세가</h2>${CLANS.filter(c => c.group === '오대세가').map(row).join('')}<h2 style="margin-top:12px">사파 · 흑도맹</h2>${SAPA.map(sap).join('')}<h2 style="margin-top:12px">마교</h2><div class="note">${demon}</div></div></div>`;
 }
 function tabNote(B) {
   const S = G.S, moon = ['moon1', 'moon2', 'moon3', 'moon4', 'moon5', 'moon6', 'moon7'];

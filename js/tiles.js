@@ -84,6 +84,7 @@ export function arena(theme) {
     case 'fort': paintGround(c, grid((x, y) => (x > 0 && x < W - 1 && y > 1 && y < Ht - 1) ? 1 : 0), 'dusk'); edge('wood_h'); break;
     case 'court': paintGround(c, grid((x, y) => (x > 2 && x < W - 3 && y > 2 && y < Ht - 3) ? 3 : 0), 'grass'); edge('wall_h'); for (let x = 16; x < W * TS; x += 64) drawStamp(c, 'banner3', x, 6); break;
     case 'ring': paintGround(c, grid((x, y) => (x > 1 && x < W - 2 && y > 1 && y < Ht - 2) ? 5 : 3), 'sand'); edge('wall_h'); for (let x = 16; x < W * TS; x += 48) drawStamp(c, ['banner1', 'banner2', 'banner5'][(x / 48 | 0) % 3], x, 6); break;
+    case 'dock': paintGround(c, grid((x, y) => (y < 3 || y > Ht - 3) ? 2 : 4), 'grass', { detail: 0 }); break;
     case 'room': paintRoom(c, W, Ht, 0); break;
     case 'moon': paintGround(c, grid((x, y) => (Math.abs(x - 12) < 9 && Math.abs(y - 7) < 6) ? 1 : 0), 'dusk'); for (let x = 0; x < W * TS; x += 32) drawStamp(c, 'tree_dead', x, -14); c.fillStyle = 'rgba(40,20,70,.32)'; c.fillRect(0, 0, W * TS, Ht * TS); break;
     case 'snow': paintGround(c, grid(() => 0), 'snow'); for (let x = 0; x < W * TS; x += 32) drawStamp(c, 'tree_snow', x, -14); break;

@@ -19,6 +19,7 @@ export const ctx = {
   note(t) { G.S.notes.push(t); toast('수첩에 적었다'); },
   love(k, n = 1) { G.S.love[k] = Math.min(100, (G.S.love[k] || 0) + n * 14); G.S.flags['met_' + k] = true; Sound.sfx('secret'); toast(`${WHO[k].name}와(과) 가까워졌다`); },
   page(id) { if (!G.S.pages.includes(id)) G.S.pages.push(id); learn(id); },
+  rep(k, n) { G.S.rep[k] += n; toast(`${k === 'jeong' ? '정파' : '사파'} 평판 ${n > 0 ? '+' : ''}${n}`); },
   silver(n) { G.S.silver += n; Sound.sfx('coin'); toast(`은자 ${n}냥을 얻었다`); },
   async duel(cfg) {
     for (; ;) {

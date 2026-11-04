@@ -20,14 +20,14 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       while (S.silver > 60 && S.potion < 6) { S.silver -= 12; S.potion++; }
       const usable = S.skills.filter(id => { const k = D.ctx.learn && window.__SK ? 1 : 1; return true; });
     };
-    const wantedMap = { c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
+    const wantedMap = { c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], s1: ['cheongha', 22, 26], s2: ['cheongha', 22, 20], s3: ['bokun', 7, 8], s4: ['cheongha', 22, 20], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
     let iter = 0, lastStep = '', stuck = 0, loses = 0;
     while (iter++ < 3000) {
       await pump(2);
       if (G.scene === 'battle' && G.battle) { const B = G.battle, t0 = B.t; const name = B.cfg.title || B.cfg.foes.join(); let n = 0; while (G.scene === 'battle' && G.battle === B && n++ < 400) { G.fast(60); await sleep(); } log.push(`${S.flags.step} ${name} lv${S.lv} ${B.outcome} ${B.t.toFixed(0)}s hp${Math.round(B.p.hp / B.p.maxHp * 100)}% pot${S.potion}`); if (B.outcome === 'lose') { loses++; S.exp += D.stats ? 60 + S.lv * 20 : 0; if (S.exp > 18 * Math.pow(S.lv, 1.32)) { S.exp = 0; S.lv++; S.pts += 3; } } await pump(1); continue; }
       if (G.field.busy) continue;
       upkeep();
-      const st = S.flags.step; if (st === 'end') break;
+      const st = S.flags.step; if (st === 'end') break; if (typeof F.__c === 'undefined') F.__c = 1;
       if (st === lastStep) stuck++; else { stuck = 0; lastStep = st; }
       if (stuck > 400) { log.push('STUCK at ' + st + ' map ' + S.map + ' goal ' + S.goal); break; }
       const f = G.field, m = f.m;

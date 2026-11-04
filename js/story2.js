@@ -8,7 +8,7 @@ import { clansWon } from './clandata.js';
 const S = () => G.S, F = () => G.S.flags;
 // ── 2장 ──
 async function arrive() {
-  await narr('제2장 · 구름 위의 칼\n\n창운산. 구파일방 바로 아랫줄에 선다는 신흥 명문, 창운검문이 구름 위에 앉아 있다.');
+  await narr('제1부 · 구름 위의 칼\n\n창운산. 구파일방 바로 아랫줄에 선다는 신흥 명문, 창운검문이 구름 위에 앉아 있다.');
   await say('yun', '저는 문주님 진맥하러 왔다고 하면 돼요. {나} 씨는요?');
   await say('me', '입문 시험을 본대요. 외문 제자로 들어가서 서찰에 인장 찍은 사람을 찾아야죠.');
   await say('yun', '점소이가 어떻게 검문에 들어가요.');
@@ -103,7 +103,7 @@ async function wiBoss() {
 }
 // ── 3장 ──
 async function toGuhwa() {
-  await narr('제3장 · 천하비무\n\n구화성. 구파일방과 오대세가가 모두 깃발을 들고 왔다.\n강호 사람이 다 모였다는 말이 과장이 아닌 날이었다.');
+  await narr('제2부 · 천하비무\n\n구화성. 구파일방과 오대세가가 모두 깃발을 들고 왔다.\n강호 사람이 다 모였다는 말이 과장이 아닌 날이었다.');
   await ctx.warp('guhwa', 24.5, 29, 1);
   await say('yun', '사람이 너무 많아요. 소매치기 조심해요.');
   await say('me', '아, 금봉 객잔에서 시끄러운 소리가 나는데요.');
@@ -214,7 +214,7 @@ async function finalMatch() {
   await say('so', '곽 호법이 월하곡에 있다면 가야지. 내 사부 일도 거기서 끝내겠어.');
   await say('boat', '이런, 먼 데까지 왔더니 네가 쫓기고 있구나. 타라! 곽 아주머니 국수값은 내가 갚는다.');
   set('c4a');
-  await narr('제4장 · 달이 진 골짜기\n\n배는 밤새 강을 거슬러 올랐다.\n열일곱 해 만에 돌아온 곳이었다.');
+  await narr('제3부 · 달이 진 골짜기\n\n배는 밤새 강을 거슬러 올랐다.\n열일곱 해 만에 돌아온 곳이었다.');
   ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
   await ctx.warp('wolha', 22, 37, 1);
 }
@@ -277,6 +277,9 @@ async function foxBoss() {
   await ctx.duel({ foes: ['chief'], allies, foeHpMul: won >= 15 ? .8 : 1, arena: 'moon', bgm: 'boss', title: '정천맹주 연경추' });
   await say('chief', '…왜지. 나는 다 익혔는데. 왜 네 달이 더 밝은 게냐.');
   await say('me', '걸레질을 안 해 보셨잖아요.');
+  await say('chief', '하하… 그래도 늦었다. 일곱 장은 이미 천산을 향해 있다. 교주께서… 깨어나신다…');
+  await say('so', '천산? 교주? 저 사람 지금 무슨 소리를 하는 거야.');
+  await say('cheol', '…시주들. 달을 보시오.');
   await ending();
 }
 async function ending() {
@@ -291,7 +294,7 @@ async function ending() {
   if (c === 2) { await narr('달맞이 객잔이 다시 문을 열었다.\n윤씨 약방이 장부를 들고 찾아오고,\n벽수궁의 검객이 국수를 먹고 가고,\n파계승은 오늘도 밥값이 없다.'); }
   if (F().baek_live) await say('baek', '점소이. 방값 가져왔다. 이자는 깎자.');
   { const q = S().married || S().partner; if (q) await say(q, G.life.pick(G.life.cand[q].chat)); }
-  await narr('강호행 · 끝\n\n여기까지 함께해 주셔서 고맙습니다.');
+  await narr('그해 겨울, 서쪽 하늘에 붉은 달이 떴다.\n개방의 거지들이 밥그릇을 엎었고,\n사파의 깃발 아래에서도 처음으로 침묵이 흘렀다.\n\n강호행 · 제1막 끝\n이야기는 제4부 ‘서역의 달’로 이어집니다.');
   set('end'); F().cleared = true; ctx.goal('');
   await ctx.warp('cheongha', 22.5, 16, 0);
 }

@@ -51,6 +51,11 @@ export const FOES = {
   bruiser: F('산적 행동대장', 'chars/Caveman2', 170, 15, 4, 44, 44, 20, 1.2, ['heavy', 'slash', 'spin'], { wpn: 'BigSword', elite: 1, poise: 30 }),
   raccoon_king: F('대왕 너구리', 'boss/GiantRacoon', 520, 14, 3, 48, 90, 40, 1, ['heavy', 'charge', 'quake', 'bite'], { boss: 1, poise: 90, big: { frames: 6, w: 60, h: 60, img: 'boss/GiantRacoonIdle' }, r: 13 }),
   lion: F('광사자 맹호', 'chars/Lion', 760, 17, 5, 58, 160, 120, .95, ['slash', 'double', 'heavy', 'spin', 'lunge'], { wpn: 'BigSword', boss: 1, poise: 120, phases: [{ hp: .5, say: '하하! 이제 좀 몸이 풀리는군!', add: ['flurry', 'quake'], pause: .75 }], scale: 1.4 }),
+  // 1부 장강수로채
+  pirate: F('수적', 'chars/Villager3', 58, 9, 1, 54, 13, 5, 1.25, ['slash', 'lunge'], { wpn: 'Axe', drops: [['ore_iron', .2, 1, 1]] }),
+  pirate_bow: F('수적 궁수', 'chars/Samurai', 44, 9, 1, 48, 13, 5, 1.3, ['arrow'], { keep: 90 }),
+  pirate_hook: F('갈고리 수적', 'chars/Caveman', 112, 12, 3, 50, 28, 12, 1.2, ['heavy', 'lunge', 'slash'], { wpn: 'Club', elite: 1, poise: 20 }),
+  wei: F('낭리비어 위충', 'chars/Paeng', 640, 15, 4, 66, 130, 90, .95, ['double', 'lunge', 'spin', 'dart3', 'heavy'], { wpn: 'Lance', boss: 1, poise: 100, phases: [{ hp: .5, say: '강에서는 내가 법이다!', add: ['flurry', 'rain'], pause: .78 }], scale: 1.3 }),
   // 2장
   disciple: F('창운문 제자', 'chars/GreenNinja', 140, 18, 5, 60, 34, 14, 1.2, ['slash', 'swallow_qi', 'cloud_flash'], { wpn: 'Sword', guard: .5 }),
   senior_go: F('사형 고진', 'chars/Inspector', 420, 22, 7, 62, 110, 60, 1, ['double', 'cloud_flash', 'swallow_qi', 'wind_turn'], { wpn: 'Sword', guard: .7, boss: 1, poise: 70 }),

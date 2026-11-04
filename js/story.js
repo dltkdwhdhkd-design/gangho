@@ -4,3 +4,4 @@ import './story1.js';
 import './story2.js';
 import './clans.js';
 import './life.js';
+import './part1.js';

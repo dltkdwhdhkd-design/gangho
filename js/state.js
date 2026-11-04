@@ -8,7 +8,7 @@ export function newState(name, look, gender, diff) {
   return {
     v: 2, name, look, gender, diff, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 20,
     weapon: 'stick', weapons: ['stick'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
-    potion: 3, potionMax: 3, inv: {}, accs: [], tree: {}, tp: 0, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1,
+    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0 }, inv: {}, accs: [], tree: {}, tp: 0, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1,
   };
 }
 // 무공 트리, 장신구, 요리, 배우자, 집에서 오는 효과를 합친다
@@ -54,7 +54,7 @@ export const canEquip = (id, S = G.S) => { const k = SKILLS[id]; return k.w === 
 export function save(slient = true) {
   try { localStorage.setItem(KEY, JSON.stringify(G.S)); if (!slient) toast('저장했습니다'); } catch (e) { if (!slient) toast('저장하지 못했습니다'); }
 }
-export function load() { try { const r = localStorage.getItem(KEY); return r ? migrate(JSON.parse(r)) : null; } catch (e) { return null; } }
+export function load() { try { const r = localStorage.getItem(KEY); return r ? fill(migrate(JSON.parse(r))) : null; } catch (e) { return null; } }
 // 예전 저장을 새 형식으로 옮긴다
 function migrate(S) {
   if ((S.v || 1) >= 2) return S;
@@ -63,6 +63,7 @@ function migrate(S) {
   for (const k in d.love) { if (S.love[k] === undefined) S.love[k] = 0; else S.love[k] *= 15; }
   S.tp = S.lv - 1; S.v = 2; return S;
 }
+function fill(S) { if (!S.rep) S.rep = { jeong: 0, sa: 0 }; return S; }
 export const have = id => (G.S.inv[id] || 0);
 export function give(id, n = 1) { G.S.inv[id] = have(id) + n; }
 export function take(id, n = 1) { G.S.inv[id] = have(id) - n; if (G.S.inv[id] <= 0) delete G.S.inv[id]; }

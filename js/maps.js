@@ -86,7 +86,7 @@ export function buildMaps() {
   m.house('clay', 8, 11, 'smith', 7, 8, 1);
   m.house('shop_green', 31, 11, 'clinic', 7, 8, 1);
   m.house('shop_blue', 36, 18, 'shop', 6, 7, 1);
-  m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).put('hut_o2', 26, 18).put('wood_o', 4, 18).put('wood_b', 12, 8);
+  m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).house('hut_o2', 26, 18, 'bokun', 7, 8, 1, { when: 'bokun_open', lock: '낮에는 문이 잠겨 있다. 밤에만 불이 켜진다는 집이다.' }).put('wood_o', 4, 18).put('wood_b', 12, 8);
   m.put('banner2', 17, 10, { nosolid: true }).put('banner2', 24, 10, { nosolid: true });
   m.put('plum', 2, 22).put('plum', 40, 8).put('plum_g', 18, 22).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
   m.put('jar', 18, 12).put('pot', 26, 12).put('pot', 27, 12).put('signpost', 24, 16).put('signpost', 41, 13);
@@ -115,6 +115,10 @@ export function buildMaps() {
   m = M('shop', 12, 10, { name: '만물상', bgm: 'good', room: true, arena: 'yard' });
   m.put('shelf', 1, 1).put('shelf2', 3, 1).put('shelf', 7, 1).put('counter', 3, 4).put('box', 1, 6).put('box', 10, 6);
   m.exit(4, 9, 4, 1, 'cheongha', 37.5, 22, 0, { door: true });
+  // 복운전: 하오문의 도박장
+  m = M('bokun', 14, 11, { name: '복운전', bgm: 'mystic', room: true, roomStyle: 1, arena: 'room' });
+  m.put('longtable', 2, 3).put('longtable', 8, 3).put('longtable', 2, 6).row('stool', 2, 2, 3).row('stool', 8, 2, 3).put('lantern', 12, 2).put('jar', 12, 7).put('rack', 8, 7);
+  m.exit(5, 10, 4, 1, 'cheongha', 28, 22, 0, { door: true });
   // 우물 아래 밀실
   m = M('well', 12, 9, { name: '우물 아래 밀실', bgm: 'mystic', room: true, roomStyle: 1, arena: 'room', tint: 'rgba(20,10,40,.35)' });
   m.row('tablet', 2, 2, 4, 2).put('tablet2', 4, 3).put('tablet2', 6, 3).put('chest', 9, 5);

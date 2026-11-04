@@ -7,7 +7,7 @@ import { WEAPONS } from './data.js';
 const S = () => G.S, F = () => G.S.flags, step = () => G.S.flags.step || 'p0', set = v => { G.S.flags.step = v; };
 const at = (...a) => a.includes(step());
 const after = v => ORDER.indexOf(step()) >= ORDER.indexOf(v);
-const ORDER = ['p0', 'p1', 'p2', 'c1a', 'c1b', 'c1c', 'c1d', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
+const ORDER = ['p0', 'p1', 'p2', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
 export { step, set, at, after };
 
 Story.scenes.opening = async () => {
@@ -87,7 +87,7 @@ async function baekFirst() {
   await say('me', '…제가 찾으러 가야 해요.');
   await say('yun', '그 몸으로요? 일단 품에 있던 종이부터 보세요. 젖지도 않았어요. 이상한 종이예요.');
   F().met_yun = true;
-  await narr('제1장 · 타다 남은 객잔');
+  await narr('제1부 · 객잔의 점소이\n\n타다 남은 객잔');
   ctx.goal('불탄 객잔을 살펴보고, 나루터의 뱃사공에게 묻기');
   ctx.note('곽 아주머니는 검은 옷의 무리에게 끌려갔다. 여우 가면이 아주머니를 “곽 호법”이라고 불렀다.');
   ctx.note('마을에서 할 수 있는 일: 복덕방에서 집 사기, 뱃사공에게 낚싯대 얻기, 서쪽 청풍골에서 사냥과 벌목, 대장간과 약방에서 제작, 떠돌이 비무객과 겨루기.');
@@ -143,14 +143,13 @@ async function yunAfter() {
   await say('yun', '뱃사공 노씨가 찾던데요. 흑의인들이 탄 배를 봤대요.');
   await say('doc', '{나}야. 운기조식 정도는 알아 두어라. 강호에 나가면 네 몸은 네가 돌봐야 한다.');
   learn('breath');
-  set('c1e'); F().pass_open = true; F().fort_open = false;
-  ctx.goal('대장간에서 무기를 구하고, 동쪽 산길로 가기');
+  set('s1'); ctx.goal('나루터의 뱃사공 노씨 만나기');
   const c = await choice('윤설이 약을 싸 주며 시선을 피한다.', ['고맙다고 말한다', '값은 나중에 갚겠다고 말한다']);
   if (c === 0) { await say('me', '고마워요. 강에서 건져 준 것도.'); await say('yun', '…무거웠다니까요.'); ctx.love('yun'); }
   else { await say('me', '약값은 꼭 갚을게요.'); await say('yun', '네, 장부에 적어 뒀어요.'); }
 }
 async function roadBlock() {
-  await say('bandit', '멈춰라! 이 길은 흑풍채 맹호 나리의 길이다!');
+  await say('bandit', '멈춰라! 이 길은 녹림 칠십이채, 흑풍채 맹호 나리의 길이다!');
   await say('me', '흑의인들이 이쪽으로 갔다던데요.');
   await say('bandit', '그건 몰라도 통행세는 안다!');
   await ctx.duel({ foes: ['bandit', 'bandit', 'archer'], arena: 'fort', title: '흑풍채 산적', tip: '활을 쏘는 적부터 잡으세요. <b>I</b>에 초승을 두었다면 등 뒤로 건너갈 수 있습니다.' });
@@ -174,7 +173,7 @@ async function lionFight() {
   await ctx.duel({ foes: ['lion'], arena: 'fort', bgm: 'boss', title: '광사자 맹호' });
   await say('lion', '크윽… 강호가 좁긴 좁군. 점소이한테 지다니.');
   await say('me', '말해요. 누가 시켰어요.');
-  await say('lion', '나도 얼굴은 못 봤다. 다들 얼굴을 가린 놈들이니까. 무면회라고 하더군.');
+  await say('lion', '나도 얼굴은 못 봤다. 다들 얼굴을 가린 놈들이니까. 무면회라고 하더군. 녹림 칠십이채의 총채주도 그놈들 일이라면 말을 아낀다.');
   await say('lion', '값을 낸 건 그놈들이지만, 서찰엔 창운검문 인장이 찍혀 있었다. 놀랍지? 정파 나리들이 말이야.');
   await say('lion', '이것도 가져가라. 놈들이 흘리고 간 쇳조각이다. 달 모양이라 뭔가 했지.');
   await say(null, '달 모양 쇠붙이를 얻었다. 객잔 우물 뚜껑의 구멍과 크기가 비슷하다.');
