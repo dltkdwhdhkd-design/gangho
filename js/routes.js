@@ -57,6 +57,7 @@ export async function crossroads() {
   await say('me', '독은 그쪽이 탔는데요.');
   await say('boat', '이긴 놈이 장부를 쓰는 거다.');
   await say('yun', '지금 정천맹 깃발 아래로 돌아가면 다 죽어요. 어디로 갈지 정해요.');
+  await fadeTo(1); F().night = true; G.field.load('valley', 23, 15, 2); await fadeTo(0);
   await narr('새벽녘 갈대밭에 배를 댔다.\n등불이 셋 보였다.\n셋 다 나를 기다리고 있었다.');
   await say('so', '월하곡으로 가자. 곽 호법을 구하고 맹주의 정체를 강호에 밝혀. 구파일방에도 귀가 달린 사람은 있어.');
   await say('baekrang', '역적이 되셨네요, {호}. 패천도가 보자고 해요. 강호에서 맹주 목을 원하는 사람은 우리뿐이거든요.');
@@ -68,13 +69,11 @@ export async function crossroads() {
   await say('hyeok', '정파는 당신의 집을 불태웠고, 사파는 당신을 값으로 보고, 저희는 당신을 열쇠로 봅니다. 셋 중 누가 가장 솔직합니까.');
   await say('boat', '배는 네가 말하는 데로 간다. 이제 너한테 명령할 사람은 없다.');
   const c = await choice('누구의 손을 잡을까?', ['소연하와 월하곡으로 간다 (정파)', '백랑을 따라 흑도맹으로 간다 (사파)', '혁련하를 따라 서쪽으로 간다 (마교)', '아무의 손도 잡지 않는다 (낭인)']);
-  if (c === 0) return toJeong();
-  if (c === 1) return toSa();
-  if (c === 2) return toMa();
-  return toFree();
+  const go = [toJeong, toSa, toMa, toFree][c];
+  await go();
 }
 export async function toWolha() {
-  set('c4a');
+  set('c4a'); F().night = false;
   await narr('제6부 · 달이 진 골짜기\n\n달이 없는 밤, 강을 거슬러 올랐다.\n열일곱 해 만에 돌아온 곳이었다.');
   ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
   await ctx.warp('wolha', 22, 37, 1);
@@ -106,7 +105,7 @@ async function toSa() {
   await say('so', '…사파 밑으로 들어가겠다고? 그럼 월하곡에서 보자. 어느 쪽에 서 있든 곽 호법은 내가 먼저 찾아.');
   await say('yun', '사파 쪽에도 다치는 사람은 있겠죠. 장부는 제가 챙길게요.');
   await say('hyeok', '값을 고르셨군요. 값은 언제나 오릅니다.');
-  set('sa1'); ctx.goal('산채 안의 패천도 사마웅 만나기');
+  set('sa1'); F().night = false; ctx.goal('산채 안의 패천도 사마웅 만나기');
   await narr('제4부 · 흑도맹\n\n열흘 뒤, 동쪽 산길.\n맹호의 산채에 검은 깃발 열두 개가 올라가 있었다.');
   await ctx.warp('fort', 18, 22, 1);
 }
@@ -184,7 +183,7 @@ async function toMa() {
   await say('yun', '거기는 못 가요. 사람 살리려고 배운 손이에요.');
   await say('yun', '돌아오면 팔부터 봐 줄게요. 살아서 와요.');
   G.S.love.yun = Math.max(0, (G.S.love.yun || 0) - 14); G.S.love.so = Math.max(0, (G.S.love.so || 0) - 14);
-  set('ma1'); ctx.goal('제단 앞의 혁련하와 이야기하기');
+  set('ma1'); F().night = false; ctx.goal('제단 앞의 혁련하와 이야기하기');
   await narr('제4부 · 붉은 초승달\n\n청풍골 서쪽 절벽에 문이 있었다.\n청하진에서 반나절 거리였다.\n십칠 년 동안 아무도 몰랐다.');
   await ctx.warp('shrine', 7, 8, 1);
 }
