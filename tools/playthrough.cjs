@@ -4,7 +4,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 400))); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); else if (m.text().startsWith('LOG')) console.log(m.text()); });
-  await p.goto('http://127.0.0.1:8123/index.html'); await p.waitForTimeout(1200);
+  await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForTimeout(1200);
   const res = await p.evaluate(async ({ diff, skill }) => {
     const G = __G, D = G.dbg; G.manual = true; G.auto = true; G.speedup = 2000; G.bot = { skill };
     const log = { push: t => console.log('LOG ' + t), join: () => '' }; const sleep = () => new Promise(r => setTimeout(r, 0));

@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.goto('http://127.0.0.1:8123/index.html'); await p.waitForTimeout(1200);
+  await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForTimeout(1200);
   const out = await p.evaluate(() => {
     const G = __G, D = G.dbg; G.S = D.newState('a', 'Boy', 'm', 'normal');
     const res = [];

@@ -1,7 +1,7 @@
 const { chromium } = require('playwright'); const fs = require('fs');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
-  await p.goto('http://127.0.0.1:8123/index.html'); await p.waitForTimeout(1200);
+  await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForTimeout(1200);
   const ids = process.argv.slice(2);
   for (const id of ids) {
     const url = await p.evaluate(async id => {

@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 300))); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
-  await p.goto('http://127.0.0.1:8123/index.html'); await p.waitForTimeout(1300);
+  await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForTimeout(1300);
   await p.click('#bNew'); await p.waitForTimeout(200); await p.click('#go'); await p.waitForTimeout(800);
   const st = () => p.evaluate(() => { const G = __G, f = G.field; return { map: f.m.id, x: +(f.p.x / 16).toFixed(1), y: +(f.p.y / 16).toFixed(1), busy: f.busy, step: G.S.flags.step, dlg: G.dbg.dialog.talking(), scene: G.scene, goal: G.S.goal }; });
   for (let i = 0; i < 40; i++) { await p.keyboard.press('e'); await p.waitForTimeout(90); if (!(await st()).dlg && i > 3) break; }
