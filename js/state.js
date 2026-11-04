@@ -53,8 +53,27 @@ export function learn(id) {
   return true;
 }
 export const canEquip = (id, S = G.S) => { const k = SKILLS[id]; return k.w === '무관' || k.w === WEAPONS[S.weapon].type; };
+let fileHandle = null; // 기기에 고른 저장 파일. 지원하는 브라우저에서는 저장할 때마다 함께 갱신한다
+async function writeFile(handle, text) { const w = await handle.createWritable(); await w.write(text); await w.close(); }
 export function save(slient = true) {
   try { localStorage.setItem(KEY, JSON.stringify(G.S)); if (!slient) toast('저장했습니다'); } catch (e) { if (!slient) toast('저장하지 못했습니다'); }
+  if (fileHandle) writeFile(fileHandle, JSON.stringify(G.S)).catch(() => { fileHandle = null; });
+}
+export async function saveToFile() {
+  const S = G.S, text = JSON.stringify(S), name = `강호행_${S.name}_${S.day}일째.json`;
+  if (window.showSaveFilePicker) {
+    try {
+      fileHandle = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: '강호행 저장 파일', accept: { 'application/json': ['.json'] } }] });
+      await writeFile(fileHandle, text); toast('기기에 저장했습니다. 이제 저장할 때마다 이 파일도 갱신됩니다.', 4); return;
+    } catch (e) { if (e.name === 'AbortError') return; fileHandle = null; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast('다운로드 폴더에 저장했습니다', 3);
+}
+export async function loadFromFile(file) {
+  const d = JSON.parse(await file.text());
+  if (!d || !d.name || !d.flags) throw new Error('강호행 저장 파일이 아닙니다');
+  const S = fill(migrate(d)); localStorage.setItem(KEY, JSON.stringify(S)); return S;
 }
 export function load() { try { const r = localStorage.getItem(KEY); return r ? fill(migrate(JSON.parse(r))) : null; } catch (e) { return null; } }
 // 예전 저장을 새 형식으로 옮긴다

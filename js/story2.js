@@ -9,36 +9,36 @@ const S = () => G.S, F = () => G.S.flags;
 // ── 2장 ──
 async function arrive() {
   await narr('제2부 · 구름 위의 칼\n\n창운산에는 창운검문이 있다. 구파일방 바로 아래 자리를 넘본다는 신흥 명문이다.');
-  await say('yun', '저는 문주님 진맥하러 왔다고 하면 되는데, 그쪽은 어쩔 거예요?');
-  await say('me', '입문 시험을 보겠습니다. 외문 제자로 들어가서 서찰에 인장 찍은 자를 찾아야 합니다.');
+  await say('yun', '저는 문주님 진맥하러 왔다고 하면 되는데, {나} 씨는 어쩌려고요?');
+  await say('me', '입문 시험을 볼 거예요. 외문 제자로 들어가서 서찰에 인장 찍은 놈을 찾아야죠.');
   await say('yun', '점소이가 검문 시험을 본다고요?');
-  await say('me', '칼은 좀 씁니다.');
+  await say('me', '칼은 좀 쓰니까요.');
   await say('yun', '그건 그렇죠. 너무 튀지나 마요.');
   set('c2b'); ctx.goal('연무장에서 고진 사형에게 입문 시험 보기');
 }
 async function exam() {
   await say('go', '객잔 심부름꾼이 창운검문에 들어오겠다고? 여기는 국수 나르는 데가 아니다.');
-  await say('me', '시험은 누구나 볼 수 있다고 들었습니다.');
+  await say('me', '시험은 누구나 볼 수 있다고 들었는데요.');
   await say('go', '좋다. 제자 둘을 이기면 나와 겨룰 기회를 주겠다.');
   await ctx.duel({ foes: ['disciple', 'disciple'], arena: 'court', title: '입문 시험', yieldAt: 0 });
   await say('go', '제법 움직이는군. 그 걸음은 어디서 배웠느냐?');
   await ctx.duel({ foes: ['senior_go'], arena: 'court', bgm: 'boss', title: '사형 고진', yieldAt: .25 });
   await say('go', '인정하겠다. 외문 제자로 받아 주지. 앞으로 나를 사형이라고 불러라.');
   await say('so', '야, 너 걸음이 재밌다. 어디서 배웠어?');
-  await say('me', '누구십니까.');
+  await say('me', '누구세요?');
   await say('so', '벽수궁 소연하. 객으로 와 있어. 그 걸음 창운문 거 아니지? 나랑 한판 하자.');
-  await say('me', '방금 시험을 끝냈습니다.');
+  await say('me', '방금 시험 끝났는데요.');
   await say('so', '잘됐네. 몸 풀렸겠다.');
   await ctx.duel({ foes: ['so_rival'], arena: 'court', bgm: 'boss', title: '소연하', yieldAt: .35 });
   await say('so', '너 점소이라고 했지? 근데 칼이 왜 사람 목만 노려? 어디서 배웠어?');
-  await say('me', '배운 적은 없습니다. 안 그러면 죽는 곳에 있었습니다.');
+  await say('me', '배운 적은 없어요. 안 그러면 죽는 데 있었거든요.');
   await say('so', '뭐야, 너 좀 무섭다. 마음에 들어.');
   F().met_so = true;
   set('c2c'); ctx.goal('본전에서 윤설과 함께 문주를 뵙기');
 }
 async function lordSick() {
   await say('yun', '왔어요? 문주님 뵙고 왔는데 병이 아니에요.');
-  await say('me', '그럼 뭡니까.');
+  await say('me', '그럼 뭔데요?');
   await say('yun', '칠일소혼산이라는 독이에요. 이레에 한 번씩 조금씩 먹이는 건데, 곁에 있는 사람 아니면 먹일 수가 없어요.');
   await say('wi', '검각주 위문상이오. 의원 낭자, 문주께서는 오래된 지병이시오. 함부로 입을 놀리지 마시오.');
   await say('yun', '네, 죄송합니다.');
@@ -58,9 +58,9 @@ async function cure() {
   await narr('사흘이 지났다.');
   await say('lord', '의원 낭자에게 들었소. 그대가 이끼를 캐 왔다지.');
   await say('lord', '장로 중 누가 내게 독을 먹였는지는 짐작이 가오. 다만 증거가 없소. 장서각에 십칠 년 전 기록이 있을 것이오.');
-  await say('me', '십칠 년 전이라면…');
+  await say('me', '십칠 년 전이요?');
   await say('lord', '구파일방과 오대세가가 정천맹 깃발 아래 모여 월하문을 친 해요. 혹시 아는 이름이오?');
-  await say('me', '조금 압니다.');
+  await say('me', '조금요.');
   await say('yun', '문주님은 제가 지킬게요. 다치지 말고 다녀와요.');
   const c = await choice('윤설이 작은 약병을 건넨다.', ['손을 잡고 고맙다고 한다', '약값은 얼마냐고 묻는다']);
   if (c === 0) { await say('yun', '손 놔요. 약 쏟아져요.'); ctx.love('yun'); } else await say('yun', '지금 그걸 물어요? 나중에 한꺼번에 받을게요.');
@@ -70,12 +70,12 @@ async function cure() {
 async function library() {
   await say('me', '십칠 년 전 기록이 여기 있는데 가운데가 다 뜯겨 있네.');
   await say('so', '너도 그거 찾으러 왔어?');
-  await say('me', '언제 들어왔습니까?');
+  await say('me', '언제 들어왔어요?');
   await say('so', '내 사부님이 십칠 년 전 월하문 토벌에 나갔다가 안 돌아오셨어. 벽수궁에서는 아무도 말을 안 해 주고.');
   await say('so', '그래서 객으로 들어온 거야. 넌? 점소이가 장서각엔 왜 왔어?');
   const c = await choice('소연하가 빤히 쳐다본다.', ['월하문의 마지막 아이라고 털어놓는다', '심부름이라고 둘러댄다']);
-  if (c === 0) { await say('me', '월하문 사람이라고 합니다. 얼마 전에 알았습니다.'); await say('so', '아, 그래서 그 걸음이구나. 말해 줘서 고맙다.'); ctx.love('so'); }
-  else { await say('me', '심부름입니다.'); await say('so', '거짓말 되게 못한다. 됐어, 말하기 싫으면 말아.'); }
+  if (c === 0) { await say('me', '월하문 사람이래요. 얼마 전에 알았어요.'); await say('so', '아, 그래서 그 걸음이구나. 말해 줘서 고맙다.'); ctx.love('so'); }
+  else { await say('me', '심부름이요.'); await say('so', '거짓말 되게 못한다. 됐어, 말하기 싫으면 말아.'); }
   await say(null, '뜯긴 장부 틈에서 쪽지 하나가 떨어졌다. “토벌대 명부. 내통자 낙월. 맹주 수결.”');
   await say('so', '맹주 수결이라고? 정천맹주 연경추?');
   await say('wi', '거기까지 하시오.');
@@ -89,7 +89,7 @@ async function library() {
 }
 async function wiBoss() {
   await say('wi', '점소이 따위가 십칠 년 공들인 일을 망치는구나.');
-  await say('me', '곽 아주머니는 어디 있나.');
+  await say('me', '곽 아주머니 어디 있어.');
   await say('wi', '그보다 네 사문의 초식이 궁금하지 않으냐. 내 품에 두 장이 있다. 가져갈 수 있으면 가져가 보아라.');
   await ctx.duel({ foes: ['elder_wi'], arena: 'room', bgm: 'boss', title: '검각주 위문상' });
   await say('wi', '맹주께서… 구화성에서 너를 기다리실 것이다…');
@@ -111,16 +111,16 @@ export async function toGuhwa() {
   await narr('제3부 · 천하비무\n\n구화성에 구파일방과 오대세가의 깃발이 모두 모였다. 거리마다 칼 찬 사람들로 발 디딜 틈이 없었다.');
   await ctx.warp('guhwa', 24.5, 29, 1);
   await say('yun', '사람 진짜 많다. 소매치기 조심해요.');
-  await say('me', '금봉 객잔 쪽이 시끄럽습니다.');
+  await say('me', '금봉 객잔 쪽이 시끄러운데요.');
   await say('yun', '아, 그리고 동문 밖 구파 회관에는 구파일방이, 서문 밖 세가 거리에는 오대세가가 묵는대요. 대표들한테 비무를 청할 수도 있다던데요.');
-  await say('me', '이기면 뭘 줍니까.');
+  await say('me', '이기면 뭘 주는데요?');
   await say('yun', '인정받으면 자기네 무공을 조금 가르쳐 준대요. 지면 망신이고요.');
   set('c3b'); ctx.goal('금봉 객잔에 들르기, 광장의 심판에게 대회 등록하기 (동문·서문에서 문파 비무 가능)');
 }
 async function monkMeet() {
   await say('host', '스님! 돼지고기 세 근에 술이 두 병이오! 그걸 다 드시고 돈이 없다니요!');
   await say('cheol', '시주, 너무 야박하게 굴지 마시오. 비무대회 상금 타면 갚는다니까 그러시오.');
-  await say('me', '얼마입니까. 제가 내겠습니다.');
+  await say('me', '얼마예요? 제가 낼게요.');
   S().silver = Math.max(0, S().silver - 20);
   await say('cheol', '오! 고맙소, 시주! 나는 철우라 하오. 소림에서 쫓겨난 땡중이지.');
   await say('cheol', '밥 한 끼 빚졌으니 그냥 갈 수야 없지. 주먹 쓰는 법을 하나 가르쳐 드리겠소.');
@@ -130,7 +130,7 @@ async function monkMeet() {
 const ROUNDS = [['fighter_a', '공동파 곽충'], ['fighter_b', '팽가 방계 마혜'], ['fighter_c', '곤륜파 등표'], ['cheolu_spar', '소림 파계승 철우']];
 async function bracketName() {
   await say('judge', '대진표를 쓰겠소. 이름은 적었고, 별호는 뭐요?');
-  await say('me', '별호 말입니까.');
+  await say('me', '별호요?');
   await say('judge', '강호에 이름만 들고 나오는 사람은 없소. 없으면 지금 지으시오. 대진표에 적은 대로 강호에 소문이 나오.');
   S().title = await ctx.ask('별호 짓기', '대진표에 올릴 별호를 적으세요. 메뉴의 상태에서 언제든 다시 바꿀 수 있습니다.', S().title);
   await say('judge', '{호} {나}. 적었소.');
@@ -169,7 +169,7 @@ async function chiefMeet() {
   await say('chief', '달거울을 상품으로 내건 것도 그 때문일세. 제 주인을 찾아가기를 바라서 말이야.');
   await say('me', '…….');
   await say('so', '어때, 맹주 만나 보니까?');
-  await say('me', '좋은 분 같았습니다. 차도 맛있었습니다.');
+  await say('me', '좋은 분 같던데요. 차도 맛있었고요.');
   await say('so', '그게 더 수상한데.');
   F().chief_met = true; ctx.goal('광장의 심판에게 말하기');
 }
@@ -178,20 +178,20 @@ async function ambush() {
   await narr('삼경쯤 창틀이 소리 없이 열렸다.');
   await ctx.duel({ foes: ['shadow2', 'shadow2', 'shadow2'], arena: 'room', title: '심야 암습', bgm: 'fight' });
   await say('cheol', '시주! 괜찮소? 옆방에서 자느라 늦었소.');
-  await say('me', '왜 대회 중에 저를 노리는 겁니까.');
+  await say('me', '왜 대회 중에 저를 노리는 거죠?');
   await say('yun', '결승까지 가는 걸 싫어하는 사람이 있나 봐요.');
   F().ambushed = true; ctx.goal('광장의 심판에게 다음 경기 신청하기');
 }
 async function lantern() {
   await say('yun', '오늘 밤에 등불 놀이가 있대요. 약재 사러 나왔다가 봤어요. 진짜로요.');
   const c = await choice('윤설이 등불을 보고 있다.', ['같이 보자고 한다', '내일 경기를 준비하러 간다']);
-  if (c === 0) { await say('me', '같이 보시겠습니까. 등불은 제가 사겠습니다.'); await say('yun', '웬일이에요? {나} 씨가 돈을 다 쓰고.'); await say('yun', '오늘은 좋네요. 고마워요.'); ctx.love('yun'); if (!S().hearts.includes('mercy')) { S().hearts.push('mercy'); toast('심법 인의심공을 익혔다'); } }
+  if (c === 0) { await say('me', '같이 보실래요? 등불은 제가 살게요.'); await say('yun', '웬일이에요? {나} 씨가 돈을 다 쓰고.'); await say('yun', '오늘은 좋네요. 고마워요.'); ctx.love('yun'); if (!S().hearts.includes('mercy')) { S().hearts.push('mercy'); toast('심법 인의심공을 익혔다'); } }
   else await say('yun', '네, 그러세요.');
   F().ev_lantern = true;
 }
 async function soEve() {
   await say('so', '내일이네. 안 봐준다고 했다.');
-  await say('me', '알고 있습니다.');
+  await say('me', '알아요.');
   await say('so', '네가 이기면 달거울은 네 거고, 내가 이기면 같이 맹주 앞에 서자. 어느 쪽이든 그 사람 얼굴은 볼 거야.');
   const c = await choice('소연하가 칼을 닦는다.', ['사부님을 꼭 찾자고 한다', '살살 해 달라고 한다']);
   if (c === 0) { await say('so', '고맙다. 사실 돌아가셨을 거라는 건 알아. 그래도 고마워.'); ctx.love('so'); if (!S().hearts.includes('swift')) { S().hearts.push('swift'); toast('심법 쾌검심결을 익혔다'); } }
@@ -200,9 +200,9 @@ async function soEve() {
 }
 async function cheolDrink() {
   await say('cheol', '시주, 내가 왜 소림에서 쫓겨났는지 궁금하지 않소?');
-  await say('me', '고기를 드셔서 아닙니까.');
+  await say('me', '고기 드셔서 아니에요?');
   await say('cheol', '아니오. 소림 말사에 산적이 몰려왔는데 주지가 문을 닫으라 하더이다. 밖에 마을 사람들이 있는데 말이오. 그래서 문을 부수고 나갔소. 고기는 그다음에 배웠고.');
-  await say('me', '생각보다 좋은 이유입니다.');
+  await say('me', '생각보다 멋있는 이유네요.');
   await say('cheol', '그렇지? 그러니 오늘 술은 시주가 사시오.');
   F().ev_cheol = true; ctx.love('cheol');
 }
@@ -219,7 +219,7 @@ async function finalMatch() {
   await say('me', '…예?');
   await say(null, '품속의 달거울이 뜨거워졌다. 꺼내 보니 거울에 비친 낱장에 숨은 글이 떠올랐다. “낙월을 움직인 자는 연경추다. 달 없는 밤에 그가 문주를 베었다.”');
   await say('chief', '거울을 봤군. 일곱 장을 모아 줘서 고맙네. 제자들은 십칠 년을 찾아도 못 찾던 걸 자네는 석 달 만에 찾더군.');
-  await say('me', '곽 아주머니는 어디 있나.');
+  await say('me', '곽 아주머니는 어디 있어.');
   await say('chief', '월하곡에 있네. 제칠식이 거기 있으니 자네도 오겠지. 하지만 자네가 살아서 갈 필요는 없어. 낱장만 가면 되니까.');
   await say('yun', '{나} 씨! 마시지 마요! 독이에요!');
   await say(null, '윤설이 뛰어들어 잔을 쳐 냈다. 연회장 문이 닫히고 복면을 쓴 자들이 내려왔다.');
@@ -244,7 +244,7 @@ async function baekReunion() {
   await say('baek', '왔느냐.');
   await say('me', '어르신.');
   await say('baek', '허리가 많이 펴졌구나.');
-  await say('me', '낙월이 어르신이지요. 문을 연 것도 어르신입니까.');
+  await say('me', '낙월이 어르신이죠? 문을 연 것도요.');
   await say('baek', '그래, 내가 열었다. 연경추가 마공 익힌 자만 벌하겠다고 했다. 사문에서 밀려난 게 분해서 그 말을 믿고 싶었지.');
   await say('baek', '그날 밤 너를 곽란에게 넘겼고, 큰아이는 끝내 찾지 못했다. 그 뒤로 그믐마다 은자를 보내며 술만 마셨다.');
   await say('baek', '내가 줄 수 있는 건 이것뿐이다.');
@@ -271,10 +271,10 @@ async function foxBoss() {
   await ctx.duel({ foes: ['fox'], arena: 'moon', bgm: 'boss', title: '여우 가면' });
   await narr('가면이 갈라져 떨어졌다. 나와 어딘가 닮은 얼굴이었다.');
   await say('cheon', '너도 개처럼 컸다더구나. 나는 여덟 살에 저자 손에 끌려가 사람 죽이는 법을 배웠다.');
-  await say('me', '그럼 당신이 그 큰아이입니까.');
+  await say('me', '그럼 당신이 그 큰아이…');
   await say('cheon', '형이라고 부르지 마라. 그 말을 들으면 칼을 못 든다.');
   await say('cheon', '하나만 알아 둬라. 북쪽 변경 마을을 태운 건 전쟁이 아니다. 너를 찾던 무면당이다. 견대도 저자가 고아를 모으려고 만든 곳이고.');
-  await say('me', '제 마지막 임무도 말입니까.');
+  await say('me', '제 마지막 임무도요?');
   await say('cheon', '그래. 네가 살아 돌아온 것만 저자의 계산에 없었다.');
   await say('gwak', '천아! 이 못난 놈아, 밥은 먹고 다니냐!');
   await say('cheon', '…아주머니.');
@@ -290,7 +290,7 @@ async function ending() {
   await narr('달이 떴다. 강호는 맹주가 쓰러졌다는 소식으로 석 달을 시끄러웠다. 월천의 무덤은 위패 곁에 만들어 주었다.');
   await narr('정천맹은 해체되었다. 구파일방과 오대세가의 장문인들이 차례로 월하곡에 올라와 향을 피웠다.');
   await say('gwak', '그래서, 백 영감 방값은 받았어?');
-  await say('me', '아주머니, 첫마디가 그겁니까.');
+  await say('me', '아주머니, 첫마디가 그거예요?');
   await say('gwak', '살아 돌아왔으면 됐지, 뭐. 그래서 그 종이들은 어쩔 거야?');
   const c = await choice('찢어진 일곱 장을 앞에 두고', ['태운다', '문파를 다시 세운다', '객잔부터 다시 짓는다']);
   if (c === 0) { await narr('일곱 장을 태웠다. 재는 강으로 날아갔고, 초식은 내 몸에만 남았다.'); }

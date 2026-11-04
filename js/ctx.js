@@ -6,7 +6,7 @@ import { learn, save } from './state.js';
 import { showResult, choiceLose, openShop, shopItem } from './ui.js';
 Object.assign(WHO, {
   gwak: { name: '곽 아주머니', face: 'OldWoman' }, baek: { name: '백 노인', face: 'OldMan3' }, yun: { name: '윤설', face: 'Princess' }, doc: { name: '윤 의원', face: 'OldMan' },
-  smith: { name: '철 대장장이', face: 'Caveman2' }, boat: { name: '뱃사공 노씨', face: 'OldMan2' }, kid: { name: '동네 꼬마', face: 'Child' }, shopk: { name: '만물상 주인', face: 'Noble' }, town: { name: '마을 사람', face: 'Villager' }, town2: { name: '마을 아낙', face: 'Villager4' },
+  smith: { name: '대장장이 강씨', face: 'Caveman2' }, boat: { name: '뱃사공 노씨', face: 'OldMan2' }, kid: { name: '동네 꼬마', face: 'Child' }, shopk: { name: '만물상 주인', face: 'Noble' }, town: { name: '마을 사람', face: 'Villager' }, town2: { name: '마을 아낙', face: 'Villager4' },
   rowdy: { name: '왈패', face: 'Villager2' }, shadow: { name: '흑의인', face: 'DarkNinja' }, fox: { name: '여우 가면', face: 'MaskedNinja' }, bandit: { name: '산적', face: 'Villager2' }, lion: { name: '광사자 맹호', face: 'Lion' },
   so: { name: '소연하', face: 'RedSamurai' }, go: { name: '고진', face: 'Inspector' }, wi: { name: '위문상', face: 'Noble' }, lord: { name: '청운자', face: 'Monk' }, disc: { name: '창운문 제자', face: 'GreenNinja' },
   cheol: { name: '철우', face: 'Monk2' }, judge: { name: '심판', face: 'Inspector' }, chief: { name: '연경추', face: 'Master' }, host: { name: '객잔 주인', face: 'Villager' }, cheon: { name: '월천', face: 'BlueSamurai' }, racoon: { name: '대왕 너구리', face: 'GiantRacoon' },

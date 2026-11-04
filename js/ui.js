@@ -2,7 +2,7 @@
 import { TITLES } from './titles.js';
 import { G, IMG, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS } from './core.js';
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
-import { newState, stats, save, load, hasSave, masteryLv, canEquip, DIFF, learn, have, give, take } from './state.js';
+import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
 import { Story } from './story.js';
@@ -17,8 +17,10 @@ function titleBg(c) {
 }
 export function showTitle() {
   G.scene = 'title'; G.bgDraw = titleBg; $('#hud').innerHTML = '';
-  const s = $('#screen'); s.innerHTML = `<div id="title"><div class="logo">강호행</div><div class="han">江湖行</div><div class="sub">군적에서 지워진 낭인, 찢어진 비급 일곱 장</div><div class="col"><button class="btn pri" id="bNew">새로 시작</button><button class="btn" id="bLoad">이어 하기</button></div><div class="foot">도트 그림·소리: Ninja Adventure (CC0) · 글꼴: 갈무리 (OFL)</div></div>`;
+  const s = $('#screen'); s.innerHTML = `<div id="title"><div class="logo">강호행</div><div class="han">江湖行</div><div class="sub">군적에서 지워진 낭인, 찢어진 비급 일곱 장</div><div class="col"><button class="btn pri" id="bNew">새로 시작</button><button class="btn" id="bLoad">이어 하기</button><button class="btn" id="bFile">저장 파일 불러오기</button><input type="file" id="fFile" accept=".json,application/json" hidden></div><div class="foot">도트 그림·소리: Ninja Adventure (CC0) · 글꼴: 갈무리 (OFL)</div></div>`;
   $('#bNew').onclick = () => { Sound.init(); Sound.resume(); Sound.bgm('story'); showCreate(); };
+  $('#bFile').onclick = () => $('#fFile').click();
+  $('#fFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { G.S = await loadFromFile(f); Sound.init(); Sound.resume(); s.innerHTML = ''; Story.resume(); } catch (err) { toast('저장 파일을 읽지 못했습니다', 3); } };
   const l = $('#bLoad'); if (!hasSave()) l.disabled = true; else l.classList.add('pri'); (hasSave() ? l : $('#bNew')).focus(); l.onclick = () => { Sound.init(); G.S = load(); s.innerHTML = ''; Story.resume(); };
 }
 function showCreate() {
@@ -146,12 +148,13 @@ function tabLove(B) {
 function tabSet(B) {
   B.innerHTML = `<h2>조작</h2><div class="two"><div class="note">이동 W A S D 또는 방향키<br>평타 J · 경공 K · 막기 L<br>초식 U I O P 또는 1 2 3 4<br>금창약 H · 대화 E · 메뉴 Esc</div><div class="note">막기를 맞기 직전에 누르면 <b>튕겨내기</b>가 됩니다.<br>노란 예고는 막을 수 있습니다.<br>붉은 예고는 막을 수 없으니 경공으로 피하세요.</div></div>
   <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 J로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 E<br>집: 청하진 복덕방에서 구입, 집 안에서 B로 꾸미기, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
-  <h2>설정</h2><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">저장은 지금 쓰는 브라우저 안에 됩니다. 다른 기기나 시크릿 창에서는 이어서 할 수 없고, 브라우저의 사이트 데이터를 지우면 함께 지워집니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">지금 저장</button><button class="btn" id="tt">제목으로</button></div>`;
+  <h2>설정</h2><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">지금 저장은 이 브라우저 안에 됩니다. 기기에 파일로 저장해 두면 브라우저 기록을 지워도, 다른 기기에서도 제목 화면의 저장 파일 불러오기로 이어 할 수 있습니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">지금 저장</button><button class="btn" id="svf">기기에 파일로 저장</button><button class="btn" id="tt">제목으로</button></div>`;
   $('#vBgm').oninput = e => { Sound.setBgm(e.target.value / 100); $('#vBgmN').textContent = e.target.value; };
   $('#vSfx').oninput = e => { Sound.setSfx(e.target.value / 100); $('#vSfxN').textContent = e.target.value; };
   $('#vSfx').onchange = () => Sound.sfx('tick');
   $('#mute').onclick = () => { Sound.setMuted(!Sound.muted); drawMenu(); };
   $('#sv').onclick = () => save(false);
+  $('#svf').onclick = () => { save(); saveToFile(); };
   $('#tt').onclick = () => { save(); closeMenu(); G.field.busy = false; showTitle(); };
 }
 // ── 상점 ──
