@@ -1,4 +1,4 @@
-// 1부 2장: 강변의 보호세. 장강수로채와의 첫 대립
+// 1부 2장: 강변의 보호세. 떠돌이 수적 패거리와의 동네 소동
 import { G, Sound, fadeTo, toast, pick } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
@@ -15,7 +15,7 @@ async function wharf() {
   await say('me', '그걸 어떻게 아세요.');
   await say('boat', '청하진에서 비밀이 제일 오래 간 게 한나절이다. 그건 됐고, 저기 봐라.');
   await narr('나루 끝에 처음 보는 쾌선 세 척이 묶여 있었다.\n돛에 검은 물고기가 그려져 있었다.');
-  await say('boat', '장강수로채다. 사파 흑도맹 깃발 아래서 강을 먹고 사는 놈들이지. 객잔이 타고 열흘도 안 돼서 왔다.');
+  await say('boat', '검은물고기패다. 강을 떠도는 수적 패거리지. 큰 산채에도 못 끼는 놈들인데, 객잔이 타고 열흘도 안 돼서 왔다.');
   await say('me', '뭘 하러 왔는데요?');
   await say('boat', '저놈들이 오면 하는 일은 하나다.');
   await say('pirate', '어이, 노인장. 이 나루는 오늘부터 우리가 지켜 준다. 배 한 척에 은자 두 냥. 그리고 객잔 터 땅문서도 가져와.');
@@ -25,8 +25,8 @@ async function wharf() {
   const c = await choice('수적이 뱃사공의 멱살을 잡는다.', ['쟁반을 든다', '좋게 말해 본다']);
   if (c === 0) { await say('me', '손 놓으시죠. 그분 저희 집 단골이에요.'); ctx.rep('jeong', 1); }
   else { await say('me', '아주머니 돌아오시면 같이 얘기하시죠. 국수라도 한 그릇 드릴게요.'); await say('pirate', '국수? 우리 형제가 몇인 줄 알고?'); ctx.rep('sa', 1); }
-  await ctx.duel({ foes: ['pirate', 'pirate', 'pirate'], arena: 'dock', title: '장강수로채', tip: '적이 많을 때는 <b>K 경공</b>으로 빠져나와 한 명씩 상대하세요.' });
-  await say('pirate', '크윽… 네놈, 장강수로채를 건드렸다. 위충 분타주께 전하마.');
+  await ctx.duel({ foes: ['pirate', 'pirate', 'pirate'], arena: 'dock', title: '검은물고기패', tip: '적이 많을 때는 <b>K 경공</b>으로 빠져나와 한 명씩 상대하세요.' });
+  await say('pirate', '크윽… 네놈, 우리 두목 낭리비어를 모르는구나. 두목께 전하마.');
   await say('boat', '큰일이다. 저놈들은 맞으면 더 많이 돌아온다. 훈장 어른이 사람들을 모으고 계신다. 가 보자.');
   set('s2'); ctx.goal('광장의 훈장 어른과 이야기하기');
 }
@@ -44,12 +44,12 @@ async function meeting() {
   else { await say('me', '보호세를 한 번만 내서 열흘을 법시다. 외상 손님은 그렇게 상대해요. 일단 드시게 하고, 그동안 문을 잠그는 거예요.'); await say('smith', '장사꾼 같은 소리인데 틀린 말은 아니군.'); S().silver = Math.max(0, S().silver - 15); ctx.rep('sa', 2); }
   await say('elder', '좋네. 그럼 할 일이 많아. 철 대장장이, 순이네, 그리고 저 꼬마까지 다들 자네를 찾더군.');
   F().s2_on = true; ctx.goal('철 대장장이, 순이네, 꼬마의 부탁 들어주기 (마을의 ! 표시)');
-  ctx.note('장강수로채가 객잔 터 땅문서를 요구한다. 그믐에 다시 온다. 정천맹은 도와주지 않았다.');
+  ctx.note('수적 검은물고기패가 객잔 터 땅문서를 요구한다. 그믐에 다시 온다. 정천맹은 도와주지 않았다.');
 }
 async function checkAll() {
   if (F().q_smith && F().q_wife && F().q_kid) {
     F().bokun_open = true; set('s3');
-    await say('boat', '세 집 일을 다 해결했다고? 나보다 낫구나. 그 나무패 말이다, 복운전 표다. 밤에만 불이 켜지는 그 집. 하오문 사람들이 있는 곳이지.');
+    await say('boat', '세 집 일을 다 해결했다고? 나보다 낫구나. 그 나무패 말이다, 복운전 표다. 밤에만 불이 켜지는 도박장이지. 거기 주인이 소문을 판다더라.');
     ctx.goal('복운전(광장 남쪽의 주황 지붕)에서 소문 알아보기');
   }
 }
@@ -98,7 +98,7 @@ async function gamble() {
 }
 async function baekrang() {
   await say('baekrang', '어서 와요. 점소이가 여기를 다 오네. 한 판 하러 왔어요, 소문 사러 왔어요?');
-  await say('me', '장강수로채가 왜 객잔 우물을 찾는지 알고 싶어요.');
+  await say('me', '검은물고기패가 왜 객잔 우물을 찾는지 알고 싶어요.');
   await say('baekrang', '소문은 공짜가 없어요. 은자 서른 냥. 돈이 없으면 홀짝 세 판. 두 판 이기면 공짜, 지면 내 심부름 하나.');
   const c = await choice('백랑이 주사위를 굴린다.', ['은자 서른 냥을 낸다', '홀짝을 한다']);
   if (c === 0 && S().silver >= 30) { S().silver -= 30; Sound.sfx('coin'); }
@@ -107,8 +107,8 @@ async function baekrang() {
     if (w < 2) { await say('baekrang', '졌네요. 저기 저 손님, 석 달째 외상이에요. 좀 내보내 줘요. 잘하잖아요, 그런 거.'); await say('me', '…이 일은 어딜 가나 똑같네.'); await ctx.duel({ foes: ['pirate_hook'], arena: 'room', title: '외상 손님' }); await say('baekrang', '역시 전문가네요.'); }
     else await say('baekrang', '운이 좋네요. 공짜로 드릴게요. 이런 날은 잘 없어요.');
   }
-  await say('baekrang', '위충은 흑도맹 강남 분타주예요. 그런데 사파라고 다 한통속은 아니에요. 맹주 사마웅은 이 일을 몰라요.');
-  await say('me', '그럼 우물을 찾는 손님은 흑도맹 사람이 아니에요?');
+  await say('baekrang', '두목 위충은 어디에도 끼지 못한 떠돌이예요. 이런 시골 나루 일에 강호의 큰 어른들은 관심도 없고요.');
+  await say('me', '그럼 위충에게 은자를 준 손님은 어느 쪽 사람이에요? 사파요?');
   await say('baekrang', '아니에요. 정파도 아니고.');
   await say('me', '정파도 사파도 아니면 누구예요?');
   await say('baekrang', '강호에는 길이 둘 있다고들 하죠. 사실은 셋이에요. 세 번째 길의 이름을 입에 올리면 혀가 잘려요. 나는 혀로 먹고사는 사람이고.');
@@ -129,13 +129,13 @@ async function newmoon() {
   await ctx.duel({ foes: ['pirate_hook', 'pirate_hook', 'pirate_bow', 'pirate_bow'], allies: ['smith_ally'], arena: 'dock', bgm: 'fight', title: '나루 끝에서' });
   await say('wei', '점소이 하나 때문에 배를 세 번 띄웠다. 내 얼굴이 뭐가 되나.');
   await say('me', '땅문서는 없어요. 우물도 없고요. 돌아가세요.');
-  await say('wei', '하나만 묻자. 관아가 걷으면 세금이고, 정천맹이 걷으면 의연금이고, 내가 걷으면 약탈이냐?');
+  await say('wei', '하나만 묻자. 관아가 걷으면 세금이고, 큰 문파가 걷으면 의연금이고, 내가 걷으면 약탈이냐?');
   await say('me', '…맞는 말이어도 멱살은 잡지 마세요.');
   await say('wei', '하하! 객잔 물을 먹어서 말은 잘하는군. 칼로 들어 보자.');
   await ctx.duel({ foes: ['wei'], arena: 'dock', bgm: 'boss', title: '낭리비어 위충' });
   await say('wei', '…졌다. 배운 적도 없는 놈한테.');
   await say('me', '우물은 왜 찾은 거예요.');
-  await say('wei', '나도 모른다. 얼굴 가린 손님이 은자를 미리 줬다. 그 돈 없으면 내 형제 삼백이 굶는다. 강은 인심이 없어.');
+  await say('wei', '나도 모른다. 얼굴 가린 손님이 은자를 미리 줬다. 그 돈 없으면 내 형제 서른이 굶는다. 강은 인심이 없어.');
   const c = await choice('위충이 칼을 내려놓는다.', ['살려서 보낸다', '포박해 관아로 넘긴다']);
   if (c === 0) { await say('me', '가세요. 다시는 나루에 오지 말고요.'); await say('wei', '빚은 갚는 게 강의 법이다. 언젠가 물 위에서 보자, 점소이.'); F().wei_spared = true; ctx.rep('sa', 3); }
   else { await say('elder', '현령이 받아 줄지는 모르겠네만 그게 법이지.'); await say('wei', '법이라. 사흘이면 나온다. 그래도 네 뜻은 알겠다.'); ctx.rep('jeong', 3); }

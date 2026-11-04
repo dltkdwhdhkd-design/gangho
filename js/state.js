@@ -30,6 +30,7 @@ export function stats(S = G.S) {
   if (S.heart === 'tonap') regen *= 1.3;
   if (S.heart === 'swift') cdMul *= .85;
   if (S.heart === 'yigin') maxHp *= 1.15;
+  if (S.heart === 'sesu') { regen *= 1.2; maxHp *= 1.05; }
   if (S.heart === 'taecheong') regen *= 1.5;
   if (S.heart === 'jaha') power *= 1.12;
   if (S.heart === 'changgung') { cdMul *= .9; maxHp *= 1.1; }

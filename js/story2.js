@@ -8,7 +8,7 @@ import { clansWon } from './clandata.js';
 const S = () => G.S, F = () => G.S.flags;
 // ── 2장 ──
 async function arrive() {
-  await narr('제1부 · 구름 위의 칼\n\n창운산. 구파일방 바로 아랫줄에 선다는 신흥 명문, 창운검문이 구름 위에 앉아 있다.');
+  await narr('구름 위의 칼\n\n창운산. 구파일방 바로 아랫줄에 선다는 신흥 명문, 창운검문이 구름 위에 앉아 있다.');
   await say('yun', '저는 문주님 진맥하러 왔다고 하면 돼요. {나} 씨는요?');
   await say('me', '입문 시험을 본대요. 외문 제자로 들어가서 서찰에 인장 찍은 사람을 찾아야죠.');
   await say('yun', '점소이가 어떻게 검문에 들어가요.');
@@ -98,12 +98,15 @@ async function wiBoss() {
   await say('lord', '《청운검법》이다. 검을 든다면 쓸모가 있을 것이다.');
   await say('lord', '구화성에서 곧 천하비무대회가 열린다. 우승자에게는 월하문의 유물 달거울을 준다고 맹주가 직접 정했지. 이상하지 않으냐.');
   await say('so', '너를 부르는 미끼네. 그래도 갈 거지? 나도 간다. 비무대에서 만나면 안 봐줘.');
+  await say('lord', '대회까지 석 달이 남았다. 지금 네 무공으로는 예선도 어렵다. 강호를 보고 오너라. 소림에 서찰을 써 주마.');
+  await say('lord', '네 걸음을 알아볼 사람이 거기 있을지도 모른다.');
   ctx.silver(300);
-  set('c3a'); F().boat_guhwa = true; ctx.goal('본전을 나가 산문의 뱃길로 구화성에 가기');
+  set('t1'); ctx.goal('산문 앞 뱃길 안내에서 소림으로 떠나기');
 }
 // ── 3장 ──
-async function toGuhwa() {
-  await narr('제2부 · 천하비무\n\n구화성. 구파일방과 오대세가가 모두 깃발을 들고 왔다.\n강호 사람이 다 모였다는 말이 과장이 아닌 날이었다.');
+export async function toGuhwa() {
+  F().boat_guhwa = true;
+  await narr('제1부 · 천하비무\n\n구화성. 구파일방과 오대세가가 모두 깃발을 들고 왔다.\n강호 사람이 다 모였다는 말이 과장이 아닌 날이었다.');
   await ctx.warp('guhwa', 24.5, 29, 1);
   await say('yun', '사람이 너무 많아요. 소매치기 조심해요.');
   await say('me', '아, 금봉 객잔에서 시끄러운 소리가 나는데요.');

@@ -197,6 +197,27 @@ export function buildMaps() {
   for (const [nm, x, y] of [['tree_pine', 9, 5], ['tree_round', 14, 7], ['tree_big', 26, 4], ['tree_pine', 32, 11], ['plum_g', 14, 19], ['tree_round', 7, 22], ['tree_pine', 25, 24], ['tree_big', 34, 26], ['boulder', 23, 10], ['boulder', 15, 25], ['plum', 30, 17], ['tree_round', 5, 9]]) m.put(nm, x, y);
   m.scatter(['fern1', 'fern2', 'bush2', 'bush4', 'flower3'], 34, 41);
   m.exit(39, 14, 1, 4, 'cheongha', 2, 15.5, 3);
+  // 소림사: 숭산의 절
+  m = M('shaolin', 40, 30, { name: '소림사', bgm: 'temple', biome: 'grass', arena: 'court', ambient: 'leaf' });
+  m.fill(14, 8, 12, 14, 3).road(19, 22, 19, 29, 2).road(5, 15, 14, 15, 2).road(26, 15, 34, 15, 2);
+  m.put('hall', 17, 0).label(19, -.2 + 1, '대웅전').put('statue', 15, 9).put('statue', 23, 9).put('gate', 18.3, 21, { nosolid: true });
+  m.house('wood_b', 3, 12, 'sutra', 7, 9, 1).label(5, 11.6, '장경각').put('lodge', 32, 9).label(34, 8.6, '나한당');
+  m.put('tree_big', 10, 6).put('tree_pine', 28, 5).put('tree_round', 6, 22).put('tree_big', 31, 23).put('tree_pine', 12, 25).put('plum_g', 26, 25);
+  m.border(['grove_pine', 'tree_big', 'grove_green'], [[18, 28, 4, 3]], 3);
+  m.scatter(['fern1', 'bush1', 'flower3', 'bush3'], 26, 51);
+  // 장경각
+  m = M('sutra', 16, 12, { name: '소림 장경각', bgm: 'quiet', room: true, arena: 'room' });
+  m.put('bookcase', 1, 1).put('bookcase', 3, 1).put('bookcase', 5, 1).put('bookcase', 9, 1).put('bookcase', 11, 1).put('bookcase', 13, 1).put('bookcase', 2, 5).put('bookcase', 12, 5).put('scrollcase', 7, 1);
+  m.exit(6, 11, 4, 1, 'shaolin', 5, 16, 0, { door: true });
+  // 화산 절벽길
+  m = M('hwasan', 30, 20, { name: '화산 절벽길', bgm: 'road', biome: 'rose', arena: 'forest', ambient: 'leafpink' });
+  m.road(0, 10, 29, 10, 3);
+  for (const [nm, x, y] of [['plum', 3, 3], ['plum', 12, 2], ['plum', 22, 4], ['plum', 6, 14], ['plum', 18, 15], ['plum', 26, 14], ['boulder', 15, 6], ['boulder', 10, 15], ['tree_white', 26, 3]]) m.put(nm, x, y);
+  m.border(['rocks', 'plum', 'boulder'], [[0, 9, 2, 5], [28, 9, 3, 5]], 4);
+  m.scatter(['flower2', 'flower3', 'bush3'], 20, 61);
+  // 벼랑 아래 동굴
+  m = M('cliffcave', 16, 12, { name: '벼랑 아래 동굴', bgm: 'cave', room: true, roomStyle: 1, arena: 'moon', tint: 'rgba(10,20,40,.3)' });
+  m.put('boulder', 2, 2).put('boulder', 12, 8).put('jar', 12, 2).put('tablet', 7, 2).put('tablet2', 9, 2).put('fern1', 3, 8, { flat: true }).put('flower1', 5, 3, { flat: true });
   // 구파 회관: 구파일방의 숙소가 늘어선 곳
   m = M('ninehall', 44, 25, { name: '구파 회관', bgm: 'temple', biome: 'grass', arena: 'court' });
   m.fill(0, 9, 44, 3, 3).fill(0, 19, 44, 3, 3).fill(1, 9, 2, 13, 3).fill(41, 9, 2, 13, 3).fill(21, 12, 2, 7, 3);

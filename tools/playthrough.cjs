@@ -20,7 +20,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       while (S.silver > 60 && S.potion < 6) { S.silver -= 12; S.potion++; }
       const usable = S.skills.filter(id => { const k = D.ctx.learn && window.__SK ? 1 : 1; return true; });
     };
-    const wantedMap = { c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], s1: ['cheongha', 22, 26], s2: ['cheongha', 22, 20], s3: ['bokun', 7, 8], s4: ['cheongha', 22, 20], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
+    const wantedMap = { c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], s1: ['cheongha', 22, 26], s2: ['cheongha', 22, 20], s3: ['bokun', 7, 8], s4: ['cheongha', 22, 20], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], t1: ['cloudmt', 22, 34], t2: ['shaolin', 19, 25], t3: ['sutra', 8, 8], t4: ['shaolin', 28, 16], t5: ['cliffcave', 8, 8], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
     let iter = 0, lastStep = '', stuck = 0, loses = 0;
     while (iter++ < 3000) {
       await pump(2);
@@ -53,7 +53,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       if (st === 'c4a') { const k = !F.tr1 ? 0 : !F.tr2 ? 1 : 2; if (m.id !== 'wolha') { f.load('wolha', 22, 26, 1); continue; } const sp = f.spots[k]; f.run(sp.act); continue; }
       if (st === 'c3e') { if (m.id !== 'guhwa') { f.load('guhwa', 24, 20, 1); continue; } const so = f.npcs.find(n => n.mark && n.mark()); if (so) { f.run(so.talk); continue; } f.run(f.npcs.find(n => n.id === 'judge').talk); continue; }
       if (w && m.id !== w[0]) { f.load(w[0], w[1], w[2], 1); continue; }
-      const spot = f.spots.find(s => (!s.when || s.when()) && (st === 'c1a' ? s.hint === '살펴보기' : st === 'c1c' ? s.hint === '석상' : st === 'c1g' ? String(s.hint).includes('우물') : st === 'c2d' ? s.hint === '살펴보기' : st === 'c2f' ? s.hint === '기록 찾기' : st === 'c3a' ? s.hint === '뱃길 안내' : false));
+      const spot = f.spots.find(s => (!s.when || s.when()) && (st === 'c1a' ? s.hint === '살펴보기' : st === 'c1c' ? s.hint === '석상' : st === 'c1g' ? String(s.hint).includes('우물') : st === 'c2d' ? s.hint === '살펴보기' : st === 'c2f' ? s.hint === '기록 찾기' : st === 'c3a' || st === 't1' ? s.hint === '뱃길 안내' : false));
       if (spot) { f.run(spot.act); continue; }
       const boat = f.npcs.find(n => n.id === 'boat'); if (st === 'c1a' && boat) { f.run(boat.talk); continue; }
       if (st === 'c1f') { const n = f.npcs.find(n => n.id === 'bruiser') || f.npcs.find(n => n.id === 'lion'); if (n) { f.run(n.talk); continue; } }

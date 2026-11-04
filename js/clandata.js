@@ -51,9 +51,9 @@ export const clansWon = () => CLANS.filter(c => G.S.flags['clan_' + c.id]).lengt
 
 // 사파 흑도맹과 마교. 정천맹과 맞서는 나머지 두 갈래
 export const SAPA = [
-  { name: '녹림 칠십이채', han: '綠林七十二寨', desc: '산을 먹고 사는 산채들의 연합. 흑풍채도 그중 하나다.', open: 'bamboo_open' },
-  { name: '장강수로채', han: '長江水路寨', desc: '강을 먹고 사는 수적. 뱃길에 세금을 매긴다.', open: 'pirate_met' },
-  { name: '하오문', han: '下五門', desc: '도박장과 기루, 도둑들의 소문망. 싸움보다 장사를 좋아한다.', open: 'bokun_open' },
+  { name: '녹림 칠십이채', han: '綠林七十二寨', desc: '산을 먹고 사는 산채들의 연합. 흑풍채 같은 곳은 그 끝자락이다.', open: 'fort_open' },
+  { name: '장강수로채', han: '長江水路寨', desc: '장강의 뱃길을 쥔 큰 수적. 동네 수적과는 규모가 다르다.', open: 'boat_guhwa' },
+  { name: '하오문', han: '下五門', desc: '도박장과 기루, 도둑들의 소문망. 싸움보다 장사를 좋아한다.', open: 'boat_guhwa' },
   { name: '오독문', han: '五毒門', desc: '독을 쓰는 문파. 사천당가와 오랜 앙숙이다.', open: 'cloud_open' },
   { name: '혈의방', han: '血衣幇', desc: '돈을 받고 사람을 죽이는 살수들.', open: 'boat_guhwa' },
 ];

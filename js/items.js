@@ -27,6 +27,7 @@ export const ACCS = {
 };
 const W = (name, type, atk, spr, desc) => ({ name, type, atk, spr, desc });
 Object.assign(WEAPONS, {
+  moon_blade_old: W('호법의 검', '검', 21, 'Katana', '월하문 호법 강유의 검. 녹을 털어 내니 달빛 같다.'),
   black_sword: W('흑철검', '검', 24, 'Katana', '대장간에서 벼린 검은 쇠칼.'), black_blade: W('흑철도', '도', 27, 'BigSword', '묵직한 검은 칼.'), dragon_tooth: W('용아창', '창', 26, 'Lance2', '창날이 이빨처럼 휘었다.'), vajra_fist: W('금강권투', '권', 24, 'Club', '두드리면 종소리가 난다.'), star_sword: W('운철검', '검', 38, 'Rapier', '운철로 벼린 명검.'),
   w_hangma: W('항마권투', '권', 26, 'Club', '소림의 보물.'), w_zhenwu: W('진무검', '검', 27, 'Sword', '무당의 고검.'), w_plum: W('매화검', '검', 25, 'Rapier', '칼끝에서 꽃향기가 난다.'), w_jongnam: W('청봉검', '검', 24, 'Sword', '종남 검수의 애검.'), w_emei: W('아미자', '권', 24, 'Sai', '손에 끼는 짧은 쇠.'), w_kunlun: W('설봉창', '창', 26, 'Lance2', '창날에 서리가 앉아 있다.'), w_gong: W('칠상권투', '권', 28, 'Club', '끼면 손이 아프다.'), w_diancang: W('사일쾌검', '검', 26, 'Ninjaku', '가볍고 빠르다.'), w_qing: W('송풍검', '검', 24, 'Katana', '바람 소리가 난다.'), w_tagu: W('타구봉', '창', 24, 'Stick', '개를 때리는 막대기. 방주의 상징이다.'),
   w_namgung: W('창궁검', '검', 32, 'Rapier', '남궁의 가보.'), w_moyong: W('환영검', '검', 30, 'Katana', '빛에 따라 칼날이 사라진다.'), w_jegal: W('철우선', '권', 28, 'Sai', '쇠로 만든 깃털 부채.'), w_dang: W('독비수', '도', 27, 'Ninjaku', '칼날이 푸르다.'), w_paeng: W('오호대도', '도', 33, 'BigSword', '범 다섯 마리가 새겨진 대도.'),
