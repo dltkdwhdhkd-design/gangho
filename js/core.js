@@ -1,4 +1,7 @@
 // 공용 도구: 수학, 그림과 소리 불러오기, 입력
+// 받침을 보고 조사를 고른다. josa('철검', '을/를') -> 철검을, josa('집', '으로/로') -> 집으로
+export const hasJong = w => { const c = String(w).charCodeAt(String(w).length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 > 0; };
+export const josa = (w, pair) => { const [a, b] = pair.split('/'), c = String(w).charCodeAt(String(w).length - 1); if (a === '으로' && c >= 0xAC00 && (c - 0xAC00) % 28 === 8) return w + b; return w + (hasJong(w) ? a : b); };
 export const TS = 16, SCALE = 4, VW = 320, VH = 180, STEP = 1 / 60;
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];

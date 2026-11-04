@@ -43,10 +43,12 @@ async function smithFirst() {
 }
 async function boatFirst() {
   await say('boat', '왔구먼. 오늘 잉어가 실혀. 곽씨 몫이여.');
-  await say('me', '고맙습니다. 동네 분들이 다 아주머니를 어려워하시네요.');
-  await say('boat', '너 아직 모르는구먼. 모레가 그믐이잖여. 그 집 문 앞에 봉투 놓이는 날이여.');
+  await say('me', '고맙습니다.');
+  await say('boat', '오늘내일은 곽씨 심기 건드리지 말어. 모레가 그믐이잖여.');
+  await say('me', '그믐이 왜요?');
+  await say('boat', '너 아직 모르는구먼. 그믐마다 그 집 문 앞에 봉투가 놓여.');
   await say('me', '봉투요?');
-  await say('boat', '달마다 은자 다섯 냥이 놓여 있어. 누가 두고 가는지는 십 년 넘도록 아무도 못 봤고. 곽씨는 그 돈으로 사람을 사서 어딜 자꾸 보내더라고.');
+  await say('boat', '은자 다섯 냥이 들어 있어. 누가 두고 가는지는 십 년 넘도록 아무도 못 봤고. 곽씨는 그 돈으로 사람을 사서 어딜 자꾸 보내더라고.');
   await say('me', '어디로요?');
   await say('boat', '내가 그걸 어찌 아누. 궁금해도 묻지 말어. 그거 물어봤다가 국자로 맞은 놈이 한둘이 아녀.');
   F().e_boat = true; await doneCheck();
@@ -80,7 +82,7 @@ async function training() {
 async function noodleNight() {
   await say('gwak', '장작에 맞고 다니냐? 이리 와. 면 뽑는 거나 배워.');
   await say('me', '제가요?');
-  await say('gwak', '내가 언제까지 끓일 줄 알아? 물은 끓어오르기 직전에 불을 줄이고, 면은 그릇보다 먼저 올려. 국물은 나중에 가르쳐 줄게.');
+  await say('gwak', '내가 언제까지 끓일 줄 알아? 물이 끓으면 면을 넣고, 넘치려고 할 때 찬물을 한 번 끼얹어. 국물은 나중에 가르쳐 줄게.');
   await say('me', '국물은 왜 나중이에요?');
   await say('gwak', '그것까지 알려 주면 너 나갈 거 아냐.');
   await say('me', '여섯 닢만 갚으면 나갈 사람인데요.');

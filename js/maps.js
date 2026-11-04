@@ -108,7 +108,7 @@ export function buildMaps() {
   m.put('shelf2', 1, 1).put('shelf2', 3, 1).put('scrollcase', 6, 1).put('drawer', 9, 1).put('bed', 8, 5).put('counter', 2, 5).put('plant', 12, 2).put('jar', 1, 8);
   m.exit(5, 10, 4, 1, 'cheongha', 33, 15, 0, { door: true });
   // 대장간
-  m = M('smith', 14, 11, { name: '철씨 대장간', bgm: 'village', room: true, arena: 'yard', roomStyle: 1 });
+  m = M('smith', 14, 11, { name: '강씨 대장간', bgm: 'village', room: true, arena: 'yard', roomStyle: 1 });
   m.put('rack', 2, 1).put('rack', 6, 1).put('box', 11, 2).put('box', 12, 2).put('counter', 2, 5).put('jar', 11, 7).put('stump', 9, 4);
   m.exit(5, 10, 4, 1, 'cheongha', 9.5, 15, 0, { door: true });
   // 잡화점
@@ -183,7 +183,7 @@ export function buildMaps() {
   m.put('plum', 5, 14).put('plum_o', 4, 26).put('plum_o', 44, 5).put('statue', 19, 18).put('statue', 29, 18);
   m.fill(38, 25, 6, 5, 2).label(41, 24.4, '연못');
   m.put('jar', 15, 11).put('pot', 34, 11).put('pot', 35, 11);
-  m.exit(23, 35, 4, 1, 'pass', 37.5, 18.5, 2, { when: 'never', lock: '이제 되돌아갈 수 없다.' });
+  m.exit(23, 35, 4, 1, 'pass', 37.5, 18.5, 2, { when: 'never', lock: '산길은 끊겼다. 돌아가려면 남문 나루의 뱃사공을 찾자.' });
   m.solids = m.solids.filter(s => !((s.x === 47 * TS || s.x === 2 * TS) && s.y >= 18 * TS && s.y <= 20 * TS + 8));
   m.stamps = m.stamps.filter(s => !(s.name === 'wall_h' && (s.x === 47 * TS || s.x === 2 * TS) && s.y >= 18 * TS && s.y <= 20 * TS));
   m.fill(2, 18, 3, 3, 3).fill(46, 18, 3, 3, 3);

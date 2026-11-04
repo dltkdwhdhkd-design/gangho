@@ -73,8 +73,8 @@ export class Battle {
     const c = this.cfg, p = this.p, foes = this.actors.filter(a => a.team === 1), alive = foes.filter(a => !a.dead);
     if (c.survive && this.t >= c.survive) return this.end('win');
     if (p.hp <= 0) return this.end(c.survive || c.loseOk ? 'win' : 'lose');
-    if (c.yieldAt && foes.some(f => f.hp / f.maxHp <= c.yieldAt)) { foes.forEach(f => { f.st = 'idle'; f.sk = null; f.yielded = true; }); return this.end('win'); }
-    if (!alive.length) return this.end('win');
+    const leads = foes.filter(a => a.boss); if (c.yieldAt && (leads.length ? leads : foes).some(f => f.hp / f.maxHp <= c.yieldAt)) { foes.forEach(f => { f.st = 'idle'; f.sk = null; f.yielded = true; }); return this.end('win'); }
+    if (!alive.length || (c.foes.length === 1 && foes[0].dead)) return this.end('win');
   }
   end(o) {
     this.ended = true; this.outcome = o; this.stop = .3;
@@ -120,8 +120,9 @@ export class Battle {
     if (danger && a.dashCd <= 0 && !a.busy && Math.random() < skill) { const s = Math.random() < .5 ? 1 : -1; this.dash(a, { x: -a.ay * s - a.ax * .5, y: a.ax * s - a.ay * .5 }); return; }
     if (a.busy) return;
     if (a.hp / a.maxHp < .4 && G.S.potion > 0) this.usePotion(a);
-    for (let i = 0; i < 4; i++) { const id = G.S.slots[i]; if (id && (a.cd[i] || 0) <= 0 && a.mp >= SKILLS[id].mp && !SKILLS[id].self && d < 62 && Math.random() < .08) { this.trySkill(a, id, i); return; } }
-    if (d < 24) { this.basic(a, { x: dx / d, y: dy / d }); return; }
+    for (let i = 0; i < 4; i++) { const id = G.S.slots[i]; if (id && (a.cd[i] || 0) <= 0 && a.mp >= SKILLS[id].mp && !SKILLS[id].self && d < 62 && Math.random() < (G.bot.skillUse ?? .08)) { this.trySkill(a, id, i); return; } }
+    a.botWait = (a.botWait || 0) - dt; if (a.botWait > 0) { a.st = 'idle'; a.vx = a.vy = 0; return; } // 사람처럼 쉬어 가며 때리는 시험용 지연
+    if (d < 24) { this.basic(a, { x: dx / d, y: dy / d }); if (G.bot.rest && a.combo === 0) a.botWait = G.bot.rest; return; }
     a.vx = dx / d * a.spd; a.vy = dy / d * a.spd; a.st = 'move';
   }
   aim(a, d) {
@@ -166,14 +167,14 @@ export class Battle {
   }
   // ── 초식 실행 ──
   start(a, sk, key) {
-    a.st = 'skill'; a.sk = sk; a.skKey = key; a.skT = 0; a.skI = 0; a.vx = a.vy = 0; a.counter = 0;
+    a.st = 'skill'; a.sk = sk; a.skKey = key; a.skT = 0; a.skI = 0; a.vx = a.vy = 0; a.counter = 0; a.skSeq = (a.skSeq || 0) + 1;
     if (sk.steps && sk.teleToFoe) { const T = this.near(a); a.jumpTo = T ? { x: T.x, y: T.y } : null; }
     if (a.team === 1 && !sk.noTele) this.addTeles(a, sk);
   }
   addTeles(a, sk) {
     const slow = a.slowT > 0 ? 1 / a.slowF : 1;
-    const add = (step, h) => this.teles.push({ owner: a, skRef: sk, x: a.x, y: a.y, ax: a.ax, ay: a.ay, left: step.t * slow, tot: step.t * slow, shape: h.shape, r: h.r, a: h.a, len: h.len, w: h.w, off: h.off, ub: h.ub });
-    if (sk.tele) return add(sk.steps[0], { ...sk.tele, ub: true });
+    const to = sk.teleToFoe && a.jumpTo; const add = (step, h) => this.teles.push({ owner: a, skRef: sk, x: to ? to.x : a.x, y: to ? to.y : a.y, ax: a.ax, ay: a.ay, left: step.t * slow, tot: step.t * slow, shape: h.shape, r: h.r, a: h.a, len: h.len, w: h.w, off: h.off, ub: h.ub });
+    if (sk.tele) return add(sk.steps[0], { ub: true, ...sk.tele });
     for (const s of sk.steps) { if (s.hit) add(s, s.hit); }
     const pr = sk.steps.find(s => s.proj); if (pr && !sk.steps.some(s => s.hit)) this.teles.push({ owner: a, skRef: sk, x: a.x, y: a.y, ax: a.ax, ay: a.ay, left: pr.t * slow, tot: pr.t * slow, shape: 'line', len: 46, w: 5 });
   }
@@ -235,7 +236,7 @@ export class Battle {
       let x = a.x, y = a.y;
       if (z.at === 'ring') { const an = i / n * 6.283; x = clamp(a.x + Math.cos(an) * z.dist, 10, this.W - 10); y = clamp(a.y + Math.sin(an) * z.dist * .85, 20, this.H - 10); }
       if (z.at === 'target' && T) { x = clamp(T.x + (i ? rnd(-z.spread, z.spread) : 0), 10, this.W - 10); y = clamp(T.y + (i ? rnd(-z.spread, z.spread) : 0), 20, this.H - 10); }
-      this.zones.push({ x, y, r: z.r, left: z.delay + (z.at === 'ring' ? 0 : i * .08), tot: z.delay + (z.at === 'ring' ? 0 : i * .08), h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub }, owner: a, team: a.team, sk, fx: z.fx, fxS: z.at === 'ring' ? 1 : 0, sfx: z.sfx, player: z.player });
+      this.zones.push({ x, y, r: z.r, left: z.delay + (z.at === 'ring' ? 0 : i * .08), tot: z.delay + (z.at === 'ring' ? 0 : i * .08), h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub }, owner: a, team: a.team, sk, fx: z.fx, fxS: z.at === 'ring' ? 1 : 0, sfx: z.sfx, player: z.player && a.team === 0 });
     }
   }
   // 피해 처리
@@ -406,7 +407,7 @@ export class Battle {
     a.ax = lerp(a.ax, nx, .25); a.ay = lerp(a.ay, ny, .25); const l = hyp(a.ax, a.ay) || 1; a.ax /= l; a.ay /= l; a.face = faceOf(a.ax, a.ay);
     const f = a.def_;
     // 막기: 플레이어가 코앞에서 공격하면 일정 확률로 막는다
-    if (f.guard && T.st === 'skill' && d < 44 && T.skT < .08 && Math.random() < f.guard * .45) { a.st = 'guard'; a.guardT = .1; a.guardAI = rnd(.35, .7); return; }
+    if (f.guard && T.st === 'skill' && d < 44 && T.skT < .08 && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < f.guard * .4) { a.st = 'guard'; a.guardT = f.guard >= 1 && Math.random() < .3 ? .1 : .3; a.guardAI = rnd(.35, .7); return; } }
     const attackers = this.actors.filter(o => o.team === 1 && !o.dead && o.st === 'skill').length;
     if (a.atkCd <= 0 && (a.boss || attackers < 2 || a.team === 0)) {
       const opts = a.moves.map(m => MOVES[m]).filter(m => m && d <= m.range + 8 && (a.cd[m.id] || 0) <= 0);
@@ -486,7 +487,7 @@ export class Battle {
     if (a.buffs.diamond > 0) { c.strokeStyle = 'rgba(255,220,120,.7)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 7, 10, 0, 7); c.stroke(); }
     if (a.buffs.moonlight > 0) { c.strokeStyle = 'rgba(170,210,255,.85)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 7, 11, 0, 7); c.stroke(); }
     if (a.slowT > 0) { c.fillStyle = 'rgba(120,80,200,.3)'; c.beginPath(); c.arc(a.x, y - 6, 9, 0, 7); c.fill(); }
-    if (a.team === 1 && !a.boss && !dead && !a.dummy) { const w = 16; c.fillStyle = '#000'; c.fillRect(snap(a.x - w / 2 - .5), snap(y - 21), w + 1, 2.5); c.fillStyle = '#d8402e'; c.fillRect(snap(a.x - w / 2), snap(y - 20.75), w * clamp(a.hp / a.maxHp, 0, 1), 2); }
+    if (a.team === 1 && !a.boss && a !== this.bossA && !dead && !a.dummy) { const w = 16; c.fillStyle = '#000'; c.fillRect(snap(a.x - w / 2 - .5), snap(y - 21), w + 1, 2.5); c.fillStyle = '#d8402e'; c.fillRect(snap(a.x - w / 2), snap(y - 20.75), w * clamp(a.hp / a.maxHp, 0, 1), 2); }
     if (a.team === 0 && !a.isPlayer && !dead) { const w = 16; c.fillStyle = '#000'; c.fillRect(snap(a.x - w / 2 - .5), snap(y - 21), w + 1, 2.5); c.fillStyle = '#58b878'; c.fillRect(snap(a.x - w / 2), snap(y - 20.75), w * clamp(a.hp / a.maxHp, 0, 1), 2); }
   }
   sprite(c, a, x, y, _, face, white) {
@@ -538,7 +539,7 @@ export class Battle {
     const h = $('#hud'); h.innerHTML = '';
     const p = this.p, S = G.S;
     h.innerHTML = `<div class="bars"><div class="bname">${esc(S.title)} ${esc(p.name)}</div><div class="bar"><i class="lag" id="hLag"></i><i class="val" id="hVal"></i><b id="hTxt"></b></div><div class="bar mp"><i class="val" id="mVal"></i><b id="mTxt"></b></div></div>`;
-    const bosses = this.actors.filter(a => a.boss && a.team === 1);
+    const bosses = this.actors.filter(a => (a.boss || a.elite) && a.team === 1).sort((a, b) => !!b.boss - !!a.boss);
     if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.nameplate || b.name)}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
     const key = (i) => 'UIOP'[i];
     let sk = '';

@@ -1,5 +1,5 @@
 // 생활: 제작, 채집, 사냥, 낚시, 집, 연애, 결혼, 비무 전리품
-import { G, Input, Sound, $, $$, el, esc, toast, clamp, rnd, rint, pick, fadeTo, TS } from './core.js';
+import { G, Input, Sound, $, $$, el, esc, toast, clamp, rnd, rint, pick, fadeTo, TS, josa } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { have, give, take, nextDay, save, stats } from './state.js';
@@ -58,7 +58,7 @@ export function openCraft(at, title) {
     for (const r of RECIPES.filter(q => q.at === at)) {
       const owned = r.out.weapon && S().weapons.includes(r.out.weapon);
       const b = el('button', 'item', `${r.out.weapon ? icon(r.out.weapon) : r.out.item ? icon(r.out.item) : ''}${outName(r)}${owned ? '<span class="tag">가지고 있음</span>' : ''}<small>${outDesc(r)}<br>${needText(r)}</small>`);
-      b.disabled = owned || !canCraft(r); b.onclick = () => { craft(r); toast(`${outName(r)}을(를) 만들었다`); redraw(); }; list.appendChild(b);
+      b.disabled = owned || !canCraft(r); b.onclick = () => { craft(r); toast(`${josa(outName(r), '을/를')} 만들었다`); redraw(); }; list.appendChild(b);
     }
     B.innerHTML = `<p class="hint">가진 은자 ${S().silver}냥</p>`; B.appendChild(list);
   });
@@ -91,7 +91,7 @@ Object.assign(FOES.boar, { drops: [['meat', .9, 1, 2], ['hide', .7, 1, 2]] }); O
 function pickFish(loc) { const t = FISH[loc], sum = t.reduce((a, b) => a + b[1], 0); let r = rnd(sum); for (const f of t) { r -= f[1]; if (r <= 0) return f; } return t[0]; }
 export function fishing(loc) {
   return new Promise(res => {
-    const [id, , hard] = pickFish(loc), done = ok => { G.menuOpen = false; M.classList.remove('on'); M.innerHTML = ''; Input.clear(); removeEventListener('pointerup', up); if (ok) { give(id); S().fishLog[id] = (S().fishLog[id] || 0) + 1; Sound.sfx('bonus'); toast(`${DB[id].name}을(를) 낚았다!`, 2.6); } else toast('물고기가 달아났다'); save(); res(ok); };
+    const [id, , hard] = pickFish(loc), done = ok => { G.menuOpen = false; M.classList.remove('on'); M.innerHTML = ''; Input.clear(); removeEventListener('pointerup', up); if (ok) { give(id); S().fishLog[id] = (S().fishLog[id] || 0) + 1; Sound.sfx('bonus'); toast(`${josa(DB[id].name, '을/를')} 낚았다!`, 2.6); } else toast('물고기가 달아났다'); save(); res(ok); };
     if (G.auto) { give(id); S().fishLog[id] = 1; return res(true); }
     G.menuOpen = true; Input.clear(); const M = $('#modal'); M.classList.add('on');
     M.innerHTML = `<div class="fishing"><div class="fmsg" id="fm">찌를 던졌다…</div><div class="ftrack" id="ft" style="display:none"><div class="fzone" id="fz"></div><img class="ffish" id="ff" src="${iconUrl(id)}" alt=""></div><div class="fprog" id="fpw" style="display:none"><i id="fp"></i></div><div class="hint" style="color:#efe3c8" id="fh">입질이 오면 E (또는 화면 누르기)</div></div>`;
@@ -158,7 +158,7 @@ export function placeAt(x, y) {
 async function realtor() {
   const lv = S().house.lv, nx = HOUSES[lv + 1];
   if (!nx) { await say('realtor', '더 큰 집은 없소.'); return; }
-  await say('realtor', lv ? `지금 집을 ${nx.name}(으)로 넓히겠소? ${nx.price}냥이오.` : `이 집 비어 있소. 곽 아주머니 객잔이 다시 서기까지 머물 곳이 필요하지 않소? ${nx.price}냥이오.`);
+  await say('realtor', lv ? `지금 집을 ${josa(nx.name, '으로/로')} 넓히겠소? ${nx.price}냥이오.` : `이 집 비어 있소. 곽 아주머니 객잔이 다시 서기까지 머물 곳이 필요하지 않소? ${nx.price}냥이오.`);
   const c = await choice(`${nx.name} ${nx.price}냥 · 가진 돈 ${S().silver}냥`, ['산다', '그만둔다']);
   if (c) return;
   if (S().silver < nx.price) { await say('realtor', '돈이 모자라오.'); return; }
@@ -167,19 +167,19 @@ async function realtor() {
 }
 // ── 호감, 연애, 결혼 ──
 export const CAND = {
-  yun: { name: '윤설', likes: ['tea', 'herb', 'poem', 'honey'], loves: ['ginseng', 'antler', 'hairpin'], hates: ['venom', 'f_catfish'], chat: ['약초는 그늘에서 말려야 해요. 볕에 말리면 약효가 날아가요.', '요즘 잠은 잘 자요? 눈 밑이 까매요.', '또 어디 다쳤어요? 일단 앉아 봐요.'], date: ['강가에서 약초를 캤다. 윤설이 말없이 도시락을 내밀었다.', '윤설이 일을 일찍 끝내고 같이 산책을 나갔다.', '둘이서 약초 이름 맞히기를 했다. 윤설이 전부 이겼다.'], confess: ['…알아요. 티 많이 나요.', '저도 좋아해요. 근데 다치지 좀 마요.'], propose: ['옥가락지네요. 이거 비싸지 않아요?', '네. 좋아요.'], wife: ['일어났어요? 어제 무리했던데, 이 약 먹어요.', '아침 차려 놨어요. 먹고 가요.', '오늘은 다치지 말고 와요.'] },
-  so: { name: '소연하', likes: ['plum_wine', 'skewer', 'hairpin'], loves: ['ore_star', 'poem', 'ginseng_soup'], hates: ['sachet', 'sweets'], chat: ['칼 닦을 때가 제일 편해. 넌 안 그래?', '사부 얘기는 이제 괜찮아. 물어봐도 돼.', '오늘 한판 할래? 지는 사람이 술 사기.'], date: ['둘이서 비무를 하다가 술을 마셨다. 소연하가 처음으로 크게 웃었다.', '산등성이에서 소연하와 술을 마시며 달을 봤다.', '내기 비무에서 졌다. 술값은 내가 냈다.'], confess: ['야, 그런 말을 갑자기 하면 어떡해.', '…나도 좋아해. 뭐, 그렇게 됐다.'], propose: ['가락지? 나 이런 거 안 껴 봤는데. 줘 봐.', '그래, 하자. 대신 대련은 매일 할 거야.'], wife: ['일어나. 새벽 대련 안 할 거야?', '너 아직도 왼발이 늦어. 이따 고쳐 줄게.', '술은 저녁에. 오늘은 내가 살게.'] },
+  yun: { name: '윤설', likes: ['tea', 'herb', 'poem', 'honey'], loves: ['ginseng', 'antler', 'hairpin'], hates: ['venom', 'f_catfish'], chat: ['약초는 그늘에서 말려야 해요. 볕에 말리면 약효가 날아가요.', '요즘 잠은 잘 자요? 눈 밑이 까매요.', '또 어디 다쳤어요? 일단 앉아 봐요.'], date: ['강가에서 약초를 캤다. 윤설이 말없이 도시락을 내밀었다.', '윤설이 일을 일찍 끝내고 같이 산책을 나갔다.', '둘이서 약초 이름 맞히기를 했다. 윤설이 전부 이겼다.'], confess: ['…알아요. 티 많이 나요.', '저도 좋아해요. 근데 다치지 좀 마요.'], propose: ['옥가락지네요. 이거 비싸지 않아요?', '네. 좋아요.'], house: '살 집은 있어요? 집부터 구해요.', wife: ['일어났어요? 어제 무리했던데, 이 약 먹어요.', '아침 차려 놨어요. 먹고 가요.', '오늘은 다치지 말고 와요.'] },
+  so: { name: '소연하', likes: ['plum_wine', 'skewer', 'hairpin'], loves: ['ore_star', 'poem', 'ginseng_soup'], hates: ['sachet', 'sweets'], chat: ['칼 닦을 때가 제일 편해. 넌 안 그래?', '사부 얘기는 이제 괜찮아. 물어봐도 돼.', '오늘 한판 할래? 지는 사람이 술 사기.'], date: ['둘이서 비무를 하다가 술을 마셨다. 소연하가 처음으로 크게 웃었다.', '산등성이에서 소연하와 술을 마시며 달을 봤다.', '내기 비무에서 졌다. 술값은 내가 냈다.'], confess: ['야, 그런 말을 갑자기 하면 어떡해.', '…나도 좋아해. 뭐, 그렇게 됐다.'], propose: ['가락지? 나 이런 거 안 껴 봤는데. 줘 봐.', '그래, 하자. 대신 대련은 매일 할 거야.'], house: '살 집은 있어? 집부터 구하고 와.', wife: ['일어나. 새벽 대련 안 할 거야?', '너 아직도 왼발이 늦어. 이따 고쳐 줄게.', '술은 저녁에. 오늘은 내가 살게.'] },
   cheol: { name: '철우', likes: ['meat', 'skewer', 'noodle'], loves: ['plum_wine', 'ginseng_soup', 'eel_rice'], hates: ['tea', 'herb'], chat: ['시주, 오늘은 뭘 드셨소? 나는 아직이오.', '부처님도 배고프면 드셨을 것이오.', '소림 산문은 내가 부쉈지만 고치는 건 못 봤소.'], date: ['철우와 시장을 돌며 만두를 먹었다. 값은 내가 냈다.', '철우가 강에 뛰어들어 맨손으로 잉어를 잡았다. 저녁이 해결됐다.', '철우가 불경을 외우다 잠들었다. 코 고는 소리가 불경보다 낭랑했다.'], sworn: ['시주… 아니, 아우. 내 평생 밥을 사 준 사람은 그대뿐이오.', '소승은 이미 파계한 몸이니 걸릴 것도 없소. 오늘부터 형제요.'] },
-  baekrang: { name: '백랑', likes: ['plum_wine', 'silver_cup', 'sachet'], loves: ['gold_cup', 'hairpin', 'f_gold'], hates: ['herb', 'tea'], chat: ['요즘 장사는 어때요? 저는 별로예요.', '언제 한판 하러 와요. 봐줄게요.', '사람들은 돈 잃을 때 제일 솔직해져요.'], date: ['백랑이 도박장 문을 닫고 야시장에 나왔다.', '둘이서 홀짝을 했다. 내가 다 잃었고 백랑이 술을 샀다.', '백랑이 지붕 위에서 강호의 소문을 하나씩 들려주었다.'], confess: ['어머, 진심이에요? …저 같은 사람한테 그런 말 하는 사람은 처음이에요.', '좋아요. 대신 도망가면 하오문이 다 쫓아가요.'], propose: ['옥가락지네요. 진짜 옥이죠? 농담이에요.', '좋아요. 장부는 제가 쓸게요.'], wife: ['일어나요. 해 떴어요.', '밥 먹고 가요.', '어제 누가 당신 욕을 했는지 들었는데 들어 볼래요?'] },
-  hyeok: { name: '혁련하', likes: ['poem', 'tea', 'sachet'], loves: ['ginseng', 'hairpin', 'antler'], hates: ['meat', 'noodle'], chat: ['향을 피우면 잠이 오십니까. 저는 잘 오지 않습니다.', '성녀는 어릴 때 뽑혀 평생 제단 앞에서 삽니다.', '국수라는 것을 먹어 보았습니다. 맛있었습니다.'], date: ['혁련하가 처음으로 시장에 나왔다. 사람들이 왜 웃는지 물었다.', '달을 보며 천산의 눈 이야기를 들었다.', '혁련하가 향을 만드는 법을 가르쳐 주었다. 손이 차가웠다.'], confess: ['…그런 말씀은 처음 듣습니다.', '저도 같은 마음입니다.'], propose: ['제단이 아닌 곳에서 맹세하는 것은 처음입니다.', '받겠습니다.'], wife: ['일어나셨습니까. 향을 갈아 두었습니다.', '아침을 지어 보았습니다. 드셔 보십시오.', '오늘도 무사히 돌아오십시오.'] },
-  clan_dang: { name: '당소연', likes: ['venom', 'herb', 'sachet'], loves: ['antler', 'ginseng', 'hairpin'], hates: ['sweets', 'noodle'], chat: ['내 찻잔은 건드리지 마요. {나} 씨 건 안전해요. 아마도요.', '독은 양이 문제예요. 약도 많이 먹으면 독이고요.', '오늘은 얼굴이 좋네요. 중독은 아니고요.'], date: ['당소연이 새로 만든 약을 시험하자고 했다. 다행히 해독제도 있었다.', '둘이서 독초밭을 걸었다.', '당소연이 처음으로 독 없는 차를 끓여 주었다.'], confess: ['그런 말을 당가 사람한테 하면 어떻게 되는지 알아요?', '…후회 안 할 거면 좋아요.'], propose: ['가락지에 독침은 없죠? 농담이에요. 고마워요.', '좋아요. 앞으로 {나} 씨 밥은 제가 챙길게요.'], wife: ['아침이에요. 독은 안 탔어요.', '오늘은 어디 가요? 암기 좀 챙겨 가요.', '{나} 씨 찻잔은 따로 쓸게요. 혹시 모르니까.'] },
-  clan_moyong: { name: '모용설', likes: ['poem', 'tea', 'silver_cup'], loves: ['hairpin', 'gold_cup', 'f_gold'], hates: ['meat', 'hide'], chat: ['그대 말투를 따라 해 보았소. 재미없구려.', '받은 것은 돌려주는 것이 모용가의 법도요.', '걸레질이 정말이었다니 아직도 믿기지 않소.'], date: ['모용설과 시를 지었다. 모용설이 내 시를 그대로 되돌려 주었다.', '거울 앞에서 서로의 초식을 흉내 내며 놀았다.', '모용설이 처음으로 예법을 잊고 웃었다.'], confess: ['그 말, 그대로 돌려드리겠소.', '이 말은 흉내가 아니오. 나도 그대를 좋아하오.'], propose: ['이 가락지는 돌려주지 않겠소.', '받겠소.'], wife: ['잘 주무셨소?', '오늘은 내가 그대 초식을 봐 드리겠소.', '거울이 하나 더 필요하겠소.'] },
-  clan_namgung: { name: '남궁진', likes: ['silver_cup', 'gold_cup', 'tea'], loves: ['ore_star', 'plum_wine', 'poem'], hates: ['meat', 'f_crucian'], chat: ['국수를 먹어 봤다. 나쁘지 않더군.', '남궁세가 사람들이 너를 못마땅해한다. 내가 알아서 하겠다.', '다음에는 내가 이긴다.'], date: ['남궁진이 처음으로 저잣거리를 걸었다. 어색하게 만두를 들고 있었다.', '둘이서 대련을 하고 말없이 달을 보았다.', '남궁진이 국수를 두 그릇 먹었다. 비밀로 해 달라고 했다.'], confess: ['…가문에 뭐라고 해야 할지 모르겠다. 그래도 내 대답은 같다.', '나도 같은 마음이다.'], propose: ['집안이 뒤집어지겠군. 상관없다.', '받겠다. 가문은 내가 설득하지.'], wife: ['일찍 일어났군. 나는 벌써 검을 천 번 휘둘렀다.', '국수를 끓여 봤다. 먹어 봐라. 아무한테도 말하지 말고.', '오늘도 대련이다.'] },
+  baekrang: { name: '백랑', likes: ['plum_wine', 'silver_cup', 'sachet'], loves: ['gold_cup', 'hairpin', 'f_gold'], hates: ['herb', 'tea'], chat: ['요즘 장사는 어때요? 저는 별로예요.', '언제 한판 하러 와요. 봐줄게요.', '사람들은 돈 잃을 때 제일 솔직해져요.'], date: ['백랑이 도박장 문을 닫고 야시장에 나왔다.', '둘이서 홀짝을 했다. 내가 다 잃었고 백랑이 술을 샀다.', '백랑이 지붕 위에서 강호의 소문을 하나씩 들려주었다.'], confess: ['어머, 진심이에요? …저 같은 사람한테 그런 말 하는 사람은 처음이에요.', '좋아요. 대신 도망가면 하오문이 다 쫓아가요.'], propose: ['옥가락지네요. 진짜 옥이죠? 농담이에요.', '좋아요. 장부는 제가 쓸게요.'], house: '집도 없이 살림을 차리자고요? 집문서부터 가져와요.', wife: ['일어나요. 해 떴어요.', '밥 먹고 가요.', '어제 누가 당신 욕을 했는지 들었는데 들어 볼래요?'] },
+  hyeok: { name: '혁련하', likes: ['poem', 'tea', 'sachet'], loves: ['ginseng', 'hairpin', 'antler'], hates: ['meat', 'noodle'], chat: ['향을 피우면 잠이 오십니까. 저는 잘 오지 않습니다.', '성녀는 어릴 때 뽑혀 평생 제단 앞에서 삽니다.', '국수라는 것을 먹어 보았습니다. 맛있었습니다.'], date: ['혁련하가 처음으로 시장에 나왔다. 사람들이 왜 웃는지 물었다.', '달을 보며 천산의 눈 이야기를 들었다.', '혁련하가 향을 만드는 법을 가르쳐 주었다. 손이 차가웠다.'], confess: ['…그런 말씀은 처음 듣습니다.', '저도 같은 마음입니다.'], propose: ['제단이 아닌 곳에서 맹세하는 것은 처음입니다.', '받겠습니다.'], house: '머물 집이 있어야 합니다. 집부터 구해 주십시오.', wife: ['일어나셨습니까. 향을 갈아 두었습니다.', '아침을 지어 보았습니다. 드셔 보십시오.', '오늘도 무사히 돌아오십시오.'] },
+  clan_dang: { name: '당소연', likes: ['venom', 'herb', 'sachet'], loves: ['antler', 'ginseng', 'hairpin'], hates: ['sweets', 'noodle'], chat: ['내 찻잔은 건드리지 마요. {나} 씨 건 안전해요. 아마도요.', '독은 양이 문제예요. 약도 많이 먹으면 독이고요.', '오늘은 얼굴이 좋네요. 중독은 아니고요.'], date: ['당소연이 새로 만든 약을 시험하자고 했다. 다행히 해독제도 있었다.', '둘이서 독초밭을 걸었다.', '당소연이 처음으로 독 없는 차를 끓여 주었다.'], confess: ['그런 말을 당가 사람한테 하면 어떻게 되는지 알아요?', '…후회 안 할 거면 좋아요.'], propose: ['가락지에 독침은 없죠? 농담이에요. 고마워요.', '좋아요. 앞으로 {나} 씨 밥은 제가 챙길게요.'], house: '살 집은 있어요? 집부터 구해요. 독초밭 달린 데로요.', wife: ['아침이에요. 독은 안 탔어요.', '오늘은 어디 가요? 암기 좀 챙겨 가요.', '{나} 씨 찻잔은 따로 쓸게요. 혹시 모르니까.'] },
+  clan_moyong: { name: '모용설', likes: ['poem', 'tea', 'silver_cup'], loves: ['hairpin', 'gold_cup', 'f_gold'], hates: ['meat', 'hide'], chat: ['그대 말투를 따라 해 보았소. 재미없구려.', '받은 것은 돌려주는 것이 모용가의 법도요.', '걸레질이 정말이었다니 아직도 믿기지 않소.'], date: ['모용설과 시를 지었다. 모용설이 내 시를 그대로 되돌려 주었다.', '거울 앞에서 서로의 초식을 흉내 내며 놀았다.', '모용설이 처음으로 예법을 잊고 웃었다.'], confess: ['그 말, 그대로 돌려드리겠소.', '이 말은 흉내가 아니오. 나도 그대를 좋아하오.'], propose: ['이 가락지는 돌려주지 않겠소.', '받겠소.'], house: '살 집부터 구해 오시오. 모용가의 법도요.', wife: ['잘 주무셨소?', '오늘은 내가 그대 초식을 봐 드리겠소.', '거울이 하나 더 필요하겠소.'] },
+  clan_namgung: { name: '남궁진', likes: ['silver_cup', 'gold_cup', 'tea'], loves: ['ore_star', 'plum_wine', 'poem'], hates: ['meat', 'f_crucian'], chat: ['국수를 먹어 봤다. 나쁘지 않더군.', '남궁세가 사람들이 너를 못마땅해한다. 내가 알아서 하겠다.', '다음에는 내가 이긴다.'], date: ['남궁진이 처음으로 저잣거리를 걸었다. 어색하게 만두를 들고 있었다.', '둘이서 대련을 하고 말없이 달을 보았다.', '남궁진이 국수를 두 그릇 먹었다. 비밀로 해 달라고 했다.'], confess: ['…가문에 뭐라고 해야 할지 모르겠다. 그래도 내 대답은 같다.', '나도 같은 마음이다.'], propose: ['집안이 뒤집어지겠군. 상관없다.', '받겠다. 가문은 내가 설득하지.'], house: '집도 없이 남궁가 사람을 데려갈 셈이냐. 집부터 구해라.', wife: ['일찍 일어났군. 나는 벌써 검을 천 번 휘둘렀다.', '국수를 끓여 봤다. 먹어 봐라. 아무한테도 말하지 말고.', '오늘도 대련이다.'] },
 };
 const THANKS = {
   yun: ['이걸 어떻게 알았어요? 제일 좋아하는 거예요.', '고마워요. 잘 쓸게요.', '고맙게 받을게요.', '…이걸 저한테요?'], so: ['어떻게 알았어? 이거 진짜 좋아해.', '오, 괜찮네. 고마워.', '고마워. 받아 둘게.', '이런 건 안 좋아해.'], cheol: ['시주! 부처님이 오셨소!', '고맙소. 잘 먹겠소.', '고맙소. 먹는 거요?', '이건 입에 안 맞소.'],
   baekrang: ['이걸 어떻게 구했어요? 소문 값으로 쳐 줄게요.', '오, 값이 나가겠는데요. 고마워요.', '받아 둘게요.', '이건 팔아도 안 남겠네요.'], hyeok: ['…제가 이것을 좋아한다는 것을 어찌 아셨습니까.', '고맙습니다.', '받겠습니다.', '이것은 교리에 맞지 않습니다.'],
-  clan_dang: ['…어떻게 알았지? 조사했어?', '쓸 만하네. 고마워.', '받아 둘게. 독은 안 넣었겠지?', '이건 내가 독을 넣어도 못 살리겠어.'], clan_moyong: ['이런 건 돌려주기 아까운데. 고마워.', '받았어. 언젠가 돌려줄게.', '고마워. 예법대로 받을게.', '이건 그대로 돌려줄게.'], clan_namgung: ['…탐나는 물건이다. 어떻게 구했지?', '나쁘지 않군. 고맙다.', '받아 두지.', '남궁에 이런 것을 가져오다니.'],
+  clan_dang: ['…어떻게 알았어요? 조사했어요?', '쓸 만하네요. 고마워요.', '받아 둘게요. 독은 안 넣었겠죠?', '이건 제가 독을 넣어도 못 살리겠어요.'], clan_moyong: ['이런 것은 돌려드리기 아깝구려. 고맙소.', '받았소. 언젠가 돌려드리겠소.', '고맙소. 예법대로 받겠소.', '이것은 그대로 돌려드리겠소.'], clan_namgung: ['…탐나는 물건이다. 어떻게 구했지?', '나쁘지 않군. 고맙다.', '받아 두지.', '남궁에 이런 것을 가져오다니.'],
 };
 export const stageOf = (id) => { const s = G.S, l = s.love[id] || 0; return s.sworn === id ? '의형제' : s.married === id ? '부부' : s.partner === id ? '연인' : l >= 70 ? '각별한 사이' : l >= 40 ? '가까운 벗' : l >= 15 ? '친구' : '아는 사이'; };
 const addLove = (id, n) => { G.S.love[id] = clamp((G.S.love[id] || 0) + n, 0, 100); F()['met_' + id] = true; };
@@ -193,19 +193,19 @@ async function giveGift(id) {
 }
 async function confess(id) {
   const c = CAND[id]; await say('me', '드릴 말씀이 있어요.'); for (const l of c.confess) await say(id, l);
-  S().partner = id; Sound.sfx('ok3'); toast(`${c.name}와(과) 연인이 되었다`, 3); ctx.note(`${c.name}와(과) 연인이 되었다.`);
+  S().partner = id; Sound.sfx('ok3'); toast(`${josa(c.name, '과/와')} 연인이 되었다`, 3); ctx.note(`${josa(c.name, '과/와')} 연인이 되었다.`);
 }
 async function propose(id) {
   const c = CAND[id];
-  if (!F().own_house) { await say(id, '살 집은 있어요? 집부터 구해요.'); return; }
+  if (!F().own_house) { await say(id, c.house); return; }
   if (have('jade_ring') < 1) { await say('me', '(옥가락지가 있어야 한다. 대장간에서 옥돌로 만들 수 있다.)'); return; }
   take('jade_ring'); await say('me', '저랑 혼인해 주세요.'); for (const l of c.propose) await say(id, l);
-  await fadeTo(1); await narr(`${F().step === 'end' ? '달맞이 객잔 마당에 혼례상이 차려졌다.\n곽 아주머니가 국수를 끓였고, 뱃사공 노씨가 울었고,\n대장장이 강씨는 밥값을 받지 않았다.' : '청하진 사람들이 내 집 마당에 혼례상을 차렸다.\n뱃사공 노씨가 울었고, 대장장이 강씨는 밥값을 받지 않았다.\n곽 아주머니 자리는 비워 두었다.'}\n\n${S().name}와(과) ${c.name}은(는) 부부가 되었다.`); await fadeTo(0);
+  await fadeTo(1); await narr(`${F().inn_rebuilt ? '달맞이 객잔 마당에 혼례상이 차려졌다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니는 그날만큼은 밥값을 받지 않았다.' : '청하진 사람들이 내 집 마당에 혼례상을 차렸다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니 자리는 비워 두었다.'}\n\n${josa(S().name, '과/와')} ${josa(c.name, '은/는')} 부부가 되었다.`); await fadeTo(0);
   S().married = id; addLove(id, 100); Sound.sfx('ok3'); toast('혼인했다! 배우자가 집에서 기다린다.', 3.5); G.field.refresh();
 }
 async function swear(id) {
   const c = CAND[id]; await say('me', '형님으로 모실게요.'); for (const l of c.sworn) await say(id, l);
-  S().sworn = id; Sound.sfx('ok3'); toast(`${c.name}와(과) 의형제를 맺었다`, 3); ctx.note(`${c.name}와(과) 의형제를 맺었다.`);
+  S().sworn = id; Sound.sfx('ok3'); toast(`${josa(c.name, '과/와')} 의형제를 맺었다`, 3); ctx.note(`${josa(c.name, '과/와')} 의형제를 맺었다.`);
 }
 async function romance(id, base) {
   const c = CAND[id], s = S(), L = s.love[id] || 0, d = s.daily, opts = [];
@@ -231,7 +231,7 @@ export function giveLoot(id) {
   const s = S(); s.taken[id] = true;
   if (WEAPONS[id]) { if (!s.weapons.includes(id)) s.weapons.push(id); else s.silver += 50; }
   else if (ACCS[id]) { (s.accs = s.accs || []).push(id); } else give(id, DB[id].kind === '재료' ? 3 : 1);
-  Sound.sfx('bonus'); toast(`${nameOf(id)}을(를) 가져왔다`, 2.6);
+  Sound.sfx('bonus'); toast(`${josa(nameOf(id), '을/를')} 가져왔다`, 2.6);
 }
 export function lootPick(name, ids) {
   ids = ids.filter((v, i, a) => a.indexOf(v) === i);
@@ -249,7 +249,7 @@ async function wanderer() {
   if (S().daily.wander) { await say('wander', '오늘은 이만. 내일 다시 오시오.'); return; }
   await say('wander', '강호를 떠도는 사람이오. 비무 한 판 어떻소? 이긴 쪽이 상대 물건 하나를 가져가는 것이 법이오.');
   const c = await choice('떠돌이 비무객과 겨룰까?', ['겨룬다', '그만둔다']); if (c) return;
-  const lv = S().lv; Object.assign(FOES.wanderer, { hp: 60 + lv * 42, atk: 7 + lv * 2.1, def: 2 + lv * .4, exp: 12 + lv * 9, silver: 8 + lv * 4 });
+  const lv = S().lv; Object.assign(FOES.wanderer, { hp: 60 + lv * 60, atk: 7 + lv * 2.1, def: 2 + lv * .4, exp: 12 + lv * 9, silver: 8 + lv * 4 });
   S().daily.wander = 1;
   const won = await ctx.duel({ foes: ['wanderer'], arena: G.field.m.arena, title: '떠돌이 비무객', bgm: 'fight', yieldAt: .25, optional: true });
   if (won) await lootPick('떠돌이 비무객', pick([['silver_cup', 'herb', 'hide'], ['ore_blue', 'plum_wine', 'fur'], ['tea', 'wood', 'sachet'], ['jade', 'meat', 'sweets'], ['gold_cup', 'ore_iron', 'poem']]));
@@ -267,7 +267,7 @@ Story.providers.push(function content4(id) {
   if (id === 'guhwa') { sp.push({ x: 37, y: 24, w: 8, h: 7, hint: '낚시하기', act: () => fishSpot('pond') }); n.push({ id: 'wander', spr: 'Samurai', x: 22, y: 26, dir: 3, talk: wanderer }); }
   if (id === 'valley') {
     sp.push({ x: 17, y: 2, w: 6, h: 26, hint: '낚시하기', act: () => fishSpot('stream') });
-    n.push({ id: 'hunter', spr: 'Villager3', x: 34.5, y: 14, dir: 2, mark: () => !F().bow, talk: async () => { if (!F().bow) { await say('hunter', '여긴 짐승이 많지. 활은 쏠 줄 아나? 하나 주지. 곽 아주머니 국수값이다.'); F().bow = true; Sound.sfx('bonus'); await say(null, '사냥활을 받았다. 사냥터에서 J 키로 화살을 쏜다. 짐승은 다가가면 달아난다.'); } else await say('hunter', '노루는 빠르니 앞을 보고 쏴라. 멧돼지 큰 놈은 칼로 상대하고.'); } });
+    n.push({ id: 'hunter', spr: 'Villager3', x: 34.5, y: 14, dir: 2, mark: () => !F().bow, talk: async () => { if (!F().bow) { await say('hunter', '여긴 짐승이 많지. 활은 쏠 줄 아나? 하나 주지. 곽 아주머니 국수를 공으로 먹은 게 많아서 말이야.'); F().bow = true; Sound.sfx('bonus'); await say(null, '사냥활을 받았다. 사냥터에서 J 키로 화살을 쏜다. 짐승은 다가가면 달아난다.'); } else await say('hunter', '노루는 빠르니 앞을 보고 쏴라. 멧돼지 큰 놈은 칼로 상대하고.'); } });
     for (const [a, x, y] of [['rabbit', 10, 10], ['rabbit', 28, 10], ['rabbit', 30, 22], ['pheasant', 7, 18], ['pheasant', 26, 16], ['deer', 12, 24], ['deer', 33, 18], ['piglet', 9, 14], ['badger', 31, 8]]) hunt.push({ kind: a, x, y });
   }
   if (id === 'bamboo') for (const [a, x, y] of [['rabbit', 14, 15.5], ['pheasant', 30.5, 20], ['rabbit', 20, 7.5]]) hunt.push({ kind: a, x, y });

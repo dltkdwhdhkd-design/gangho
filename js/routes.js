@@ -10,12 +10,12 @@ const S = () => G.S, F = () => G.S.flags, side = () => G.S.side || 'jeong';
 Object.assign(WHO, { samaung: { name: '패천도 사마웅', face: 'Samaung' }, hyeok: { name: '혁련하', face: 'Hyeok' }, hyeolma: { name: '혈마', face: 'Skeleton' }, makgo: { name: '혈수 막고', face: 'RedNinja' }, clerk: { name: '서기', face: 'Inspector' } });
 const foe = (name, spr, hp, atk, def, spd, exp, silver, pause, moves, o = {}) => ({ name, spr, hp, atk, def, spd, exp, silver, pause, moves, ...o });
 Object.assign(FOES, {
-  jeong_guard: foe('정천맹 순찰', 'chars/Knight', 300, 30, 9, 62, 80, 30, 1.05, ['double', 'lunge', 'heavy'], { wpn: 'Sword', guard: .5 }),
-  jeong_elite: foe('정천맹 검수', 'chars/Knight', 520, 38, 11, 68, 130, 50, .95, ['double', 'lunge', 'cloud_flash'], { wpn: 'Sword', guard: .6, elite: 1 }),
-  myeon: foe('무면당 밀정', 'chars/GrayNinja', 400, 38, 9, 82, 110, 30, .95, ['quick', 'blink', 'dart3', 'lunge'], { wpn: 'Ninjaku', guard: .5 }),
-  makgo: foe('혈수 막고', 'chars/RedNinja', 1100, 34, 9, 86, 320, 200, .85, ['flurry', 'blink', 'dart3', 'lunge'], { wpn: 'Ninjaku', guard: .7, boss: 1, poise: 110 }),
-  hyeolma: foe('혈마', 'chars/Skeleton', 1800, 40, 11, 66, 520, 300, .85, ['venom', 'heavy', 'spin', 'quake'], { wpn: 'Axe', guard: .6, boss: 1, poise: 150 }),
-  samaung_foe: foe('패천도 사마웅', 'chars/Samaung', 2800, 48, 15, 62, 700, 500, .85, ['heavy', 'quake', 'spin', 'charge'], { wpn: 'BigSword', guard: .8, boss: 1, poise: 200 }),
+  jeong_guard: foe('정천맹 순찰', 'chars/Knight', 420, 30, 9, 62, 80, 30, 1.05, ['double', 'lunge', 'heavy'], { wpn: 'Sword', guard: .5 }),
+  jeong_elite: foe('정천맹 검수', 'chars/Knight', 700, 38, 11, 68, 130, 50, .95, ['double', 'lunge', 'cloud_flash'], { wpn: 'Sword', guard: .6, elite: 1 }),
+  myeon: foe('무면당 밀정', 'chars/GrayNinja', 520, 38, 9, 82, 110, 30, .95, ['quick', 'blink', 'dart3', 'lunge'], { wpn: 'Ninjaku', guard: .5 }),
+  makgo: foe('혈수 막고', 'chars/RedNinja', 2000, 34, 9, 86, 320, 200, .85, ['flurry', 'blink', 'dart3', 'lunge'], { wpn: 'Ninjaku', guard: .7, boss: 1, poise: 220 }),
+  hyeolma: foe('혈마', 'chars/Skeleton', 3000, 40, 11, 66, 520, 300, .85, ['venom', 'heavy', 'spin', 'quake'], { wpn: 'Axe', guard: .6, boss: 1, poise: 280 }),
+  samaung_foe: foe('패천도 사마웅', 'chars/Samaung', 4500, 48, 15, 62, 700, 500, .85, ['heavy', 'quake', 'spin', 'charge'], { wpn: 'BigSword', guard: .8, boss: 1, poise: 360 }),
   samaung_ally: foe('사마웅', 'chars/Samaung', 2400, 46, 16, 62, 0, 0, 1.1, ['heavy', 'quake', 'spin'], { wpn: 'BigSword' }),
   hyeok_ally: foe('혁련하', 'chars/Hyeok', 1400, 44, 9, 78, 0, 0, 1, ['blood_fan', 'blink', 'fan5'], { wpn: 'Ninjaku' }),
   wei_ally: foe('위충', 'chars/Paeng', 1200, 36, 10, 66, 0, 0, 1.1, ['double', 'lunge'], { wpn: 'Sword' }),
@@ -31,7 +31,7 @@ async function baeGuhwa() {
   const c = await choice('백랑이 주사위 통을 흔들며 기다린다.', ['맡는다', '정천맹 창고는 건드리기 싫다고 한다']);
   F().gu_bae = true;
   if (c === 0) {
-    await ctx.duel({ foes: ['jeong_guard', 'jeong_guard'], arena: 'ring', bgm: 'fight', title: '정천맹 창고' });
+    await ctx.duel({ foes: ['jeong_guard', 'jeong_guard'], arena: 'room', bgm: 'fight', title: '정천맹 창고' });
     await say('baekrang', '빠르네요. 이거 구파일방 장로들이 뒷돈 받은 장부예요. 나중에 쓸 데가 있거든요.');
     ctx.silver(100); ctx.rep('sa', 2); ctx.love('baekrang');
     ctx.note('백랑은 하오문 사람이다. 정천맹 장로들의 뒷돈 장부를 훔쳐다 주었다.');
@@ -45,15 +45,16 @@ async function hyeokGuhwa() {
   await say('hyeok', '향 장수입니다.');
   const c = await choice('여인의 눈이 붉은빛을 띤다.', ['향을 산다 (10냥)', '어디서 그 걸음을 봤는지 묻는다', '그냥 지나간다']);
   F().gu_hyeok = true;
-  if (c === 0) { S().silver = Math.max(0, S().silver - 10); await say('hyeok', '맹주가 권하는 잔은 조심하십시오. 덤입니다.'); ctx.rep('ma', 1); ctx.love('hyeok'); ctx.note('서역 향 장수: 맹주가 권하는 잔을 조심하라고 했다.'); }
+  if (c === 0) { S().silver = Math.max(0, S().silver - 10); F().gu_incense = true; await say('hyeok', '맹주가 권하는 잔은 조심하십시오. 덤입니다.'); ctx.rep('ma', 1); ctx.love('hyeok'); ctx.note('서역 향 장수: 맹주가 권하는 잔을 조심하라고 했다.'); }
   if (c === 1) { await say('hyeok', '아는 사람의 걸음과 같아서 여쭈었습니다. 정파 사람도 사파 사람도 아닙니다.'); ctx.rep('ma', 1); ctx.note('서역 향 장수는 월하칠식의 걸음을 알아보았다.'); }
   if (c === 2) await say('hyeok', '네. 또 뵙겠습니다.');
 }
 
 // ── 갈림 ──
 export async function crossroads() {
+  F().cross = true;
   await narr('배는 불빛이 없는 쪽으로 내려갔다. 돌아보니 구화성 쪽 하늘이 벌겋게 물들어 있었다.');
-  await say('boat', '나루마다 네 얼굴이 붙었다더라. 맹주를 독살하려 한 역적이라고.');
+  await say('boat', '나루마다 네 얼굴이 붙었다더구먼. 맹주를 독살하려 한 역적이라고.');
   await say('me', '독은 저쪽이 탔는데요.');
   await say('boat', '그걸 누가 믿겄어.');
   await say('yun', '지금 정천맹으로 돌아가면 다 죽어요. 어디로 갈지 정해요.');
@@ -63,7 +64,7 @@ export async function crossroads() {
   await say('baekrang', '역적이 되셨네요, {호}. 패천도가 보자고 하세요. 지금 맹주랑 맞붙을 사람은 그분밖에 없거든요.');
   await say('me', '사파에 들어오라는 얘기예요?');
   await say('baekrang', '정파가 뭘 해 줬는데요? 우리는 일한 만큼은 확실히 쳐줘요.');
-  await say('hyeok', F().gu_hyeok ? '향은 잘 쓰셨습니까. 저는 천마신교의 성녀 혁련하입니다.' : '처음 뵙습니다. 천마신교의 성녀 혁련하입니다.');
+  await say('hyeok', F().gu_incense ? '향은 잘 쓰셨습니까. 저는 천마신교의 성녀 혁련하입니다.' : F().gu_hyeok ? '또 뵙습니다. 저는 천마신교의 성녀 혁련하입니다.' : '처음 뵙습니다. 천마신교의 성녀 혁련하입니다.');
   await say('hyeok', '연경추는 원래 우리 교의 심마였습니다. 교주님을 깨워 자기 뜻대로 쓰려고 교단을 배신했습니다. 저희도 그자를 죽여야 합니다.');
   await say('me', '마교가 저를 돕겠다고요?');
   await say('hyeok', '월하문의 핏줄이 필요합니다. 봉인을 다룰 수 있는 사람은 당신뿐이니까요. 숨기지 않겠습니다.');
@@ -74,7 +75,8 @@ export async function crossroads() {
 }
 export async function toWolha() {
   set('c4a'); F().night = false;
-  await narr('제6부 · 달이 진 골짜기\n\n달이 없는 밤에 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.');
+  const road = { jeong: '그 뒤로 두 달을 쫓겨 다녔다. 나루마다 내 얼굴이 붙어 있어서 낮에는 갈대밭에 숨고 밤에만 움직였다. ', free: '그 뒤로 두 달을 혼자 떠돌았다. 나루마다 내 얼굴이 붙어 있어서 낮에는 갈대밭에 숨고 밤에만 움직였다. ' }[S().side] || '';
+  await narr(`제6부 · 달이 진 골짜기\n\n${road}달이 없는 밤에 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.`);
   ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
   await ctx.warp('wolha', 22, 37, 1);
 }
@@ -128,7 +130,7 @@ async function samaungMeet() {
 }
 async function jobShip() {
   if (F().wei_spared) await say('wei', '왔냐, 점소이. 저번에 살려 준 빚은 오늘 갚는다.');
-  else await say('pirate', '대장은 관아에 잡혀 있소. 우리끼리 왔소이다.');
+  else await say('pirate', '대장은 사흘이면 나온다더니 아직도 옥에 있소. 우리끼리 왔소.');
   await ctx.duel({ foes: ['jeong_guard', 'jeong_guard', 'jeong_elite'], allies: F().wei_spared ? ['wei_ally'] : [], arena: 'dock', bgm: 'fight', title: '정천맹 군량선' });
   await narr('배에는 곡식 삼백 섬이 실려 있었다. 나루 사람들이 멀리서 이쪽을 보고 있었다.');
   const c = await choice('쌀을 어떻게 할까?', ['절반을 나루 사람들에게 푼다', '전부 산채로 올려 보낸다']);
@@ -155,7 +157,7 @@ async function jobMonk() {
   const c = await choice('혜각이 염주를 내려놓고 눈을 감는다.', ['칼을 뽑는다', '칼을 거둔다']);
   if (c === 0) {
     await ctx.duel({ foes: ['clan_shaolin'], arena: 'court', bgm: 'boss', title: '소림 혜각' });
-    await narr('혜각은 끝까지 손을 쓰지 않았다. 그날 저녁 소림의 종소리가 멀리서도 들렸다.');
+    await narr('혜각은 마지막 일격을 피하지 않았다. 그날 저녁 소림의 종소리가 멀리서도 들렸다.');
     F().hyegak_dead = true; ctx.rep('sa', 3); ctx.rep('jeong', -4); ctx.note('혜각 대사를 베었다. 소림은 나를 잊지 않을 것이다.');
   } else {
     await say('me', '못 하겠습니다. 그 값은 제가 치를게요.');
@@ -178,7 +180,7 @@ async function saReturn() {
 async function toMa() {
   S().side = 'ma'; ctx.rep('ma', 3); ctx.rep('jeong', -3); ctx.rep('sa', -1); F().ma_open = true;
   await say('so', '야, {나}. 너 지금 뭐 하는 거야?');
-  await say('me', '아주머니를 구하려면 저쪽 힘이 필요해.');
+  await say('me', '아주머니를 구하려면 저쪽 힘이 필요해요.');
   await say('so', '미쳤구나. 다음에 보면 나도 안 봐준다.');
   await say('yun', '저는 거기 못 가요. 사람 살리는 일을 하는 사람이에요.');
   await say('yun', '…돌아오면 팔부터 봐 줄게요. 꼭 살아서 와요.');
@@ -207,7 +209,7 @@ async function jobSpy() {
   await ctx.duel({ foes: ['myeon', 'myeon', 'myeon'], arena: 'room', bgm: 'fight', title: '무면당 밀정' });
   await say(null, '쓰러진 밀정의 품에서 낡은 나무패가 나왔다. 불에 지진 번호가 적혀 있었다.');
   await say('me', '이거 견대 번호패예요. 왜 이게 여기 있죠?');
-  await say('hyeok', '무면당은 전쟁터에서 고아들을 사들입니다. 심마가 그렇게 조직을 키웠습니다. 당신이 있던 부대도 그중 하나였습니다.');
+  await say('hyeok', '무면당은 강호에서 무면회라고 부르는 자들입니다. 전쟁터에서 고아들을 사들여 조직을 키웠습니다. 당신이 있던 부대도 그중 하나였습니다.');
   ctx.note('무면당 밀정이 견대 번호패를 지니고 있었다. 견대는 심마가 고아를 모으던 곳이었다.');
   ctx.rep('ma', 1); F().ma_job1 = true; maCheck();
 }
@@ -235,7 +237,7 @@ async function jobWell() {
     F().plague = true; ctx.rep('ma', 4); ctx.rep('jeong', -5); G.S.love.yun = 0;
     ctx.note('청하진 우물에 혈우를 부었다.');
   } else {
-    await say('me', '이번엔 안 해요.');
+    await say('me', '이건 못 하겠어.');
     F().ma_defy = true; ctx.rep('jeong', 2); ctx.note('혈우 항아리를 깨 버렸다. 혈마가 가만있지 않을 것이다.');
   }
   F().ma_job3 = true; maCheck();
@@ -292,19 +294,21 @@ export async function chiefBattle() {
   }
   await ctx.duel({ foes: ['chief'], allies, foeHpMul: mul, arena: 'moon', bgm: 'boss', title: '정천맹주 연경추' });
   await say('chief', '왜지… 나는 칠식을 다 익혔는데…');
-  await say('me', '걸레질을 안 해 보셨잖아.');
+  await say('me', '걸레질을 안 해 봤잖아.');
   await say('chief', '하하… 어차피 늦었네. 일곱 장은 이미 천산을 깨웠어. 교주께서 곧…');
   if (s === 'jeong') { await say('so', '천산? 교주? 저 사람 지금 무슨 소리야?'); await say('cheol', '시주들, 달을 보시오.'); }
 }
 
 // ── 결말 ──
-const hook = line => narr(`그해 겨울, 서쪽 하늘에 붉은 달이 떴다. ${line}\n\n강호행 · 제1막 끝\n이야기는 제7부 ‘붉은 달’로 이어집니다.`);
+const baekFate = async () => { if (F().baek_live) await say('baek', '점소이, 방값 가져왔다. 이자는 깎아라.'); else await narr('백 노인은 그날 밤을 넘기지 못했다. 곽 아주머니는 무덤 앞에 국 한 그릇을 놓고 한참 서 있다가 아무 말 없이 돌아갔다.'); };
+const hook = line => narr(`그해 겨울, 서쪽 하늘에 붉은 달이 떴다. ${line}\n\n강호행 · 제2막 끝\n이야기는 제7부 ‘붉은 달’로 이어집니다.`);
 function finish(map = 'cheongha') { set('end'); F().cleared = true; ctx.goal(''); return map === 'shrine' ? ctx.warp('shrine', 7, 8, 1) : ctx.warp('cheongha', 22.5, 16, 0); }
 async function endSa() {
   await say('samaung', '약속은 지켰다. 곽란은 데려가고, 일곱 장도 네가 가져라.');
   await say('gwak', '사파 밥 먹었다며?');
   await say('me', '네.');
   await say('gwak', '아이고, 이놈아. 그래도 살아 돌아왔으니 됐다. 밥은 먹었어?');
+  await baekFate();
   await narr('정천맹이 무너지자 구파일방은 산문을 닫았고, 흑도맹의 검은 깃발이 장강을 따라 내려갔다.', 'end_sa');
   if (F().hyegak_dead) await narr('얼마 뒤 소림의 승병들이 산을 내려왔다는 소문이 돌았다. 혜각의 원수를 갚겠다고 했다.');
   const c = await choice('사마웅이 부맹주 자리를 맡으라고 한다.', ['부맹주 자리를 받는다', '비무를 청해 맹주 자리를 건다', '거절하고 떠난다']);
@@ -324,6 +328,7 @@ async function endMa() {
   await say('gwak', '그 옷은 뭐야?');
   await say('me', '천마신교 옷이요.');
   await say('gwak', '네 어미가 그 제단을 잠그다가 죽었다. 알고나 입어.');
+  await baekFate();
   if (F().plague) { await say('gwak', '청하진 우물에 뭘 넣었어?'); await say('me', '…….'); await say('gwak', '…나가. 내 앞에 나타나지 마.'); }
   const c = await choice('일곱 장을 제단에 올렸다. 혁련하가 내 말을 기다린다.', ['봉인을 푼다. 천마를 깨운다', '봉인을 잠그고 신교를 잇는다', '일곱 장을 태우고 등을 돌린다']);
   if (c === 0) { F().ending = 'ma_awake'; await say('hyeok', '교주님이 깨어나십니다.'); await narr('달이 붉게 물들었다. 강호의 모든 칼이 한꺼번에 울었다고 한다. 나는 천마의 오른팔이 되었다.', 'end_ma'); }
@@ -344,16 +349,17 @@ async function endFree() {
   await say('gwak', '이리 와, 국수 끓여 줄게. 다 먹으면 어디로 갈지나 생각해 봐.');
   await say('me', '갈 데가 없는데요.');
   await say('gwak', '없으면 여기 있으면 되지.');
+  await baekFate();
   const c = await choice('찢어진 일곱 장을 앞에 두고', ['태운다', '곽 아주머니에게 맡긴다', '품에 넣고 혼자 떠난다']);
   F().ending = 'free' + c;
   if (c === 0) await narr('일곱 장을 태웠다. 재는 강으로 날아갔고, 나는 다시 낭인으로 돌아갔다.', 'end_free');
-  if (c === 1) await narr('달맞이 객잔이 다시 문을 열었다. 나는 가끔 들러 바닥을 닦고 간다.', 'end_jeong');
+  if (c === 1) { F().inn_rebuilt = true; await narr('달맞이 객잔이 다시 문을 열었다. 나는 가끔 들러 바닥을 닦고 간다.', 'end_jeong'); }
   if (c === 2) await narr('일곱 장을 품에 넣고 새벽에 길을 나섰다.', 'end_free');
   await hook('나는 아무 깃발도 없이 그 달 아래를 걸었다.');
   await finish();
 }
 export async function routeEnding() { const s = side(); if (s === 'sa') await endSa(); else if (s === 'ma') await endMa(); else await endFree(); }
-G.route = { crossroads, toWolha, chiefBattle, routeEnding, side };
+G.route = { crossroads, toWolha, chiefBattle, routeEnding, side, baekFate };
 
 // ── 지도별 사람과 일감 ──
 const job = (o) => ({ dir: 0, mark: () => true, ...o });

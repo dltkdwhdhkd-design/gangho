@@ -1,16 +1,17 @@
 // 무공, 무기, 심법, 물건 자료
 export const WEAPONS = {
+  mop: { name: '걸레 자루', type: '검', atk: 2, spr: 'Stick', desc: '객잔 걸레 자루. 칼 대신 쥐고 있다.' },
   stick: { name: '낡은 목검', type: '검', atk: 3, spr: 'Stick', desc: '백 노인이 방값 대신 두고 간 목검. 손잡이가 닳아 있다.' },
   army_blade: { name: '이 빠진 군도', type: '검', atk: 6, spr: 'Sword', desc: '군에서 나올 때 손에 남은 칼. 곽 아주머니가 맡아 두고 곱게 갈아 놓았다.' },
   iron_sword: { name: '철검', type: '검', atk: 9, spr: 'Sword', price: 90, desc: '대장간에서 흔히 파는 쇠칼. 쓸 만하다.' },
   blue_sword: { name: '청강검', type: '검', atk: 17, spr: 'Rapier', price: 420, desc: '푸른 빛이 도는 잘 벼린 검.' },
   moon_sword: { name: '월영검', type: '검', atk: 30, spr: 'Katana', desc: '달빛을 받으면 칼날이 희게 빛나는 옛 검.' },
   iron_blade: { name: '박도', type: '도', atk: 12, spr: 'BigSword', price: 110, desc: '넓적한 칼. 느리지만 묵직하다.' },
-  ghost_blade: { name: '귀두도', type: '도', atk: 22, spr: 'Axe', price: 480, desc: '칼등에 귀신 머리가 새겨진 대도.' },
+  ghost_blade: { name: '귀면도', type: '도', atk: 22, spr: 'Axe', price: 480, desc: '칼등에 귀신 얼굴이 새겨진 대도.' },
   iron_spear: { name: '철창', type: '창', atk: 10, spr: 'Lance', price: 100, desc: '길어서 먼저 닿는다.' },
   dragon_spear: { name: '유룡창', type: '창', atk: 19, spr: 'Lance2', price: 450, desc: '창대가 낭창낭창한 명창.' },
-  fist_wrap: { name: '면장갑', type: '권', atk: 6, spr: 'Sai', price: 60, desc: '손을 감싼 천. 맨손으로 싸우는 사람의 무기.' },
-  iron_gauntlet: { name: '철권투', type: '권', atk: 15, spr: 'Club', price: 400, desc: '쇠로 만든 권투.' },
+  fist_wrap: { name: '무명 권대', type: '권', atk: 6, spr: 'Sai', price: 60, desc: '손에 감는 무명천. 맨손으로 싸우는 사람의 무기.' },
+  iron_gauntlet: { name: '철권갑', type: '권', atk: 15, spr: 'Club', price: 400, desc: '쇠로 만든 권갑.' },
 };
 
 // 평타: 무기 종류마다 다르다

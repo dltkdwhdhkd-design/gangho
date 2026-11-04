@@ -8,14 +8,14 @@ import { step, set, at } from './story1.js';
 
 const S = () => G.S, F = () => G.S.flags;
 Object.assign(WHO, { pirate: { name: '수적', face: 'Villager3' }, elder: { name: '촌장 어른', face: 'Monk' }, wife: { name: '순이네', face: 'Woman' }, husband: { name: '순이 아버지', face: 'Villager' }, baekrang: { name: '백랑', face: 'Cavegirl' }, wei: { name: '낭리비어 위충', face: 'Paeng' } });
-Object.assign(FOES, { smith_ally: { name: '대장장이 강씨', spr: 'chars/Caveman2', hp: 120, atk: 13, def: 4, spd: 48, exp: 0, silver: 0, pause: 1.4, moves: ['slash', 'heavy'], wpn: 'Club' } });
+Object.assign(FOES, { debtor: { ...FOES.pirate_hook, name: '외상 손님', spr: 'chars/Villager3' }, smith_ally: { name: '대장장이 강씨', spr: 'chars/Caveman2', hp: 120, atk: 13, def: 4, spd: 48, exp: 0, silver: 0, pause: 1.4, moves: ['slash', 'heavy'], wpn: 'Club' } });
 
 async function wharf() {
   await say('boat', '왔구먼. 팔 다쳤다며? 너구리한테 물렸다고 온 동네에 소문났어.');
   await say('me', '그걸 어떻게 아세요?');
   await say('boat', '이 동네에 비밀이 어딨어. 그보다 저기 좀 봐.');
   await narr('나루 끝에 처음 보는 쾌선 세 척이 묶여 있었다. 돛에 검은 물고기가 그려져 있었다.');
-  await say('boat', '검은물고기패여. 강을 떠도는 수적 놈들인디, 어디 큰 산채에도 못 끼는 떨거지들이지. 객잔 타고 열흘도 안 됐는데 벌써 냄새를 맡았구먼.');
+  await say('boat', '검은물고기패여. 강을 떠도는 수적 놈들인디, 어디 큰 산채에도 못 끼는 떨거지들이지. 객잔 타고 스무 날도 안 됐는데 벌써 냄새를 맡았구먼.');
   await say('me', '뭐 하러 온 건데요?');
   await say('boat', '뭐 하긴, 뜯어먹으러 왔지.');
   await say('pirate', '어이, 영감. 이 나루는 오늘부터 우리가 지켜 준다. 배 한 척에 은자 두 냥씩 내. 그리고 객잔 터 땅문서도 가져오고.');
@@ -103,8 +103,9 @@ async function baekrang() {
   const c = await choice('백랑이 주사위를 굴린다.', ['은자 서른 냥을 낸다', '홀짝을 한다']);
   if (c === 0 && S().silver >= 30) { S().silver -= 30; Sound.sfx('coin'); }
   else {
+    if (c === 0) await say('baekrang', '돈이 모자라네요. 그럼 홀짝이나 해요.');
     const w = await gamble();
-    if (w < 2) { await say('baekrang', '졌네요. 그럼 저기 저 손님 좀 내보내 줘요. 석 달째 외상만 긋거든요. 그런 거 잘한다면서요.'); await say('me', '어딜 가나 이 일이네.'); await ctx.duel({ foes: ['pirate_hook'], arena: 'room', title: '외상 손님' }); await say('baekrang', '어머, 잘하네요.'); }
+    if (w < 2) { await say('baekrang', '졌네요. 그럼 저기 저 손님 좀 내보내 줘요. 석 달째 외상만 긋거든요. 그런 거 잘한다면서요.'); await say('me', '어딜 가나 이 일이네.'); await ctx.duel({ foes: ['debtor'], arena: 'room', title: '외상 손님' }); await say('baekrang', '어머, 잘하네요.'); }
     else await say('baekrang', '운이 좋네요. 그럼 그냥 알려 줄게요.');
   }
   await say('baekrang', '두목 위충은 어디에도 못 낀 떠돌이예요. 강호 큰 어른들은 이런 시골 나루에 관심도 없고요.');

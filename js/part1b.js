@@ -12,10 +12,10 @@ const F2 = (name, spr, hp, atk, def, spd, exp, silver, pause, moves, o = {}) => 
 Object.assign(WHO, { jigaek: { name: '지객승 혜명', face: 'Monk' }, sodi: { name: '늙은 스님', face: 'Sodi' }, luohan: { name: '나한당 수좌', face: 'Monk' }, yuhyeon: { name: '화산 검수', face: 'Hwasan' } });
 Object.assign(FOES, {
   sodi: F2('늙은 스님', 'chars/Sodi', 99999, 11, 40, 72, 0, 0, 1.15, ['quick', 'iron_fist', 'blink'], { boss: 1, poise: 99999, wpn: 'Stick', title: '장경각' }),
-  luohan: F2('나한승', 'chars/Monk', 210, 21, 7, 58, 46, 10, 1.15, ['iron_fist', 'earth_stomp', 'slash'], { wpn: 'Club', guard: .5, poise: 20 }),
-  luohan_chief: F2('나한당 수좌', 'chars/Monk', 780, 27, 9, 62, 190, 80, .95, ['luohan', 'chain_kick', 'heavy', 'earth_stomp'], { wpn: 'Club', guard: .8, boss: 1, poise: 110 }),
-  jongnam_d: F2('종남 제자', 'chars/BlueNinja', 200, 23, 6, 64, 44, 12, 1.1, ['double', 'lunge', 'swallow_qi'], { wpn: 'Sword', guard: .4 }),
-  python: F2('벼랑 구렁이', 'mon/Snake2', 1040, 28, 8, 54, 260, 0, .9, ['venom', 'charge', 'quake', 'spit'], { mon: 1, boss: 1, poise: 120, scale: 2.4, r: 11 }),
+  luohan: F2('나한승', 'chars/Monk', 280, 21, 7, 58, 46, 10, 1.15, ['iron_fist', 'earth_stomp', 'slash'], { wpn: 'Club', guard: .5, poise: 20 }),
+  luohan_chief: F2('나한당 수좌', 'chars/Monk', 1100, 27, 9, 62, 190, 80, .95, ['luohan', 'chain_kick', 'heavy', 'earth_stomp'], { wpn: 'Club', guard: .8, boss: 1, poise: 200 }),
+  jongnam_d: F2('종남 제자', 'chars/BlueNinja', 270, 23, 6, 64, 44, 12, 1.1, ['double', 'lunge', 'swallow_qi'], { wpn: 'Sword', guard: .4 }),
+  python: F2('벼랑 구렁이', 'mon/Snake2', 1500, 28, 8, 54, 260, 0, .9, ['venom', 'charge', 'quake', 'spit'], { mon: 1, boss: 1, poise: 220, scale: 2.4, r: 11 }),
 });
 
 async function toShaolin() {
@@ -84,18 +84,18 @@ async function luohanHall() {
   await say('me', '왜 가셨어요?');
   await say('clan_shaolin', '맹약이 있었고, 마공을 익힌 문파라고 들었기 때문이오. 그런데 도착해 보니 골짜기는 이미 불타고 있었소. 칼을 뽑을 일도 없었지.');
   await say('clan_shaolin', '누가 불을 질렀는지는 노납도 모르오. 그 뒤로 십칠 년을 염불만 했소.');
-  await say('me', '철우라는 스님 아세요?');
-  await say('jigaek', '그 이름은 어디서 들으셨습니까. 그자가 부순 산문을 저희가 아직도 고치고 있습니다.');
+  await say('me', '올라오면서 보니까 산문 한쪽만 새 나무던데요.');
+  await say('jigaek', '철우라는 파계승이 부수고 나간 자리입니다. 저희가 아직도 고치고 있습니다.');
   ctx.note('혜각 대사: 소림이 도착했을 때 월하곡은 이미 불타고 있었다.');
   await narr('소림을 떠나 서쪽으로 갔다. 화산에 매화가 피었다는 소문이 있었고, 윤설이 그 산에서만 나는 약초를 찾았다.');
   await fadeTo(1); G.field.load('hwasan', 14, 11.5, 3); await fadeTo(0);
   await say('clan_hwasan', '비켜! 이 절벽길은 화산 땅이야!');
   await say('clan_jongnam', '언제부터? 삼백 년 전 지도에는 종남 땅으로 돼 있소.');
   await say('me', '약초만 캐고 갈게요.');
-  await say('clan_jongnam', '넌 뭐냐? 화산 쪽 사람이냐?');
+  await say('clan_jongnam', '그대는 뭐요? 화산 쪽 사람이오?');
   await say('clan_hwasan', '우리가 저런 애를 데리고 다니겠어?');
   await say('yun', '저 사람들 왜 저래요?');
-  await ctx.duel({ foes: ['jongnam_d', 'jongnam_d', 'jongnam_d'], arena: 'forest', title: '절벽길 시비', bgm: 'fight', tip: '좁은 싸움입니다. 끝나면 벼랑을 조심하세요.' });
+  await ctx.duel({ foes: ['jongnam_d', 'jongnam_d', 'jongnam_d'], arena: 'forest', title: '절벽길 시비', bgm: 'fight', tip: '길이 좁아 둘러싸이기 쉽습니다. <b>K 경공</b>으로 빠져나오세요.' });
   await say('me', '끝났죠? 이제 약초만…');
   await say(null, '그때 발밑 바위가 부서지면서 몸이 뒤로 기울었다.');
   await say('yun', '{나} 씨!');

@@ -1,5 +1,5 @@
 // 구파일방과 오대세가: 대화, 비무, 전수
-import { G, Sound, toast } from './core.js';
+import { G, Sound, toast, josa } from './core.js';
 import { Story, ctx, say, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { learn } from './state.js';
@@ -10,7 +10,7 @@ import { LOOT } from './items.js';
 async function talk(c) {
   const k = 'clan_' + c.id, F = G.S.flags;
   if (F[k]) {
-    await say(k, ['잘 지내시오.', '또 보세.', '몸조심하시오.'][c.tier - 1]);
+    await say(k, c.bye);
     const left = LOOT[c.id].filter(i => !G.S.taken[i]);
     if (!left.length || G.S.daily['duel_' + c.id]) return;
     const a = await choice(`다시 비무를 청할까? 이기면 ${c.who}의 물건 하나를 가져온다. (하루 한 번)`, ['청한다', '그만둔다']); if (a) return;
@@ -22,14 +22,14 @@ async function talk(c) {
   const a = await choice(`${c.name} ${c.who}에게 비무를 청할까?`, ['비무를 청한다', '다음에 온다']);
   if (a) return;
   const won = await ctx.duel({ foes: [k], arena: c.group === '구파일방' ? 'court' : 'ring', bgm: 'boss', title: `${c.name} · ${c.who}`, yieldAt: .25, optional: true });
-  if (!won) { await say(k, '다시 오시오.'); return; }
+  if (!won) { await say(k, c.again || '다시 오시오.'); return; }
   F[k] = true;
   for (const l of c.win) l.length === 2 ? await say(l[0], l[1]) : await say(k, l[0]);
   c.gift.forEach(id => learn(id));
-  if (c.heart && !G.S.hearts.includes(c.heart)) { G.S.hearts.push(c.heart); toast(`심법 ${HEARTS[c.heart].name}을(를) 익혔다`, 3); }
+  if (c.heart && !G.S.hearts.includes(c.heart)) { G.S.hearts.push(c.heart); toast(`심법 ${josa(HEARTS[c.heart].name, '을/를')} 익혔다`, 3); }
   if (c.note) ctx.note(c.note);
   await G.life.lootPick(c.who, LOOT[c.id]);
-  if (clansWon() === 15) { Sound.sfx('ok3'); await say(null, '구파일방과 오대세가의 대표가 모두 인정했다. 강호에 네 이름이 퍼지기 시작했다.'); ctx.note('열다섯 세력에게 모두 인정받았다.'); }
+  if (clansWon() === 15) { Sound.sfx('ok3'); await say(null, '구파일방과 오대세가의 대표가 모두 인정했다. 강호에 내 이름이 퍼지기 시작했다.'); ctx.note('열다섯 세력에게 모두 인정받았다.'); }
 }
 async function beggar() {
   const c = await choice('개방 거지가 그릇을 내민다.', ['구파일방이 뭐예요', '오대세가는요', '정천맹은요', '사파는요', '그 밖에 또 있어요?', '그만둔다'], 'clan_gaebang');

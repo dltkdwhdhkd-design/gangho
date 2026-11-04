@@ -1,6 +1,6 @@
 // 제목 화면, 주인공 만들기, 메뉴, 상점, 결과창
 import { TITLES } from './titles.js';
-import { G, IMG, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS } from './core.js';
+import { G, IMG, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS, josa } from './core.js';
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
@@ -114,7 +114,7 @@ function tabBag(B) {
   if (!ids.length) h += '<p class="hint">가진 물건이 없습니다. 채집, 사냥, 낚시로 모을 수 있습니다.</p>';
   for (const kd of kinds) { const l = ids.filter(k => DB[k].kind === kd); if (!l.length) continue; h += `<div><h2>${kd}</h2><div class="list">${l.map(k => `<button class="item" ${DB[k].meal ? `data-eat="${k}"` : 'disabled style="opacity:1"'}>${icon(k)}${DB[k].name} × ${have(k)}${DB[k].meal ? '<span class="tag">먹기</span>' : ''}<small>${DB[k].desc}</small></button>`).join('')}</div></div>`; }
   B.innerHTML = h + '</div>';
-  $$('[data-eat]', B).forEach(b => b.onclick = () => { const k = b.dataset.eat; take(k); S.meal = { id: k, left: 3 }; Sound.sfx('ok1'); toast(`${DB[k].name}을(를) 먹었다`); drawMenu(); });
+  $$('[data-eat]', B).forEach(b => b.onclick = () => { const k = b.dataset.eat; take(k); S.meal = { id: k, left: 3 }; Sound.sfx('ok1'); toast(`${josa(DB[k].name, '을/를')} 먹었다`); drawMenu(); });
 }
 let treeTab = 'sword';
 export const nodeOpen = (n, tr) => !n.req.length || n.req.some(r => (G.S.tree[r] || 0) > 0);
@@ -124,14 +124,14 @@ function tabTree(B) {
   let lines = '', nodes = '';
   for (const n of t.nodes) { for (const q of n.req) { const p = t.nodes.find(z => z.id === q); lines += `<line x1="${X(p.c) + 100}" y1="${Y(p.r) + 34}" x2="${X(n.c) + 100}" y2="${Y(n.r) + 34}" stroke="${(S.tree[q] || 0) > 0 ? '#b5352a' : '#a8947a'}" stroke-width="4"/>`; } const r = S.tree[n.id] || 0, open = nodeOpen(n); nodes += `<button class="tnode ${r ? 'got' : ''} ${r >= n.max ? 'full' : ''}" data-n="${n.id}" ${!open || r >= n.max || !(S.tp > 0) ? 'disabled' : ''} style="left:${X(n.c)}px;top:${Y(n.r)}px"><b>${n.name}</b> <span>${r}/${n.max}</span><small>${n.desc}</small></button>`; }
   const wt = WEAPONS[S.weapon].type;
-  B.innerHTML = `<div class="ttabs">${TREES.map(x => `<button class="btn sm ${x.id === treeTab ? 'pri' : ''}" data-t="${x.id}">${x.name}</button>`).join('')}<span class="hint" style="margin-left:14px">수련 점수 <b style="color:var(--red);font-weight:400">${S.tp || 0}</b> · 경지가 오를 때마다 1점</span><button class="btn sm" id="trs" style="margin-left:auto">초기화 (100냥)</button></div>${t.w && t.w !== wt ? `<p class="hint">${t.name} 트리는 ${t.name}을(를) 들었을 때만 효과가 납니다. 지금 무기는 ${wt}입니다.</p>` : ''}<div class="tree"><svg width="760" height="460">${lines}</svg>${nodes}</div>`;
+  B.innerHTML = `<div class="ttabs">${TREES.map(x => `<button class="btn sm ${x.id === treeTab ? 'pri' : ''}" data-t="${x.id}">${x.name}</button>`).join('')}<span class="hint" style="margin-left:14px">수련 점수 <b style="color:var(--red);font-weight:400">${S.tp || 0}</b> · 경지가 오를 때마다 1점</span><button class="btn sm" id="trs" style="margin-left:auto">초기화 (100냥)</button></div>${t.w && t.w !== wt ? `<p class="hint">${t.name} 트리는 ${josa(t.name, '을/를')} 들었을 때만 효과가 납니다. 지금 무기는 ${wt}입니다.</p>` : ''}<div class="tree"><svg width="760" height="460">${lines}</svg>${nodes}</div>`;
   $$('[data-t]', B).forEach(b => b.onclick = () => { treeTab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $$('[data-n]', B).forEach(b => b.onclick = () => { if (learnNode(t.nodes.find(n => n.id === b.dataset.n))) Sound.sfx('power1'); drawMenu(); });
   $('#trs').onclick = () => { if (S.silver < 100) return; S.silver -= 100; S.tp = (S.tp || 0) + Object.values(S.tree).reduce((a, b) => a + b, 0); S.tree = {}; drawMenu(); };
 }
 function tabClan(B) {
   const S = G.S, row = c => { const w = S.flags['clan_' + c.id]; return `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400;font-size:18px">${c.name}</b> <small class="hint">${c.han}</small>${w ? '<span class="tag ult">인정받음</span>' : ''}<div class="hint" style="line-height:1.35">${c.desc}${S.flags.boat_guhwa || w ? ` 대표 ${c.who}.` : ''}${w ? ` 전수: ${c.gift.map(id => SKILLS[id].name).join(', ')}` : ''}</div></div>`; };
-  const sap = c => `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400;font-size:18px">${S.flags[c.open] ? c.name : '???'}</b> ${S.flags[c.open] ? `<small class="hint">${c.han}</small><div class="hint" style="line-height:1.35">${c.desc}</div>` : ''}</div>`, demon = S.flags.cleared ? '<b style="font-weight:400;font-size:18px">천마신교</b> <small class="hint">天魔神敎</small><div class="hint">천산 너머에서 달을 먹는다는 자들.</div>' : S.flags.demon_hint ? '<b style="font-weight:400;font-size:18px">세 번째 길</b><div class="hint">백랑은 이 이름을 말하면 혀가 잘린다고 했다.</div>' : '<b style="font-weight:400;font-size:18px">???</b>';
+  const sap = c => `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400;font-size:18px">${S.flags[c.open] ? c.name : '???'}</b> ${S.flags[c.open] ? `<small class="hint">${c.han}</small><div class="hint" style="line-height:1.35">${c.desc}</div>` : ''}</div>`, demon = S.flags.cleared || S.flags.cross ? '<b style="font-weight:400;font-size:18px">천마신교</b> <small class="hint">天魔神敎</small><div class="hint">천산 너머에서 달을 먹는다는 자들.</div>' : S.flags.demon_hint ? '<b style="font-weight:400;font-size:18px">세 번째 길</b><div class="hint">백랑은 이 이름을 말하면 혀가 잘린다고 했다.</div>' : '<b style="font-weight:400;font-size:18px">???</b>';
   B.innerHTML = `<p class="hint">강호는 세 갈래다. 내 평판: 정파 ${S.rep.jeong} · 사파 ${S.rep.sa} · 마교 ${S.rep.ma || 0} · 소속: ${{ jeong: '정파 쪽', sa: '흑도맹', ma: '천마신교', free: '무소속 낭인' }[S.side] || '없음'} · 인정받은 세력 ${clansWon()} / 15</p><div class="two"><div><h2>정파 · 구파일방</h2>${CLANS.filter(c => c.group === '구파일방').map(row).join('')}</div><div><h2>정파 · 오대세가</h2>${CLANS.filter(c => c.group === '오대세가').map(row).join('')}<h2 style="margin-top:12px">사파 · 흑도맹</h2>${SAPA.map(sap).join('')}<h2 style="margin-top:12px">마교</h2><div class="note">${demon}</div></div></div>`;
 }
 function tabNote(B) {
@@ -179,12 +179,12 @@ export function openShop(title, goods) {
   });
 }
 export const shopItem = {
-  weapon: id => ({ info: () => { const w = WEAPONS[id]; return { name: `${w.name} (${w.type})`, price: w.price, desc: `공격 ${w.atk}. ${w.desc}` }; }, owned: () => G.S.weapons.includes(id), buy: () => { G.S.weapons.push(id); G.S.weapon = id; toast(`${WEAPONS[id].name}을(를) 들었다`); } }),
-  potion: () => ({ info: () => ({ name: '금창약', price: ITEMS.hp.price, desc: `전투 중 H 키로 체력을 35% 되찾는다. 지금 ${G.S.potion}개` }), buy: () => { G.S.potion++; } }),
+  weapon: id => ({ info: () => { const w = WEAPONS[id]; return { name: `${w.name} (${w.type})`, price: w.price, desc: `공격 ${w.atk}. ${w.desc}` }; }, owned: () => G.S.weapons.includes(id), buy: () => { G.S.weapons.push(id); G.S.weapon = id; toast(`${josa(WEAPONS[id].name, '을/를')} 들었다`); } }),
+  potion: (price = ITEMS.hp.price) => ({ info: () => ({ name: '금창약', price, desc: `전투 중 H 키로 체력을 35% 되찾는다. 지금 ${G.S.potion}개` }), buy: () => { G.S.potion++; } }),
   stuff: (id, price) => ({ info: () => ({ name: DB[id].name, price, desc: `${DB[id].desc} 지금 ${have(id)}개` }), buy: () => give(id) }),
   furn: id => ({ info: () => ({ name: FURN[id].name, price: FURN[id].price, desc: `가구. 꾸밈 점수 ${FURN[id].score}. 가진 수 ${G.S.house.furn[id] || 0}` }), buy: () => { G.S.house.furn[id] = (G.S.house.furn[id] || 0) + 1; } }),
   book: (id, price) => ({ info: () => ({ name: `비급: ${SKILLS[id].name}`, price, desc: `[${SKILLS[id].w}] ${SKILLS[id].desc}` }), owned: () => G.S.skills.includes(id), buy: () => learn(id) }),
-  heart: (id, price) => ({ info: () => ({ name: `심법서: ${HEARTS[id].name}`, price, desc: HEARTS[id].desc }), owned: () => G.S.hearts.includes(id), buy: () => { G.S.hearts.push(id); toast(`${HEARTS[id].name}을(를) 익혔다. 메뉴에서 고르세요.`, 3); } }),
+  heart: (id, price) => ({ info: () => ({ name: `심법서: ${HEARTS[id].name}`, price, desc: HEARTS[id].desc }), owned: () => G.S.hearts.includes(id), buy: () => { G.S.hearts.push(id); toast(`${josa(HEARTS[id].name, '을/를')} 익혔다. 메뉴에서 고르세요.`, 3); } }),
 };
 // 전투 결과
 export function showResult(r) {

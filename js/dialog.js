@@ -1,5 +1,5 @@
 // 대화창: 말하는 사람의 그림이 크게 뜨고, 글자가 한 자씩 나온다
-import { G, IMG, ART, Input, Sound, $, el, esc } from './core.js';
+import { G, IMG, ART, Input, Sound, $, el, esc, hasJong } from './core.js';
 export const WHO = {};
 const D = { cur: null };
 export const talking = () => !!D.cur;
@@ -41,7 +41,8 @@ function render(c) {
   d.appendChild(box);
 }
 function click(c) { Input.press('ok'); setTimeout(() => Input.release('ok'), 30); }
-const sub = s => s.replaceAll('{나}', G.S ? G.S.name : '').replaceAll('{호}', G.S ? G.S.title : '');
+// 이름 뒤 말끝은 받침에 맞춘다: 진소야, 강철아
+const sub = s => { const n = G.S ? G.S.name : '', j = hasJong(n); return s.replaceAll('{나}야', n + (j ? '아' : '야')).replaceAll('{나}구나', n + (j ? '이구나' : '구나')).replaceAll('{나}', n).replaceAll('{호}', G.S ? G.S.title : ''); };
 export function say(who, text, expr) { return new Promise(res => { const c = { type: 'say', who, text: sub(text), expr, n: 0, res }; D.cur = c; render(c); }); }
 export function narr(text, cg) { return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res, cg }; D.cur = c; render(c); }); }
 export function choice(q, opts, who) {
