@@ -44,7 +44,7 @@ async function part9() {
   await narr('손가락 하나가 내 배꼽 밑을 눌렀다. 아프지 않았다. 다만 그동안 몸 안을 돌던 것이 전부 빠져나갔다. 물 뺀 자루처럼 무릎이 꺾였다.');
   F().crippled = true;
   await say('samaung', '이 애송이가, 언제 왔다고 먼저 눕나.');
-  await narr('누가 나를 자루처럼 어깨에 들쳐 멨다. 그다음은 기억이 끊겼다.');
+  await narr('누가 나를 짐짝처럼 어깨에 들쳐 멨다. 그다음은 기억이 끊겼다.');
   await fadeTo(1); over(true);
   await narr('나중에 들은 얘기다. 천산 앞에 닿은 연합군 본대는 사흘 만에 무너졌다. 사마웅이 나를 메고 나왔고, 소연하가 뒤를 끊었고, 혁련하가 물 있는 길을 찾았다. 살아서 비단길을 되돌아온 사람은 나간 사람의 삼분의 일이 안 됐다.');
   await narr('청하진까지 석 달이 걸렸다고 한다. 나는 그 석 달 동안 숟가락을 혼자 들지 못했다.');
@@ -110,7 +110,7 @@ async function siege() {
   await say('elder', '늙은이는 뒤에 있으라고들 하는데, 뒤가 어딘가. 여기가 맨 뒤일세.');
   if (F().wei_spared) await say('wei', '점소이, 국수 외상 갚으러 왔다. 배는 다 뒤집어 놨으니 강으로는 못 물러난다.');
   if (F().lion_debt) await say('lion', '산에서 내려왔다. 녹림 놈들은 빚지고는 못 산다고 했잖냐.');
-  if (F().kids_saved) await narr('나무패를 벗은 아이들이 서른한 개 쟁반을 들고 줄을 섰다. 말리는 사람이 없었다. 꼬마가 맨 앞에서 던지는 법을 가르치고 있었다.');
+  if (F().kids_saved) await narr('나무패를 벗은 아이들 서른한 명이 쟁반을 하나씩 들고 줄을 섰다. 말리는 사람이 없었다. 꼬마가 맨 앞에서 던지는 법을 가르치고 있었다.');
   await say('gwak', '다들 밥은 먹었어? 안 먹은 놈은 나중에 먹어. 살아서 먹어.');
   await narr('곽 아주머니가 국자를 들고 맨 앞으로 걸어 나갔다. 나는 쟁반을 집어 들었다.');
   ctx.cgOff();
@@ -123,7 +123,7 @@ async function siege() {
   await ctx.duel({ foes: ['moon_envoy'], allies: ['gwak_ally'], arena: 'yard', bgm: 'boss', title: '붉은 달 사자' });
   await narr('날이 밝았다. 군세가 강 건너로 물러났다. 객잔은 지붕이 반쯤 날아갔는데 서 있었고, 곽 아주머니는 오른쪽 어깨를 누르고 부뚜막 앞에 앉아 있었다. 옛날 칼자국 위로 새 칼자국이 나 있었다.');
   await say('yun', '팔 줘 봐요. 아니, 아주머니 어깨부터요.');
-  await say('gwak', '약 쓰게 하지 말고 감초 많이 넣어.');
+  await say('gwak', '약 너무 쓰게 달이지 말고 감초 많이 넣어.');
   await say('me', '아주머니.');
   await say('gwak', '왜.');
   await say('me', '다녀올게요.');
@@ -190,7 +190,7 @@ async function finale() {
   if (F().hyeok_join && !allies.includes('hyeok_ally')) { await say('hyeok', '제단의 불은 제가 끄겠습니다. 저는 소야입니다.'); allies.push('hyeok_ally'); }
   if (!allies.includes('so_ally')) { await say('so', '왼발 늦지 마라.'); allies.push('so_ally'); }
   slotPreface();
-  await ctx.duel({ foes: ['tianmo'], allies, arena: 'moon', bgm: 'boss', title: '천마 혁련무극', tip: '칼이 닿지 않습니다. 초식 <b>서문</b>으로 달빛을 닦아 내면 잠시 닿습니다. 메뉴에서 칸에 넣으세요.' });
+  await ctx.duel({ foes: ['tianmo'], allies, foeHpMul: G.S.diff === 'hard' ? .75 : 1, arena: 'moon', bgm: 'boss', title: '천마 혁련무극', tip: '칼이 닿지 않습니다. 초식 <b>서문</b>으로 달빛을 닦아 내면 잠시 닿습니다. 메뉴에서 칸에 넣으세요.' });
   ctx.cg('fall');
   await narr('허리를 세웠다. 왼발로 밀었다. 오른발이 따라왔다. 칠식은 하나도 쓰지 않았다. 군막에서 배운 것도, 강호에서 배운 것도 쓰지 않았다. 객잔 바닥을 닦던 걸음으로 그 사람에게 걸어갔다.');
   await narr('손바닥이 그 사람 가슴에 닿았다. 먼지가 닦이듯 붉은빛이 밀려났다. 그 밑에 나온 것은 맨발에 비쩍 마른 사람 하나였다. 그 사람이 빈 그릇을 내려다봤다.');
@@ -208,7 +208,7 @@ async function lastChoice() {
   const c = await choice('그 뒤로 나는', ['달맞이 객잔으로 돌아간다', lead[0], '천산에 남아 봉인 자리를 지킨다', '다시 길을 떠난다']);
   F().finale = ['inn', 'lead', 'seal', 'road'][c];
   if (F().cheol_dead) await narr('철우는 소림 경내에 묻혔다. 파계승의 무덤으로는 처음이었다. 그 앞에는 언제나 만두가 놓여 있는데, 누가 놓는지는 아무도 말하지 않는다.');
-  if (F().baek_gone) await narr('열일곱 해 치 봉투에 마지막 다섯 냥을 얹어 곽 아주머니에게 드렸다. 아주머니는 세어 보지도 않고 장부에 ‘갚음’이라고 적었다.');
+  if (F().baek_gone) await narr('백 노인의 마지막 봉투는 곽 아주머니에게 드렸다. 아주머니는 세어 보지도 않고 장부에 ‘갚음’이라고 적었다.');
   if (c === 0) {
     ctx.cg('end_table');
     await narr('달맞이 객잔 지붕을 다시 올렸다. 나는 아침마다 바닥을 닦고 손님상에 국수를 나른다. 곽 아주머니는 내 국물에 아직도 소금이 모자란다고 한다.');

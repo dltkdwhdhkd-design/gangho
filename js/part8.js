@@ -35,24 +35,24 @@ async function part8() {
   ctx.cg('silk');
   await narr('봄이 오기 전에 원정대가 구화성을 떠났다. 연합군 본대는 천산 앞에서 만나기로 하고, 나는 혁련하를 따라 앞서 걸었다. 곽 아주머니 도시락은 사흘 만에 바닥이 났다.');
   ctx.cgOff();
-  set('w1'); await ctx.warp('silk', 3, 13, 3);
+  set('w1'); await ctx.warp('silk', 41, 15.5, 2);
   await say('hyeok', '사주성까지 열흘입니다. 낮에는 쉬고 밤에 별을 보고 걷습니다.');
   await say('yun', '물은 하루 세 번만 마셔요. 목마르다고 더 마시면 배탈 나요.');
   await say('so', '더워 죽겠다. 천산에 눈 있다며?');
   await say('hyeok', '이 모래를 지나야 눈이 나옵니다.');
   if (S().sworn === 'cheol') await say('cheol', '아우, 소승 물통 좀 열어 주시오. 한 손으로는 안 되오.');
-  ctx.goal('비단길을 따라 동쪽 끝 사주성으로 가기');
+  ctx.goal('비단길을 따라 서쪽 끝 사주성으로 가기');
   ctx.note('천산으로 원정을 떠났다. 비단길 끝에 사주성이 있다.');
 }
 async function oasisCome() {
   await narr('열흘 만에 사주성 성벽이 보였다. 그런데 낮인데도 성문이 닫혀 있었고, 성벽 밑에 사람들이 빈 물통을 안고 앉아 있었다.');
   await say('trader', '중원에서 오셨소? 하필 이럴 때 오셨구려. 우물이 다 말랐소.');
   await say('me', '비가 안 왔어요?');
-  await say('trader', '여기는 원래 비가 안 오오. 산에서 내려오는 물길이 있는데, 그걸 막아 놓은 게 있소. 동쪽 바위산 동굴에 들어간 사람이 하나도 안 나왔소.');
+  await say('trader', '여기는 원래 비가 안 오오. 산에서 내려오는 물길이 있는데, 그걸 막아 놓은 게 있소. 서쪽 바위산 동굴에 들어간 사람이 하나도 안 나왔소.');
   await say('hyeok', '혈교가 일부러 막은 것입니다. 사주성을 말려서 교단 앞에 꿇리려는 것이지요.');
   await say('yun', '물이 없으면 우리도 못 가요.');
-  set('w1b'); ctx.goal('사주성 동쪽 끝의 바위산 동굴로 들어가 물길 열기');
-  ctx.note('사주성의 물길이 막혔다. 동쪽 바위산 동굴을 살펴봐야 한다.');
+  set('w1b'); ctx.goal('사주성 서쪽 끝의 바위산 동굴로 들어가 물길 열기');
+  ctx.note('사주성의 물길이 막혔다. 서쪽 바위산 동굴을 살펴봐야 한다.');
 }
 async function wormFight() {
   await narr('동굴은 생각보다 깊었다. 바닥이 젖어 있는데 물은 없었다. 안쪽 벽이 숨을 쉬듯 움직였고, 나는 그제야 그게 벽이 아니라는 걸 알았다.');
@@ -92,7 +92,7 @@ async function iceStart() {
 }
 async function icePalace() {
   await narr('빙궁 벽은 얼음이었다. 얼음 속에 사람들이 서 있었다. 칼을 든 채였고, 옷은 정파 것이었다. 십칠 년 전 토벌에 나갔다 돌아오지 않은 사람들이었다.');
-  await say('me', '이 사람들을 왜 여기 세워 놨대요.');
+  await say('me', '이 사람들을 왜 여기 세워 놨을까요.');
   await say('so', '말 시키지 마. 나 지금 얼굴 보고 다니는 중이니까.');
   await ctx.duel({ foes: ['icefolk', 'icefolk', 'icefolk'], allies: ['so_ally'], arena: 'snow', bgm: 'fight', title: '빙궁 회랑' });
   await narr('궁 맨 안쪽에 얼음 의자가 있었다. 여인이 앉아 있었고, 허리에 찬 칼에는 칼집이 없었다. 칼날을 그대로 띠에 꽂고 있었다.');
@@ -226,7 +226,7 @@ Story.providers.push(function part8p(id) {
     if (at('w1b', 'w2')) { n.push({ id: 'so', spr: 'RedSamurai', x: 16, y: 18, dir: 3, talk: async () => { await say('so', '칼은 닦았어?'); } }); n.push({ id: 'yun', spr: 'Princess', x: 18, y: 19, dir: 3, talk: async () => { await say('yun', '물은 하루 세 번이에요.'); } }); if (F().hyeok_join) n.push({ id: 'hyeok', spr: 'Hyeok', x: 24, y: 18, dir: 3, talk: async () => { await say('hyeok', '북문으로 나가면 설산입니다.'); } }); }
     if (at('w1')) tr.push({ x: 0, y: 0, w: 99, h: 99, when: () => at('w1'), run: oasisCome });
     n.push({ id: 'trader', spr: 'Noble', x: 20, y: 15, dir: 0, talk: async () => { await say('trader', F().worm ? '약은 은인께 반값이오. 칼은 대장장이 몫이 있어 깎아 드리지 못하오.' : '물이 없어서 장사가 안 되오. 그래도 보시오.'); await ctx.shop('사주성 상인', [ctx.item.potion(F().worm ? 8 : 14), ctx.item.weapon('frost_sword'), ctx.item.weapon('frost_blade'), ctx.item.weapon('frost_spear'), ctx.item.weapon('frost_fist')]); } });
-    if (at('w1b')) n.push(job({ id: 'job_worm', stamp: 'rocks', spr: '', x: 37, y: 12, hint: '동굴로 들어가기', talk: wormFight }));
+    if (at('w1b')) n.push(job({ id: 'job_worm', stamp: 'rocks', spr: '', x: 6, y: 12, hint: '동굴로 들어가기', talk: wormFight }));
     if (at('w2', 'w1b')) { if (at('w2')) sp.push({ x: 18, y: 0, w: 6, h: 2, hint: '북문으로 나가기', act: async () => { await ctx.warp('snowpeak', 22, 30, 1); await iceStart(); set('w2b'); } }); }
   }
   if (id === 'silk') ro.push({ spr: 'mon/Lizard', x: 12, y: 11, foes: ['scorpion', 'scorpion'] }, { spr: 'chars/GrayNinja', x: 22, y: 15, foes: ['sand_cut', 'sand_cut'] }, { spr: 'mon/Lizard', x: 32, y: 11, foes: ['scorpion', 'sand_cut'] });
