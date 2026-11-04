@@ -52,7 +52,8 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 #dialog .pf.art{background:none;border:0;box-shadow:none;width:380px;height:520px;left:6px;bottom:0}
 #dialog .box.artbox{left:330px;padding-left:30px}
 #dialog .box.artbox .who{left:30px}
-#dialog .narr{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fbf1dc;font-size:26px;line-height:1.9;padding:0 120px;text-shadow:0 3px 0 #000;pointer-events:auto;cursor:pointer}
+#dialog.over{z-index:10}
+#dialog .narr{white-space:pre-line;position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fbf1dc;font-size:26px;line-height:1.9;padding:0 120px;text-shadow:0 3px 0 #000;pointer-events:auto;cursor:pointer}
 #dialog .choices{position:absolute;right:60px;bottom:214px;display:flex;flex-direction:column;gap:10px;pointer-events:auto;align-items:stretch;min-width:380px}
 #dialog .choices .btn{text-align:left;font-size:20px}
 #dialog .choices .btn.on{background:var(--gold);outline:3px solid var(--red)}

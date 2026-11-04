@@ -1,5 +1,5 @@
 // 프롤로그와 1장: 청하진
-import { G, Sound, fadeTo, wait, toast } from './core.js';
+import { G, Sound, fadeTo, wait, toast, $ } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { learn } from './state.js';
 import { WEAPONS } from './data.js';
@@ -7,11 +7,39 @@ import { WEAPONS } from './data.js';
 const S = () => G.S, F = () => G.S.flags, step = () => G.S.flags.step || 'p0', set = v => { G.S.flags.step = v; };
 const at = (...a) => a.includes(step());
 const after = v => ORDER.indexOf(step()) >= ORDER.indexOf(v);
-const ORDER = ['p0', 'p1', 'p2', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
+const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
 export { step, set, at, after };
+const overBlack = on => $('#dialog').classList.toggle('over', on);
 
 Story.scenes.opening = async () => {
-  await narr('강을 따라 물건과 소문이 오가는 나루, 청하진.\n이 마을 달맞이 객잔에는\n열일곱 해 전 문 앞에 버려졌던 아이가 점소이로 산다.');
+  overBlack(true); Sound.bgm('dark');
+  await narr('다섯 살 되던 해, 전쟁이 마을을 지나갔다.\n아버지도 어머니도 살던 집도 재가 되었다.');
+  await narr('갈 곳이 없어 군막을 찾아갔다.\n아무도 아이를 거두지 않았다. 며칠 못 가 죽을 거라고들 했다.\n말똥을 치우고 시체를 나르며 남은 밥을 얻어먹었다.');
+  await narr('일곱 살에 견대(犬隊)로 보내졌다.\n아이들로 꾸린 척후대였다. 이름 대신 번호로 불렸고\n병사들은 우리를 개라고 불렀다.\n화살이 어디서 날아오는지 보려고 먼저 들여보내는 개.');
+  await narr('팔백 명이 들어가 서른 명이 남았다.\n마지막 명령은 적의 보급기지를 치라는 것이었다.\n그곳에 보급기지는 없었고, 돌아온 것은 나 혼자였다.');
+  await narr('부대를 버리고 혼자 살아 돌아온 비겁자라고 했다.\n밥을 얻어먹던 병사들이 먼저 침을 뱉었다.\n휴전이 맺어지자 군적에서 이름이 지워졌다.\n열여덟 살, 손에 남은 것은 이 빠진 칼 한 자루였다.');
+  await narr('두 해를 떠돌았다.\n표물을 지키고 빚을 받아 주며 밥값만큼 칼을 썼다.\n사람들은 그런 자를 낭인이라고 불렀다.');
+  await narr('스무 살 봄.\n강을 따라 물건과 소문이 오가는 나루, 청하진.\n사흘을 굶은 낭인 하나가 배에서 내렸다.');
+  overBlack(false); Sound.bgm('village'); await fadeTo(0);
+  set('p0a'); ctx.goal('마을 위쪽 달맞이 객잔에서 밥 먹기 (WASD 이동)');
+};
+export async function firstMeal() {
+  await say('gwak', '어서 와. 칼 찬 손님은 선불이다.');
+  await say('me', '…국수 한 그릇이요.');
+  await narr('사흘 만의 밥이었다. 국물까지 마셨다.\n주머니를 뒤졌다. 동전 네 닢. 국수 값은 열 닢이었다.');
+  await say('gwak', '모자라네.');
+  await say('me', '칼을 맡기겠습니다.');
+  await say('gwak', '이 칼, 군용이네. 어디서 왔냐.');
+  await say('me', '북쪽이요.');
+  await say('gwak', '몇 살이냐.');
+  await say('me', '스물입니다.');
+  await narr('곽 아주머니가 오래 쳐다보았다.\n손에 들고 있던 국자가 바닥에 떨어졌다.');
+  await say('gwak', '…손이 미끄러웠다. 칼은 내가 맡는다. 여섯 닢어치 일하고 찾아가라. 걸레는 저기 있다.');
+  await say('me', '여섯 닢이면 반나절이면 되겠네요.');
+  await say('gwak', '이자가 있다.');
+  await fadeTo(1); overBlack(true); G.field.load('inn', 8, 8, 1);
+  await narr('반나절은 한 달이 되었다.\n칼은 돌려받지 못했고, 사람들은 낭인을 점소이라고 불렀다.');
+  overBlack(false); await fadeTo(0);
   await say('gwak', '{나}! 거기서 뭐 하냐! 해가 중천이다!');
   await say('me', '방금 바닥 다 닦았어요.');
   await say('gwak', '닦은 바닥이 왜 저렇게 번들거려? 손님들 미끄러져 죽겠다.');
@@ -19,7 +47,7 @@ Story.scenes.opening = async () => {
   await say('me', '그 어르신은 말만 붙이면 걸레질 타박이던데요.');
   await say('gwak', '타박을 듣든 술주정을 듣든 은자만 받아 오면 된다.');
   set('p1'); ctx.goal('구석 자리의 백 노인에게 방값 받기');
-};
+}
 async function baekFirst() {
   await say('baek', '또 왔냐, 점소이.');
   await say('me', '어르신, 방값이요. 석 달 치.');
@@ -32,13 +60,17 @@ async function baekFirst() {
   await ctx.duel({ foes: ['log', 'log', 'log'], arena: 'yard', title: '장작 패기', bgm: 'peaceful', tip: '<b>W A S D</b> 이동, <b>J</b> 평타. J를 이어서 누르면 연달아 벱니다.' });
   await say('gwak', '장작은 잘 패네. 방값은?');
   await say('me', '…내일 주신대요.');
+  await say('gwak', '그 말을 석 달째 듣는다. 내일은 심부름이 많으니 일찍 자라.');
+  set('p3'); ctx.goal('곽 아주머니에게 심부름 받기');
+}
+export async function evening() {
   await narr('저녁이 되자 객잔이 뱃사람들로 찼다.');
   await say('rowdy', '야, 점소이! 술이 왜 이렇게 싱거워!');
   await say('me', '손님, 그건 물입니다. 술은 아직 안 시키셨어요.');
   await say('rowdy', '이 자식이 사람을 놀려? 오늘 술값은 없는 줄 알아라!');
   await say('gwak', '{나}. 저 손님들 밖으로 모셔라.');
-  await say('me', '제가요?');
-  await say('gwak', '장작 패는 놈이 왈패 둘을 못 패겠느냐. 쟁반은 들고 가고.');
+  await say('me', '제 칼 주시면 금방 끝나는데요.');
+  await say('gwak', '칼은 밥값 다 내면 돌려준다. 쟁반 들고 가라. 사람 죽이지 말고.');
   learn('tray');
   await ctx.duel({ foes: ['rowdy', 'rowdy'], arena: 'yard', title: '왈패 소동', tip: '<b>U</b> 쟁반 던지기. <b>L</b> 막기: 노란 예고가 뜨면 누르세요. 맞기 직전에 누르면 <b>튕겨내기</b>가 됩니다.' });
   await narr('그날 밤, 객잔 처마 아래.');
@@ -50,6 +82,10 @@ async function baekFirst() {
   await say('baek', '저 달 봐라. 저렇게 가늘어도 달은 달이지. 초승이라는 건 말이다, 뜨기 시작했다는 뜻이다.');
   await say('me', '어르신, 취하셨어요.');
   await say('baek', '허허. 그래, 취했다. 내일은 꼭 주마.');
+  F().night = false; G.field.load('inn', 8, 8, 1);
+  set('p4'); ctx.goal('구석 자리의 백 노인 찾아가기');
+}
+export async function lastMorning() {
   await narr('다음 날 아침, 구석방은 비어 있었다.\n방값 대신 낡은 목검 한 자루와 찢어진 종이 한 장이 탁자에 놓여 있었다.');
   F().night = false; G.field.load('inn', 13, 8, 1);
   await say('me', '이 영감님이 끝내 튀었네. 목검이랑… 이건 뭐지. 책장이 찢어진 건가.');
@@ -81,24 +117,29 @@ async function baekFirst() {
   G.field.load('clinic', 9.2, 7.6, 3); await fadeTo(0);
   await say('yun', '눈 떴네요. 강물을 한 말은 마셨어요.');
   await say('me', '여기가…');
-  await say('yun', '윤씨 약방이요. 갈대밭에 걸려 있길래 끌고 왔어요. 무거웠어요.');
+  await say('yun', '약방이요. 갈대밭에 걸려 있길래 끌고 왔어요. 무거웠어요. 그쪽 등에 흉터가 많던데요. 약값에 얹어 둘게요.');
   await say('me', '아주머니는요? 곽 아주머니는!');
   await say('yun', '객잔은 반쯤 탔고, 아주머니는 없었어요. 사람들은 검은 옷 입은 자들이 데려갔다고 해요.');
   await say('me', '…제가 찾으러 가야 해요.');
   await say('yun', '그 몸으로요? 일단 품에 있던 종이부터 보세요. 젖지도 않았어요. 이상한 종이예요.');
   F().met_yun = true;
-  await narr('제1부 · 객잔의 점소이\n\n타다 남은 객잔');
+  await narr('제1부 · 객잔의 낭인\n\n타다 남은 객잔');
   ctx.goal('불탄 객잔을 살펴보고, 나루터의 뱃사공에게 묻기');
   ctx.note('곽 아주머니는 검은 옷의 무리에게 끌려갔다. 여우 가면이 아주머니를 “곽 호법”이라고 불렀다.');
   ctx.note('마을에서 할 수 있는 일: 복덕방에서 집 사기, 뱃사공에게 낚싯대 얻기, 서쪽 청풍골에서 사냥과 벌목, 대장간과 약방에서 제작, 떠돌이 비무객과 겨루기.');
 }
 
 async function c1Inn() {
-  await say('me', '곽 아주머니 방이다. 장부랑… 이건 아주머니 글씨가 아닌데.');
-  await say(null, '서랍 깊은 곳에서 작은 쪽지가 나왔다. “그믐마다 은자 다섯 냥. 아이가 스물이 되기 전엔 절대 알리지 말 것. 낙월.”');
-  await say('me', '그믐마다 오던 그 봉투…? 나한테 뭘 알리지 말라는 거야.');
+  await say('me', '곽 아주머니 방이다. 장부는 안 탔네.');
+  await say(null, '내 이름 옆에 여섯 닢이라고 적혀 있다. 그 옆에 첫날 날짜로 ‘갚음’이라고 쓰여 있다.');
+  await say('me', '첫날이요? …그럼 한 달 동안 뭘 갚은 거야.');
+  await say(null, '서랍 안쪽에 맡겨 둔 칼이 있었다. 이 빠진 자리까지 곱게 갈아 놓았다. 칼 밑에서 아주머니 글씨가 아닌 쪽지가 나왔다.');
+  await say(null, '“그믐마다 은자 다섯 냥. 아이를 찾는 데 쓰시오. 낙월.”');
+  await say('me', '그믐마다 오던 그 봉투구나. 아이를 찾는다고? 아주머니한테 아이가 있었나.');
+  S().weapons.push('army_blade'); S().weapon = 'army_blade'; toast('이 빠진 군도를 되찾았다'); Sound.sfx('bonus');
   await say(null, '뒷문 쪽 우물에 쇠 뚜껑이 덮여 있다. 달 모양의 구멍이 나 있어 열리지 않는다.');
-  ctx.note('아주머니 서랍의 쪽지: “그믐마다 은자 다섯 냥. 아이가 스물이 되기 전엔 절대 알리지 말 것. 낙월.”');
+  ctx.note('아주머니 서랍의 쪽지: “그믐마다 은자 다섯 냥. 아이를 찾는 데 쓰시오. 낙월.”');
+  ctx.note('장부에 내 밥값은 첫날 이미 갚은 것으로 적혀 있었다.');
   ctx.note('객잔 우물 뚜껑에 달 모양 구멍이 있다. 맞는 것을 찾아야 한다.');
   F().c1inn = true; await checkClues();
 }
@@ -112,9 +153,9 @@ async function yunPaper() {
   await say('yun', '“월하칠식 제일식, 초승. 허리를 세우고 왼발로 밀고, 오른발은 따라오게 둔다.”');
   await say('me', '…그거 걸레질이잖아요.');
   await say('yun', '걸레질요?');
-  await say('me', '백 영감이 맨날 시키던 거요! 그 영감이 삼 년 동안 나한테 무공을 가르친 거였어요?');
+  await say('me', '백 영감이 맨날 시키던 거요! 그 영감이 한 달 동안 나한테 무공을 가르친 거였어요?');
   await say('yun', '밑에 더 있어요. “대숲 석상 앞에서 세 번 걷고 네 번째에 베어라.” 뒷산 대숲길에 석상이 있죠.');
-  await say('yun', '요즘 거기 멧돼지가 사납대요. 목검 하나로 가겠다면 금창약은 가져가요. 값은 나중에 받을게요.');
+  await say('yun', '요즘 거기 멧돼지가 사납대요. 그 칼 하나로 가겠다면 금창약은 가져가요. 값은 나중에 받을게요.');
   S().potion += 2; toast('금창약 2개를 받았다');
   F().bamboo_open = true; set('c1c'); ctx.goal('북쪽 대숲길의 석상을 찾기 (마을 북쪽 출구)');
 }
@@ -188,14 +229,19 @@ async function wellOpen() {
   await narr('작은 방에 위패가 빼곡했다. 모두 마흔아홉.\n맨 앞 위패에는 이렇게 적혀 있었다.\n“월하문 문주 월청운 내외의 신위”');
   await say('me', '아주머니는 여기서 매일 향을 피운 건가. 이 궤짝은…');
   await say(null, '궤짝 안에 찢어진 종이 한 장과 편지가 들어 있었다.');
-  await say('gwak', '이걸 읽고 있다면 나는 곁에 없겠구나. 너는 내가 주운 아이가 아니다. 월하문의 마지막 아이다.');
-  await say('gwak', '십칠 년 전 달 없는 밤에 문파가 불탔다. 나는 호법이었고, 너를 안고 도망쳤다.');
+  await say('gwak', '이걸 읽고 있다면 나는 곁에 없겠구나.');
+  await say('gwak', '네가 문으로 들어온 날 국자를 떨어뜨렸지. 왼쪽 귀 뒤의 점을 보았다. 네 어미와 같은 자리였다.');
+  await say('gwak', '너는 떠돌다 들어온 낭인이 아니다. 월하문의 마지막 아이다.');
+  await say('gwak', '십칠 년 전 달 없는 밤에 문파가 불탔다. 나는 호법이었고, 세 살 난 너를 안고 도망쳤다.');
+  await say('gwak', '나를 쫓는 눈이 많아 북쪽 변경의 착한 내외에게 너를 맡겼다. 네가 아버지 어머니라고 부른 분들이다.');
+  await say('gwak', '두 해 뒤 그 마을이 불탔다는 말을 들었다. 그때부터 열다섯 해를 찾았다. 미안하다. 너무 오래 걸렸다.');
   await say('gwak', '그날 골짜기를 둘러싼 깃발은 구파일방과 오대세가의 것이었다. 정천맹이라는 이름 아래 모두 왔지.');
   await say('gwak', '누가 시작했는지는 모른다. 다만 문을 안에서 열어 준 자가 있었다.');
   await say('gwak', '복수는 생각도 마라. 그래도 나간다면 밥은 챙겨 먹고. 방값은 꼭 받아라.');
   await say('me', '…이런 때도 방값이에요.');
+  await narr('스무 해를 살면서\n누가 나를 찾고 있을 거라고는 생각해 본 적이 없었다.');
   ctx.page('moon2');
-  ctx.note('나는 월하문의 마지막 아이. 곽 아주머니는 월하문 호법 곽란. 구파일방과 오대세가가 월하곡을 둘러쌌고, 문을 안에서 열어 준 자가 있었다.');
+  ctx.note('나는 월하문의 마지막 아이. 곽 아주머니는 월하문 호법 곽란. 전쟁 때 잃은 부모는 나를 맡아 키운 분들이었다. 구파일방과 오대세가가 월하곡을 둘러쌌고, 문을 안에서 열어 준 자가 있었다.');
   set('c1h'); F().well_open = true; F().cloud_open = true;
   ctx.goal('윤설에게 작별하고, 동쪽 산길 남쪽 길로 창운산에 가기');
 }
@@ -218,7 +264,7 @@ const talkTown = {
   smith: async () => {
     if (step() === 'c1e' && !F().smith_gift) {
       F().smith_gift = true;
-      await say('smith', '살아 있었구나. 곽 아주머니 밥을 십 년 얻어먹었다. 그 목검으로 산적을 치겠다고? 이거 가져가.');
+      await say('smith', '살아 있었구나. 곽 아주머니 밥을 십 년 얻어먹었다. 그 이 빠진 칼로 산적을 치겠다고? 이거 가져가.');
       S().weapons.push('iron_sword'); S().weapon = 'iron_sword'; toast('철검을 받았다'); Sound.sfx('bonus');
     }
     const c = await choice('무엇을 할까?', ['무기 사기', '제작과 강화', '그만둔다'], 'smith'); if (c === 0) await ctx.shop('철 대장간', [ctx.item.weapon('iron_sword'), ctx.item.weapon('iron_blade'), ctx.item.weapon('iron_spear'), ctx.item.weapon('fist_wrap'), ctx.item.weapon('blue_sword'), ctx.item.weapon('ghost_blade')]); if (c === 1) await G.life.openCraft('forge', '철 대장간 · 제작과 강화');
@@ -240,22 +286,22 @@ Story.providers.push(function content1(id) {
   const n = [], sp = [], tr = [], ro = [], s = step();
   if (id === 'inn') {
     if (!F().burned) {
-      n.push({ id: 'gwak', spr: 'OldWoman', x: 4, y: 4.6, dir: 0, talk: async () => { if (s === 'p1') await say('gwak', '구석 자리다. 백 영감, 오늘은 놓치지 마라.'); else await say('gwak', '일해라, 일.'); } });
-      n.push({ id: 'baek', spr: 'OldMan3', x: 14.5, y: 5.6, dir: 2, mark: () => at('p1'), talk: async () => { if (at('p1')) { set('p2'); await baekFirst(); } else await say('baek', '허리.'); } });
-      n.push({ id: 'guest', spr: 'Villager', x: 11, y: 8.6, dir: 1, talk: async () => { await say('town', '여기 국수는 곽 아주머니 욕을 먹으면서 먹어야 맛이 나.'); } });
+      n.push({ id: 'gwak', spr: 'OldWoman', x: 4, y: 4.6, dir: 0, mark: () => G.life.dayMark('gwak'), talk: async () => { if (await G.life.dayTalk('gwak')) return; if (s === 'p1') await say('gwak', '구석 자리다. 백 영감, 오늘은 놓치지 마라.'); else await say('gwak', '일해라, 일.'); } });
+      n.push({ id: 'baek', spr: 'OldMan3', x: 14.5, y: 5.6, dir: 2, mark: () => at('p1') || G.life.dayMark('baek'), talk: async () => { if (at('p1')) { set('p2'); await baekFirst(); } else if (!(await G.life.dayTalk('baek'))) await say('baek', '허리.'); } });
+      n.push({ id: 'guest', spr: 'Villager', x: 13.7, y: 8.6, dir: 2, talk: async () => { await say('town', '여기 국수는 곽 아주머니 욕을 먹으면서 먹어야 맛이 나.'); } });
     } else {
       sp.push({ x: 1, y: 3, w: 3, h: 1, hint: '살펴보기', when: () => !F().c1inn, act: c1Inn });
       sp.push({ x: 13, y: 10, w: 2, h: 2, hint: F().well_open ? '우물 아래로' : '우물 뚜껑', act: async () => { if (F().well_open) await ctx.warp('well', 6, 7, 1); else if (at('c1g')) await wellOpen(); else await say(null, '쇠 뚜껑에 달 모양 구멍이 나 있다. 꿈쩍도 하지 않는다.'); } });
       sp.push({ x: 7, y: 5, w: 2, h: 2, hint: '구석방 탁자', when: () => after('c1a'), act: async () => { await say(null, '타다 남은 탁자에 술잔 자국이 남아 있다. 석 달 치 방값은 끝내 받지 못했다.'); } });
     }
   }
-  if (id === 'clinic') {
+  if (id === 'clinic' && F().burned) {
     n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => at('c1b', 'c1d', 'c1h'), when: () => (!F().yun_join || at('end')) && S().married !== 'yun', talk: async () => { if (at('c1b')) await yunPaper(); else if (at('c1d')) await yunAfter(); else if (at('c1h')) await yunGo(); else if (F().c1yun2 || !after('c1e')) await say('yun', '약이 필요하면 만물상보다 여기가 낫다는 말은 안 할게요. 제일 싼 건 맞아요.'); else { F().c1yun2 = true; await yunNight(); } } });
     n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, talk: async () => { await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion()]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
   }
-  if (id === 'smith') n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => at('c1e') && !F().smith_gift, talk: talkTown.smith });
+  if (id === 'smith' && F().burned) n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => at('c1e') && !F().smith_gift, talk: talkTown.smith });
   if (id === 'shop') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: talkTown.shopk });
-  if (id === 'cheongha' && !at('p0', 'p1', 'p2')) {
+  if (id === 'cheongha' && F().burned) {
     n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, mark: () => at('c1a') && !F().c1boat, talk: talkTown.boat });
     n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, talk: async () => { await say('kid', '쟁반 또 던져 봐요! 그거 진짜 멋있었어요!'); } });
     n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, talk: async () => { await say('town', after('c1h') ? '네가 흑풍채를 혼냈다며? 객잔 다시 지을 때 부르거라.' : '곽 아주머니가 그렇게 될 줄이야. 객잔 불은 우리가 껐다.'); } });

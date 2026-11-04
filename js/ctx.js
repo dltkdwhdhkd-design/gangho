@@ -43,7 +43,7 @@ export const Story = {
     if (Story.wrapNpc) npcs.forEach(Story.wrapNpc);
     return { npcs, spots: L.flatMap(x => x.spots), trigs: L.flatMap(x => x.trigs), roam: L.flatMap(x => x.roam), hunt: L.flatMap(x => x.hunt || []) };
   },
-  begin() { G.scene = 'field'; G.field.load('inn', 8, 8, 1); $('#fade').style.opacity = 0; G.field.run(Story.scenes.opening); },
+  begin() { G.scene = 'field'; G.field.load('cheongha', 22, 25, 1); $('#fade').style.opacity = 1; G.field.run(Story.scenes.opening); },
   resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0); },
   async line(t) { await say(null, t); },
   async encounter(r) {

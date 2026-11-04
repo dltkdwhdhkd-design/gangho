@@ -38,9 +38,9 @@ async function meeting() {
   await say('town', '정천맹에 사람을 보내면 안 됩니까? 그 사람들이 강호 질서를 지킨다면서요.');
   await say('elder', '보냈네. 답이 왔어. “청하진은 맹의 관할이 아니니 현령에게 알아보라”더군.');
   await say('smith', '현령은 벌써 수로채에 돈을 먹었고요.');
-  await say('elder', '자네 생각은 어떤가. 그 객잔에서 자란 사람은 자네뿐이니.');
+  await say('elder', '자네 생각은 어떤가. 이 마을에서 전쟁을 치러 본 사람은 자네뿐이니.');
   const c = await choice('사람들이 모두 나를 본다.', ['싸우겠습니다', '보호세로 시간을 벌겠습니다']);
-  if (c === 0) { await say('me', '그믐까지 열흘이에요. 객잔 마당에서 왈패 내보내는 일은 제가 제일 잘합니다.'); await say('town2', '왈패랑 수적은 다르잖아요.'); await say('me', '그래서 좀 더 세게 던지려고요.'); ctx.rep('jeong', 2); }
+  if (c === 0) { await say('me', '그믐까지 열흘이에요. 군막에서는 사흘 주고 성을 지키라고 했습니다.'); await say('town2', '그래서 지켰어요?'); await say('me', '저는 살았습니다.'); ctx.rep('jeong', 2); }
   else { await say('me', '보호세를 한 번만 내서 열흘을 법시다. 외상 손님은 그렇게 상대해요. 일단 드시게 하고, 그동안 문을 잠그는 거예요.'); await say('smith', '장사꾼 같은 소리인데 틀린 말은 아니군.'); S().silver = Math.max(0, S().silver - 15); ctx.rep('sa', 2); }
   await say('elder', '좋네. 그럼 할 일이 많아. 철 대장장이, 순이네, 그리고 저 꼬마까지 다들 자네를 찾더군.');
   F().s2_on = true; ctx.goal('철 대장장이, 순이네, 꼬마의 부탁 들어주기 (마을의 ! 표시)');

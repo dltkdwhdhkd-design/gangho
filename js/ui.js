@@ -16,14 +16,14 @@ function titleBg(c) {
 }
 export function showTitle() {
   G.scene = 'title'; G.bgDraw = titleBg; $('#hud').innerHTML = '';
-  const s = $('#screen'); s.innerHTML = `<div id="title"><div class="logo">강호행</div><div class="han">江湖行</div><div class="sub">찢어진 비급 일곱 장, 점소이의 강호 유람기</div><div class="col"><button class="btn pri" id="bNew">새로 시작</button><button class="btn" id="bLoad">이어 하기</button></div><div class="foot">도트 그림·소리: Ninja Adventure (CC0) · 글꼴: 갈무리 (OFL)</div></div>`;
+  const s = $('#screen'); s.innerHTML = `<div id="title"><div class="logo">강호행</div><div class="han">江湖行</div><div class="sub">군적에서 지워진 낭인, 찢어진 비급 일곱 장</div><div class="col"><button class="btn pri" id="bNew">새로 시작</button><button class="btn" id="bLoad">이어 하기</button></div><div class="foot">도트 그림·소리: Ninja Adventure (CC0) · 글꼴: 갈무리 (OFL)</div></div>`;
   $('#bNew').onclick = () => { Sound.init(); Sound.resume(); Sound.bgm('story'); showCreate(); };
   const l = $('#bLoad'); if (!hasSave()) l.disabled = true; else l.classList.add('pri'); (hasSave() ? l : $('#bNew')).focus(); l.onclick = () => { Sound.init(); G.S = load(); s.innerHTML = ''; Story.resume(); };
 }
 function drawLook(cv, key) { const x = cv.getContext('2d'); cv.width = 16; cv.height = 16; x.imageSmoothingEnabled = false; const im = IMG['chars/' + key]; if (im) x.drawImage(im, 0, 0, 16, 16, 0, 0, 16, 16); }
 function showCreate() {
   const s = $('#screen'); let look = 0, diff = 'normal';
-  s.innerHTML = `<div class="sheet"><div class="card"><h2>어떤 점소이입니까?</h2><div class="hint">이름은 문 앞에 버려졌을 때 곽 아주머니가 지어 준 것입니다.</div>
+  s.innerHTML = `<div class="sheet"><div class="card"><h2>어떤 낭인입니까?</h2><div class="hint">군막에서는 번호로 불렸습니다. 이름 하나만은 잊지 않았습니다.</div>
   <div class="field"><span>이름</span><input id="nm" maxlength="6" value="진소" autocomplete="off"></div>
   <div class="looks" id="lk"></div>
   <div class="field"><span>난이도</span><div class="seg" id="df"></div></div>

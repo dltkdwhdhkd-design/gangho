@@ -1,6 +1,7 @@
 // 무공, 무기, 심법, 물건 자료
 export const WEAPONS = {
   stick: { name: '낡은 목검', type: '검', atk: 3, spr: 'Stick', desc: '백 노인이 방값 대신 두고 간 목검. 손잡이가 닳아 있다.' },
+  army_blade: { name: '이 빠진 군도', type: '검', atk: 6, spr: 'Sword', desc: '군에서 나올 때 손에 남은 칼. 곽 아주머니가 맡아 두고 곱게 갈아 놓았다.' },
   iron_sword: { name: '철검', type: '검', atk: 9, spr: 'Sword', price: 90, desc: '대장간에서 흔히 파는 쇠칼. 쓸 만하다.' },
   blue_sword: { name: '청강검', type: '검', atk: 17, spr: 'Rapier', price: 420, desc: '푸른 빛이 도는 잘 벼린 검.' },
   moon_sword: { name: '월영검', type: '검', atk: 30, spr: 'Katana', desc: '달빛을 받으면 칼날이 희게 빛나는 옛 검.' },
@@ -27,7 +28,7 @@ export const BASIC = {
 const S = (name, han, w, school, mp, cd, desc, dur, steps, o = {}) => ({ name, han, w, school, mp, cd, desc, dur, steps, ...o });
 export const SKILLS = {
   // 공통
-  tray: S('쟁반 던지기', '', '무관', '점소이 잡기', 5, 3, '객잔에서 십 년 갈고닦은 쟁반 투척. 날아갔다가 돌아온다.', .3, [{ t: .08, sfx: 'jump', proj: { img: 'tray', speed: 170, mul: 1.1, life: 1.05, ret: true, pierce: true, r: 6, stun: .3 } }]),
+  tray: S('쟁반 던지기', '', '무관', '점소이 잡기', 5, 3, '칼을 잡힌 낭인이 객잔에서 익힌 쟁반 투척. 날아갔다가 돌아온다.', .3, [{ t: .08, sfx: 'jump', proj: { img: 'tray', speed: 170, mul: 1.1, life: 1.05, ret: true, pierce: true, r: 6, stun: .3 } }]),
   dart: S('비도술', '飛刀術', '무관', '강호 잡학', 8, 4, '비도 세 자루를 부채꼴로 던진다.', .3, [{ t: .1, sfx: 'sword', proj: { img: 'p_kunai', speed: 230, mul: .8, life: .9, n: 3, spread: 16, r: 4, stun: .15 } }]),
   breath: S('운기조식', '運氣調息', '무관', '강호 잡학', 0, 22, '잠깐 멈춰 숨을 고른다. 체력과 내력이 조금 돌아온다.', .9, [{ t: .05, sfx: 'power1', fx: { n: 'aura', s: 1.4, at: 'self' } }, { t: .7, heal: { hp: .16, mp: .12 } }], { self: true }),
   // 검
