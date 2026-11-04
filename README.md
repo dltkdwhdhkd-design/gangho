@@ -28,7 +28,7 @@
 - `tools/` 자동 시험 (`playthrough.cjs`, `reach.cjs`)과 에셋 정리 스크립트
 
 ## 일러스트 넣는 법
-`python3 tools/art_in.py <그림 파일> <인물>_n` 으로 넣으면 WebP로 줄여 `assets/art/`에 저장하고 `list.json`에 등록합니다. 대화 화면에 바로 일러스트가 나옵니다.
+`python3 tools/art_in.py <그림 파일> <인물>_n` 으로 넣으면 WebP로 줄여 `assets/art/`에 저장하고 `list.json`에 등록합니다. 대화 화면에 바로 일러스트가 나옵니다. 주인공은 왼쪽, 상대는 오른쪽에 서고 오른쪽 그림은 좌우가 뒤집힙니다. 그림 크기는 세로 1024×1536입니다.
 인물 이름은 `js/ctx.js`의 WHO 표를 따릅니다 (gwak, baek, yun, so, cheol 등). 주인공은 me 입니다.
 
 ## 출처
