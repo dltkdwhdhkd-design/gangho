@@ -139,7 +139,7 @@ async function ghostPass() {
   await ctx.duel({ foes: ['cheon2'], arena: 'snow', bgm: 'boss', title: '월천', yieldAt: .3, noLoot: true });
   await narr('칼을 맞대는 내내 형은 숨소리도 내지 않았다. 내가 왼발을 밀면 똑같이 왼발이 나왔다. 칼끝에 어깨가 베여도 얼굴은 그대로였다. 무릎이 꺾인 형을 두고 나는 칼을 돌렸다.');
   await say('me', '이제 네 차례야.');
-  await ctx.duel({ foes: ['gwima'], allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '귀마' });
+  await ctx.duel({ foes: ['gwima'], foeHpMul: G.S.diff === 'hard' ? .85 : 1, allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '귀마' });
   await say('gwima', '죽은 것은… 다시 일어난다… 나도…');
   await narr('귀마가 흩어지자 고개를 메우고 있던 망자들이 눈 위로 픽픽 쓰러졌다. 나는 형을 찾아 뒤를 돌아봤다.');
   await narr('형은 쓰러지지 않았다. 잠깐 제 손을 내려다보더니 천산 쪽으로 걸어가기 시작했다. 불러도 돌아보지 않았고, 금방 눈보라에 가려 보이지 않게 됐다.');
@@ -206,7 +206,7 @@ async function fifthStart() {
   await say('chief', '자네는 살았잖나. 살아서 일곱 장을 모았어. 고맙네.');
   await say('so', '내 사부님 머리에 얼음 넣은 것도 고맙다고 해 보지 그래.');
   await say('chief', '소 낭자도 왔군. 다들 모였어. 시작하지.');
-  await ctx.duel({ foes: ['chief2'], allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '심마 연경추' });
+  await ctx.duel({ foes: ['chief2'], allies: ['so_ally'], foeHpMul: G.S.diff === 'hard' ? .85 : 1, arena: 'moon', bgm: 'boss', title: '심마 연경추' });
   await narr('연경추의 칼이 부러졌다. 내 칼이 가슴을 뚫고 나갔는데, 그 사람은 웃고 있었다.');
   await say('chief', '일곱 초식이 한 몸에서 펼쳐져야 문이 열린다고 했지. 자네 몸에는 진작 다 있었네.');
   await say('chief', '모자란 건 하나였어. 문을 잠근 자의 핏줄이, 문을 판 자를 베는 것. 자네 아버지는 끝내 나를 안 베었네. 그래서 내가 벤 거고.');
