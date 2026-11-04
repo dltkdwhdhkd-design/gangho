@@ -53,7 +53,7 @@ G.fast = (n) => { for (let i = 0; i < n; i++) tick(STEP); render(); };
   ctx.fillStyle = '#efe3c8'; ctx.font = '24px Galmuri14, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('불러오는 중...', 640, 360);
   Input.init(); initTouch();
   await loadAll(p => { ctx.fillStyle = '#14110f'; ctx.fillRect(0, 380, 1280, 40); ctx.fillStyle = '#e0ad3b'; ctx.fillRect(440, 390, 400 * p, 10); });
-  await loadArtList();
+  loadArtList(); // 일러스트는 뒤에서 받는다. 먼저 뜬 화면을 막지 않는다
   await document.fonts.load('20px Galmuri14', '강호').catch(() => { });
   await document.fonts.load('20px Galmuri11Bold', '강호').catch(() => { });
   buildMaps();
