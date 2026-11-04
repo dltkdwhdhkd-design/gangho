@@ -89,8 +89,8 @@ export const Sound = {
 const KEYMAP = {
   KeyW: ['up'], ArrowUp: ['up'], KeyS: ['down'], ArrowDown: ['down'], KeyA: ['left'], ArrowLeft: ['left'], KeyD: ['right'], ArrowRight: ['right'],
   KeyJ: ['atk'], KeyZ: ['atk'], KeyK: ['dash'], KeyX: ['dash'], Space: ['ok', 'dash'], KeyL: ['guard'], KeyC: ['guard'], ShiftLeft: ['guard'],
-  KeyU: ['s0'], KeyI: ['s1'], KeyO: ['s2'], KeyP: ['s3'], Digit1: ['s0'], Digit2: ['s1'], Digit3: ['s2'], Digit4: ['s3'],
-  KeyH: ['potion'], KeyQ: ['potion'], KeyB: ['decor'], KeyE: ['ok'], Enter: ['ok'], Escape: ['menu'], KeyM: ['menu'],
+  KeyU: ['s0'], KeyI: ['s1'], KeyO: ['s2', 'opt'], KeyP: ['s3'], Digit1: ['s0'], Digit2: ['s1'], Digit3: ['s2'], Digit4: ['s3'],
+  KeyH: ['potion'], KeyQ: ['potion'], KeyB: ['decor'], KeyE: ['ok'], Enter: ['ok'], Escape: ['menu'], KeyM: ['map'],
 };
 export const Input = {
   down: {}, buf: {}, axis: { x: 0, y: 0 }, stick: { x: 0, y: 0 },

@@ -9,13 +9,14 @@ import { DB } from './items.js';
 import { give } from './state.js';
 import { checkTitles } from './titles.js';
 import { stageClear } from './dialog.js';
+import { bindMini, tickMini, openMap } from './mapview.js';
 
 const DIRV = [[0, 1], [0, -1], [-1, 0], [1, 0]];
 export class Field {
   constructor() { this.p = { x: 0, y: 0, dir: 0, walk: 0 }; this.npcs = []; this.spots = []; this.trigs = []; this.roam = []; this.cam = { x: 0, y: 0 }; this.busy = false; this.parts = []; this.t = 0; }
   load(id, tx, ty, dir = 0) {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
-    const m = MAPS[id]; this.m = m; G.S.map = id; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
+    const m = MAPS[id]; this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];
@@ -31,12 +32,14 @@ export class Field {
   }
   flashPlace() { const e = $('#place'); if (!e) return; e.textContent = this.m.name; e.classList.add('on'); clearTimeout(this._pt); this._pt = setTimeout(() => e.classList.remove('on'), 1800); }
   showHud() {
-    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (B)</button>' : ''}<button class="btn sm" id="mbtn">메뉴 (Esc)</button></div><div class="keys" id="keys">${G.S.day}일째${G.touch ? '' : ' · 이동 WASD · 대화 E · 메뉴 Esc'}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
+    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (B)</button>' : ''}<button class="btn sm" id="mapb">지도 (M)</button><button class="btn sm" id="mbtn">메뉴 (O)</button></div><canvas id="mm"></canvas><div class="keys" id="keys">${G.S.day}일째${G.touch ? '' : ' · 이동 WASD · 대화 E · 메뉴 O · 지도 M'}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
     $('#mbtn').onclick = () => openMenu();
+    $('#mapb').onclick = () => { if (!this.busy && !G.decor) openMap(); };
+    bindMini(this);
     if ($('#dbtn')) $('#dbtn').onclick = () => { if (!this.busy && !G.decor) G.life.openDecor(); };
     this.updateGoal();
   }
-  updateGoal() { const e = $('#goal'); if (e) { const g = G.S.goal; e.style.display = g ? 'block' : 'none'; e.innerHTML = `<b>목표</b>${g}`; } const b = $('#mbtn'); if (b) b.textContent = G.S.pts > 0 || G.S.tp > 0 ? `메뉴 · 올릴 점수 있음` : '메뉴 (Esc)'; }
+  updateGoal() { const e = $('#goal'); if (e) { const g = G.S.goal; e.style.display = g ? 'block' : 'none'; e.innerHTML = `<b>목표</b>${g}`; } const b = $('#mbtn'); if (b) b.textContent = G.S.pts > 0 || G.S.tp > 0 ? `메뉴 (O) · 올릴 점수 있음` : '메뉴 (O)'; }
   async run(fn) {
     if (this.busy) return; this.busy = true; Input.clear();
     try { await fn(); } catch (e) { console.error(e); }
@@ -49,7 +52,8 @@ export class Field {
     this.t += dt; Input.tick(dt);
     if (this.busy) { this.tickNpcs(dt); this.camera(.12); return; }
     if (G.decor) { this.tickDecor(); return; }
-    if (Input.take('menu')) { openMenu(); return; }
+    if (Input.take('menu') || Input.take('opt')) { openMenu(); return; }
+    if (Input.take('map')) { openMap(); return; }
     if (Input.take('decor') && this.m.id === 'myhouse') { G.life.openDecor(); return; }
     const p = this.p, m = this.m, d = Input.dir(), S = G.S, sp = 76;
     let moving = false;
@@ -84,7 +88,7 @@ export class Field {
   }
   tickDecor() {
     const d = G.decor, I = Input;
-    if (I.take('menu')) { G.life.closeDecor(); return; }
+    if (I.take('menu') || I.take('opt')) { G.life.closeDecor(); return; }
     if (I.take('up')) d.cy--; if (I.take('down')) d.cy++; if (I.take('left')) d.cx--; if (I.take('right')) d.cx++;
     if (I.take('ok')) G.life.placeAt(d.cx, d.cy);
   }
@@ -174,6 +178,7 @@ export class Field {
       c.setTransform(1, 0, 0, 1, 0, 0); c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const x = (l.x * TS + ox) * SCALE, y = (l.y * TS + oy) * SCALE; if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); }
     }
+    tickMini(this);
   }
   ambient(c) {
     const kind = this.m.ambient || ({ cheongha: 'leafpink', bamboo: 'leaf', cloudmt: 'leafpink', guhwa: 'leafpink', wolha: 'snow' })[this.m.id];

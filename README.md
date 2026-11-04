@@ -4,7 +4,7 @@
 평타와 초식을 직접 눌러 싸우고, 어떤 초식을 네 칸에 넣을지는 메뉴에서 고릅니다.
 
 ## 조작
-- 이동 W A S D 또는 방향키, 대화 E, 메뉴 Esc
+- 이동 W A S D 또는 방향키, 대화 E, 메뉴 O (전투 중에는 Esc), 지도 M
 - 평타 J, 경공 K, 막기 L (맞기 직전에 누르면 튕겨내기), 금창약 H
 - 초식 U I O P 또는 1 2 3 4
 - 휴대폰과 태블릿은 화면 버튼으로 조작합니다.
@@ -21,7 +21,7 @@
 
 ## 소스 구조 (빌드 없이 그대로 실행)
 - `js/battle.js` 전투, `js/data.js` 초식과 무기, `js/foes.js` 적
-- `js/field.js` 걷기, `js/maps.js` 지도, `js/tiles.js` 타일과 소품
+- `js/field.js` 걷기, `js/mapview.js` 미니맵과 전체 지도, `js/maps.js` 지도, `js/tiles.js` 타일과 소품
 - `js/ctx.js`, `js/story1.js`, `js/story2.js` 이야기와 대사
 - `js/items.js` 물건, 제작법, 가구, 무공 트리 자료, `js/life.js` 생활 체계, `js/clandata.js`와 `js/clans.js` 세력
 - `js/dialog.js` 대화창, `js/ui.js` 메뉴와 상점, `js/state.js` 저장과 능력치

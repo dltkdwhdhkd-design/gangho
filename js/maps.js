@@ -29,6 +29,8 @@ class MapDef {
   }
   exit(tx, ty, w, h, to, ex, ey, dir, o = {}) { this.portals.push({ x: tx * TS, y: ty * TS, w: w * TS, h: h * TS, to, tx: ex, ty: ey, dir, ...o }); return this; }
   label(tx, ty, text) { (this.labels = this.labels || []).push({ x: tx, y: ty, text }); return this; }
+  // 전체 지도에만 보이는 이름
+  place(tx, ty, text) { (this.names = this.names || []).push({ x: tx, y: ty, text }); return this; }
   scatter(names, n, seed = 1) {
     let r = seed * 9301 + 49297; const R = () => (r = (r * 9301 + 49297) % 233280) / 233280;
     for (let i = 0; i < n * 4 && n > 0; i++) {
@@ -97,6 +99,7 @@ export function buildMaps() {
   m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
   m.exit(0, 14, 1, 4, 'valley', 37.5, 15.5, 2, { when: 'burned', lock: '서쪽 청풍골은 나중에 가 보자.' });
   m.label(3.5, 13.2, '← 청풍골');
+  m.place(23, 13.8, '광장').place(23, 27, '나루터').place(13, 24.2, '복덕방');
   m.exit(21, 0, 4, 1, 'bamboo', 18, 30, 1, { when: 'bamboo_open', lock: '아직 산으로 갈 때가 아니다.' }).exit(45, 14, 1, 4, 'pass', 1, 13.5, 3, { when: 'pass_open', lock: '동쪽 산길은 지금 갈 이유가 없다.' });
   // 객잔 내부
   m = M('inn', 18, 13, { name: '달맞이 객잔', bgm: 'peaceful', room: true, arena: 'yard' });
@@ -189,6 +192,7 @@ export function buildMaps() {
   m.fill(2, 18, 3, 3, 3).fill(46, 18, 3, 3, 3);
   m.exit(48, 18, 1, 3, 'ninehall', 1.5, 10.5, 3).exit(1, 18, 1, 3, 'fiveclans', 37.5, 12.5, 2);
   m.label(44.5, 17.2, '구파 회관 →').label(5.5, 17.2, '← 세가 거리');
+  m.place(25, 14, '비무대').place(27, 28, '남문 나루');
   // 청풍골: 사냥과 낚시, 벌목
   m = M('valley', 40, 30, { name: '청풍골', bgm: 'peaceful', biome: 'deep', arena: 'forest', ambient: 'leaf' });
   m.water(19, 0, 2, 30).fill(19, 13, 2, 3, 4).road(21, 14, 39, 14, 2).road(4, 14, 18, 14, 2);
