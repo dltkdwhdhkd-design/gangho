@@ -1,5 +1,5 @@
 // 이벤트 전용 화면과 부·장 표지. 그림이 아직 없으면 색과 제목만 있는 임시 화면을 띄운다
-// 그림은 assets/art/cg_<이름>.png 로 넣고 list.json에 적으면 자동으로 바뀐다. 목록은 docs/cg-list.md
+// 그림은 tools/art_in.py로 넣으면(assets/art/cg_<이름>.webp, list.json 등록) 자동으로 바뀐다. 목록은 docs/cg-list.md
 import { G, ART, $, wait } from './core.js';
 
 // 이름: [화면 제목, 위 색, 아래 색, 그림 설명]
