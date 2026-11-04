@@ -1,0 +1,44 @@
+name: 윈도우 프로그램 빌드
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 도구 설치
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+      - name: 설치 파일 만들기
+        working-directory: desktop
+        run: npm run build:win
+      - name: 윈도우에서 실제로 실행해 보기
+        working-directory: desktop
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          node smoke.cjs
+      - name: 시험 화면 보관
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke
+          path: desktop/dist/smoke-*.png
+          if-no-files-found: ignore
+      - name: 릴리스에 올리기
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            desktop/dist/Gangho-Setup-*.exe
+            desktop/dist/Gangho-*-win64.zip
+          body: |
+            강호행 윈도우판입니다. 설치판(Gangho-Setup)을 받아 실행하면 바탕화면에 바로가기가 생깁니다.
+            설치하지 않으려면 zip을 받아 압축을 풀고 안의 강호행.exe를 실행하세요.
+            서명하지 않은 프로그램이라 처음 실행할 때 Windows의 PC 보호 창이 뜰 수 있습니다. 추가 정보를 누르고 실행을 고르면 됩니다.

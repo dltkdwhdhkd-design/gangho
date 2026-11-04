@@ -1,0 +1,54 @@
+{
+  "name": "gangho",
+  "productName": "강호행",
+  "version": "1.0.0",
+  "description": "도트 무협 RPG 강호행",
+  "author": "강호행",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "node copy-game.cjs && electron .",
+    "build:win": "node copy-game.cjs && electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.gangho.game",
+    "productName": "강호행",
+    "copyright": "강호행",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "game/**"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "icon.ico",
+      "artifactName": "Gangho-${version}-win64.${ext}"
+    },
+    "nsis": {
+      "artifactName": "Gangho-Setup-${version}.${ext}",
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "강호행",
+      "installerLanguages": [
+        "ko_KR"
+      ],
+      "language": "1042"
+    },
+    "electronLanguages": [
+      "ko",
+      "en-US"
+    ]
+  }
+}

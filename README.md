@@ -34,3 +34,12 @@
 ## 출처
 - 도트 그림, 음악, 효과음: [Ninja Adventure Asset Pack](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by Pixel-boy & AAA (CC0)
 - 글꼴: [갈무리](https://github.com/quiple/galmuri) by Quiple (SIL OFL 1.1)
+
+## 프로그램으로 실행
+
+윈도우 설치 파일과 압축 파일은 저장소의 Releases에 있습니다. 게임 코드는 웹판과 같은 것을 쓰고, `desktop/`은 Electron으로 감싸는 껍데기만 담고 있습니다.
+
+- 게임을 고칠 곳은 언제나 맨 위의 `js`, `css`, `assets`입니다. `desktop/game`은 빌드할 때 복사되는 사본입니다.
+- 새 버전 내기: `desktop/package.json`의 version을 올리고 같은 번호로 `v1.0.1` 같은 태그를 올리면 GitHub Actions가 윈도우에서 빌드하고 실행 시험까지 한 뒤 Releases에 올립니다.
+- 저장은 `%APPDATA%/강호행`에 남아서 다시 설치해도 지워지지 않습니다. 웹판 저장은 파일로 저장한 뒤 프로그램에서 저장 파일 불러오기로 옮깁니다.
+- F11 또는 Alt+Enter로 전체 화면을 켜고 끕니다.
