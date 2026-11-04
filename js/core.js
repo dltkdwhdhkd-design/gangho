@@ -50,8 +50,13 @@ export async function loadArtList() {
 }
 
 // ── 소리 ─────────────────────────────
+const AUDIO_KEY = 'gangho_audio';
+const audioPrefs = (() => { try { return JSON.parse(localStorage.getItem(AUDIO_KEY)) || {}; } catch (e) { return {}; } })();
 export const Sound = {
-  ctx: null, buf: {}, cur: null, curName: '', bgmVol: .5, sfxVol: .7, muted: false,
+  ctx: null, buf: {}, cur: null, curName: '', bgmVol: audioPrefs.bgm ?? .2, sfxVol: audioPrefs.sfx ?? .3, muted: !!audioPrefs.muted,
+  keep() { try { localStorage.setItem(AUDIO_KEY, JSON.stringify({ bgm: this.bgmVol, sfx: this.sfxVol, muted: this.muted })); } catch (e) { /* 저장이 막혀 있어도 소리는 그대로 */ } },
+  setBgm(v) { this.bgmVol = v; if (this.cur && !this.muted) this.cur.volume = v; this.keep(); },
+  setSfx(v) { this.sfxVol = v; if (this.gain) this.gain.gain.value = v; this.keep(); },
   init() {
     if (this.ctx) return;
     try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); this.gain = this.ctx.createGain(); this.gain.gain.value = this.sfxVol; this.gain.connect(this.ctx.destination); } catch (e) { return; }
@@ -74,7 +79,7 @@ export const Sound = {
     this.cur = a; a.play().catch(() => { });
   },
   resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); if (this.cur && this.cur.paused) this.cur.play().catch(() => { }); },
-  setMuted(m) { this.muted = m; if (this.cur) this.cur.volume = m ? 0 : this.bgmVol; },
+  setMuted(m) { this.muted = m; if (this.cur) this.cur.volume = m ? 0 : this.bgmVol; this.keep(); },
 };
 
 // ── 입력 ─────────────────────────────

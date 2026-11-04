@@ -146,7 +146,10 @@ function tabLove(B) {
 function tabSet(B) {
   B.innerHTML = `<h2>조작</h2><div class="two"><div class="note">이동 W A S D 또는 방향키<br>평타 J · 경공 K · 막기 L<br>초식 U I O P 또는 1 2 3 4<br>금창약 H · 대화 E · 메뉴 Esc</div><div class="note">막기를 맞기 직전에 누르면 <b>튕겨내기</b>가 됩니다.<br>노란 예고는 막을 수 있습니다.<br>붉은 예고는 막을 수 없으니 경공으로 피하세요.</div></div>
   <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 J로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 E<br>집: 청하진 복덕방에서 구입, 집 안에서 B로 꾸미기, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
-  <h2>설정</h2><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">지금 저장</button><button class="btn" id="tt">제목으로</button></div>`;
+  <h2>설정</h2><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">저장은 지금 쓰는 브라우저 안에 됩니다. 다른 기기나 시크릿 창에서는 이어서 할 수 없고, 브라우저의 사이트 데이터를 지우면 함께 지워집니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">지금 저장</button><button class="btn" id="tt">제목으로</button></div>`;
+  $('#vBgm').oninput = e => { Sound.setBgm(e.target.value / 100); $('#vBgmN').textContent = e.target.value; };
+  $('#vSfx').oninput = e => { Sound.setSfx(e.target.value / 100); $('#vSfxN').textContent = e.target.value; };
+  $('#vSfx').onchange = () => Sound.sfx('tick');
   $('#mute').onclick = () => { Sound.setMuted(!Sound.muted); drawMenu(); };
   $('#sv').onclick = () => save(false);
   $('#tt').onclick = () => { save(); closeMenu(); G.field.busy = false; showTitle(); };

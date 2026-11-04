@@ -147,3 +147,4 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .tnode{position:absolute;width:200px;height:68px;background:#f7ecd4;border:3px solid var(--line);padding:4px 8px;text-align:left;line-height:1.25;font-size:16px}
 .tnode b{font-weight:400}.tnode span{float:right;color:var(--muted)}.tnode small{display:block;color:var(--muted);font-size:13px}
 .tnode.got{border-color:var(--red);background:#fff3d6}.tnode.full{background:#f3d9a0}.tnode:disabled{cursor:default}.tnode:disabled:not(.got){opacity:.6}
+.vol{display:flex;gap:28px;margin-bottom:8px}.vol label{display:flex;align-items:center;gap:10px;flex:1}.vol input{flex:1;accent-color:var(--red)}.vol span{width:32px;text-align:right}
