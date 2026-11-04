@@ -7,7 +7,7 @@ import { WEAPONS } from './data.js';
 const S = () => G.S, F = () => G.S.flags, step = () => G.S.flags.step || 'p0', set = v => { G.S.flags.step = v; };
 const at = (...a) => a.includes(step());
 const after = v => ORDER.indexOf(step()) >= ORDER.indexOf(v);
-const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'sa1', 'sa2', 'ma1', 'ma2', 'jg1', 'jg2', 'jg3', 'fr1', 'fr2', 'sa3', 'ma3', 'c4b', 'c4c', 'c4d', 'c4e', 'end'];
+const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'sa1', 'sa2', 'ma1', 'ma2', 'jg1', 'jg2', 'jg3', 'fr1', 'fr2', 'sa3', 'ma3', 'c4b', 'c4c', 'c4d', 'c4e', 'r2', 'r2b', 'r3', 'r4', 'r5', 'w1', 'w1b', 'w2', 'w2b', 'w3', 'w4', 'w5', 'x2', 'x3', 'x4', 'x5', 'end'];
 export { step, set, at, after };
 G.after = after;
 const overBlack = on => $('#dialog').classList.toggle('over', on);
@@ -263,7 +263,7 @@ const talkTown = {
   boat: async () => {
     if (F().burned && !F().rod && step() !== 'c1a') { F().rod = true; await say('boat', '객잔이 타 버렸으니 먹고살 일이 막막하겄네. 이 낚싯대 가져가. 나루 끝에서 던지면 뭐라도 물 거여.'); Sound.sfx('bonus'); await say(null, '낚싯대를 받았다. 물가에서 E 키로 낚시한다.'); return; }
     if (step() === 'c1a') { await say('boat', '아이고, 살아 있었구먼! 그날 밤에 시커먼 놈들이 배 세 척으로 강을 건너더니 동쪽 산으로 올라가더라고.'); await say('boat', '거긴 흑풍채 놈들 땅인디. 맨손으로는 못 가.'); F().c1boat = true; ctx.note('뱃사공: 흑의인들은 동쪽 산, 흑풍채 쪽으로 갔다.'); await checkClues(); return; }
-    if (F().boat_guhwa) { const c = await choice('어디로 갈까?', ['구화성으로', '그만둔다'], 'boat'); if (c === 0) await ctx.warp('guhwa', 24.5, 29, 1); return; }
+    if (F().boat_guhwa) { const o = [...(at('r4') ? ['소림사로'] : []), '구화성으로', '그만둔다'], c = await choice('어디로 갈까?', o, 'boat'); if (o[c] === '소림사로') await ctx.warp('shaolin', 19.5, 26, 1); if (o[c] === '구화성으로') await ctx.warp('guhwa', 24.5, 29, 1); return; }
     await say('boat', '그려, 또 와.');
   },
   smith: async () => {
@@ -297,11 +297,11 @@ Story.providers.push(function content1(id) {
     } else {
       sp.push({ x: 1, y: 3, w: 3, h: 1, hint: '살펴보기', when: () => !F().c1inn, act: c1Inn });
       sp.push({ x: 13, y: 10, w: 2, h: 2, hint: F().well_open ? '우물 아래로' : '우물 뚜껑', act: async () => { if (F().well_open) await ctx.warp('well', 6, 7, 1); else if (at('c1g')) await wellOpen(); else await say(null, '쇠 뚜껑에 달 모양 구멍이 나 있다. 꿈쩍도 하지 않는다.'); } });
-      sp.push({ x: 7, y: 5, w: 2, h: 2, hint: '구석방 탁자', when: () => after('c1a'), act: async () => { await say(null, '타다 남은 탁자에 술잔 자국이 남아 있다.'); } });
+      sp.push({ x: 7, y: 5, w: 2, h: 2, hint: '구석방 탁자', when: () => after('c1a') && !F().inn_rebuilt, act: async () => { await say(null, '타다 남은 탁자에 술잔 자국이 남아 있다.'); } });
     }
   }
   if (id === 'clinic' && F().burned) {
-    n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => at('c1b', 'c1d', 'c1h'), when: () => (!F().yun_join || at('end') || S().side === 'free' || S().side === 'ma') && S().married !== 'yun', talk: async () => { if (at('c1b')) await yunPaper(); else if (at('c1d')) await yunAfter(); else if (at('c1h')) await yunGo(); else if (F().c1yun2 || !after('c1e')) await say('yun', '금창약은 만물상보다 여기가 싸요. 넉넉히 사 가요.'); else { F().c1yun2 = true; await yunNight(); } } });
+    n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => at('c1b', 'c1d', 'c1h'), when: () => (!F().yun_join || at('end') || S().side === 'free' || S().side === 'ma' || F().act3) && !at('r2', 'r2b') && S().married !== 'yun', talk: async () => { if (at('c1b')) await yunPaper(); else if (at('c1d')) await yunAfter(); else if (at('c1h')) await yunGo(); else if (F().c1yun2 || !after('c1e')) await say('yun', '금창약은 만물상보다 여기가 싸요. 넉넉히 사 가요.'); else { F().c1yun2 = true; await yunNight(); } } });
     n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, mark: () => !!G.ch.hook('doc'), talk: async () => { const h = G.ch.hook('doc'); if (h) return h(); await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
   }
   if (id === 'smith' && F().burned) n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => at('c1e') && !F().smith_gift, talk: talkTown.smith });

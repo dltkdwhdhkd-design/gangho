@@ -305,11 +305,8 @@ async function ending() {
   F().ending = ['jeong_burn', 'jeong_clan', 'jeong_inn'][c];
   if (c === 2) { F().inn_rebuilt = true; await narr('달맞이 객잔이 다시 문을 열었다. 윤설이 장부를 들고 찾아오고, 소연하가 국수를 먹고 가고, 철우는 오늘도 돈이 없다.'); }
   if (F().baek_live) await G.route.baekFate();
-  await G.bond.ending();
-  await narr('그 뒤로 강호에서는 나를 이렇게 불렀다. {호} {나}.');
-  await narr('그해 겨울, 서쪽 하늘에 붉은 달이 떴다. 강호의 어른들이 오래 입에 올리지 않던 이름이 다시 돌기 시작했다.\n\n강호행 · 제2막 끝\n이야기는 제7부 ‘붉은 달’로 이어집니다.');
-  set('end'); F().cleared = true; ctx.goal('');
-  await ctx.warp('cheongha', 22.5, 16, 0);
+  await narr('그해 가을이 저물도록 강호는 조용했다. 강호에서는 나를 이렇게 불렀다. {호} {나}.');
+  await G.act3.begin();
 }
 
 Story.providers.push(function content2(id) {

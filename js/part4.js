@@ -329,6 +329,7 @@ G.ch = {
   jeong4, free4, sa5, ma5,
   // 원래 있던 인물이 이야기가 있을 때 먼저 말을 꺼내게 한다
   hook(k) {
+    { const h = G.act3 && G.act3.hook7(k); if (h) return h; }
     if (at('jg1')) { if (k === 'clan_dang' && !F().jg_dang) return dangRecord; if (k === 'clan_jegal' && !F().jg_date) return jegalOrder; }
     if (at('jg2') && k === 'clan_shaolin') return hyegakPlea;
     if (at('fr1')) { if (k === 'beggar' && !F().fr_talk) return frBeggar; if (k === 'doc' && F().fr_talk && !F().fr_med) return frMed; }

@@ -1,6 +1,7 @@
 // 이야기에서 함께 쓰는 도구와 등장인물
 import { G, Sound, $, fadeTo, wait, toast, TS, josa } from './core.js';
-import { say, narr, choice, WHO } from './dialog.js';
+import { say, narr, choice, card, WHO } from './dialog.js';
+import { showCG, hideCG } from './cg.js';
 import { fight } from './battle.js';
 import { learn, save } from './state.js';
 import { showResult, choiceLose, openShop, shopItem } from './ui.js';
@@ -23,7 +24,7 @@ export const ctx = {
   silver(n) { G.S.silver += n; Sound.sfx('coin'); toast(`은자 ${n}냥을 얻었다`); },
   async duel(cfg) {
     for (; ;) {
-      await fadeTo(1); G.field.hideHud?.(); await fadeTo(0);
+      hideCG(); await fadeTo(1); G.field.hideHud?.(); await fadeTo(0);
       const r = await fight(cfg);
       if (r.outcome === 'win') { await showResult(r); if (cfg.bgm === 'boss') G.S.potion = Math.max(G.S.potion, G.S.potionMax); if (cfg.yieldAt && !cfg.noLoot) await G.life.lootAfter(cfg); restoreBgm(); G.field.showHud(); return true; }
       if (cfg.optional) { restoreBgm(); G.field.showHud(); return false; }
@@ -31,6 +32,10 @@ export const ctx = {
     }
   },
   warp: (id, x, y, d) => G.field.warp(id, x, y, d),
+  cg: id => showCG(id), cgOff: () => hideCG(),
+  // 부 표지, 장 표지. 수첩에 지금 어디쯤인지 남긴다
+  async part(no, name, chap) { G.S.chapter = chap ? `제${no}부 ${name} · ${chap}` : `제${no}부 ${name}`; await card(`제${no}부`, name, chap); },
+  async chap(no, name, chap) { G.S.chapter = `제${no}부 ${name} · ${chap}`; await card(`제${no}부 ${name}`, chap); },
   npc: id => G.field.npcs.find(n => n.id === id),
   shop: (...a) => openShop(...a), get item() { return shopItem; }, learn: id => learn(id),
 };
@@ -52,4 +57,4 @@ export const Story = {
   },
   scenes: {}, providers: [],
 };
-export { say, narr, choice };
+export { say, narr, choice, card };

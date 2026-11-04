@@ -3,7 +3,7 @@ import { G, Input, Sound, $, $$, el, esc, TS } from './core.js';
 import { MAPS } from './maps.js';
 import { drawStamp } from './tiles.js';
 
-const burnedInn = (c, m, k, ox = 0, oy = 0) => { if (m.id === 'cheongha' && G.S.flags.burned) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(ox + 19 * TS * k, oy + 8 * TS * k, 4 * TS * k, (3 * TS - 2) * k); } };
+const burnedInn = (c, m, k, ox = 0, oy = 0) => { if (m.id === 'cheongha' && G.S.flags.burned && !G.S.flags.inn_rebuilt) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(ox + 19 * TS * k, oy + 8 * TS * k, 4 * TS * k, (3 * TS - 2) * k); } };
 // 소품까지 다 그린 지도 한 장. 지도마다 한 번만 만든다
 function whole(m) {
   if (m._whole) return m._whole;
@@ -73,18 +73,18 @@ function drawArea(cv, r, f) {
 }
 
 // ── 강호 전도 ──
-const SPOTS = { cheongha: [560, 285], bamboo: [560, 165], valley: [410, 285], shrine: [285, 225], pass: [695, 285], fort: [815, 195], cloudmt: [835, 395], guhwa: [560, 445], ninehall: [705, 490], fiveclans: [415, 490], shaolin: [245, 415], hwasan: [105, 320], wolha: [300, 95] };
-const ROADS = [['cheongha', 'bamboo'], ['cheongha', 'valley'], ['valley', 'shrine'], ['cheongha', 'pass'], ['pass', 'fort'], ['pass', 'cloudmt'], ['guhwa', 'ninehall'], ['guhwa', 'fiveclans'], ['shaolin', 'hwasan'], ['cheongha', 'guhwa', 1], ['cloudmt', 'guhwa', 1], ['cloudmt', 'shaolin', 1], ['hwasan', 'guhwa', 1], ['guhwa', 'wolha', 1]];
-const SECRET = ['shrine', 'wolha'];
+const SPOTS = { cheongha: [822, 285], bamboo: [822, 165], valley: [680, 285], shrine: [560, 225], pass: [950, 285], fort: [1064, 195], cloudmt: [1083, 395], guhwa: [822, 445], ninehall: [960, 490], fiveclans: [684, 490], shaolin: [523, 415], hwasan: [390, 320], wolha: [575, 95], silk: [290, 400], oasis: [190, 330], snowpeak: [120, 215], tiangate: [75, 115], blackpalace: [230, 80] };
+const ROADS = [['cheongha', 'bamboo'], ['cheongha', 'valley'], ['valley', 'shrine'], ['cheongha', 'pass'], ['pass', 'fort'], ['pass', 'cloudmt'], ['guhwa', 'ninehall'], ['guhwa', 'fiveclans'], ['shaolin', 'hwasan'], ['cheongha', 'guhwa', 1], ['cloudmt', 'guhwa', 1], ['cloudmt', 'shaolin', 1], ['hwasan', 'guhwa', 1], ['guhwa', 'wolha', 1], ['guhwa', 'silk'], ['silk', 'oasis'], ['oasis', 'snowpeak'], ['snowpeak', 'tiangate'], ['tiangate', 'blackpalace']];
+const SECRET = ['shrine', 'wolha', 'silk', 'oasis', 'snowpeak', 'tiangate', 'blackpalace'];
 function drawWorld(cv, here) {
   const c = cv.getContext('2d'), W = cv.width, H = cv.height, seen = G.S.seen || {}, known = id => !!seen[id];
   const near = id => !SECRET.includes(id) && ROADS.some(([a, b]) => (a === id && known(b)) || (b === id && known(a)));
   const shown = id => known(id) || near(id);
   c.fillStyle = '#e6d6b2'; c.fillRect(0, 0, W, H); c.strokeStyle = '#a8947a'; c.lineWidth = 6; c.strokeRect(10, 10, W - 20, H - 20);
   // 장강
-  c.strokeStyle = '#8fb6c4'; c.lineWidth = 16; c.lineCap = 'round'; c.beginPath(); c.moveTo(20, 395); c.bezierCurveTo(240, 330, 330, 395, 560, 350); c.bezierCurveTo(740, 320, 800, 340, W - 20, 300); c.stroke();
+  c.strokeStyle = '#8fb6c4'; c.lineWidth = 16; c.lineCap = 'round'; c.beginPath(); c.moveTo(310, 395); c.bezierCurveTo(520, 330, 600, 395, 822, 350); c.bezierCurveTo(990, 320, 1050, 340, W - 20, 300); c.stroke();
   // 산
-  c.fillStyle = '#bfa987'; for (const [x, y, s] of [[130, 255, 26], [165, 270, 20], [90, 275, 18], [800, 150, 24], [842, 165, 18], [880, 395, 24], [905, 425, 16], [205, 450, 20], [270, 460, 15], [255, 60, 22], [345, 62, 20]]) { c.beginPath(); c.moveTo(x - s, y + s * .8); c.lineTo(x, y - s * .8); c.lineTo(x + s, y + s * .8); c.closePath(); c.fill(); }
+  c.fillStyle = '#bfa987'; for (const [x, y, s] of [[415, 255, 26], [450, 270, 20], [375, 275, 18], [1050, 150, 24], [1090, 165, 18], [1120, 395, 16], [485, 450, 20], [545, 460, 15], [530, 60, 22], [620, 62, 20], [60, 200, 26], [110, 160, 20], [170, 150, 24]]) { c.beginPath(); c.moveTo(x - s, y + s * .8); c.lineTo(x, y - s * .8); c.lineTo(x + s, y + s * .8); c.closePath(); c.fill(); }
   // 길과 뱃길
   c.lineCap = 'butt';
   for (const [a, b, boat] of ROADS) {

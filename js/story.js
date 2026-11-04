@@ -10,3 +10,6 @@ import './part1b.js';
 import './routes.js';
 import './part4.js';
 import './bonds.js';
+import './part7.js';
+import './part8.js';
+import './part9.js';

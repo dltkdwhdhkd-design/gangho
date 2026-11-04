@@ -87,6 +87,7 @@ export function arena(theme) {
     case 'dock': paintGround(c, grid((x, y) => (y < 3 || y > Ht - 3) ? 2 : 4), 'grass', { detail: 0 }); break;
     case 'room': paintRoom(c, W, Ht, 0); break;
     case 'moon': paintGround(c, grid((x, y) => (Math.abs(x - 12) < 9 && Math.abs(y - 7) < 6) ? 1 : 0), 'dusk'); for (let x = 0; x < W * TS; x += 32) drawStamp(c, 'tree_dead', x, -14); c.fillStyle = 'rgba(40,20,70,.32)'; c.fillRect(0, 0, W * TS, Ht * TS); break;
+    case 'sand': paintGround(c, grid((x, y) => (Math.abs(x - 12) < 9 && Math.abs(y - 7) < 5) ? 1 : 0), 'sand'); for (let x = 0; x < W * TS; x += 40) drawStamp(c, 'tree_dead', x, -14); plant(['bush1', 'bush3'], 6); break;
     case 'snow': paintGround(c, grid(() => 0), 'snow'); for (let x = 0; x < W * TS; x += 32) drawStamp(c, 'tree_snow', x, -14); break;
     default: paintGround(c, grid(() => 0), 'grass');
   }

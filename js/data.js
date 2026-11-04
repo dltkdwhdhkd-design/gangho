@@ -100,6 +100,6 @@ export const HEARTS = {
 export const ITEMS = {
   hp: { name: '금창약', icon: 'hp', price: 12, desc: '전투 중 H 키. 체력을 35% 되찾는다.' },
 };
-export const RANKS = [[1, '삼류'], [6, '이류'], [11, '일류'], [17, '절정'], [23, '초절정'], [29, '화경']];
+export const RANKS = [[1, '삼류'], [6, '이류'], [11, '일류'], [17, '절정'], [23, '초절정'], [29, '화경'], [35, '현경'], [45, '생사경']];
 export const rankOf = lv => RANKS.reduce((r, [l, n]) => lv >= l ? n : r, '삼류');
 export const expNeed = lv => Math.round(18 * Math.pow(lv, 1.32));

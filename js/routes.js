@@ -296,16 +296,18 @@ export async function chiefBattle() {
   }
   { const a = await G.bond.join(s, allies); if (a) allies.push(a); }
   await ctx.duel({ foes: ['chief'], allies, foeHpMul: mul, arena: 'moon', bgm: 'boss', title: '정천맹주 연경추' });
+  F().chief_down = true;
   await say('chief', '왜지… 나는 칠식을 다 익혔는데…');
   await say('me', '걸레질을 안 해 봤잖아.');
   await say('chief', '하하… 어차피 늦었네. 일곱 장은 이미 천산을 깨웠어. 교주께서 곧…');
   if (s === 'jeong') { await say('so', '천산? 교주? 저 사람 지금 무슨 소리야?'); await say('cheol', '시주들, 달을 보시오.'); }
+  await narr('달이 구름에 가렸다가 다시 나왔을 때 연경추는 쓰러진 채 숨이 끊겨 있었다. 적어도 그때는 그렇게 보였다.');
 }
 
 // ── 결말 ──
 const baekFate = async () => { if (F().baek_live) await say('baek', '점소이, 방값 가져왔다. 이자는 깎아라.'); else await narr('백 노인은 그날 밤을 넘기지 못했다. 곽 아주머니는 무덤 앞에 국 한 그릇을 놓고 한참 서 있다가 아무 말 없이 돌아갔다.'); };
-const hook = line => narr(`그해 겨울, 서쪽 하늘에 붉은 달이 떴다. ${line}\n\n강호행 · 제2막 끝\n이야기는 제7부 ‘붉은 달’로 이어집니다.`);
-function finish(map = 'cheongha') { set('end'); F().cleared = true; ctx.goal(''); return map === 'shrine' ? ctx.warp('shrine', 7, 8, 1) : ctx.warp('cheongha', 22.5, 16, 0); }
+const hook = line => narr(`그해 가을이 저물었다. ${line}`);
+const finish = () => G.act3.begin();
 async function endSa() {
   await say('samaung', '약속은 지켰다. 곽란은 데려가고, 일곱 장도 네가 가져라.');
   await say('gwak', '사파 밥 먹었다며?');
@@ -323,7 +325,6 @@ async function endSa() {
     F().ending = 'sa_lord'; await narr('그렇게 군적에서 지워진 낭인이 강호 절반을 쥔 맹주가 되었다.');
   }
   if (c === 2) { F().ending = 'sa_leave'; await say('baekrang', '돈도 자리도 싫다고요? 별난 사람이에요, 정말.'); await narr('나는 다시 길을 떠났다.'); }
-  await G.bond.ending();
   await hook('정파가 무너진 틈을 마교가 놓칠 리 없었다.');
   await finish();
 }
@@ -342,9 +343,8 @@ async function endMa() {
     await narr('천마신교는 삼백 년 만에 살아 있는 교주를 맞았다.', 'end_ma');
   }
   if (c === 2) { F().ending = 'ma_leave'; await say('hyeok', '그러실 줄 알았습니다. 문은 열어 두겠습니다.'); await narr('일곱 장을 태웠다. 그날부터 정파도 사파도 마교도 나를 쫓기 시작했다.', 'end_free'); }
-  await G.bond.ending();
-  await hook(F().ending === 'ma_awake' ? '강호 사람들은 이제 그 달을 보며 잠들지 못했다.' : '심마가 남긴 무리는 아직 강호 곳곳에 숨어 있었다.');
-  await finish(F().ending === 'ma_leave' ? 'cheongha' : 'shrine');
+  await hook(F().ending === 'ma_awake' ? '제단의 불은 그날부터 꺼지지 않았다.' : '심마가 남긴 무리는 아직 강호 곳곳에 숨어 있었다.');
+  await finish();
 }
 async function endFree() {
   await say('gwak', '혼자 왔어?');
@@ -360,8 +360,7 @@ async function endFree() {
   if (c === 0) await narr('일곱 장을 태웠다. 재는 강으로 날아갔고, 나는 다시 낭인으로 돌아갔다.', 'end_free');
   if (c === 1) { F().inn_rebuilt = true; await narr('달맞이 객잔이 다시 문을 열었다. 나는 가끔 들러 바닥을 닦고 간다.', 'end_jeong'); }
   if (c === 2) await narr('일곱 장을 품에 넣고 새벽에 길을 나섰다.', 'end_free');
-  await G.bond.ending();
-  await hook('나는 아무 깃발도 없이 그 달 아래를 걸었다.');
+  await hook('나는 아무 깃발도 없이 길 위에서 겨울을 맞았다.');
   await finish();
 }
 export async function routeEnding() { const s = side(); if (s === 'sa') await endSa(); else if (s === 'ma') await endMa(); else await endFree(); }
@@ -397,6 +396,6 @@ Story.providers.push(function routes(id) {
       if (id === 'cheongha' && has('ma_job3')) n.push(job({ id: 'kid', spr: 'Child', x: 21, y: 23.5, hint: '우물가로 가기', talk: jobWell }));
     }
   }
-  if (id === 'guhwa' && sd && !at('end')) ro.push({ spr: 'chars/Knight', x: 24, y: 24, foes: ['jeong_guard', 'jeong_guard'] }, { spr: 'chars/Knight', x: 12, y: 16, foes: ['jeong_elite'] });
+  if (id === 'guhwa' && sd && !at('end') && !F().act3) ro.push({ spr: 'chars/Knight', x: 24, y: 24, foes: ['jeong_guard', 'jeong_guard'] }, { spr: 'chars/Knight', x: 12, y: 16, foes: ['jeong_elite'] });
   return { npcs: n, spots: [], trigs: [], roam: ro };
 });

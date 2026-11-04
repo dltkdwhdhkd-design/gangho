@@ -242,6 +242,8 @@ export class Battle {
   // 피해 처리
   applyHit(src, o, h, sk, proj) {
     const isP = o.isPlayer, inv = src.isPlayer;
+    if (o.def_ && o.def_.immune && !(o.exposed > 0)) { if (!(sk && sk.expose)) { if (!(o.immT > this.t)) { o.immT = this.t + .7; this.say(o, '닿지 않는다', '#d8c8a8'); Sound.sfx('mini', .6); } return; } }
+    if (sk && sk.expose && o.def_ && o.def_.immune) { o.exposed = 5.5; this.say(o, '달빛이 벗겨졌다!', '#fff3c8'); this.shake(3); this.addFx('ringw', o.x, o.y - 8, 2.4); }
     const dx = o.x - src.x, dy = o.y - src.y, d = hyp(dx, dy) || 1, nx = dx / d, ny = dy / d;
     if (o.counter > 0 && (!h.ub || o.counterAll)) { // 낙화유수, 이화접목
       o.counter = 0; o.iframe = .4; const m = o.counterMul; this.addFx('double', src.x, src.y - 6, 1.6); this.say(o, (o.counterName || '반격') + '!', '#ffd27a'); this.stop = .08; Sound.sfx('sword2'); this.applyHit(o, src, { mul: m, kb: 60, stun: .7, ub: true }, o.sk); return;
@@ -316,6 +318,7 @@ export class Battle {
     if (a.dead) { a.deadT += dt0; return; }
     const dt = dt0 * (a.slowT > 0 ? a.slowF : 1);
     if (a.slowT > 0) a.slowT -= dt0;
+    if (a.exposed > 0) a.exposed -= dt0;
     a.iframe -= dt; a.armor -= dt; a.dashCd -= dt; a.comboT -= dt; a.flash -= dt; a.counter -= dt; a.ghostT -= dt; a.atkCd -= dt; a.stagger = Math.max(0, (a.stagger || 0) - dt);
     for (const k in a.cd) if (a.cd[k] > 0) a.cd[k] -= dt0;
     for (const k in a.buffs) if (a.buffs[k] > 0) a.buffs[k] -= dt0;
@@ -484,6 +487,7 @@ export class Battle {
     c.globalAlpha = 1;
     if (a.swing && a.wpn) this.drawWeapon(c, a);
     if (a.st === 'stun' && !dead && a.stagger > 0) { for (let i = 0; i < 3; i++) { const an = this.t * 6 + i * 2.1; c.fillStyle = '#ffe36a'; c.fillRect(snap(a.x + Math.cos(an) * 7), snap(y - 20 + Math.sin(an) * 2), 2, 2); } }
+    if (a.def_ && a.def_.immune && !(a.exposed > 0)) { c.strokeStyle = 'rgba(230,50,40,.75)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 9 * s, 12 * s, 0, 7); c.stroke(); }
     if (a.buffs.diamond > 0) { c.strokeStyle = 'rgba(255,220,120,.7)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 7, 10, 0, 7); c.stroke(); }
     if (a.buffs.moonlight > 0) { c.strokeStyle = 'rgba(170,210,255,.85)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 7, 11, 0, 7); c.stroke(); }
     if (a.slowT > 0) { c.fillStyle = 'rgba(120,80,200,.3)'; c.beginPath(); c.arc(a.x, y - 6, 9, 0, 7); c.fill(); }

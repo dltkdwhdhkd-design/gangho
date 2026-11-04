@@ -267,5 +267,36 @@ export function buildMaps() {
   m.row('tablet', 15, 11, 3, 2).row('tablet', 24, 11, 3, 2).put('statue_big', 20, 1).put('statue', 15, 4).put('statue', 27, 4);
   m.scatter(['fern2', 'bush2'], 24, 9);
   m.exit(20, 39, 4, 1, 'guhwa', 24, 30, 1, { when: 'never', lock: '돌아갈 길은 끊겼다.' });
+  // 제8부: 비단길, 사주성, 설산, 천산 입구
+  m = M('silk', 44, 26, { name: '비단길', bgm: 'road', biome: 'sand', arena: 'sand' });
+  m.road(0, 12, 18, 12, 2).road(18, 8, 18, 13, 2).road(18, 8, 30, 8, 2).road(30, 8, 30, 15, 2).road(30, 15, 43, 15, 2);
+  m.border(['rocks', 'tree_dead', 'boulder'], [[42, 14, 3, 4], [0, 11, 3, 4]], 4);
+  for (const [nm, x, y] of [['boulder', 8, 6], ['rocks', 14, 18], ['tree_dead', 24, 14], ['boulder', 36, 8], ['stump', 26, 20], ['tree_dead', 6, 19], ['rocks', 38, 21]]) m.put(nm, x, y);
+  m.scatter(['bush1', 'bush3'], 18, 21);
+  m.exit(43, 14, 1, 4, 'oasis', 2, 15, 3);
+  m = M('oasis', 44, 30, { name: '사주성', bgm: 'good', biome: 'sand', arena: 'sand' });
+  m.road(0, 15, 43, 15, 2).road(21, 0, 21, 15, 2).road(21, 15, 21, 20, 2); m.water(17, 21, 10, 5);
+  m.put('shop_green', 8, 8).put('mud', 14, 10).put('mud', 28, 9).put('straw', 33, 10).put('straw', 7, 20).put('mud', 31, 20).put('hut_b', 12, 21);
+  m.put('tree_round', 15, 20).put('tree_round', 28, 20).put('tree_round', 15, 26).put('tree_round', 28, 26).put('jar', 19, 13).put('pot', 24, 13).put('rocks', 38, 9).put('boulder', 40, 12);
+  m.border(['rocks', 'tree_dead'], [[20, 0, 4, 2], [0, 14, 3, 4]], 4);
+  m.exit(0, 14, 1, 4, 'silk', 41, 15.5, 2);
+  m.place(38, 8.6, '바위산 동굴').place(22, 2.6, '북문').place(22, 20.4, '오아시스');
+  m = M('snowpeak', 44, 34, { name: '빙궁 설산', bgm: 'mystic', biome: 'snow', arena: 'snow', ambient: 'snow' });
+  m.road(22, 8, 22, 33, 2).road(22, 13, 36, 13, 2).road(36, 8, 36, 14, 2);
+  m.put('hall', 20, 0, { dy: -24 }).put('statue', 18, 8).put('statue', 26, 8);
+  m.border(['tree_snow', 'rocks'], [[20, 31, 5, 4]], 3);
+  for (const [nm, x, y] of [['tree_snow', 10, 8], ['tree_snow', 14, 16], ['tree_snow', 30, 20], ['tree_snow', 8, 24], ['tree_snow', 34, 26], ['rocks', 12, 12], ['rocks', 30, 6], ['tree_snow', 28, 28]]) m.put(nm, x, y);
+  m.place(22, 5.4, '빙궁').place(36.5, 6.6, '고개 마루');
+  m = M('tiangate', 44, 34, { name: '천산 입구', bgm: 'curse', biome: 'dusk', arena: 'moon', tint: 'rgba(40,10,30,.3)', ambient: 'snow' });
+  m.road(21, 10, 21, 33, 2).fill(15, 7, 14, 5, 3);
+  m.put('statue_big', 20, 3).put('statue', 15, 6).put('statue', 27, 6).row('tablet', 16, 12, 2, 3).row('tablet', 25, 12, 2, 3);
+  m.border(['rocks', 'grove_dead', 'tree_dead'], [[20, 31, 5, 4]], 3);
+  for (const [nm, x, y] of [['rocks', 10, 12], ['rocks', 32, 12], ['tree_dead', 12, 20], ['tree_dead', 30, 22], ['boulder', 14, 26], ['boulder', 28, 16]]) m.put(nm, x, y);
+  // 제9부: 흑운궁
+  m = M('blackpalace', 44, 38, { name: '흑운궁', bgm: 'curse', biome: 'dusk', arena: 'moon', tint: 'rgba(60,8,30,.34)' });
+  m.water(0, 21, 44, 11); m.road(21, 12, 21, 37, 2); m.fill(14, 8, 16, 12, 3);
+  m.put('hall', 20, 0).put('statue_big', 13, 6).put('statue_big', 28, 6).row('wall_h', 2, 7, 12).row('wall_h', 30, 7, 12);
+  m.border(['rocks', 'grove_dead'], [[20, 35, 5, 4]], 4);
+  m.place(22, 7.6, '제단').place(25.5, 26.6, '다리');
   for (const k in MAPS) MAPS[k].render();
 }

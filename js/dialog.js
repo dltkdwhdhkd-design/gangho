@@ -1,5 +1,6 @@
 // 대화창: 말하는 사람의 그림이 크게 뜨고, 글자가 한 자씩 나온다
 import { G, IMG, ART, Input, Sound, $, el, esc, hasJong } from './core.js';
+import { cgOn } from './cg.js';
 export const WHO = {};
 const D = { cur: null };
 export const talking = () => !!D.cur;
@@ -19,7 +20,7 @@ function slot(side, who, expr) {
   st.appendChild(e);
 }
 function stageShow(who, expr) {
-  const st = $('#vn'); if (!st) return; st.classList.add('on');
+  const st = $('#vn'); if (!st) return; const hint0 = $('#thint'); if (hint0) hint0.style.display = 'none'; if (cgOn()) { stageClear(); return; } st.classList.add('on');
   const hint = $('#thint'); if (hint) hint.style.display = 'none';
   if (who === 'me') slot('l', 'me', expr); else if (!st.querySelector('.st.l')) slot('l', 'me');
   if (who && who !== 'me') slot('r', who, expr);
@@ -29,7 +30,9 @@ export function stageClear() { const st = $('#vn'); if (st) { st.classList.remov
 function render(c) {
   const d = $('#dialog'); d.innerHTML = '';
   if (c.type === 'narr') {
-    stageClear(); const n = el('div', 'narr'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c);
+    stageClear(); if (c.card) { const k = el('div', 'card', `<b>${esc(c.card[0])}</b><span>${esc(c.card[1])}</span>${c.card[2] ? `<i>${esc(c.card[2])}</i>` : ''}`); d.appendChild(k); d.style.background = ''; d.classList.add('over'); k.onclick = () => click(c); c.txtEl = null; return; }
+    if (cgOn()) { const n = el('div', 'narr low'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c); d.style.background = ''; return; }
+    const n = el('div', 'narr'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c);
     const pic = c.cg && ART.get('cg_' + c.cg); d.style.background = pic ? `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)), url(${pic.src}) center/cover` : 'rgba(0,0,0,.72)'; return;
   }
   d.style.background = ''; stageShow(c.who, c.expr);
@@ -45,6 +48,8 @@ function click(c) { Input.press('ok'); setTimeout(() => Input.release('ok'), 30)
 const sub = s => { const n = G.S ? G.S.name : '', j = hasJong(n); return s.replaceAll('{나}야', n + (j ? '아' : '야')).replaceAll('{나}구나', n + (j ? '이구나' : '구나')).replaceAll('{나}', n).replaceAll('{호}', G.S ? G.S.title : ''); };
 export function say(who, text, expr) { return new Promise(res => { const c = { type: 'say', who, text: sub(text), expr, n: 0, res }; D.cur = c; render(c); }); }
 export function narr(text, cg) { return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res, cg }; D.cur = c; render(c); }); }
+// 부와 장 표지: 까만 화면에 제목을 띄운다
+export function card(part, title, chap) { return new Promise(res => { const c = { type: 'narr', card: [part, title, chap], text: '', n: 0, res: v => { $('#dialog').classList.remove('over'); res(v); } }; D.cur = c; render(c); }); }
 export function choice(q, opts, who) {
   return new Promise(res => {
     const c = { type: 'choice', who, text: sub(q || ''), n: 0, res, opts, sel: 0 }; D.cur = c; render(c);
@@ -66,7 +71,7 @@ export function tickDialog(dt) {
     const shown = c.text.slice(0, Math.ceil(c.n));
     if (c.txtEl) c.txtEl.textContent = shown;
     if (Math.ceil(c.n) % 4 === 0) Sound.sfx('text', .22);
-    if (Input.take('ok')) { c.n = len; c.txtEl.textContent = c.text; }
+    if (Input.take('ok')) { c.n = len; if (c.txtEl) c.txtEl.textContent = c.text; }
     return true;
   }
   if (c.type === 'choice') {
