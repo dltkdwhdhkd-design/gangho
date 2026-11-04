@@ -3,7 +3,8 @@ import { G, IMG, Input, Sound, $, $$, el, STEP, VW, VH, SCALE, TS, clamp, lerp, 
 import { SKILLS, BASIC, WEAPONS } from './data.js';
 import { MOVES, FOES } from './foes.js';
 import { arena, ARENA_W, ARENA_H, drawStamp, STAMPS } from './tiles.js';
-import { stats, masteryLv, canEquip, DIFF, gainExp, save } from './state.js';
+import { stats, bonus, masteryLv, canEquip, DIFF, gainExp, save, give } from './state.js';
+import { DB } from './items.js';
 import { openMenu } from './ui.js';
 
 const PARRY = .17, D2R = Math.PI / 180;
@@ -25,7 +26,7 @@ export class Battle {
     this.cfg = cfg; this.t = 0; this.actors = []; this.fx = []; this.proj = []; this.zones = []; this.nums = []; this.teles = []; this.parts = [];
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
     this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;
-    const S = G.S, st = stats(S); this.st = st;
+    const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;
     (cfg.allies || []).forEach((id, i, l) => this.spawn(id, 0, this.W / 2 + (i - (l.length - 1) / 2) * 34 + (l.length % 2 ? 20 : 0), this.H * .74 + (i % 2) * 10));
@@ -134,6 +135,10 @@ export class Battle {
     if (a.comboT <= 0) a.combo = 0;
     this.aim(a, d);
     this.start(a, list[a.combo % list.length], 'basic'); a.vx = a.vy = 0;
+    const last = a.combo === list.length - 1, b = this.b;
+    a.skRate = 1 + (b.basicSpeed || 0) / 100;
+    if (last && b.armorBasic) a.armor = Math.max(a.armor, .4);
+    if (last && b.qi) this.shoot(a, { img: 'p_energy', speed: 190, mul: .7, life: .6, r: 6, pierce: true, stun: .2 }, list[a.combo]);
     a.combo = (a.combo + 1) % list.length; a.comboT = .6;
     a.basicHit = true;
   }
@@ -141,18 +146,20 @@ export class Battle {
     const k = SKILLS[id];
     if ((a.cd[slot] || 0) > 0) return this.say(a, '아직', '#ccc');
     if (!canEquip(id)) return this.say(a, '무기가 안 맞음', '#ccc');
-    if (a.mp < k.mp) { Sound.sfx('cancel'); return this.say(a, '내력 부족', '#8fc0ff'); }
-    a.mp -= k.mp; a.cd[slot] = k.cd * this.st.cdMul * (masteryLv(id) >= 5 ? .85 : 1);
+    const cost = k.mp * (1 + (this.b.mpCost || 0) / 100);
+    if (a.mp < cost) { Sound.sfx('cancel'); return this.say(a, '내력 부족', '#8fc0ff'); }
+    a.mp -= cost; a.skRate = 1; a.cd[slot] = k.cd * this.st.cdMul * (masteryLv(id) >= 5 ? .85 : 1);
     this.aim(a, Input.dir()); a.vx = a.vy = 0;
     if (a.isPlayer) { G.S.mastery[id] = (G.S.mastery[id] || 0) + 1; }
     this.start(a, k, id);
   }
   usePotion(a) {
     if (G.S.potion <= 0) return this.say(a, '금창약 없음', '#ccc');
-    G.S.potion--; const h = Math.round(a.maxHp * .35); a.hp = Math.min(a.maxHp, a.hp + h); this.num(a.x, a.y - 16, '+' + h, '#7fe08a', 1); Sound.sfx('power1');
+    G.S.potion--; const h = Math.round(a.maxHp * .35 * (1 + (this.b.potion || 0) / 100)); a.hp = Math.min(a.maxHp, a.hp + h); this.num(a.x, a.y - 16, '+' + h, '#7fe08a', 1); Sound.sfx('power1');
   }
   dash(a, d) {
-    const l = hyp(d.x, d.y) || 1; a.st = 'dash'; a.sk = null; a.stT = .17; a.iframe = Math.max(a.iframe, .2); a.dashCd = .6;
+    const l = hyp(d.x, d.y) || 1; const b = a.isPlayer ? this.b : {}; a.st = 'dash'; a.sk = null; a.stT = .17; a.iframe = Math.max(a.iframe, .2 + (b.dashInv || 0)); a.dashCd = .6 + (b.dashCd || 0);
+    if (b.dashHit) a.rush = { mul: .8, kb: 16, stun: .25, seen: new Set() };
     a.vx = d.x / l * 225; a.vy = d.y / l * 225; a.ghostT = .17; Sound.sfx('jump', .7);
     a.face = faceOf(d.x, d.y); this.addFx('smoke', a.x, a.y - 2, .5);
   }
@@ -203,7 +210,8 @@ export class Battle {
   swingFx(a, h) { if (a.wpn) a.swing = { t: 0, dur: .13, from: h.shape === 'line' ? 0 : -1.2, to: h.shape === 'line' ? 0 : 1.2, thrust: h.shape === 'line' }; }
   // 근접 판정
   melee(a, h, sk) {
-    const ang = Math.atan2(a.ay, a.ax), ca = Math.cos((h.a || 0) * D2R);
+    const ca = Math.cos((h.a || 0) * D2R);
+    if (a.isPlayer && sk && sk.basic && this.b.reach) { const q = 1 + this.b.reach / 100; h = { ...h, r: h.r && h.r * q, len: h.len && h.len * q }; }
     for (const o of this.foes(a)) {
       if (o.iframe > 0) continue;
       let x = o.x - a.x, y = (o.y - 3) - (a.y - 3), inside = false; const pad = o.r;
@@ -239,14 +247,14 @@ export class Battle {
     const front = (-nx * o.ax + -ny * o.ay) > -.1 || proj;
     if (o.st === 'guard' && front && !h.ub) {
       const moon = o.buffs.moonlight > 0;
-      if (o.guardT < PARRY || moon) return this.parry(o, src, proj);
+      if (o.guardT < PARRY + (isP ? (this.b.parry || 0) : 0) || moon) return this.parry(o, src, proj);
       const bd = this.calc(src, o, h, sk) * .22; o.hp -= bd; o.mp = Math.max(0, o.mp - bd * .4); this.num(o.x, o.y - 16, Math.round(bd), '#bbb', .8); Sound.sfx('mini', .8); this.addFx('spark', o.x + nx * -6, o.y - 6, .5);
       o.kx = nx * 40; o.ky = ny * 40; o.kT = .1;
       if (isP && o.mp <= 0) { o.st = 'stun'; o.stT = .7; this.say(o, '자세 무너짐', '#ff8f7a'); }
       return;
     }
     let dmg = this.calc(src, o, h, sk), crit = Math.random() < src.crit;
-    if (crit) dmg *= 1.6;
+    if (crit) dmg *= 1.6 + (inv ? (this.b.critDmg || 0) / 100 : 0);
     if (o.buffs.diamond > 0) dmg *= .5;
     if (isP && G.S.heart === 'iron_shirt') dmg *= .9;
     if (src.isPlayer && G.S.heart === 'fury' && src.hp < src.maxHp * .5) dmg *= 1.25;
@@ -255,13 +263,17 @@ export class Battle {
     this.num(o.x + rnd(-4, 4), o.y - 16, dmg, crit ? '#ffd23c' : isP ? '#ff7a6a' : '#fff', crit ? 1.35 : 1);
     this.addFx('spark', o.x - nx * 2, o.y - 7, .55);
     Sound.sfx(rint(0, 1) ? 'hit' : 'hit2', .8);
-    if (src.isPlayer) { src.mp = Math.min(src.maxMp, src.mp + (sk && sk.basic ? 1.6 : .4)); }
+    if (src.isPlayer) {
+      src.mp = Math.min(src.maxMp, src.mp + (sk && sk.basic ? 1.6 + (this.b.mpHit || 0) : .4));
+      if (this.b.lifeHit) src.hp = Math.min(src.maxHp, src.hp + dmg * this.b.lifeHit / 100);
+      if (this.b.venom && sk && sk.basic) o.dots.push({ dps: src.atk * .12, t: 2, n: 0 });
+    }
     if (h.dot) o.dots.push({ dps: src.atk * h.dot.dps, t: h.dot.t, n: 0 });
     // 경직과 밀림
     let stagger = true;
     if (o.armor > 0 || o.buffs.diamond > 0) stagger = false;
     if (o.maxPoise > 0) {
-      o.poise -= (h.mul || 1) * 7 * (inv ? 1 : 0);
+      o.poise -= (h.mul || 1) * 7 * (inv ? 1 + (this.b.poiseDmg || 0) / 100 : 0);
       if (o.poise > 0) stagger = false;
       else if (o.maxPoise < 9000) { o.poise = o.maxPoise; o.st = 'stun'; o.stT = 1.5; o.stagger = 1.5; o.sk = null; stagger = false; this.say(o, '자세 무너짐!', '#ffd23c'); this.shake(3); Sound.sfx('boom2'); this.teles = this.teles.filter(t => t.owner !== o); }
     }
@@ -273,7 +285,11 @@ export class Battle {
   }
   calc(src, o, h, sk) {
     let m = h.mul || 1;
-    if (src.isPlayer) { if (sk && !sk.basic) m *= this.st.power * (1 + (masteryLv(src.skKey) - 1) * .07); }
+    if (src.isPlayer) {
+      const b = this.b;
+      if (sk && !sk.basic) m *= this.st.power * (1 + (masteryLv(src.skKey) - 1) * .07) * (1 + ((b.skill || 0) + (sk.ult ? (b.ult || 0) : 0)) / 100);
+      else m *= 1 + (b.basic || 0) / 100;
+    }
     if (src.team === 1 && sk && sk.fromSkill) m *= .55;
     return src.atk * m * (60 / (60 + o.def)) * rnd(.93, 1.07);
   }
@@ -290,6 +306,7 @@ export class Battle {
   kill(o, src) {
     o.dead = true; o.st = 'dead'; o.deadT = 0; o.sk = null; o.mv = null; o.rush = null; this.teles = this.teles.filter(t => t.owner !== o);
     Sound.sfx('kill'); if (o.boss) { this.shake(6); this.stop = .35; }
+    if (src && src.isPlayer && this.b.killHeal) src.hp = Math.min(src.maxHp, src.hp + src.maxHp * this.b.killHeal / 100);
     if (o.team === 1) { this.addFx('smoke', o.x, o.y - 7, 1.2); }
   }
   // ── 매 틱 ──
@@ -311,13 +328,13 @@ export class Battle {
     for (const g of a.ghosts) g.t -= dt0; a.ghosts = a.ghosts.filter(g => g.t > 0);
     switch (a.st) {
       case 'skill': {
-        a.skT += dt;
+        a.skT += dt * (a.sk.basic ? (a.skRate || 1) : 1);
         const steps = a.sk.steps;
         while (a.sk && a.skI < steps.length && steps[a.skI].t <= a.skT) this.runStep(a, steps[a.skI++]);
         if (a.st === 'skill' && a.sk && a.skT >= a.sk.dur) { a.sk = null; a.st = 'idle'; a.rush = null; }
         break;
       }
-      case 'dash': a.stT -= dt; if (a.stT <= 0) { a.st = 'idle'; a.vx = a.vy = 0; } break;
+      case 'dash': a.stT -= dt; if (a.stT <= 0) { a.st = 'idle'; a.vx = a.vy = 0; a.rush = null; } break;
       case 'stun': a.stT -= dt; a.vx *= .8; a.vy *= .8; if (a.stT <= 0) a.st = 'idle'; break;
     }
     let vx = a.vx, vy = a.vy;
@@ -563,15 +580,17 @@ export function fight(cfg) {
     Sound.bgm(cfg.bgm || (cfg.foes.some(f => FOES[f].boss) ? 'boss' : 'fight'));
     B.onDone = async (o) => {
       G.lastOutcome = o;
-      let up = 0, ex = 0, si = 0;
+      let up = 0, ex = 0, si = 0; const drops = [];
       if (o === 'win') {
         for (const a of B.actors) if (a.team === 1) { const f = a.def_; if (a.dead || a.yielded) { ex += f.exp; si += f.silver; } }
         ex = Math.round(ex * (cfg.expMul ?? 1)); si = Math.round(si * (cfg.expMul ?? 1));
         up = gainExp(ex); G.S.silver += si;
+        for (const a of B.actors) if (a.team === 1 && a.dead) for (const [id, ch, lo, hi] of a.def_.drops || []) if (Math.random() < ch) { const n = rint(lo, hi); give(id, n); drops.push(`${DB[id].name} ${n}`); }
       }
+      const meal = G.S.meal; if (meal && --meal.left <= 0) G.S.meal = null;
       $('#hud').innerHTML = '';
       G.scene = prev === 'battle' ? 'field' : prev; G.battle = null;
-      res({ outcome: o, exp: ex, silver: si, levelUp: up });
+      res({ outcome: o, exp: ex, silver: si, levelUp: up, drops });
     };
   });
 }

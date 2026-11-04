@@ -90,6 +90,7 @@ async function baekFirst() {
   await narr('제1장 · 타다 남은 객잔');
   ctx.goal('불탄 객잔을 살펴보고, 나루터의 뱃사공에게 묻기');
   ctx.note('곽 아주머니는 검은 옷의 무리에게 끌려갔다. 여우 가면이 아주머니를 “곽 호법”이라고 불렀다.');
+  ctx.note('마을에서 할 수 있는 일: 복덕방에서 집 사기, 뱃사공에게 낚싯대 얻기, 서쪽 청풍골에서 사냥과 벌목, 대장간과 약방에서 제작, 떠돌이 비무객과 겨루기.');
 }
 
 async function c1Inn() {
@@ -210,6 +211,7 @@ async function yunGo() {
 
 const talkTown = {
   boat: async () => {
+    if (F().burned && !F().rod && step() !== 'c1a') { F().rod = true; await say('boat', '객잔도 탔는데 뭘 먹고 사냐. 이 낚싯대 가져가라. 나루 끝에서 던지면 뭐라도 문다.'); Sound.sfx('bonus'); await say(null, '낚싯대를 받았다. 물가에서 E 키로 낚시한다.'); return; }
     if (step() === 'c1a') { await say('boat', '네가 살아 있었구나! 그날 밤 흑의인 놈들이 배 세 척으로 강을 건너더니 동쪽 산으로 가더라.'); await say('boat', '동쪽이면 흑풍채 놈들 땅인데. 맨손으론 못 간다.'); F().c1boat = true; ctx.note('뱃사공: 흑의인들은 동쪽 산, 흑풍채 쪽으로 갔다.'); await checkClues(); return; }
     if (F().boat_guhwa) { const c = await choice('어디로 갈까?', ['구화성으로', '그만둔다'], 'boat'); if (c === 0) await ctx.warp('guhwa', 24.5, 29, 1); return; }
     await say('boat', '강물은 늘 그 자리인데 사람만 바뀌는구나.');
@@ -220,9 +222,9 @@ const talkTown = {
       await say('smith', '살아 있었구나. 곽 아주머니 밥을 십 년 얻어먹었다. 그 목검으로 산적을 치겠다고? 이거 가져가.');
       S().weapons.push('iron_sword'); S().weapon = 'iron_sword'; toast('철검을 받았다'); Sound.sfx('bonus');
     }
-    await ctx.shop('철 대장간', [ctx.item.weapon('iron_sword'), ctx.item.weapon('iron_blade'), ctx.item.weapon('iron_spear'), ctx.item.weapon('fist_wrap'), ctx.item.weapon('blue_sword'), ctx.item.weapon('ghost_blade')]);
+    const c = await choice('무엇을 할까?', ['무기 사기', '제작과 강화', '그만둔다'], 'smith'); if (c === 0) await ctx.shop('철 대장간', [ctx.item.weapon('iron_sword'), ctx.item.weapon('iron_blade'), ctx.item.weapon('iron_spear'), ctx.item.weapon('fist_wrap'), ctx.item.weapon('blue_sword'), ctx.item.weapon('ghost_blade')]); if (c === 1) await G.life.openCraft('forge', '철 대장간 · 제작과 강화');
   },
-  shopk: async () => { await ctx.shop('만물상', [ctx.item.potion(), ctx.item.book('dart', 40), ctx.item.heart('tonap', 60), ctx.item.heart('iron_shirt', 160)]); },
+  shopk: async () => { const c = await choice('무엇을 할까?', ['물건 사기', '가구 사기', '물건 팔기', '그만둔다'], 'shopk'); if (c === 0) await ctx.shop('만물상', [ctx.item.potion(), ctx.item.stuff('rice', 4), ctx.item.stuff('noodlep', 4), ctx.item.stuff('sweets', 24), ctx.item.stuff('tea', 44), ctx.item.book('dart', 40), ctx.item.heart('tonap', 60), ctx.item.heart('iron_shirt', 160)]); if (c === 1) await ctx.shop('만물상 · 가구', ['bed', 'table', 'stool', 'drawer', 'plant', 'jar', 'lamp', 'stove', 'bench'].map(ctx.item.furn)); if (c === 2) await G.life.openSell(); },
 };
 async function wantedBoard() {
   const list = [['wanted1', '좀도둑 쥐눈이', 40, 'c1c'], ['wanted2', '독수리 마삼', 120, 'c2a'], ['wanted3', '인면수 낭패', 300, 'c3a']].filter(w => after(w[3]) && !S().wanted[w[0]]);
@@ -249,8 +251,8 @@ Story.providers.push(function content1(id) {
     }
   }
   if (id === 'clinic') {
-    n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => at('c1b', 'c1d', 'c1h'), when: () => !F().yun_join, talk: async () => { if (at('c1b')) await yunPaper(); else if (at('c1d')) await yunAfter(); else if (at('c1h')) await yunGo(); else if (F().c1yun2 || !after('c1e')) await say('yun', '약이 필요하면 만물상보다 여기가 낫다는 말은 안 할게요. 제일 싼 건 맞아요.'); else { F().c1yun2 = true; await yunNight(); } } });
-    n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, talk: async () => { await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); await ctx.shop('윤씨 약방', [ctx.item.potion()]); } });
+    n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => at('c1b', 'c1d', 'c1h'), when: () => (!F().yun_join || at('end')) && S().married !== 'yun', talk: async () => { if (at('c1b')) await yunPaper(); else if (at('c1d')) await yunAfter(); else if (at('c1h')) await yunGo(); else if (F().c1yun2 || !after('c1e')) await say('yun', '약이 필요하면 만물상보다 여기가 낫다는 말은 안 할게요. 제일 싼 건 맞아요.'); else { F().c1yun2 = true; await yunNight(); } } });
+    n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, talk: async () => { await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion()]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
   }
   if (id === 'smith') n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => at('c1e') && !F().smith_gift, talk: talkTown.smith });
   if (id === 'shop') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: talkTown.shopk });

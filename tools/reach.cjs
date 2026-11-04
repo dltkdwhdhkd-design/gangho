@@ -10,7 +10,7 @@ const { chromium } = require('playwright');
     const allFlags = ['c1a', 'c1c', 'c1e', 'c2b', 'c2c', 'c2d', 'c2f', 'c2g', 'c3a', 'c3b', 'c3e', 'c4a', 'c4b', 'c4c'];
     for (const [id, m] of Object.entries(D.MAPS)) {
       for (const q of m.portals) {
-        const t = D.MAPS[q.to]; if (!t) { res.push(`${id}: 없는 지도 ${q.to}`); continue; }
+        if (q.to === 'myhouse') continue; const t = D.MAPS[q.to]; if (!t) { res.push(`${id}: 없는 지도 ${q.to}`); continue; }
         if (t.blocked(q.tx * 16, q.ty * 16)) res.push(`${id} → ${q.to}: 도착점(${q.tx},${q.ty})이 막힘`);
         for (const r of t.portals) if (q.tx * 16 > r.x && q.tx * 16 < r.x + r.w && q.ty * 16 > r.y && q.ty * 16 < r.y + r.h) res.push(`${id} → ${q.to}: 도착점이 다른 포탈 위`);
       }

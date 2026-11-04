@@ -8,6 +8,7 @@ import { fight } from './battle.js';
 import { Story } from './story.js';
 import { ctx as sctx } from './ctx.js';
 import { MAPS } from './maps.js';
+import * as state from './state.js';
 import { newState, stats } from './state.js';
 import * as dialog from './dialog.js';
 
@@ -17,6 +18,10 @@ function fit() {
   $('#stage').style.transform = `translate(-50%,-50%) scale(${s})`;
 }
 addEventListener('resize', fit); fit();
+// 꾸미기: 화면을 눌러 가구를 놓는다
+const tileAt = e => { const r = cv.getBoundingClientRect(), f = G.field; return [Math.floor(((e.clientX - r.left) / r.width * 320 + f.cam.x) / 16), Math.floor(((e.clientY - r.top) / r.height * 180 + f.cam.y) / 16)]; };
+cv.addEventListener('pointermove', e => { if (G.decor) { [G.decor.cx, G.decor.cy] = tileAt(e); } });
+cv.addEventListener('pointerdown', e => { if (G.decor) { [G.decor.cx, G.decor.cy] = tileAt(e); G.life.placeAt(G.decor.cx, G.decor.cy); } });
 
 function tick(dt) {
   if (G.menuOpen) { Input.tick(dt); return; }
@@ -55,6 +60,6 @@ G.fast = (n) => { for (let i = 0; i < n; i++) tick(STEP); render(); };
   G.field = new Field();
   showTitle();
   requestAnimationFrame(frame);
-  G.dbg = { fight, Story, ctx: sctx, MAPS, newState, stats, dialog };
+  G.dbg = { fight, Story, ctx: sctx, MAPS, newState, stats, dialog, state };
   window.__G = G;
 })();

@@ -290,6 +290,7 @@ async function ending() {
   if (c === 1) { await narr('월하곡에 다시 돌문이 섰다. 첫 제자는 쟁반을 든 꼬마였다.\n입문 시험은 걸레질이다.'); }
   if (c === 2) { await narr('달맞이 객잔이 다시 문을 열었다.\n윤씨 약방이 장부를 들고 찾아오고,\n벽수궁의 검객이 국수를 먹고 가고,\n파계승은 오늘도 밥값이 없다.'); }
   if (F().baek_live) await say('baek', '점소이. 방값 가져왔다. 이자는 깎자.');
+  { const q = S().married || S().partner; if (q) await say(q, G.life.pick(G.life.cand[q].chat)); }
   await narr('강호행 · 끝\n\n여기까지 함께해 주셔서 고맙습니다.');
   set('end'); F().cleared = true; ctx.goal('');
   await ctx.warp('cheongha', 22.5, 16, 0);
@@ -315,16 +316,16 @@ Story.providers.push(function content2(id) {
   if (id === 'library' && at('c2f')) sp.push({ x: 6, y: 2, w: 3, h: 3, hint: '기록 찾기', act: library });
   if (id === 'guhwa') {
     n.push({ id: 'judge', spr: 'Inspector', x: 24.5, y: 15, dir: 0, mark: () => after('c3b') && !after('c4a'), when: () => !after('c4a'), talk: judge });
-    n.push({ id: 'yun', spr: 'Princess', x: 13, y: 15, dir: 3, mark: () => (F().round || 0) >= 1 && !F().ev_lantern, when: () => !after('c4a'), talk: async () => { if ((F().round || 0) >= 1 && !F().ev_lantern) await lantern(); else await say('yun', '금창약은 넉넉해요? 값은 장부에.'); } });
-    n.push({ id: 'so', spr: 'RedSamurai', x: 34, y: 15, dir: 2, mark: () => at('c3e') && !F().ev_soeve, when: () => !after('c4a'), talk: async () => { if (at('c3e') && !F().ev_soeve) await soEve(); else await say('so', '칼은 닦았어?'); } });
-    n.push({ id: 'cheol', spr: 'Monk2', x: 20, y: 22, dir: 3, mark: () => !!F().monk_met && !F().ev_cheol, when: () => !!F().monk_met && !after('c4a'), talk: async () => { if (!F().ev_cheol) await cheolDrink(); else await say('cheol', '나무아미… 저 만두 하나만.'); } });
+    n.push({ id: 'yun', spr: 'Princess', x: 13, y: 15, dir: 3, mark: () => (F().round || 0) >= 1 && !F().ev_lantern, when: () => !after('c4a') && S().married !== 'yun', talk: async () => { if ((F().round || 0) >= 1 && !F().ev_lantern) await lantern(); else await say('yun', '금창약은 넉넉해요? 값은 장부에.'); } });
+    n.push({ id: 'so', spr: 'RedSamurai', x: 34, y: 15, dir: 2, mark: () => at('c3e') && !F().ev_soeve, when: () => (!after('c4a') || at('end')) && S().married !== 'so', talk: async () => { if (at('c3e') && !F().ev_soeve) await soEve(); else await say('so', '칼은 닦았어?'); } });
+    n.push({ id: 'cheol', spr: 'Monk2', x: 20, y: 22, dir: 3, mark: () => !!F().monk_met && !F().ev_cheol, when: () => !!F().monk_met && (!after('c4a') || at('end')) && S().married !== 'cheol', talk: async () => { if (!F().ev_cheol) await cheolDrink(); else await say('cheol', '나무아미… 저 만두 하나만.'); } });
     n.push({ id: 'boat', spr: 'OldMan2', x: 26.5, y: 29, dir: 2, talk: async () => { const c = await choice('청하진으로 갈까?', ['간다', '그만둔다'], 'boat'); if (!c) await ctx.warp('cheongha', 22.5, 26, 1); } });
   }
   if (id === 'inn2') {
     n.push({ id: 'host', spr: 'Villager', x: 4, y: 4.6, dir: 0, mark: () => after('c3b') && !F().monk_met, talk: async () => { if (!F().monk_met) await monkMeet(); else await say('host', '어서 오시오. 스님 빚을 대신 갚은 분이시지.'); } });
     tr.push({ x: 2, y: 6, w: 14, h: 6, when: () => (F().round || 0) === 3 && !F().ambushed, run: ambush });
   }
-  if (id === 'shop2') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: async () => { await ctx.shop('구화 상회', [ctx.item.potion(), ctx.item.weapon('blue_sword'), ctx.item.weapon('dragon_spear'), ctx.item.weapon('ghost_blade'), ctx.item.weapon('iron_gauntlet'), ctx.item.book('one_point', 200), ctx.item.book('dragon_pass', 260), ctx.item.book('sweep_army', 260), ctx.item.book('mad_wind', 260), ctx.item.book('hundred_flower', 340), ctx.item.book('sky_pierce', 700), ctx.item.heart('fury', 300)]); } });
+  if (id === 'shop2') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: async () => { const c = await choice('무엇을 할까?', ['물건 사기', '가구 사기', '선물 사기', '물건 팔기', '그만둔다'], 'shopk'); if (c === 1) await ctx.shop('구화 상회 · 가구', ['bookcase', 'shelf', 'rack', 'scroll', 'chair', 'dummy', 'plum_tree', 'sword_rack'].map(ctx.item.furn)); if (c === 2) await ctx.shop('구화 상회 · 선물', [['tea', 44], ['plum_wine', 70], ['hairpin', 130], ['sachet', 60], ['poem', 90], ['jade', 200]].map(a => ctx.item.stuff(...a))); if (c === 3) await G.life.openSell(); if (c) return; await ctx.shop('구화 상회', [ctx.item.potion(), ctx.item.weapon('blue_sword'), ctx.item.weapon('dragon_spear'), ctx.item.weapon('ghost_blade'), ctx.item.weapon('iron_gauntlet'), ctx.item.book('one_point', 200), ctx.item.book('dragon_pass', 260), ctx.item.book('sweep_army', 260), ctx.item.book('mad_wind', 260), ctx.item.book('hundred_flower', 340), ctx.item.book('sky_pierce', 700), ctx.item.heart('fury', 300)]); } });
   if (id === 'hall2' && !after('c3e')) n.push({ id: 'chief', spr: 'Master', x: 7, y: 4.6, dir: 0, mark: () => (F().round || 0) === 2 && !F().chief_met, talk: async () => { if ((F().round || 0) >= 2 && !F().chief_met) await chiefMeet(); else await say('chief', '차가 식는다.'); } });
   if (id === 'wolha') {
     sp.push({ x: 20, y: 28, w: 4, h: 2, hint: '쓰러진 돌문', act: () => trace(1) }, { x: 7, y: 22, w: 3, h: 3, hint: '돌계단', act: () => trace(2) }, { x: 33, y: 22, w: 3, h: 3, hint: '칼자국', act: () => trace(3) });

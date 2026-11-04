@@ -17,14 +17,14 @@ export const ctx = {
   F: () => G.S.flags,
   goal(t) { G.S.goal = t; G.field.updateGoal(); },
   note(t) { G.S.notes.push(t); toast('수첩에 적었다'); },
-  love(k, n = 1) { G.S.love[k] = Math.min(3, G.S.love[k] + n); G.S.flags['met_' + k] = true; Sound.sfx('secret'); toast(`${WHO[k].name}와(과) 가까워졌다`); },
+  love(k, n = 1) { G.S.love[k] = Math.min(100, (G.S.love[k] || 0) + n * 14); G.S.flags['met_' + k] = true; Sound.sfx('secret'); toast(`${WHO[k].name}와(과) 가까워졌다`); },
   page(id) { if (!G.S.pages.includes(id)) G.S.pages.push(id); learn(id); },
   silver(n) { G.S.silver += n; Sound.sfx('coin'); toast(`은자 ${n}냥을 얻었다`); },
   async duel(cfg) {
     for (; ;) {
       await fadeTo(1); G.field.hideHud?.(); await fadeTo(0);
       const r = await fight(cfg);
-      if (r.outcome === 'win') { await showResult(r); if (cfg.bgm === 'boss') G.S.potion = Math.max(G.S.potion, G.S.potionMax); restoreBgm(); G.field.showHud(); return true; }
+      if (r.outcome === 'win') { await showResult(r); if (cfg.bgm === 'boss') G.S.potion = Math.max(G.S.potion, G.S.potionMax); if (cfg.yieldAt) await G.life.lootAfter(cfg); restoreBgm(); G.field.showHud(); return true; }
       if (cfg.optional) { restoreBgm(); G.field.showHud(); return false; }
       await choiceLose();
     }
@@ -38,7 +38,9 @@ function restoreBgm() { const m = G.field.m; if (m) Sound.bgm(m.bgm); }
 export const Story = {
   content(id) {
     const L = Story.providers.map(f => f(id));
-    return { npcs: L.flatMap(x => x.npcs).filter(n => !n.when || n.when()), spots: L.flatMap(x => x.spots), trigs: L.flatMap(x => x.trigs), roam: L.flatMap(x => x.roam) };
+    const npcs = L.flatMap(x => x.npcs).filter(n => !n.when || n.when());
+    if (Story.wrapNpc) npcs.forEach(Story.wrapNpc);
+    return { npcs, spots: L.flatMap(x => x.spots), trigs: L.flatMap(x => x.trigs), roam: L.flatMap(x => x.roam), hunt: L.flatMap(x => x.hunt || []) };
   },
   begin() { G.scene = 'field'; G.field.load('inn', 8, 8, 1); $('#fade').style.opacity = 0; G.field.run(Story.scenes.opening); },
   resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0); },

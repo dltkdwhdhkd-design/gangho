@@ -1,7 +1,9 @@
 // 제목 화면, 주인공 만들기, 메뉴, 상점, 결과창
 import { G, IMG, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS } from './core.js';
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
-import { newState, stats, save, load, hasSave, masteryLv, canEquip, DIFF, learn } from './state.js';
+import { newState, stats, save, load, hasSave, masteryLv, canEquip, DIFF, learn, have, give, take } from './state.js';
+import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
+import { icon } from './icons.js';
 import { Story } from './story.js';
 import { CLANS, clansWon } from './clandata.js';
 
@@ -44,18 +46,18 @@ export function closeMenu() { G.menuOpen = false; $('#modal').classList.remove('
 function menuKey(e) { if (e.code === 'Escape' || e.code === 'KeyM') { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식 배치'], ['gear', '무기·심법'], ['clan', '강호'], ['note', '수첩'], ['love', '인연'], ['set', '설정']];
+  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식 배치'], ['tree', '무공 트리'], ['gear', '장비·심법'], ['bag', '소지품'], ['clan', '강호'], ['note', '수첩'], ['love', '인연'], ['set', '설정']];
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (Esc)</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, gear: tabGear, clan: tabClan, note: tabNote, love: tabLove, set: tabSet })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: tabClan, note: tabNote, love: tabLove, set: tabSet })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
   const line = (k, label, v, tip) => `<div class="stat"><b>${label}</b><span>${v} <small class="hint">${tip}</small></span>${S.pts > 0 ? `<button class="btn sm" data-up="${k}">+1</button>` : ''}</div>`;
   B.innerHTML = `<div class="two"><div><h2>${esc(S.name)}</h2><div class="hint">경지 <b style="color:var(--red);font-weight:400">${rankOf(S.lv)}</b> · ${S.lv}성 · 다음 깨달음까지 ${need - S.exp}</div>
-  <div class="stat"><b>체력</b><span>${st.maxHp}</span></div><div class="stat"><b>내력</b><span>${st.maxMp} (초당 ${st.regen.toFixed(1)} 회복)</span></div><div class="stat"><b>공격력</b><span>${st.atk.toFixed(0)}</span></div><div class="stat"><b>방어</b><span>${st.def.toFixed(0)}</span></div><div class="stat"><b>은자</b><span>${S.silver} 냥</span></div><div class="stat"><b>금창약</b><span>${S.potion} 개</span></div></div>
+  <div class="stat"><b>체력</b><span>${st.maxHp}</span></div><div class="stat"><b>내력</b><span>${st.maxMp} (초당 ${st.regen.toFixed(1)} 회복)</span></div><div class="stat"><b>공격력</b><span>${st.atk.toFixed(0)}</span></div><div class="stat"><b>방어</b><span>${st.def.toFixed(0)}</span></div><div class="stat"><b>은자</b><span>${S.silver} 냥</span></div><div class="stat"><b>금창약</b><span>${S.potion} / ${S.potionMax} 개</span></div><div class="stat"><b>내 집</b><span>${S.house.lv ? HOUSES[S.house.lv].name : '없음'}</span></div></div>
   <div><h2>능력치 ${S.pts > 0 ? `<span class="tag ult">남은 점수 ${S.pts}</span>` : ''}</h2>${line('str', '근력', S.str, '공격력')}${line('con', '근골', S.con, '체력과 방어')}${line('agi', '민첩', S.agi, '속도, 치명타, 쿨타임')}${line('inn', '내공', S.inn, '내력과 초식 위력')}
   <p class="hint" style="margin-top:12px">전투로 깨달음이 쌓이면 점수를 얻습니다. 초식은 많이 쓸수록 성이 오르고 강해집니다.</p></div></div>`;
   $$('[data-up]', B).forEach(b => b.onclick = () => { S[b.dataset.up]++; S.pts--; Sound.sfx('tick'); drawMenu(); });
@@ -83,12 +85,38 @@ function tabSkill(B) {
 function tabGear(B) {
   const S = G.S;
   let h = '<div class="two"><div><h2>무기</h2><div class="list">';
-  for (const id of S.weapons) { const w = WEAPONS[id]; h += `<button class="item ${id === S.weapon ? 'eq' : ''}" data-w="${id}">${w.name}<span class="tag">${w.type}</span><span class="tag">공격 ${w.atk}</span><small>${w.desc}</small></button>`; }
-  h += '</div></div><div><h2>심법</h2><div class="list">';
+  for (const id of S.weapons) { const w = WEAPONS[id], p = S.wplus[id] || 0; h += `<button class="item ${id === S.weapon ? 'eq' : ''}" data-w="${id}">${icon(id)}${w.name}${p ? ` +${p}` : ''}<span class="tag">${w.type}</span><span class="tag">공격 ${Math.round(w.atk * (1 + p * .12))}</span><small>${w.desc}</small></button>`; }
+  h += '</div></div><div><h2>장신구</h2><div class="list">';
+  for (const id of S.accs || []) { const w = ACCS[id]; h += `<button class="item ${id === S.acc ? 'eq' : ''}" data-a="${id}">${w.name}<small>${w.desc}</small></button>`; }
+  if (!(S.accs || []).length) h += '<p class="hint">비무에서 이기면 상대의 장신구를 가져올 수 있습니다.</p>';
+  h += '</div><h2 style="margin-top:12px">심법</h2><div class="list">';
   for (const id of S.hearts) { const w = HEARTS[id]; h += `<button class="item ${id === S.heart ? 'eq' : ''}" data-h="${id}">${w.name}<small>${w.desc}</small></button>`; }
   B.innerHTML = h + '</div></div></div>';
+  $$('[data-a]', B).forEach(b => b.onclick = () => { S.acc = S.acc === b.dataset.a ? null : b.dataset.a; Sound.sfx('accept'); drawMenu(); });
   $$('[data-w]', B).forEach(b => b.onclick = () => { S.weapon = b.dataset.w; S.slots = S.slots.map(id => id); Sound.sfx('accept'); drawMenu(); });
   $$('[data-h]', B).forEach(b => b.onclick = () => { S.heart = b.dataset.h; Sound.sfx('accept'); drawMenu(); });
+}
+function tabBag(B) {
+  const S = G.S, kinds = ['요리', '선물', '보물', '물고기', '재료'], meal = S.meal && S.meal.left > 0 ? `먹은 음식: ${DB[S.meal.id].name} (전투 ${S.meal.left}번 남음)` : '먹은 음식 없음';
+  let h = `<p class="hint">${meal} · 은자 ${S.silver}냥 · 금창약 ${S.potion}/${S.potionMax}</p><div class="two">`;
+  const ids = Object.keys(S.inv).filter(k => DB[k]);
+  if (!ids.length) h += '<p class="hint">가진 물건이 없습니다. 채집, 사냥, 낚시로 모을 수 있습니다.</p>';
+  for (const kd of kinds) { const l = ids.filter(k => DB[k].kind === kd); if (!l.length) continue; h += `<div><h2>${kd}</h2><div class="list">${l.map(k => `<button class="item" ${DB[k].meal ? `data-eat="${k}"` : 'disabled style="opacity:1"'}>${icon(k)}${DB[k].name} × ${have(k)}${DB[k].meal ? '<span class="tag">먹기</span>' : ''}<small>${DB[k].desc}</small></button>`).join('')}</div></div>`; }
+  B.innerHTML = h + '</div>';
+  $$('[data-eat]', B).forEach(b => b.onclick = () => { const k = b.dataset.eat; take(k); S.meal = { id: k, left: 3 }; Sound.sfx('ok1'); toast(`${DB[k].name}을(를) 먹었다`); drawMenu(); });
+}
+let treeTab = 'sword';
+export const nodeOpen = (n, tr) => !n.req.length || n.req.some(r => (G.S.tree[r] || 0) > 0);
+export function learnNode(n) { const S = G.S, r = S.tree[n.id] || 0; if (r >= n.max || (S.tp || 0) < 1 || !nodeOpen(n)) return false; S.tree[n.id] = r + 1; S.tp--; return true; }
+function tabTree(B) {
+  const S = G.S, t = TREES.find(x => x.id === treeTab), X = c => 40 + c * 240, Y = r => 8 + r * 88;
+  let lines = '', nodes = '';
+  for (const n of t.nodes) { for (const q of n.req) { const p = t.nodes.find(z => z.id === q); lines += `<line x1="${X(p.c) + 100}" y1="${Y(p.r) + 34}" x2="${X(n.c) + 100}" y2="${Y(n.r) + 34}" stroke="${(S.tree[q] || 0) > 0 ? '#b5352a' : '#a8947a'}" stroke-width="4"/>`; } const r = S.tree[n.id] || 0, open = nodeOpen(n); nodes += `<button class="tnode ${r ? 'got' : ''} ${r >= n.max ? 'full' : ''}" data-n="${n.id}" ${!open || r >= n.max || !(S.tp > 0) ? 'disabled' : ''} style="left:${X(n.c)}px;top:${Y(n.r)}px"><b>${n.name}</b> <span>${r}/${n.max}</span><small>${n.desc}</small></button>`; }
+  const wt = WEAPONS[S.weapon].type;
+  B.innerHTML = `<div class="ttabs">${TREES.map(x => `<button class="btn sm ${x.id === treeTab ? 'pri' : ''}" data-t="${x.id}">${x.name}</button>`).join('')}<span class="hint" style="margin-left:14px">수련 점수 <b style="color:var(--red);font-weight:400">${S.tp || 0}</b> · 경지가 오를 때마다 1점</span><button class="btn sm" id="trs" style="margin-left:auto">초기화 (100냥)</button></div>${t.w && t.w !== wt ? `<p class="hint">${t.name} 트리는 ${t.name}을(를) 들었을 때만 효과가 납니다. 지금 무기는 ${wt}입니다.</p>` : ''}<div class="tree"><svg width="760" height="460">${lines}</svg>${nodes}</div>`;
+  $$('[data-t]', B).forEach(b => b.onclick = () => { treeTab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
+  $$('[data-n]', B).forEach(b => b.onclick = () => { if (learnNode(t.nodes.find(n => n.id === b.dataset.n))) Sound.sfx('power1'); drawMenu(); });
+  $('#trs').onclick = () => { if (S.silver < 100) return; S.silver -= 100; S.tp = (S.tp || 0) + Object.values(S.tree).reduce((a, b) => a + b, 0); S.tree = {}; drawMenu(); };
 }
 function tabClan(B) {
   const S = G.S, row = c => { const w = S.flags['clan_' + c.id]; return `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400;font-size:18px">${c.name}</b> <small class="hint">${c.han}</small>${w ? '<span class="tag ult">인정받음</span>' : ''}<div class="hint" style="line-height:1.35">${c.desc}${S.flags.boat_guhwa || w ? ` 대표 ${c.who}.` : ''}${w ? ` 전수: ${c.gift.map(id => SKILLS[id].name).join(', ')}` : ''}</div></div>`; };
@@ -99,14 +127,15 @@ function tabNote(B) {
   B.innerHTML = `<div class="two"><div><h2>월하칠식 낱장 ${S.pages.length} / 7</h2>${moon.map((id, i) => S.pages.includes(id) ? `<div class="note">${SKILLS[id].name} <small class="hint">${SKILLS[id].han}</small></div>` : `<div class="note" style="opacity:.5">제${i + 1}식 ……</div>`).join('')}</div><div><h2>적어 둔 것</h2>${S.notes.length ? S.notes.map(n => `<div class="note">${n}</div>`).join('') : '<p class="hint">아직 적어 둔 것이 없습니다.</p>'}</div></div>`;
 }
 function tabLove(B) {
-  const S = G.S, list = [['yun', '윤설', 'Princess', '청하진 약방집 딸. 말이 짧고 손이 빠르다.'], ['so', '소연하', 'RedSamurai', '벽수궁 출신의 검객. 찾는 사람이 있다.'], ['cheol', '철우', 'Monk2', '절에서 쫓겨난 스님. 밥값을 낸 적이 없다.']];
-  const seen = list.filter(([k]) => S.flags['met_' + k]);
-  if (!seen.length) { B.innerHTML = '<p class="hint">아직 함께 다니는 사람이 없습니다.</p>'; return; }
-  B.innerHTML = seen.map(([k, n, f, d]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${f}" width="38" height="38" style="width:76px;height:76px;image-rendering:pixelated"></canvas><div><b style="font-weight:400;font-size:20px">${n}</b> <span class="heart">${'♥'.repeat(S.love[k])}${'♡'.repeat(Math.max(0, 3 - S.love[k]))}</span><div class="hint">${d}</div></div></div>`).join('');
+  const S = G.S, L = G.life, list = Object.entries(L.cand).filter(([k]) => S.flags['met_' + k] || (S.love[k] || 0) > 0);
+  const faces = { yun: 'Princess', so: 'RedSamurai', cheol: 'Monk2', clan_dang: 'Dang', clan_moyong: 'Moyong', clan_namgung: 'Namgung' }, desc = { yun: '청하진 약방집 딸. 말이 짧고 손이 빠르다.', so: '벽수궁 출신의 검객. 찾는 사람이 있다.', cheol: '소림에서 쫓겨난 스님. 밥값을 낸 적이 없다.', clan_dang: '사천당가의 딸. 찻잔에 손대지 말 것.', clan_moyong: '받은 것은 그대로 돌려주는 모용세가의 딸.', clan_namgung: '남궁세가의 후계자. 자존심이 높다.' };
+  if (!list.length) { B.innerHTML = '<p class="hint">아직 가까운 사람이 없습니다.</p>'; return; }
+  B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감 70이면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다.</p>` + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${faces[k]}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">호감 ${S.love[k] || 0}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${desc[k]}</div></div></div>`).join('');
   $$('canvas[data-f]', B).forEach(c => { const x = c.getContext('2d'); x.imageSmoothingEnabled = false; const im = IMG['faces/' + c.dataset.f]; if (im) x.drawImage(im, 0, 0); });
 }
 function tabSet(B) {
   B.innerHTML = `<h2>조작</h2><div class="two"><div class="note">이동 W A S D 또는 방향키<br>평타 J · 경공 K · 막기 L<br>초식 U I O P 또는 1 2 3 4<br>금창약 H · 대화 E · 메뉴 Esc</div><div class="note">막기를 맞기 직전에 누르면 <b>튕겨내기</b>가 됩니다.<br>노란 예고는 막을 수 있습니다.<br>붉은 예고는 막을 수 없으니 경공으로 피하세요.</div></div>
+  <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 J로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 E<br>집: 청하진 복덕방에서 구입, 집 안에서 B로 꾸미기, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
   <h2>설정</h2><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">지금 저장</button><button class="btn" id="tt">제목으로</button></div>`;
   $('#mute').onclick = () => { Sound.setMuted(!Sound.muted); drawMenu(); };
   $('#sv').onclick = () => save(false);
@@ -136,6 +165,8 @@ export function openShop(title, goods) {
 export const shopItem = {
   weapon: id => ({ info: () => { const w = WEAPONS[id]; return { name: `${w.name} (${w.type})`, price: w.price, desc: `공격 ${w.atk}. ${w.desc}` }; }, owned: () => G.S.weapons.includes(id), buy: () => { G.S.weapons.push(id); G.S.weapon = id; toast(`${WEAPONS[id].name}을(를) 들었다`); } }),
   potion: () => ({ info: () => ({ name: '금창약', price: ITEMS.hp.price, desc: `전투 중 H 키로 체력을 35% 되찾는다. 지금 ${G.S.potion}개` }), buy: () => { G.S.potion++; } }),
+  stuff: (id, price) => ({ info: () => ({ name: DB[id].name, price, desc: `${DB[id].desc} 지금 ${have(id)}개` }), buy: () => give(id) }),
+  furn: id => ({ info: () => ({ name: FURN[id].name, price: FURN[id].price, desc: `가구. 꾸밈 점수 ${FURN[id].score}. 가진 수 ${G.S.house.furn[id] || 0}` }), buy: () => { G.S.house.furn[id] = (G.S.house.furn[id] || 0) + 1; } }),
   book: (id, price) => ({ info: () => ({ name: `비급: ${SKILLS[id].name}`, price, desc: `[${SKILLS[id].w}] ${SKILLS[id].desc}` }), owned: () => G.S.skills.includes(id), buy: () => learn(id) }),
   heart: (id, price) => ({ info: () => ({ name: `심법서: ${HEARTS[id].name}`, price, desc: HEARTS[id].desc }), owned: () => G.S.hearts.includes(id), buy: () => { G.S.hearts.push(id); toast(`${HEARTS[id].name}을(를) 익혔다. 메뉴에서 고르세요.`, 3); } }),
 };
@@ -144,7 +175,7 @@ export function showResult(r) {
   return new Promise(res => {
     if (G.auto) return res();
     const h = $('#hud'), e = el('div', 'result');
-    e.innerHTML = `<h2>승리</h2><p>깨달음 +${r.exp}${r.silver ? ` · 은자 +${r.silver}냥` : ''}</p>${r.levelUp ? `<p style="color:var(--red)">경지가 깊어졌다! ${G.S.lv}성 (${rankOf(G.S.lv)})<br>메뉴에서 능력치를 올리세요.</p>` : ''}<p class="hint">E 또는 누르기</p>`;
+    e.innerHTML = `<h2>승리</h2><p>깨달음 +${r.exp}${r.silver ? ` · 은자 +${r.silver}냥` : ''}</p>${r.drops && r.drops.length ? `<p>${r.drops.join(', ')}</p>` : ''}${r.levelUp ? `<p style="color:var(--red)">경지가 깊어졌다! ${G.S.lv}성 (${rankOf(G.S.lv)})<br>메뉴에서 능력치와 무공 트리를 올리세요.</p>` : ''}<p class="hint">E 또는 누르기</p>`;
     h.appendChild(e); if (r.levelUp) Sound.sfx('ok3');
     let done = false; const go = () => { if (done) return; done = true; e.remove(); document.removeEventListener('keydown', kd); res(); };
     const kd = ev => { if (['KeyE', 'Enter', 'Space', 'KeyJ'].includes(ev.code)) go(); }; document.addEventListener('keydown', kd); e.onclick = go; e.style.pointerEvents = 'auto';

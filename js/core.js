@@ -24,8 +24,9 @@ const IMAGES = {
   mon: ['Beast', 'Snake', 'Snake2', 'Bamboo', 'Spirit', 'Spirit2', 'Skull', 'Racoon', 'Mole', 'Cyclope', 'Flam', 'Slime', 'Eye', 'Butterfly', 'Owl', 'Lizard'],
   boss: ['GiantRacoonIdle', 'GiantRacoonAttack', 'DemonCyclopIdle', 'DemonCyclopHit', 'GiantSpiritIdle'],
   fx: ['slash', 'curve', 'double', 'double2', 'circle', 'cut', 'claw', 'smoke', 'flam', 'thunder', 'rock', 'spark', 'spirit', 'spiritb', 'aura', 'aurap', 'ring', 'ringw', 'shieldy', 'shieldb', 'p_arrow', 'p_kunai', 'p_shuriken', 'p_energy', 'p_fire', 'p_bigenergy', 'p_ice', 'leafpink', 'leaf', 'snow', 'psprk'],
-  wpn: ['Sword', 'Katana', 'BigSword', 'Lance', 'Lance2', 'Stick', 'Sai', 'Axe', 'Club', 'Ninjaku', 'Rapier', 'Sword_icon', 'Katana_icon', 'BigSword_icon', 'Lance_icon', 'Lance2_icon', 'Stick_icon', 'Sai_icon', 'Axe_icon', 'Club_icon', 'Ninjaku_icon', 'Rapier_icon'],
-  items: ['hp', 'mp', 'scroll', 'letter', 'silver', 'gold', 'key', 'chest'],
+  wpn: ['Sword', 'Katana', 'BigSword', 'Lance', 'Lance2', 'Stick', 'Sai', 'Axe', 'Club', 'Ninjaku', 'Rapier', 'Sword_icon', 'Katana_icon', 'BigSword_icon', 'Lance_icon', 'Lance2_icon', 'Stick_icon', 'Sai_icon', 'Bow_icon', 'Rod_icon', 'Axe_icon', 'Club_icon', 'Ninjaku_icon', 'Rapier_icon'],
+  items: ['hp', 'mp', 'scroll', 'letter', 'silver', 'gold', 'key', 'chest', 'Beaf', 'Fish', 'Honey', 'Noodle', 'Nut', 'Onigiri', 'Shrimp', 'Sushi', 'TeaLeaf', 'Yakitori', 'SeedBig1', 'SeedBig2', 'SeedBig3', 'SeedLarge', 'SeedLargeWhite', 'Octopus', 'Calamari', 'Stamp', 'Letter2', 'GoldCup', 'SilverCup', 'SilverKey', 'Hear', 'MilkPot', 'EmptyPot', 'Medipack'],
+  ani: ['pheasant', 'piglet', 'deer', 'rabbit', 'badger'],
 };
 export async function loadAll(onp) {
   const list = [];
@@ -81,7 +82,7 @@ const KEYMAP = {
   KeyW: ['up'], ArrowUp: ['up'], KeyS: ['down'], ArrowDown: ['down'], KeyA: ['left'], ArrowLeft: ['left'], KeyD: ['right'], ArrowRight: ['right'],
   KeyJ: ['atk'], KeyZ: ['atk'], KeyK: ['dash'], KeyX: ['dash'], Space: ['ok', 'dash'], KeyL: ['guard'], KeyC: ['guard'], ShiftLeft: ['guard'],
   KeyU: ['s0'], KeyI: ['s1'], KeyO: ['s2'], KeyP: ['s3'], Digit1: ['s0'], Digit2: ['s1'], Digit3: ['s2'], Digit4: ['s3'],
-  KeyH: ['potion'], KeyQ: ['potion'], KeyE: ['ok'], Enter: ['ok'], Escape: ['menu'], KeyM: ['menu'],
+  KeyH: ['potion'], KeyQ: ['potion'], KeyB: ['decor'], KeyE: ['ok'], Enter: ['ok'], Escape: ['menu'], KeyM: ['menu'],
 };
 export const Input = {
   down: {}, buf: {}, axis: { x: 0, y: 0 }, stick: { x: 0, y: 0 },

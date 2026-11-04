@@ -1,19 +1,32 @@
 // 저장 자료와 능력치 계산
 import { G, Sound, toast } from './core.js';
 import { WEAPONS, HEARTS, SKILLS, expNeed, rankOf } from './data.js';
+import { DB, ACCS, TREES } from './items.js';
 const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
 export function newState(name, look, gender, diff) {
   return {
-    v: 1, name, look, gender, diff, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 20,
+    v: 2, name, look, gender, diff, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 20,
     weapon: 'stick', weapons: ['stick'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
-    potion: 3, potionMax: 3, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1,
+    potion: 3, potionMax: 3, inv: {}, accs: [], tree: {}, tp: 0, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1,
   };
 }
+// 무공 트리, 장신구, 요리, 배우자, 집에서 오는 효과를 합친다
+export const SPOUSE_FX = { yun: { potion: 25, hp: 6 }, so: { atk: 6, crit: 3 }, cheol: { hp: 10, def: 4 }, clan_dang: { venom: 1, atk: 3 }, clan_moyong: { parry: .04, skill: 5 }, clan_namgung: { atk: 8 } };
+export function bonus(S = G.S) {
+  const b = {}, add = fx => { for (const k in fx) b[k] = (b[k] || 0) + fx[k]; };
+  const wt = WEAPONS[S.weapon].type;
+  for (const t of TREES) { if (t.w && t.w !== wt) continue; for (const n of t.nodes) { const r = S.tree[n.id] || 0; for (let i = 0; i < r; i++) add(n.fx); } }
+  if (S.acc && ACCS[S.acc]) add(ACCS[S.acc].fx);
+  if (S.meal && S.meal.left > 0) add(DB[S.meal.id].meal);
+  if (S.married && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
+  if (S.rested === S.day) add({ atk: 5 });
+  return b;
+}
 export function stats(S = G.S) {
-  const w = WEAPONS[S.weapon];
-  const atk = w.atk + S.str * 1.3, maxMp = 40 + S.inn * 6, def = S.con * .6;
-  let maxHp = 90 + S.con * 10 + S.lv * 5, regen = 1.8 + S.inn * .08, cdMul = Math.max(.75, 1 - S.agi * .004), power = 1 + S.inn * .02;
+  const w = WEAPONS[S.weapon], b = bonus(S), plus = (S.wplus || {})[S.weapon] || 0, pc = k => 1 + (b[k] || 0) / 100;
+  const atk = (w.atk * (1 + plus * .12) + S.str * 1.3) * pc('atk'), maxMp = Math.round((40 + S.inn * 6) * pc('mp')), def = S.con * .6 + (b.def || 0);
+  let maxHp = (90 + S.con * 10 + S.lv * 5) * pc('hp'), regen = (1.8 + S.inn * .08) * pc('regen'), cdMul = Math.max(.75, 1 - S.agi * .004) * pc('cd'), power = 1 + S.inn * .02;
   if (S.heart === 'tonap') regen *= 1.3;
   if (S.heart === 'swift') cdMul *= .85;
   if (S.heart === 'yigin') maxHp *= 1.15;
@@ -21,12 +34,12 @@ export function stats(S = G.S) {
   if (S.heart === 'jaha') power *= 1.12;
   if (S.heart === 'changgung') { cdMul *= .9; maxHp *= 1.1; }
   maxHp = Math.round(maxHp);
-  return { atk, maxHp, maxMp, def, regen, cdMul, spd: 78 + S.agi * .7, crit: .03 + S.agi * .004, power, wtype: w.type };
+  return { atk, maxHp, maxMp, def, regen, cdMul, spd: (78 + S.agi * .7) * pc('spd'), crit: .03 + S.agi * .004 + (b.crit || 0) / 100, power, wtype: w.type };
 }
 export const masteryLv = id => { const n = (G.S.mastery[id] || 0); return n >= 60 ? 5 : n >= 32 ? 4 : n >= 15 ? 3 : n >= 5 ? 2 : 1; };
 export function gainExp(n) {
   const S = G.S; S.exp += n; let up = 0;
-  while (S.exp >= expNeed(S.lv)) { S.exp -= expNeed(S.lv); S.lv++; S.pts += 3; up++; }
+  while (S.exp >= expNeed(S.lv)) { S.exp -= expNeed(S.lv); S.lv++; S.pts += 3; S.tp = (S.tp || 0) + 1; up++; }
   return up;
 }
 export function learn(id) {
@@ -41,6 +54,18 @@ export const canEquip = (id, S = G.S) => { const k = SKILLS[id]; return k.w === 
 export function save(slient = true) {
   try { localStorage.setItem(KEY, JSON.stringify(G.S)); if (!slient) toast('저장했습니다'); } catch (e) { if (!slient) toast('저장하지 못했습니다'); }
 }
-export function load() { try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+export function load() { try { const r = localStorage.getItem(KEY); return r ? migrate(JSON.parse(r)) : null; } catch (e) { return null; } }
+// 예전 저장을 새 형식으로 옮긴다
+function migrate(S) {
+  if ((S.v || 1) >= 2) return S;
+  const d = newState(S.name, S.look, S.gender, S.diff);
+  for (const k in d) if (S[k] === undefined) S[k] = d[k];
+  for (const k in d.love) { if (S.love[k] === undefined) S.love[k] = 0; else S.love[k] *= 15; }
+  S.tp = S.lv - 1; S.v = 2; return S;
+}
+export const have = id => (G.S.inv[id] || 0);
+export function give(id, n = 1) { G.S.inv[id] = have(id) + n; }
+export function take(id, n = 1) { G.S.inv[id] = have(id) - n; if (G.S.inv[id] <= 0) delete G.S.inv[id]; }
+export function nextDay() { const S = G.S; S.day++; S.daily = {}; S.potion = Math.max(S.potion, S.potionMax); }
 export function hasSave() { return !!load(); }
 export { rankOf };

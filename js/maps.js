@@ -1,5 +1,6 @@
 // 지도. 타일 단위로 길과 물을 깔고 소품을 얹는다.
 import { TS, rint, pick, IMG } from './core.js';
+import { FURN, HOUSES } from './items.js';
 import { STAMPS, drawStamp, paintGround, paintRoom } from './tiles.js';
 
 class MapDef {
@@ -64,6 +65,13 @@ class MapDef {
 }
 
 export const MAPS = {};
+// 내 집은 가구가 바뀔 때마다 다시 만든다
+export function buildHouse(S) {
+  const h = HOUSES[S.house.lv], m = new MapDef('myhouse', h.w, h.h, { name: h.name, bgm: 'peaceful', room: true, arena: 'yard' });
+  for (const i of S.house.items) m.put(FURN[i.id].stamp, i.x, i.y);
+  m.exit(Math.floor(h.w / 2) - 2, h.h - 1, 4, 1, 'cheongha', 16, 22, 0, { door: true });
+  m.render(); return MAPS.myhouse = m;
+}
 function M(id, w, h, o) { return MAPS[id] = new MapDef(id, w, h, o); }
 
 export function buildMaps() {
@@ -72,21 +80,23 @@ export function buildMaps() {
   m.water(0, 29, 46, 5);
   m.road(3, 15, 42, 15, 2).road(22, 3, 22, 27, 2).road(9, 16, 9, 20, 2).road(32, 16, 32, 21, 2).road(21, 26, 24, 27, 2);
   m.fill(20, 12, 6, 3, 1);
-  m.road(22, 0, 22, 4, 2).road(43, 15, 45, 15, 2);
+  m.road(22, 0, 22, 4, 2).road(43, 15, 45, 15, 2).road(0, 15, 3, 15, 2);
   m.house('house_red', 19, 8, 'inn', 8, 10, 1, { doorDx: 0 });
   m.put('hut_b', 26, 8).put('sign_dojo', 0, 0, { flat: false, nosolid: true }); m.stamps.pop();
   m.house('clay', 8, 11, 'smith', 7, 8, 1);
   m.house('shop_green', 31, 11, 'clinic', 7, 8, 1);
   m.house('shop_blue', 36, 18, 'shop', 6, 7, 1);
-  m.put('hut_o', 14, 18).put('hut_o2', 26, 18).put('wood_o', 4, 18).put('wood_b', 12, 8);
+  m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).put('hut_o2', 26, 18).put('wood_o', 4, 18).put('wood_b', 12, 8);
   m.put('banner2', 17, 10, { nosolid: true }).put('banner2', 24, 10, { nosolid: true });
   m.put('plum', 2, 22).put('plum', 40, 8).put('plum_g', 18, 22).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
   m.put('jar', 18, 12).put('pot', 26, 12).put('pot', 27, 12).put('signpost', 24, 16).put('signpost', 41, 13);
   m.fill(21, 28, 4, 4, 4);
   m.solids.push({ x: 21 * TS - 4, y: 29 * TS, w: 4, h: 3 * TS }, { x: 25 * TS, y: 29 * TS, w: 4, h: 3 * TS }, { x: 21 * TS, y: 32 * TS, w: 4 * TS, h: 8 });
-  m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2]], 3);
+  m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2], [0, 13, 3, 5]], 3);
   m.put('plum', 8, 25).put('plum_o', 34, 24).put('tree_round', 38, 25).put('stump', 13, 25).put('boulder', 29, 26).put('jar', 19, 25).put('pot', 26, 25).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 40, 21);
   m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
+  m.exit(0, 14, 1, 4, 'valley', 37.5, 15.5, 2, { when: 'burned', lock: '서쪽 청풍골은 나중에 가 보자.' });
+  m.label(3.5, 13.2, '← 청풍골');
   m.exit(21, 0, 4, 1, 'bamboo', 18, 30, 1, { when: 'bamboo_open', lock: '아직 산으로 갈 때가 아니다.' }).exit(45, 14, 1, 4, 'pass', 1, 13.5, 3, { when: 'pass_open', lock: '동쪽 산길은 지금 갈 이유가 없다.' });
   // 객잔 내부
   m = M('inn', 18, 13, { name: '달맞이 객잔', bgm: 'peaceful', room: true, arena: 'yard' });
@@ -166,7 +176,8 @@ export function buildMaps() {
   m.house('house_red', 8, 6, 'inn2', 8, 10, 1).house('shop_blue', 16, 7, 'shop2', 6, 7, 1).house('shop_green', 37, 7, 'hall2', 7, 8, 1).put('hut_b', 8, 20).put('hut_o', 36, 20).put('hut_o2', 15, 22).put('hut_b', 30, 23).put('wood_o', 40, 14);
   m.fill(19, 11, 12, 9, 5);
   m.put('banner1', 19, 9, { nosolid: true }).put('banner2', 22, 9, { nosolid: true }).put('banner5', 27, 9, { nosolid: true }).put('banner1', 30, 9, { nosolid: true }).put('hall', 21.5, 0, { dy: 8 });
-  m.put('plum', 5, 14).put('plum', 44, 26).put('plum_o', 4, 26).put('plum_o', 44, 5).put('statue', 19, 18).put('statue', 29, 18);
+  m.put('plum', 5, 14).put('plum_o', 4, 26).put('plum_o', 44, 5).put('statue', 19, 18).put('statue', 29, 18);
+  m.fill(38, 25, 6, 5, 2).label(41, 24.4, '연못');
   m.put('jar', 15, 11).put('pot', 34, 11).put('pot', 35, 11);
   m.exit(23, 35, 4, 1, 'pass', 37.5, 18.5, 2, { when: 'never', lock: '이제 되돌아갈 수 없다.' });
   m.solids = m.solids.filter(s => !((s.x === 47 * TS || s.x === 2 * TS) && s.y >= 18 * TS && s.y <= 20 * TS + 8));
@@ -174,6 +185,14 @@ export function buildMaps() {
   m.fill(2, 18, 3, 3, 3).fill(46, 18, 3, 3, 3);
   m.exit(48, 18, 1, 3, 'ninehall', 1.5, 10.5, 3).exit(1, 18, 1, 3, 'fiveclans', 37.5, 12.5, 2);
   m.label(44.5, 17.2, '구파 회관 →').label(5.5, 17.2, '← 세가 거리');
+  // 청풍골: 사냥과 낚시, 벌목
+  m = M('valley', 40, 30, { name: '청풍골', bgm: 'peaceful', biome: 'deep', arena: 'forest', ambient: 'leaf' });
+  m.water(19, 0, 2, 30).fill(19, 13, 2, 3, 4).road(21, 14, 39, 14, 2).road(4, 14, 18, 14, 2);
+  m.solids.push({ x: 0, y: -8, w: 40 * TS, h: 8 });
+  m.border(['grove_pine', 'tree_big', 'grove_green', 'tree_pine'], [[38, 13, 3, 5]], 3);
+  for (const [nm, x, y] of [['tree_pine', 9, 5], ['tree_round', 14, 7], ['tree_big', 26, 4], ['tree_pine', 32, 11], ['plum_g', 14, 19], ['tree_round', 7, 22], ['tree_pine', 25, 24], ['tree_big', 34, 26], ['boulder', 23, 10], ['boulder', 15, 25], ['plum', 30, 17], ['tree_round', 5, 9]]) m.put(nm, x, y);
+  m.scatter(['fern1', 'fern2', 'bush2', 'bush4', 'flower3'], 34, 41);
+  m.exit(39, 14, 1, 4, 'cheongha', 2, 15.5, 3);
   // 구파 회관: 구파일방의 숙소가 늘어선 곳
   m = M('ninehall', 44, 25, { name: '구파 회관', bgm: 'temple', biome: 'grass', arena: 'court' });
   m.fill(0, 9, 44, 3, 3).fill(0, 19, 44, 3, 3).fill(1, 9, 2, 13, 3).fill(41, 9, 2, 13, 3).fill(21, 12, 2, 7, 3);
