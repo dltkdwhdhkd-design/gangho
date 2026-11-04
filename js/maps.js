@@ -294,7 +294,7 @@ export function buildMaps() {
   for (const [nm, x, y] of [['rocks', 10, 12], ['rocks', 32, 12], ['tree_dead', 12, 20], ['tree_dead', 30, 22], ['boulder', 14, 26], ['boulder', 28, 16]]) m.put(nm, x, y);
   // 제9부: 흑운궁
   m = M('blackpalace', 44, 38, { name: '흑운궁', bgm: 'curse', biome: 'dusk', arena: 'moon', tint: 'rgba(60,8,30,.34)' });
-  m.water(0, 21, 44, 11); m.road(21, 12, 21, 37, 2); m.fill(14, 8, 16, 12, 3);
+  m.water(0, 21, 44, 11); m.road(21, 12, 21, 37, 2); m.fill(21, 21, 2, 11, 4); m.fill(14, 8, 16, 12, 3);
   m.put('hall', 20, 0).put('statue_big', 13, 6).put('statue_big', 28, 6).row('wall_h', 2, 7, 12).row('wall_h', 30, 7, 12);
   m.border(['rocks', 'grove_dead'], [[20, 35, 5, 4]], 4);
   m.place(22, 7.6, '제단').place(25.5, 26.6, '다리');

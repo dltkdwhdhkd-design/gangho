@@ -46,7 +46,9 @@ export const BONDS = {
       await say('yun', '이거 {나} 씨가 만든 거예요? 국물이 왜 이래요. 맹물이에요?');
       await say('me', '국물은 아직 안 배웠어요.');
       await say('yun', '그러면서 점소이였어요?');
+      ctx.cg('bond_yun');
       await narr('윤설은 투덜거리면서 국물까지 다 마셨다. 그러고는 그릇을 내려놓자마자 그 자리에서 잠들었다. 며칠 뒤 장부를 슬쩍 봤더니 그날 날짜 옆에 이렇게 적혀 있었다. ‘국수 한 그릇. 맛없음. 외상 없음.’');
+      ctx.cgOff();
       await say('yun', '훔쳐보지 마요. 그리고 이거 가져가요. 금창약 넣는 주머니예요. 칼 차는 자리에 묶어 두면 왼손으로도 꺼낼 수 있어요.');
       keep('b_yun');
     } },
@@ -85,7 +87,7 @@ export const BONDS = {
       await say('so', '칼집을 두고 갔다는 건 돌아올 생각이었다는 거잖아. 안 그래?');
       const c = await choice('소연하가 칼집에서 눈을 떼지 않는다.', ['그럴 거라고 말해 준다', '칼을 뽑아 들고 나갔다는 뜻일 수도 있다고 말한다']);
       if (c === 0) { await say('me', '그럴 거예요.'); await say('so', '너 거짓말 진짜 못한다. 그래도 고맙다.'); }
-      else { await say('me', '칼을 뽑아 들고 나갔다는 뜻일 수도 있어요.'); await say('so', '…야. 그 말은 내가 혼자 있을 때 하루에 열 번씩 해. 근데 나한테 대고 한 사람은 네가 처음이다.'); ctx.love('so'); }
+      else { await say('me', '칼을 뽑아 들고 나갔다는 뜻일 수도 있어요.'); await say('so', '…야. 그 말은 내가 혼자 있을 때 하루에 열 번씩 해. 그걸 대놓고 하냐, 너는.'); ctx.love('so'); }
     } },
     { at: 70, run: async () => {
       await say('so', '벽수궁에서 편지 왔어. 돌아오래. 객으로 나간 지 너무 오래됐다고.');
@@ -105,6 +107,7 @@ export const BONDS = {
       await say('so', '일어나. 달 떴어.');
       await say('me', '지금요?');
       await say('so', '왼발 봐 준다고 했잖아. 낮에는 사람들이 봐서 싫어.');
+      ctx.cg('bond_so');
       await narr('달빛 아래서 한참을 겨뤘다. 소연하가 칼등으로 내 왼 발목을 툭 쳤다.');
       await say('so', '여기. 여기가 늦어. 내가 왜 네 왼발에 이렇게 매달리는 줄 알아?');
       await say('me', '왜요?');
@@ -122,7 +125,7 @@ export const BONDS = {
       await say('me', '뭘 탔어요?');
       await say('clan_dang', '아무것도요. 세 잔 다 그냥 차예요.');
       await say('me', '그럼 왜 그랬어요?');
-      await say('clan_dang', '당가에 와서 찻잔을 비운 사람은 {나} 씨가 처음이에요. 다들 입술만 대고 내려놔요. 궁금했거든요.');
+      await say('clan_dang', '당가에 오는 손님들은 다들 입술만 대고 내려놔요. 잔을 비우는 사람이 있나 궁금했거든요.');
     } },
     { at: 40, run: async () => {
       await say('clan_dang', '제가 어릴 때 뭘 먹고 컸는지 알아요?');
@@ -141,6 +144,7 @@ export const BONDS = {
     } },
     { at: 70, run: async () => {
       await say('clan_dang', '앞으로 {나} 씨 찻잔은 이걸로 해요.');
+      ctx.cg('bond_dang');
       await narr('작은 흰 잔이었다. 뒤집어 보니 밑바닥에 내 이름이 새겨져 있었다.');
       await say('clan_dang', '당가에서 찻잔에 이름을 새기는 건 두 경우뿐이에요. 독을 탈 사람이거나, 절대 안 탈 사람이거나.');
       await say('me', '제 건 어느 쪽이에요?');
@@ -167,7 +171,7 @@ export const BONDS = {
       await say('clan_moyong', '아니오. 보았으면 돌려주어야 하오. 그대도 넘어져 보시오.');
       const c = await choice('모용설이 흙을 털지도 않고 이쪽을 본다.', ['넘어져 준다', '싫다고 한다']);
       if (c === 0) await narr('일부러 넘어졌다. 모용설이 입을 가리고 어깨를 떨었다. 웃는 건지 화가 난 건지 끝내 알 수 없었다.');
-      else await say('clan_moyong', '모용가에서 받은 것을 안 돌려준 사람은 그대가 처음이오. 적어 두겠소.');
+      else await say('clan_moyong', '모용가에서 받은 것을 안 돌려주겠다는 말이오? 적어 두겠소.');
     } },
     { at: 40, run: async () => {
       await say('clan_moyong', '모용가에는 초식이 하나도 없소.');
@@ -177,13 +181,14 @@ export const BONDS = {
       await say('clan_moyong', '증조모의 말투요.');
       await say('me', '소저 말투는 없어요?');
       await say('clan_moyong', '…그런 것은 생각해 본 적이 없소.');
-      const c = await choice('모용설이 처음으로 대답할 말을 찾고 있다.', ['아무 말이나 해 보라고 한다', '천천히 찾아보라고 한다']);
+      const c = await choice('모용설이 대답할 말을 찾지 못하고 있다.', ['아무 말이나 해 보라고 한다', '천천히 찾아보라고 한다']);
       if (c === 0) {
         await say('me', '아무 말이나 해 보세요. 증조모님 말고요.');
+        ctx.cg('bond_mo');
         await say('clan_moyong', '뭐, 뭐라고 해야 하오. 그러니까… 배고파.');
         await say('me', '그거네요.');
         await say('clan_moyong', '잊어 주시오.');
-      } else await say('clan_moyong', '천천히라. 그런 말도 처음 듣소.');
+      } else await say('clan_moyong', '천천히라. 증조모님은 그런 말을 안 하셨소.');
     } },
     { at: 70, run: async () => {
       await say('clan_moyong', '남궁세가에서 혼담이 왔소. 남궁진의 오라비요.');
@@ -195,14 +200,14 @@ export const BONDS = {
       await say('clan_moyong', '그대는 쉽게 말하오.');
       await narr('며칠 뒤 남궁세가 사람들이 굳은 얼굴로 세가 거리를 떠나는 걸 봤다.');
       await say('clan_moyong', '말했소. 싫다고. 내 말로 한 것은 처음이오. 아버지는 사흘째 밥을 안 드시오.');
-      await say('clan_moyong', '이것은 받으시오. 돌려주는 것이 아니라 그냥 주는 것이오. 그런 것도 처음 해 보오.');
+      await say('clan_moyong', '이것은 받으시오. 돌려주는 것이 아니라 그냥 주는 것이오. 어떻게 하는 건지 몰라서 그냥 내미오.');
       keep('b_mo');
     } },
     { lover: 1, at: 80, run: async () => {
       await say('clan_moyong', '초식을 하나 만들었소. 보시오.');
       await narr('왼발로 밀고 오른발이 따라오는 걸음에 칼을 얹은 초식이었다. 세 걸음째에서 또 넘어질 뻔했다.');
       await say('me', '이름은 뭐예요?');
-      await say('clan_moyong', '아직 없소. 모용가에서 처음 나온 초식이라 뭐라고 불러야 할지 모르겠소.');
+      await say('clan_moyong', '아직 없소. 모용가에는 초식 이름을 지어 본 사람이 없소.');
       await say('clan_moyong', '그리고 말이오. 그대 앞에서는 증조모 말투를 그만 쓰려고 하오.');
       await say('me', '그럼 뭐라고 하시게요?');
       await say('clan_moyong', '…배고파.');
@@ -222,6 +227,7 @@ export const BONDS = {
       await narr('새벽에 세가 거리를 지나는데 남궁세가 담장 안에서 칼바람 소리가 났다. 남궁진이 혼자 검을 휘두르고 있었다.');
       await say('me', '벌써 일어나셨어요?');
       await say('clan_namgung', '구백십이. 말 걸지 마라. 구백십삼.');
+      ctx.cg('bond_nam');
       await narr('천 번을 채우고 나서야 검을 내렸다. 손바닥에 피가 배어 있었다.');
       await say('clan_namgung', '오라비는 오백 번이면 된다. 나는 천 번을 해야 장로들이 같은 자리에 세워 준다.');
       await say('me', '왜요?');
@@ -271,7 +277,7 @@ export const BONDS = {
       await say('baekrang', '그때부터 뭐든 값을 먼저 말하는 버릇이 들었어요. 값을 알면 마음이 편하거든요.');
       await say('me', '저는 값도 없었어요. 군에서 끌고 가면서 한 푼도 안 줬어요.');
       await say('baekrang', '어머, 그건 제가 이겼네요.');
-      await narr('백랑이 깔깔 웃었다. 나도 어쩐지 웃음이 났다. 그런 얘기를 하고 웃어 본 건 처음이었다.');
+      await narr('백랑이 깔깔 웃었다. 나도 어쩐지 웃음이 났다.');
     } },
     { at: 70, run: async () => {
       await say('baekrang', '오늘은 공짜로 하나 알려 줄게요.');
@@ -280,6 +286,7 @@ export const BONDS = {
       await narr('밤이 되자 정말로 지붕에서 기왓장 밟는 소리가 났다.');
       const lv = S().lv; Object.assign(FOES.hitman, { hp: 70 + lv * 24, atk: 8 + lv * 1.9, def: 2 + lv * .4 });
       await ctx.duel({ foes: ['hitman', 'hitman'], arena: 'yard', bgm: 'fight', title: '혈의방 자객', optional: true });
+      ctx.cg('bond_bae');
       await narr('이튿날 다시 만났더니 백랑의 왼손 새끼손가락에 붕대가 감겨 있었다.');
       await say('me', '손은 왜 그래요?');
       await say('baekrang', '하오문에 규칙이 있거든요. 소문을 공짜로 넘기면 손가락 한 마디를 문에 내야 해요.');
@@ -325,7 +332,7 @@ export const BONDS = {
       await say('hyeok', '교리에 없는 향입니다. 제단에 올릴 수 없습니다.');
       await say('me', '그럼 어디에 써요?');
       await say('hyeok', '모르겠습니다. 저는 잠이 잘 오지 않습니다. 그런데 이 향을 피우면 잠이 옵니다. 당신 곁에서도 그렇습니다.');
-      await say('hyeok', '가져가십시오. 제가 교리에 없는 일을 한 것은 이것이 처음입니다.');
+      await say('hyeok', '가져가십시오. 교리에 없는 물건이니 제단에서는 찾지 않을 것입니다.');
       keep('b_hyeok');
     } },
     { lover: 1, at: 80, ok: () => !!F().cross, run: async () => {
@@ -334,6 +341,7 @@ export const BONDS = {
       await say('hyeok', '당신이 아까 문턱에 걸려 넘어질 뻔했습니다.');
       await say('me', '그게 웃겨요?');
       await say('hyeok', '네.');
+      ctx.cg('bond_hyeok');
       await narr('혁련하가 소리 내어 웃는 걸 처음 들었다. 웃는 법이 서툴러서 기침처럼 들렸다.');
     } },
   ],
@@ -360,6 +368,7 @@ export const BONDS = {
       await say('cheol', '시주, 소림에서 사람이 왔소. 혜각 대사가 보냈다며 주먹밥 세 개를 두고 갔소.');
       await say('me', '주먹밥이요?');
       await say('cheol', '문을 부수고 나오던 날 밤에도 그 양반이 주먹밥 세 개를 쥐여 줬소. 그날 소승을 제일 크게 혼낸 사람도 그 양반이었고.');
+      ctx.cg('bond_cheol');
       await narr('철우는 주먹밥을 한참 들여다보더니 하나를 내게 내밀었다. 철우가 먹을 것을 먼저 내미는 건 처음 보았다.');
       await say('cheol', '시주는 소승이 아는 사람 중에 밥을 제일 많이 사 준 사람이오. 갚을 것은 없고, 이거나 받으시오. 소림에서 나올 때 가지고 나온 염주요.');
       keep('b_cheol');

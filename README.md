@@ -22,7 +22,7 @@
 ## 소스 구조 (빌드 없이 그대로 실행)
 - `js/battle.js` 전투, `js/data.js` 초식과 무기, `js/foes.js` 적
 - `js/field.js` 걷기, `js/mapview.js` 미니맵과 전체 지도, `js/maps.js` 지도, `js/tiles.js` 타일과 소품
-- `js/ctx.js`, `js/story1.js`, `js/story2.js`, `js/routes.js`, `js/part4.js` 이야기와 대사, `js/bonds.js` 인연 사연
+- `js/ctx.js`, `js/story1.js`, `js/story2.js`, `js/routes.js`, `js/part4.js`, `js/part7.js`, `js/part8.js`, `js/part9.js` 이야기와 대사, `js/bonds.js` 인연 사연, `js/cg.js` 이벤트 화면
 - `js/items.js` 물건, 제작법, 가구, 무공 트리 자료, `js/life.js` 생활 체계, `js/clandata.js`와 `js/clans.js` 세력
 - `js/dialog.js` 대화창, `js/ui.js` 메뉴와 상점, `js/state.js` 저장과 능력치
 - `tools/` 자동 시험 (`playthrough.cjs`, `reach.cjs`)과 에셋 정리 스크립트

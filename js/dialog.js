@@ -30,7 +30,7 @@ export function stageClear() { const st = $('#vn'); if (st) { st.classList.remov
 function render(c) {
   const d = $('#dialog'); d.innerHTML = '';
   if (c.type === 'narr') {
-    stageClear(); if (c.card) { const k = el('div', 'card', `<b>${esc(c.card[0])}</b><span>${esc(c.card[1])}</span>${c.card[2] ? `<i>${esc(c.card[2])}</i>` : ''}`); d.appendChild(k); d.style.background = ''; d.classList.add('over'); k.onclick = () => click(c); c.txtEl = null; return; }
+    stageClear(); if (c.card) { const k = el('div', 'chapcard', `<b>${esc(c.card[0])}</b><span>${esc(c.card[1])}</span>${c.card[2] ? `<i>${esc(c.card[2])}</i>` : ''}`); d.appendChild(k); d.style.background = ''; d.classList.add('over'); k.onclick = () => click(c); c.txtEl = null; return; }
     if (cgOn()) { const n = el('div', 'narr low'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c); d.style.background = ''; return; }
     const n = el('div', 'narr'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c);
     const pic = c.cg && ART.get('cg_' + c.cg); d.style.background = pic ? `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)), url(${pic.src}) center/cover` : 'rgba(0,0,0,.72)'; return;

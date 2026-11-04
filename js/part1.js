@@ -11,6 +11,7 @@ Object.assign(WHO, { pirate: { name: '수적', face: 'Villager3' }, elder: { nam
 Object.assign(FOES, { debtor: { ...FOES.pirate_hook, name: '외상 손님', spr: 'chars/Villager3' }, smith_ally: { name: '대장장이 강씨', spr: 'chars/Caveman2', hp: 120, atk: 13, def: 4, spd: 48, exp: 0, silver: 0, pause: 1.4, moves: ['slash', 'heavy'], wpn: 'Club' } });
 
 async function wharf() {
+  await ctx.chap(1, '객잔의 낭인', '제3장 강변의 보호세');
   await say('boat', '왔구먼. 팔 다쳤다며? 너구리한테 물렸다고 온 동네에 소문났어.');
   await say('me', '그걸 어떻게 아세요?');
   await say('boat', '이 동네에 비밀이 어딨어. 그보다 저기 좀 봐.');

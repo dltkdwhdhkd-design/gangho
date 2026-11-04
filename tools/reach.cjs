@@ -1,33 +1,27 @@
-// 모든 지도의 포탈, 사람, 조사 지점에 실제로 걸어서 닿을 수 있는지 확인한다
+// 사람이 걸어서 닿을 수 있는지 전 지도를 훑는다. 봇은 순간이동이라 이걸 못 잡는다.
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForTimeout(1200);
-  const out = await p.evaluate(() => {
-    const G = __G, D = G.dbg; G.S = D.newState('a', 'Boy', 'm', 'normal');
-    const res = [];
-    const allFlags = ['c1a', 'c1c', 'c1e', 'c2b', 'c2c', 'c2d', 'c2f', 'c2g', 'c3a', 'c3b', 'c3e', 'c4a', 'c4b', 'c4c'];
-    for (const [id, m] of Object.entries(D.MAPS)) {
-      for (const q of m.portals) {
-        if (q.to === 'myhouse') continue; const t = D.MAPS[q.to]; if (!t) { res.push(`${id}: 없는 지도 ${q.to}`); continue; }
-        if (t.blocked(q.tx * 16, q.ty * 16)) res.push(`${id} → ${q.to}: 도착점(${q.tx},${q.ty})이 막힘`);
-        for (const r of t.portals) if (q.tx * 16 > r.x && q.tx * 16 < r.x + r.w && q.ty * 16 > r.y && q.ty * 16 < r.y + r.h) res.push(`${id} → ${q.to}: 도착점이 다른 포탈 위`);
-      }
-      // 시작점: 들어오는 포탈의 도착점들
-      const starts = []; for (const [k, o] of Object.entries(D.MAPS)) for (const q of o.portals) if (q.to === id) starts.push([q.tx * 16, q.ty * 16]);
-      if (!starts.length) { const q = m.portals[0]; if (q) starts.push([q.x + q.w / 2, q.y - 6]); }
-      const S = 4, W = m.w * 16 / S | 0, H = m.h * 16 / S | 0, seen = new Uint8Array(W * H), st = [];
-      for (const [x, y] of starts) { const a = x / S | 0, c = y / S | 0; if (a >= 0 && c >= 0 && a < W && c < H && !seen[c * W + a]) { seen[c * W + a] = 1; st.push([a, c]); } }
-      while (st.length) { const [x, y] = st.pop(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const a = x + dx, c = y + dy; if (a < 0 || c < 0 || a >= W || c >= H || seen[c * W + a]) continue; if (m.blocked(a * S, c * S)) continue; seen[c * W + a] = 1; st.push([a, c]); } }
-      const reach = (x, y, r = 22) => { for (let c = Math.max(0, (y - r) / S | 0); c <= Math.min(H - 1, (y + r) / S | 0); c++) for (let a = Math.max(0, (x - r) / S | 0); a <= Math.min(W - 1, (x + r) / S | 0); a++) if (seen[c * W + a]) return true; return false; };
-      for (const q of m.portals) if (!reach(q.x + q.w / 2, q.y + q.h / 2, 14)) res.push(`${id}: 포탈 ${q.to}에 닿을 수 없음`);
-      const items = new Map();
-      for (const st of ['p1', ...allFlags]) { G.S.flags = { step: st, burned: st !== 'p1' }; const c = D.Story.content(id); for (const n of c.npcs) items.set('사람 ' + n.id, [n.x * 16, n.y * 16]); for (const s of c.spots) items.set('지점 ' + s.hint, [(s.x + s.w / 2) * 16, (s.y + s.h / 2) * 16]); for (const t of c.trigs) items.set('사건', [(t.x + t.w / 2) * 16, (t.y + t.h / 2) * 16]); for (const r of c.roam) items.set('몹 ' + r.spr, [r.x * 16, r.y * 16]); }
-      for (const [sd, st] of [['sa', 'sa1'], ['sa', 'sa2'], ['ma', 'ma1'], ['ma', 'ma2']]) { G.S.side = sd; G.S.flags = { step: st, burned: true, lion_debt: true }; const c = D.Story.content(id); for (const n of c.npcs) items.set('사람 ' + n.id, [n.x * 16, n.y * 16]); G.S.side = null; }
-      for (const [k, [x, y]] of items) { if (!reach(x, y)) res.push(`${id}: ${k}(${(x / 16).toFixed(1)},${(y / 16).toFixed(1)}) 닿을 수 없음`); }
-    }
-    return res;
+  await p.goto(process.env.GAME_URL); await p.waitForTimeout(1500);
+  const r = await p.evaluate(async () => {
+    const G = __G, D = G.dbg, M = D.MAPS, TS = 16;
+    const { Story } = await import('./js/ctx.js');
+    const files = ['story1', 'story2', 'part1', 'part1a', 'part1b', 'routes', 'part4', 'part7', 'part8', 'part9', 'clans', 'life', 'bonds'];
+    const warps = {}; let ORDER = [];
+    for (const f of files) { const t = await (await fetch(`js/${f}.js`)).text(); for (const m of t.matchAll(/(?:warp|load)\('(\w+)',\s*([\d.]+),\s*([\d.]+)/g)) (warps[m[1]] = warps[m[1]] || []).push([+m[2], +m[3]]); }
+    const o = /ORDER\s*=\s*(\[[^\]]+\])/.exec(await (await fetch('js/story1.js')).text()); if (o) ORDER = eval(o[1]);
+    const inc = {}; for (const id in M) for (const q of M[id].portals) if (M[q.to]) (inc[q.to] = inc[q.to] || []).push([q.tx, q.ty]);
+    const flood = (id) => { const m = M[id], seen = new Set(), q = []; for (const [x, y] of [...(inc[id] || []), ...(warps[id] || [])]) { const a = [Math.floor(x), Math.floor(y)]; for (const [dx, dy] of [[0, 0], [0, -1], [0, 1], [1, 0], [-1, 0]]) { const c = [a[0] + dx, a[1] + dy], k = c.join(); if (seen.has(k) || c[0] < 0 || c[1] < 0 || c[0] >= m.w || c[1] >= m.h) continue; if (m.blocked((c[0] + .5) * TS, (c[1] + .7) * TS)) continue; seen.add(k); q.push(c); } } while (q.length) { const [x, y] = q.shift(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy, k = nx + ',' + ny; if (seen.has(k) || nx < 0 || ny < 0 || nx >= m.w || ny >= m.h) continue; if (m.blocked((nx + .5) * TS, (ny + .7) * TS)) continue; seen.add(k); q.push([nx, ny]); } } return seen; };
+    G.S = D.newState('진소', 'BlueSamurai', 'm', 'normal');
+    const reg = {}, out = new Set(), noin = [];
+    for (const id in M) { reg[id] = flood(id); if (!reg[id].size) { noin.push(id); } }
+    const near = (s, cx, cy, rx, ry) => { for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) if (s.has(x + ',' + y)) return true; return false; };
+    const steps = ORDER.length ? ORDER : ['p0'];
+    const FL = [{}, { burned: true, act3: true, inn_rebuilt: true }, { burned: true, act3: true, cross: true, worm: true, hyeok_join: true, baek_gone: true, gwi_dead: true, bing_dead: true }, { burned: true, act3: true, crippled: true, inn_rebuilt: true }];
+    for (const step of steps) for (const fl of FL) { G.S.flags = { ...fl, step }; for (const id in M) { if (!reg[id].size) continue; let c; try { c = Story.content(id); } catch (e) { continue; } for (const n of c.npcs) if (!near(reg[id], n.x + .5, n.y + .5, 2, 2)) out.add(`${id} NPC ${n.id || n.name} ${n.x},${n.y}`); for (const s of [...c.spots, ...c.trigs]) if (s.w && !near(reg[id], s.x + s.w / 2, s.y + s.h / 2, s.w / 2 + 1, s.h / 2 + 1)) out.add(`${id} SPOT ${s.label || s.id || ''} ${s.x},${s.y}`); } }
+    for (const id in M) { const m = M[id]; if (!reg[id].size) continue; for (const q of m.portals) if (!q.door && !near(reg[id], (q.x + q.w / 2) / TS, (q.y + q.h / 2) / TS, q.w / TS / 2 + 1, q.h / TS / 2 + 1)) out.add(`${id} EXIT → ${q.to} ${q.x / TS},${q.y / TS}`); }
+    return { steps: steps.length, maps: Object.keys(M).length, noin, bad: [...out] };
   });
-  console.log(out.join('\n') || '문제 없음'); console.log(errs.join('\n')); await b.close();
-})().catch(e => { console.log(String(e).slice(0, 700)); process.exit(1); });
+  console.log(JSON.stringify(r, null, 0)); console.log(errs.slice(0, 3).join('\n') || 'no errors'); await b.close();
+})().catch(e => { console.log(String(e).slice(0, 500)); process.exit(1); });

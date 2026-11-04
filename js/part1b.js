@@ -22,7 +22,8 @@ async function toShaolin() {
   await say('yun', '소림이면 숭산이죠? 저도 갈래요. 장경각에 의서가 많다고 들었어요.');
   await say('me', '약방은 어쩌고요?');
   await say('yun', '아버지가 계시잖아요. 그리고 혼자 보냈다가 또 어디서 물려 올 거잖아요.');
-  await narr('제3부 · 강호 유람\n\n창운산을 내려와 뱃길과 산길로 보름을 갔다. 숭산에 가까워지자 절보다 종소리가 먼저 들렸다.');
+  await ctx.part(3, '강호 유람', '제1장 소림의 바닥');
+  await narr('창운산을 내려와 뱃길과 산길로 보름을 갔다. 숭산에 가까워지자 절보다 종소리가 먼저 들렸다.');
   set('t2'); ctx.goal('소림사 산문 앞의 지객승에게 서찰 전하기');
   await ctx.warp('shaolin', 19.5, 26, 1);
 }
@@ -47,6 +48,7 @@ async function mop(i) {
   if (F().mop0 && F().mop1 && F().mop2) await sweeper();
 }
 async function sweeper() {
+  ctx.cg('sweep');
   await say('sodi', '왼발로 미는구나.');
   await say('me', '언제부터 계셨어요?');
   await say('sodi', '네가 들어오기 전부터 있었다. 나는 여기서 쉰 해째 비질을 하는 늙은이다.');
@@ -56,6 +58,7 @@ async function sweeper() {
   await say('sodi', '칠식은 몇 장이나 모았느냐.');
   await say('me', '그걸 어떻게 아세요?');
   await say('sodi', '바닥만 쉰 해를 닦으면 발소리로 다 안다. 어디 덤벼 봐라. 내 빗자루를 건드리면 하나 가르쳐 주마.');
+  ctx.cgOff();
   await ctx.duel({ foes: ['sodi'], arena: 'room', bgm: 'quiet', title: '비질하는 늙은이', survive: 24, expMul: 0, tip: '스님은 쓰러뜨릴 수 없습니다. 24초를 버티며 움직임을 익히세요.' });
   await say('sodi', '끝까지 서 있었구나. 그거면 됐다.');
   await say('sodi', '손 내밀어 봐라.');
@@ -88,7 +91,7 @@ async function luohanHall() {
   await say('jigaek', '철우라는 파계승이 부수고 나간 자리입니다. 저희가 아직도 고치고 있습니다.');
   ctx.note('혜각 대사: 소림이 도착했을 때 월하곡은 이미 불타고 있었다.');
   await narr('소림을 떠나 서쪽으로 갔다. 화산에 매화가 피었다는 소문이 있었고, 윤설이 그 산에서만 나는 약초를 찾았다.');
-  await fadeTo(1); G.field.load('hwasan', 14, 11.5, 3); await fadeTo(0);
+  await fadeTo(1); G.field.load('hwasan', 14, 11.5, 3); await ctx.chap(3, '강호 유람', '제2장 벼랑 아래'); await fadeTo(0);
   await say('clan_hwasan', '비켜! 이 절벽길은 화산 땅이야!');
   await say('clan_jongnam', '언제부터? 삼백 년 전 지도에는 종남 땅으로 돼 있소.');
   await say('me', '약초만 캐고 갈게요.');
@@ -107,13 +110,14 @@ async function luohanHall() {
   await say('me', '벼랑 밑에 동굴이 있네. 이야기책에서나 나오는 건 줄 알았는데.');
 }
 async function bones() {
+  ctx.cg('cliff');
   await say(null, '돌비석 앞에 유골 한 구가 앉아 있다. 무릎 위에 낡은 검이 놓여 있고, 벽에 칼끝으로 새긴 글이 있다.');
   await say(null, '“나는 월하문 제십일대 호법 강유다. 이 동굴에서 생을 마친다. 뒤에 올 아이에게 남긴다.”');
   await say(null, '“칠식을 다 모아도 그것이 끝은 아니다. 서문을 찢지 마라. 맨 앞 장은 절대 찢지 마라.”');
   await say(null, '“동굴 물가의 설삼은 내가 심은 것이다. 지금쯤 먹을 만할 것이니 가져가라.”');
   await say('me', '설삼?');
   ctx.note('벼랑 동굴의 유언: 칠식은 끝이 아니다. 서문을 찢지 마라.');
-  F().bones = true; ctx.goal('물가의 설삼을 찾기');
+  ctx.cgOff(); F().bones = true; ctx.goal('물가의 설삼을 찾기');
 }
 async function ginseng() {
   await say('me', '이게 설삼인가.');

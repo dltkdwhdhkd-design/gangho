@@ -60,6 +60,7 @@ export async function crossroads() {
   await say('yun', '지금 정천맹으로 돌아가면 다 죽어요. 어디로 갈지 정해요.');
   await fadeTo(1); F().night = true; G.field.load('valley', 23, 15, 2); await fadeTo(0);
   await narr('새벽녘에 갈대밭에 배를 댔다. 등불을 든 사람들이 먼저 와서 기다리고 있었다.');
+  ctx.cg('cross');
   await say('so', '이제 어쩔 거야? 곽 호법이 월하곡에 있다며. 바로 가자.');
   await say('boat', '못 가. 그 골짜기는 물안개가 막고 있어서 일 년에 딱 한 번, 가을 그믐밤에만 배가 들어가. 뱃사람들은 다 아는 얘기여.');
   await say('me', '그게 언제인데요?');
@@ -73,13 +74,15 @@ export async function crossroads() {
   await say('me', '마교가 저를 돕겠다고요?');
   await say('hyeok', '월하문의 핏줄이 필요합니다. 봉인을 다룰 수 있는 사람은 당신뿐이니까요. 숨기지 않겠습니다.');
   await say('boat', '어디로 갈 거여? 배는 네가 가자는 대로 갈 텨.');
+  ctx.cgOff();
   const c = await choice('누구의 손을 잡을까?', ['소연하와 맹주의 죄를 밝힌다 (정파)', '백랑을 따라 흑도맹으로 간다 (사파)', '혁련하를 따라 서쪽으로 간다 (마교)', '아무의 손도 잡지 않는다 (낭인)']);
   const go = [toJeong, toSa, toMa, toFree][c];
   await go();
 }
 export async function toWolha() {
   set('c4a'); F().night = false;
-  await narr('제6부 · 달이 진 골짜기\n\n가을 그믐밤, 물안개가 걷혔다. 달 없는 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.');
+  await ctx.part(6, '달이 진 골짜기', '제1장 월하곡');
+  await narr('가을 그믐밤, 물안개가 걷혔다. 달 없는 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.');
   ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
   await ctx.warp('wolha', 22, 37, 1);
 }
@@ -111,7 +114,8 @@ async function toSa() {
   await say('yun', '저도 갈게요. 거기도 다치는 사람은 있을 거 아니에요.');
   await say('hyeok', '그렇습니까. 알겠습니다.');
   set('sa1'); F().night = false; ctx.goal('산채 안의 패천도 사마웅 만나기');
-  await narr('제4부 · 흑도맹\n\n열흘 뒤, 동쪽 산길을 올랐다. 맹호의 산채에 검은 깃발 열두 개가 올라가 있었다.');
+  await ctx.part(4, '흑도맹', '입맹');
+  await narr('열흘 뒤, 동쪽 산길을 올랐다. 맹호의 산채에 검은 깃발 열두 개가 올라가 있었다.');
   await ctx.warp('fort', 18, 22, 1);
 }
 async function samaungMeet() {
@@ -132,6 +136,7 @@ async function samaungMeet() {
   set('sa2'); ctx.goal('사마웅의 일감 셋 (청하진 나루, 구화성 정천맹 객관, 구파 회관). 순서는 자유');
 }
 async function jobShip() {
+  await ctx.chap(4, '흑도맹', '군량선');
   if (F().wei_spared) await say('wei', '왔냐, 점소이. 저번에 살려 준 빚은 오늘 갚는다.');
   else await say('pirate', '대장은 사흘이면 나온다더니 아직도 옥에 있소. 우리끼리 왔소.');
   await ctx.duel({ foes: ['jeong_guard', 'jeong_guard', 'jeong_elite'], allies: F().wei_spared ? ['wei_ally'] : [], arena: 'dock', bgm: 'fight', title: '정천맹 군량선' });
@@ -142,6 +147,7 @@ async function jobShip() {
   F().sa_job1 = true; jobCheck();
 }
 async function jobPaper() {
+  await ctx.chap(4, '흑도맹', '명령서');
   await narr('정천맹 객관 서고에 들어갔다. 연회 때 쓴 술 냄새가 아직 남아 있었다.');
   await say('clerk', '누구냐!');
   await ctx.duel({ foes: ['shadow2', 'shadow2', 'jeong_elite'], arena: 'room', bgm: 'fight', title: '정천맹 객관 서고' });
@@ -154,6 +160,7 @@ async function jobPaper() {
   F().sa_job2 = true; jobCheck();
 }
 async function jobMonk() {
+  await ctx.chap(4, '흑도맹', '혜각');
   await say('clan_shaolin', '올 줄 알았소, 시주. 앉으시오.');
   await say('me', '혈의방 의뢰를 받고 왔습니다. 대사님을 베라고 하네요.');
   await say('clan_shaolin', '그렇소. 언젠가 이런 날이 올 줄 알았소. 십칠 년 전 월하곡에 깃발을 들고 간 사람이니, 베어도 할 말은 없소.');
@@ -187,7 +194,8 @@ async function toMa() {
   await say('yun', '…돌아오면 팔부터 봐 줄게요. 꼭 살아서 와요.');
   G.S.love.yun = Math.max(0, (G.S.love.yun || 0) - 14); G.S.love.so = Math.max(0, (G.S.love.so || 0) - 14);
   set('ma1'); F().night = false; ctx.goal('제단 앞의 혁련하와 이야기하기');
-  await narr('제4부 · 붉은 초승달\n\n청풍골 서쪽 절벽에 숨겨진 문이 있었다. 청하진에서 반나절 거리였는데 아무도 몰랐다.');
+  await ctx.part(4, '붉은 초승달', '입교');
+  await narr('청풍골 서쪽 절벽에 숨겨진 문이 있었다. 청하진에서 반나절 거리였는데 아무도 몰랐다.');
   await ctx.warp('shrine', 7, 8, 1);
 }
 async function maRite() {
@@ -206,6 +214,7 @@ async function maRite() {
   set('ma2'); ctx.goal('혈마의 시험 셋 (구화성 금봉 객잔, 창운문 장서각, 청하진 우물가). 순서는 자유');
 }
 async function jobSpy() {
+  await ctx.chap(4, '붉은 초승달', '밀정');
   await narr('금봉 객잔 구석 자리에 국수를 시켜 놓고 한 젓가락도 먹지 않는 손님들이 앉아 있었다.');
   await ctx.duel({ foes: ['myeon', 'myeon', 'myeon'], arena: 'room', bgm: 'fight', title: '무면당 밀정' });
   await say(null, '쓰러진 밀정의 품에서 낡은 나무패가 나왔다. 불에 지진 번호가 적혀 있었다.');
@@ -215,6 +224,7 @@ async function jobSpy() {
   ctx.rep('ma', 1); F().ma_job1 = true; maCheck();
 }
 async function jobKey() {
+  await ctx.chap(4, '붉은 초승달', '제단 열쇠');
   await say('go', '사제, 돌아와라. 문주님은 아직 네 이름을 명부에서 지우지 않으셨다.');
   await say('me', '사형, 그 궤짝이 필요해요.');
   const c = await choice('고진이 궤짝 앞을 막아선다.', ['베고 지나간다', '사정을 말하고 열쇠만 받는다']);
@@ -229,6 +239,7 @@ async function jobKey() {
   F().ma_job2 = true; maCheck();
 }
 async function jobWell() {
+  await ctx.chap(4, '붉은 초승달', '우물');
   await narr('청하진 우물가에 갔다. 아이들이 물을 긷다 말고 놀고 있었다.');
   await say('kid', '쟁반 아저씨다! 쟁반 또 던져 봐요!');
   await say('me', '여기서 놀지 마라. 저쪽으로 가.');

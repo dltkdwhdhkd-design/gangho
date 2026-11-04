@@ -60,7 +60,7 @@ async function wormFight() {
   await say('so', '물 먹고 컸겠지. 비켜, 내가 왼쪽 맡을게.');
   await ctx.duel({ foes: ['sand_worm'], allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '물길의 괴물' });
   await narr('괴물이 쓰러지자 동굴 벽에서 물이 터져 나왔다. 물살에 떠밀려 나오다시피 동굴을 빠져나왔다. 그날 저녁 사주성 우물이 찼고, 성문이 활짝 열렸다.');
-  await say('trader', '은인이오! 오늘 먹고 마시는 건 전부 공짜요. 물건도 반값에 드리겠소.');
+  await say('trader', '은인이오! 오늘 먹고 마시는 건 전부 공짜요. 약도 반값에 드리겠소.');
   F().worm = true;
   if (F().hyeok_join) await hyeokMother();
   await say('hyeok', '북쪽 고개를 넘으면 설산입니다. 빙궁이 그 안에 있습니다. 준비가 되면 성 북문으로 나가십시오.');
@@ -75,7 +75,7 @@ async function hyeokMother() {
   await narr('노파가 고개를 들다가 멈췄다. 혁련하의 눈을 한참 들여다봤다. 혁련하는 평소처럼 아무 표정이 없었는데 꽃을 쥔 손가락이 하얬다.');
   await say('hyeok', '…그 아이를 뭐라고 부르셨습니까.');
   await say('flower', '소야요. 소야라고 불렀어요.');
-  await narr('그날 밤 잠이 안 와 일어났더니 달빛 아래서 작은 소리가 났다. 소야, 소야. 그 사람은 부르는 법을 잊지 않고 있었다.');
+  await narr('그날 밤 잠이 안 와 일어났더니 혁련하가 달빛 아래 앉아 작은 소리로 소야, 소야 하고 부르고 있었다.');
   ctx.love('hyeok');
 }
 
@@ -142,7 +142,7 @@ async function ghostPass() {
   await ctx.duel({ foes: ['gwima'], allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '귀마' });
   await say('gwima', '죽은 것은… 다시 일어난다… 나도…');
   await narr('귀마가 흩어지자 고개를 메우고 있던 망자들이 눈 위로 픽픽 쓰러졌다. 나는 형을 찾아 뒤를 돌아봤다.');
-  await narr('형은 쓰러지지 않았다. 잠깐 제 손을 내려다보더니 천산 쪽으로 걸어가기 시작했다. 불러도 돌아보지 않았다. 눈보라가 그 등을 지웠다.');
+  await narr('형은 쓰러지지 않았다. 잠깐 제 손을 내려다보더니 천산 쪽으로 걸어가기 시작했다. 불러도 돌아보지 않았고, 금방 눈보라에 가려 보이지 않게 됐다.');
   await say('yun', '귀마가 죽었는데 왜 안 쓰러져요?');
   await say('hyeok', '저분을 부르는 것이 귀마만은 아니었던 모양입니다.');
   F().gwi_dead = true;
@@ -201,7 +201,7 @@ async function fifthStart() {
   await say('chief', '왔나. 앉게. 차가 식겠네.');
   await say('me', '살아 있었네.');
   await say('chief', '그 정도로 죽을 거였으면 이 자리까지 못 왔지.');
-  await say('chief', '나도 이 찻잔처럼 어디서 왔는지 아무도 모르는 아이였네. 제단 앞에 버려졌지. 위에 앉은 놈들 얼굴을 다 바꿔 놓고 싶었네. 정파든 마교든.');
+  await say('chief', '나도 어디서 왔는지 아무도 모르는 아이였네. 제단 앞에 버려졌지. 위에 앉은 놈들을 다 끌어내리고 싶었어. 정파든 마교든.');
   await say('me', '그래서 애들을 모아다 개처럼 부렸어?');
   await say('chief', '자네는 살았잖나. 살아서 일곱 장을 모았어. 고맙네.');
   await say('so', '내 사부님 머리에 얼음 넣은 것도 고맙다고 해 보지 그래.');
@@ -213,7 +213,7 @@ async function fifthStart() {
   await say('me', '…뭐?');
   await say('chief', '내가 왜 자네 손에 죽으러 이 산속까지 왔겠나.');
   ctx.cg('chief_end');
-  await narr('연경추의 피가 바닥에 닿자 돌바닥에 달 일곱 개가 차례로 떠올랐다. 초승, 월영, 반월, 월광, 만월, 월식, 낙월. 내가 익힌 순서 그대로였다. 천산 전체가 한 번 크게 숨을 들이쉬었다.');
+  await narr('연경추의 피가 바닥에 닿자 돌바닥에 달 일곱 개가 차례로 떠올랐다. 초승, 월영, 반월, 월광, 만월, 월식, 낙월. 내가 익힌 순서 그대로였다. 곧이어 산 전체가 크게 울렸다.');
   ctx.cgOff();
   F().chief_end = true; ctx.note('연경추를 베었다. 그것이 마지막 열쇠였다. 봉인이 풀렸다.');
   await G.act3.part9();
@@ -225,7 +225,7 @@ Story.providers.push(function part8p(id) {
   if (id === 'oasis') {
     if (at('w1b', 'w2')) { n.push({ id: 'so', spr: 'RedSamurai', x: 16, y: 18, dir: 3, talk: async () => { await say('so', '칼은 닦았어?'); } }); n.push({ id: 'yun', spr: 'Princess', x: 18, y: 19, dir: 3, talk: async () => { await say('yun', '물은 하루 세 번이에요.'); } }); if (F().hyeok_join) n.push({ id: 'hyeok', spr: 'Hyeok', x: 24, y: 18, dir: 3, talk: async () => { await say('hyeok', '북문으로 나가면 설산입니다.'); } }); }
     if (at('w1')) tr.push({ x: 0, y: 0, w: 99, h: 99, when: () => at('w1'), run: oasisCome });
-    n.push({ id: 'trader', spr: 'Noble', x: 20, y: 15, dir: 0, talk: async () => { await say('trader', F().worm ? '은인께는 반값이오. 천산 쇠로 벼린 칼도 있소.' : '물이 없어서 장사가 안 되오. 그래도 보시오.'); await ctx.shop('사주성 상인', [ctx.item.potion(F().worm ? 8 : 14), ctx.item.weapon('frost_sword'), ctx.item.weapon('frost_blade'), ctx.item.weapon('frost_spear'), ctx.item.weapon('frost_fist')]); } });
+    n.push({ id: 'trader', spr: 'Noble', x: 20, y: 15, dir: 0, talk: async () => { await say('trader', F().worm ? '약은 은인께 반값이오. 칼은 대장장이 몫이 있어 깎아 드리지 못하오.' : '물이 없어서 장사가 안 되오. 그래도 보시오.'); await ctx.shop('사주성 상인', [ctx.item.potion(F().worm ? 8 : 14), ctx.item.weapon('frost_sword'), ctx.item.weapon('frost_blade'), ctx.item.weapon('frost_spear'), ctx.item.weapon('frost_fist')]); } });
     if (at('w1b')) n.push(job({ id: 'job_worm', stamp: 'rocks', spr: '', x: 37, y: 12, hint: '동굴로 들어가기', talk: wormFight }));
     if (at('w2', 'w1b')) { if (at('w2')) sp.push({ x: 18, y: 0, w: 6, h: 2, hint: '북문으로 나가기', act: async () => { await ctx.warp('snowpeak', 22, 30, 1); await iceStart(); set('w2b'); } }); }
   }

@@ -52,7 +52,7 @@ export async function begin() {
   await say('me', '오자마자요?');
   await say('gwak', '그럼 앉아서 손님 노릇 할래? 밥값은 있고?');
   ctx.cg('red_moon');
-  await narr('그날 저녁 나루 쪽이 웅성거렸다. 나가 보니 서쪽 하늘에 달이 떠 있었다. 어제가 그믐이었는데 달이 떴고, 붉었다.');
+  await narr('그날 저녁 나루 쪽이 웅성거렸다. 나가 보니 서쪽 하늘에 붉은 달이 떠 있었다. 어제가 그믐이었는데 말이다.');
   await say('boat', '평생 강에서 살았는디 저런 달은 처음이여.');
   await say('gwak', '…기어이 떴구나.');
   await say('me', '저게 뭐예요?');
@@ -80,7 +80,7 @@ export async function begin() {
 async function rainStart() {
   await ctx.chap(7, PART, '제2장 혈우');
   ctx.cg('rain');
-  await narr('달이 뜨고 사흘째 되는 날 비가 왔다. 빗물이 붉었다. 그 물을 받아 마신 사람들부터 기침을 시작했다.');
+  await narr('달이 뜨고 사흘째 되는 날 붉은 비가 왔다. 그 빗물을 받아 마신 사람들부터 기침을 시작했다.');
   ctx.cgOff();
   await say('yun', '왔어요? 손 씻고 들어와요. 빗물 묻은 손으로 아무것도 만지지 말고요.');
   await say('me', '어떤 병이에요?');
@@ -187,9 +187,9 @@ async function tableScene() {
     F().hyeok_join = true;
   } else await say('hyeok', '천산으로 가는 길은 제가 압니다. 믿지 않으셔도 좋습니다. 저도 제물로 쓰일 몸이었습니다.');
   await say('clan_jegal', '그러면 누가 맹주를 맡습니까. 군을 움직이려면 머리가 하나여야 합니다.');
-  const c = await choice('다들 나를 본다. 나는 아직 쟁반을 들고 있다.', ['제가 맡겠다고 한다', '혜각과 사마웅이 함께 맡게 한다', '곽 아주머니를 추대한다']);
+  const c = await choice('다들 나를 본다. 나는 아직 쟁반을 들고 있다.', ['제가 맡겠다고 한다', `${F().hyegak_dead ? '혜명' : '혜각'}과 사마웅이 함께 맡게 한다`, '곽 아주머니를 추대한다']);
   if (c === 2) { good++; await say('me', '곽 아주머니가 하시면 되잖아요. 다들 말 잘 듣는데요.'); await say('gwak', '미쳤냐? 나는 국수 끓여야 돼.'); await narr('그런데 아무도 반대하지 않았다. 사마웅이 먼저 웃음을 터뜨렸고, 그날부터 정사연합의 군령은 달맞이 객잔에서 나갔다.'); }
-  else if (c === 1) { good++; await say('samaung', '내가 저 중놈이랑?'); await say(hy, '노납도 내키지는 않소.'); await say('gwak', '둘 다 내키지 않으면 공평하네. 그렇게 해.'); }
+  else if (c === 1) { good++; await say('samaung', '내가 저 중놈이랑?'); await say(hy, F().hyegak_dead ? '소승도 내키지는 않습니다.' : '노납도 내키지는 않소.'); await say('gwak', '둘 다 내키지 않으면 공평하네. 그렇게 해.'); }
   else { await say('clan_namgung', '점소이가 맹주를 하겠다고?'); await say('samaung', '내 칼 앞에서 서 있던 놈이다. 나는 상관없다.'); ctx.rep('sa', 1); ctx.rep('jeong', 1); }
   await say('gwak', '이름은 뭐로 할 거야. 합석이면 합석이지 뭘 고민해. 먹었으면 그릇은 각자 치워.');
   await narr('그렇게 정파와 사파가 처음으로 한 상에서 밥을 먹었다. 강호 사람들은 그걸 합석이라고 불렀다.');
@@ -245,7 +245,7 @@ async function gateScene() {
     await narr('대답이 없었다. 가까이 가 보니 눈을 뜬 채였다. 오른손에 먹다 남은 주먹밥이 쥐여 있었다.');
     ctx.cgOff();
     await say('jigaek', '…문을 열겠습니다. 스님을 안으로 모십시오.');
-    await narr('십 년 넘게 닫혀 있던 쪽 문이 열렸다. 승려들이 철우를 메고 그 문으로 들어갔다. 나는 돌계단에 남은 주먹밥 부스러기를 오래 내려다봤다.');
+    await narr('십 년 넘게 닫혀 있던 쪽 문이 열렸다. 승려들이 철우를 메고 그 문으로 들어갔다.');
     F().cheol_dead = true;
   }
   ctx.note(F().cheol_dead ? '철우가 소림 산문 앞에서 세상을 떠났다. 끝까지 문 안으로 들어가지 않았다.' : '철우가 왼팔을 잃었다. 소림 산문은 뚫리지 않았다.');

@@ -13,14 +13,14 @@ G.after = after;
 const overBlack = on => $('#dialog').classList.toggle('over', on);
 
 Story.scenes.opening = async () => {
-  overBlack(true); Sound.bgm('dark');
-  await narr('내가 다섯 살 때 전쟁이 터졌다. 북쪽 변경에 있던 우리 마을은 하룻밤 새 잿더미가 됐고, 부모님도 그날 돌아가셨다.');
+  Sound.bgm('dark'); await ctx.part(1, '객잔의 낭인', '제1장 달맞이 객잔'); overBlack(true);
+  await narr('내가 다섯 살 때 전쟁이 터졌다. 북쪽 변경에 있던 우리 마을은 하룻밤 새 잿더미가 됐고, 부모님도 그날 돌아가셨다.', 'war');
   await narr('갈 데가 없으니 군막 주변을 맴돌았다. 거둬 주는 사람은 없어도 쫓아내는 사람도 없었다. 말똥 치우고 시체 나르는 걸 거들면 남은 밥 한 덩이는 얻어먹을 수 있었다.');
-  await narr('일곱 살 되던 해, 나는 견대(犬隊)로 끌려갔다. 전쟁고아를 긁어모아 만든 척후대였다. 거기선 이름 대신 번호로 불렸고, 적진에 먼저 기어 들어가 화살이 어디서 날아오나 살피는 게 우리 일이었다. 말이 척후지 미끼나 다름없었다. 병사들은 우릴 개새끼들이라고 불렀다.');
-  await narr('내가 열일곱이 되던 해, 팔백 명이던 견대는 서른 명으로 줄어 있었다. 마지막 명령은 적 보급기지를 치라는 거였는데, 막상 가 보니 보급기지는커녕 매복만 깔려 있었다. 살아서 돌아온 건 나 하나였다.');
+  await narr('일곱 살 되던 해, 나는 견대(犬隊)로 끌려갔다. 전쟁고아를 긁어모아 만든 척후대였다. 거기선 이름 대신 번호로 불렸고, 적진에 먼저 기어 들어가 화살이 어디서 날아오나 살피는 게 우리 일이었다. 말이 척후지 미끼나 다름없었다. 병사들은 우릴 개새끼들이라고 불렀다.', 'camp');
+  await narr('내가 열일곱이 되던 해, 팔백 명이던 견대는 서른 명으로 줄어 있었다. 마지막 명령은 적 보급기지를 치라는 거였는데, 막상 가 보니 보급기지는커녕 매복만 깔려 있었다. 살아서 돌아온 건 나 하나였다.', 'trap');
   await narr('그런데 돌아오자마자 나는 동료를 버리고 혼자 도망친 놈이 됐다. 얼마 안 가 휴전이 맺어졌고, 군은 견대 같은 건 애초에 없었다는 듯 굴었다. 내 이름도 군적에서 지워졌다. 열여덟 살, 손에 남은 거라곤 이 빠진 칼 한 자루뿐이었다.');
   await narr('그 뒤로 두 해를 떠돌았다. 상단 호위도 서고 남의 빚도 대신 받아 주며 근근이 입에 풀칠을 했다. 세상은 나 같은 놈을 낭인이라고 불렀다.');
-  await narr('스무 살 되던 봄, 청하진이라는 나루에 내렸을 때 나는 사흘째 굶고 있었다.');
+  await narr('스무 살 되던 봄, 청하진이라는 나루에 내렸을 때 나는 사흘째 굶고 있었다.', 'dock');
   overBlack(false); Sound.bgm('village'); await fadeTo(0);
   set('p0a'); ctx.goal('마을 위쪽 달맞이 객잔에서 밥 먹기 (WASD 이동)');
 };
@@ -34,7 +34,9 @@ export async function firstMeal() {
   await say('me', '북쪽이요.');
   await say('gwak', '몇 살이야?');
   await say('me', '스물이요.');
+  ctx.cg('ladle');
   await narr('아주머니는 내 얼굴을 한참 뜯어보더니 고개를 기울여 귀 뒤쪽을 들여다봤다. 그러다 들고 있던 국자를 떨어뜨렸다.');
+  ctx.cgOff();
   await say('gwak', '아이고, 손에 기름이 묻어서. …칼은 내가 갖고 있을 테니까, 모자란 여섯 닢어치 일하고 찾아가. 걸레는 저기 있다.');
   await say('me', '그 정도면 반나절이면 되겠네요.');
   await say('gwak', '퍽이나. 먹고 자는 건 공짜인 줄 아냐?');
@@ -114,7 +116,9 @@ export async function lastMorning() {
   await say('me', '혼자 두고 어떻게 가요!');
   await ctx.duel({ foes: ['fox0'], arena: 'yard', bgm: 'boss', title: '여우 가면', survive: 16, tip: '이길 수 없는 상대입니다. 16초를 버티세요.' });
   await say('fox', '이 아이인가. 아직 덜 여물었군.');
+  ctx.cg('fire');
   await narr('아주머니가 쓰러지는 게 보였다. 곧이어 등에 뭔가 세게 부딪혔고, 그다음은 차가운 강물밖에 기억나지 않는다.');
+  ctx.cgOff();
   await fadeTo(1); F().night = false; F().burned = true; set('c1a');
   G.field.load('clinic', 9.2, 7.6, 3); await fadeTo(0);
   await say('yun', '정신이 좀 들어요? 물을 얼마나 먹었는지 배를 누르니까 분수처럼 나오던데요.');
@@ -125,7 +129,7 @@ export async function lastMorning() {
   await say('me', '찾으러 가야 돼요.');
   await say('yun', '그 몸으로요? 일어나지도 못하면서. 그보다 품에 있던 이 종이 좀 봐요. 강에 빠졌는데 하나도 안 젖었어요.');
   F().met_yun = true;
-  await narr('제1부 · 객잔의 낭인\n\n타다 남은 객잔');
+  await ctx.chap(1, '객잔의 낭인', '제2장 타다 남은 객잔');
   ctx.goal('불탄 객잔을 살펴보고, 나루터의 뱃사공에게 묻기');
   ctx.note('곽 아주머니는 검은 옷의 무리에게 끌려갔다. 여우 가면이 아주머니를 “곽 호법”이라고 불렀다.');
   ctx.note('마을에서 할 수 있는 일: 복덕방에서 집 사기, 뱃사공에게 낚싯대 얻기, 서쪽 청풍골에서 사냥과 벌목, 대장간과 약방에서 제작, 떠돌이 비무객과 겨루기.');
@@ -192,6 +196,7 @@ async function yunAfter() {
   else { await say('me', '약값은 꼭 갚을게요.'); await say('yun', '네, 다 적어 놨어요.'); }
 }
 async function roadBlock() {
+  await ctx.chap(1, '객잔의 낭인', '제4장 흑풍채');
   await say('bandit', '거기 서! 여긴 흑풍채 맹호 어른 땅이다!');
   await say('me', '흑의인들 여기 안 지나갔어?');
   await say('bandit', '그딴 건 모르겠고 일단 통행세부터 내!');
@@ -230,6 +235,8 @@ async function lionFight() {
 async function wellOpen() {
   await say(null, '쇠붙이를 끼워 돌리자 뚜껑이 소리 없이 열렸다. 우물 벽에 사다리가 있다.');
   await ctx.warp('well', 6, 7, 1);
+  await ctx.chap(1, '객잔의 낭인', '제5장 우물 아래');
+  ctx.cg('well');
   await say('me', '이게 다 위패야?');
   await narr('우물 밑 작은 방에 위패가 빼곡히 들어차 있었다. 세어 보니 마흔아홉 개. 맨 앞 위패에는 “월하문 문주 월청운 내외의 신위”라고 적혀 있었다.');
   await say('me', '아주머니가 여기서 매일 향을 피우셨나 보네. 궤짝도 있다.');
@@ -245,6 +252,7 @@ async function wellOpen() {
   await say('gwak', '복수 같은 건 꿈도 꾸지 마라. 그래도 기어이 나가겠다면, 밥은 거르지 말고 다녀라.');
   await say('me', '끝까지 밥 얘기네.');
   await narr('누가 나를 찾고 있었다는 걸, 스무 살이 되도록 몰랐다.');
+  ctx.cgOff();
   ctx.page('moon2');
   ctx.note('나는 월하문의 마지막 아이. 곽 아주머니는 월하문 호법 곽란. 전쟁 때 잃은 부모는 나를 맡아 키운 분들이었다. 구파일방과 오대세가가 월하곡을 둘러쌌고, 문을 안에서 열어 준 자가 있었다.');
   set('c1h'); F().well_open = true; F().cloud_open = true;
@@ -302,7 +310,8 @@ Story.providers.push(function content1(id) {
   }
   if (id === 'clinic' && F().burned) {
     n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => at('c1b', 'c1d', 'c1h'), when: () => (!F().yun_join || at('end') || S().side === 'free' || S().side === 'ma' || F().act3) && !at('r2', 'r2b') && S().married !== 'yun', talk: async () => { if (at('c1b')) await yunPaper(); else if (at('c1d')) await yunAfter(); else if (at('c1h')) await yunGo(); else if (F().c1yun2 || !after('c1e')) await say('yun', '금창약은 만물상보다 여기가 싸요. 넉넉히 사 가요.'); else { F().c1yun2 = true; await yunNight(); } } });
-    n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, mark: () => !!G.ch.hook('doc'), talk: async () => { const h = G.ch.hook('doc'); if (h) return h(); await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
+    if (F().doc_dead) sp.push({ x: 9, y: 3, w: 2, h: 2, hint: '약장 열기', act: async () => { const c = await choice('윤 의원의 약장이다.', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다']); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
+    n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, when: () => !F().doc_dead, mark: () => !!G.ch.hook('doc'), talk: async () => { const h = G.ch.hook('doc'); if (h) return h(); await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
   }
   if (id === 'smith' && F().burned) n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => at('c1e') && !F().smith_gift, talk: talkTown.smith });
   if (id === 'shop') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: talkTown.shopk });

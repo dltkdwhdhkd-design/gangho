@@ -8,7 +8,8 @@ import { clansWon } from './clandata.js';
 const S = () => G.S, F = () => G.S.flags;
 // ── 2장 ──
 async function arrive() {
-  await narr('제2부 · 구름 위의 칼\n\n창운산에는 창운문이 있다. 구파일방 바로 아래 자리를 넘본다는 신흥 명문이다.');
+  await ctx.part(2, '구름 위의 칼', '제1장 입문');
+  await narr('창운산에는 창운문이 있다. 구파일방 바로 아래 자리를 넘본다는 신흥 명문이다.');
   await say('yun', '저는 문주님 진맥하러 왔다고 하면 되는데, {나} 씨는 어쩌려고요?');
   await say('me', '입문 시험을 볼 거예요. 외문 제자로 들어가서 서찰에 인장 찍은 놈을 찾아야죠.');
   await say('yun', '점소이가 시험을 본다고요?');
@@ -24,6 +25,8 @@ async function exam() {
   await say('go', '제법 움직이는군. 그 걸음은 어디서 배웠느냐?');
   await ctx.duel({ foes: ['senior_go'], arena: 'court', bgm: 'boss', title: '사형 고진', yieldAt: .25 });
   await say('go', '인정하겠다. 외문 제자로 받아 주지. 앞으로 나를 사형이라고 불러라.');
+  await ctx.chap(2, '구름 위의 칼', '제2장 연무장의 나날');
+  ctx.cg('go_yard');
   await say('so', '야, 너 걸음이 재밌다. 어디서 배웠어?');
   await say('me', '누구세요?');
   await say('so', '벽수궁 소연하. 객으로 와 있어. 그 걸음 창운문 거 아니지? 나랑 한판 하자.');
@@ -37,6 +40,7 @@ async function exam() {
   set('c2c'); ctx.goal('본전에서 윤설과 함께 문주를 뵙기');
 }
 async function lordSick() {
+  await ctx.chap(2, '구름 위의 칼', '제3장 문주의 병');
   await say('yun', '왔어요? 문주님 뵙고 왔는데 병이 아니에요.');
   await say('me', '그럼 뭔데요?');
   await say('yun', '칠일소혼산이라는 독이에요. 이레에 한 번씩 조금씩 먹이는 건데, 곁에 있는 사람 아니면 먹일 수가 없어요.');
@@ -68,6 +72,8 @@ async function cure() {
   F().night = true; set('c2f'); ctx.goal('밤에 장서각 들어가기 (왼쪽 건물)');
 }
 async function library() {
+  await ctx.chap(2, '구름 위의 칼', '제4장 장서각의 밤');
+  ctx.cg('library');
   await say('me', '십칠 년 전 기록이 여기 있는데 가운데가 다 뜯겨 있네.');
   await say('so', '너도 그거 찾으러 왔어?');
   await say('me', '언제 들어왔어요?');
@@ -81,6 +87,7 @@ async function library() {
   await say('wi', '거기까지 하시오.');
   await say('wi', '문주가 살아날 줄은 몰랐소. 밤에 책 읽다 변을 당하는 아이들이 더러 있더군.');
   ctx.note('장서각 쪽지: “토벌대 명부. 내통자 낙월. 맹주 수결.”');
+  ctx.cgOff();
   await ctx.duel({ foes: ['shadow', 'shadow', 'shadow'], allies: ['so_ally'], arena: 'room', title: '장서각 습격', bgm: 'fight' });
   await say('so', '본전 쪽으로 갔어! 문주님이 위험해!');
   F().night = false;
@@ -88,6 +95,7 @@ async function library() {
   await ctx.warp('cloudmt', 22.5, 9, 1);
 }
 async function wiBoss() {
+  await ctx.chap(2, '구름 위의 칼', '제5장 검각주');
   await say('wi', '점소이 따위가 십칠 년 공들인 일을 망치는구나.');
   await say('me', '곽 아주머니 어디 있어.');
   await say('wi', '그보다 네 사문의 초식이 궁금하지 않으냐. 내 품에 두 장이 있다. 가져갈 수 있으면 가져가 보아라.');
@@ -108,7 +116,8 @@ async function wiBoss() {
 // ── 3장 ──
 export async function toGuhwa() {
   F().boat_guhwa = true;
-  await narr('천하비무\n\n구화성에 구파일방과 오대세가의 깃발이 모두 모였다. 거리마다 칼 찬 사람들로 발 디딜 틈이 없었다.');
+  await ctx.chap(3, '강호 유람', '제3장 구화성');
+  await narr('구화성에 구파일방과 오대세가의 깃발이 모두 모였다. 거리마다 칼 찬 사람들로 발 디딜 틈이 없었다.');
   await ctx.warp('guhwa', 24.5, 29, 1);
   await say('yun', '사람 진짜 많다. 소매치기 조심해요.');
   await say('me', '금봉 객잔 쪽이 시끄러운데요.');
@@ -161,6 +170,7 @@ async function judge() {
   }
 }
 async function chiefMeet() {
+  await ctx.chap(3, '강호 유람', '제4장 맹주의 차');
   await say('chief', '자네가 창운문을 구했다는 그 젊은이로군. 앉게. 차가 식겠네.');
   await say('chief', '군에서 버려진 낭인이었다고? 괜찮네. 강호는 출신을 너무 따져서 탈이야.');
   await say('chief', '나도 구파일방이나 오대세가 출신이 아닐세. 이 자리까지 오는 데 서른 해가 걸렸지.');
@@ -209,12 +219,15 @@ async function cheolDrink() {
 async function finalMatch() {
   const left = 15 - clansWon();
   const c = await choice(`결승 상대는 소연하. 끝나면 구화성을 떠나게 될 것 같다.${left ? ` (아직 비무하지 않은 세력 ${left}곳)` : ''}`, ['올라간다', '조금 더 준비한다'], 'judge'); if (c) return;
+  await ctx.chap(3, '강호 유람', '제5장 천하비무');
+  ctx.cg('final');
   await say('so', '말했지. 안 봐준다고.');
   await ctx.duel({ foes: ['so_final'], arena: 'ring', bgm: 'boss', title: '결승 · 소연하', yieldAt: .2 });
   await say('so', '아, 졌다. 분하네. 너 칼 많이 늘었다.');
   await say('judge', '천하비무대회 우승자, {호} {나}!');
   await narr('함성 속에서 맹주가 직접 달거울을 건네주었다. 그날 밤 정천맹 객관에서 장문인들이 모인 축하 연회가 열렸다.');
   await ctx.warp('hall2', 7, 8, 1);
+  ctx.cg('banquet');
   await say('chief', '한잔 받게. 자네 아버지도 술은 약했지.');
   await say('me', '…예?');
   await say(null, '품속의 달거울이 뜨거워졌다. 꺼내 보니 뒷판이 벌어져 있고 찢어진 종이 두 장이 끼어 있었다. 거울에 비추자 종이에 숨은 글이 떠올랐다. “낙월을 움직인 자는 연경추다. 달 없는 밤에 그가 문주를 베었다.”');
@@ -224,6 +237,7 @@ async function finalMatch() {
   await say('yun', '{나} 씨! 마시지 마요! 독이에요!');
   await say(null, '윤설이 뛰어들어 잔을 쳐 냈다. 연회장 문이 닫히고 복면을 쓴 자들이 내려왔다.');
   ctx.page('moon5'); ctx.page('moon6');
+  ctx.cgOff();
   await ctx.duel({ foes: ['shadow2', 'shadow2', 'shadow2', 'shadow2'], allies: ['so_ally', 'cheol_ally'], arena: 'room', title: '정천맹 객관 탈출', bgm: 'fight' });
   await say('cheol', '시주들, 뒷문으로 오시오! 내가 부숴 놨소!');
   await say('so', '곽 호법이 월하곡에 있다면 거기로 가야지. 내 사부님 일도 거기서 끝낼 거야.');
@@ -241,6 +255,7 @@ async function trace(k) {
   if (F().tr1 && F().tr2 && F().tr3) { set('c4b'); ctx.goal('본전 터의 석상 앞으로 가기'); }
 }
 async function baekReunion() {
+  await ctx.chap(6, '달이 진 골짜기', '제2장 고백');
   await say('baek', '왔느냐.');
   await say('me', '어르신.');
   await say('baek', '허리가 많이 펴졌구나.');
@@ -263,13 +278,16 @@ async function baekReunion() {
   set('c4c'); ctx.goal('북쪽 석상 앞에서 여우 가면과 맞서기');
 }
 async function foxBoss() {
+  await ctx.chap(6, '달이 진 골짜기', '제3장 여우 가면');
   await say('fox', '제법 컸구나.');
   await say('me', '곽 아주머니를 내놔라.');
   await say('fox', '저 안에 있다. 살아 있다. 나도 그 노인네는 못 죽이겠더군.');
   await say('me', '왜 월하칠식을 쓰는 거냐.');
   await say('fox', '궁금하면 이겨 봐라.');
   await ctx.duel({ foes: ['fox'], arena: 'moon', bgm: 'boss', title: '여우 가면' });
+  ctx.cg('mask');
   await narr('가면이 갈라져 떨어졌다. 나와 어딘가 닮은 얼굴이었다.');
+  ctx.cgOff();
   await say('cheon', '너도 개처럼 컸다더구나. 나는 여덟 살에 연경추 손에 끌려가 사람 죽이는 법을 배웠다.');
   await say('me', '그럼 당신이 그 큰아이…');
   await say('cheon', '형이라고 부르지 마라. 그 말을 들으면 칼을 못 든다.');
@@ -279,13 +297,17 @@ async function foxBoss() {
   await say('gwak', '천아! 이 못난 놈아, 밥은 먹고 다니냐!');
   await say('cheon', '…아주머니.');
   await say('chief', '다들 모였군. 쓸모가 다한 놈도 같이.');
+  ctx.cg('chief_stab');
   await narr('연경추의 검이 월천의 등을 뚫었다. 월천은 쓰러지면서도 맹주의 손목을 놓지 않았다.');
   await say('cheon', '가라… 달이 뜨면… 베어라…');
+  ctx.cgOff();
+  await ctx.chap(6, '달이 진 골짜기', '제4장 낙월의 밤');
   set('c4d');
   await G.route.chiefBattle();
   await ending();
 }
 async function ending() {
+  await ctx.chap(6, '달이 진 골짜기', '제5장 달이 진 뒤');
   if (S().side && S().side !== 'jeong') return G.route.routeEnding();
   await narr('달이 떴다. 강호는 맹주가 쓰러졌다는 소식으로 석 달을 시끄러웠다. 월천의 무덤은 월하곡 본전 터에 만들어 주었다.');
   await narr('정천맹은 해체되었다. 구파일방과 오대세가의 장문인들이 차례로 월하곡에 올라와 향을 피웠다.');
@@ -331,7 +353,7 @@ Story.providers.push(function content2(id) {
     n.push({ id: 'judge', spr: 'Inspector', x: 24.5, y: 15, dir: 0, mark: () => after('c3b') && !after('c4a'), when: () => !after('c4a'), talk: judge });
     n.push({ id: 'yun', spr: 'Princess', x: 13, y: 15, dir: 3, mark: () => (F().round || 0) >= 1 && !F().ev_lantern, when: () => !after('c4a') && S().married !== 'yun', talk: async () => { if ((F().round || 0) >= 1 && !F().ev_lantern) await lantern(); else await say('yun', '금창약은 넉넉해요?'); } });
     n.push({ id: 'so', spr: 'RedSamurai', x: 34, y: 15, dir: 2, mark: () => at('c3e') && !F().ev_soeve, when: () => (!after('c4a') || at('end')) && S().married !== 'so', talk: async () => { if (at('c3e') && !F().ev_soeve) await soEve(); else await say('so', '칼은 닦았어?'); } });
-    n.push({ id: 'cheol', spr: 'Monk2', x: 20, y: 22, dir: 3, mark: () => !!F().monk_met && !F().ev_cheol, when: () => !!F().monk_met && (!after('c4a') || at('end')), talk: async () => { if (!F().ev_cheol) await cheolDrink(); else await say('cheol', '나무아미… 저 만두 하나만 사 주시오.'); } });
+    n.push({ id: 'cheol', spr: 'Monk2', x: 20, y: 22, dir: 3, mark: () => !!F().monk_met && !F().ev_cheol, when: () => !!F().monk_met && !F().cheol_dead && (!after('c4a') || at('end')), talk: async () => { if (!F().ev_cheol) await cheolDrink(); else await say('cheol', '나무아미… 저 만두 하나만 사 주시오.'); } });
     n.push({ id: 'boat', spr: 'OldMan2', x: 26.5, y: 29, dir: 2, talk: async () => { const c = await choice('청하진으로 갈까?', ['간다', '그만둔다'], 'boat'); if (!c) await ctx.warp('cheongha', 22.5, 26, 1); } });
   }
   if (id === 'inn2') {

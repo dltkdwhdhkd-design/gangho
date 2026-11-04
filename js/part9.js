@@ -31,7 +31,7 @@ const slotPreface = () => { const s = S(); if (s.skills.includes('moon0') && !s.
 async function part9() {
   await ctx.part(9, PART, '제1장 천마 재림');
   ctx.cg('tianmo');
-  await narr('문이 열린 게 아니었다. 산이 열렸다. 천산 허리가 위아래로 갈라졌고, 그 틈으로 달이 보였다. 붉은 달이 이렇게 가까이 있는 줄 처음 알았다.');
+  await narr('천산 허리가 위아래로 갈라졌다. 그 틈으로 달이 보였는데, 붉은 달이 그렇게 가까이 있는 줄은 그때 처음 알았다.');
   await narr('누가 돌계단을 걸어 올라왔다. 키가 큰 사람도 아니었다. 맨발이었다. 그 사람이 한 걸음 디딜 때마다 얼어붙은 물이 터지는 소리가 났다.');
   ctx.cgOff();
   await say('cheonma', '삼백 년을 잤더니 배가 고프구나. 문을 연 것이 너냐.');
@@ -153,7 +153,7 @@ async function bridge() {
   await say('me', '같이 가요.');
   await say('samaung', '내 형제 열둘 얘기 해 줬지? 그 애들이 나 늦는다고 욕할 때가 됐다. 가, 이 자식아. 연경추 목은 네가 따고 내 몫은 안 남겼잖냐. 이번 건 내가 먹는다.');
   ctx.cg('samaung_end');
-  await narr('사마웅은 다리 한가운데서 큰 칼을 땅에 꽂고 돌아섰다. 뒤를 돌아보지 말라고 했는데 나는 돌아봤다. 맨 앞 놈의 목이 날아갔고, 그 사람은 웃고 있었다. 칼 부딪는 소리는 궁 문이 닫힐 때까지 들렸다. 그때까지 한 번도 끊기지 않았다.');
+  await narr('사마웅은 다리 한가운데서 큰 칼을 땅에 꽂고 돌아섰다. 뒤를 돌아보지 말라고 했는데 나는 돌아봤다. 맨 앞 놈의 목이 날아갔고, 그 사람은 웃고 있었다. 칼 부딪는 소리는 궁 문이 닫힐 때까지 들렸다.');
   ctx.cgOff();
   F().samaung_dead = true; await hall();
 }
@@ -172,7 +172,7 @@ async function hall() {
   await say('me', '형!');
   await say('cheon', '달이 뜨면… 베지 말고… 닦아라.');
   ctx.cgOff();
-  await narr('이번에는 무덤을 파헤칠 사람이 없도록 내가 직접 눈을 감겨 주었다.');
+  await narr('이번에는 내가 직접 눈을 감겨 주었다.');
   F().cheon_end = true;
   set('x5'); await finale();
 }
@@ -217,7 +217,7 @@ async function lastChoice() {
     await say('gwak', '이게 닦은 거야? …됐다. 밥 먹어.');
   }
   if (c === 1) { ctx.cg({ jeong: 'end_jeong', sa: 'end_sa', ma: 'end_ma', free: 'end_free' }[s]); await narr(lead[1]); await narr('일 년에 한 번은 달맞이 객잔에 들른다. 어느 자리에 앉아 있든 곽 아주머니는 걸레부터 던져 준다.'); }
-  if (c === 2) { ctx.cg('end_ma'); await narr('천산 돌문 앞에 움막을 지었다. 백 노인이 쓰던 술병을 옆에 두고, 아침마다 돌계단을 닦는다. 먼지는 삼백 년이 지나도 또 쌓인다고 했으니, 누군가는 닦아야 했다.'); }
+  if (c === 2) { ctx.cg('end_ma'); await narr('천산 돌문 앞에 움막을 지었다. 백 노인이 쓰던 술병을 옆에 두고, 아침마다 돌계단을 닦는다. 사흘만 안 닦아도 먼지가 앉는다.'); }
   if (c === 3) { ctx.cg('end_free'); await narr('칼 한 자루를 메고 새벽에 나루를 나섰다. 이번에는 갈 데가 없어서 떠나는 게 아니었다. 강호 어디서든 그믐날 밤이면 나무패도 번호도 없는 낭인 하나가 묵었다 간다는 얘기가 돌았다.'); }
   await G.bond.ending();
   ctx.cgOff();
