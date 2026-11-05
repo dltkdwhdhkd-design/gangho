@@ -20,6 +20,7 @@ import './free.js';
 import './arts.js';
 import './jianghu.js';
 import './party.js';
+import './compbonds.js';
 import './world.js';
 import './base.js';
 import './sect.js';

@@ -8,7 +8,7 @@ import { DB, ACCS, LOOT } from './items.js';
 import { CLANS } from './clandata.js';
 import { have, take, learn, nextDay, save } from './state.js';
 import { panel } from './life.js';
-import { EXTRA, RANKS, RANK_MERIT, RANK_LV, TRIALS, JOBS, WAR_JOB, PLACES } from './freedata.js';
+import { EXTRA, RANKS, RANK_MERIT, RANK_LV, TRIALS, JOBS, FJOBS, WAR_JOB, PLACES } from './freedata.js';
 import { LOCS } from './worlddata.js';
 
 const S = () => G.S, Fr = () => G.S.fr, F = () => G.S.flags;
@@ -82,7 +82,7 @@ function wildSpot() {
 }
 function placesFor(lv) { const t = tierOf(lv); return Object.keys(PLACES).filter(k => PLACES[k].t <= t && PLACES[k].t >= Math.max(1, t - 1) && !['ninehall', 'fiveclans'].includes(k)); }
 function makeJob(f, war) {
-  const s = S(), al = f ? f.align : facAlign(), pool = JOBS[al] || JOBS.free, t = war ? WAR_JOB : pick(pool), lv = Math.max(1, s.lv + (rnd(0, 1) < .3 ? 1 : 0)), wild = rnd(0, 1) < .65 ? wildSpot() : null, map = wild ? 'world' : pick(placesFor(s.lv)), r = war ? fac(war) : rivalOf(f), p = wild ? wild.name : PLACES[map].name;
+  const s = S(), al = f ? f.align : facAlign(), pool = JOBS[al] || JOBS.free, t = war ? WAR_JOB : f && FJOBS[f.id] && rnd(0, 1) < .55 ? pick(FJOBS[f.id]) : pick(pool), lv = Math.max(1, s.lv + (rnd(0, 1) < .3 ? 1 : 0)), wild = rnd(0, 1) < .65 ? wildSpot() : null, map = wild ? 'world' : pick(placesFor(s.lv)), r = war ? fac(war) : rivalOf(f), p = wild ? wild.name : PLACES[map].name;
   const j = { id: Fr().nextId++, fac: f ? f.id : null, type: t[0], title: t[1], desc: t[2].replace(/\{p\}/g, p).replace(/\{r\}/g, r.name), kind: t[3], lv, map, place: p, rival: r.id, war: war || null };
   if (t[0] === 'gather') { if (!DB[t[3]]) return makeJob(f, war); j.item = t[3]; j.qty = t[4]; j.map = s.map; const h = f ? f.at : null; j.hub = h ? h[0] : 'cheongha'; j.map = j.hub; j.desc += ` (${DB[t[3]].name} ${t[4]}개)`; }
   if (t[0] === 'gather') j.place = PLACES[j.hub]?.name || fac(f?.id)?.name || '';
@@ -118,7 +118,7 @@ export async function openBoard(fid, title) {
   });
   G.field.refresh();
 }
-export function syncGoal() { const J = Fr().jobs; if (!J.length) { if (/^임무/.test(S().goal || '')) ctx.goal(''); return; } ctx.goal(`임무: ${J[0].title} (${J[0].type === 'gather' ? '납품' : J[0].place || ''})${J.length > 1 ? ` 외 ${J.length - 1}건` : ''}`); }
+export function syncGoal() { if (S().mode !== 'free') return; const J = Fr().jobs; if (!J.length) { if (/^임무/.test(S().goal || '')) ctx.goal(''); return; } ctx.goal(`임무: ${J[0].title} (${J[0].type === 'gather' ? '납품' : J[0].place || ''})${J.length > 1 ? ` 외 ${J.length - 1}건` : ''}`); }
 function finish(j, ok = true) {
   const f = Fr(); f.jobs = f.jobs.filter(x => x !== j); syncGoal();
   if (!ok) return;
@@ -286,14 +286,15 @@ async function gwakTalk() {
 async function roninBoard() { await openBoard(null, '일거리'); }
 const HIDE = ['bruiser', 'go', 'disc', 'gwak2'];
 const NO_SPOT = ['살펴보기', '우물 뚜껑', '구석방 탁자', '석상', '무너진 부엌', '쓰러진 돌문', '돌계단', '칼자국'];
+export const jobNpcs = id => Fr().jobs.filter(j => j.map === id).map(j => ({ id: 'q' + j.id, spr: SPR[j.type] || 'Villager', x: j.x, y: j.y, dir: 0, mark: () => true, hint: HINT[j.type] || j.title, talk: () => runJob(j) }));
 function npcsFree(id, L) {
   let out = L.filter(n => !HIDE.includes(n.id) && !FACS.some(f => f.key === n.id && f.at[0] !== id));
   out.forEach(n => { const f = FACS.find(x => x.key === n.id && x.at[0] === id); if (f) { n.talk = () => facTalk(f); n.mark = () => Fr().fac === f.id && canPromote(); } });
   out.forEach(n => { if (n.id === 'beggar') { n.talk = roninBoard; n.mark = null; n.hint = '일거리 묻기'; } });
   if (id === 'inn') out.push({ id: 'gwak', spr: 'OldWoman', x: 4, y: 4.6, dir: 0, hint: '곽 아주머니', talk: gwakTalk });
-  if (id === 'ninehall' || id === 'fiveclans') out.push({ id: 'hall_clerk', spr: 'Villager', x: 22, y: 10.5, dir: 0, hint: '회관지기', talk: async () => { await say(null, '어른들은 다들 본산으로 돌아가셨습니다. 뵙고 싶으면 강호 전도를 보고 찾아가십시오.'); } });
+  if (id === 'ninehall' || id === 'fiveclans') out.push({ id: 'hall_clerk', spr: 'Villager', x: 22, y: 10.5, dir: 0, hint: '회관지기', talk: async () => { await say(null, '어른들은 다들 본산으로 돌아가셨습니다. 뵈려면 본산까지 가셔야 합니다.'); } });
   for (const f of FACS) if (f.at[0] === id && !out.some(n => n.id === f.key) && !G.jh.fallen(f.id) && !Fr().dead?.[f.id]) out.push({ id: f.key, spr: f.spr, x: f.at[1], y: f.at[2], dir: 0, hint: f.name, mark: () => Fr().fac === f.id && canPromote(), talk: () => facTalk(f) });
-  for (const j of Fr().jobs) if (j.map === id) out.push({ id: 'q' + j.id, spr: SPR[j.type] || 'Villager', x: j.x, y: j.y, dir: 0, mark: () => true, hint: HINT[j.type] || j.title, talk: () => runJob(j) });
+  out.push(...jobNpcs(id));
   if (G.sect) out = G.sect.npcs(id, out);
   if (G.evil) out = G.evil.npcs(id, out);
   return out;
@@ -316,6 +317,6 @@ const duel0 = ctx.duel;
 ctx.duel = cfg => duel0(S()?.mode === 'free' && G.sect ? G.sect.withFollow(cfg) : cfg);
 G.freeBoard = () => openBoard('my', '일거리');
 G.freeBoard0 = roninBoard;
-G.free = { fac, start: startFree, npcs: npcsFree, spots: spotsFree, trigs: trigsFree, daily, tick, tab: tabFree, order, addRep, addNews, myName, foeFor, group, repOf, startWar, warOf, runJob, makeJob, boardFor, promote, join, facTalk, foes: FOES, period, dayLen, rankOf: () => Fr().rank };
+G.free = { fac, start: startFree, npcs: npcsFree, spots: spotsFree, trigs: trigsFree, daily, tick, tab: tabFree, order, addRep, addNews, myName, foeFor, group, repOf, startWar, warOf, runJob, makeJob, boardFor, promote, join, facTalk, foes: FOES, jobNpcs, period, dayLen, rankOf: () => Fr().rank };
 G.free.worldTick = worldTick;
 G.free.leaveForce = id => { const fr = Fr(); fr.left[id] = 1; fr.fac = null; fr.rank = 0; fr.merit = 0; fr.head = false; S().title = '파문당한 낭인'; addRep(id, -50); fr.jobs = fr.jobs.filter(j => j.fac !== id); syncGoal(); };

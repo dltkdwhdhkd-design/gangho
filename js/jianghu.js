@@ -57,7 +57,7 @@ async function after(r) {
 function spawn(x, y) {
   const fr = Fr(), g = fr.grudge.find(q => q.wait <= 0);
   if (g) { const f = fac(g.fac), k = 'gr_' + g.id, lv = Math.max(g.lv, S().lv), kin = ['사제', '사형', '사부'][g.stage - 1] || '사형'; FOES[k] = { ...FOES[disciple(f, lv, true)], name: g.who, hp: Math.round((60 + lv * 30) * (1 + g.stage * .35)), boss: 1, poise: 60 + lv * 4 }; return { spr: FOES[k].spr, x, y, hx: x, hy: y, foes: [k], fac: g.fac, gr: g, intro: `${g.who}: ${g.victim}은(는) 내 ${kin}이었다. 오늘 갚겠다.`, dir: 0, walk: 0, t: 1, vx: 0, vy: 0 }; }
-  const H = FACS.filter(f => hostile(f.id) && !fr.dead[f.id]); if (H.length && Math.random() < .4) { const f = pick(H), lv = S().lv, foes = crew(f, lv, lv < 8 ? 1 : lv < 18 ? 2 : 3); return { spr: FOES[foes[0]].spr, x, y, hx: x, hy: y, foes, fac: f.id, intro: `${f.name} 추격대: 찾았다. 강호가 네 얼굴을 안다.`, dir: 0, walk: 0, t: 1, vx: 0, vy: 0 }; }
+  const H = FACS.filter(f => hostile(f.id) && !fr.dead[f.id]); if (H.length && Math.random() < .4) { const f = pick(H), lv = S().lv, foes = crew(f, lv, lv < 8 ? 1 : lv < 18 ? 2 : 3); return { spr: FOES[foes[0]].spr, x, y, hx: x, hy: y, foes, fac: f.id, intro: `${f.name} 추격대: 찾았다. 네 얼굴은 벌써 방이 붙었어.`, dir: 0, walk: 0, t: 1, vx: 0, vy: 0 }; }
   return null;
 }
 // 본거지 앞을 막는다
@@ -91,7 +91,7 @@ const TYPES = {
     async run(e) { const s = S(); if (e.done) { await say(null, '대회는 끝났다. 빈 단상만 남았다.'); return; } const c = await choice(`${e.name}에 나갈까? (참가비 은자 50냥)`, ['나간다', '그만둔다']); if (c) return; if (s.silver < 50) { await say(null, '참가비가 모자란다.'); return; } s.silver -= 50; const lv = s.lv;
       for (let i = 1; i <= 3; i++) { const f = pick(FACS); await narr(`${i}회전. 상대는 ${f.name} 사람이다.`); const foes = i === 3 && lv >= 20 ? ['clan_' + f.id] : [disciple(f, lv + i - 1, true)]; if (!await round(foes, i, `${e.name} ${i}회전`)) { await say(null, '단상에서 내려왔다. 구경꾼들이 벌써 다음 사람을 보고 있었다.'); e.done = 1; return; } }
       e.done = 1; e.left = 0; e.won = 1; const v = rich(lv); s.silver += v; Fr().fame += 18; news(`${s.name}, ${e.name}에서 우승하다.`); await narr(`끝까지 서 있었다. 상금 은자 ${v}냥을 받았다.`); for (let i = 0; i < 2; i++) G.arts.drop(null, 1); } },
-  treasure: { hint: '땅을 파는 사람들', mk: () => { const [x, y] = wild(); return { map: 'world', x, y, place: '강호 어딘가', left: 6, name: '고수의 유품' }; }, start: () => `옛 고수의 유품이 나왔다는 소문이 돈다. 전도에 노란 별로 표시된다.`, end: () => `옛 고수의 유품은 ${pick(FACS).name} 손에 들어갔다고 한다.`,
+  treasure: { hint: '땅을 파는 사람들', mk: () => { const [x, y] = wild(); return { map: 'world', x, y, place: '강호 어딘가', left: 6, name: '고수의 유품' }; }, start: () => `옛 고수의 유품이 나왔다는 소문이 돈다. 칼 찬 사람들이 벌써 길을 나섰다.`, end: () => `옛 고수의 유품은 ${pick(FACS).name} 손에 들어갔다고 한다.`,
     async run(e) { await narr('먼저 온 사람들이 구덩이를 둘러싸고 서로 노려보고 있었다. 내가 다가가자 칼이 일제히 이쪽을 향했다.'); const lv = S().lv; if (!await round(G.free.group('rogue', lv + 1, 3), 2, '유품 쟁탈')) return; e.done = 1; e.left = 0; e.won = 1; await narr('구덩이 바닥에서 썩은 궤짝이 나왔다.'); for (let i = 0; i < 3; i++) G.arts.drop(null, 1); S().silver += rich(lv) >> 1; Fr().fame += 6; } },
   raid: { hint: '피투성이 제자', mk: () => { const fr = Fr(), L = RIGHT().filter(l => !fr.fallen[l.fac] && l.map.startsWith('b_')), l = pick(L), a = pick(['cheonma', 'cheonma', 'nokrim', 'hyeoleui', 'odok']); return { map: l.map, place: l.name, b: l.fac, a, left: 5, name: `${fac(a).name}의 ${l.name} 습격` }; }, start: e => `${fac(e.a).name}이(가) ${e.place}을(를) 치러 간다는 소문이 돈다.`, end: e => { hurt(e.b, 16); gain(e.a, 8); return `${e.place}이(가) ${fac(e.a).name}에게 크게 당했다.`; },
     async run(e) { const a = fac(e.a), b = fac(e.b); if (e.done) { await say(null, '제자가 고맙다는 말을 몇 번이고 했다.'); return; } await say(null, `${b.name} 제자: ${a.name} 놈들이 산문까지 왔습니다. 칼을 드실 수 있으면 도와주십시오!`); const lv = S().lv; if (!await round(crew(a, lv + 1, 3), 2, `${b.name} 방어전`)) return; e.done = 1; e.left = 0; e.won = 1; hurt(e.a, 10); addRep(e.b, 22); Fr().fame += 10; const v = rich(lv) >> 1; S().silver += v; await say(null, `${b.name} 제자: 이 은혜는 잊지 않겠습니다. 은자 ${v}냥입니다.`); G.arts.drop(e.b, 1); news(`${S().name}, ${e.place}을(를) 지켜 내다.`); } },
@@ -128,7 +128,20 @@ function daily() {
   if (S().mode !== 'free' && G.free.worldTick) G.free.worldTick();
 }
 const evNpcs = id => { const fr = Fr(); return (fr?.ev || []).filter(e => e.map === id && !e.won).map(e => ({ id: 'ev' + e.id, spr: e.type === 'plague' ? 'OldMan' : e.type === 'bounty' ? 'DarkNinja' : e.type === 'raid' ? 'GreenNinja' : e.type === 'treasure' ? 'Villager2' : 'Noble', x: e.x ?? 24, y: e.y ?? 16, dir: 0, mark: () => true, hint: TYPES[e.type].hint, talk: () => TYPES[e.type].run(e) })); };
-Story.providers.push(id => ({ npcs: G.S && G.world?.open() ? evNpcs(id) : [], spots: [], trigs: [], roam: [] }));
+Story.providers.push(id => ({ npcs: G.S && G.world?.open() ? [...evNpcs(id), ...(S().mode !== 'free' ? G.free.jobNpcs(id) : [])] : [], spots: [], trigs: [], roam: [] }));
+// 이야기가 어디까지 왔는지에 따라 사람들이 하는 말
+const RUMOR = {
+  1: ['청하진 쪽에 수적이 보호세를 뜯는다던데요.', '달맞이 객잔이 불탔대요. 국수가 괜찮았는데.', '창운문이 제자를 받는다는 말이 있어요.'],
+  2: ['창운문 문주가 앓아누웠다는 소문이 돌아요.', '창운산 쪽 약초값이 올랐어요. 누가 사들이는 모양이에요.', '검각주 위문상이 곧 문주가 될 거라고들 해요.'],
+  3: ['구화성에서 천하비무가 열린대요. 방값이 세 배가 됐어요.', '소림 장경각을 청소한 낭인이 있대요. 무슨 소린지는 모르겠지만.', '화산이랑 종남이 또 싸운대요. 그 사람들은 쉬는 날이 있나 몰라요.'],
+  4: ['구화성 대회장에 불이 났대요. 맹주가 토벌령을 내렸다나요.', '흑도맹 깃발이 강가에 보인대요.', '뱃삯이 세 배가 됐어요. 전쟁 때문이래요.'],
+  5: ['장문인이 자다가 죽었대요. 혈의방 짓이라는데 본 사람이 없어요.', '사천 쪽에서는 우물을 함부로 마시지 말래요. 독이 돌았대요.', '고을마다 징발령이에요. 우리 아들도 끌려갔어요.'],
+  6: ['구화성 사람들이 십칠 년 전 얘기를 수군대요. 뭔지는 말을 안 해 줘요.', '달이 이상해요. 어젯밤엔 붉게 떴다니까요.', '맹주가 어쨌다는 소문이 있는데, 입조심해요.'],
+  7: ['서쪽 문파들이 열흘 만에 무너졌대요.', '붉은 비 오면 받아 마시지 마요. 앓다가 벌떡 일어난대요.', '정파랑 사파가 한 객잔에 앉았대요. 오래 살고 볼 일이에요.'],
+  8: ['서쪽으로 원정대가 떠났대요. 돌아온 사람은 아직 없어요.', '비단길 장사꾼이 씨가 말랐어요.', '사주성 성문이 낮에도 닫혀 있대요.'],
+  9: ['천산 쪽 소식이 끊겼어요.', '강 따라 피난민이 내려와요. 다들 말을 안 해요.', '그래도 문은 열어야지요. 국밥은 식으면 못 먹으니까.'],
+};
+const talkOfDay = () => { const s = S(); if (s.mode === 'free') return null; const n = +(String(s.chapter || '').match(/^제(\d+)부/) || [])[1]; return RUMOR[n] ? pick(RUMOR[n]) : null; };
 // 재건
 async function rebuild(f) { const c = await choice(`${f.name}은(는) 무너졌다. 남은 사람들이 잿더미를 치우고 있다.`, ['은자 1000냥을 내놓는다', '돌아선다']); if (c) return; if (S().silver < 1000) { await say(null, '은자가 모자란다.'); return; } S().silver -= 1000; delete Fr().fallen[f.id]; Fr().power[f.id] = 45; addRep(f.id, 45, false); Fr().fame += 12; news(`${S().name}, ${f.name} 재건을 돕다.`); await narr('남은 제자들이 땅에 머리를 찧었다. 일으켜 세우느라 한참 걸렸다.'); G.field.refresh(); }
 // 소식 탭
@@ -136,8 +149,8 @@ function tab(B) {
   const fr = Fr(), rows = fr.ev.map(e => `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400">${esc(e.name)}</b> <small class="hint">${esc(e.place)} · ${e.left}일 남음${e.won ? ' · 끝남' : ''}</small></div>`).join('') || '<p class="hint">지금은 큰일이 없다.</p>';
   const gr = fr.grudge.map(g => `<div class="hint">${esc(g.who)} (${fac(g.fac)?.name}): ${esc(g.victim)}의 일로 나를 찾고 있다.</div>`).join('') || '<div class="hint">나를 찾는 사람은 없다.</div>';
   const bad = FACS.filter(f => hostile(f.id)).map(f => `<div style="margin-bottom:4px">${f.name} <small class="hint">우호 ${rep(f.id)}</small> <button class="btn sm" data-p="${f.id}">화해금 은자 ${200 + Math.abs(rep(f.id)) * 12}냥</button></div>`).join('') || '<div class="hint">적으로 삼은 세력은 없다.</div>';
-  const down = Object.keys(fr.fallen).map(k => fac(k)?.name).filter(Boolean).join(', ');
-  B.innerHTML = `<div class="two"><div><h2>강호 사건</h2>${rows}<p class="hint">자리는 지도(M)에 별로 나온다. 끼어들지 않아도 날짜가 지나면 저절로 끝난다.</p><h2 style="margin-top:10px">원한</h2>${gr}<h2 style="margin-top:10px">적대</h2>${bad}${down ? `<h2 style="margin-top:10px">무너진 세력</h2><div class="hint">${down}</div>` : ''}</div><div><h2>소문</h2>${fr.news.slice(0, 16).map(n => `<div class="hint">${esc(n)}</div>`).join('') || '<div class="hint">아직 들리는 소문이 없다.</div>'}</div></div>`;
+  const down = Object.keys(fr.fallen).map(k => fac(k)?.name).filter(Boolean).join(', '), jobs = S().mode === 'free' ? '' : `<h2 style="margin-top:10px">맡은 일</h2>${fr.jobs.map(j => `<div class="hint">${esc(j.title)} (${esc(j.place || '')})</div>`).join('') || '<div class="hint">맡은 일이 없다. 도시에서 일거리를 찾을 수 있다.</div>'}`;
+  B.innerHTML = `<div class="two"><div><h2>강호 사건</h2>${rows}<p class="hint">자리는 지도(M)에 별로 나온다. 끼어들지 않아도 날짜가 지나면 저절로 끝난다.</p>${jobs}<h2 style="margin-top:10px">원한</h2>${gr}<h2 style="margin-top:10px">적대</h2>${bad}${down ? `<h2 style="margin-top:10px">무너진 세력</h2><div class="hint">${down}</div>` : ''}</div><div><h2>소문</h2>${fr.news.slice(0, 16).map(n => `<div class="hint">${esc(n)}</div>`).join('') || '<div class="hint">아직 들리는 소문이 없다.</div>'}</div></div>`;
   B.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { peace(fac(b.dataset.p)); tab(B); });
 }
-G.jh = { heard, storyTime, ensure, rep, addRep, hostile, disciple, crew, kill, after, spawn, gate, challenge, peace, jobDone, daily, tab, rebuild, fallen: id => !!Fr()?.fallen[id], news, startEv, TYPES, marks: () => (Fr()?.ev || []).filter(e => !e.won), near };
+G.jh = { talkOfDay, heard, storyTime, ensure, rep, addRep, hostile, disciple, crew, kill, after, spawn, gate, challenge, peace, jobDone, daily, tab, rebuild, fallen: id => !!Fr()?.fallen[id], news, startEv, TYPES, marks: () => (Fr()?.ev || []).filter(e => !e.won), near };

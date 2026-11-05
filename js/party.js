@@ -51,7 +51,7 @@ async function join(id) {
 }
 const leave = id => { const p = st(); p.in = p.in.filter(k => k !== id); };
 // 이름난 인물과 나누는 말
-async function chat(id) { const c = COMP[id], s = S(); if (!s.daily['chat_' + id]) { s.daily['chat_' + id] = 1; addLove(id, 3); } await say(id, c.bark[Math.floor(Math.random() * c.bark.length)].replace(/\{p\}/g, '이곳')); }
+async function chat(id) { const c = COMP[id], s = S(); if (id.startsWith('c_') && G.bond.next(id)) return G.bond.play(id); if (!s.daily['chat_' + id]) { s.daily['chat_' + id] = 1; addLove(id, 3); } await say(id, c.bark[Math.floor(Math.random() * c.bark.length)].replace(/\{p\}/g, '이곳')); }
 async function compTalk(id) {
   const p = st(), opts = [['이야기한다', () => chat(id)]];
   if (p.met[id]) { if (isIn(id)) opts.push(['잠시 헤어진다', async () => { leave(id); await say(id, '알았어. 또 보자.'); }]); else opts.push(['같이 가자고 한다', () => join(id)]); }
@@ -70,7 +70,7 @@ function body(id, lv) {
   return k;
 }
 const allies = cfg => { const s = S(), p = st(); if (!p.in.length || cfg.noFollow || cfg.spar || cfg.yieldAt || (s.mode !== 'free' && !cfg.optional)) return cfg; return { ...cfg, allies: [...(cfg.allies || []), ...p.in.map(id => body(id, s.lv))] }; };
-const duel1 = ctx.duel; ctx.duel = cfg => duel1(allies(cfg));
+const duel1 = ctx.duel; ctx.duel = async cfg => { const won = await duel1(allies(cfg)); if (won && G.S?.pt) for (const id of G.S.pt.in) addLove(id, 1); return won; };
 function fx() { const b = {}, p = G.S?.pt; if (p) for (const id of p.in) for (const k in COMP[id].fx) b[k] = (b[k] || 0) + COMP[id].fx[k]; return b; }
 // 집터
 const JOBS = { herb: ['약초를 캔다', () => give('herb', 2), '약초 2'], fish: ['물고기를 잡는다', () => give('f_crucian', 1), '붕어 1'], ore: ['광석을 캔다', () => give('ore_iron', 2), '철광석 2'], train: ['수련한다', (id) => { st().up[id] = Math.min(25, (st().up[id] || 0) + 1); }, '실력 상승'] };
@@ -79,7 +79,7 @@ function daily() {
   for (const id in p.home) { const j = JOBS[p.home[id]]; if (j) { j[1](id); got.push(`${nameOf(id)}: ${j[2]}`); } }
   if (got.length) toast(`집터 소식 · ${got.join(', ')}`, 3.4);
   const fr = S().fr; if (!fr) return;
-  for (const id of [...p.in]) { const c = COMP[id]; if ((c.good && fr.infamy >= 70) || (c.fac && G.jh.hostile(c.fac))) { leave(id); love(id) > 10 && addLove(id, -10); toast(`${nameOf(id)}이(가) 말없이 떠났다`, 4); } }
+  for (const id of [...p.in]) { addLove(id, 2); const c = COMP[id]; if ((c.good && fr.infamy >= 70) || (c.fac && G.jh.hostile(c.fac))) { leave(id); love(id) > 10 && addLove(id, -10); toast(`${nameOf(id)}이(가) 말없이 떠났다`, 4); } }
 }
 function bark(prov) { const p = G.S?.pt; if (!p?.in.length || Math.random() > .3) return; const id = p.in[Math.floor(Math.random() * p.in.length)], c = COMP[id]; toast(`${nameOf(id)}: ${c.bark[Math.floor(Math.random() * c.bark.length)].replace(/\{p\}/g, prov)}`, 3.6); }
 async function teach(id) {
@@ -89,16 +89,17 @@ async function teach(id) {
   (p.moves[id] = p.moves[id] || []).push(L[k]); addLove(id, 5); await G.life.sleepNow(); toast(`${nameOf(id)}이(가) ${SKILLS[L[k]].name}을(를) 익혔다`, 3);
 }
 function tab(B) {
-  const s = S(), p = st(), L = known(), row = id => { const c = COMP[id], home = p.home[id]; return `<div class="note" style="margin-bottom:6px;padding:8px 10px"><b style="font-weight:400;font-size:18px">${esc(nameOf(id))}</b> <small class="hint">호감 ${love(id)} · ${c.boon}${isIn(id) ? ' · 동행 중' : home !== undefined ? ` · 집터(${home ? JOBS[home][0] : '쉬는 중'})` : ''}</small><div class="hint">쓰는 초식: ${[...c.moves, ...(p.moves[id] || [])].map(m => SKILLS[m]?.name).filter(Boolean).join(', ') || '기본기'}</div><div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap">${isIn(id) ? `<button class="btn sm" data-a="out" data-i="${id}">빼기</button><button class="btn sm" data-a="say" data-i="${id}">말 걸기</button><button class="btn sm" data-a="teach" data-i="${id}">초식 가르치기</button>` : `<button class="btn sm" data-a="in" data-i="${id}">데려가기</button>`}${s.flags.own_house && !isIn(id) ? Object.keys(JOBS).map(j => `<button class="btn sm ${home === j ? 'pri' : ''}" data-a="job" data-j="${j}" data-i="${id}">${JOBS[j][0]}</button>`).join('') : ''}</div></div>`; };
+  const s = S(), p = st(), L = known(), row = id => { const c = COMP[id], home = p.home[id]; return `<div class="note" style="margin-bottom:6px;padding:8px 10px"><b style="font-weight:400;font-size:18px">${esc(nameOf(id))}</b> <small class="hint">호감 ${love(id)} · ${c.boon}${id.startsWith('c_') && G.bond.next(id) ? ' · <b style="font-weight:400;color:var(--red)">할 얘기가 있는 듯하다</b>' : ''}${isIn(id) ? ' · 동행 중' : home !== undefined ? ` · 집터(${home ? JOBS[home][0] : '쉬는 중'})` : ''}</small><div class="hint">쓰는 초식: ${[...c.moves, ...(p.moves[id] || [])].map(m => SKILLS[m]?.name).filter(Boolean).join(', ') || '기본기'}</div><div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap">${isIn(id) ? `<button class="btn sm" data-a="out" data-i="${id}">빼기</button><button class="btn sm" data-a="say" data-i="${id}">말 걸기</button><button class="btn sm" data-a="teach" data-i="${id}">초식 가르치기</button>` : `<button class="btn sm" data-a="in" data-i="${id}">데려가기</button>`}${s.flags.own_house && !isIn(id) ? Object.keys(JOBS).map(j => `<button class="btn sm ${home === j ? 'pri' : ''}" data-a="job" data-j="${j}" data-i="${id}">${JOBS[j][0]}</button>`).join('') : ''}</div></div>`; };
   B.innerHTML = `<p class="hint">호감을 쌓은 사람에게 같이 다니자고 할 수 있다. 함께 다니는 사람은 ${MAX}명까지다. 집을 사면 남은 사람에게 일을 맡길 수 있다.</p>${L.map(row).join('') || '<p class="hint">아직 함께 다니는 사람이 없다. 인연을 쌓거나 도시를 돌아보자.</p>'}`;
   B.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { const id = b.dataset.i, a = b.dataset.a; if (a === 'out') { leave(id); p.home[id] = p.home[id] ?? null; tab(B); G.field.refresh(); } if (a === 'in') { if (p.in.length >= MAX) { toast(`${MAX}명까지다`, 2); return; } p.in.push(id); delete p.home[id]; tab(B); G.field.refresh(); } if (a === 'job') { p.home[id] = p.home[id] === b.dataset.j ? null : b.dataset.j; tab(B); } if (a === 'say') { G.closeMenu(); G.field.run(() => chat(id)); } if (a === 'teach') { G.closeMenu(); G.field.run(() => teach(id)); } });
 }
 // 강호 인물과 집터 사람을 지도에 놓는다
 Story.providers.push(id => {
   const out = { npcs: [], spots: [], trigs: [], roam: [] }; if (!G.S || !G.world?.open()) return out; const p = st();
-  for (const k in COMP) { const c = COMP[k]; if (c.at === id && !isIn(k) && p.home[k] === undefined) out.npcs.push({ id: k, spr: c.spr, x: c.x, y: c.y, dir: 0, hint: c.hint, talk: () => compTalk(k) }); }
+  for (const k in COMP) { const c = COMP[k]; if (c.at === id && !isIn(k) && p.home[k] === undefined && !p.gone?.[k]) out.npcs.push({ id: k, spr: c.spr, x: c.x, y: c.y, dir: 0, hint: c.hint, talk: () => compTalk(k) }); }
   if (id === 'myhouse') { let i = 0; for (const k in p.home) { if (S().married === k) continue; out.npcs.push({ id: 'home_' + k, spr: COMP[k].spr, x: 3 + i * 2, y: 4, dir: 0, hint: nameOf(k), talk: () => compTalk(k) }); i++; } }
   return out;
 });
 const spar = id => { const c = COMP[id], k = 'spar_' + id, lv = Math.max(8, S().lv - 1); FOES[k] = { name: nameOf(id), spr: 'chars/' + c.spr, hp: 80 + lv * 30, atk: 8 + lv * 1.3, def: 2 + lv * .3, spd: 66, exp: 20 + lv * 6, silver: 0, pause: 1, moves: c.moves, wpn: c.wpn, guard: .6, poise: 40 + lv * 3 }; return k; };
-G.party = { fx, tab, join, loveOpt, daily, bark, spar, members: () => G.S?.pt?.in || [], spr: id => COMP[id].spr };
+const dismiss = id => { const p = st(); leave(id); delete p.met[id]; delete p.home[id]; (p.gone = p.gone || {})[id] = 1; G.field.refresh(); };
+G.party = { dismiss, fx, tab, join, loveOpt, daily, bark, spar, members: () => G.S?.pt?.in || [], spr: id => COMP[id].spr };

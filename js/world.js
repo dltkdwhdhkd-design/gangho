@@ -154,11 +154,11 @@ async function jumo() {
   const S = G.S, c = await choice('길가 주막이다. 주모가 행주로 탁자를 훔치고 있다.', ['하룻밤 묵는다 (은자 5냥)', '국밥을 먹는다 (은자 3냥)', '요즘 소문을 묻는다', '그만둔다']);
   if (c === 0) { if (S.silver < 5) { await say(null, '주머니가 비었다.'); return; } S.silver -= 5; await G.life.sleepNow(); }
   if (c === 1) { if (S.silver < 3) { await say(null, '주머니가 비었다.'); return; } S.silver -= 3; S.potion = Math.max(S.potion, S.potionMax); await say(null, '뜨거운 국밥을 비우고 나니 금창약도 다시 채워 넣을 여유가 생겼다.'); }
-  if (c === 2) { const rm = Math.random() < .35 ? G.arts.rumor() : null, n = rm || (S.fr?.news?.length ? pick(S.fr.news.slice(0, 6)).replace(/^\d+일: /, '') : null) || pick(['소림 스님들이 요즘 산문을 일찍 닫는다더군요.', '장강 쪽 뱃삯이 또 올랐대요. 수로채가 뭘 또 걷는 모양이에요.', '서쪽으로 가는 장사꾼들이 부쩍 줄었어요. 왜 그런지는 아무도 말을 안 해요.', '개방 거지들한테 밥 한 끼 주면 소문을 공짜로 들을 수 있어요. 저는 그렇게 장사해요.']); await say(null, `주모: ${n}`); }
+  if (c === 2) { const rm = Math.random() < .35 ? G.arts.rumor() : G.jh.talkOfDay(), n = rm || (S.fr?.news?.length ? pick(S.fr.news.slice(0, 6)).replace(/^\d+일: /, '') : null) || pick(['소림 스님들이 요즘 산문을 일찍 닫는다더군요.', '장강 쪽 뱃삯이 또 올랐대요. 수로채가 뭘 또 걷는 모양이에요.', '서쪽으로 가는 장사꾼들이 부쩍 줄었어요. 왜 그런지는 아무도 말을 안 해요.', '개방 거지들한테 밥 한 끼 주면 소문을 공짜로 들을 수 있어요. 저는 그렇게 장사해요.']); await say(null, `주모: ${n}`); }
 }
 let spawnT = 3, lastProv = '', lastChunk = '';
 function tick(dt) {
-  const f = G.field; if (!f.m?.live || f.busy) return; const p = f.p, S = G.S, tx = Math.floor(p.x / TS), ty = Math.floor(p.y / TS), b = BN[B[ty]?.[tx] ?? 0];
+  const f = G.field; if (!f.m?.live || f.busy) return; if (!G.S.flags.world_tip) { G.S.flags.world_tip = 1; f.run(async () => { await say(null, '여기서부터 강호다. 길을 따라가면 마을과 문파가 나오고, 길가 주막에서는 쉬거나 소문을 들을 수 있다.'); await say(null, '문파 사범에게 무공을 배울 수 있고, 메뉴의 무공록과 소식에서 할 일을 찾을 수 있다. 지도(M)에서 가 본 곳을 누르면 빠르게 갈 수 있다.'); }); return; } const p = f.p, S = G.S, tx = Math.floor(p.x / TS), ty = Math.floor(p.y / TS), b = BN[B[ty]?.[tx] ?? 0];
   f.m.arena = { grass: 'village', deep: 'forest', sand: 'sand', rose: 'sand', snow: 'snow', dusk: 'fort' }[b]; f.m.ambient = b === 'snow' ? 'snow' : b === 'deep' ? 'leaf' : null;
   const ck = Math.floor(tx / CH) + ',' + Math.floor(ty / CH); if (ck !== lastChunk) { lastChunk = ck; f.refresh(); }
   let bp = null, bd = 1e9; for (const q of PROV) { const d = Math.hypot(q[1] - p.x / TS / K, q[2] - p.y / TS / K); if (d < bd) { bd = d; bp = q[0]; } }

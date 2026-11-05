@@ -99,11 +99,11 @@ function provider(id) {
   if (G.S.mode !== 'free' && !F.world_open && G.after && G.after('c1a')) F.world_open = true;
   if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
   G.jh.ensure(); const chat = CHAT[l.style], folk = l.style === 'town' ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy'] : ST[l.style].folk, R = fold(id), spots = l.style === 'town' ? [[13, 12], [26, 12], [20, 18], [9, 15], [31, 15]] : [[11, 13], [14, 14.5], [26, 13], [29, 14.5]];
-  spots.forEach(([x, y], i) => { const line = chat[(i + Math.floor(R() * 3)) % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 3 === 0 ? 0 : i % 2 ? 2 : 3, hint: '말 걸기', talk: async () => { await say(null, line); } }); });
+  spots.forEach(([x, y], i) => { const line = chat[(i + Math.floor(R() * 3)) % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 3 === 0 ? 0 : i % 2 ? 2 : 3, hint: '말 걸기', talk: async () => { await say(null, (l.style === 'town' && i < 2 && G.jh.talkOfDay()) || line); } }); });
   if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: 24, y: 26.5, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
   if (l.style === 'town') {
     out.npcs.push({ id: 'cshop', spr: 'Noble', x: 12, y: 17, dir: 3, hint: '저잣거리', talk: () => shopTalk(l) }, { id: 'cinn', spr: 'OldWoman', x: 27, y: 17, dir: 2, hint: '객잔', talk: () => innTalk(l) }, { id: 'cbook', spr: 'OldMan3', x: 16, y: 12.5, dir: 0, hint: '고서점', talk: () => G.arts.bookshop(l) });
-    if (G.S.mode === 'free') out.npcs.push({ id: 'cboard', spr: 'Gaebang', x: 20, y: 12, dir: 0, hint: '일거리 묻기', talk: () => G.freeBoard0() });
+    out.npcs.push({ id: 'cboard', spr: 'Gaebang', x: 20, y: 12, dir: 0, hint: '일거리 묻기', talk: () => G.freeBoard0() });
     return out;
   }
   const f = G.free?.fac(l.fac); if (!f) return out;
