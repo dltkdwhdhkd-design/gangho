@@ -13,12 +13,12 @@ import { bindMini, tickMini, openMap } from './mapview.js';
 
 const DIRV = [[0, 1], [0, -1], [-1, 0], [1, 0]];
 export class Field {
-  constructor() { this.p = { x: 0, y: 0, dir: 0, walk: 0 }; this.npcs = []; this.spots = []; this.trigs = []; this.roam = []; this.cam = { x: 0, y: 0 }; this.busy = false; this.parts = []; this.t = 0; }
+  constructor() { this.p = { x: 0, y: 0, dir: 0, walk: 0 }; this.npcs = []; this.spots = []; this.trigs = []; this.roam = []; this.cam = { x: 0, y: 0 }; this.busy = false; this.parts = []; this.t = 0; this.trail = []; }
   load(id, tx, ty, dir = 0) {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
     if (id === 'mysect') G.sect.build();
     G.world.ensure(id);
-    const m = MAPS[id]; this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
+    this.trail = []; const m = MAPS[id]; this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];
@@ -65,7 +65,7 @@ export class Field {
       const nx = p.x + d.x * sp * dt, ny = p.y + d.y * sp * dt;
       const blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => hyp(n.x - x, (n.y - 1) - y) < 8);
       if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
-      p.walk += dt * 8;
+      p.walk += dt * 8; this.trail.unshift({ x: p.x, y: p.y, dir: p.dir }); if (this.trail.length > 70) this.trail.pop();
     } else p.walk = 0;
     this.tickNpcs(dt); this.tickRoam(dt); this.tickHunt(dt); this.camera(.14);
     // 포탈
@@ -152,6 +152,7 @@ export class Field {
     for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x > cam.x - 120 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
     for (const n of this.npcs) list.push({ y: n.y, n });
     for (const r of this.roam) if (!r.gone) list.push({ y: r.y, n: r, mon: true });
+    if (G.party && this.m.id !== 'world0') G.party.members().forEach((id, i) => { if (this.npcs.some(n => n.id === id)) return; const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q) return; list.push({ y: q.y, n: { spr: G.party.spr(id), x: q.x, y: q.y, dir: q.dir, walk: p.walk } }); });
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });
     if (!this.hideMe) list.push({ y: p.y, me: true });
     list.sort((a, b) => a.y - b.y);

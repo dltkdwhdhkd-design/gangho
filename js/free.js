@@ -41,7 +41,7 @@ export function initFree() {
   Object.assign(s.flags, { step: 'end', ended: true, act3: true, burned: true, inn_rebuilt: true, bamboo_open: true, fort_open: true, ma_open: true, pass_open: true, cloud_open: true, bokun_open: true, boat_guhwa: true, title_free: true, cross: true, monk_met: true, met_cheol: true, rod: true, bow: false });
   s.fr = { fac: null, rank: 0, merit: 0, rep: {}, fame: 0, infamy: 0, jobs: [], board: {}, done: 0, sect: null, towns: {}, wars: [], news: [], power: {}, nextId: 1, clock: 0, left: {} };
   FACS.forEach(f => { s.fr.power[f.id] = 40 + f.tier * 20; });
-  s.flags.world_open = true;
+  s.flags.world_open = true; G.jh.ensure();
   learn('tray');
 }
 async function opening() {
@@ -124,6 +124,7 @@ function finish(j, ok = true) {
   S().silver += j.silver; f.done++; f.fame += j.fame;
   if (j.fac && j.fac === f.fac) f.merit += j.merit;
   if (j.fac) { addRep(j.fac, 3); addRep(j.rival, -1); }
+  G.jh.jobDone(j);
   if (j.war) warScore(j.fac, 1);
   Sound.sfx('coin'); toast(`임무 완료: 은자 ${j.silver}냥${j.fac === f.fac && j.fac ? `, 공적 ${j.merit}` : ''}`, 3.5);
   if (G.evil) G.evil.afterJob(j);
@@ -220,6 +221,7 @@ export async function facTalk(f) {
     if (head) opts.push(['장문인 명령', () => order(f.id)]);
     opts.push([`${josa(f.name, '을/를')} 떠난다`, () => leave(f)]);
   } else {
+    if (G.jh.hostile(f.id)) { await say(f.key, '네가 여기까지 걸어 들어온 건 칭찬해 주지.'); const won = await ctx.duel({ foes: ['clan_' + f.id], arena: G.field.m.arena, bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .2, optional: true, noLoot: true }); if (won) { const c = await choice(`${f.who}이(가) 쓰러졌다. 칼을 어떻게 할까?`, ['거둔다', '목을 벤다']); if (c === 0) { await say(f.key, '오늘 일은 기억하겠다.'); G.jh.addRep(f.id, 20, false); } else { await narr(`${f.name}의 어른이 내 칼에 죽었다. 강호가 이 일을 오래 말할 것이다.`); Fr().dead[f.id] = 1; Fr().infamy += 20; G.jh.news(`${S().name}, ${f.name}의 ${f.who}을(를) 베다.`); G.jh.addRep(f.id, -40); Fr().power[f.id] = 20; G.field.refresh(); } } return; }
     if (!S().daily['duel_' + f.id]) opts.push(['비무를 청한다', () => sparClan(f)]);
     if (!fr.fac) opts.push(['입문을 청한다', () => join(f)]);
     opts.push(['이곳에 대해 묻는다', async () => { await narr(f.desc); }]);
@@ -285,7 +287,7 @@ function npcsFree(id, L) {
   out.forEach(n => { if (n.id === 'beggar') { n.talk = roninBoard; n.mark = null; n.hint = '일거리 묻기'; } });
   if (id === 'inn') out.push({ id: 'gwak', spr: 'OldWoman', x: 4, y: 4.6, dir: 0, hint: '곽 아주머니', talk: gwakTalk });
   if (id === 'ninehall' || id === 'fiveclans') out.push({ id: 'hall_clerk', spr: 'Villager', x: 22, y: 10.5, dir: 0, hint: '회관지기', talk: async () => { await say(null, '어른들은 다들 본산으로 돌아가셨습니다. 뵙고 싶으면 강호 전도를 보고 찾아가십시오.'); } });
-  for (const f of FACS) if (f.at[0] === id && !out.some(n => n.id === f.key)) out.push({ id: f.key, spr: f.spr, x: f.at[1], y: f.at[2], dir: 0, hint: f.name, mark: () => Fr().fac === f.id && canPromote(), talk: () => facTalk(f) });
+  for (const f of FACS) if (f.at[0] === id && !out.some(n => n.id === f.key) && !G.jh.fallen(f.id) && !Fr().dead?.[f.id]) out.push({ id: f.key, spr: f.spr, x: f.at[1], y: f.at[2], dir: 0, hint: f.name, mark: () => Fr().fac === f.id && canPromote(), talk: () => facTalk(f) });
   for (const j of Fr().jobs) if (j.map === id) out.push({ id: 'q' + j.id, spr: SPR[j.type] || 'Villager', x: j.x, y: j.y, dir: 0, mark: () => true, hint: HINT[j.type] || j.title, talk: () => runJob(j) });
   if (G.sect) out = G.sect.npcs(id, out);
   if (G.evil) out = G.evil.npcs(id, out);
@@ -310,3 +312,5 @@ ctx.duel = cfg => duel0(S()?.mode === 'free' && G.sect ? G.sect.withFollow(cfg) 
 G.freeBoard = () => openBoard('my', '일거리');
 G.freeBoard0 = roninBoard;
 G.free = { fac, start: startFree, npcs: npcsFree, spots: spotsFree, trigs: trigsFree, daily, tick, tab: tabFree, order, addRep, addNews, myName, foeFor, group, repOf, startWar, warOf, runJob, makeJob, boardFor, promote, join, facTalk, foes: FOES, rankOf: () => Fr().rank };
+G.free.worldTick = worldTick;
+G.free.leaveForce = id => { const fr = Fr(); fr.left[id] = 1; fr.fac = null; fr.rank = 0; fr.merit = 0; fr.head = false; S().title = '파문당한 낭인'; addRep(id, -50); fr.jobs = fr.jobs.filter(j => j.fac !== id); syncGoal(); };

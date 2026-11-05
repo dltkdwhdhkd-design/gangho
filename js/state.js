@@ -18,6 +18,8 @@ export function bonus(S = G.S) {
   const wt = WEAPONS[S.weapon].type;
   for (const t of TREES) { if (t.w && t.w !== wt) continue; for (const n of t.nodes) { const r = S.tree[n.id] || 0; for (let i = 0; i < r; i++) add(n.fx); } }
   if (S.acc && ACCS[S.acc]) add(ACCS[S.acc].fx);
+  if (HEARTS[S.heart]?.fx) add(HEARTS[S.heart].fx);
+  if (G.party) add(G.party.fx());
   if (S.meal && S.meal.left > 0) add(DB[S.meal.id].meal);
   if (S.married && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
   if (S.sworn && SPOUSE_FX[S.sworn]) add(SPOUSE_FX[S.sworn]);
@@ -95,6 +97,6 @@ function fill(S) { if (!S.rep) S.rep = { jeong: 0, sa: 0, ma: 0 }; if (S.rep.ma 
 export const have = id => (G.S.inv[id] || 0);
 export function give(id, n = 1) { G.S.inv[id] = have(id) + n; }
 export function take(id, n = 1) { G.S.inv[id] = have(id) - n; if (G.S.inv[id] <= 0) delete G.S.inv[id]; }
-export function nextDay() { const S = G.S; S.day++; S.daily = {}; S.potion = Math.max(S.potion, S.potionMax); if (S.mode === 'free' && G.free) G.free.daily(); }
+export function nextDay() { const S = G.S; S.day++; S.daily = {}; S.potion = Math.max(S.potion, S.potionMax); if (S.mode === 'free' && G.free) G.free.daily(); if (G.jh) G.jh.daily(); if (G.party) G.party.daily(); }
 export function hasSave() { return !!load(); }
 export { rankOf };

@@ -45,16 +45,17 @@ export function openMenu(t) {
   const M = $('#modal'); M.classList.add('on'); drawMenu();
   Sound.sfx('select');
 }
+G.closeMenu = () => closeMenu();
 export function closeMenu() { G.menuOpen = false; $('#modal').classList.remove('on'); $('#modal').innerHTML = ''; Input.clear(); save(); document.removeEventListener('keydown', menuKey); if (G.battle) G.battle.refreshGear(); }
 function menuKey(e) { if (e.repeat || (e.code === 'KeyO' && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || e.code === 'KeyO') { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식 배치'], ['tree', '무공 트리'], ['gear', '장비·심법'], ['bag', '소지품'], ['clan', '강호'], ['note', '수첩'], ['love', '인연'], ['set', '설정']];
+  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['note', '수첩'], ['set', '설정']];
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (O)</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, set: tabSet, title: tabTitle })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
@@ -76,18 +77,21 @@ function tabTitle(B) {
   $$('[data-tt]', B).forEach(b => b.onclick = () => use(b.dataset.tt));
   if (free) { const i = $('#tname', B), ok = () => { const n = i.value.trim(); if (n) use(n); }; $('#tset', B).onclick = ok; i.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) ok(); }); }
 }
+let showAll = false;
 function tabSkill(B) {
   const S = G.S; const skl = id => SKILLS[id];
   let html = `<p class="hint">위의 칸을 고르고 아래에서 초식을 누르세요. U I O P 키가 각 칸을 씁니다. 지금 무기는 <b>${WEAPONS[S.weapon].name}</b> (${WEAPONS[S.weapon].type}) 입니다. 무기가 맞지 않는 초식은 쓸 수 없습니다.</p><div class="slots">`;
   S.slots.forEach((id, i) => { const k = id && skl(id); html += `<button class="slot ${i === slotSel ? 'on' : ''} ${k ? 'fill' : ''}" data-s="${i}"><b style="font-weight:400">${'UIOP'[i]}</b> ${k ? `${k.name}<small>내력 ${k.mp} · 쿨타임 ${k.cd}초 ${!canEquip(id) ? '· 무기 안 맞음' : ''}</small>` : '<small>비어 있음</small>'}</button>`; });
   html += `</div><div class="list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">`;
-  const sorted = [...S.skills].sort((a, b) => skl(a).school.localeCompare(skl(b).school));
+  const sorted = [...S.skills].filter(k => showAll || canEquip(k)).sort((a, b) => skl(a).school.localeCompare(skl(b).school));
+  html = html.replace('<div class="list" style="display:grid', `<button class="btn sm" id="skall" style="margin:6px 0">${showAll ? '지금 무기로 쓸 수 있는 것만' : `익힌 초식 전부 보기 (${S.skills.length})`}</button><div class="list" style="display:grid`);
   if (!sorted.length) html += '<p class="hint">아직 익힌 초식이 없습니다.</p>';
   for (const id of sorted) {
     const k = skl(id), on = S.slots.includes(id), ok = canEquip(id);
     html += `<button class="item ${on ? 'eq' : ''}" data-k="${id}" ${ok ? '' : 'disabled'}>${k.name}${k.han ? ` <small style="display:inline">${k.han}</small>` : ''}${k.ult ? '<span class="tag ult">절초</span>' : ''}<span class="tag">${k.w}</span><span class="tag">${masteryLv(id)}성</span><small>${k.desc} (내력 ${k.mp}, 쿨타임 ${k.cd}초)</small></button>`;
   }
   B.innerHTML = html + '</div>';
+  if ($('#skall', B)) $('#skall', B).onclick = () => { showAll = !showAll; Sound.sfx('tick'); drawMenu(); };
   $$('[data-s]', B).forEach(b => b.onclick = () => { slotSel = +b.dataset.s; Sound.sfx('tick'); drawMenu(); });
   $$('[data-k]', B).forEach(b => b.onclick = () => {
     const id = b.dataset.k, cur = S.slots.indexOf(id);

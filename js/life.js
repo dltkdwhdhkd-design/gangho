@@ -217,6 +217,7 @@ async function romance(id, base) {
     if (L >= 70 && !s.partner && !s.married && G.bond.done(id) >= 3) opts.push(['마음을 전한다', () => confess(id)]);
     if (s.partner === id && !s.married && L >= 100) opts.push(['혼인을 청한다', () => propose(id)]);
   }
+  { const q = G.party.loveOpt(id); if (q) opts.push(q); }
   opts.push(['그만둔다', async () => { }]);
   const k = await choice(`${c.name} · ${stageOf(id)} (호감 ${L})`, opts.map(o => o[0])); await opts[k][1]();
 }

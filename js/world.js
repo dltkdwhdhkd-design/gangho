@@ -119,6 +119,7 @@ function china(c, W, H, o = {}) {
     c.lineWidth = 5; c.strokeStyle = '#efe2c2'; c.strokeText(l.name, x, y + 24); c.fillStyle = k ? '#2a2018' : '#7a6a52'; c.fillText(l.name, x, y + 24); hits.push({ l, x, y, k });
   }
   const ms = G.S.fr?.sect; if (ms) { const sl = LOCS.find(q => q.map === ms.site) || LOCS[0]; hits.push({ l: { name: ms.name, map: 'mysect', at: [20, 25], px: sl.px }, x: sl.px[0] * sx, y: sl.px[1] * sy, k: true }); }
+  for (const e of G.jh.marks()) { const l = e.map === 'world' ? null : LOCS.find(q => q.map === e.map), a = l ? l.px[0] * sx : e.x / K * sx, b = l ? l.px[1] * sy : e.y / K * sy; c.fillStyle = '#ffd23c'; c.strokeStyle = '#7a2a18'; c.lineWidth = 3; c.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 7 : 16, q = i * Math.PI / 5 - 1.57; c.lineTo(a + Math.cos(q) * r, b + Math.sin(q) * r); } c.closePath(); c.fill(); c.stroke(); }
   for (const j of G.S.fr?.jobs || []) if (j.map === 'world') { const a = j.x / K * sx, b = j.y / K * sy; c.fillStyle = '#ffd23c'; c.strokeStyle = '#2a2018'; c.lineWidth = 3; c.beginPath(); c.arc(a, b, 9, 0, 7); c.fill(); c.stroke(); }
   if (G.S.map === 'world') { const a = G.field.p.x / TS / K * sx, b = G.field.p.y / TS / K * sy; c.fillStyle = '#ff3b2c'; c.beginPath(); c.arc(a, b, 11, 0, 7); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); }
 }
@@ -131,7 +132,7 @@ function travelBar(M, close) {
   const fee = l => { const [x, y] = whereAmI(); return Math.max(5, Math.round(Math.hypot(l.px[0] - x, l.px[1] - y) / 12)); };
   const at = e => { const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * cv.width / r.width, y = (e.clientY - r.top) * cv.height / r.height; let b = null, bd = 26; for (const q of hits) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd) { bd = d; b = q; } } return b; };
   cv.onmousemove = e => { const b = at(e); h.textContent = !b ? '가 본 곳을 누르면 빠른 이동 (거리에 따라 은자)' : b.k ? `${b.l.name}: 은자 ${fee(b.l)}냥` : `${b.l.name}: 아직 가 본 적 없다`; };
-  cv.onclick = e => { const b = at(e); if (!b || !b.k) return; const f = fee(b.l); if (b.l.map === G.S.map) return; if (G.S.silver < f) { toast(`은자 ${f}냥이 있어야 한다`, 2); return; } close(); G.S.silver -= f; G.field.run(() => ctx.warp(b.l.map, b.l.at[0], b.l.at[1], 1)); };
+  cv.onclick = e => { const b = at(e); if (!b || !b.k) return; const f = fee(b.l); if (b.l.map === G.S.map) return; if (G.S.silver < f) { toast(`은자 ${f}냥이 있어야 한다`, 2); return; } close(); G.S.silver -= f; const [hx, hy] = whereAmI(), days = Math.floor(Math.hypot(b.l.px[0] - hx, b.l.px[1] - hy) / 170); G.field.run(async () => { await ctx.warp(b.l.map, b.l.at[0], b.l.at[1], 1); for (let i = 0; i < days; i++) nextDay(); if (days) toast(`길에서 ${days}일을 보냈다`, 2.4); }); };
 }
 // 길에서 만나는 것들
 const GROUND = { grass: [['herb', 'fern1'], ['wood', 'stump'], ['honey', 'flower4']], deep: [['herb', 'fern1'], ['wood', 'stump'], ['ginseng', 'flower1'], ['shoot', 'fern2']], sand: [['ore_iron', 'boulder']], rose: [['ore_iron', 'boulder']], snow: [['ore_blue', 'boulder_w'], ['herb', 'fern1']], dusk: [['ore_iron', 'boulder_b'], ['ore_star', 'boulder_b'], ['jade', 'boulder_b']] };
@@ -140,9 +141,12 @@ function nodes(cx, cy) {
   for (let i = 0; i < n; i++) { const x = cx * CH + 2 + Math.floor(R() * (CH - 4)), y = cy * CH + 2 + Math.floor(R() * (CH - 4)), b = BN[B[y]?.[x] ?? 0], L = GROUND[b], g0 = L[Math.floor(R() * L.length)]; if (m.g[y]?.[x] !== 0 || m.blocked((x + .5) * TS, (y + .7) * TS, 14, 12)) continue; out.push({ key: `w_${cx}_${cy}_${i}`, item: g0[0], stamp: g0[1], x, y }); }
   return out;
 }
+const relicAt = r => r.at || (r.at = wildAround(r.px, 0) || [Math.round(r.px[0] * K), Math.round(r.px[1] * K)]);
+function wildAround(px, min = 10) { for (let i = 0; i < 60; i++) { const a = Math.random() * 6.28, d = min + i * .6, x = Math.round(px[0] * K + Math.cos(a) * d), y = Math.round(px[1] * K + Math.sin(a) * d); if (m.g[y]?.[x] !== undefined && m.g[y][x] !== 2 && !m.blocked((x + .5) * TS, (y + .7) * TS, 18, 14)) return [x + .5, y + .6]; } return null; }
 function npcsAt() {
   const f = G.field, S = G.S, px = f.p.x / TS, py = f.p.y / TS, cx = Math.floor(px / CH), cy = Math.floor(py / CH), out = [];
-  for (let b = cy - 1; b <= cy + 1; b++) for (let a = cx - 1; a <= cx + 1; a++) for (const n of nodes(a, b)) if (!S.daily[n.key]) out.push({ id: n.key, stamp: n.stamp, spr: '', x: n.x, y: n.y, hint: `${DB[n.item].name} 얻기`, talk: async () => { give(n.item, 1); S.daily[n.key] = 1; Sound.sfx('coin', .6); toast(`${DB[n.item].name}을(를) 얻었다`, 1.8); } });
+  for (let b = cy - 1; b <= cy + 1; b++) for (let a = cx - 1; a <= cx + 1; a++) for (const n of nodes(a, b)) if (!S.daily[n.key]) out.push({ id: n.key, stamp: n.stamp, spr: '', x: n.x, y: n.y, hint: `${DB[n.item].name} 얻기`, talk: async () => { const q = G.party?.fx().gather ? 2 : 1; give(n.item, q); S.daily[n.key] = 1; Sound.sfx('coin', .6); toast(`${DB[n.item].name} ${q}개를 얻었다`, 1.8); } });
+  for (const r of G.arts.relics) { if ((S.relic || {})[r.id]) continue; const [rx, ry] = relicAt(r); if (Math.hypot(rx - px, ry - py) < 44) out.push({ id: r.id, stamp: r.stamp, spr: '', x: rx, y: ry, hint: '살펴보기', talk: () => G.arts.relic(r) }); }
   for (const t of STOPS) if (Math.hypot(t.x - px, t.y - py) < 40) out.push({ id: 'jumo', spr: 'OldWoman', x: t.x - .5, y: t.y + .6, dir: 0, hint: '주막', talk: jumo });
   return out;
 }
@@ -150,7 +154,7 @@ async function jumo() {
   const S = G.S, c = await choice('길가 주막이다. 주모가 행주로 탁자를 훔치고 있다.', ['하룻밤 묵는다 (은자 5냥)', '국밥을 먹는다 (은자 3냥)', '요즘 소문을 묻는다', '그만둔다']);
   if (c === 0) { if (S.silver < 5) { await say(null, '주머니가 비었다.'); return; } S.silver -= 5; await G.life.sleepNow(); }
   if (c === 1) { if (S.silver < 3) { await say(null, '주머니가 비었다.'); return; } S.silver -= 3; S.potion = Math.max(S.potion, S.potionMax); await say(null, '뜨거운 국밥을 비우고 나니 금창약도 다시 채워 넣을 여유가 생겼다.'); }
-  if (c === 2) { const n = S.fr?.news?.length ? pick(S.fr.news.slice(0, 6)).replace(/^\d+일: /, '') : pick(['소림 스님들이 요즘 산문을 일찍 닫는다더군요.', '장강 쪽 뱃삯이 또 올랐대요. 수로채가 뭘 또 걷는 모양이에요.', '서쪽으로 가는 장사꾼들이 부쩍 줄었어요. 왜 그런지는 아무도 말을 안 해요.', '개방 거지들한테 밥 한 끼 주면 소문을 공짜로 들을 수 있어요. 저는 그렇게 장사해요.']); await say(null, `주모: ${n}`); }
+  if (c === 2) { const rm = Math.random() < .35 ? G.arts.rumor() : null, n = rm || (S.fr?.news?.length ? pick(S.fr.news.slice(0, 6)).replace(/^\d+일: /, '') : null) || pick(['소림 스님들이 요즘 산문을 일찍 닫는다더군요.', '장강 쪽 뱃삯이 또 올랐대요. 수로채가 뭘 또 걷는 모양이에요.', '서쪽으로 가는 장사꾼들이 부쩍 줄었어요. 왜 그런지는 아무도 말을 안 해요.', '개방 거지들한테 밥 한 끼 주면 소문을 공짜로 들을 수 있어요. 저는 그렇게 장사해요.']); await say(null, `주모: ${n}`); }
 }
 let spawnT = 3, lastProv = '', lastChunk = '';
 function tick(dt) {
@@ -158,7 +162,7 @@ function tick(dt) {
   f.m.arena = { grass: 'village', deep: 'forest', sand: 'sand', rose: 'sand', snow: 'snow', dusk: 'fort' }[b]; f.m.ambient = b === 'snow' ? 'snow' : b === 'deep' ? 'leaf' : null;
   const ck = Math.floor(tx / CH) + ',' + Math.floor(ty / CH); if (ck !== lastChunk) { lastChunk = ck; f.refresh(); }
   let bp = null, bd = 1e9; for (const q of PROV) { const d = Math.hypot(q[1] - p.x / TS / K, q[2] - p.y / TS / K); if (d < bd) { bd = d; bp = q[0]; } }
-  if (bp !== lastProv) { lastProv = bp; const e = document.querySelector('#place'); if (e) { e.textContent = bp; e.classList.add('on'); clearTimeout(f._pt); f._pt = setTimeout(() => e.classList.remove('on'), 1800); } }
+  if (bp !== lastProv) { if (lastProv) G.party.bark(bp); lastProv = bp; const e = document.querySelector('#place'); if (e) { e.textContent = bp; e.classList.add('on'); clearTimeout(f._pt); f._pt = setTimeout(() => e.classList.remove('on'), 1800); } }
   // 물가에 서면 낚시
   const [dx, dy] = [[0, 1], [0, -1], [-1, 0], [1, 0]][p.dir] || [0, 1], wet = f.m.g[ty + dy * 1]?.[tx + dx * 1] === 2;
   f.spots = wet && S.flags.rod ? [{ x: tx - 1, y: ty - 1, w: 3, h: 3, hint: '낚시하기', act: () => G.life.fishing(b === 'deep' ? 'stream' : 'river') }] : [];
@@ -167,10 +171,11 @@ function tick(dt) {
   const a = Math.random() * 6.28, x = p.x + Math.cos(a) * 210, y = p.y + Math.sin(a) * 150; if (f.m.blocked(x, y, 14, 12)) return;
   if (S.flags.bow && f.animals.length < 3 && Math.random() < .5) { const k = pick(b === 'snow' ? ['rabbit', 'deer'] : ['rabbit', 'pheasant', 'deer']); f.animals.push({ kind: k, ...G.life.animals[k], x, y, vx: 0, vy: 0, t: 1, walk: 0 }); return; }
   if (f.roam.length >= 3 || !S.flags.world_open && S.mode !== 'free') return;
+  const hunted = G.jh.spawn(x, y); if (hunted) { f.roam.push(hunted); return; }
   const lv = Math.max(1, S.lv + (Math.random() < .3 ? 1 : 0)), onRoad = f.m.g[ty]?.[tx] === 1 || f.m.g[ty]?.[tx] === 4, kind = pick(wet ? ['pirate', 'pirate', 'bandit'] : onRoad ? ['bandit', 'rogue', 'bandit'] : ['bandit', 'rogue']), n = lv < 5 ? 1 : lv < 14 ? 2 : 3, foes = G.free.group(kind, lv, n), FO = G.free.foes;
   f.roam.push({ spr: FO[foes[0]].spr, x, y, hx: x, hy: y, foes, dir: 0, walk: 0, t: 1 + Math.random() * 2, vx: 0, vy: 0 });
 }
 function ensure(id) { if (id === 'world') buildWorld(); else if (!MAPS[id]) G.base.make(id); }
 const entry = id => { const l = LOCS.find(q => q.map === id); return l ? [Math.round(l.px[0] * K) + .5, Math.round(l.px[1] * K) + 3.5] : [Math.round(598 * K), Math.round(440 * K)]; };
 Story.providers.push(id => id === 'world' && ready ? { npcs: npcsAt(), spots: [], trigs: [], roam: [] } : { npcs: [], spots: [], trigs: [], roam: [] });
-G.world = { here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };
+G.world = { wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };

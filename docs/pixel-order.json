@@ -1,1542 +1,1806 @@
 [
 {
-"no": 1,
+"no": "C1",
 "code": "T1",
 "name": "시험: 주인공 걷기",
 "how": "자르기 시험"
 },
 {
-"no": 2,
+"no": "B1",
 "code": "T2",
 "name": "시험: 객잔 건물",
 "how": "스탬프 시험"
 },
 {
-"no": 3,
+"no": "E1",
 "code": "T3",
 "name": "시험: 베기 이펙트",
 "how": "이펙트 시험"
 },
 {
-"no": 4,
+"no": "B2",
 "code": "arena/village",
 "name": "전투 배경 village",
 "how": "arena village"
 },
 {
-"no": 5,
+"no": "B3",
 "code": "arena/yard",
 "name": "전투 배경 yard",
 "how": "arena yard"
 },
 {
-"no": 6,
+"no": "B4",
 "code": "arena/court",
 "name": "전투 배경 court",
 "how": "arena court"
 },
 {
-"no": 7,
+"no": "B5",
 "code": "arena/forest",
 "name": "전투 배경 forest",
 "how": "arena forest"
 },
 {
-"no": 8,
+"no": "B6",
 "code": "arena/fort",
 "name": "전투 배경 fort",
 "how": "arena fort"
 },
 {
-"no": 9,
+"no": "B7",
 "code": "arena/moon",
 "name": "전투 배경 moon",
 "how": "arena moon"
 },
 {
-"no": 10,
+"no": "B8",
 "code": "arena/ring",
 "name": "전투 배경 ring",
 "how": "arena ring"
 },
 {
-"no": 11,
+"no": "B9",
 "code": "arena/room",
 "name": "전투 배경 room",
 "how": "arena room"
 },
 {
-"no": 12,
+"no": "B10",
 "code": "arena/sand",
 "name": "전투 배경 sand",
 "how": "arena sand"
 },
 {
-"no": 13,
+"no": "B11",
 "code": "arena/snow",
 "name": "전투 배경 snow",
 "how": "arena snow"
 },
 {
-"no": 14,
+"no": "B12",
 "code": "ground/grass",
 "name": "땅 봄 풀밭",
 "how": "tex grass"
 },
 {
-"no": 15,
+"no": "B13",
 "code": "ground/deep",
 "name": "땅 짙은 숲 바닥",
 "how": "tex deep"
 },
 {
-"no": 16,
+"no": "B14",
 "code": "ground/sand",
 "name": "땅 마른 황토",
 "how": "tex sand"
 },
 {
-"no": 17,
+"no": "B15",
 "code": "ground/snow",
 "name": "땅 눈밭",
 "how": "tex snow"
 },
 {
-"no": 18,
+"no": "B16",
 "code": "ground/dusk",
 "name": "땅 검붉은 황무지",
 "how": "tex dusk"
 },
 {
-"no": 19,
+"no": "B17",
 "code": "ground/rose",
 "name": "땅 복사꽃이 떨어진 바닥",
 "how": "tex rose"
 },
 {
-"no": 20,
+"no": "B18",
 "code": "ground/path",
 "name": "땅 다져진 흙길",
 "how": "tex path"
 },
 {
-"no": 21,
+"no": "B19",
 "code": "ground/stone",
 "name": "땅 네모난 돌판 마당",
 "how": "tex stone"
 },
 {
-"no": 22,
+"no": "B20",
 "code": "ground/water",
 "name": "땅 맑은 강물",
 "how": "tex water"
 },
 {
-"no": 23,
+"no": "B21",
 "code": "ground/wood",
 "name": "땅 나무 다리 판자",
 "how": "tex wood"
 },
 {
-"no": 24,
+"no": "B22",
 "code": "stamp/hut_o",
 "name": "기와 민가, 주황 지붕",
 "how": "stamp hut_o 64 48"
 },
 {
-"no": 25,
+"no": "B23",
 "code": "stamp/hut_b",
 "name": "기와 민가, 푸른 지붕",
 "how": "stamp hut_b 64 48"
 },
 {
-"no": 26,
+"no": "B24",
 "code": "stamp/hut_o2",
 "name": "넓은 민가, 진흙색 지붕",
 "how": "stamp hut_o2 64 48"
 },
 {
-"no": 27,
+"no": "B25",
 "code": "stamp/house_red",
 "name": "붉은 기둥의 큰 집",
 "how": "stamp house_red 64 48"
 },
 {
-"no": 28,
+"no": "B26",
 "code": "stamp/shop_blue",
 "name": "푸른 천막의 작은 가게",
 "how": "stamp shop_blue 48 48"
 },
 {
-"no": 29,
+"no": "B27",
 "code": "stamp/shop_green",
 "name": "녹색 지붕의 넓은 상점",
 "how": "stamp shop_green 64 48"
 },
 {
-"no": 30,
+"no": "B28",
 "code": "stamp/clay",
 "name": "서역풍 흙벽돌 집",
 "how": "stamp clay 48 48"
 },
 {
-"no": 31,
+"no": "B29",
 "code": "stamp/wood_o",
 "name": "작은 목조 창고",
 "how": "stamp wood_o 48 48"
 },
 {
-"no": 32,
+"no": "B30",
 "code": "stamp/wood_b",
 "name": "수채에 어울리는 큰 목조 건물",
 "how": "stamp wood_b 64 48"
 },
 {
-"no": 33,
+"no": "B31",
 "code": "stamp/hall",
 "name": "문파 본전. 3층 기와지붕의 위엄 있는 전각",
 "how": "stamp hall 64 112"
 },
 {
-"no": 34,
+"no": "B32",
 "code": "stamp/lodge",
 "name": "2층 전각. 문파 곁채",
 "how": "stamp lodge 64 80"
 },
 {
-"no": 35,
+"no": "B33",
 "code": "stamp/mud",
 "name": "작은 흙집",
 "how": "stamp mud 42 39"
 },
 {
-"no": 36,
+"no": "B34",
 "code": "stamp/straw",
 "name": "낡은 초가집",
 "how": "stamp straw 47 32"
 },
 {
-"no": 37,
+"no": "B35",
 "code": "stamp/gate",
 "name": "마을 패루 기둥문",
 "how": "stamp gate 34 29"
 },
 {
-"no": 38,
+"no": "B36",
 "code": "stamp/gate_arch",
 "name": "문파 산문. 기와를 얹은 문",
 "how": "stamp gate_arch 64 48"
 },
 {
-"no": 39,
+"no": "B37",
 "code": "stamp/statue",
 "name": "작은 석상",
 "how": "stamp statue 30 30"
 },
 {
-"no": 40,
+"no": "B38",
 "code": "stamp/statue_big",
 "name": "큰 불상이나 사자 석상",
 "how": "stamp statue_big 34 46"
 },
 {
-"no": 41,
+"no": "B39",
 "code": "sheet/tree_round",
 "name": "나무 1",
 "how": "stamps 4 2 tree_round,tree_pine,tree_dead,tree_big,tree_snow,tree_white,tree_pink,plum"
 },
 {
-"no": 42,
+"no": "B40",
 "code": "sheet/grove_pine",
 "name": "숲 덩어리",
 "how": "stamps 3 2 grove_pine,grove_green,grove_pink,grove_dead,grove_white,rocks"
 },
 {
-"no": 43,
+"no": "B41",
 "code": "sheet/bamboo",
 "name": "돌과 풀",
 "how": "stamps 4 3 bamboo,stump,stump_o,signpost,boulder,boulder_b,boulder_w,bush1,bush2,flower1,fern1,log"
 },
 {
-"no": 44,
+"no": "B42",
 "code": "sheet/banner1",
 "name": "깃발",
 "how": "stamps 7 1 banner1,banner2,banner3,banner4,banner5,banner6,banner7"
 },
 {
-"no": 45,
+"no": "B43",
 "code": "sheet/wall_h",
 "name": "담장",
 "how": "stamps 3 1 wall_h,wood_h,fence_h"
 },
 {
-"no": 46,
+"no": "B44",
 "code": "sheet/pot",
 "name": "마당 소품",
 "how": "stamps 3 2 pot,jar,sign_sword,sign_dojo,awning,f_dummy"
 },
 {
-"no": 47,
+"no": "B45",
 "code": "sheet/bush3",
 "name": "꽃과 풀",
 "how": "stamps 3 2 bush3,bush4,fern2,flower2,flower3,flower4"
 },
 {
-"no": 48,
+"no": "B46",
 "code": "sheet/plum_g",
 "name": "꽃나무 2",
 "how": "stamps 3 1 plum_g,plum_o,plum_w"
 },
 {
-"no": 49,
+"no": "B47",
 "code": "sheet/f_bed",
 "name": "침실과 객실",
 "how": "stamps 4 2 f_bed,bed,f_lamp,f_bonsai,drawer,chest,box,f_stool"
 },
 {
-"no": 50,
+"no": "B48",
 "code": "sheet/shelf",
 "name": "서재와 전각",
 "how": "stamps 4 2 shelf,shelf2,bookcase,f_scroll,tablet,lantern,f_chair,longtable"
 },
 {
-"no": 51,
+"no": "B49",
 "code": "sheet/counter",
 "name": "가게와 부엌",
 "how": "stamps 4 2 counter,bench,f_stove,f_bench,rack,teapot,plant,stool"
 },
 {
-"no": 52,
+"no": "B50",
 "code": "sheet/bookcase2",
 "name": "장식",
 "how": "stamps 4 1 bookcase2,rack2,scrollcase,tablet2"
 },
 {
-"no": 53,
+"no": "B51",
 "code": "map/cheongha",
 "name": "청하진 배치도",
 "how": "map cheongha"
 },
 {
-"no": 54,
+"no": "B52",
 "code": "map/bamboo",
 "name": "대숲길 배치도",
 "how": "map bamboo"
 },
 {
-"no": 55,
+"no": "B53",
 "code": "map/pass",
 "name": "동쪽 산길 배치도",
 "how": "map pass"
 },
 {
-"no": 56,
+"no": "B54",
 "code": "map/fort",
 "name": "흑풍채 배치도",
 "how": "map fort"
 },
 {
-"no": 57,
+"no": "B55",
 "code": "map/cloudmt",
 "name": "창운산 배치도",
 "how": "map cloudmt"
 },
 {
-"no": 58,
+"no": "B56",
 "code": "map/guhwa",
 "name": "구화성 배치도",
 "how": "map guhwa"
 },
 {
-"no": 59,
+"no": "B57",
 "code": "map/valley",
 "name": "청풍골 배치도",
 "how": "map valley"
 },
 {
-"no": 60,
+"no": "B58",
 "code": "map/mysect",
 "name": "내 문파 배치도",
 "how": "map mysect"
 },
 {
-"no": 61,
+"no": "B59",
 "code": "map/shaolin",
 "name": "소림사 배치도",
 "how": "map shaolin"
 },
 {
-"no": 62,
+"no": "B60",
 "code": "map/hwasan",
 "name": "화산 절벽길 배치도",
 "how": "map hwasan"
 },
 {
-"no": 63,
+"no": "B61",
 "code": "map/ninehall",
 "name": "구파 회관 배치도",
 "how": "map ninehall"
 },
 {
-"no": 64,
+"no": "B62",
 "code": "map/fiveclans",
 "name": "세가 거리 배치도",
 "how": "map fiveclans"
 },
 {
-"no": 65,
+"no": "B63",
 "code": "map/wolha",
 "name": "월하곡 배치도",
 "how": "map wolha"
 },
 {
-"no": 66,
+"no": "B64",
 "code": "map/silk",
 "name": "비단길 배치도",
 "how": "map silk"
 },
 {
-"no": 67,
+"no": "B65",
 "code": "map/oasis",
 "name": "사주성 배치도",
 "how": "map oasis"
 },
 {
-"no": 68,
+"no": "B66",
 "code": "map/snowpeak",
 "name": "빙궁 설산 배치도",
 "how": "map snowpeak"
 },
 {
-"no": 69,
+"no": "B67",
 "code": "map/tiangate",
 "name": "천산 입구 배치도",
 "how": "map tiangate"
 },
 {
-"no": 70,
+"no": "B68",
 "code": "map/blackpalace",
 "name": "흑운궁 배치도",
 "how": "map blackpalace"
 },
 {
-"no": 71,
+"no": "B69",
 "code": "room/inn",
 "name": "달맞이 객잔 실내",
 "how": "room inn"
 },
 {
-"no": 72,
+"no": "B70",
 "code": "room/clinic",
 "name": "윤씨 약방 실내",
 "how": "room clinic"
 },
 {
-"no": 73,
+"no": "B71",
 "code": "room/smith",
 "name": "강씨 대장간 실내",
 "how": "room smith"
 },
 {
-"no": 74,
+"no": "B72",
 "code": "room/shop",
 "name": "만물상 실내",
 "how": "room shop"
 },
 {
-"no": 75,
+"no": "B73",
 "code": "room/bokun",
 "name": "복운전 실내",
 "how": "room bokun"
 },
 {
-"no": 76,
+"no": "B74",
 "code": "room/well",
 "name": "우물 아래 밀실 실내",
 "how": "room well"
 },
 {
-"no": 77,
+"no": "B75",
 "code": "room/hall_in",
 "name": "창운문 본전 실내",
 "how": "room hall_in"
 },
 {
-"no": 78,
+"no": "B76",
 "code": "room/library",
 "name": "장서각 실내",
 "how": "room library"
 },
 {
-"no": 79,
+"no": "B77",
 "code": "room/shrine",
 "name": "흑운궁 분타 실내",
 "how": "room shrine"
 },
 {
-"no": 80,
+"no": "B78",
 "code": "room/sutra",
 "name": "소림 장경각 실내",
 "how": "room sutra"
 },
 {
-"no": 81,
+"no": "B79",
 "code": "room/cliffcave",
 "name": "벼랑 아래 동굴 실내",
 "how": "room cliffcave"
 },
 {
-"no": 82,
+"no": "B80",
 "code": "room/inn2",
 "name": "금봉 객잔 실내",
 "how": "room inn2"
 },
 {
-"no": 83,
+"no": "B81",
 "code": "room/shop2",
 "name": "구화 상회 실내",
 "how": "room shop2"
 },
 {
-"no": 84,
+"no": "B82",
 "code": "room/hall2",
 "name": "정천맹 객관 실내",
 "how": "room hall2"
 },
 {
-"no": 85,
+"no": "B83",
 "code": "base/temple",
 "name": "본거지: temple",
 "how": "base temple"
 },
 {
-"no": 86,
+"no": "B84",
 "code": "base/dao",
 "name": "본거지: dao",
 "how": "base dao"
 },
 {
-"no": 87,
+"no": "B85",
 "code": "base/peak",
 "name": "본거지: peak",
 "how": "base peak"
 },
 {
-"no": 88,
+"no": "B86",
 "code": "base/manor",
 "name": "본거지: manor",
 "how": "base manor"
 },
 {
-"no": 89,
+"no": "B87",
 "code": "base/water",
 "name": "본거지: water",
 "how": "base water"
 },
 {
-"no": 90,
+"no": "B88",
 "code": "base/fort",
 "name": "본거지: fort",
 "how": "base fort"
 },
 {
-"no": 91,
+"no": "B89",
 "code": "base/dark",
 "name": "본거지: dark",
 "how": "base dark"
 },
 {
-"no": 92,
+"no": "B90",
 "code": "base/slum",
 "name": "본거지: slum",
 "how": "base slum"
 },
 {
-"no": 93,
+"no": "B91",
 "code": "base/ice",
 "name": "본거지: ice",
 "how": "base ice"
 },
 {
-"no": 94,
+"no": "B92",
 "code": "base/west",
 "name": "본거지: west",
 "how": "base west"
 },
 {
-"no": 95,
+"no": "B93",
 "code": "base/town",
 "name": "본거지: town",
 "how": "base town"
 },
 {
-"no": 96,
+"no": "B94",
 "code": "world/concept",
 "name": "강호 전도 지역 그림",
 "how": "world"
 },
 {
-"no": 97,
+"no": "C2",
 "code": "chars/BlueSamurai",
 "name": "BlueSamurai",
 "how": "walk BlueSamurai"
 },
 {
-"no": 98,
+"no": "C3",
 "code": "chars/Princess",
 "name": "Princess",
 "how": "walk Princess"
 },
 {
-"no": 99,
+"no": "C4",
 "code": "chars/RedSamurai",
 "name": "RedSamurai",
 "how": "walk RedSamurai"
 },
 {
-"no": 100,
+"no": "C5",
 "code": "chars/Cavegirl",
 "name": "Cavegirl",
 "how": "walk Cavegirl"
 },
 {
-"no": 101,
+"no": "C6",
 "code": "chars/Hyeok",
 "name": "Hyeok",
 "how": "walk Hyeok"
 },
 {
-"no": 102,
+"no": "C7",
 "code": "chars/Dang",
 "name": "Dang",
 "how": "walk Dang"
 },
 {
-"no": 103,
+"no": "C8",
 "code": "chars/Moyong",
 "name": "Moyong",
 "how": "walk Moyong"
 },
 {
-"no": 104,
+"no": "C9",
 "code": "chars/Namgung",
 "name": "Namgung",
 "how": "walk Namgung"
 },
 {
-"no": 105,
+"no": "C10",
 "code": "chars/Monk2",
 "name": "Monk2",
 "how": "walk Monk2"
 },
 {
-"no": 106,
+"no": "C11",
 "code": "chars/OldWoman",
 "name": "OldWoman",
 "how": "walk OldWoman"
 },
 {
-"no": 107,
+"no": "C12",
 "code": "chars/Inspector",
 "name": "Inspector",
 "how": "walk Inspector"
 },
 {
-"no": 108,
+"no": "C13",
 "code": "chars/Hwasan",
 "name": "Hwasan",
 "how": "walk Hwasan"
 },
 {
-"no": 109,
+"no": "C14",
 "code": "chars/Jegal",
 "name": "Jegal",
 "how": "walk Jegal"
 },
 {
-"no": 110,
+"no": "C15",
 "code": "chars/Paeng",
 "name": "Paeng",
 "how": "walk Paeng"
 },
 {
-"no": 111,
+"no": "C16",
 "code": "chars/Samaung",
 "name": "Samaung",
 "how": "walk Samaung"
 },
 {
-"no": 112,
+"no": "C17",
 "code": "chars/Master",
 "name": "Master",
 "how": "walk Master"
 },
 {
-"no": 113,
+"no": "C18",
 "code": "chars/Gaebang",
 "name": "Gaebang",
 "how": "walk Gaebang"
 },
 {
-"no": 114,
+"no": "C19",
 "code": "chars/Monk",
 "name": "Monk",
 "how": "walk Monk"
 },
 {
-"no": 115,
+"no": "C20",
 "code": "chars/Sodi",
 "name": "Sodi",
 "how": "walk Sodi"
 },
 {
-"no": 116,
+"no": "C21",
 "code": "chars/EggGirl",
 "name": "EggGirl",
 "how": "walk EggGirl"
 },
 {
-"no": 117,
+"no": "C22",
 "code": "chars/Eskimo",
 "name": "Eskimo",
 "how": "walk Eskimo"
 },
 {
-"no": 118,
+"no": "C23",
 "code": "chars/EskimoNinja",
 "name": "EskimoNinja",
 "how": "walk EskimoNinja"
 },
 {
-"no": 119,
+"no": "C24",
 "code": "chars/Greenman",
 "name": "Greenman",
 "how": "walk Greenman"
 },
 {
-"no": 120,
+"no": "C25",
 "code": "chars/BlueNinja",
 "name": "BlueNinja",
 "how": "walk BlueNinja"
 },
 {
-"no": 121,
+"no": "C26",
 "code": "chars/GreenNinja",
 "name": "GreenNinja",
 "how": "walk GreenNinja"
 },
 {
-"no": 122,
+"no": "C27",
 "code": "chars/GrayNinja",
 "name": "GrayNinja",
 "how": "walk GrayNinja"
 },
 {
-"no": 123,
+"no": "C28",
 "code": "chars/DarkNinja",
 "name": "DarkNinja",
 "how": "walk DarkNinja"
 },
 {
-"no": 124,
+"no": "C29",
 "code": "chars/RedNinja",
 "name": "RedNinja",
 "how": "walk RedNinja"
 },
 {
-"no": 125,
+"no": "C30",
 "code": "chars/RedNinja2",
 "name": "RedNinja2",
 "how": "walk RedNinja2"
 },
 {
-"no": 126,
+"no": "C31",
 "code": "chars/MaskedNinja",
 "name": "MaskedNinja",
 "how": "walk MaskedNinja"
 },
 {
-"no": 127,
+"no": "C32",
 "code": "chars/Knight",
 "name": "Knight",
 "how": "walk Knight"
 },
 {
-"no": 128,
+"no": "C33",
 "code": "chars/GoldKnight",
 "name": "GoldKnight",
 "how": "walk GoldKnight"
 },
 {
-"no": 129,
+"no": "C34",
 "code": "chars/Samurai",
 "name": "Samurai",
 "how": "walk Samurai"
 },
 {
-"no": 130,
+"no": "C35",
 "code": "chars/Lion",
 "name": "Lion",
 "how": "walk Lion"
 },
 {
-"no": 131,
+"no": "C36",
 "code": "chars/Caveman",
 "name": "Caveman",
 "how": "walk Caveman"
 },
 {
-"no": 132,
+"no": "C37",
 "code": "chars/Caveman2",
 "name": "Caveman2",
 "how": "walk Caveman2"
 },
 {
-"no": 133,
+"no": "C38",
 "code": "chars/Villager",
 "name": "Villager",
 "how": "walk Villager"
 },
 {
-"no": 134,
+"no": "C39",
 "code": "chars/Villager2",
 "name": "Villager2",
 "how": "walk Villager2"
 },
 {
-"no": 135,
+"no": "C40",
 "code": "chars/Villager3",
 "name": "Villager3",
 "how": "walk Villager3"
 },
 {
-"no": 136,
+"no": "C41",
 "code": "chars/Villager4",
 "name": "Villager4",
 "how": "walk Villager4"
 },
 {
-"no": 137,
+"no": "C42",
 "code": "chars/Woman",
 "name": "Woman",
 "how": "walk Woman"
 },
 {
-"no": 138,
+"no": "C43",
 "code": "chars/OldMan",
 "name": "OldMan",
 "how": "walk OldMan"
 },
 {
-"no": 139,
+"no": "C44",
 "code": "chars/OldMan2",
 "name": "OldMan2",
 "how": "walk OldMan2"
 },
 {
-"no": 140,
+"no": "C45",
 "code": "chars/OldMan3",
 "name": "OldMan3",
 "how": "walk OldMan3"
 },
 {
-"no": 141,
+"no": "C46",
 "code": "chars/Noble",
 "name": "Noble",
 "how": "walk Noble"
 },
 {
-"no": 142,
+"no": "C47",
 "code": "chars/Boy",
 "name": "Boy",
 "how": "walk Boy"
 },
 {
-"no": 143,
+"no": "C48",
 "code": "chars/Child",
 "name": "Child",
 "how": "walk Child"
 },
 {
-"no": 144,
+"no": "C49",
 "code": "chars/EggBoy",
 "name": "EggBoy",
 "how": "walk EggBoy"
 },
 {
-"no": 145,
+"no": "C50",
 "code": "chars/Skeleton",
 "name": "Skeleton",
 "how": "walk Skeleton"
 },
 {
-"no": 146,
+"no": "C51",
 "code": "chars/Cavegirl2",
 "name": "Cavegirl2",
 "how": "walk Cavegirl2"
 },
 {
-"no": 147,
+"no": "C52",
 "code": "mon/Beast",
 "name": "멧돼지",
 "how": "grid 4 4 32 32 mon/Beast"
 },
 {
-"no": 148,
+"no": "C53",
 "code": "mon/Snake",
 "name": "독사",
 "how": "grid 4 4 32 32 mon/Snake"
 },
 {
-"no": 149,
+"no": "C54",
 "code": "mon/Snake2",
 "name": "큰 구렁이",
 "how": "grid 4 4 32 32 mon/Snake2"
 },
 {
-"no": 150,
+"no": "C55",
 "code": "mon/Racoon",
 "name": "너구리",
 "how": "grid 4 4 32 32 mon/Racoon"
 },
 {
-"no": 151,
+"no": "C56",
 "code": "mon/Bamboo",
 "name": "대나무 귀신",
 "how": "grid 4 4 32 32 mon/Bamboo"
 },
 {
-"no": 152,
+"no": "C57",
 "code": "mon/Spirit",
 "name": "푸른 원혼",
 "how": "grid 4 4 32 32 mon/Spirit"
 },
 {
-"no": 153,
+"no": "C58",
 "code": "mon/Spirit2",
 "name": "흰 망자",
 "how": "grid 4 4 32 32 mon/Spirit2"
 },
 {
-"no": 154,
+"no": "C59",
 "code": "mon/Lizard",
 "name": "사막 도마뱀",
 "how": "grid 4 4 32 32 mon/Lizard"
 },
 {
-"no": 155,
+"no": "C60",
 "code": "boss/GiantRacoon",
 "name": "대왕 너구리 보스",
 "how": "grid 6 1 120 120 boss/GiantRacoon"
 },
 {
-"no": 156,
+"no": "C61",
 "code": "boss/DemonCyclop",
 "name": "외눈 혈안귀 보스",
 "how": "grid 5 1 100 100 boss/DemonCyclop"
 },
 {
-"no": 157,
+"no": "C62",
 "code": "boss/GiantSpirit",
 "name": "거대한 귀마 원령 보스",
 "how": "grid 6 1 120 120 boss/GiantSpirit"
 },
 {
-"no": 158,
+"no": "C63",
 "code": "ani/rabbit",
 "name": "산토끼",
 "how": "grid 2 1 32 32 ani/rabbit"
 },
 {
-"no": 159,
+"no": "C64",
 "code": "ani/pheasant",
 "name": "꿩",
 "how": "grid 2 1 32 32 ani/pheasant"
 },
 {
-"no": 160,
+"no": "C65",
 "code": "ani/deer",
 "name": "노루",
 "how": "grid 2 1 32 32 ani/deer"
 },
 {
-"no": 161,
+"no": "C66",
 "code": "ani/piglet",
 "name": "멧돼지 새끼",
 "how": "grid 2 1 32 32 ani/piglet"
 },
 {
-"no": 162,
+"no": "C67",
 "code": "ani/badger",
 "name": "오소리",
 "how": "grid 2 1 32 32 ani/badger"
 },
 {
-"no": 163,
+"no": "E2",
 "code": "wpn/Sword",
 "name": "곧은 장검",
 "how": "one 12 22 wpn/Sword"
 },
 {
-"no": 164,
+"no": "E3",
 "code": "wpn/Rapier",
 "name": "가늘고 긴 세검",
 "how": "one 18 22 wpn/Rapier"
 },
 {
-"no": 165,
+"no": "E4",
 "code": "wpn/Katana",
 "name": "살짝 휜 단도",
 "how": "one 12 20 wpn/Katana"
 },
 {
-"no": 166,
+"no": "E5",
 "code": "wpn/BigSword",
 "name": "넓은 대도",
 "how": "one 14 24 wpn/BigSword"
 },
 {
-"no": 167,
+"no": "E6",
 "code": "wpn/Axe",
 "name": "큰 도끼",
 "how": "one 22 16 wpn/Axe"
 },
 {
-"no": 168,
+"no": "E7",
 "code": "wpn/Club",
 "name": "쇠곤봉",
 "how": "one 16 20 wpn/Club"
 },
 {
-"no": 169,
+"no": "E8",
 "code": "wpn/Lance",
 "name": "긴 창",
 "how": "one 12 32 wpn/Lance"
 },
 {
-"no": 170,
+"no": "E9",
 "code": "wpn/Lance2",
 "name": "붉은 술이 달린 창",
 "how": "one 14 28 wpn/Lance2"
 },
 {
-"no": 171,
+"no": "E10",
 "code": "wpn/Ninjaku",
 "name": "짧은 비수",
 "how": "one 6 24 wpn/Ninjaku"
 },
 {
-"no": 172,
+"no": "E11",
 "code": "wpn/Sai",
 "name": "쌍갈래 철척",
 "how": "one 14 16 wpn/Sai"
 },
 {
-"no": 173,
+"no": "E12",
 "code": "wpn/Stick",
 "name": "타구봉",
 "how": "one 6 24 wpn/Stick"
 },
 {
-"no": 174,
+"no": "E13",
 "code": "fx/slash",
 "name": "초승달 모양 흰 칼바람",
 "how": "grid 4 1 64 64 fx/slash"
 },
 {
-"no": 175,
+"no": "E14",
 "code": "fx/curve",
 "name": "크게 휘어 도는 칼바람",
 "how": "grid 4 1 64 64 fx/curve"
 },
 {
-"no": 176,
+"no": "E15",
 "code": "fx/double",
 "name": "두 줄로 교차하는 칼자국",
 "how": "grid 4 1 64 64 fx/double"
 },
 {
-"no": 177,
+"no": "E16",
 "code": "fx/double2",
 "name": "붉은 기운이 도는 교차 칼자국",
 "how": "grid 4 1 64 64 fx/double2"
 },
 {
-"no": 178,
+"no": "E17",
 "code": "fx/circle",
 "name": "몸 주위로 도는 원형 칼바람",
 "how": "grid 4 1 64 64 fx/circle"
 },
 {
-"no": 179,
+"no": "E18",
 "code": "fx/cut",
 "name": "곧은 일자 베기 섬광",
 "how": "grid 5 1 64 64 fx/cut"
 },
 {
-"no": 180,
+"no": "E19",
 "code": "fx/claw",
 "name": "세 줄 손톱자국",
 "how": "grid 4 1 64 64 fx/claw"
 },
 {
-"no": 181,
+"no": "E20",
 "code": "fx/smoke",
 "name": "회색 먼지구름",
 "how": "grid 6 1 64 64 fx/smoke"
 },
 {
-"no": 182,
+"no": "E21",
 "code": "fx/flam",
 "name": "붉은 불꽃 터짐",
 "how": "grid 5 1 64 64 fx/flam"
 },
 {
-"no": 183,
+"no": "E22",
 "code": "fx/thunder",
 "name": "푸른 번개 줄기",
 "how": "grid 4 1 80 56 fx/thunder"
 },
 {
-"no": 184,
+"no": "E23",
 "code": "fx/rock",
 "name": "땅에서 솟았다가 부서지는 바위",
 "how": "grid 14 1 60 60 fx/rock"
 },
 {
-"no": 185,
+"no": "E24",
 "code": "fx/spark",
 "name": "칼끼리 부딪쳐 튀는 불꽃",
 "how": "grid 5 1 64 64 fx/spark"
 },
 {
-"no": 186,
+"no": "E25",
 "code": "fx/spirit",
 "name": "푸른 혼불",
 "how": "grid 5 1 64 64 fx/spirit"
 },
 {
-"no": 187,
+"no": "E26",
 "code": "fx/spiritb",
 "name": "검붉은 혼불",
 "how": "grid 5 1 64 64 fx/spiritb"
 },
 {
-"no": 188,
+"no": "E27",
 "code": "fx/aura",
 "name": "몸에서 솟구치는 금빛 기운",
 "how": "grid 4 1 64 64 fx/aura"
 },
 {
-"no": 189,
+"no": "E28",
 "code": "fx/aurap",
 "name": "몸에서 솟구치는 보랏빛 기운",
 "how": "grid 4 1 64 64 fx/aurap"
 },
 {
-"no": 190,
+"no": "E29",
 "code": "fx/ring",
 "name": "바닥에 퍼지는 흰 충격파 고리",
 "how": "grid 4 1 64 64 fx/ring"
 },
 {
-"no": 191,
+"no": "E30",
 "code": "fx/ringw",
 "name": "바닥에 퍼지는 물빛 고리",
 "how": "grid 4 1 64 64 fx/ringw"
 },
 {
-"no": 192,
+"no": "E31",
 "code": "fx/shieldy",
 "name": "금빛 호신강기",
 "how": "grid 6 1 48 52 fx/shieldy"
 },
 {
-"no": 193,
+"no": "E32",
 "code": "fx/shieldb",
 "name": "푸른 호신강기",
 "how": "grid 6 1 48 52 fx/shieldb"
 },
 {
-"no": 194,
+"no": "E33",
 "code": "fx/p_arrow",
 "name": "날아가는 화살, 오른쪽을 향해",
 "how": "grid 1 1 26 10 fx/p_arrow"
 },
 {
-"no": 195,
+"no": "E34",
 "code": "fx/p_kunai",
 "name": "날아가는 비도, 오른쪽을 향해",
 "how": "grid 1 1 28 10 fx/p_kunai"
 },
 {
-"no": 196,
+"no": "E35",
 "code": "fx/p_shuriken",
 "name": "회전하는 표창",
 "how": "grid 2 1 32 32 fx/p_shuriken"
 },
 {
-"no": 197,
+"no": "E36",
 "code": "fx/p_energy",
 "name": "작은 푸른 기탄",
 "how": "grid 4 1 32 32 fx/p_energy"
 },
 {
-"no": 198,
+"no": "E37",
 "code": "fx/p_fire",
 "name": "작은 불덩이",
 "how": "grid 4 1 32 32 fx/p_fire"
 },
 {
-"no": 199,
+"no": "E38",
 "code": "fx/p_bigenergy",
 "name": "큰 금빛 기탄",
 "how": "grid 4 1 48 48 fx/p_bigenergy"
 },
 {
-"no": 200,
+"no": "E39",
 "code": "fx/p_ice",
 "name": "얼음 송곳",
 "how": "grid 1 1 32 32 fx/p_ice"
 },
 {
-"no": 201,
+"no": "E40",
 "code": "fx/leaf",
 "name": "떨어지는 초록 잎",
 "how": "grid 6 1 24 14 fx/leaf"
 },
 {
-"no": 202,
+"no": "E41",
 "code": "fx/leafpink",
 "name": "떨어지는 꽃잎",
 "how": "grid 6 1 24 14 fx/leafpink"
 },
 {
-"no": 203,
+"no": "E42",
 "code": "fx/snow",
 "name": "내리는 눈송이",
 "how": "grid 4 1 16 16 fx/snow"
 },
 {
-"no": 204,
+"no": "E43",
 "code": "fx/psprk",
 "name": "작은 불티",
 "how": "grid 4 1 16 16 fx/psprk"
 },
 {
-"no": 205,
+"no": "E44",
 "code": "fx/sk_tray",
 "name": "쟁반 던지기",
 "how": "grid 6 1 96 96 fx/sk_tray"
 },
 {
-"no": 206,
+"no": "E45",
 "code": "fx/sk_dart",
 "name": "비도술",
 "how": "grid 6 1 96 96 fx/sk_dart"
 },
 {
-"no": 207,
+"no": "E46",
 "code": "fx/sk_breath",
 "name": "운기조식",
 "how": "grid 6 1 96 96 fx/sk_breath"
 },
 {
-"no": 208,
+"no": "E47",
 "code": "fx/sk_cloud_flash",
 "name": "청운일섬",
 "how": "grid 6 1 96 96 fx/sk_cloud_flash"
 },
 {
-"no": 209,
+"no": "E48",
 "code": "fx/sk_flow_three",
 "name": "유운삼검",
 "how": "grid 6 1 96 96 fx/sk_flow_three"
 },
 {
-"no": 210,
+"no": "E49",
 "code": "fx/sk_wind_turn",
 "name": "회풍검",
 "how": "grid 6 1 96 96 fx/sk_wind_turn"
 },
 {
-"no": 211,
+"no": "E50",
 "code": "fx/sk_swallow_qi",
 "name": "비연검기",
 "how": "grid 6 1 96 96 fx/sk_swallow_qi"
 },
 {
-"no": 212,
+"no": "E51",
 "code": "fx/sk_fall_flower",
 "name": "낙화유수",
 "how": "grid 6 1 96 96 fx/sk_fall_flower"
 },
 {
-"no": 213,
+"no": "E52",
 "code": "fx/sk_sky_sword",
 "name": "창궁무애검",
 "how": "grid 6 1 96 96 fx/sk_sky_sword"
 },
 {
-"no": 214,
+"no": "E53",
 "code": "fx/sk_break_mount",
 "name": "파산일도",
 "how": "grid 6 1 96 96 fx/sk_break_mount"
 },
 {
-"no": 215,
+"no": "E54",
 "code": "fx/sk_mad_wind",
 "name": "광풍난무",
 "how": "grid 6 1 96 96 fx/sk_mad_wind"
 },
 {
-"no": 216,
+"no": "E55",
 "code": "fx/sk_blood_fan",
 "name": "혈선도",
 "how": "grid 6 1 96 96 fx/sk_blood_fan"
 },
 {
-"no": 217,
+"no": "E56",
 "code": "fx/sk_tiger_roar",
 "name": "오호단문도",
 "how": "grid 6 1 96 96 fx/sk_tiger_roar"
 },
 {
-"no": 218,
+"no": "E57",
 "code": "fx/sk_one_point",
 "name": "일점돌",
 "how": "grid 6 1 96 96 fx/sk_one_point"
 },
 {
-"no": 219,
+"no": "E58",
 "code": "fx/sk_dragon_pass",
 "name": "유룡천",
 "how": "grid 6 1 96 96 fx/sk_dragon_pass"
 },
 {
-"no": 220,
+"no": "E59",
 "code": "fx/sk_sweep_army",
 "name": "횡소천군",
 "how": "grid 6 1 96 96 fx/sk_sweep_army"
 },
 {
-"no": 221,
+"no": "E60",
 "code": "fx/sk_hundred_flower",
 "name": "백화난무",
 "how": "grid 6 1 96 96 fx/sk_hundred_flower"
 },
 {
-"no": 222,
+"no": "E61",
 "code": "fx/sk_sky_pierce",
 "name": "천룡강림",
 "how": "grid 6 1 96 96 fx/sk_sky_pierce"
 },
 {
-"no": 223,
+"no": "E62",
 "code": "fx/sk_iron_fist",
 "name": "붕권",
 "how": "grid 6 1 96 96 fx/sk_iron_fist"
 },
 {
-"no": 224,
+"no": "E63",
 "code": "fx/sk_chain_kick",
 "name": "연환각",
 "how": "grid 6 1 96 96 fx/sk_chain_kick"
 },
 {
-"no": 225,
+"no": "E64",
 "code": "fx/sk_earth_stomp",
 "name": "진각",
 "how": "grid 6 1 96 96 fx/sk_earth_stomp"
 },
 {
-"no": 226,
+"no": "E65",
 "code": "fx/sk_diamond_body",
 "name": "금강호체",
 "how": "grid 6 1 96 96 fx/sk_diamond_body"
 },
 {
-"no": 227,
+"no": "E66",
 "code": "fx/sk_tathagata",
 "name": "여래신장",
 "how": "grid 6 1 96 96 fx/sk_tathagata"
 },
 {
-"no": 228,
+"no": "E67",
 "code": "fx/sk_luohan",
 "name": "나한복호권",
 "how": "grid 6 1 96 96 fx/sk_luohan"
 },
 {
-"no": 229,
+"no": "E68",
 "code": "fx/sk_taiji",
 "name": "태극혜검",
 "how": "grid 6 1 96 96 fx/sk_taiji"
 },
 {
-"no": 230,
+"no": "E69",
 "code": "fx/sk_plum",
 "name": "이십사수매화검법",
 "how": "grid 6 1 96 96 fx/sk_plum"
 },
 {
-"no": 231,
+"no": "E70",
 "code": "fx/sk_zhongnan",
 "name": "천하삼십육검",
 "how": "grid 6 1 96 96 fx/sk_zhongnan"
 },
 {
-"no": 232,
+"no": "E71",
 "code": "fx/sk_emei",
 "name": "불광보조",
 "how": "grid 6 1 96 96 fx/sk_emei"
 },
 {
-"no": 233,
+"no": "E72",
 "code": "fx/sk_kunlun",
 "name": "운룡대팔식",
 "how": "grid 6 1 96 96 fx/sk_kunlun"
 },
 {
-"no": 234,
+"no": "E73",
 "code": "fx/sk_kongtong",
 "name": "칠상권",
 "how": "grid 6 1 96 96 fx/sk_kongtong"
 },
 {
-"no": 235,
+"no": "E74",
 "code": "fx/sk_diancang",
 "name": "사일검",
 "how": "grid 6 1 96 96 fx/sk_diancang"
 },
 {
-"no": 236,
+"no": "E75",
 "code": "fx/sk_qingcheng",
 "name": "송풍검",
 "how": "grid 6 1 96 96 fx/sk_qingcheng"
 },
 {
-"no": 237,
+"no": "E76",
 "code": "fx/sk_tagu",
 "name": "타구봉법",
 "how": "grid 6 1 96 96 fx/sk_tagu"
 },
 {
-"no": 238,
+"no": "E77",
 "code": "fx/sk_hangryong",
 "name": "항룡십팔장",
 "how": "grid 6 1 96 96 fx/sk_hangryong"
 },
 {
-"no": 239,
+"no": "E78",
 "code": "fx/sk_ihwa",
 "name": "이화접목",
 "how": "grid 6 1 96 96 fx/sk_ihwa"
 },
 {
-"no": 240,
+"no": "E79",
 "code": "fx/sk_palmun",
 "name": "팔문금쇄진",
 "how": "grid 6 1 96 96 fx/sk_palmun"
 },
 {
-"no": 241,
+"no": "E80",
 "code": "fx/sk_manchen",
 "name": "만천화우",
 "how": "grid 6 1 96 96 fx/sk_manchen"
 },
 {
-"no": 242,
+"no": "E81",
 "code": "fx/sk_moon1",
 "name": "제1식 초승",
 "how": "grid 6 1 96 96 fx/sk_moon1"
 },
 {
-"no": 243,
+"no": "E82",
 "code": "fx/sk_moon2",
 "name": "제2식 월영",
 "how": "grid 6 1 96 96 fx/sk_moon2"
 },
 {
-"no": 244,
+"no": "E83",
 "code": "fx/sk_moon3",
 "name": "제3식 반월",
 "how": "grid 6 1 96 96 fx/sk_moon3"
 },
 {
-"no": 245,
+"no": "E84",
 "code": "fx/sk_moon4",
 "name": "제4식 월광",
 "how": "grid 6 1 96 96 fx/sk_moon4"
 },
 {
-"no": 246,
+"no": "E85",
 "code": "fx/sk_moon5",
 "name": "제5식 만월",
 "how": "grid 6 1 96 96 fx/sk_moon5"
 },
 {
-"no": 247,
+"no": "E86",
 "code": "fx/sk_moon6",
 "name": "제6식 월식",
 "how": "grid 6 1 96 96 fx/sk_moon6"
 },
 {
-"no": 248,
+"no": "E87",
 "code": "fx/sk_moon7",
 "name": "제7식 낙월",
 "how": "grid 6 1 96 96 fx/sk_moon7"
 },
 {
-"no": 249,
+"no": "E88",
 "code": "fx/sk_moon0",
 "name": "서문",
 "how": "grid 6 1 96 96 fx/sk_moon0"
 },
 {
-"no": 250,
+"no": "E89",
+"code": "fx/sk_x_shaolin3",
+"name": "대력금강장",
+"how": "grid 6 1 96 96 fx/sk_x_shaolin3"
+},
+{
+"no": "E90",
+"code": "fx/sk_x_wudang3",
+"name": "진무칠절검",
+"how": "grid 6 1 96 96 fx/sk_x_wudang3"
+},
+{
+"no": "E91",
+"code": "fx/sk_x_hwasan3",
+"name": "자하검기",
+"how": "grid 6 1 96 96 fx/sk_x_hwasan3"
+},
+{
+"no": "E92",
+"code": "fx/sk_x_jongnam3",
+"name": "청봉벽력",
+"how": "grid 6 1 96 96 fx/sk_x_jongnam3"
+},
+{
+"no": "E93",
+"code": "fx/sk_x_emei3",
+"name": "불광보조",
+"how": "grid 6 1 96 96 fx/sk_x_emei3"
+},
+{
+"no": "E94",
+"code": "fx/sk_x_gonryun3",
+"name": "옥허검",
+"how": "grid 6 1 96 96 fx/sk_x_gonryun3"
+},
+{
+"no": "E95",
+"code": "fx/sk_x_gongdong3",
+"name": "파옥권",
+"how": "grid 6 1 96 96 fx/sk_x_gongdong3"
+},
+{
+"no": "E96",
+"code": "fx/sk_x_jeomchang3",
+"name": "유성일섬",
+"how": "grid 6 1 96 96 fx/sk_x_jeomchang3"
+},
+{
+"no": "E97",
+"code": "fx/sk_x_cheongseong3",
+"name": "최심장",
+"how": "grid 6 1 96 96 fx/sk_x_cheongseong3"
+},
+{
+"no": "E98",
+"code": "fx/sk_x_gaebang3",
+"name": "견룡재전",
+"how": "grid 6 1 96 96 fx/sk_x_gaebang3"
+},
+{
+"no": "E99",
+"code": "fx/sk_x_namgung3",
+"name": "제왕검형",
+"how": "grid 6 1 96 96 fx/sk_x_namgung3"
+},
+{
+"no": "E100",
+"code": "fx/sk_x_moyong3",
+"name": "두전성이",
+"how": "grid 6 1 96 96 fx/sk_x_moyong3"
+},
+{
+"no": "E101",
+"code": "fx/sk_x_jegal3",
+"name": "구궁비도",
+"how": "grid 6 1 96 96 fx/sk_x_jegal3"
+},
+{
+"no": "E102",
+"code": "fx/sk_x_dang3",
+"name": "만천화우",
+"how": "grid 6 1 96 96 fx/sk_x_dang3"
+},
+{
+"no": "E103",
+"code": "fx/sk_x_paeng3",
+"name": "일도양단",
+"how": "grid 6 1 96 96 fx/sk_x_paeng3"
+},
+{
+"no": "E104",
+"code": "fx/sk_x_hwangbo3",
+"name": "패왕장",
+"how": "grid 6 1 96 96 fx/sk_x_hwangbo3"
+},
+{
+"no": "E105",
+"code": "fx/sk_x_ak3",
+"name": "정충보국",
+"how": "grid 6 1 96 96 fx/sk_x_ak3"
+},
+{
+"no": "E106",
+"code": "fx/sk_x_yang3",
+"name": "이화창",
+"how": "grid 6 1 96 96 fx/sk_x_yang3"
+},
+{
+"no": "E107",
+"code": "fx/sk_x_eon3",
+"name": "철두공",
+"how": "grid 6 1 96 96 fx/sk_x_eon3"
+},
+{
+"no": "E108",
+"code": "fx/sk_x_jin3",
+"name": "무영각",
+"how": "grid 6 1 96 96 fx/sk_x_jin3"
+},
+{
+"no": "E109",
+"code": "fx/sk_x_haenam3",
+"name": "해일",
+"how": "grid 6 1 96 96 fx/sk_x_haenam3"
+},
+{
+"no": "E110",
+"code": "fx/sk_x_cheonsan3",
+"name": "유성검",
+"how": "grid 6 1 96 96 fx/sk_x_cheonsan3"
+},
+{
+"no": "E111",
+"code": "fx/sk_x_jeonjin3",
+"name": "선천검기",
+"how": "grid 6 1 96 96 fx/sk_x_jeonjin3"
+},
+{
+"no": "E112",
+"code": "fx/sk_x_mosan3",
+"name": "오뢰정법",
+"how": "grid 6 1 96 96 fx/sk_x_mosan3"
+},
+{
+"no": "E113",
+"code": "fx/sk_x_jangbaek3",
+"name": "천지일창",
+"how": "grid 6 1 96 96 fx/sk_x_jangbaek3"
+},
+{
+"no": "E114",
+"code": "fx/sk_x_pota3",
+"name": "관음수",
+"how": "grid 6 1 96 96 fx/sk_x_pota3"
+},
+{
+"no": "E115",
+"code": "fx/sk_x_bukhae3",
+"name": "빙하세계",
+"how": "grid 6 1 96 96 fx/sk_x_bukhae3"
+},
+{
+"no": "E116",
+"code": "fx/sk_x_noeum3",
+"name": "대수인",
+"how": "grid 6 1 96 96 fx/sk_x_noeum3"
+},
+{
+"no": "E117",
+"code": "fx/sk_x_podalra3",
+"name": "대일여래인",
+"how": "grid 6 1 96 96 fx/sk_x_podalra3"
+},
+{
+"no": "E118",
+"code": "fx/sk_x_changun3",
+"name": "창운비천",
+"how": "grid 6 1 96 96 fx/sk_x_changun3"
+},
+{
+"no": "E119",
+"code": "fx/sk_x_nokrim3",
+"name": "패왕참",
+"how": "grid 6 1 96 96 fx/sk_x_nokrim3"
+},
+{
+"no": "E120",
+"code": "fx/sk_x_janggang3",
+"name": "강룡번신",
+"how": "grid 6 1 96 96 fx/sk_x_janggang3"
+},
+{
+"no": "E121",
+"code": "fx/sk_x_haomun3",
+"name": "영보",
+"how": "grid 6 1 96 96 fx/sk_x_haomun3"
+},
+{
+"no": "E122",
+"code": "fx/sk_x_odok3",
+"name": "천주만독수",
+"how": "grid 6 1 96 96 fx/sk_x_odok3"
+},
+{
+"no": "E123",
+"code": "fx/sk_x_hyeoleui3",
+"name": "일혈참",
+"how": "grid 6 1 96 96 fx/sk_x_hyeoleui3"
+},
+{
+"no": "E124",
+"code": "fx/sk_x_cheonma3",
+"name": "흡성대법",
+"how": "grid 6 1 96 96 fx/sk_x_cheonma3"
+},
+{
+"no": "E125",
+"code": "fx/sk_r_dokgo",
+"name": "독고구검",
+"how": "grid 6 1 96 96 fx/sk_r_dokgo"
+},
+{
+"no": "E126",
+"code": "fx/sk_r_six",
+"name": "육맥신검",
+"how": "grid 6 1 96 96 fx/sk_r_six"
+},
+{
+"no": "E127",
+"code": "fx/sk_r_lingbo",
+"name": "능파미보",
+"how": "grid 6 1 96 96 fx/sk_r_lingbo"
+},
+{
+"no": "E128",
+"code": "fx/sk_r_geongon",
+"name": "건곤대나이",
+"how": "grid 6 1 96 96 fx/sk_r_geongon"
+},
+{
+"no": "E129",
+"code": "fx/sk_r_yiyang",
+"name": "일양지",
+"how": "grid 6 1 96 96 fx/sk_r_yiyang"
+},
+{
+"no": "E130",
+"code": "fx/sk_r_tanji",
+"name": "탄지신통",
+"how": "grid 6 1 96 96 fx/sk_r_tanji"
+},
+{
+"no": "E131",
+"code": "fx/sk_r_ansu",
+"name": "암연소혼장",
+"how": "grid 6 1 96 96 fx/sk_r_ansu"
+},
+{
+"no": "E132",
+"code": "fx/sk_r_taehyeon",
+"name": "태현경",
+"how": "grid 6 1 96 96 fx/sk_r_taehyeon"
+},
+{
+"no": "E133",
 "code": "icon/sheet1",
 "name": "아이콘 묶음 1",
 "how": "icons 6 6 ore_iron,ore_blue,ore_star,wood,hide,fur,meat,feather,antler,herb,ginseng,honey,shoot,venom,rice,noodlep,jade,f_crucian,f_carp,f_catfish,f_eel,f_sweet,f_mandarin,f_shrimp,f_gold,f_sturgeon,f_moon,noodle,rice_ball,skewer,fish_soup,eel_rice,shoot_rice,ginseng_soup,moon_feast,tea"
 },
 {
-"no": 251,
+"no": "E134",
 "code": "icon/sheet2",
 "name": "아이콘 묶음 2",
 "how": "icons 6 6 plum_wine,hairpin,sachet,poem,sweets,jade_ring,gold_cup,silver_cup,a_haenam,a_cheonsan,a_jeonjin,a_mosan,a_jangbaek,a_pota,a_hwangbo,a_ak,a_yang,a_eon,a_jin,a_bukhae,a_noeum,a_podalra,a_beads,a_taiji,a_plum,a_jongnam,a_emei,a_kunlun,a_gong,a_diancang,a_qing,a_gae,b_yun,b_so,b_dang,b_mo"
 },
 {
-"no": 252,
+"no": "E135",
 "code": "icon/sheet3",
 "name": "아이콘 묶음 3",
 "how": "icons 6 6 b_nam,b_bae,b_hyeok,b_cheol,a_nam,a_mo,a_je,a_dang,a_paeng,a_spoon,a_tassel"
 },
 {
-"no": 253,
+"no": "B95",
 "code": "ui/title",
 "name": "title",
 "how": "ui title"
 },
 {
-"no": 254,
+"no": "B96",
 "code": "ui/window",
 "name": "window",
 "how": "ui window"
 },
 {
-"no": 255,
+"no": "B97",
 "code": "ui/button",
 "name": "button",
 "how": "ui button"
 },
 {
-"no": 256,
+"no": "B98",
 "code": "ui/menu",
 "name": "menu",
 "how": "ui menu"
 },
 {
-"no": 257,
+"no": "B99",
 "code": "ui/hud",
 "name": "hud",
 "how": "ui hud"

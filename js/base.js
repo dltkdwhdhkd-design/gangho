@@ -97,16 +97,21 @@ async function boatTalk(l) {
 function provider(id) {
   const out = { npcs: [], spots: [], trigs: [], roam: [] }, l = LOCS.find(q => q.map === id), F = G.S?.flags; if (!l || !F) return out;
   if (G.S.mode !== 'free' && !F.world_open && G.after && G.after('c1a')) F.world_open = true;
-  if (l.kind === 'old') { out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
-  const chat = CHAT[l.style], folk = l.style === 'town' ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy'] : ST[l.style].folk, R = fold(id), spots = l.style === 'town' ? [[13, 12], [26, 12], [20, 18], [9, 15], [31, 15]] : [[11, 13], [14, 14.5], [26, 13], [29, 14.5]];
+  if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
+  G.jh.ensure(); const chat = CHAT[l.style], folk = l.style === 'town' ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy'] : ST[l.style].folk, R = fold(id), spots = l.style === 'town' ? [[13, 12], [26, 12], [20, 18], [9, 15], [31, 15]] : [[11, 13], [14, 14.5], [26, 13], [29, 14.5]];
   spots.forEach(([x, y], i) => { const line = chat[(i + Math.floor(R() * 3)) % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 3 === 0 ? 0 : i % 2 ? 2 : 3, hint: '말 걸기', talk: async () => { await say(null, line); } }); });
   if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: 24, y: 26.5, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
   if (l.style === 'town') {
-    out.npcs.push({ id: 'cshop', spr: 'Noble', x: 12, y: 17, dir: 3, hint: '저잣거리', talk: () => shopTalk(l) }, { id: 'cinn', spr: 'OldWoman', x: 27, y: 17, dir: 2, hint: '객잔', talk: () => innTalk(l) });
+    out.npcs.push({ id: 'cshop', spr: 'Noble', x: 12, y: 17, dir: 3, hint: '저잣거리', talk: () => shopTalk(l) }, { id: 'cinn', spr: 'OldWoman', x: 27, y: 17, dir: 2, hint: '객잔', talk: () => innTalk(l) }, { id: 'cbook', spr: 'OldMan3', x: 16, y: 12.5, dir: 0, hint: '고서점', talk: () => G.arts.bookshop(l) });
     if (G.S.mode === 'free') out.npcs.push({ id: 'cboard', spr: 'Gaebang', x: 20, y: 12, dir: 0, hint: '일거리 묻기', talk: () => G.freeBoard0() });
     return out;
   }
-  const f = G.free?.fac(l.fac); if (!f || G.S.mode === 'free') { if (!f) return out; return out; }
+  const f = G.free?.fac(l.fac); if (!f) return out;
+  if (G.jh.fallen(f.id)) { out.npcs = [{ id: 'ash', spr: 'Villager', x: 20, y: 18, dir: 0, hint: '잿더미를 치우는 사람', talk: () => G.jh.rebuild(f) }]; return out; }
+  if (G.jh.hostile(f.id)) { out.trigs.push({ x: 17, y: 21, w: 6, h: 3, when: () => !G.S.daily['gate_' + f.id], run: async () => { G.S.daily['gate_' + f.id] = 1; await G.jh.gate(f); } }); out.npcs = out.npcs.filter(n => n.id === 'boat'); }
+  else out.npcs.push({ id: 'tutor', spr: folk[0], x: 24, y: 11.5, dir: 2, hint: '사범', talk: () => G.arts.tutor(f) });
+  if (G.S.mode === 'free') return out;
+  if (G.jh.hostile(f.id)) return out;
   if (f.hi) out.npcs.push({ id: f.key, spr: f.spr, x: 20, y: 11.5, dir: 0, hint: f.name, talk: () => storyFac(f) });
   else out.npcs.push({ id: 'keeper', spr: folk[0], x: 16.5, y: 23, dir: 3, hint: '문지기', talk: async () => { await say(null, AWAY[f.group] || '어른은 지금 안 계십니다.'); } });
   return out;
@@ -115,4 +120,4 @@ function init() {
   Story.providers.push(provider);
   for (const l of LOCS) if (l.kind === 'old' && MAPS[l.map]) { const m = MAPS[l.map], n = m.stamps.length; m.put('signpost', Math.floor(l.at[0] - 1.5), Math.floor(l.at[1] - 1.5), { nosolid: true }); if (m.objs) m.objs.push(m.stamps[n]); }
 }
-G.base = { make, init };
+G.base = { make, init, folk: l => l && ST[l.style] ? ST[l.style].folk : null };

@@ -84,7 +84,7 @@ export function openMap() {
   const close = () => { G.menuOpen = false; M.classList.remove('on'); M.innerHTML = ''; Input.clear(); document.removeEventListener('keydown', k); };
   const draw = () => {
     if (!r) view = 'world';
-    M.innerHTML = `<div class="menu"><div class="pane" style="height:auto"><div class="tabs">${r ? `<button data-v="area" class="${view === 'area' ? 'on' : ''}">${esc(r.m.name)}</button>` : ''}<button data-v="world" class="${view === 'world' ? 'on' : ''}">강호 전도</button><button class="x">닫기 (M)</button></div><div class="body" style="padding:10px 12px 8px"><canvas id="mapc" width="1152" height="540" style="display:block;width:1152px;height:540px"></canvas><p class="hint" style="margin:6px 0 0">${view === 'area' ? '파란 칸이 나, 노란 칸이 할 일, 붉은 칸이 적입니다.' : '실선은 걷는 길, 점선은 뱃길입니다.'} Tab으로 지도를 바꿉니다.${G.S.goal ? ` · 목표: ${G.S.goal}` : ''}</p></div></div></div>`;
+    M.innerHTML = `<div class="menu"><div class="pane" style="height:auto"><div class="tabs">${r ? `<button data-v="area" class="${view === 'area' ? 'on' : ''}">${esc(r.m.name)}</button>` : ''}<button data-v="world" class="${view === 'world' ? 'on' : ''}">강호 전도</button><button class="x">닫기 (M)</button></div><div class="body" style="padding:10px 12px 8px"><canvas id="mapc" width="1152" height="540" style="display:block;width:1152px;height:540px"></canvas><p class="hint" style="margin:6px 0 0">${view === 'area' ? '파란 칸이 나, 노란 칸이 할 일, 붉은 칸이 적입니다.' : ''} Tab으로 지도를 바꿉니다.${G.S.goal ? ` · 목표: ${G.S.goal}` : ''}</p></div></div></div>`;
     $$('[data-v]', M).forEach(b => b.onclick = () => { view = b.dataset.v; Sound.sfx('tick'); draw(); });
     $('.x', M).onclick = close;
     const cv = $('#mapc', M); if (view === 'area') drawArea(cv, r, f); else drawWorld(cv, r ? r.m.id : null);

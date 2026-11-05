@@ -57,4 +57,11 @@
 
 ## 다시 그린 도트
 
-`docs/pixel-requests.md`가 ChatGPT 요청서고 `tools/pixel_doc.py`가 게임 자료로 만든다. 받은 시트는 `tools/sprite_in.py`로 잘라 `assets/hd/`에 넣는다. 거기 있는 그림이 기본 그림을 대신한다.
+`docs/pixel-background.md`, `docs/pixel-effects.md`, `docs/pixel-characters.md`가 ChatGPT 요청서고 `tools/pixel_doc.py`가 게임 자료로 만든다. 받은 시트는 `tools/sprite_in.py`로 잘라 `assets/hd/`에 넣는다. 거기 있는 그림이 기본 그림을 대신한다.
+
+## 강호의 살림
+
+- `js/artdata.js`, `js/arts.js`: 세력별 초식과 심법, 사사, 대련, 견식, 잔권 해독, 기연, 고서점.
+- `js/party.js`: 동료 합류, 동행, 집터 일, 초식 전수.
+- `js/jianghu.js`: 세력 관계, 원한과 복수, 적대, 화해, 강호 사건, 세력 흥망. 이야기 모드에서도 돈다.
+- 점검은 `tools/jh_test.cjs free|story`.

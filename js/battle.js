@@ -301,6 +301,7 @@ export class Battle {
     this.addFx('ringw', o.x, o.y - 7, 1.2); Sound.sfx('sword2'); Sound.sfx('power1', .5); this.stop = .12; this.shake(2);
     this.say(o, '튕겨내기!', '#ffe9a8'); o.iframe = .25;
     if (o.isPlayer) {
+      if (G.arts && src?.skKey && src.st === 'skill') G.arts.parried(src.skKey);
       o.mp = Math.min(o.maxMp, o.mp + 8);
       if (G.S.heart === 'mercy') o.hp = Math.min(o.maxHp, o.hp + o.maxHp * .05);
       if (G.S.heart === 'moon_heart') for (const k in o.cd) o.cd[k] = Math.max(0, o.cd[k] - 2);
@@ -591,7 +592,7 @@ export function fight(cfg) {
       if (o === 'win') {
         for (const a of B.actors) if (a.team === 1) { const f = a.def_; if (a.dead || a.yielded) { ex += f.exp; si += f.silver; } }
         ex = Math.round(ex * (cfg.expMul ?? 1)); si = Math.round(si * (cfg.expMul ?? 1));
-        up = gainExp(ex); G.S.silver += si;
+        si = Math.round(si * (1 + (G.party?.fx().silver || 0) / 100)); up = gainExp(ex); G.S.silver += si;
         for (const a of B.actors) if (a.team === 1 && a.dead) for (const [id, ch, lo, hi] of a.def_.drops || []) if (Math.random() < ch) { const n = rint(lo, hi); give(id, n); drops.push(`${DB[id].name} ${n}`); }
       }
       const meal = G.S.meal; if (meal && --meal.left <= 0) G.S.meal = null;

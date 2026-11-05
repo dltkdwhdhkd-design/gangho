@@ -5,8 +5,8 @@ const O = (id, name, px, at, t, o = {}) => ({ id, name, px, map: id, at, t, kind
 export const LOCS = [
   // 처음부터 있던 곳
   O('cheongha', '청하진', [598, 436], [22.5, 25], 1), O('valley', '청풍골', [574, 428], [35, 15.5], 1), O('bamboo', '대숲길', [600, 414], [18, 29], 1, { need: 'bamboo_open' }),
-  O('pass', '동쪽 산길', [630, 436], [3, 12.5], 2, { need: 'pass_open' }), O('fort', '흑풍채', [652, 426], [3, 13], 3, { need: 'fort_open', fac: 'nokrim', color: 'evil' }), O('cloudmt', '창운산', [642, 462], [22.5, 33], 2, { need: 'cloud_open', fac: 'changun', color: 'sect' }),
-  O('guhwa', '구화성', [602, 472], [24.5, 29], 3, { need: 'boat_guhwa' }), O('shaolin', '소림사', [556, 356], [19.5, 26], 4, { fac: 'shaolin', color: 'sect' }), O('hwasan', '화산파', [515, 362], [22, 11.5], 4, { fac: 'hwasan', color: 'sect' }),
+  O('pass', '동쪽 산길', [630, 436], [3, 12.5], 2, { need: 'pass_open' }), O('fort', '흑풍채', [652, 426], [3, 13], 3, { need: 'fort_open', fac: 'nokrim', color: 'evil', tutor: [17, 21] }), O('cloudmt', '창운산', [642, 462], [22.5, 33], 2, { need: 'cloud_open', fac: 'changun', color: 'sect', tutor: [25.5, 30] }),
+  O('guhwa', '구화성', [602, 472], [24.5, 29], 3, { need: 'boat_guhwa' }), O('shaolin', '소림사', [556, 356], [19.5, 26], 4, { fac: 'shaolin', color: 'sect', tutor: [24, 12.5] }), O('hwasan', '화산파', [515, 362], [22, 11.5], 4, { fac: 'hwasan', color: 'sect', tutor: [18, 12] }),
   O('wolha', '월하곡', [540, 472], [22, 37], 6, { need: 'seen_wolha' }), O('silk', '비단길', [392, 262], [41, 15.5], 5, { need: 'seen_silk' }), O('oasis', '사주성', [300, 240], [40, 15.5], 5, { need: 'seen_oasis' }),
   O('tiangate', '천산 입구', [138, 208], [22, 30], 6, { need: 'seen_tiangate' }), O('snowpeak', '빙궁 설산', [118, 178], [22, 30], 6, { need: 'seen_snowpeak' }), O('blackpalace', '흑운궁', [92, 150], [22, 34], 6, { need: 'seen_blackpalace' }),
   // 구파일방

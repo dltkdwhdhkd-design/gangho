@@ -53,7 +53,9 @@ export const Story = {
   resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0); },
   async line(t) { await say(null, t); },
   async encounter(r) {
+    if (r.intro) await say(null, r.intro);
     const won = await ctx.duel({ foes: r.foes, arena: G.field.m.arena, bgm: 'fight', noIntro: true, optional: true, expMul: 1 });
+    if (won) { if (r.fac && G.jh) await G.jh.after(r); if (G.arts && G.field.m?.live) G.arts.drop(r.fac, r.fac ? .2 : .06); }
     return won;
   },
   scenes: {}, providers: [],
