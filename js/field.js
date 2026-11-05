@@ -165,7 +165,7 @@ export class Field {
         mark(n); }
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha') { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }
-    const ar = IMG['fx/p_arrow']; for (const r of this.arrows) { c.save(); c.translate(r.x, r.y); c.rotate(r.an); if (ar) c.drawImage(ar, -6, -2); c.restore(); }
+    const ar = IMG['fx/p_arrow']; for (const r of this.arrows) { c.save(); c.translate(r.x, r.y); c.rotate(r.an); if (ar) c.drawImage(ar, -6, -2, ar.width / (ar.hd || 1), ar.height / (ar.hd || 1)); c.restore(); }
     if (G.decor) {
       const d = G.decor; c.strokeStyle = '#ffe36a'; c.lineWidth = .75;
       if (d.sel) { const [w, h] = G.life.size(d.sel), ok = G.life.canPlace(d.sel, d.cx, d.cy); c.fillStyle = ok ? 'rgba(90,220,120,.35)' : 'rgba(230,60,50,.35)'; c.fillRect(d.cx * TS, d.cy * TS, w * TS, h * TS); }
@@ -187,8 +187,8 @@ export class Field {
     const kind = this.m.ambient || ({ cheongha: 'leafpink', bamboo: 'leaf', cloudmt: 'leafpink', guhwa: 'leafpink', wolha: 'snow' })[this.m.id];
     if (!kind) return; const im = IMG['fx/' + kind]; if (!im) return;
     if (this.parts.length < 22 && Math.random() < .06) this.parts.push({ x: rnd(0, VW + 40), y: -8, vx: rnd(-16, -5), vy: rnd(9, 22), f: Math.floor(rnd(6)), t: rnd(100) });
-    const fw = kind === 'snow' ? 8 : 12, fh = kind === 'snow' ? 8 : 7, frames = Math.floor(im.width / fw);
-    for (const q of this.parts) { q.x += q.vx / 60; q.y += q.vy / 60; q.t += 1 / 60; const fr = Math.floor(q.t * 6) % frames; c.drawImage(im, fr * fw, 0, fw, fh, snap(q.x), snap(q.y), fw, fh); }
+    const k = im.hd || 1, fw = kind === 'snow' ? 8 : 12, fh = kind === 'snow' ? 8 : 7, frames = Math.floor(im.width / k / fw);
+    for (const q of this.parts) { q.x += q.vx / 60; q.y += q.vy / 60; q.t += 1 / 60; const fr = Math.floor(q.t * 6) % frames; c.drawImage(im, fr * fw * k, 0, fw * k, fh * k, snap(q.x), snap(q.y), fw, fh); }
     this.parts = this.parts.filter(q => q.y < VH + 10 && q.x > -14);
   }
 }

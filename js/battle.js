@@ -188,7 +188,7 @@ export class Battle {
     if (s.move) { const dd = s.move.d; a.mv = { vx: a.ax * dd / s.move.dur, vy: a.ay * dd / s.move.dur, t: s.move.dur, ghost: s.move.ghost }; if (s.move.iframe) a.iframe = Math.max(a.iframe, s.move.dur + .06); if (s.move.ghost) a.ghostT = s.move.dur; }
     if (s.rush) { a.mv = { vx: a.ax * s.rush.d / s.rush.dur, vy: a.ay * s.rush.d / s.rush.dur, t: s.rush.dur, ghost: true }; a.rush = { ...s.rush, seen: new Set() }; a.ghostT = s.rush.dur; }
     if (s.blink) { const T = this.near(a); if (T) { const tl = hyp(T.ax, T.ay) || 1, b = s.blink.behind; a.x = clamp(T.x - T.ax / tl * b, this.left, this.right); a.y = clamp(T.y - T.ay / tl * b, this.top, this.floorB); const dx = T.x - a.x, dy = T.y - a.y, l = hyp(dx, dy) || 1; a.ax = dx / l; a.ay = dy / l; a.face = faceOf(dx, dy); a.iframe = Math.max(a.iframe, .2); if (s.blink.enemy) this.teles.push({ owner: a, skRef: sk, x: a.x, y: a.y, ax: a.ax, ay: a.ay, left: .28, tot: .28, shape: 'arc', r: 26, a: 90 }); } }
-    if (s.fx) this.stepFx(a, s.fx);
+    if (s.fx) { const key = 'sk_' + sk.id; if (IMG['fx/' + key] && s === sk.steps.find(q => q.fx)) { FX[key] = FX[key] || [48, 48, 6]; this.stepFx(a, { ...s.fx, n: key }); } else this.stepFx(a, s.fx); }
     if (s.shake) this.shake(s.shake);
     if (s.hit) { this.swingFx(a, s.hit); this.melee(a, s.hit, sk); }
     if (s.proj) this.shoot(a, s.proj, sk);

@@ -73,6 +73,7 @@ export const ARENA_W = 24, ARENA_H = 15;
 export function arena(theme) {
   if (ARENA[theme]) return ARENA[theme];
   const cv = mk(ARENA_W * TS, ARENA_H * TS), c = cv.getContext('2d');
+  if (IMG['arena/' + theme]) { c.drawImage(IMG['arena/' + theme], 0, 0, cv.width, cv.height); return ARENA[theme] = cv; }
   const W = ARENA_W, Ht = ARENA_H;
   const grid = (fn) => Array.from({ length: Ht }, (_, y) => Array.from({ length: W }, (_, x) => fn(x, y)));
   const edge = (name, sp = TS) => { for (let x = 0; x < W * TS; x += sp) { drawStamp(c, name, x, -2); } };

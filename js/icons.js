@@ -11,6 +11,7 @@ function rectUrl(key, x, y, w, h) {
   return cache[k] = c.toDataURL();
 }
 export function iconUrl(id) {
+  const hd = IMG['icon/' + id]; if (hd) return rectUrl('icon/' + id, 0, 0, hd.width, hd.height);
   if (WEAPONS[id]) { const n = 'wpn/' + WEAPONS[id].spr + '_icon', im = IMG[n]; return im ? rectUrl(n, 0, 0, Math.min(16, im.width), Math.min(16, im.height)) : ''; }
   if (ACCS[id]) return rectUrl('items/Hear', 0, 0, 16, 16);
   const d = DB[id]; if (!d) return '';

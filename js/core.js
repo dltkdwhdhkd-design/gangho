@@ -142,7 +142,7 @@ const whiteCache = {};
 export function whiteOf(key) {
   if (whiteCache[key]) return whiteCache[key];
   const im = IMG[key]; if (!im) return null;
-  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.hd = im.hd;
   const x = c.getContext('2d'); x.drawImage(im, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
   return whiteCache[key] = c;
 }

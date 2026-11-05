@@ -82,6 +82,7 @@ export const SKILLS = {
   moon7: S('제7식 낙월', '落月', '무관', '월하칠식', 60, 34, '[절초] 달이 떨어진다. 화면의 모든 적을 차례로 벤다.', 1.3, [{ t: .02, cut: 1, iframe: 1.25 }, ...[.34, .46, .58, .7, .82, .94].map(t => ({ t, sfx: 'sword2', moonstrike: { mul: 1.5 } })), { t: 1.1, sfx: 'boom', moonstrike: { mul: 3, big: true }, shake: 6 }], { ult: true }),
 };
 
+for (const k in SKILLS) SKILLS[k].id = k;
 export const HEARTS = {
   none: { name: '없음', desc: '심법을 익히지 않았다.' },
   tonap: { name: '기초토납법', desc: '내력이 30% 빨리 찬다.' },

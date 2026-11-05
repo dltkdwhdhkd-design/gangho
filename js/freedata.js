@@ -95,7 +95,7 @@ export const GIVEN = ['철수', '대길', '복동', '만수', '길수', '덕구'
 // 전도에 새로 나온 세력
 const N = (id, group, align, name, who, spr, tier, wpn, moves, gift, heart, desc, hi) => ({ id, group, align, name, who, key: 'clan_' + id, spr, tier, wpn, moves, gift, heart, at: ['b_' + id, 20, 11.5], desc, hi });
 EXTRA.push(
-  N('haenam', '문파', 'jeong', '해남파', '임해조', 'BlueSamurai', 1, 'Sword', ['diancang', 'swallow_qi', 'double', 'lunge'], ['diancang', 'swallow_qi'], 'tonap', '남쪽 바다 섬에 있는 검문. 파도를 보고 칼을 배운다고 한다. 제자들 말로는 그냥 배가 자주 뒤집힌다.', '배 타고 왔소? 멀미를 안 했으면 칼도 들 만하겠군.'),
+  N('haenam', '문파', 'jeong', '해남파', '임해조', 'Samurai', 1, 'Sword', ['diancang', 'swallow_qi', 'double', 'lunge'], ['diancang', 'swallow_qi'], 'tonap', '남쪽 바다 섬에 있는 검문. 파도를 보고 칼을 배운다고 한다. 제자들 말로는 그냥 배가 자주 뒤집힌다.', '배 타고 왔소? 멀미를 안 했으면 칼도 들 만하겠군.'),
   N('cheonsan', '문파', 'jeong', '천산파', '고산옥', 'EskimoNinja', 2, 'Rapier', ['fall_flower', 'kunlun', 'flurry', 'blink'], ['fall_flower', 'kunlun'], 'jaha', '천마신교를 코앞에 두고 몇백 년을 버틴 검문. 사람이 적어서 장문인이 직접 장작을 팬다.', '장작 좀 들고 들어오지 그랬어. 여긴 손님도 일해.'),
   N('jeonjin', '문파', 'jeong', '전진교', '장양 진인', 'OldMan2', 2, 'Sword', ['zhongnan', 'taiji', 'double', 'swallow_qi'], ['zhongnan', 'taiji'], 'taecheong', '칼보다 계율을 먼저 가르치는 도관. 종남파와 같은 산을 나눠 쓰는 탓에 사이가 애매하다.', '술 냄새가 나는구려. 문 안에서는 참으시오.'),
   N('mosan', '문파', 'jeong', '모산파', '허정자', 'OldMan3', 1, 'Sword', ['palmun', 'emei', 'quick', 'dart3'], ['palmun', 'emei'], 'tonap', '부적을 쓰고 귀신을 쫓아 주며 먹고사는 도가 문파. 사람보다 귀신을 더 많이 상대했다고 자랑한다.', '어깨에 뭐가 붙었네. 아, 먼지요.'),
