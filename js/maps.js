@@ -205,6 +205,13 @@ export function buildMaps() {
   m = M('shrine', 14, 11, { name: '흑운궁 분타', bgm: 'curse', room: true, roomStyle: 1, arena: 'moon', tint: 'rgba(70,6,20,.4)' });
   m.put('statue', 6, 1).put('lantern', 1, 2).put('lantern', 12, 2).put('bookcase', 2, 1).put('bookcase', 10, 1);
   m.exit(5, 10, 4, 1, 'valley', 3, 15, 3, { door: true });
+  // 자유 모드: 내 문파. 건물은 살 때마다 sect.js가 얹는다
+  m = M('mysect', 40, 30, { name: '내 문파', bgm: 'temple', biome: 'grass', arena: 'court' });
+  m.road(19, 8, 19, 29, 2).fill(10, 14, 20, 11, 3);
+  m.put('hall', 18, 1).put('gate', 18, 27, { nosolid: true }).put('lantern', 16, 11).put('lantern', 23, 11);
+  m.border(['tree_pine', 'grove_green', 'tree_big'], [[18, 28, 4, 3]], 3);
+  m.scatter(['fern1', 'bush2', 'flower2'], 26, 6);
+  m.exit(18, 29, 4, 1, 'valley', 35, 15.5, 2);
   // 소림사: 숭산의 절
   m = M('shaolin', 40, 30, { name: '소림사', bgm: 'temple', biome: 'grass', arena: 'court', ambient: 'leaf' });
   m.fill(14, 8, 12, 14, 3).road(19, 22, 19, 29, 2).road(5, 15, 14, 15, 2).road(26, 15, 34, 15, 2);

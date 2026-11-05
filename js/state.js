@@ -95,6 +95,6 @@ function fill(S) { if (!S.rep) S.rep = { jeong: 0, sa: 0, ma: 0 }; if (S.rep.ma 
 export const have = id => (G.S.inv[id] || 0);
 export function give(id, n = 1) { G.S.inv[id] = have(id) + n; }
 export function take(id, n = 1) { G.S.inv[id] = have(id) - n; if (G.S.inv[id] <= 0) delete G.S.inv[id]; }
-export function nextDay() { const S = G.S; S.day++; S.daily = {}; S.potion = Math.max(S.potion, S.potionMax); }
+export function nextDay() { const S = G.S; S.day++; S.daily = {}; S.potion = Math.max(S.potion, S.potionMax); if (S.mode === 'free' && G.free) G.free.daily(); }
 export function hasSave() { return !!load(); }
 export { rankOf };

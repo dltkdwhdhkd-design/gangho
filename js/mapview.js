@@ -113,6 +113,7 @@ export function openMap() {
     $$('[data-v]', M).forEach(b => b.onclick = () => { view = b.dataset.v; Sound.sfx('tick'); draw(); });
     $('.x', M).onclick = close;
     const cv = $('#mapc', M); if (view === 'area') drawArea(cv, r, f); else drawWorld(cv, r ? r.m.id : null);
+    if (G.S.mode === 'free' && view === 'world' && !f.busy) G.free.travelBar(M, close);
   };
   const k = e => {
     if (e.repeat) return;

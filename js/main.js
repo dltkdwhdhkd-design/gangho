@@ -27,7 +27,7 @@ function tick(dt) {
   if (G.menuOpen) { Input.tick(dt); return; }
   if (talking()) { tickDialog(dt); return; }
   if (G.scene === 'battle' && G.battle) G.battle.update(dt);
-  else if (G.scene === 'field' && G.field) { G.S.time += dt; G.field.update(dt); }
+  else if (G.scene === 'field' && G.field) { G.S.time += dt; G.field.update(dt); if (G.S.mode === 'free' && G.free) G.free.tick(dt); }
   else Input.tick(dt);
 }
 function render() {

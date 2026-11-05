@@ -16,6 +16,7 @@ export class Field {
   constructor() { this.p = { x: 0, y: 0, dir: 0, walk: 0 }; this.npcs = []; this.spots = []; this.trigs = []; this.roam = []; this.cam = { x: 0, y: 0 }; this.busy = false; this.parts = []; this.t = 0; }
   load(id, tx, ty, dir = 0) {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
+    if (id === 'mysect') G.sect.build();
     const m = MAPS[id]; this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);

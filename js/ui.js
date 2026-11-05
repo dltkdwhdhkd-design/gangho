@@ -24,15 +24,18 @@ export function showTitle() {
   const l = $('#bLoad'); if (!hasSave()) l.disabled = true; else l.classList.add('pri'); (hasSave() ? l : $('#bNew')).focus(); l.onclick = () => { Sound.init(); G.S = load(); s.innerHTML = ''; Story.resume(); };
 }
 function showCreate() {
-  const s = $('#screen'); let diff = 'normal';
+  const s = $('#screen'); let diff = 'normal', mode = 'story';
   s.innerHTML = `<div class="sheet"><div class="card"><h2>어떤 낭인입니까?</h2><div class="hint">군막에서는 번호로 불렸습니다. 이름 하나만은 잊지 않았습니다.</div>
   <div class="field"><span>이름</span><input id="nm" maxlength="6" placeholder="이름을 입력하세요" autocomplete="off"></div>
+  <div class="field"><span>방식</span><div class="seg" id="md"></div></div>
+  <div class="hint" id="mdh">아홉 부로 이어지는 이야기를 따라갑니다.</div>
   <div class="field"><span>난이도</span><div class="seg" id="df"></div></div>
   <div class="hint">쉬움은 적이 약하고, 어려움은 적의 공격이 세고 체력도 많습니다. 나중에 바꿀 수 없습니다.</div>
   <div class="row"><button class="btn" id="back">돌아가기</button><button class="btn pri" id="go">시작</button></div></div></div>`;
   for (const k of ['easy', 'normal', 'hard']) { const b = el('button', 'btn' + (k === diff ? ' on' : ''), DIFF[k].name); b.onclick = () => { diff = k; $$('#df .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); }; $('#df').appendChild(b); }
+  for (const [k, n, h] of [['story', '이야기', '아홉 부로 이어지는 이야기를 따라갑니다.'], ['free', '자유', '이야기 없이 강호를 삽니다. 문파에 들어가도, 낭인으로 살아도, 내 문파를 세워도, 악인이 되어도 됩니다.']]) { const b = el('button', 'btn' + (k === mode ? ' on' : ''), n); b.onclick = () => { mode = k; $$('#md .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); $('#mdh').textContent = h; }; $('#md').appendChild(b); }
   $('#back').onclick = showTitle;
-  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LOOK, 'm', diff); s.innerHTML = ''; G.bgDraw = null; Story.begin(); };
+  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LOOK, 'm', diff); s.innerHTML = ''; G.bgDraw = null; if (mode === 'free') G.free.start(); else Story.begin(); };
   setTimeout(() => $('#nm').focus(), 50);
 }
 // ── 메뉴 ──
@@ -51,7 +54,7 @@ function drawMenu() {
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (O)</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: tabClan, note: tabNote, love: tabLove, set: tabSet, title: tabTitle })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, set: tabSet, title: tabTitle })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
