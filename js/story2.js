@@ -4,12 +4,19 @@ import { Story, ctx, say, narr, choice } from './ctx.js';
 import { step, set, at, after } from './story1.js';
 import { learn } from './state.js';
 import { clansWon } from './clandata.js';
+import { after2 } from './part2.js';
 
 const S = () => G.S, F = () => G.S.flags;
 // ── 2장 ──
 async function arrive() {
   await ctx.part(2, '구름 위의 칼', '제1장 입문');
   await narr('창운산에는 창운문이 있다. 구파일방 바로 아래 자리를 넘본다는 신흥 명문이다.');
+  await narr('산문까지 돌계단이 구백 칸이라고 했다. 세다가 육백 칸쯤에서 잊어버렸다. 계단 끝에 사람들이 줄을 서 있었다. 보따리를 멘 사람, 아버지 손에 끌려온 사람, 칼 대신 낫을 찬 사람도 있었다.');
+  await say('jangpal', '형씨도 시험 보러 왔어유? 나는 이번이 세 번째유.');
+  await say('me', '세 번이나요?');
+  await say('jangpal', '첫해는 목검을 놓쳤고 작년엔 배가 아파서 나갔어유. 올해도 떨어지면 집에 가서 소나 몰아야 되는디, 우리 집에 소가 없어유.');
+  await say('me', '그럼 뭘 몰아요?');
+  await say('jangpal', '그러니께 꼭 붙어야지유.');
   await say('yun', '저는 문주님 진맥하러 왔다고 하면 되는데, {나} 씨는 어쩌려고요?');
   await say('me', '입문 시험을 볼 거예요. 외문 제자로 들어가서 서찰에 인장 찍은 놈을 찾아야죠.');
   await say('yun', '점소이가 시험을 본다고요?');
@@ -25,6 +32,10 @@ async function exam() {
   await say('go', '제법 움직이는군. 그 걸음은 어디서 배웠느냐?');
   await ctx.duel({ foes: ['senior_go'], arena: 'court', bgm: 'boss', title: '사형 고진', yieldAt: .25 });
   await say('go', '인정하겠다. 외문 제자로 받아 주지. 앞으로 나를 사형이라고 불러라.');
+  await narr('장팔도 붙었다. 목검을 또 놓쳤는데 상대가 그걸 밟고 미끄러졌다고 했다.');
+  await say('go', '외문 제자는 묘시에 일어난다. 물 긷고 마당 쓸고 밥 짓고, 그러고 남는 시간에 칼을 잡는다. 불만 있으면 지금 내려가라.');
+  await say('me', '마당은 잘 씁니다.');
+  await say('go', '그건 두고 보자.');
   await ctx.chap(2, '구름 위의 칼', '제2장 연무장의 나날');
   ctx.cg('go_yard');
   await say('so', '야, 너 걸음이 재밌다. 어디서 배웠어?');
@@ -37,7 +48,7 @@ async function exam() {
   await say('me', '배운 적은 없어요. 안 그러면 죽는 데 있었거든요.');
   await say('so', '뭐야, 너 좀 무섭다. 마음에 들어.');
   F().met_so = true;
-  set('c2c'); ctx.goal('본전에서 윤설과 함께 문주를 뵙기');
+  set('c2b2'); ctx.goal('외문 일과: 우물가 물 긷기, 연무장 목인 치기, 식당 밥 당번');
 }
 async function lordSick() {
   await ctx.chap(2, '구름 위의 칼', '제3장 문주의 병');
@@ -46,6 +57,7 @@ async function lordSick() {
   await say('yun', '칠일소혼산이라는 독이에요. 이레에 한 번씩 조금씩 먹이는 건데, 곁에 있는 사람 아니면 먹일 수가 없어요.');
   await say('wi', '검각주 위문상이오. 의원 낭자, 문주께서는 오래된 지병이시오. 함부로 입을 놀리지 마시오.');
   await say('yun', '네, 죄송합니다.');
+  if (F().wi_tea) { await say('yun', '(작은 목소리로) 혹시 검각에서 주는 거 뭐 마셨어요? 손 줘 봐요.'); await narr('윤설이 내 손목을 짚고 한참 있다가 놓았다.'); await say('yun', '괜찮아요. 한 번으로는 티도 안 나요. 앞으로 여기서 주는 건 아무것도 먹지 마요.'); }
   await say('yun', '(작은 목소리로) 달빛이끼만 있으면 해독할 수 있어요. 산 북동쪽 바위틈에 난대요. 저 사람 눈에 띄지 않게 가요.');
   set('c2d'); ctx.goal('창운산 북동쪽 끝 매화나무 아래에서 달빛이끼 캐기');
 }
@@ -99,7 +111,8 @@ async function wiBoss() {
   await say('wi', '점소이 따위가 십칠 년 공들인 일을 망치는구나.');
   await say('me', '곽 아주머니 어디 있어.');
   await say('wi', '그보다 네 사문의 초식이 궁금하지 않으냐. 내 품에 두 장이 있다. 가져갈 수 있으면 가져가 보아라.');
-  await ctx.duel({ foes: ['elder_wi'], arena: 'room', bgm: 'boss', title: '검각주 위문상' });
+  const allies = []; await after2.wiArrive(allies);
+  await ctx.duel({ foes: ['elder_wi'], allies, arena: 'room', bgm: 'boss', title: '검각주 위문상' });
   await say('wi', '맹주께서… 구화성에서 너를 기다리실 것이다…');
   await narr('위문상의 품에서 찢어진 종이 두 장이 나왔다.');
   ctx.page('moon3'); ctx.page('moon4');
@@ -110,6 +123,7 @@ async function wiBoss() {
   await say('so', '너 오라고 미끼 던진 거네. 그래도 갈 거지? 나도 갈 거야. 비무대에서 만나면 안 봐준다.');
   await say('lord', '대회까지 석 달 남았소. 지금 그대 무공으로는 예선도 어렵소. 강호를 좀 보고 오시오. 소림에 서찰을 써 주겠소.');
   await say('lord', '그대 걸음을 알아볼 사람이 거기 있을지도 모르오.');
+  await after2.wiAfter();
   ctx.silver(300);
   set('t1'); ctx.goal('산문 앞 뱃길 안내에서 소림으로 떠나기');
 }
@@ -336,7 +350,7 @@ Story.providers.push(function content2(id) {
   if (id === 'pass' && at('c2a')) { /* 창운산 가는 길 */ }
   if (id === 'cloudmt') {
     if (at('c2a')) tr.push({ x: 18, y: 28, w: 10, h: 6, when: () => at('c2a'), run: arrive });
-    n.push({ id: 'go', spr: 'Inspector', x: 22.5, y: 19, dir: 0, mark: () => at('c2b'), when: () => !after('c3a'), talk: async () => { if (at('c2b')) await exam(); else await say('go', '수련을 게을리하지 마라, 사제.'); } });
+    n.push({ id: 'go', spr: 'Inspector', x: 22.5, y: 19, dir: 0, mark: () => at('c2b') || (at('c2f') && !!F().jang_clue && !F().go_told), when: () => !after('c3a'), talk: async () => { if (at('c2b')) await exam(); else if (at('c2f') && F().jang_clue && !F().go_told) await after2.told(); else await say('go', '수련을 게을리하지 마라, 사제.'); } });
     n.push({ id: 'disc', spr: 'GreenNinja', x: 15, y: 19, dir: 3, talk: async () => { const c = await choice('연무장에서 대련할까?', ['대련한다', '그만둔다'], 'disc'); if (c === 0) await ctx.duel({ foes: ['disciple', 'disciple'], arena: 'court', title: '대련', optional: true, bgm: 'fight' }); } });
     n.push({ id: 'smith2', spr: 'Caveman2', x: 32, y: 23, dir: 2, talk: async () => { await say('smith', '창운문 병기창이오. 값은 치르시오.'); await ctx.shop('창운문 병기창', [ctx.item.weapon('blue_sword'), ctx.item.weapon('ghost_blade'), ctx.item.weapon('dragon_spear'), ctx.item.weapon('iron_gauntlet'), ctx.item.potion()]); } });
     sp.push({ x: 39, y: 7, w: 3, h: 3, hint: '살펴보기', act: moss });
