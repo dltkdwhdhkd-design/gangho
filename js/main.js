@@ -27,7 +27,7 @@ function tick(dt) {
   if (G.menuOpen) { Input.tick(dt); return; }
   if (talking()) { tickDialog(dt); return; }
   if (G.scene === 'battle' && G.battle) G.battle.update(dt);
-  else if (G.scene === 'field' && G.field) { G.S.time += dt; G.field.update(dt); if (G.S.mode === 'free' && G.free) G.free.tick(dt); }
+  else if (G.scene === 'field' && G.field) { G.S.time += dt; G.field.update(dt); if (G.S.mode === 'free' && G.free) G.free.tick(dt); if (G.field.m?.live) G.world.tick(dt); }
   else Input.tick(dt);
 }
 function render() {
@@ -56,7 +56,7 @@ G.fast = (n) => { for (let i = 0; i < n; i++) tick(STEP); render(); };
   loadArtList(); // 일러스트는 뒤에서 받는다. 먼저 뜬 화면을 막지 않는다
   await document.fonts.load('20px Galmuri14', '강호').catch(() => { });
   await document.fonts.load('20px Galmuri11Bold', '강호').catch(() => { });
-  buildMaps();
+  buildMaps(); G.base.init();
   G.field = new Field();
   showTitle();
   requestAnimationFrame(frame);

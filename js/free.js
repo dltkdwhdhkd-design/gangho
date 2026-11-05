@@ -9,9 +9,13 @@ import { CLANS } from './clandata.js';
 import { have, take, learn, nextDay, save } from './state.js';
 import { panel } from './life.js';
 import { EXTRA, RANKS, RANK_MERIT, RANK_LV, TRIALS, JOBS, WAR_JOB, PLACES } from './freedata.js';
+import { LOCS } from './worlddata.js';
 
 const S = () => G.S, Fr = () => G.S.fr, F = () => G.S.flags;
 export const FACS = [...CLANS.map(c => ({ ...c, align: 'jeong', key: 'clan_' + c.id })), ...EXTRA];
+// 자유 모드에서는 대표가 본거지에 있다
+const HOME = { shaolin: ['shaolin', 20, 12.5], hwasan: ['hwasan', 15, 11] };
+FACS.forEach(f => { const l = LOCS.find(q => q.fac === f.id); if (HOME[f.id]) f.at = HOME[f.id]; else if (l && l.map.startsWith('b_')) f.at = [l.map, 20, 11.5]; });
 export const fac = id => FACS.find(f => f.id === id);
 export const rankName = (f, r) => (f.id === 'gaebang' ? RANKS.개방 : RANKS[f.group])[r];
 const T = { 1: [1000, 28, 8, 66, 130, 60, 1.05, 130], 2: [1500, 34, 10, 72, 220, 100, .95, 170], 3: [2200, 40, 12, 76, 340, 160, .85, 220] };
@@ -37,7 +41,7 @@ export function initFree() {
   Object.assign(s.flags, { step: 'end', ended: true, act3: true, burned: true, inn_rebuilt: true, bamboo_open: true, fort_open: true, ma_open: true, pass_open: true, cloud_open: true, bokun_open: true, boat_guhwa: true, title_free: true, cross: true, monk_met: true, met_cheol: true, rod: true, bow: false });
   s.fr = { fac: null, rank: 0, merit: 0, rep: {}, fame: 0, infamy: 0, jobs: [], board: {}, done: 0, sect: null, towns: {}, wars: [], news: [], power: {}, nextId: 1, clock: 0, left: {} };
   FACS.forEach(f => { s.fr.power[f.id] = 40 + f.tier * 20; });
-  for (const k in PLACES) s.seen[k] = 1;
+  s.flags.world_open = true;
   learn('tray');
 }
 async function opening() {
@@ -50,8 +54,8 @@ async function opening() {
   await say('gwak', '못된 짓을 하고 다니면 내 국자가 찾아간다. 알았어?');
   await say('gwak', '이건 석 달 치 품삯이다. 배고프면 와. 밥값은 받는다.');
   await narr('그렇게 나는 강호로 나왔다. 어디로 갈지는 아무도 정해 주지 않았다.');
-  ctx.goal('강호를 둘러보기 (창운문, 구파 회관, 개방 거지)');
-  toast('지도(M)의 강호 전도에서 빠른 이동을 할 수 있습니다', 5);
+  ctx.goal('강호를 둘러보기 (청하진 나루 팻말에서 강호로 나갈 수 있다)');
+  toast('지도(M)로 강호 전도를 봅니다. 가 본 곳은 눌러서 빠르게 갈 수 있습니다', 5);
 }
 export function startFree() { initFree(); G.scene = 'field'; G.field.load('cheongha', 22, 12, 0); $('#fade').style.opacity = 1; G.field.run(async () => { await fadeTo(0); await opening(); }); }
 
@@ -70,16 +74,23 @@ function reachable(id) {
   return m._reach = out;
 }
 const spotIn = id => { const a = reachable(id).filter(([x, y]) => { const p = PLACES[id].at; return Math.hypot(x - p[0], y - p[1]) > 6; }); const b = pick(a.length ? a : reachable(id)); return [b[0] + .5, b[1] + .6]; };
-function placesFor(lv) { const t = lv < 8 ? 1 : lv < 14 ? 2 : lv < 22 ? 3 : lv < 28 ? 4 : lv < 34 ? 5 : 6; return Object.keys(PLACES).filter(k => PLACES[k].t <= t && PLACES[k].t >= Math.max(1, t - 1) && !['ninehall', 'fiveclans'].includes(k)); }
+const tierOf = lv => lv < 8 ? 1 : lv < 14 ? 2 : lv < 22 ? 3 : lv < 28 ? 4 : lv < 34 ? 5 : 6;
+function wildSpot() {
+  G.world.build(); const t = tierOf(S().lv), L = LOCS.filter(l => l.t <= t && l.t >= Math.max(1, t - 1)), l = pick(L.length ? L : LOCS), K = G.world.K, m = MAPS.world;
+  for (let i = 0; i < 40; i++) { const a = rnd(0, 6.28), d = rnd(9, 20), x = Math.round(l.px[0] * K + Math.cos(a) * d), y = Math.round(l.px[1] * K + Math.sin(a) * d); if (!m.blocked((x + .5) * 16, (y + .7) * 16, 14, 10)) return { name: l.name + ' 근처', x: x + .5, y: y + .6 }; }
+  const [x, y] = G.world.entry(l.map); return { name: l.name + ' 근처', x, y };
+}
+function placesFor(lv) { const t = tierOf(lv); return Object.keys(PLACES).filter(k => PLACES[k].t <= t && PLACES[k].t >= Math.max(1, t - 1) && !['ninehall', 'fiveclans'].includes(k)); }
 function makeJob(f, war) {
-  const s = S(), al = f ? f.align : facAlign(), pool = JOBS[al] || JOBS.free, t = war ? WAR_JOB : pick(pool), lv = Math.max(1, s.lv + (rnd(0, 1) < .3 ? 1 : 0)), map = pick(placesFor(s.lv)), r = war ? fac(war) : rivalOf(f), p = PLACES[map].name;
-  const j = { id: Fr().nextId++, fac: f ? f.id : null, type: t[0], title: t[1], desc: t[2].replace(/\{p\}/g, p).replace(/\{r\}/g, r.name), kind: t[3], lv, map, rival: r.id, war: war || null };
+  const s = S(), al = f ? f.align : facAlign(), pool = JOBS[al] || JOBS.free, t = war ? WAR_JOB : pick(pool), lv = Math.max(1, s.lv + (rnd(0, 1) < .3 ? 1 : 0)), wild = rnd(0, 1) < .65 ? wildSpot() : null, map = wild ? 'world' : pick(placesFor(s.lv)), r = war ? fac(war) : rivalOf(f), p = wild ? wild.name : PLACES[map].name;
+  const j = { id: Fr().nextId++, fac: f ? f.id : null, type: t[0], title: t[1], desc: t[2].replace(/\{p\}/g, p).replace(/\{r\}/g, r.name), kind: t[3], lv, map, place: p, rival: r.id, war: war || null };
   if (t[0] === 'gather') { if (!DB[t[3]]) return makeJob(f, war); j.item = t[3]; j.qty = t[4]; j.map = s.map; const h = f ? f.at : null; j.hub = h ? h[0] : 'cheongha'; j.map = j.hub; j.desc += ` (${DB[t[3]].name} ${t[4]}개)`; }
-  [j.x, j.y] = t[0] === 'gather' ? gatherSpot(j.hub) : spotIn(map);
+  if (t[0] === 'gather') j.place = PLACES[j.hub]?.name || fac(f?.id)?.name || '';
+  [j.x, j.y] = t[0] === 'gather' ? gatherSpot(j.hub) : wild ? [wild.x, wild.y] : spotIn(map);
   j.silver = Math.round((30 + lv * 12) * (war ? 1.4 : 1)); j.merit = Math.round((24 + lv * 2.2) * (war ? 1.6 : 1)); j.fame = 2;
   return j;
 }
-const gatherSpot = id => { const p = id === 'cheongha' ? [20, 19] : id === 'cloudmt' ? [26, 20] : id === 'ninehall' ? [20, 13] : id === 'fiveclans' ? [18, 14] : id === 'fort' ? [18, 21] : id === 'shrine' ? [4, 8] : [10, 10]; return p; };
+const gatherSpot = id => { const p = id === 'cheongha' ? [20, 19] : id === 'cloudmt' ? [26, 20] : id === 'ninehall' ? [20, 13] : id === 'fiveclans' ? [18, 14] : id === 'fort' ? [18, 21] : id === 'shrine' ? [4, 8] : id.startsWith('b_') ? [24, 14] : [10, 10]; return p; };
 function boardFor(fid) {
   const b = Fr().board, k = fid || 'free';
   if (!b[k] || b[k].day !== S().day) {
@@ -106,7 +117,7 @@ export async function openBoard(fid, title) {
   });
   G.field.refresh();
 }
-export function syncGoal() { const J = Fr().jobs; if (!J.length) { if (/^임무/.test(S().goal || '')) ctx.goal(''); return; } ctx.goal(`임무: ${J[0].title} (${J[0].type === 'gather' ? '납품' : PLACES[J[0].map]?.name || ''})${J.length > 1 ? ` 외 ${J.length - 1}건` : ''}`); }
+export function syncGoal() { const J = Fr().jobs; if (!J.length) { if (/^임무/.test(S().goal || '')) ctx.goal(''); return; } ctx.goal(`임무: ${J[0].title} (${J[0].type === 'gather' ? '납품' : J[0].place || ''})${J.length > 1 ? ` 외 ${J.length - 1}건` : ''}`); }
 function finish(j, ok = true) {
   const f = Fr(); f.jobs = f.jobs.filter(x => x !== j); syncGoal();
   if (!ok) return;
@@ -214,6 +225,7 @@ export async function facTalk(f) {
     opts.push(['이곳에 대해 묻는다', async () => { await narr(f.desc); }]);
   }
   opts.push(['그만둔다', async () => { }]);
+  if (f.hi && !F()['hi_' + f.id]) { F()['hi_' + f.id] = 1; await say(f.key, f.hi); }
   const lab = mine ? `${f.name} · ${rankName(f, fr.rank)} · 공적 ${fr.merit}${fr.rank < 4 ? `/${RANK_MERIT[fr.rank + 1]} (레벨 ${RANK_LV[fr.rank + 1]})` : ''}` : `${f.name} · 우호 ${repOf(f.id)}`;
   const c = await choice(lab, opts.map(o => o[0])); await opts[c][1]();
 }
@@ -265,23 +277,15 @@ async function gwakTalk() {
   if (c === 2) await say('gwak', Fr().infamy >= 40 ? '네 소문이 여기까지 온다. 내 국자 어디 뒀더라.' : Fr().fac ? '문파 밥은 먹을 만하냐? 살 빠졌다.' : '아직도 떠돌아? 밥은 먹고 다니냐.');
 }
 async function roninBoard() { await openBoard(null, '일거리'); }
-export function travelBar(M, close) {
-  const pane = M.querySelector('.pane'); if (!pane) return;
-  const cv = M.querySelector('#mapc'); if (cv) { cv.style.height = '430px'; cv.style.width = 'auto'; cv.style.margin = '0 auto'; cv.style.display = 'block'; }
-  const box = el('div'); box.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;padding:6px 10px 10px';
-  const go = async (id, x, y) => { close(); const here = G.field.m.id; if (here === id) return; if (S().silver < 10) { toast('은자 10냥이 있어야 한다', 2); return; } S().silver -= 10; G.field.run(() => ctx.warp(id, x, y, 1)); };
-  const list = Object.entries(PLACES).map(([k, p]) => [k, p.name, p.at]); if (Fr().sect) list.unshift(['mysect', Fr().sect.name, [20, 25]]);
-  for (const [k, n, at] of list) { const b = el('button', 'btn sm', esc(n)); b.onclick = () => go(k, at[0], at[1]); box.appendChild(b); }
-  const h = el('div', 'hint', '빠른 이동 (은자 10냥)'); h.style.padding = '6px 10px 0'; pane.appendChild(h); pane.appendChild(box);
-}
 const HIDE = ['bruiser', 'go', 'disc', 'gwak2'];
 const NO_SPOT = ['살펴보기', '우물 뚜껑', '구석방 탁자', '석상', '무너진 부엌', '쓰러진 돌문', '돌계단', '칼자국'];
 function npcsFree(id, L) {
-  let out = L.filter(n => !HIDE.includes(n.id));
+  let out = L.filter(n => !HIDE.includes(n.id) && !FACS.some(f => f.key === n.id && f.at[0] !== id));
   out.forEach(n => { const f = FACS.find(x => x.key === n.id && x.at[0] === id); if (f) { n.talk = () => facTalk(f); n.mark = () => Fr().fac === f.id && canPromote(); } });
   out.forEach(n => { if (n.id === 'beggar') { n.talk = roninBoard; n.mark = null; n.hint = '일거리 묻기'; } });
   if (id === 'inn') out.push({ id: 'gwak', spr: 'OldWoman', x: 4, y: 4.6, dir: 0, hint: '곽 아주머니', talk: gwakTalk });
-  for (const f of EXTRA) if (f.at[0] === id) out.push({ id: f.key, spr: f.spr, x: f.at[1], y: f.at[2], dir: 0, hint: f.name, mark: () => Fr().fac === f.id && canPromote(), talk: () => facTalk(f) });
+  if (id === 'ninehall' || id === 'fiveclans') out.push({ id: 'hall_clerk', spr: 'Villager', x: 22, y: 10.5, dir: 0, hint: '회관지기', talk: async () => { await say(null, '어른들은 다들 본산으로 돌아가셨습니다. 뵙고 싶으면 강호 전도를 보고 찾아가십시오.'); } });
+  for (const f of FACS) if (f.at[0] === id && !out.some(n => n.id === f.key)) out.push({ id: f.key, spr: f.spr, x: f.at[1], y: f.at[2], dir: 0, hint: f.name, mark: () => Fr().fac === f.id && canPromote(), talk: () => facTalk(f) });
   for (const j of Fr().jobs) if (j.map === id) out.push({ id: 'q' + j.id, spr: SPR[j.type] || 'Villager', x: j.x, y: j.y, dir: 0, mark: () => true, hint: HINT[j.type] || j.title, talk: () => runJob(j) });
   if (G.sect) out = G.sect.npcs(id, out);
   if (G.evil) out = G.evil.npcs(id, out);
@@ -295,7 +299,7 @@ export function tabFree(B) {
   const fr = Fr(), f = curFac(), s = fr.sect;
   const me = fr.fac === 'my' ? `${esc(s.name)} 장문인` : f ? `${f.name} ${rankName(f, fr.rank)} · 공적 ${fr.merit}` : '무소속 낭인';
   const row = (t, v) => `<div class="stat"><b>${t}</b><span>${v}</span></div>`;
-  const jobs = fr.jobs.map((j, i) => `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400">${esc(j.title)}</b> <small class="hint">${j.type === 'gather' ? `${DB[j.item].name} ${j.qty}개 납품` : PLACES[j.map]?.name || ''}</small><button class="btn sm" data-drop="${i}" style="float:right">포기</button><div class="hint">${esc(j.desc)}</div></div>`).join('') || '<p class="hint">받은 임무가 없다.</p>';
+  const jobs = fr.jobs.map((j, i) => `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400">${esc(j.title)}</b> <small class="hint">${j.type === 'gather' ? `${DB[j.item].name} ${j.qty}개 납품` : j.place || ''}</small><button class="btn sm" data-drop="${i}" style="float:right">포기</button><div class="hint">${esc(j.desc)}</div></div>`).join('') || '<p class="hint">받은 임무가 없다.</p>';
   const facs = [...FACS].sort((a, b) => (fr.power[b.id] || 0) - (fr.power[a.id] || 0)).map(x => `<tr><td>${x.name}</td><td>${{ jeong: '정', sa: '사', ma: '마' }[x.align]}</td><td>${Math.round(fr.power[x.id] || 0)}</td><td>${repOf(x.id)}</td></tr>`).join('');
   const wars = fr.wars.map(w => `<div class="hint">${fac(w.a)?.name || myName()} ↔ ${fac(w.b)?.name || myName()} (${w.days}일째 남음)</div>`).join('') || '<div class="hint">지금은 큰 싸움이 없다.</div>';
   B.innerHTML = `<div class="two"><div><h2>내 처지</h2>${row('소속', me)}${row('명성', fr.fame)}${row('악명', fr.infamy)}${row('현상금', `은자 ${fr.infamy * 12}냥`)}${row('끝낸 임무', fr.done)}<h2 style="margin-top:12px">받은 임무</h2>${jobs}<h2 style="margin-top:12px">전쟁</h2>${wars}</div><div><h2>세력</h2><table class="hint" style="width:100%;border-collapse:collapse"><tr><td>이름</td><td>길</td><td>세력</td><td>우호</td></tr>${facs}</table><h2 style="margin-top:12px">강호 소식</h2>${fr.news.slice(0, 10).map(n => `<div class="hint">${esc(n)}</div>`).join('') || '<div class="hint">아직 들려오는 소식이 없다.</div>'}</div></div>`;
@@ -304,4 +308,5 @@ export function tabFree(B) {
 const duel0 = ctx.duel;
 ctx.duel = cfg => duel0(S()?.mode === 'free' && G.sect ? G.sect.withFollow(cfg) : cfg);
 G.freeBoard = () => openBoard('my', '일거리');
-G.free = { fac, start: startFree, npcs: npcsFree, spots: spotsFree, trigs: trigsFree, daily, tick, tab: tabFree, travelBar, order, addRep, addNews, myName, foeFor, group, repOf, startWar, warOf, runJob, makeJob, boardFor, promote, join, facTalk, rankOf: () => Fr().rank };
+G.freeBoard0 = roninBoard;
+G.free = { fac, start: startFree, npcs: npcsFree, spots: spotsFree, trigs: trigsFree, daily, tick, tab: tabFree, order, addRep, addNews, myName, foeFor, group, repOf, startWar, warOf, runJob, makeJob, boardFor, promote, join, facTalk, foes: FOES, rankOf: () => Fr().rank };

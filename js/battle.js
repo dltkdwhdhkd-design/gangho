@@ -498,8 +498,8 @@ export class Battle {
     const s = a.scale || 1;
     if (a.def_ && a.def_.stamp) { if (!white) { const q = STAMPS[a.def_.stamp]; drawStamp(c, a.def_.stamp, snap(x - q[3] / 2), snap(y - q[4] + 2)); } return; }
     if (a.big) {
-      const b = a.big, im = white || IMG[b.img]; if (!im) return; const fr = Math.floor(this.t * 7) % b.frames;
-      c.drawImage(im, fr * b.w, 0, b.w, b.h, snap(x - b.w / 2), snap(y - b.h + 6), b.w, b.h); return;
+      const b = a.big, im = white || IMG[b.img]; if (!im) return; const fr = Math.floor(this.t * 7) % b.frames, k = im.hd || 1;
+      c.drawImage(im, fr * b.w * k, 0, b.w * k, b.h * k, snap(x - b.w / 2), snap(y - b.h + 6), b.w, b.h); return;
     }
     const im = white || IMG[a.spr]; if (!im) return;
     let row = 0;
@@ -509,29 +509,29 @@ export class Battle {
     else if (a.dead) row = 0;
     else if (a.st === 'guard') row = 6;
     else if (a.st === 'move') row = Math.floor(a.walk) % 4;
-    row = Math.min(row, Math.floor(im.height / 16) - 1);
+    const f = 16 * (im.hd || 1); row = Math.min(row, Math.floor(im.height / f) - 1);
     const w = 16 * s;
-    c.drawImage(im, face * 16, row * 16, 16, 16, snap(x - w / 2), snap(y - 15 * s), w, w);
+    c.drawImage(im, face * f, row * f, f, f, snap(x - w / 2), snap(y - 15 * s), w, w);
   }
   drawWeapon(c, a) {
     const im = IMG['wpn/' + a.wpn]; if (!im) return;
     const sw = a.swing, u = sw.t / sw.dur, base = Math.atan2(a.ay, a.ax), an = base + lerp(sw.from, sw.to, u) + Math.PI / 2;
     c.save(); c.translate(a.x + a.ax * 3, a.y - 7 + a.ay * 3); c.rotate(an);
     const push = sw.thrust ? Math.sin(u * Math.PI) * 8 : 2;
-    c.drawImage(im, -im.width / 2, -im.height - push, im.width, im.height); c.restore();
+    const iw = im.width / (im.hd || 1), ih = im.height / (im.hd || 1); c.drawImage(im, -iw / 2, -ih - push, iw, ih); c.restore();
   }
   drawProj(c, p) {
     c.save(); c.translate(p.x, p.y);
     if (p.img === 'tray') { c.rotate(p.age * 18); c.fillStyle = '#7a4a22'; c.beginPath(); c.ellipse(0, 0, 6, 3.4, 0, 0, 7); c.fill(); c.fillStyle = '#b57a3e'; c.beginPath(); c.ellipse(0, 0, 4.4, 2.2, 0, 0, 7); c.fill(); }
     else if (p.img === 'plum') { c.rotate(p.age * 9); c.fillStyle = '#ffb7c8'; for (let i = 0; i < 5; i++) { const q = i * 1.2566; c.beginPath(); c.arc(Math.cos(q) * 2.4, Math.sin(q) * 2.4, 1.8, 0, 7); c.fill(); } c.fillStyle = '#ffe36a'; c.fillRect(-1, -1, 2, 2); }
     else if (p.img === 'crescent') { c.rotate(p.an); c.strokeStyle = '#eaf2ff'; c.lineWidth = 3; c.beginPath(); c.arc(-6, 0, 12, -1.1, 1.1); c.stroke(); c.strokeStyle = 'rgba(150,190,255,.6)'; c.lineWidth = 5; c.beginPath(); c.arc(-9, 0, 12, -1, 1); c.stroke(); }
-    else { const d = PJ[p.img] || [16, 16, 1], im = IMG['fx/' + p.img], fr = Math.floor(p.age * 12) % d[2]; c.rotate(p.an); if (im) c.drawImage(im, fr * d[0], 0, d[0], d[1], -d[0] / 2, -d[1] / 2, d[0], d[1]); }
+    else { const d = PJ[p.img] || [16, 16, 1], im = IMG['fx/' + p.img], fr = Math.floor(p.age * 12) % d[2], k = im?.hd || 1; c.rotate(p.an); if (im) c.drawImage(im, fr * d[0] * k, 0, d[0] * k, d[1] * k, -d[0] / 2, -d[1] / 2, d[0], d[1]); }
     c.restore();
   }
   drawFx(c, f) {
     const im = IMG['fx/' + f.n]; if (!im) return; const fr = Math.min(f.frames - 1, Math.floor(f.t / f.dur * f.frames));
     c.save(); c.translate(f.x, f.y); if (f.rot) c.rotate(f.rot); if (f.flip) c.scale(1, -1); c.scale(f.s, f.s);
-    c.drawImage(im, fr * f.fw, 0, f.fw, f.fh, -f.fw / 2, -f.fh / 2, f.fw, f.fh); c.restore();
+    const k = im.hd || 1; c.drawImage(im, fr * f.fw * k, 0, f.fw * k, f.fh * k, -f.fw / 2, -f.fh / 2, f.fw, f.fh); c.restore();
   }
   // 싸우는 도중 메뉴에서 초식이나 무기를 바꾼 경우
   refreshGear() {

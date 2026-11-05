@@ -17,7 +17,8 @@ export class Field {
   load(id, tx, ty, dir = 0) {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
     if (id === 'mysect') G.sect.build();
-    const m = MAPS[id]; this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
+    G.world.ensure(id);
+    const m = MAPS[id]; this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];
@@ -70,7 +71,7 @@ export class Field {
     // 포탈
     for (const q of m.portals) {
       if (p.x > q.x && p.x < q.x + q.w && p.y > q.y && p.y < q.y + q.h) {
-        if (q.when && !S.flags[q.when]) { if (q.lock && !this._locked) { this._locked = true; const msg = q.lock; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(msg); this._locked = false; }); } return; }
+        if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) { if (q.lock && !this._locked) { this._locked = true; const msg = q.lock; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(msg); this._locked = false; }); } return; }
         if (q.door && Input.dir().y > 0 && q.dir !== 0 && false) continue;
         this.run(async () => { Sound.sfx('select', .6); await this.warp(q.to, q.tx, q.ty, q.dir); });
         return;
@@ -146,9 +147,9 @@ export class Field {
     c.setTransform(SCALE, 0, 0, SCALE, 0, 0); c.imageSmoothingEnabled = false;
     c.fillStyle = '#000'; c.fillRect(0, 0, VW, VH);
     const ox = -snap(cam.x), oy = -snap(cam.y); c.translate(ox, oy);
-    c.drawImage(m.canvas, 0, 0);
+    if (m.live) G.world.ground(c, cam); else c.drawImage(m.canvas, 0, 0);
     const list = [];
-    for (const s of m.objs) if (s.x < cam.x + VW + 8 && s.x > cam.x - 120 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
+    for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x > cam.x - 120 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
     for (const n of this.npcs) list.push({ y: n.y, n });
     for (const r of this.roam) if (!r.gone) list.push({ y: r.y, n: r, mon: true });
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });

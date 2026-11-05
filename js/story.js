@@ -17,5 +17,7 @@ import './part8.js';
 import './part9.js';
 import './side.js';
 import './free.js';
+import './world.js';
+import './base.js';
 import './sect.js';
 import './evil.js';

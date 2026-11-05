@@ -20,7 +20,7 @@ export const STAMPS = {
   f_bed: [E, 160, 0, 16, 32, 1, 8, 14, 22], f_stool: [E, 17, 19, 14, 13, 1, 6, 12, 7], f_lamp: [E, 176, 0, 16, 16, 4, 8, 8, 7], f_scroll: [E, 16, 80, 16, 32, 1, 18, 14, 13], f_chair: [E, 64, 60, 32, 20, 2, 6, 28, 13], f_stove: [E, 192, 0, 16, 16, 1, 5, 14, 10], f_bench: [E, 80, 16, 16, 16, 1, 5, 14, 10], f_dummy: [H, 241, 229, 14, 25, 2, 15, 10, 9], f_bonsai: [E, 0, 120, 16, 24, 2, 14, 12, 8], rack2: [E, 224, 41, 32, 21, 1, 8, 30, 12],
   stool: [E, 17, 19, 14, 13, 1, 6, 12, 7], box: [E, 32, 16, 16, 16, 1, 6, 14, 9], chest: [E, 48, 16, 16, 16, 1, 6, 14, 9], bed: [E, 176, 39, 48, 22, 2, 2, 44, 18], counter: [E, 32, 160, 48, 16, 0, 2, 48, 13], plant: [E, 0, 120, 16, 24, 2, 14, 12, 8], teapot: [E, 1, 160, 15, 15, 1, 6, 13, 8], rack: [E, 224, 41, 32, 21, 1, 8, 30, 12], lantern: [E, 96, 72, 16, 32, 4, 24, 8, 7], tablet: [E, 66, 32, 12, 15, 1, 8, 10, 6], tablet2: [E, 83, 32, 9, 16, 0, 8, 9, 7], scrollcase: [E, 17, 84, 14, 27, 1, 14, 12, 12],
 };
-export function drawStamp(ctx, name, x, y) { const s = STAMPS[name]; if (!s) return; const im = IMG['tiles/' + s[0]]; if (im) ctx.drawImage(im, s[1], s[2], s[3], s[4], x, y, s[3], s[4]); }
+export function drawStamp(ctx, name, x, y) { const s = STAMPS[name]; if (!s) return; const hd = IMG['stamp/' + name]; if (hd) { ctx.drawImage(hd, x, y, s[3], s[4]); return; } const im = IMG['tiles/' + s[0]]; if (im) ctx.drawImage(im, s[1], s[2], s[3], s[4], x, y, s[3], s[4]); }
 
 export const BIOME = {
   grass: { sheet: 'Floor', fill: [0, 12], block: [0, 7], det: [[1, 12], [2, 12], [3, 12], [4, 12], [2, 11], [3, 11]] },
@@ -31,7 +31,7 @@ export const BIOME = {
   dusk: { sheet: 'Floor', fill: [11, 19], block: [11, 14], det: [[12, 19], [13, 19], [14, 19], [15, 19]] },
 };
 // 십자 이웃만 보고 고르는 간단한 자동 타일: 위1 오른2 아래4 왼8
-const AUTO = { 0: [3, 3], 1: [3, 2], 4: [3, 0], 5: [3, 1], 2: [0, 3], 8: [2, 3], 10: [1, 3], 6: [0, 0], 12: [2, 0], 3: [0, 2], 9: [2, 2], 7: [0, 1], 13: [2, 1], 14: [1, 0], 11: [1, 2], 15: [1, 1] };
+export const AUTO = { 0: [3, 3], 1: [3, 2], 4: [3, 0], 5: [3, 1], 2: [0, 3], 8: [2, 3], 10: [1, 3], 6: [0, 0], 12: [2, 0], 3: [0, 2], 9: [2, 2], 7: [0, 1], 13: [2, 1], 14: [1, 0], 11: [1, 2], 15: [1, 1] };
 export function paintGround(c, g, biome, opt = {}) {
   // g[y][x]: 0 바닥, 1 길, 2 물, 3 깔린 돌바닥
   const b = BIOME[biome], fl = IMG['tiles/' + b.sheet], wa = IMG['tiles/Water'], w = g[0].length, h = g.length;

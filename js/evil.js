@@ -12,6 +12,7 @@ export const TOWNS = {
   cheongha: { name: '청하진', size: 3, rooms: ['inn', 'smith', 'clinic', 'shop', 'bokun'], plaza: [18, 20] },
   guhwa: { name: '구화성', size: 5, rooms: ['inn2', 'shop2', 'hall2'], plaza: [24, 24] },
   oasis: { name: '사주성', size: 4, rooms: [], plaza: [22, 18] },
+  c_yeongyeong: { name: '연경', size: 6, rooms: [], plaza: [20, 16] }, c_nakyang: { name: '낙양', size: 5, rooms: [], plaza: [20, 16] }, c_changan: { name: '장안', size: 5, rooms: [], plaza: [20, 16] }, c_seongdo: { name: '성도', size: 5, rooms: [], plaza: [20, 16] }, c_guangzhou: { name: '광주', size: 5, rooms: [], plaza: [20, 16] }, c_suzhou: { name: '소주', size: 6, rooms: [], plaza: [20, 16] },
 };
 const townOf = id => Object.keys(TOWNS).find(k => k === id || TOWNS[k].rooms.includes(id));
 const st = k => (Fr().towns[k] = Fr().towns[k] || {});

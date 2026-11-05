@@ -22,8 +22,8 @@ export const G = { S: null, scene: null, speedup: 1, paused: false, ctx: null, d
 export const IMG = {};
 const IMAGES = {
   tiles: ['Floor', 'Nature', 'House', 'Element', 'Water', 'Relief', 'FloorDetail', 'Interior', 'InteriorFloor', 'WallSimple', 'InteriorElements'],
-  chars: ['_Shadow', 'Hyeok', 'Samaung', 'BlueNinja', 'BlueSamurai', 'Boy', 'Cavegirl', 'Cavegirl2', 'Caveman', 'Caveman2', 'Child', 'DarkNinja', 'EggBoy', 'EggGirl', 'GoldKnight', 'GrayNinja', 'GreenNinja', 'Greenman', 'Inspector', 'Knight', 'Lion', 'MaskFrog', 'MaskedNinja', 'Master', 'Monk', 'Monk2', 'Noble', 'OldMan', 'OldMan2', 'OldMan3', 'OldWoman', 'Princess', 'RedNinja', 'RedNinja2', 'RedSamurai', 'Samurai', 'Skeleton', 'Villager', 'Villager2', 'Villager3', 'Villager4', 'Woman', 'Eskimo', 'Greenman', 'Namgung', 'Moyong', 'Jegal', 'Dang', 'Paeng', 'Hwasan', 'Gaebang', 'Sodi'],
-  faces: ['Hyeok', 'Samaung', 'BlueNinja', 'BlueSamurai', 'Boy', 'Cavegirl', 'Cavegirl2', 'Caveman', 'Caveman2', 'Child', 'DarkNinja', 'EggBoy', 'EggGirl', 'GoldKnight', 'GrayNinja', 'GreenNinja', 'Inspector', 'Knight', 'Lion', 'MaskFrog', 'MaskedNinja', 'Master', 'Monk', 'Monk2', 'Noble', 'OldMan', 'OldMan2', 'OldMan3', 'OldWoman', 'Princess', 'RedNinja', 'RedNinja2', 'RedSamurai', 'Samurai', 'Skeleton', 'Villager', 'Villager2', 'Villager3', 'Villager4', 'Woman', 'GiantRacoon', 'DemonCyclop', 'GiantSpirit', 'Eskimo', 'Greenman', 'Namgung', 'Moyong', 'Jegal', 'Dang', 'Paeng', 'Hwasan', 'Gaebang', 'Sodi'],
+  chars: ['_Shadow', 'Hyeok', 'Samaung', 'BlueNinja', 'BlueSamurai', 'Boy', 'Cavegirl', 'Cavegirl2', 'EskimoNinja', 'Caveman', 'Caveman2', 'Child', 'DarkNinja', 'EggBoy', 'EggGirl', 'GoldKnight', 'GrayNinja', 'GreenNinja', 'Greenman', 'Inspector', 'Knight', 'Lion', 'MaskFrog', 'MaskedNinja', 'Master', 'Monk', 'Monk2', 'Noble', 'OldMan', 'OldMan2', 'OldMan3', 'OldWoman', 'Princess', 'RedNinja', 'RedNinja2', 'RedSamurai', 'Samurai', 'Skeleton', 'Villager', 'Villager2', 'Villager3', 'Villager4', 'Woman', 'Eskimo', 'Greenman', 'Namgung', 'Moyong', 'Jegal', 'Dang', 'Paeng', 'Hwasan', 'Gaebang', 'Sodi'],
+  faces: ['Hyeok', 'Samaung', 'BlueNinja', 'BlueSamurai', 'Boy', 'Cavegirl', 'Cavegirl2', 'EskimoNinja', 'Caveman', 'Caveman2', 'Child', 'DarkNinja', 'EggBoy', 'EggGirl', 'GoldKnight', 'GrayNinja', 'GreenNinja', 'Inspector', 'Knight', 'Lion', 'MaskFrog', 'MaskedNinja', 'Master', 'Monk', 'Monk2', 'Noble', 'OldMan', 'OldMan2', 'OldMan3', 'OldWoman', 'Princess', 'RedNinja', 'RedNinja2', 'RedSamurai', 'Samurai', 'Skeleton', 'Villager', 'Villager2', 'Villager3', 'Villager4', 'Woman', 'GiantRacoon', 'DemonCyclop', 'GiantSpirit', 'Eskimo', 'Greenman', 'Namgung', 'Moyong', 'Jegal', 'Dang', 'Paeng', 'Hwasan', 'Gaebang', 'Sodi'],
   mon: ['Beast', 'Snake', 'Snake2', 'Bamboo', 'Spirit', 'Spirit2', 'Skull', 'Racoon', 'Mole', 'Cyclope', 'Flam', 'Slime', 'Eye', 'Butterfly', 'Owl', 'Lizard'],
   boss: ['GiantRacoonIdle', 'GiantRacoonAttack', 'DemonCyclopIdle', 'DemonCyclopHit', 'GiantSpiritIdle'],
   fx: ['slash', 'curve', 'double', 'double2', 'circle', 'cut', 'claw', 'smoke', 'flam', 'thunder', 'rock', 'spark', 'spirit', 'spiritb', 'aura', 'aurap', 'ring', 'ringw', 'shieldy', 'shieldb', 'p_arrow', 'p_kunai', 'p_shuriken', 'p_energy', 'p_fire', 'p_bigenergy', 'p_ice', 'leafpink', 'leaf', 'snow', 'psprk'],
@@ -33,11 +33,14 @@ const IMAGES = {
 };
 export async function loadAll(onp) {
   const list = [];
-  for (const [d, ns] of Object.entries(IMAGES)) for (const n of ns) list.push([d + '/' + n, `assets/${d}/${n}.png`]);
+  // 다시 그린 도트는 assets/hd에 있다. 있으면 기본 그림 대신 쓴다. 칸 크기가 두 배다
+  let hd = []; try { const r = await fetch('assets/hd/list.json'); if (r.ok) hd = await r.json(); } catch (e) { /* 없으면 기본 그림 */ }
+  for (const [d, ns] of Object.entries(IMAGES)) for (const n of ns) if (!hd.includes(d + '/' + n)) list.push([d + '/' + n, `assets/${d}/${n}.png`]);
+  for (const k of hd) list.push([k, `assets/hd/${k}.webp`, 2]);
   let done = 0;
-  await Promise.all(list.map(([k, url]) => new Promise(res => {
+  await Promise.all(list.map(([k, url, h]) => new Promise(res => {
     const im = new Image();
-    im.onload = () => { IMG[k] = im; onp && onp(++done / list.length); res(); };
+    im.onload = () => { if (h) im.hd = h; IMG[k] = im; onp && onp(++done / list.length); res(); };
     im.onerror = () => { console.warn('그림 없음', url); done++; res(); };
     im.src = url;
   })));
@@ -127,10 +130,10 @@ export const snap = v => Math.round(v * SCALE) / SCALE;
 // 스프라이트 시트: 열은 방향(아래, 위, 왼쪽, 오른쪽), 행은 걷기 네 칸 + 공격 + 점프 + 특수
 export function drawActorSprite(ctx, key, dirCol, row, x, y, opt = {}) {
   const img = IMG[key]; if (!img) return;
-  const r = Math.min(row, Math.floor(img.height / 16) - 1);
+  const f = 16 * (img.hd || 1), r = Math.min(row, Math.floor(img.height / f) - 1);
   ctx.save();
   if (opt.alpha !== undefined) ctx.globalAlpha = opt.alpha;
-  ctx.drawImage(img, dirCol * 16, r * 16, 16, 16, snap(x - 8), snap(y - 15), 16, 16);
+  ctx.drawImage(img, dirCol * f, r * f, f, f, snap(x - 8), snap(y - 15), 16, 16);
   ctx.restore();
 }
 export function drawShadow(ctx, x, y, s = 1) { const im = IMG['chars/_Shadow']; if (im) ctx.drawImage(im, snap(x - 6 * s), snap(y - 3 * s), 12 * s, 7 * s); }

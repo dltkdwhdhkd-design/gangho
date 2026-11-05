@@ -17,6 +17,7 @@ const marks = f => f.npcs.filter(n => n.mark && n.mark());
 const foesOf = f => f.roam.filter(r => !r.gone);
 // 방 안에 있으면 그 방이 속한 바깥 지도와 문 앞 자리를 찾는다
 function region(m, f) {
+  if (m.live) return null;
   let cur = m, pos = { x: f.p.x / TS, y: f.p.y / TS };
   for (let i = 0; i < 4 && cur.room; i++) { const q = cur.portals.find(p => MAPS[p.to]); if (!q) return null; pos = { x: q.tx, y: q.ty }; cur = MAPS[q.to]; }
   return { m: cur, pos };
@@ -28,16 +29,16 @@ let mm = null, base = null, frame = 0;
 export function bindMini(f) {
   mm = $('#mm'); if (!mm) return; const m = f.m;
   if (m.room) { mm.style.display = 'none'; return; }
-  mm.width = m.w * K; mm.height = m.h * K; mm.style.width = m.w * K * 2 + 'px'; mm.style.height = m.h * K * 2 + 'px'; mm.onclick = () => { if (!f.busy) openMap(); };
+  mm.width = m.live ? 240 : m.w * K; mm.height = m.live ? 196 : m.h * K; mm.style.width = (m.live ? 240 : m.w * K * 2) + 'px'; mm.style.height = (m.live ? 196 : m.h * K * 2) + 'px'; mm.onclick = () => { if (!f.busy) openMap(); };
   base = document.createElement('canvas'); base.width = mm.width; base.height = mm.height;
-  const x = base.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(whole(m), 0, 0, mm.width, mm.height); burnedInn(x, m, K / TS);
+  const x = base.getContext('2d'); x.imageSmoothingQuality = 'high'; if (m.live) G.world.china(x, mm.width, mm.height, { mini: true }); else { x.drawImage(whole(m), 0, 0, mm.width, mm.height); burnedInn(x, m, K / TS); }
   frame = 0;
 }
 export function tickMini(f) {
   if (!mm || !mm.isConnected || f.m.room) return;
   const hide = f.busy || !!G.decor; if (mm._hide !== hide) { mm._hide = hide; mm.style.display = hide ? 'none' : 'block'; }
   if (hide || frame++ % 6) return;
-  const x = mm.getContext('2d'), dot = (px, py, s, col) => { const a = Math.round(px / TS * K - s / 2), b = Math.round(py / TS * K - s / 2); x.fillStyle = '#000'; x.fillRect(a - 1, b - 1, s + 2, s + 2); x.fillStyle = col; x.fillRect(a, b, s, s); };
+  const kk = f.m.live ? mm.width / (f.m.w * TS) : K / TS, x = mm.getContext('2d'), dot = (px, py, s, col) => { const a = Math.round(px * kk - s / 2), b = Math.round(py * kk - s / 2); x.fillStyle = '#000'; x.fillRect(a - 1, b - 1, s + 2, s + 2); x.fillStyle = col; x.fillRect(a, b, s, s); };
   x.drawImage(base, 0, 0);
   for (const r of foesOf(f)) dot(r.x, r.y, 2, '#e8503a');
   for (const n of marks(f)) dot(n.x, n.y, 3, '#ffd23c');
@@ -73,33 +74,7 @@ function drawArea(cv, r, f) {
 }
 
 // ── 강호 전도 ──
-const SPOTS = { cheongha: [822, 285], bamboo: [822, 165], valley: [680, 285], shrine: [560, 225], pass: [950, 285], fort: [1064, 195], cloudmt: [1083, 395], guhwa: [822, 445], ninehall: [960, 490], fiveclans: [684, 490], shaolin: [523, 415], hwasan: [390, 320], wolha: [575, 95], silk: [290, 400], oasis: [190, 330], snowpeak: [120, 215], tiangate: [75, 115], blackpalace: [230, 80] };
-const ROADS = [['cheongha', 'bamboo'], ['cheongha', 'valley'], ['valley', 'shrine'], ['cheongha', 'pass'], ['pass', 'fort'], ['pass', 'cloudmt'], ['guhwa', 'ninehall'], ['guhwa', 'fiveclans'], ['shaolin', 'hwasan'], ['cheongha', 'guhwa', 1], ['cloudmt', 'guhwa', 1], ['cloudmt', 'shaolin', 1], ['hwasan', 'guhwa', 1], ['guhwa', 'wolha', 1], ['guhwa', 'silk'], ['silk', 'oasis'], ['oasis', 'snowpeak'], ['snowpeak', 'tiangate'], ['tiangate', 'blackpalace']];
-const SECRET = ['shrine', 'wolha', 'silk', 'oasis', 'snowpeak', 'tiangate', 'blackpalace'];
-function drawWorld(cv, here) {
-  const c = cv.getContext('2d'), W = cv.width, H = cv.height, seen = G.S.seen || {}, known = id => !!seen[id];
-  const near = id => !SECRET.includes(id) && ROADS.some(([a, b]) => (a === id && known(b)) || (b === id && known(a)));
-  const shown = id => known(id) || near(id);
-  c.fillStyle = '#e6d6b2'; c.fillRect(0, 0, W, H); c.strokeStyle = '#a8947a'; c.lineWidth = 6; c.strokeRect(10, 10, W - 20, H - 20);
-  // 장강
-  c.strokeStyle = '#8fb6c4'; c.lineWidth = 16; c.lineCap = 'round'; c.beginPath(); c.moveTo(310, 395); c.bezierCurveTo(520, 330, 600, 395, 822, 350); c.bezierCurveTo(990, 320, 1050, 340, W - 20, 300); c.stroke();
-  // 산
-  c.fillStyle = '#bfa987'; for (const [x, y, s] of [[415, 255, 26], [450, 270, 20], [375, 275, 18], [1050, 150, 24], [1090, 165, 18], [1120, 395, 16], [485, 450, 20], [545, 460, 15], [530, 60, 22], [620, 62, 20], [60, 200, 26], [110, 160, 20], [170, 150, 24]]) { c.beginPath(); c.moveTo(x - s, y + s * .8); c.lineTo(x, y - s * .8); c.lineTo(x + s, y + s * .8); c.closePath(); c.fill(); }
-  // 길과 뱃길
-  c.lineCap = 'butt';
-  for (const [a, b, boat] of ROADS) {
-    if (!shown(a) || !shown(b) || (!known(a) && !known(b))) continue;
-    const p = SPOTS[a], q = SPOTS[b]; c.strokeStyle = boat ? '#4f7f96' : '#7a5a3a'; c.lineWidth = 3; c.setLineDash(boat ? [9, 8] : []); c.beginPath(); c.moveTo(...p); c.lineTo(...q); c.stroke();
-  }
-  c.setLineDash([]);
-  c.textAlign = 'center'; c.font = '18px Galmuri11Bold, Galmuri14, sans-serif';
-  for (const id in SPOTS) {
-    if (!shown(id)) continue; const [x, y] = SPOTS[id], k = known(id), me = id === here;
-    c.fillStyle = '#2a2018'; c.fillRect(x - 9, y - 9, 18, 18); c.fillStyle = me ? '#c43a2c' : k ? '#f4e6c4' : '#9a8a70'; c.fillRect(x - 6, y - 6, 12, 12);
-    const name = k ? MAPS[id].name : '???'; c.lineWidth = 6; c.lineJoin = 'round'; c.strokeStyle = '#e6d6b2'; c.strokeText(name, x, y + 30); c.fillStyle = k ? '#2a2018' : '#8a7a62'; c.fillText(name, x, y + 30);
-    if (me) { c.fillStyle = '#c43a2c'; c.font = '16px Galmuri11Bold, Galmuri14, sans-serif'; c.fillText('지금 여기', x, y - 16); c.font = '18px Galmuri11Bold, Galmuri14, sans-serif'; }
-  }
-}
+function drawWorld(cv, here) { cv.width = 1206; cv.height = 987; cv.style.cssText = 'display:block;width:1206px;height:987px;max-width:none;image-rendering:auto'; G.world.china(cv.getContext('2d'), cv.width, cv.height, { here }); const box = document.createElement('div'); box.style.cssText = 'overflow:auto;height:570px;max-width:100%;margin:0 auto'; cv.parentNode.insertBefore(box, cv); box.appendChild(cv); const [x, y] = G.world.here(); box.scrollLeft = x * 1.5 - box.clientWidth / 2; box.scrollTop = y * 1.5 - box.clientHeight / 2; }
 
 // ── 지도 창 ──
 let view = 'area';
@@ -113,7 +88,7 @@ export function openMap() {
     $$('[data-v]', M).forEach(b => b.onclick = () => { view = b.dataset.v; Sound.sfx('tick'); draw(); });
     $('.x', M).onclick = close;
     const cv = $('#mapc', M); if (view === 'area') drawArea(cv, r, f); else drawWorld(cv, r ? r.m.id : null);
-    if (G.S.mode === 'free' && view === 'world' && !f.busy) G.free.travelBar(M, close);
+    if (view === 'world' && !f.busy) G.world.travelBar(M, close);
   };
   const k = e => {
     if (e.repeat) return;

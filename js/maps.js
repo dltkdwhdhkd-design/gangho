@@ -75,6 +75,7 @@ export function buildHouse(S) {
   m.render(); return MAPS.myhouse = m;
 }
 function M(id, w, h, o) { return MAPS[id] = new MapDef(id, w, h, o); }
+export const makeMap = M;
 
 export function buildMaps() {
   // 청하진: 강변 나루 마을
