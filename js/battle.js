@@ -1,5 +1,6 @@
 // 직접 조작 전투
 import { G, IMG, Input, Sound, $, $$, el, esc, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait } from './core.js';
+import { Keys } from './core.js';
 import { stageClear } from './dialog.js';
 import { SKILLS, BASIC, WEAPONS } from './data.js';
 import { MOVES, FOES } from './foes.js';
@@ -546,10 +547,10 @@ export class Battle {
     h.innerHTML = `<div class="bars"><div class="bname">${esc(S.title)} ${esc(p.name)}</div><div class="bar"><i class="lag" id="hLag"></i><i class="val" id="hVal"></i><b id="hTxt"></b></div><div class="bar mp"><i class="val" id="mVal"></i><b id="mTxt"></b></div></div>`;
     const bosses = this.actors.filter(a => (a.boss || a.elite) && a.team === 1).sort((a, b) => !!b.boss - !!a.boss);
     if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.nameplate || b.name)}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
-    const key = (i) => 'UIOP'[i];
+    const key = (i) => Keys.label('s' + i);
     let sk = '';
     S.slots.forEach((id, i) => { const k = id && SKILLS[id]; sk += `<div class="sk ${k && k.ult ? 'ult' : ''}" id="sk${i}"><span class="ky">${key(i)}</span>${k ? `<span class="mp">${k.mp}</span><span class="nm">${k.name}</span>` : '<span class="nm">-</span>'}<div class="cd"></div><span class="ct"></span></div>`; });
-    sk += `<div class="sk small"><span class="ky">J</span><span class="nm">평타</span></div><div class="sk small" id="skDash"><span class="ky">K</span><span class="nm">경공</span><div class="cd"></div></div><div class="sk small"><span class="ky">L</span><span class="nm">막기</span></div><div class="sk small" id="skPot"><span class="ky">H</span><span class="nm">금창약<br><span id="potN"></span></span></div>`;
+    sk += `<div class="sk small"><span class="ky">${Keys.label('atk')}</span><span class="nm">평타</span></div><div class="sk small" id="skDash"><span class="ky">${Keys.label('dash')}</span><span class="nm">경공</span><div class="cd"></div></div><div class="sk small"><span class="ky">${Keys.label('guard')}</span><span class="nm">막기</span></div><div class="sk small" id="skPot"><span class="ky">${Keys.label('potion')}</span><span class="nm">금창약<br><span id="potN"></span></span></div>`;
     h.insertAdjacentHTML('beforeend', `<div class="skills">${sk}</div>`);
     if (this.introT > 0) { this.vsEl = el('div', 'vs', this.cfg.title || (bosses[0] ? bosses[0].name : '대결')); h.appendChild(this.vsEl); }
     if (G.touchB) { S.slots.forEach((id, i) => { G.touchB[3 + i].textContent = id ? SKILLS[id].name.replace(/^제\d식 /, '').slice(0, 4) : '-'; }); $$('.skills .small').forEach(e => e.style.display = 'none'); $('.skills').style.bottom = '6px'; }

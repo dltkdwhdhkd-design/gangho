@@ -1,6 +1,7 @@
 // 제목 화면, 주인공 만들기, 메뉴, 상점, 결과창
 import { TITLES } from './titles.js';
 import { G, IMG, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS, josa } from './core.js';
+import { Keys, KEY_ACTIONS, KEY_PRESETS } from './core.js';
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
@@ -46,13 +47,13 @@ export function openMenu(t) {
   Sound.sfx('select');
 }
 G.closeMenu = () => closeMenu();
-export function closeMenu() { G.menuOpen = false; $('#modal').classList.remove('on'); $('#modal').innerHTML = ''; Input.clear(); save(); document.removeEventListener('keydown', menuKey); if (G.battle) G.battle.refreshGear(); }
-function menuKey(e) { if (e.repeat || (e.code === 'KeyO' && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || e.code === 'KeyO') { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
+export function closeMenu() { G.keyWait = false; G.menuOpen = false; $('#modal').classList.remove('on'); $('#modal').innerHTML = ''; Input.clear(); save(); document.removeEventListener('keydown', menuKey); if (G.battle) G.battle.refreshGear(); else if (G.field?.m && G.scene === 'field') G.field.showHud(); }
+function menuKey(e) { if (G.keyWait) return; if (e.repeat || (Keys.is('opt', e.code) && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || Keys.is('opt', e.code)) { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
   const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['note', '수첩'], ['set', '설정']];
   const keep = M.querySelector('.body')?.scrollTop || 0;
-  M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (O)</button></div><div class="body"></div></div></div>`;
+  M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (${Keys.label('opt')})</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
   const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab })[tab](B); B.scrollTop = keep;
@@ -80,7 +81,7 @@ function tabTitle(B) {
 let showAll = false;
 function tabSkill(B) {
   const S = G.S; const skl = id => SKILLS[id];
-  let html = `<p class="hint">위의 칸을 고르고 아래에서 초식을 누르세요. U I O P 키가 각 칸을 씁니다. 지금 무기는 <b>${WEAPONS[S.weapon].name}</b> (${WEAPONS[S.weapon].type}) 입니다. 무기가 맞지 않는 초식은 쓸 수 없습니다.</p><div class="slots">`;
+  let html = `<p class="hint">위의 칸을 고르고 아래에서 초식을 누르세요. ${[0, 1, 2, 3].map(i => Keys.label('s' + i)).join(' ')} 키가 각 칸을 씁니다. 지금 무기는 <b>${WEAPONS[S.weapon].name}</b> (${WEAPONS[S.weapon].type}) 입니다. 무기가 맞지 않는 초식은 쓸 수 없습니다.</p><div class="slots">`;
   S.slots.forEach((id, i) => { const k = id && skl(id); html += `<button class="slot ${i === slotSel ? 'on' : ''} ${k ? 'fill' : ''}" data-s="${i}"><b style="font-weight:400">${'UIOP'[i]}</b> ${k ? `${k.name}<small>내력 ${k.mp} · 쿨타임 ${k.cd}초 ${!canEquip(id) ? '· 무기 안 맞음' : ''}</small>` : '<small>비어 있음</small>'}</button>`; });
   html += `</div><div class="list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">`;
   const sorted = [...S.skills].filter(k => showAll || canEquip(k)).sort((a, b) => skl(a).school.localeCompare(skl(b).school));
@@ -152,10 +153,21 @@ function tabLove(B) {
   B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와는 셋째 사연 뒤에 의형제를 맺습니다.</p>` + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${faces[k]}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || S.sworn === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${desc[k]}</div></div></div>`).join('');
   $$('canvas[data-f]', B).forEach(c => { const x = c.getContext('2d'); x.imageSmoothingEnabled = false; const im = IMG['faces/' + c.dataset.f]; if (im) x.drawImage(im, 0, 0); });
 }
+// 키 설정. 칸을 누르고 쓰고 싶은 키나 마우스 버튼을 누른다
+function drawKeys(T) {
+  const row = (a, n) => `<div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="width:84px">${n}</span>${[0, 1].map(i => `<button class="btn sm" data-ka="${a}" data-ks="${i}" style="min-width:72px">${Keys.name(Keys.map[a][i])}</button>`).join('')}</div>`, half = Math.ceil(KEY_ACTIONS.length / 2);
+  T.innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px"><b style="font-weight:400">쓰기 쉬운 묶음</b>${Object.keys(KEY_PRESETS).map(n => `<button class="btn sm" data-kp="${n}">${n}</button>`).join('')}</div><div class="hint">칸을 누르고 쓰고 싶은 키나 마우스 버튼을 누르세요. 지우려면 Delete, 취소는 Esc. 전투 키와 필드 키는 겹쳐도 됩니다.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 18px;margin-top:6px"><div>${KEY_ACTIONS.slice(0, half).map(k => row(k[0], k[1])).join('')}</div><div>${KEY_ACTIONS.slice(half).map(k => row(k[0], k[1])).join('')}</div></div>`;
+  T.querySelectorAll('[data-kp]').forEach(b => b.onclick = () => { Keys.use(b.dataset.kp); Sound.sfx('tick'); drawKeys(T); toast(`키 묶음: ${b.dataset.kp}`, 2); });
+  T.querySelectorAll('[data-ka]').forEach(b => b.onclick = ev => { ev.stopPropagation(); if (G.keyWait) return; const a = b.dataset.ka, s = +b.dataset.ks; b.textContent = '누르세요…'; G.keyWait = true;
+    const done = code => { removeEventListener('keydown', kd, true); removeEventListener('mousedown', md, true); setTimeout(() => { G.keyWait = false; }, 60); if (code === '') { Keys.map[a] = [...Keys.map[a]]; Keys.map[a][s] = ''; Keys.save(); } else if (code) Keys.set(a, s, code); Sound.sfx('tick'); drawKeys(T); };
+    const kd = e => { e.preventDefault(); e.stopPropagation(); if (e.code === 'Escape') return done(null); if (e.code === 'Delete' || e.code === 'Backspace') return done(''); if (e.code === 'Enter') return done(null); done(e.code); }, md = e => { e.preventDefault(); e.stopPropagation(); done('Mouse' + e.button); };
+    addEventListener('keydown', kd, true); setTimeout(() => addEventListener('mousedown', md, true), 80); });
+}
 function tabSet(B) {
-  B.innerHTML = `<h2>조작</h2><div class="two"><div class="note">이동 W A S D 또는 방향키<br>평타 J · 경공 K · 막기 L<br>초식 U I O P 또는 1 2 3 4<br>금창약 H · 대화 E · 메뉴 O · 지도 M<br>싸우는 중에는 O가 초식 칸이라 메뉴는 Esc로 엽니다.</div><div class="note">막기를 맞기 직전에 누르면 <b>튕겨내기</b>가 됩니다.<br>노란 예고는 막을 수 있습니다.<br>붉은 예고는 막을 수 없으니 경공으로 피하세요.</div></div>
-  <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 J로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 E<br>집: 청하진 복덕방에서 구입, 집 안에서 B로 꾸미기, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
+  B.innerHTML = `<h2>조작</h2><div class="two"><div class="note" id="keyTable" style="grid-column:1 / -1"></div><div class="note">메뉴는 언제나 Esc로도 엽니다. 대사는 Enter로도 넘어갑니다.</div><div class="note">막기를 맞기 직전에 누르면 <b>튕겨내기</b>가 됩니다.<br>노란 예고는 막을 수 있습니다.<br>붉은 예고는 막을 수 없으니 경공으로 피하세요.</div></div>
+  <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 평타 키로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 대화 키<br>집: 청하진 복덕방에서 구입, 집 안에서 꾸미기 키, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
   <h2>설정</h2><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">지금 저장은 이 브라우저 안에 됩니다. 기기에 파일로 저장해 두면 브라우저 기록을 지워도, 다른 기기에서도 제목 화면의 저장 파일 불러오기로 이어 할 수 있습니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">지금 저장</button><button class="btn" id="svf">기기에 파일로 저장</button><button class="btn" id="tt">제목으로</button></div>`;
+  drawKeys($('#keyTable', B));
   if (G.S.mode === 'free') { const d = el('div', 'note', `자유 모드의 하루는 현실 시간으로 <b style="font-weight:400">${Math.round(G.free.dayLen() / 60)}분</b>입니다. `); d.style.marginTop = '8px'; for (const [n, v] of [['15분', 900], ['30분', 1800], ['1시간', 3600]]) { const q = el('button', 'btn sm', n); q.style.marginLeft = '5px'; q.onclick = () => { G.S.dayLen = v; G.S.fr.clock = 0; Sound.sfx('tick'); drawMenu(); }; d.appendChild(q); } B.appendChild(d); }
   $('#vBgm').oninput = e => { Sound.setBgm(e.target.value / 100); $('#vBgmN').textContent = e.target.value; };
   $('#vSfx').oninput = e => { Sound.setSfx(e.target.value / 100); $('#vSfxN').textContent = e.target.value; };
@@ -202,7 +214,7 @@ export function showResult(r) {
     e.innerHTML = `<h2>승리</h2><p>깨달음 +${r.exp}${r.silver ? ` · 은자 +${r.silver}냥` : ''}</p>${r.drops && r.drops.length ? `<p>${r.drops.join(', ')}</p>` : ''}${r.levelUp ? `<p style="color:var(--red)">경지가 깊어졌다! ${G.S.lv}성 (${rankOf(G.S.lv)})<br>메뉴에서 능력치와 무공 트리를 올리세요.</p>` : ''}<p class="hint">E 또는 누르기</p>`;
     h.appendChild(e); if (r.levelUp) Sound.sfx('ok3');
     let done = false; const go = () => { if (done) return; done = true; e.remove(); document.removeEventListener('keydown', kd); res(); };
-    const kd = ev => { if (['KeyE', 'Enter', 'Space', 'KeyJ'].includes(ev.code)) go(); }; document.addEventListener('keydown', kd); e.onclick = go; e.style.pointerEvents = 'auto';
+    const kd = ev => { if (Keys.is('ok', ev.code) || Keys.is('atk', ev.code)) go(); }; document.addEventListener('keydown', kd); e.onclick = go; e.style.pointerEvents = 'auto';
   });
 }
 export function choiceLose() {

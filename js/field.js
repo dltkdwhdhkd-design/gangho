@@ -1,5 +1,6 @@
 // 마을과 산길을 걸어 다니는 화면
 import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast } from './core.js';
+import { Keys } from './core.js';
 import { MAPS } from './maps.js';
 import { drawStamp } from './tiles.js';
 import { save } from './state.js';
@@ -34,14 +35,14 @@ export class Field {
   }
   flashPlace() { const e = $('#place'); if (!e) return; e.textContent = this.m.name; e.classList.add('on'); clearTimeout(this._pt); this._pt = setTimeout(() => e.classList.remove('on'), 1800); }
   showHud() {
-    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (B)</button>' : ''}<button class="btn sm" id="mapb">지도 (M)</button><button class="btn sm" id="mbtn">메뉴 (O)</button></div><canvas id="mm"></canvas><div class="keys" id="keys"><span id="dayl">${G.S.day}일째${G.S.mode === 'free' ? ' ' + G.free.period() : ''}</span>${G.touch ? '' : ' · 이동 WASD · 대화 E · 메뉴 O · 지도 M'}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
+    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (' + Keys.label('decor') + ')</button>' : ''}<button class="btn sm" id="mapb">지도 (${Keys.label('map')})</button><button class="btn sm" id="mbtn">메뉴 (${Keys.label('opt')})</button></div><canvas id="mm"></canvas><div class="keys" id="keys"><span id="dayl">${G.S.day}일째${G.S.mode === 'free' ? ' ' + G.free.period() : ''}</span>${G.touch ? '' : ` · 대화 ${Keys.label('ok')} · 메뉴 ${Keys.label('opt')} · 지도 ${Keys.label('map')}`}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
     $('#mbtn').onclick = () => openMenu();
     $('#mapb').onclick = () => { if (!this.busy && !G.decor) openMap(); };
     bindMini(this);
     if ($('#dbtn')) $('#dbtn').onclick = () => { if (!this.busy && !G.decor) G.life.openDecor(); };
     this.updateGoal();
   }
-  updateGoal() { const e = $('#goal'); if (e) { const g = G.S.goal; e.style.display = g ? 'block' : 'none'; e.innerHTML = `<b>목표</b>${g}`; } const b = $('#mbtn'); if (b) b.textContent = G.S.pts > 0 || G.S.tp > 0 ? `메뉴 (O) · 올릴 점수 있음` : '메뉴 (O)'; }
+  updateGoal() { const e = $('#goal'); if (e) { const g = G.S.goal; e.style.display = g ? 'block' : 'none'; e.innerHTML = `<b>목표</b>${g}`; } const b = $('#mbtn'); if (b) b.textContent = G.S.pts > 0 || G.S.tp > 0 ? `메뉴 (${Keys.label('opt')}) · 올릴 점수 있음` : `메뉴 (${Keys.label('opt')})`; }
   async run(fn) {
     if (this.busy) return; this.busy = true; Input.clear();
     try { await fn(); } catch (e) { console.error(e); }

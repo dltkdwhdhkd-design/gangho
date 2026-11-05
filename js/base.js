@@ -9,6 +9,8 @@ import { LOOT } from './items.js';
 import { learn } from './state.js';
 import { LOCS } from './worlddata.js';
 import { EXTRA, SURNAME } from './freedata.js';
+import { TALK, CITYTALK, HOME } from './talkdata.js';
+import { WEAPONS } from './data.js';
 import { CLANS } from './clandata.js';
 
 const NEW = EXTRA.filter(f => f.hi); NEW.forEach(f => { WHO[f.key] = { name: f.who, face: f.spr }; });
@@ -48,13 +50,14 @@ const FEAT = {
 };
 const ROOMS = {}; // 방 id → { back, bx, by, kind, name, owner }
 const SW = id => STAMPS[id][3] / TS, SH = id => STAMPS[id][4] / TS;
-const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 11], dorm: [18, 12, 7, 11], mess: [18, 12, 7, 11], inn: [18, 12, 7, 11], shop: [16, 11, 6, 10], book: [16, 11, 6, 10] };
+const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 11], dorm: [18, 12, 7, 11], mess: [18, 12, 7, 11], inn: [18, 12, 7, 11], shop: [16, 11, 6, 10], book: [16, 11, 6, 10], clinic: [14, 10, 5, 9], armory: [14, 10, 5, 9], gov: [20, 13, 8, 12], home: [14, 10, 5, 9], temple: [16, 11, 6, 10] };
+const HOUSES = ['hall', 'lodge', 'house_red', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];
 function room(m, l, stamp, x, y, kind, name, o) {
   const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2, by: y + SH(stamp) + 1, kind, name, owner: l };
-  m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0 }); m.label(x + SW(stamp) / 2, y - .6, name); return id;
+  m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0 }); if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
 }
 function makeRoom(id) {
-  const info = ROOMS[id] || (() => { const o = LOCS.find(q => id.startsWith(`r_${q.id}_`)); if (o) { G.world.ensure(o.map); return ROOMS[id]; } })(); if (!info) { console.warn('없는 방', id); return; }
+  const info = ROOMS[id] || (() => { if (id.startsWith('h_')) return null; const o = LOCS.find(q => id.startsWith(`r_${q.id}_`)); if (o) { G.world.ensure(o.map); return ROOMS[id]; } })(); if (!info) { console.warn('없는 방', id); return; }
   const [w, h, ex] = ROOM[info.kind], dark = ['fort', 'dark'].includes(info.owner.style), m = makeMap(id, w, h, { name: `${info.owner.name} ${info.name}`, bgm: info.owner.style === 'temple' ? 'temple' : 'quiet', room: true, roomStyle: dark ? 1 : 0, arena: 'room', tint: dark ? 'rgba(30,8,20,.22)' : undefined });
   const k = info.kind;
   if (k === 'hall') { m.put('tablet', 10, 1).put('f_chair', 10.5, 3).put('lantern', 3, 2).put('lantern', 18, 2).put('lantern', 3, 7).put('lantern', 18, 7).put('longtable', 5, 8).put('longtable', 14, 8).put('rack', 1, 2).put('rack', 19, 2).put('plant', 1, 11).put('plant', 20, 11).put('f_scroll', 6, 1).put('f_scroll', 15, 1); }
@@ -65,6 +68,11 @@ function makeRoom(id) {
   if (k === 'inn') { m.put('counter', 1, 2).put('shelf', 5, 1).put('rack', 11, 1).put('longtable', 3, 6).put('longtable', 11, 6).put('longtable', 3, 9).put('longtable', 11, 9).row('stool', 3, 5, 3, 1).row('stool', 11, 5, 3, 1).put('plant', 16, 2); }
   if (k === 'shop') { m.put('shelf', 1, 1).put('shelf2', 4, 1).put('shelf', 8, 1).put('counter', 4, 4).put('box', 1, 7).put('box', 13, 7).put('jar', 13, 2); }
   if (k === 'book') { m.row('bookcase', 1, 1, 3, 4).put('scrollcase', 13, 1).put('counter', 4, 5).put('f_lamp', 1, 8).put('box', 13, 7); }
+  if (k === 'clinic') { m.put('shelf2', 1, 1).put('shelf2', 4, 1).put('drawer', 8, 1).put('bed', 9, 5).put('counter', 1, 5).put('jar', 12, 8).put('plant', 1, 8); }
+  if (k === 'armory') { m.row('rack', 1, 1, 4, 3).put('box', 1, 7).put('box', 12, 7).put('chest', 11, 5).put('counter', 2, 5); }
+  if (k === 'gov') { m.put('f_chair', 9.5, 2).put('longtable', 8, 4).put('tablet', 9, 1).put('f_scroll', 3, 1).put('f_scroll', 16, 1).put('rack', 1, 5).put('rack', 17, 5).put('lantern', 3, 9).put('lantern', 16, 9); }
+  if (k === 'temple') { m.put('tablet', 7, 1).put('tablet2', 3, 2).put('tablet2', 12, 2).put('lantern', 1, 4).put('lantern', 14, 4).put('longtable', 6, 5).put('plant', 1, 9).put('plant', 14, 9); }
+  if (k === 'home') { const v = [...id].reduce((a, c) => a + c.charCodeAt(0), 0) % 4; if (v === 0) m.put('f_bed', 1, 1).put('chest', 4, 1).put('longtable', 6, 5).row('stool', 6, 4, 3, 1).put('jar', 12, 1).put('f_stove', 10, 1); if (v === 1) m.put('bed', 9, 1).put('drawer', 1, 1).put('shelf', 4, 1).put('longtable', 3, 6).put('plant', 12, 7); if (v === 2) m.put('shelf2', 1, 1).put('box', 5, 1).put('box', 7, 1).put('jar', 10, 1).put('pot', 12, 1).put('counter', 2, 5).put('f_bed', 10, 6); if (v === 3) m.put('f_stove', 1, 1).put('longtable', 5, 5).put('f_bed', 10, 1).put('f_lamp', 8, 1).put('f_bonsai', 1, 7).put('stool', 5, 4).put('stool', 7, 4); }
   m.exit(ex, h - 1, 4, 1, info.back, info.bx, info.by, 0, { door: true }); m.render();
 }
 // 세력 본거지. 아래가 산문, 위로 갈수록 외문 구역, 연무장, 내문 구역, 본전이다
@@ -84,14 +92,14 @@ function sectLayout(m, l, st, ft) {
   // 산문
   m.row(w, 3, 60, cx - 3); m.row(w, cx + 4, 60, W - cx - 7); m.put('gate_arch', cx, 58, { nosolid: true }); m.place(mid, 57.2, l.name); m.put(st.ban, cx - 2, 61); m.put(st.ban, cx + 5, 61);
   // 외문 구역
-  room(m, l, big, 7, 45, 'dorm', '외문 숙소'); if (!st.water) { m.put(big, 13, 45); m.put('log', 7, 53); m.put('log', 10, 53); }
+  room(m, l, big, 7, 45, 'dorm', '외문 숙소'); if (!st.water) { room(m, l, big, 13, 45, 'dorm', '외문 숙소', { n: 2, quiet: 1 }); m.put('log', 7, 53); m.put('log', 10, 53); }
   room(m, l, small, 33, 47, 'mess', '식당'); m.put('jar', 30, 52); m.put('jar', 32, 52); m.put('pot', 35, 52); m.put(st.ban, cx - 3, 50); m.put(st.ban, cx + 6, 50);
   // 연무장
   m.fill(YARD.x, YARD.y, YARD.w, YARD.h, 3); m.place(mid, YARD.y - 1, ft[1]);
   for (let i = 0; i < 6; i++) m.put('f_dummy', YARD.x + 2 + i * 5, YARD.y + 1);
   m.put('rack', YARD.x + 1, YARD.y + 13); m.put('rack', YARD.x + YARD.w - 4, YARD.y + 13); m.put(st.ban, YARD.x - 1, YARD.y); m.put(st.ban, YARD.x + YARD.w, YARD.y); m.put(st.ban, YARD.x - 1, YARD.y + 14); m.put(st.ban, YARD.x + YARD.w, YARD.y + 14);
   // 내문 구역
-  room(m, l, big, 7, 12, 'lib', ft[2]); room(m, l, big, 35, 12, 'elder', ft[3]); m.put(small, 13, 13); m.put(small, 28, 13);
+  room(m, l, big, 7, 12, 'lib', ft[2]); room(m, l, big, 35, 12, 'elder', ft[3]); room(m, l, small, 13, 13, 'clinic', '약방'); room(m, l, small, 28, 13, 'armory', '무기고');
   const dk = i => (ex.deco || st.deco)[i % (ex.deco || st.deco).length]; m.put(dk(0), 3, 18); m.put(dk(1), 41, 18); m.put(dk(0), 17, 19); m.put(dk(1), 28, 19);
   // 본전
   m.fill(cx - 5, 8, 14, 2, 3); room(m, l, hall, cx, 1, 'hall', ft[0]); m.put(dk(0), cx - 5, 3); m.put(dk(0), cx + 6, 3); m.put(st.ban, cx - 2, 6); m.put(st.ban, cx + 5, 6);
@@ -106,12 +114,18 @@ function townLayout(m, l) {
   m.border(['tree_round', 'grove_green'], [[cx - 1, H - 3, 6, 3]], 3);
   m.fill(cx, 3, 4, H - 3, 1); m.fill(3, 21, W - 6, 4, 1); m.fill(20, 14, 20, 18, 3);
   m.row('wall_h', 3, 43, cx - 3); m.row('wall_h', cx + 4, 43, W - cx - 7); m.put('gate_arch', cx, 41, { nosolid: true }); m.place(cx + 2, 40, l.name);
-  room(m, l, 'house_red', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); m.put('hall', 26, 2); m.label(cx, 1.4, '관아');
-  m.put('hut_b', 49, 13); m.put('hut_o', 34, 10); m.put('hut_o2', 18, 7); m.put('clay', 40, 6); m.put('wood_b', 6, 30); m.put('hut_o', 13, 30); m.put('clay', 40, 30); m.put('wood_o', 47, 30); m.put('hut_b', 6, 36); m.put('hut_o2', 13, 36); m.put('hut_b', 40, 36); m.put('hut_o', 47, 36);
+  room(m, l, 'house_red', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); room(m, l, 'hall', 26, 2, 'gov', '관아');
+  [['hut_b', 49, 13], ['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => room(m, l, st, x, y, 'home', '민가', { n: i, quiet: 1 }));
   m.put('banner2', 20, 13); m.put('banner1', 39, 13); m.put('statue', 29.5, 19, { nosolid: true }); m.put('awning', 21, 16, { nosolid: true }); m.put('awning', 34, 16, { nosolid: true }); m.put('jar', 22, 19); m.put('pot', 37, 19); m.put('sign_sword', 25, 26); m.scatter(['flower1', 'fern1'], 18, 4);
 }
+// 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다
+function autoDoors(m, owner) {
+  [...m.stamps].forEach((st, i) => { if (!HOUSES.includes(st.name)) return; const w = STAMPS[st.name][3], h = STAMPS[st.name][4], cx = st.x + w / 2, by = st.y + h; if (m.portals.some(q => q.x + q.w > st.x && q.x < st.x + w && Math.abs(q.y - by) < 28)) return;
+    const bx = cx / TS, byT = by / TS + 1; if (m.blocked(cx, by + 16) || m.blocked(cx, by + 8)) return; const big = st.name === 'hall' || st.name === 'lodge', kind = big ? 'temple' : 'home', id = `h_${m.id}_${i}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: m.id, bx, by: byT, kind, name: big ? '전각' : '집', owner };
+    m.portals.push({ x: cx - 9, y: by - 4, w: 18, h: 9, to: id, tx: ex + 2, ty: ey - .6, dir: 1, door: true }); });
+}
 function make(id) {
-  if (id.startsWith('r_')) return makeRoom(id);
+  if (id.startsWith('r_') || id.startsWith('h_')) return makeRoom(id);
   const l = LOCS.find(q => q.map === id); if (!l) { console.warn('없는 지도', id); return; }
   const town = l.style === 'town', st = town ? { biome: l.px[1] > 480 ? 'grass' : 'sand', bgm: 'good', arena: 'village' } : ST[l.style], ft = FEAT[l.fac] || ['본전', '연무장', '서고', '장로원', {}], ex = ft[4] || {}, W = town ? 60 : 46, H = town ? 48 : 68;
   const m = makeMap(id, W, H, { name: l.name, bgm: st.bgm, biome: ex.biome || st.biome, arena: st.arena, ambient: ex.ambient || st.ambient, tint: st.tint });
@@ -151,29 +165,39 @@ async function boatTalk(l) {
 }
 const elderName = (l, i) => { const R = fold(l.id + i); return `${SURNAME[Math.floor(R() * SURNAME.length)]} 장로`; };
 function roomNpcs(id, out) {
-  const r = ROOMS[id], l = r.owner, kind = r.kind, f = l.fac && G.free?.fac(l.fac), lv = () => G.S.lv;
+  const r = ROOMS[id], l = r.owner, kind = r.kind; const hash = [...id].reduce((a, c) => a * 31 + c.charCodeAt(0) & 65535, 7);
+  if (kind === 'home') { const [who, spr, t] = HOME[hash % HOME.length]; out.npcs.push({ id: 'res', spr, x: 7, y: 4 + hash % 2, dir: 0, hint: who, talk: async () => { await say(null, `${who}: ${t.replace(/\{p\}/g, l.name)}`); } }); return; }
+  if (kind === 'temple') { out.npcs.push({ id: 'res', spr: 'Monk', x: 8, y: 7.4, dir: 0, hint: '전각지기', talk: async () => { await say(null, `전각지기: ${['여기는 향만 피우면 됩니다. 소리 내지 마십시오.', '오늘은 손님이 없습니다. 어제도 없었습니다.', '바닥을 닦고 있었습니다. 밟으신 데 다시 닦겠습니다.'][hash % 3]}`); } }); return; }
+  if (kind === 'gov') { out.npcs.push({ id: 'res', spr: 'Noble', x: 10, y: 6.4, dir: 0, hint: '아전', talk: async () => { await say(null, `아전: ${l.name} 관아요. 칼 찬 사람끼리 싸운 일은 우리 소관이 아니오. 말은 그렇게 하라고 위에서 그랬소.`); } }); return; }
   if (kind === 'inn') out.npcs.push({ id: 'cinn', spr: 'OldWoman', x: 3, y: 4.6, dir: 0, hint: '객잔 주인', talk: () => innTalk(l) });
   if (kind === 'shop') out.npcs.push({ id: 'cshop', spr: 'Noble', x: 6, y: 3.4, dir: 0, hint: '장사꾼', talk: () => shopTalk(l) });
   if (kind === 'book') out.npcs.push({ id: 'cbook', spr: 'OldMan3', x: 6, y: 4.4, dir: 0, hint: '서점 주인', talk: () => G.arts.bookshop(l) });
-  if (!f || G.jh.fallen(f.id)) return;
+  const f = l.fac && G.free?.fac(l.fac); if (!f || G.jh.fallen(f.id)) return;
   const st = ST[l.style], folk = st.folk, hostile = G.jh.hostile(f.id);
   if (kind === 'hall') { if (G.S.mode !== 'free' && f.hi && !hostile) out.npcs.push({ id: f.key, spr: f.spr, x: 11, y: 5, dir: 0, hint: f.name, talk: () => storyFac(f) }); if (G.S.mode !== 'free' && !f.hi) { const c = CLANS.find(q => q.id === f.id); if (c && !G.S.flags.boat_guhwa && !hostile) out.npcs.push({ ...G.clanNpc(c), x: 11, y: 5 }); else out.npcs.push({ id: 'keeper', spr: folk[0], x: 11, y: 5, dir: 0, hint: '본전을 지키는 제자', talk: async () => { await say(null, AWAY[f.group] || '어른은 지금 안 계십니다.'); } }); } }
   if (hostile) return;
+  const T = TALK[f.id] || []; const line = (i, alt) => T[i] || CHAT[l.style][alt % CHAT[l.style].length];
+  if (kind === 'clinic') out.npcs.push({ id: 'heal', spr: 'OldMan', x: 4, y: 7, dir: 0, hint: '의원', talk: async () => { await say(null, `${l.name} 의원: 상처를 봐 드리겠습니다. 금창약도 채워 드리지요.`); G.S.potion = Math.max(G.S.potion, G.S.potionMax); Sound.sfx('heal', .6); } });
+  if (kind === 'armory') out.npcs.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 7.4, dir: 0, hint: '무기고지기', talk: () => armory(f) });
   if (kind === 'elder') { out.npcs.push({ id: 'elder1', spr: 'OldMan', x: 5, y: 5, dir: 0, hint: elderName(l, 1), talk: () => G.arts.tutor(f) }, { id: 'elder2', spr: 'OldMan2', x: 14, y: 5, dir: 0, hint: elderName(l, 2), talk: async () => { await say(null, `${elderName(l, 2)}: 강호에서 ${f.name} 이름을 지키는 게 칼보다 어렵네. 우호가 쌓이면 가르칠 게 더 있을 걸세.`); } }); }
   if (kind === 'lib') out.npcs.push({ id: 'elder3', spr: 'OldMan3', x: 9, y: 8.4, dir: 0, hint: `${elderName(l, 3)} (서고지기)`, talk: async () => { await narr(f.desc); await G.arts.library(f); } });
-  if (kind === 'dorm') out.npcs.push({ id: 'd1', spr: folk[0], x: 5, y: 5, dir: 3, hint: '제자', talk: async () => { await say(null, CHAT[l.style][0]); } }, { id: 'd2', spr: folk[1 % folk.length], x: 12, y: 5, dir: 2, hint: '제자', talk: async () => { await say(null, CHAT[l.style][1]); } });
-  if (kind === 'mess') out.npcs.push({ id: 'cook', spr: 'Villager4', x: 3, y: 3.6, dir: 0, hint: '밥 짓는 사람', talk: async () => { await say(null, '밥때 되면 오시오. 지금 와 봐야 물밖에 없소.'); } }, { id: 'd3', spr: folk[0], x: 13, y: 4, dir: 0, hint: '제자', talk: async () => { await say(null, CHAT[l.style][2]); } });
+  if (kind === 'dorm') out.npcs.push({ id: 'd1', spr: folk[0], x: 5, y: 5, dir: 3, hint: '제자', talk: async () => { await say(null, line(5, 0)); } }, { id: 'd2', spr: folk[1 % folk.length], x: 12, y: 5, dir: 2, hint: '제자', talk: async () => { await say(null, CHAT[l.style][id.length % CHAT[l.style].length]); } });
+  if (kind === 'mess') out.npcs.push({ id: 'cook', spr: 'Villager4', x: 3, y: 3.6, dir: 0, hint: '밥 짓는 사람', talk: async () => { await say(null, '밥때 되면 오시오. 지금 와 봐야 물밖에 없소.'); } }, { id: 'd3', spr: folk[0], x: 13, y: 4, dir: 0, hint: '제자', talk: async () => { await say(null, line(5, 2)); } });
+}
+async function armory(f) {
+  const s = G.S, w = (LOOT[f.id] || []).find(k => WEAPONS[k] && !s.weapons.includes(k)); if (!w) { await say(null, '무기고지기: 내줄 만한 칼이 없소.'); return; } if (G.jh.rep(f.id) < 35) { await say(null, `무기고지기: 우리 사람한테만 파는 물건이오. (우호 35)`); return; }
+  const c = await choice(`${WEAPONS[w].name}을(를) 살까? (은자 800냥)`, ['산다', '그만둔다']); if (c) return; if (s.silver < 800) { await say(null, '은자가 모자란다.'); return; } s.silver -= 800; s.weapons.push(w); Sound.sfx('coin'); toast(`${WEAPONS[w].name}을(를) 샀다`, 3);
 }
 function provider(id) {
   const out = { npcs: [], spots: [], trigs: [], roam: [] }, F = G.S?.flags; if (!F) return out;
-  if (id.startsWith('r_')) { if (ROOMS[id]) { G.jh.ensure(); roomNpcs(id, out); } return out; }
+  if (id.startsWith('r_') || id.startsWith('h_')) { if (ROOMS[id]) { G.jh.ensure(); roomNpcs(id, out); } return out; }
   const l = LOCS.find(q => q.map === id); if (!l) return out;
   if (G.S.mode !== 'free' && !F.world_open && G.after && G.after('c1a')) F.world_open = true;
   if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
-  G.jh.ensure(); const chat = CHAT[l.style], town = l.style === 'town', folk = town ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy', 'Villager4', 'OldMan'] : ST[l.style].folk, R = fold(id);
+  G.jh.ensure(); const town = l.style === 'town', chat = town ? CITYTALK[l.id] : [...(TALK[l.fac] || []), ...CHAT[l.style]], folk = town ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy', 'Villager4', 'OldMan'] : ST[l.style].folk, R = fold(id);
   if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: town ? 33 : 26, y: town ? 44.5 : 62, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
   if (town) {
-    [[23, 18], [36, 18], [26, 28], [33, 26], [12, 23], [46, 23], [30, 33], [18, 28]].forEach(([x, y], i) => { const line = chat[(i + Math.floor(R() * 4)) % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: '말 걸기', talk: async () => { await say(null, (i < 2 && G.jh.talkOfDay()) || line); } }); });
+    [[23, 18], [36, 18], [26, 28], [33, 26], [12, 23], [46, 23], [30, 33], [18, 28]].forEach(([x, y], i) => { const line = chat[i % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: '말 걸기', talk: async () => { await say(null, (i < 2 && G.jh.talkOfDay()) || line); } }); });
     out.npcs.push({ id: 'cboard', spr: 'Gaebang', x: 30, y: 15.5, dir: 0, hint: '일거리 묻기', talk: () => G.freeBoard0() }); return out;
   }
   const f = G.free?.fac(l.fac); if (!f) return out;
@@ -181,15 +205,15 @@ function provider(id) {
   if (G.jh.hostile(f.id)) { out.trigs.push({ x: 20, y: 56, w: 6, h: 4, when: () => !G.S.daily['gate_' + f.id], run: async () => { G.S.daily['gate_' + f.id] = 1; await G.jh.gate(f); } }); return out; }
   // 문지기, 일하는 외문 제자, 연무장에서 수련하는 제자들, 사범
   const say1 = t => async () => { await say(null, t); }, name = f.group === '세가' ? '가솔' : '제자';
-  out.npcs.push({ id: 'gate1', spr: folk[0], x: 19.6, y: 62, dir: 0, hint: '문지기', talk: say1(`어서 오십시오. 이곳은 ${l.name}입니다. 어른들은 안쪽 ${FEAT[l.fac]?.[0] || '본전'}에 계십니다.`) }, { id: 'gate2', spr: folk[1 % folk.length], x: 26.4, y: 62, dir: 0, hint: '문지기', talk: say1(chat[0]) });
-  [[17, 50], [28, 50], [12, 52], [34, 55]].forEach(([x, y], i) => out.npcs.push({ id: `work${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: `외문 ${name}`, talk: say1(chat[i % chat.length]) }));
-  for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) out.npcs.push({ id: `drill${r}${c}`, spr: folk[(r + c) % folk.length], x: YARD.x + 3.5 + c * 4.6, y: YARD.y + 6 + r * 3.4, dir: 1, drill: 1, hint: name, talk: say1(pickLine(chat, r, c)) });
+  out.npcs.push({ id: 'gate1', spr: folk[0], x: 19.6, y: 62, dir: 0, hint: '문지기', talk: say1(TALK[l.fac]?.[0] || chat[0]) }, { id: 'gate2', spr: folk[1 % folk.length], x: 26.4, y: 62, dir: 0, hint: '문지기', talk: say1(`어른들은 위쪽 ${FEAT[l.fac]?.[0] || '본전'}에 계십니다. 연무장을 지나 곧장 올라가십시오.`) });
+  [[17, 50], [28, 50], [12, 52], [34, 55]].forEach(([x, y], i) => out.npcs.push({ id: `work${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: `외문 ${name}`, talk: say1(chat[1 + i % (chat.length - 1)]) }));
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) out.npcs.push({ id: `drill${r}${c}`, spr: folk[(r + c) % folk.length], x: YARD.x + 3.5 + c * 4.6, y: YARD.y + 6 + r * 3.4, dir: 1, drill: 1, hint: name, talk: say1(chat[3 + (r * 6 + c) % (chat.length - 3)]) });
   out.npcs.push({ id: 'tutor', spr: folk[0], x: YARD.x + YARD.w / 2 + 1.5, y: YARD.y + 4, dir: 0, hint: '사범', talk: () => G.arts.tutor(f) });
   return out;
 }
-const pickLine = (chat, r, c) => chat[(r * 2 + c) % chat.length];
 function init() {
   Story.providers.push(provider);
+  for (const id in MAPS) { const m = MAPS[id]; if (!m.room && id !== 'world' && id !== 'mysect' && !id.startsWith('b_') && !id.startsWith('c_')) autoDoors(m, { id, name: m.name, style: 'town', map: id }); }
   MAPS.hwasan?.exit(29, 9, 1, 5, 'b_hwasan', 1.5, 32, 3);
   for (const l of LOCS) if (l.kind === 'old' && MAPS[l.map]) { const m = MAPS[l.map], n = m.stamps.length; m.put('signpost', Math.floor(l.at[0] - 1.5), Math.floor(l.at[1] - 1.5), { nosolid: true }); if (m.objs) m.objs.push(m.stamps[n]); }
 }

@@ -89,11 +89,26 @@ export const Sound = {
 };
 
 // ── 입력 ─────────────────────────────
-const KEYMAP = {
-  KeyW: ['up'], ArrowUp: ['up'], KeyS: ['down'], ArrowDown: ['down'], KeyA: ['left'], ArrowLeft: ['left'], KeyD: ['right'], ArrowRight: ['right'],
-  KeyJ: ['atk'], KeyZ: ['atk'], KeyK: ['dash'], KeyX: ['dash'], Space: ['ok', 'dash'], KeyL: ['guard'], KeyC: ['guard'], ShiftLeft: ['guard'],
-  KeyU: ['s0'], KeyI: ['s1'], KeyO: ['s2', 'opt'], KeyP: ['s3'], Digit1: ['s0'], Digit2: ['s1'], Digit3: ['s2'], Digit4: ['s3'],
-  KeyH: ['potion'], KeyQ: ['potion'], KeyB: ['decor'], KeyE: ['ok'], Enter: ['ok'], Escape: ['menu'], KeyM: ['map'],
+// 조작 키. 메뉴 설정에서 바꿀 수 있다. Enter와 Esc는 언제나 확인과 메뉴다
+export const KEY_ACTIONS = [['up', '위로', 'all'], ['down', '아래로', 'all'], ['left', '왼쪽', 'all'], ['right', '오른쪽', 'all'], ['atk', '평타', 'fight'], ['dash', '경공', 'fight'], ['guard', '막기', 'fight'], ['s0', '초식 1', 'fight'], ['s1', '초식 2', 'fight'], ['s2', '초식 3', 'fight'], ['s3', '초식 4', 'fight'], ['potion', '금창약', 'fight'], ['ok', '대화·확인', 'field'], ['opt', '메뉴', 'field'], ['map', '지도', 'field'], ['decor', '집 꾸미기', 'field']];
+export const KEY_PRESETS = {
+  기본: { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], atk: ['KeyJ', 'KeyZ'], dash: ['KeyK', 'Space'], guard: ['KeyL', 'ShiftLeft'], s0: ['KeyU', 'Digit1'], s1: ['KeyI', 'Digit2'], s2: ['KeyO', 'Digit3'], s3: ['KeyP', 'Digit4'], potion: ['KeyH', 'KeyQ'], ok: ['KeyE', 'Space'], opt: ['KeyO', 'Tab'], map: ['KeyM', ''], decor: ['KeyB', ''] },
+  '방향키 + 왼손': { up: ['ArrowUp', ''], down: ['ArrowDown', ''], left: ['ArrowLeft', ''], right: ['ArrowRight', ''], atk: ['KeyZ', ''], dash: ['KeyX', ''], guard: ['KeyC', ''], s0: ['KeyA', ''], s1: ['KeyS', ''], s2: ['KeyD', ''], s3: ['KeyF', ''], potion: ['KeyV', ''], ok: ['KeyZ', 'Space'], opt: ['KeyQ', 'Tab'], map: ['KeyW', ''], decor: ['KeyE', ''] },
+  '마우스 + WASD': { up: ['KeyW', ''], down: ['KeyS', ''], left: ['KeyA', ''], right: ['KeyD', ''], atk: ['Mouse0', ''], dash: ['Space', ''], guard: ['Mouse2', 'ShiftLeft'], s0: ['Digit1', 'KeyQ'], s1: ['Digit2', 'KeyE'], s2: ['Digit3', 'KeyR'], s3: ['Digit4', 'KeyF'], potion: ['KeyC', ''], ok: ['KeyE', 'Space'], opt: ['Tab', 'KeyI'], map: ['KeyM', ''], decor: ['KeyB', ''] },
+  '숫자 초식': { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], atk: ['KeyJ', ''], dash: ['KeyK', 'Space'], guard: ['KeyL', ''], s0: ['Digit1', ''], s1: ['Digit2', ''], s2: ['Digit3', ''], s3: ['Digit4', ''], potion: ['KeyH', ''], ok: ['KeyE', 'Space'], opt: ['KeyO', 'Tab'], map: ['KeyM', ''], decor: ['KeyB', ''] },
+};
+const KEYSAVE = 'gangho_keys';
+export const Keys = {
+  map: null, code: {},
+  load() { let v = null; try { v = JSON.parse(localStorage.getItem(KEYSAVE) || 'null'); } catch { } this.map = { ...KEY_PRESETS.기본, ...(v || {}) }; this.build(); },
+  save() { try { localStorage.setItem(KEYSAVE, JSON.stringify(this.map)); } catch { } this.build(); },
+  build() { this.code = { Enter: ['ok'], Escape: ['menu'] }; for (const a in this.map) for (const c of this.map[a]) if (c) (this.code[c] = this.code[c] || []).push(a); },
+  use(name) { this.map = JSON.parse(JSON.stringify(KEY_PRESETS[name])); this.save(); },
+  // 같은 상황에서 겹치는 키는 원래 자리에서 빼고 새 자리로 옮긴다. 전투 키와 필드 키는 겹쳐도 된다
+  set(act, slot, code) { const ctx = KEY_ACTIONS.find(k => k[0] === act)[2]; for (const [a, , c] of KEY_ACTIONS) if (a !== act && (c === ctx || c === 'all' || ctx === 'all')) this.map[a] = this.map[a].map(v => v === code ? '' : v); this.map[act] = [...this.map[act]]; if (this.map[act][1 - slot] === code) this.map[act][1 - slot] = ''; this.map[act][slot] = code; this.save(); },
+  is(act, code) { return (this.map[act] || []).includes(code) || (act === 'ok' && code === 'Enter'); },
+  name(code) { if (!code) return '없음'; const M = { Space: 'Space', ShiftLeft: '왼Shift', ShiftRight: '오른Shift', ControlLeft: '왼Ctrl', ControlRight: '오른Ctrl', AltLeft: '왼Alt', AltRight: '오른Alt', Tab: 'Tab', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Mouse0: '왼클릭', Mouse1: '휠클릭', Mouse2: '오른클릭', Semicolon: ';', Quote: "'", Comma: ',', Period: '.', Slash: '/', BracketLeft: '[', BracketRight: ']', Backquote: '`', Minus: '-', Equal: '=', Backslash: '\\', CapsLock: 'Caps' }; return M[code] || code.replace(/^Key/, '').replace(/^Digit/, '').replace(/^Numpad/, '숫자패드'); },
+  label(act) { return this.name((this.map[act] || []).find(Boolean) || ''); },
 };
 export const Input = {
   down: {}, buf: {}, axis: { x: 0, y: 0 }, stick: { x: 0, y: 0 },
@@ -108,16 +123,22 @@ export const Input = {
     return { x, y };
   },
   init() {
+    Keys.load();
     addEventListener('keydown', e => {
       Sound.init(); Sound.resume();
       if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
       if (G.scene === 'title') return;
-      const m = KEYMAP[e.code]; if (!m) return;
+      const m = Keys.code[e.code]; if (!m) return;
       e.preventDefault();
       if (e.repeat) return;
       m.forEach(a => this.press(a));
     });
-    addEventListener('keyup', e => { const m = KEYMAP[e.code]; if (m) m.forEach(a => this.release(a)); });
+    addEventListener('keyup', e => { const m = Keys.code[e.code]; if (m) m.forEach(a => this.release(a)); });
+    // 마우스 버튼도 키처럼 쓴다. 화면 단추나 메뉴를 누를 때는 건드리지 않는다
+    const onCanvas = e => !G.menuOpen && !G.keyWait && !e.target?.closest?.('button,input,a,#modal,.menu');
+    addEventListener('mousedown', e => { if (!onCanvas(e)) return; const m = Keys.code['Mouse' + e.button]; if (m) { e.preventDefault(); m.forEach(a => this.press(a)); } });
+    addEventListener('mouseup', e => { const m = Keys.code['Mouse' + e.button]; if (m) m.forEach(a => this.release(a)); });
+    addEventListener('contextmenu', e => { if (onCanvas(e) && Keys.code.Mouse2) e.preventDefault(); });
     addEventListener('blur', () => this.clear());
     addEventListener('pointerdown', () => { Sound.init(); Sound.resume(); });
   },
