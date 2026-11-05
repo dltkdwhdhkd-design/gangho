@@ -153,13 +153,14 @@ export class Field {
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });
     if (!this.hideMe) list.push({ y: p.y, me: true });
     list.sort((a, b) => a.y - b.y);
+    const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
       if (o.s) drawStamp(c, o.s.name, o.s.x, o.s.y);
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
-      else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); }
+      else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) { drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y); }
       else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y); drawActorSprite(c, key, n.dir, Math.floor(n.walk || 0) % 4, n.x, n.y);
-        if (n.mark && n.mark()) { const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); } }
+        mark(n); }
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha') { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }
     const ar = IMG['fx/p_arrow']; for (const r of this.arrows) { c.save(); c.translate(r.x, r.y); c.rotate(r.an); if (ar) c.drawImage(ar, -6, -2); c.restore(); }

@@ -171,8 +171,14 @@ async function judge() {
   if (c) return;
   await say('judge', '{호} {나}, 비무대로 오르시오.');
   if (id === 'cheolu_spar') { await say('cheol', '시주! 빚은 빚이고 비무는 비무요. 사정 안 봐주겠소. 내가 이기면 밥 한 끼 더 사시오!'); }
+  if (r === 0) await say('gwakchung', '공동파 곽충이오. 주먹이 좀 아플 거요. 미리 말해 두는 거요.');
+  if (r === 1) await say('sosu', '팽가 방계 팽소소다. 본가 사람들이 저 위에서 구경 중이니까 쉽게는 안 져 줄 거야.');
+  if (r === 2) await say('deung', '곤륜파 등표요. 산에서 내려온 건 처음이라 사람이 이렇게 많은 줄 몰랐소. 어지럽구려.');
   await ctx.duel({ foes: [id], arena: 'ring', bgm: 'boss', title: `${r + 1}회전 · ${name}`, yieldAt: .25 });
   F().round = r + 1;
+  if (r === 0) await say('gwakchung', '내가 친 자리가 자꾸 비어 있던데, 그 걸음 뭐요? 아무튼 졌소. 공동산에 오면 술 한잔 삽시다.');
+  if (r === 1) await say('sosu', '본가 애들 표정 봤어? 방계가 여기까지 올라온 건 처음이래. 너한테 진 건 분한데 그건 좋다.');
+  if (r === 2) await say('deung', '졌소. 구경은 잘했소. 돌아가서 사제들한테 자랑해야겠소. 눈밖에 없는 데라 애들이 뭐든 듣고 싶어 하거든.');
   if (r === 0) ctx.goal('다음 경기까지 시내를 둘러보고 심판에게 말하기');
   if (r === 1) { await say('judge', '훌륭하오. 맹주께서 직접 뵙고 싶다 하시오. 동쪽 정천맹 객관으로 가시오.'); ctx.goal('동쪽 정천맹 객관에서 맹주 만나기'); }
   if (r === 2) { await say('judge', '오늘 경기는 여기까지요. 푹 쉬시오.'); ctx.goal('금봉 객잔에서 쉬기'); }
@@ -259,6 +265,11 @@ async function finalMatch() {
   await G.route.crossroads();
 }
 // ── 4장 ──
+async function kitchenRuin() {
+  F().tr_kitchen = true;
+  await narr('본전 터 뒤로 돌아가니 무너진 부엌이 있었다. 아궁이 위에 큰 솥이 엎어져 있고, 벽에 못이 하나 남아 있었다. 국자를 걸던 못 같았다. 높이가 딱 곽 아주머니 어깨께였다.');
+  await say('me', '여기서도 국을 끓이셨구나.');
+}
 async function trace(k) {
   if (F()['tr' + k]) { await say(null, '이미 살펴보았다.'); return; }
   F()['tr' + k] = true;
@@ -322,6 +333,14 @@ async function foxBoss() {
 }
 async function ending() {
   await ctx.chap(6, '달이 진 골짜기', '제5장 달이 진 뒤');
+  await narr('싸움이 끝난 자리에 곽 아주머니가 월천을 무릎에 눕히고 앉아 있었다. 소매로 얼굴의 피를 닦아 주고 있었다. 석 달 사이에 머리가 허옇게 세어 있었다.');
+  await say('gwak', '왔냐.');
+  await say('me', '네.');
+  await say('gwak', '얼굴이 그게 뭐야. 밥은 먹고 다녔어?');
+  await narr('뭐라고 대답하려는데 목이 막혔다. 곽 아주머니가 주먹으로 내 머리를 한 번 쥐어박았다.');
+  if (F().tr_kitchen) { await say('me', '부엌 터 봤어요.'); await say('gwak', '거길 봤어? 그 솥으로 삼백 명 밥을 했다. 네 아버지가 국이 싱겁다고 하도 타박해서 국자로 한 대 때린 적도 있어.'); }
+  await say('gwak', '이 애 좀 같이 들어라. 혼자는 못 들겠다.');
+  await narr('월천은 생각보다 가벼웠다.');
   if (S().side && S().side !== 'jeong') return G.route.routeEnding();
   await narr('달이 떴다. 강호는 맹주가 쓰러졌다는 소식으로 석 달을 시끄러웠다. 월천의 무덤은 월하곡 본전 터에 만들어 주었다.');
   await narr('정천맹은 해체되었다. 구파일방과 오대세가의 장문인들이 차례로 월하곡에 올라와 향을 피웠다.');
@@ -377,6 +396,7 @@ Story.providers.push(function content2(id) {
   if (id === 'shop2') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: async () => { const c = await choice('무엇을 할까?', ['물건 사기', '가구 사기', '선물 사기', '물건 팔기', '그만둔다'], 'shopk'); if (c === 1) await ctx.shop('구화 상회 · 가구', ['bookcase', 'shelf', 'rack', 'scroll', 'chair', 'dummy', 'plum_tree', 'sword_rack'].map(ctx.item.furn)); if (c === 2) await ctx.shop('구화 상회 · 선물', [['tea', 44], ['plum_wine', 70], ['hairpin', 130], ['sachet', 60], ['poem', 90], ['jade', 200]].map(a => ctx.item.stuff(...a))); if (c === 3) await G.life.openSell(); if (c) return; await ctx.shop('구화 상회', [ctx.item.potion(), ctx.item.weapon('blue_sword'), ctx.item.weapon('dragon_spear'), ctx.item.weapon('ghost_blade'), ctx.item.weapon('iron_gauntlet'), ctx.item.book('one_point', 200), ctx.item.book('dragon_pass', 260), ctx.item.book('sweep_army', 260), ctx.item.book('mad_wind', 260), ctx.item.book('hundred_flower', 340), ctx.item.book('sky_pierce', 700), ctx.item.heart('fury', 300)]); } });
   if (id === 'hall2' && !after('c3e')) n.push({ id: 'chief', spr: 'Master', x: 7, y: 4.6, dir: 0, mark: () => (F().round || 0) === 2 && !F().chief_met, talk: async () => { if ((F().round || 0) >= 2 && !F().chief_met) await chiefMeet(); else await say('chief', '차가 식겠네.'); } });
   if (id === 'wolha') {
+    if (!F().tr_kitchen) sp.push({ x: 28, y: 22, w: 3, h: 3, hint: '무너진 부엌', act: kitchenRuin });
     sp.push({ x: 20, y: 28, w: 4, h: 2, hint: '쓰러진 돌문', act: () => trace(1) }, { x: 7, y: 22, w: 3, h: 3, hint: '돌계단', act: () => trace(2) }, { x: 33, y: 22, w: 3, h: 3, hint: '칼자국', act: () => trace(3) });
     n.push({ id: 'baek', spr: 'OldMan3', x: 22, y: 10, dir: 0, mark: () => at('c4b'), when: () => at('c4b'), talk: baekReunion });
     n.push({ id: 'fox', spr: 'MaskedNinja', x: 22, y: 6.5, dir: 0, mark: () => at('c4c'), when: () => at('c4c'), hint: '맞서기', talk: foxBoss });

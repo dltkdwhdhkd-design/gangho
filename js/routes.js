@@ -83,6 +83,14 @@ export async function toWolha() {
   set('c4a'); F().night = false;
   await ctx.part(6, '달이 진 골짜기', '제1장 월하곡');
   await narr('가을 그믐밤, 물안개가 걷혔다. 달 없는 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.');
+  await say('boat', '여기서부터 바위가 많어. 다들 배 가운데로 앉어.');
+  await say('me', '잘 아시네요. 일 년에 하룻밤만 열린다면서요.');
+  await say('boat', '십칠 년 전 그믐에도 이 물길을 탔으니께.');
+  await say('me', '네?');
+  await say('boat', '곽씨가 피투성이로 갈대밭에 쓰러져 있었어. 등에 애를 업고. 그 둘을 강 아래까지 실어 나른 게 나여.');
+  await say('me', '그럼 처음부터 다 아셨어요? 왜 말 안 하셨어요?');
+  await say('boat', '입 뻥긋하면 배에 불 지른다는디. 그 여편네는 진짜 지르거든.');
+  await say('boat', '너는 배 바닥에서 내내 울었어. 강을 다 내려와서야 그치더라. 이제 그 배로 네가 돌아가는구먼.');
   ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
   await ctx.warp('wolha', 22, 37, 1);
 }
@@ -261,8 +269,10 @@ async function jobWell() {
   }
   F().ma_job3 = true; maCheck();
 }
+import { maAfter } from './part45.js';
 function maCheck() { if (F().ma_job1 && F().ma_job2 && F().ma_job3) ctx.goal('청풍골 서쪽 분타로 돌아가 혁련하에게 알리기'); }
 async function maReturn() {
+  await maAfter();
   if (F().ma_defy) {
     await say('hyeolma', '항아리가 깨졌다더군. 열쇠는 손잡이만 있으면 돼. 나머지는 잘라 내겠다.');
     await say('hyeok', '혈마 님, 멈추십시오. 제 앞에서는 안 됩니다.');

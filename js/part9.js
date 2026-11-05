@@ -74,6 +74,10 @@ async function preface() {
   await narr('그렇게 한 달을 닦았다. 칼을 찬 사람들은 객잔에 들르지 않았다. 손님은 약을 얻으러 온 피난민들이었고, 나는 그 사람들 그릇을 치웠다. 아침마다 허리를 세우고 왼발로 밀었다.');
   await narr('어느 날 아침, 닦아 놓은 바닥을 돌아보다가 알았다. 오른발이 저절로 따라오고 있었다. 숨이 끊기지 않았다. 배꼽 밑에서 아주 작은 뭔가가 같이 밀리고 있었다.');
   ctx.cgOff();
+  await say('kid', '쟁반 아저씨, 이제 칼 못 들어요?');
+  await say('me', '응.');
+  await say('kid', '그럼 쟁반이라도 던져요. 쟁반 잘 던지잖아요.');
+  await narr('쟁반은 들렸다. 던지면 두 칸도 못 날아가서 문제였다. 꼬마가 주워다 주기를 열 번쯤 하더니 자기가 던져 보겠다고 했다. 나보다 멀리 날아갔다.');
   await say('gwak', '늦었어. 국수 다 불겠다. 이리 와서 국물 끓이는 거나 배워.');
   await say('me', '국물이요? 나중에 가르쳐 주신다면서요.');
   await say('gwak', '지금이 나중이다. 민물새우 한 줌에 무 한 토막. 끓으면 불 줄이고 딴생각 말고 앉아 있어.');
@@ -110,6 +114,7 @@ async function siege() {
   await say('elder', '늙은이는 뒤에 있으라고들 하는데, 뒤가 어딘가. 여기가 맨 뒤일세.');
   await say('guyang', '산길은 내 애들이 막았다. 쌀값은 이걸로 치른 거다.');
   await say('namhwa', '나루 밖 우물은 제가 손봐 뒀어요. 저쪽 놈들이 마시면 그날로 끝이에요. 우리 쪽은 마시지 마세요.');
+  await G.side.siege();
   if (F().wei_spared) await say('wei', '점소이, 국수 외상 갚으러 왔다. 배는 다 뒤집어 놨으니 강으로는 못 물러난다.');
   if (F().lion_debt) await say('lion', '산에서 내려왔다. 녹림 놈들은 빚지고는 못 산다고 했잖냐.');
   if (F().kids_saved) await narr('나무패를 벗은 아이들 서른한 명이 쟁반을 하나씩 들고 줄을 섰다. 말리는 사람이 없었다. 꼬마가 맨 앞에서 던지는 법을 가르치고 있었다.');
@@ -221,6 +226,7 @@ async function lastChoice() {
   if (c === 1) { ctx.cg({ jeong: 'end_jeong', sa: 'end_sa', ma: 'end_ma', free: 'end_free' }[s]); await narr(lead[1]); await narr('일 년에 한 번은 달맞이 객잔에 들른다. 어느 자리에 앉아 있든 곽 아주머니는 걸레부터 던져 준다.'); }
   if (c === 2) { ctx.cg('end_ma'); await narr('천산 돌문 앞에 움막을 지었다. 백 노인이 쓰던 술병을 옆에 두고, 아침마다 돌계단을 닦는다. 사흘만 안 닦아도 먼지가 앉는다.'); }
   if (c === 3) { ctx.cg('end_free'); await narr('칼 한 자루를 메고 새벽에 나루를 나섰다. 이번에는 갈 데가 없어서 떠나는 게 아니었다. 강호 어디서든 그믐날 밤이면 나무패도 번호도 없는 낭인 하나가 묵었다 간다는 얘기가 돌았다.'); }
+  await G.side.ending();
   await G.bond.ending();
   ctx.cgOff();
   await narr('그 뒤로 강호에서는 나를 이렇게 불렀다. {호} {나}.\n\n사람들이 뭐라고 부르든, 나는 곽씨네 점소이였다.');

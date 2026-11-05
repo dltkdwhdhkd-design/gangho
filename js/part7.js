@@ -1,5 +1,5 @@
 // 제7부 붉은 달: 어느 길을 왔든 청하진으로 모이고, 정파와 사파가 한 상에 앉는다
-import { G, Sound, fadeTo, toast } from './core.js';
+import { G, Sound, fadeTo, toast, josa } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { FOES } from './foes.js';
@@ -71,6 +71,10 @@ export async function begin() {
   else if (s === 'sa') await say('baekrang', '서쪽 소문이 안 좋아요. 곤륜이랑 공동이 열흘 만에 무너졌대요. 우리 분타도 연락이 끊겼고요.');
   else if (s === 'ma') await say('hyeok', '혈교의 선봉입니다. 곤륜과 공동은 이미 없다고 보셔야 합니다.');
   else await say('beggar', '서쪽 거지들 소식이 끊겼다. 곤륜이랑 공동이 열흘 만에 무너졌다더라.');
+  await narr('그날 오후 나루에 배 한 척이 닿았다. 서쪽에서 내려온 피난민들 틈에 곤륜파 복색을 한 사내가 지팡이를 짚고 내렸다. 비무대에서 어지럽다던 그 사람이었다.');
+  await say('deung', '살아 있었구려. 곤륜은 없어졌소. 사제들 먼저 내려보내고 나도 내려왔소. 다 못 내려왔지만.');
+  await say('me', '공동은요?');
+  await say('deung', '곽충이 산문 앞에서 막았다더군. 맨주먹으로. 그쪽으로 술 마시러 간다고 약속했는데 말이오.');
   await say('boat', '약방에 사람이 또 실려 갔구먼. 비 맞은 사람들이여. 가 봐.');
   set('r2'); ctx.goal('윤씨 약방의 윤설 찾아가기');
   ctx.note('서쪽 하늘에 붉은 달이 떴다. 월하칠식은 천마의 봉인을 여는 열쇠였다. 월천과 연경추의 시신이 사라졌다.');
@@ -104,6 +108,8 @@ async function mossRain() {
     await say('go', '…내 사제들이다.');
     await say('me', '사형, 죄송합니다.');
     await say('go', '네가 왜. 내가 할 일을 네가 했다. 문주님도 앓아누우셨다. 약이 되면 제일 먼저 기별해라.');
+    await say('jangpal', '형씨. 쟤들 저랑 같이 물 긷던 애들이어유. 묻어 주고 싶은디 손이 떨려서 삽을 못 잡겠어유.');
+    await narr('셋이서 매화나무 아래에 구덩이를 팠다. 고진은 사제들 칼을 하나씩 닦아서 같이 묻었다.');
   } else await say('lord', '고진이 있었으면 저 아이들을 자기 손으로 보냈을 것이오. 이끼는 가져가시오. 산문을 나가시오.');
   F().r_moss = true; ctx.note('창운산에서 달빛이끼를 구했다.'); checkRain();
 }
@@ -136,6 +142,7 @@ async function rainCure() {
   else {
     await say('yun', '약이 들어요. 마을 사람들은 다 살 거예요.');
     await say('me', '네.');
+    if (F().baby) await narr(`장례 때 순이네가 ${josa(F().baby, '을/를')} 업고 왔다. 윤 의원이 받은 삼백열두 번째 아이였다. 아기는 사람들 틈에서 혼자 잘 웃었다.`);
     await say('yun', '팔 줘 봐요.');
     await narr('윤설은 내 팔에 붕대를 감았다. 다친 데도 없는 팔이었다. 붕대를 감는 손이 떨리고 있었다. 나는 아무 말도 하지 않았다.');
   }
@@ -252,6 +259,7 @@ async function gateScene() {
     await narr('대답이 없었다. 가까이 가 보니 눈을 뜬 채였다. 오른손에 먹다 남은 주먹밥이 쥐여 있었다.');
     ctx.cgOff();
     await say('jigaek', '…문을 열겠습니다. 스님을 안으로 모십시오.');
+    if (F().cheol_soup) await narr('철우가 부탁한 대로 그날 저녁 고깃국을 한 솥 끓여 문 앞에 놓았다. 소금을 조금 많이 넣었다. 혜명은 절 앞에 고깃국이 놓인 걸 보고도 치우라는 말을 하지 않았다.');
     await narr('십 년 넘게 닫혀 있던 쪽 문이 열렸다. 승려들이 철우를 메고 그 문으로 들어갔다.');
     F().cheol_dead = true;
   }

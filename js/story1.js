@@ -313,7 +313,7 @@ Story.providers.push(function content1(id) {
     if (F().doc_dead) sp.push({ x: 9, y: 3, w: 2, h: 2, hint: '약장 열기', act: async () => { const c = await choice('윤 의원의 약장이다.', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다']); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
     n.push({ id: 'doc', spr: 'OldMan', x: 9.5, y: 3.6, dir: 0, when: () => !F().doc_dead, mark: () => !!G.ch.hook('doc'), talk: async () => { const h = G.ch.hook('doc'); if (h) return h(); await say('doc', '몸이 재산이다. 금창약은 넉넉히 챙겨라.'); const c = await choice('무엇을 할까?', ['약 사기', '약 조제', '침상에서 쉬기 (5냥)', '그만둔다'], 'doc'); if (c === 0) await ctx.shop('윤씨 약방', [ctx.item.potion(9)]); if (c === 1) await G.life.openCraft('brew', '윤씨 약방 · 조제'); if (c === 2 && S().silver >= 5) { S().silver -= 5; await G.life.sleepNow(); } } });
   }
-  if (id === 'smith' && F().burned) n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => at('c1e') && !F().smith_gift, talk: talkTown.smith });
+  if (id === 'smith' && F().burned) n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => (at('c1e') && !F().smith_gift) || !!G.ch.hook('smith'), talk: async () => { const h = G.ch.hook('smith'); if (h && !(at('c1e') && !F().smith_gift)) return h(); await talkTown.smith(); } });
   if (id === 'shop') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: talkTown.shopk });
   if (id === 'cheongha' && F().burned) {
     n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, mark: () => at('c1a') && !F().c1boat, talk: talkTown.boat });

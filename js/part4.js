@@ -75,6 +75,7 @@ async function granary() {
 }
 
 // ── 정파 길 ──
+import { crossFire } from './part45.js';
 async function jeong4() {
   F().night = false;
   await ctx.part(4, '쫓기는 몸', '움막');
@@ -296,6 +297,7 @@ async function frElder() {
 async function sa5() {
   await ctx.part(5, '장강의 불', '도하');
   await narr('보름 뒤, 흑도맹의 배 삼백 척이 장강을 건넜다. 사마웅은 맨 앞 배 뱃머리에 서서 구화성이 보일 때까지 앉지 않았다.');
+  await crossFire();
   await say('samaung', '맹주 창고부터 턴다. 그놈 쌀을 끊어야 군대가 굶는다. 네가 가라.');
   await say('baekrang', '그 창고는 소문이 이상해요. 쌀은 매일 들어가는데 나오는 걸 본 사람이 없대요.');
   set('sa3'); ctx.goal('구화성 맹주 창고 털기');
@@ -354,6 +356,7 @@ G.ch = {
   // 원래 있던 인물이 이야기가 있을 때 먼저 말을 꺼내게 한다
   hook(k) {
     { const h = G.act3 && G.act3.hook7(k); if (h) return h; }
+    { const h = G.side && G.side.hook(k); if (h) return h; }
     if (at('jg1')) { if (k === 'clan_dang' && !F().jg_dang) return dangRecord; if (k === 'clan_jegal' && !F().jg_date) return jegalOrder; }
     if (at('jg2') && k === 'clan_shaolin') return hyegakPlea;
     if (at('fr1')) { if (k === 'beggar' && !F().fr_talk) return frBeggar; if (k === 'doc' && F().fr_talk && !F().fr_med) return frMed; }
