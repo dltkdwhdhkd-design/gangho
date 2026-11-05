@@ -14,8 +14,8 @@ import { LOCS } from './worlddata.js';
 const S = () => G.S, Fr = () => G.S.fr, F = () => G.S.flags;
 export const FACS = [...CLANS.map(c => ({ ...c, align: 'jeong', key: 'clan_' + c.id })), ...EXTRA];
 // 자유 모드에서는 대표가 본거지에 있다
-const HOME = { shaolin: ['shaolin', 20, 12.5], hwasan: ['hwasan', 15, 11] };
-FACS.forEach(f => { const l = LOCS.find(q => q.fac === f.id); if (HOME[f.id]) f.at = HOME[f.id]; else if (l && l.map.startsWith('b_')) f.at = [l.map, 20, 11.5]; });
+const HOME = { shaolin: ['shaolin', 20, 12.5] };
+FACS.forEach(f => { const l = LOCS.find(q => q.fac === f.id); if (HOME[f.id]) f.at = HOME[f.id]; else if (l && l.map.startsWith('b_')) f.at = [`r_${l.id}_hall`, 11, 5]; });
 export const fac = id => FACS.find(f => f.id === id);
 export const rankName = (f, r) => (f.id === 'gaebang' ? RANKS.개방 : RANKS[f.group])[r];
 const T = { 1: [1000, 28, 8, 66, 130, 60, 1.05, 130], 2: [1500, 34, 10, 72, 220, 100, .95, 170], 3: [2200, 40, 12, 76, 340, 160, .85, 220] };
@@ -90,7 +90,7 @@ function makeJob(f, war) {
   j.silver = Math.round((30 + lv * 12) * (war ? 1.4 : 1)); j.merit = Math.round((24 + lv * 2.2) * (war ? 1.6 : 1)); j.fame = 2;
   return j;
 }
-const gatherSpot = id => { const p = id === 'cheongha' ? [20, 19] : id === 'cloudmt' ? [26, 20] : id === 'ninehall' ? [20, 13] : id === 'fiveclans' ? [18, 14] : id === 'fort' ? [18, 21] : id === 'shrine' ? [4, 8] : id.startsWith('b_') ? [24, 14] : [10, 10]; return p; };
+const gatherSpot = id => { const p = id === 'cheongha' ? [20, 19] : id === 'cloudmt' ? [26, 20] : id === 'ninehall' ? [20, 13] : id === 'fiveclans' ? [18, 14] : id === 'fort' ? [18, 21] : id === 'shrine' ? [4, 8] : id.startsWith('r_') ? [5, 10.5] : [10, 10]; return p; };
 function boardFor(fid) {
   const b = Fr().board, k = fid || 'free';
   const stamp = `${S().day}:${period()}`; // 하루가 길어서 끼니마다 일거리가 바뀐다

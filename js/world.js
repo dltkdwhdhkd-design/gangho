@@ -7,7 +7,7 @@ import { give, nextDay } from './state.js';
 import { Story, ctx, say, choice } from './ctx.js';
 import { LOCS, ROADS, PROV } from './worlddata.js';
 
-const K = 1.25, WW = Math.round(804 * K), WH = Math.round(658 * K), CH = 32;
+const K = 1.6, WW = Math.round(804 * K), WH = Math.round(658 * K), CH = 32;
 // 바다. 해안선을 따라 시계 방향
 const SEA = [[804, 100], [770, 130], [752, 160], [745, 190], [712, 222], [690, 240], [668, 232], [650, 255], [625, 262], [612, 272], [628, 292], [660, 290], [692, 295], [665, 318], [645, 338], [650, 352], [670, 385], [695, 395], [680, 405], [702, 430], [692, 470], [662, 520], [620, 548], [590, 567], [545, 585], [528, 598], [522, 618], [505, 592], [470, 575], [440, 590], [420, 605], [420, 658], [804, 658]];
 // 중원의 경계. 전도에 선으로 그린다
@@ -51,19 +51,14 @@ export function buildWorld() {
   }
   STOPS = STOPS.filter(t => g[t.y]?.[t.x] === 1 || g[t.y]?.[t.x] === 0);
   const near = (x, y, d) => { for (let q = -d; q <= d; q += 2) for (let r = -d; r <= d; r += 2) { const k = g[y + r]?.[x + q]; if (k === 1 || k === 4) return true; } return false; };
-  const keep = [...LOCS.map(l => [l.px[0] * K, l.px[1] * K]), ...STOPS.map(t => [t.x, t.y])], far = (x, y, d) => keep.every(([a, b]) => Math.hypot(a - x, b - y) > d);
-  const ok = (x, y) => g[y]?.[x] === 0 && g[y + 3]?.[x + 3] === 0 && !near(x + 2, y + 2, 7) && far(x, y, 11);
+  const keep = [...LOCS.map(l => [l.px[0] * K, l.px[1] * K]), ...STOPS.map(t => [t.x, t.y])], far = (x, y, d) => keep.every(([a, b]) => Math.hypot(a - x, b - (y + 5)) > d);
+  const ok = (x, y) => g[y]?.[x] === 0 && g[y + 3]?.[x + 3] === 0 && !near(x + 2, y + 2, 7) && far(x, y, 22);
   RANGES.forEach(r => line(r, 7, (x, y) => { if (R() < .012 && ok(x, y)) m.put(R() < .62 ? 'rocks' : (BN[B[y][x]] === 'snow' ? 'boulder_w' : 'boulder'), x, y); }));
   const TREE = { grass: ['tree_round', 'grove_green', 'tree_big', 'bush1', 'tree_round'], deep: ['grove_pine', 'tree_pine', 'grove_green', 'bamboo'], sand: ['tree_dead', 'boulder', 'bush3', 'rocks'], rose: ['tree_dead', 'stump'], snow: ['tree_snow', 'boulder_w', 'tree_snow', 'grove_white'], dusk: ['boulder_b', 'tree_dead', 'grove_dead'] };
   const dens = { grass: .008, deep: .02, sand: .002, rose: .003, snow: .006, dusk: .005 };
   for (let y = 2; y < WH - 4; y++) for (let x = 2; x < WW - 4; x++) { const b = BN[B[y][x]]; if (R() < dens[b] && ok(x, y)) m.put(TREE[b][Math.floor(R() * TREE[b].length)], x, y); }
   for (const t of STOPS) { m.put('hut_o', t.x - 2, t.y - 4); m.put('banner4', t.x + 2, t.y - 2); m.fill(t.x - 1, t.y - 1, 3, 2, 1); m.label(t.x, t.y - 5, '주막'); }
-  for (const l of LOCS) {
-    const tx = Math.round(l.px[0] * K), ty = Math.round(l.px[1] * K), mark = l.kind === 'city' ? ['shop_green', 3] : l.style === 'fort' || l.style === 'slum' || l.color === 'evil' ? ['wood_b', 3] : ['lodge', 5];
-    m.fill(tx - 2, ty, 5, 3, 1); m.put(mark[0], tx - 2, ty - mark[1]);
-    m.label(tx, ty - mark[1] - 1, l.name);
-    m.exit(tx - 2, ty - 1, 4, 1, l.map, l.at[0], l.at[1], 1, { world: true, when: l.need, lock: l.need ? '지금 갈 만한 까닭이 없다.' : undefined });
-  }
+  for (const l of LOCS) compound(l);
   m.objs = m.stamps; m.canvas = null;
   // 칸 묶음별 충돌과 소품
   m.sg = new Map(); m.og = new Map();
@@ -78,6 +73,32 @@ export function buildWorld() {
   };
 }
 const objsNear = cam => { const S = CH * TS, out = []; for (let cy = Math.floor((cam.y - 120) / S); cy <= Math.floor((cam.y + VH + 8) / S); cy++) for (let cx = Math.floor((cam.x - 120) / S); cx <= Math.floor((cam.x + VW + 8) / S); cx++) { const L = m.og.get(cx + cy * 4096); if (L) out.push(...L); } return out; };
+// 전도 위의 문파와 도시. 길가 집 한 채가 아니라 담장 두른 건물 무리로 보인다
+function shape(l) { if (l.kind === 'city' || l.map === 'guhwa' || l.map === 'oasis') return 'city'; if (l.kind === 'old') return { cheongha: 'village', valley: 'hamlet', bamboo: 'pass', pass: 'pass', fort: 'fort', cloudmt: 'mount', shaolin: 'mount', wolha: 'pass', silk: 'pass', tiangate: 'pass', snowpeak: 'pass', blackpalace: 'dark' }[l.map]; return { dao: 'mount', temple: 'mount', peak: 'mount', west: 'mount', manor: 'manor', water: 'fort', fort: 'fort', slum: 'fort', dark: 'dark', ice: 'manor' }[l.style]; }
+const SIZE = { city: [15, 16], mount: [11, 14], manor: [10, 11], fort: [9, 9], dark: [11, 14], village: [9, 8], hamlet: [5, 4], pass: [3, 2] };
+function compound(l) {
+  const tx = Math.round(l.px[0] * K), ty = Math.round(l.px[1] * K), s = shape(l), [rx, ry] = SIZE[s], g = m.g, x0 = tx - rx, x1 = tx + rx, y0 = ty - ry, y1 = ty;
+  // 터를 고르고 둘레에 길을 낸다. 어느 쪽에서 오든 정문으로 돌아 들어간다
+  for (let y = y0 - 1; y <= y1 + 3; y++) for (let x = x0 - 1; x <= x1 + 1; x++) if (g[y]?.[x] !== undefined) { const edge = y === y0 - 1 || y === y1 + 3 || x === x0 - 1 || x === x1 + 1; g[y][x] = edge ? 1 : y > y1 ? 1 : 0; }
+  m.label(tx, ty + 4.6, l.name); const brow = (st, x, y, n) => { for (let i = 0; i < n; i++) m.put(st, x + i, y); };
+  if (s === 'mount' || s === 'dark') {
+    const w = s === 'dark' ? 'wall_h' : 'wall_h'; m.put('rocks', tx - rx - 5, ty - ry + 1); m.put('rocks', tx + rx + 2, ty - ry + 1); m.put('rocks', tx - rx - 5, ty - 7); m.put('rocks', tx + rx + 2, ty - 7); m.put('rocks', tx - 3, ty - ry - 4); m.put('rocks', tx + 1, ty - ry - 4);
+    brow(w, x0, ty - 1, rx - 2); brow(w, tx + 3, ty - 1, rx - 2); for (let y = y0; y < ty; y++) { m.put(w, x0, y); m.put(w, x1 - 1, y); } brow(w, x0, y0, rx * 2);
+    m.put('hall', tx - 2, y0 + 1); m.put('lodge', x0 + 1, y0 + 2); m.put('lodge', x1 - 6, y0 + 2); m.put('hut_o2', x0 + 1, ty - 5); m.put('hut_o2', x1 - 6, ty - 5); m.put('gate_arch', tx - 2, ty - 3, { nosolid: true }); m.put('banner3', tx - 4, ty - 3); m.put('banner3', tx + 3, ty - 3);
+  } else if (s === 'manor') {
+    brow('wall_h', x0, ty - 1, rx - 2); brow('wall_h', tx + 3, ty - 1, rx - 2); for (let y = y0; y < ty; y++) { m.put('wall_h', x0, y); m.put('wall_h', x1 - 1, y); } brow('wall_h', x0, y0, rx * 2);
+    m.put('house_red', tx - 3, y0 + 1); m.put('hut_o', x0 + 1, y0 + 1); m.put('hut_b', x1 - 5, y0 + 1); m.put('gate_arch', tx - 2, ty - 3, { nosolid: true }); m.put('banner1', tx - 4, ty - 3); m.put('banner1', tx + 3, ty - 3);
+  } else if (s === 'city') {
+    brow('wall_h', x0, ty - 1, rx - 2); brow('wall_h', tx + 3, ty - 1, rx - 2); for (let y = y0; y < ty; y++) { m.put('wall_h', x0, y); m.put('wall_h', x1 - 1, y); } brow('wall_h', x0, y0, rx * 2);
+    m.put('hall', tx - 2, y0 + 1); [[-13, -14, 'house_red'], [-7, -14, 'shop_green'], [3, -13, 'shop_blue'], [8, -14, 'hut_o'], [-13, -9, 'hut_b'], [-7, -9, 'hut_o2'], [3, -8, 'clay'], [8, -9, 'wood_b']].forEach(([a, b, st]) => m.put(st, tx + a, ty + b)); m.put('gate_arch', tx - 2, ty - 3, { nosolid: true });
+  } else if (s === 'fort') {
+    brow('wood_h', x0, ty - 1, rx - 2); brow('wood_h', tx + 3, ty - 1, rx - 2); for (let y = y0; y < ty; y++) { m.put('wood_h', x0, y); m.put('wood_h', x1 - 1, y); } brow('wood_h', x0, y0, rx * 2);
+    m.put('wood_b', tx - 3, y0 + 1); m.put('wood_o', x0 + 1, ty - 5); m.put('mud', x1 - 5, ty - 5); m.put('banner7', tx - 3, ty - 3); m.put('banner7', tx + 2, ty - 3);
+  } else if (s === 'village') { m.put('hut_o', tx - 8, ty - 7); m.put('house_red', tx - 3, ty - 8); m.put('hut_b', tx + 3, ty - 7); m.put('hut_o2', tx - 7, ty - 3); m.put('shop_green', tx + 2, ty - 3); }
+  else if (s === 'hamlet') { m.put('hut_o', tx - 4, ty - 4); m.put('straw', tx + 1, ty - 4); }
+  else m.put('gate_arch', tx - 2, ty - 3, { nosolid: true });
+  m.exit(tx - 2, ty - 1, 4, 1, l.map, l.at[0], l.at[1], 1, { world: true, when: l.need, lock: l.need ? '지금 갈 만한 까닭이 없다.' : undefined });
+}
 const fillOf = b => BIOME[b];
 function chunk(cx, cy) {
   const k = cx + ',' + cy; let e = chunks.get(k); if (e) { e.t = G.field.t; return e.c; }

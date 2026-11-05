@@ -90,6 +90,12 @@ export async function tutor(f) {
   opts.push(['이곳에 대해 묻는다', async () => { await narr(f.desc); }], ['그만둔다', async () => { }]);
   const c = await choice(`${f.name} 사범 · 우호 ${jh.rep(f.id)}`, opts.map(o => o[0])); await opts[c][1]();
 }
+// 서고: 우호가 쌓이면 그 세력 잔권을 빌려 베낄 수 있다
+async function library(f) {
+  const s = S(), jh = G.jh, L = (ID[f.id] || []).filter(k => !s.skills.includes(k) && !SKILLS[k].ult); if (!L.length) { await say(null, '서고지기가 더 내줄 책이 없다고 했다.'); return; }
+  if (jh.rep(f.id) < 20) { await say(null, '서고지기가 우호 20은 되어야 책을 내준다고 했다.'); return; } if (s.daily['lib_' + f.id]) { await say(null, '오늘은 더 안 된다고 했다.'); return; }
+  const k = L[0], c = await choice(`${SKILLS[k].name} 잔권을 베낄까? (은자 120냥)`, ['베낀다', '그만둔다']); if (c) return; if (s.silver < 120) { await say(null, '은자가 모자란다.'); return; } s.silver -= 120; s.daily['lib_' + f.id] = 1; addScrap(k);
+}
 // ── 책방 ──
 export async function bookshop(l) {
   const s = S(), day = s.day, seed = l.id.length * 7 + day, q = (n, L) => L[(seed * 31 + n * 17) % L.length], J = ID.jabhak.filter(k => !s.skills.includes(k)), books = [...new Set([q(1, J), q(2, J), q(3, J)])].filter(Boolean), all = Object.keys(ID).filter(k => k !== 'jabhak'), fid = q(4, all), scrap = q(5, ID[fid].filter(k => !SKILLS[k].ult)), opts = [];
@@ -117,4 +123,4 @@ function codex(B) {
   B.querySelectorAll('details').forEach(d => d.ontoggle = () => { if (d.open) B._open = d.dataset.f; });
   B.querySelectorAll('[data-dec]').forEach(b => b.onclick = () => { const k = b.dataset.dec; G.closeMenu && G.closeMenu(); G.field.run(() => decode(k)); });
 }
-G.arts = { parried, drop, tutor, bookshop, codex, relics: ALL_RELICS, relic, addScrap, usable, rumor, ID };
+G.arts = { library, parried, drop, tutor, bookshop, codex, relics: ALL_RELICS, relic, addScrap, usable, rumor, ID };

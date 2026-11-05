@@ -7,7 +7,7 @@ import { WEAPONS } from './data.js';
 const S = () => G.S, F = () => G.S.flags, step = () => G.S.flags.step || 'p0', set = v => { G.S.flags.step = v; };
 const at = (...a) => a.includes(step());
 const after = v => ORDER.indexOf(step()) >= ORDER.indexOf(v);
-const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2b2', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'sa1', 'sa2', 'ma1', 'ma2', 'jg1', 'jg2', 'jg3', 'fr1', 'fr2', 'sa3', 'ma3', 'c4b', 'c4c', 'c4d', 'c4e', 'r2', 'r2b', 'r3', 'r4', 'r5', 'w1', 'w1b', 'w2', 'w2b', 'w3', 'w4', 'w5', 'x2', 'x3', 'x4', 'x5', 'end'];
+const ORDER = ['p0', 'p0a', 'p1', 'p2', 'p3', 'p4', 'p5', 'c1a', 'c1b', 'c1c', 'c1d', 's1', 's2', 's3', 's4', 'c1e', 'c1f', 'c1g', 'c1h', 'c2a', 'c2b', 'c2b2', 'c2b3', 'c2c', 'c2d', 'c2e', 'c2f', 'c2g', 'c2h', 't1', 't2', 't3', 't4', 't5', 'c3a', 'c3b', 'c3c', 'c3d', 'c3e', 'c3f', 'c3g', 'c4a', 'sa1', 'sa2', 'ma1', 'ma2', 'jg1', 'jg2', 'jg3', 'fr1', 'fr2', 'sa3', 'ma3', 'c4b', 'c4c', 'c4d', 'c4e', 'r2', 'r2b', 'r3', 'r4', 'r5', 'w1', 'w1b', 'w2', 'w2b', 'w3', 'w4', 'w5', 'x2', 'x3', 'x4', 'x5', 'end'];
 export { step, set, at, after };
 G.after = after;
 const overBlack = on => $('#dialog').classList.toggle('over', on);

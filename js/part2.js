@@ -14,7 +14,10 @@ const left = () => [!F().ch_well && '우물가 물 긷기', !F().ch_dummy && '�
 async function done() {
   if (!chores()) { ctx.goal(`외문 일과: ${left()}`); return; }
   await narr('그렇게 이레가 갔다. 손바닥에 잡힌 굳은살이 슬슬 칼자루 모양을 닮아 갔다.');
-  await narr('이레째 저녁에 검각주가 나를 불렀다. 외문 제자를 검각주가 직접 부르는 일은 없다고 장팔이 몇 번이나 말했다.');
+  await G.part2Month();
+}
+G.part2Tea = async function tea() {
+  await narr('그달 마지막 날 저녁에 검각주가 나를 불렀다. 외문 제자를 검각주가 직접 부르는 일은 없다고 장팔이 몇 번이나 말했다.');
   await say('wi', '앉으시오. 객잔에서 일했다지. 고진이 그러더군, 목부터 치는 버릇이 있다고.');
   await say('me', '고치는 중입니다.');
   await say('wi', '그 걸음은 어디서 배웠소?');
@@ -25,7 +28,7 @@ async function done() {
   if (c === 0) { F().wi_tea = true; await narr('쓴맛 뒤로 매화 향이 조금 남았다. 위문상은 내가 잔을 내려놓을 때까지 내 손을 보고 있었다.'); await say('wi', '잘 마시는구려. 가 보시오.'); }
   else { await say('me', '혀가 약해서요. 식으면 마시겠습니다.'); await narr('위문상은 내 잔을 제 앞으로 끌어다 놓더니 천천히 비웠다.'); await say('wi', '점소이가 차를 식혀 마신다니, 귀한 손님이 오셨구려. 가 보시오.'); }
   set('c2c'); ctx.goal('본전에서 윤설과 함께 문주를 뵙기');
-}
+};
 async function water() {
   await narr('물지게를 지고 우물과 주방 사이를 오갔다. 스무 번쯤 오가니 어깨가 벌겋게 부어올랐다. 장팔은 다섯 번 만에 주저앉았다.');
   await say('jangpal', '형씨는 어째 숨도 안 차유?');

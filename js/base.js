@@ -3,24 +3,26 @@ import { G, Sound, toast, josa, pick } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { MAPS, makeMap } from './maps.js';
+import { STAMPS } from './tiles.js';
+import { TS } from './core.js';
 import { LOOT } from './items.js';
 import { learn } from './state.js';
 import { LOCS } from './worlddata.js';
-import { EXTRA } from './freedata.js';
+import { EXTRA, SURNAME } from './freedata.js';
 import { CLANS } from './clandata.js';
 
 const NEW = EXTRA.filter(f => f.hi); NEW.forEach(f => { WHO[f.key] = { name: f.who, face: f.spr }; });
 const ST = {
-  temple: { biome: 'grass', bgm: 'temple', arena: 'court', wall: 'wall_h', trees: ['tree_round', 'grove_green'], side: 'lodge', small: 'hut_o2', deco: ['statue_big', 'plum_w'], folk: ['Monk', 'Monk2'], ban: 'banner3' },
-  dao: { biome: 'deep', bgm: 'mystic', arena: 'forest', wall: 'wall_h', trees: ['tree_pine', 'grove_pine'], side: 'lodge', small: 'wood_o', deco: ['plum', 'statue'], folk: ['OldMan', 'BlueNinja', 'Villager'], ban: 'banner5' },
-  peak: { biome: 'snow', bgm: 'mystic', arena: 'snow', ambient: 'snow', wall: 'wood_h', trees: ['tree_snow', 'grove_white'], side: 'lodge', small: 'wood_b', deco: ['boulder_w', 'tree_white'], folk: ['Eskimo', 'EskimoNinja'], ban: 'banner5' },
-  manor: { biome: 'grass', bgm: 'story', arena: 'yard', wall: 'wall_h', trees: ['tree_round', 'plum_o'], side: 'house_red', small: 'shop_green', deco: ['plum', 'pot'], folk: ['Knight', 'Noble', 'Villager4'], ban: 'banner1' },
-  water: { biome: 'sand', bgm: 'road', arena: 'village', wall: 'fence_h', trees: ['tree_dead', 'bush3'], side: 'wood_b', small: 'wood_o', deco: ['jar', 'log'], folk: ['Villager3', 'Villager2'], water: true, ban: 'banner6' },
-  fort: { biome: 'dusk', bgm: 'dungeon', arena: 'fort', wall: 'wood_h', trees: ['tree_dead', 'grove_dead'], side: 'wood_b', small: 'mud', deco: ['boulder_b', 'jar'], folk: ['DarkNinja', 'RedNinja', 'Caveman'], ban: 'banner7' },
+  temple: { mount: 1, hall: 'hall', biome: 'grass', bgm: 'temple', arena: 'court', wall: 'wall_h', trees: ['tree_round', 'grove_green'], side: 'lodge', small: 'hut_o2', deco: ['statue_big', 'plum_w'], folk: ['Monk', 'Monk2'], ban: 'banner3' },
+  dao: { mount: 1, biome: 'deep', bgm: 'mystic', arena: 'forest', wall: 'wall_h', trees: ['tree_pine', 'grove_pine'], side: 'lodge', small: 'wood_o', deco: ['plum', 'statue'], folk: ['OldMan', 'BlueNinja', 'Villager'], ban: 'banner5' },
+  peak: { mount: 1, biome: 'snow', bgm: 'mystic', arena: 'snow', ambient: 'snow', wall: 'wood_h', trees: ['tree_snow', 'grove_white'], side: 'lodge', small: 'wood_b', deco: ['boulder_w', 'tree_white'], folk: ['Eskimo', 'EskimoNinja'], ban: 'banner5' },
+  manor: { big: 'house_red', hall: 'house_red', biome: 'grass', bgm: 'story', arena: 'yard', wall: 'wall_h', trees: ['tree_round', 'plum_o'], side: 'house_red', small: 'shop_green', deco: ['plum', 'pot'], folk: ['Knight', 'Noble', 'Villager4'], ban: 'banner1' },
+  water: { big: 'wood_b', hall: 'wood_b', biome: 'sand', bgm: 'road', arena: 'village', wall: 'fence_h', trees: ['tree_dead', 'bush3'], side: 'wood_b', small: 'wood_o', deco: ['jar', 'log'], folk: ['Villager3', 'Villager2'], water: true, ban: 'banner6' },
+  fort: { big: 'wood_b', hall: 'wood_b', biome: 'dusk', bgm: 'dungeon', arena: 'fort', wall: 'wood_h', trees: ['tree_dead', 'grove_dead'], side: 'wood_b', small: 'mud', deco: ['boulder_b', 'jar'], folk: ['DarkNinja', 'RedNinja', 'Caveman'], ban: 'banner7' },
   dark: { biome: 'dusk', bgm: 'curse', arena: 'moon', tint: 'rgba(60,8,30,.28)', wall: 'wall_h', trees: ['tree_dead', 'grove_dead'], side: 'lodge', small: 'mud', deco: ['statue_big', 'boulder_b'], folk: ['Skeleton', 'RedNinja2', 'MaskedNinja'], ban: 'banner7' },
-  slum: { biome: 'sand', bgm: 'good', arena: 'village', wall: 'fence_h', trees: ['tree_dead', 'bush3'], side: 'straw', small: 'mud', deco: ['jar', 'log'], folk: ['Gaebang', 'Villager2', 'Boy'], ban: 'banner2' },
+  slum: { big: 'straw', hall: 'mud', biome: 'sand', bgm: 'good', arena: 'village', wall: 'fence_h', trees: ['tree_dead', 'bush3'], side: 'straw', small: 'mud', deco: ['jar', 'log'], folk: ['Gaebang', 'Villager2', 'Boy'], ban: 'banner2' },
   ice: { biome: 'snow', bgm: 'mystic', arena: 'snow', ambient: 'snow', tint: 'rgba(120,170,230,.14)', wall: 'wall_h', trees: ['tree_snow', 'boulder_w'], side: 'lodge', small: 'wood_b', deco: ['boulder_w', 'statue'], folk: ['Eskimo', 'Cavegirl'], water: true, ban: 'banner5' },
-  west: { biome: 'sand', bgm: 'temple', arena: 'sand', wall: 'wall_h', trees: ['tree_dead', 'boulder'], side: 'clay', small: 'clay', deco: ['statue_big', 'pot'], folk: ['Monk2', 'Master'], ban: 'banner3' },
+  west: { mount: 1, big: 'clay', biome: 'sand', bgm: 'temple', arena: 'sand', wall: 'wall_h', trees: ['tree_dead', 'boulder'], side: 'clay', small: 'clay', deco: ['statue_big', 'pot'], folk: ['Monk2', 'Master'], ban: 'banner3' },
 };
 const CHAT = {
   temple: ['아침 공양 전에 마당부터 쓸어야 합니다.', '사형이 또 졸다가 죽비를 맞았습니다.', '보시는 저쪽 함에 넣으시면 됩니다. 아, 안 하셔도 됩니다. 정말로요.'],
@@ -36,32 +38,85 @@ const CHAT = {
   town: ['요즘 관아가 칼 찬 사람들을 눈여겨본다더군.', '비단값이 또 올랐어. 서쪽 길이 막혔다나.', '여기 국수는 맛없어. 그래도 다들 먹어.', '칼 차고 다니는 사람은 외상을 안 줘.'],
 };
 function fold(s) { let n = 7; for (const c of s) n = (n * 31 + c.charCodeAt(0)) % 233280; return () => (n = (n * 9301 + 49297) % 233280) / 233280; }
-function layout(m, l, st) {
-  const R = fold(l.id), w = st.wall;
-  m.border(st.trees, [[17, 27, 6, 3]], 3);
-  if (st.water) { m.water(1, 20, 15, 6); m.water(25, 20, 14, 6); }
-  m.road(18, 9, 18, 29, 4); m.fill(9, 9, 22, 7, 3);
-  if (l.style === 'fort' || l.style === 'slum') { m.put('lodge', 18, 2); } else m.put('hall', 18, 1);
-  m.put(st.side, 7, 2); m.put(st.side, 29, 2); m.put(st.small, 4, 12); m.put(st.small, 32, 12);
-  if (!st.water) { m.put(st.small, 7, 19); m.put(st.side, 29, 19); }
-  m.put(st.ban, 15, 7); m.put(st.ban, 24, 7); m.put(st.ban, 15, 16); m.put(st.ban, 24, 16);
-  const dk = (i) => st.deco[i % st.deco.length]; m.put(dk(0), 11, 7); m.put(dk(0), 27, 7); m.put(dk(1), 12, 17); m.put(dk(1), 26, 17);
-  m.row(w, 2, 25, 16); m.row(w, 22, 25, 16); m.col(w, 2, 1, 24); m.col(w, 37, 1, 24); m.put('gate_arch', 18, 23, { nosolid: true });
-  m.put('f_dummy', 11, 11); m.put('f_dummy', 28, 11);
-  if (R() < .5) m.scatter(['flower1', 'flower2', 'fern1'], 14, 3); else m.scatter(['fern1', 'fern2', 'bush2'], 12, 5);
+// 세력마다 건물 이름과 풍경이 다르다: [본전, 연무장, 서고, 장로 거처, 덧붙임]
+const FEAT = {
+  hwasan: ['연화전', '낙안봉 연무장', '자하각', '장로원', { biome: 'rose', trees: ['plum', 'tree_pink', 'rocks'], ambient: 'leafpink', deco: ['plum', 'tree_pink'], mount: 1 }], wudang: ['자소궁', '태극 마당', '장경각', '장로원', { mount: 1 }], jongnam: ['중양궁', '종남 연무장', '장경각', '장로원', { mount: 1 }], emei: ['금정대전', '보현 마당', '장경각', '사태원', { mount: 1 }], gonryun: ['옥허전', '설봉 연무장', '장경각', '장로원', { mount: 1 }], gongdong: ['칠상전', '공동 연무장', '비급각', '장로원', { mount: 1 }], jeomchang: ['사일전', '점창 연무장', '장경각', '장로원', { mount: 1 }], cheongseong: ['상청궁', '청성 마당', '장경각', '장로원', { mount: 1 }], gaebang: ['총타 대청', '타구 마당', '소문방', '장로 오두막', {}],
+  namgung: ['창궁전', '남궁 연무장', '서고', '원로원', {}], moyong: ['참합장', '연자오 마당', '환시수각', '원로원', {}], jegal: ['팔괘전', '구궁 마당', '장서루', '원로원', {}], dang: ['만독전', '암기 훈련장', '독경각', '원로원', { deco: ['fern1', 'jar'] }], paeng: ['오호전', '오호 연무장', '서고', '원로원', {}],
+  janggang: ['취의청', '수련장', '장부방', '두령 거처', {}], haomun: ['금전방', '뒷마당', '정보방', '어른 방', {}], odok: ['오독전', '독충 마당', '독경방', '장로 굴', {}], hyeoleui: ['혈의청', '암살 훈련장', '장부방', '장로 방', {}], cheonma: ['천마전', '혈우 광장', '마경각', '장로원', { mount: 1 }],
+  haenam: ['해조전', '파도 마당', '장경각', '장로원', {}], cheonsan: ['표묘궁', '천산 마당', '장경각', '장로원', { mount: 1 }], jeonjin: ['전진궁', '북두 마당', '장경각', '장로원', { mount: 1 }], mosan: ['구소궁', '오뢰 마당', '부적방', '장로원', { mount: 1 }], jangbaek: ['천지전', '백호 마당', '장경각', '장로원', { mount: 1 }], pota: ['자죽전', '조음 마당', '장경각', '사태원', {}],
+  hwangbo: ['천왕전', '권법 연무장', '서고', '원로원', {}], ak: ['정충전', '창술 연무장', '서고', '원로원', {}], yang: ['천파전', '창술 연무장', '서고', '원로원', {}], eon: ['패왕전', '권법 마당', '서고', '원로원', {}], jin: ['철선 무관', '권법 마당', '서고', '원로원', {}], bukhae: ['빙백궁', '빙호 광장', '장경각', '장로원', {}], noeum: ['대웅보전', '범음 마당', '장경각', '장로원', { mount: 1 }], podalra: ['금강전', '법왕 광장', '경전고', '장로원', { mount: 1 }],
+};
+const ROOMS = {}; // 방 id → { back, bx, by, kind, name, owner }
+const SW = id => STAMPS[id][3] / TS, SH = id => STAMPS[id][4] / TS;
+const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 11], dorm: [18, 12, 7, 11], mess: [18, 12, 7, 11], inn: [18, 12, 7, 11], shop: [16, 11, 6, 10], book: [16, 11, 6, 10] };
+function room(m, l, stamp, x, y, kind, name, o) {
+  const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2, by: y + SH(stamp) + 1, kind, name, owner: l };
+  m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0 }); m.label(x + SW(stamp) / 2, y - .6, name); return id;
+}
+function makeRoom(id) {
+  const info = ROOMS[id] || (() => { const o = LOCS.find(q => id.startsWith(`r_${q.id}_`)); if (o) { G.world.ensure(o.map); return ROOMS[id]; } })(); if (!info) { console.warn('없는 방', id); return; }
+  const [w, h, ex] = ROOM[info.kind], dark = ['fort', 'dark'].includes(info.owner.style), m = makeMap(id, w, h, { name: `${info.owner.name} ${info.name}`, bgm: info.owner.style === 'temple' ? 'temple' : 'quiet', room: true, roomStyle: dark ? 1 : 0, arena: 'room', tint: dark ? 'rgba(30,8,20,.22)' : undefined });
+  const k = info.kind;
+  if (k === 'hall') { m.put('tablet', 10, 1).put('f_chair', 10.5, 3).put('lantern', 3, 2).put('lantern', 18, 2).put('lantern', 3, 7).put('lantern', 18, 7).put('longtable', 5, 8).put('longtable', 14, 8).put('rack', 1, 2).put('rack', 19, 2).put('plant', 1, 11).put('plant', 20, 11).put('f_scroll', 6, 1).put('f_scroll', 15, 1); }
+  if (k === 'lib') { m.row('bookcase', 1, 1, 4, 4).row('bookcase2', 2, 5, 4, 4).put('scrollcase', 14, 8).put('counter', 2, 8).put('f_lamp', 9, 8); }
+  if (k === 'elder') { m.put('tablet2', 8, 1).put('f_scroll', 3, 1).put('f_scroll', 13, 1).put('f_chair', 4, 3).put('f_chair', 13, 3).put('teapot', 8.5, 5).put('longtable', 7, 5).put('f_bonsai', 1, 9).put('f_bonsai', 16, 9); }
+  if (k === 'dorm') { m.row('f_bed', 1, 1, 5, 3).row('f_bed', 1, 6, 5, 3).put('chest', 16, 9).put('f_lamp', 1, 10); }
+  if (k === 'mess') { m.put('f_stove', 1, 1).put('f_stove', 4, 1).put('jar', 8, 1).put('pot', 10, 1).put('longtable', 3, 5).put('longtable', 10, 5).put('longtable', 3, 8).put('longtable', 10, 8).row('stool', 3, 4, 3, 1).row('stool', 10, 4, 3, 1); }
+  if (k === 'inn') { m.put('counter', 1, 2).put('shelf', 5, 1).put('rack', 11, 1).put('longtable', 3, 6).put('longtable', 11, 6).put('longtable', 3, 9).put('longtable', 11, 9).row('stool', 3, 5, 3, 1).row('stool', 11, 5, 3, 1).put('plant', 16, 2); }
+  if (k === 'shop') { m.put('shelf', 1, 1).put('shelf2', 4, 1).put('shelf', 8, 1).put('counter', 4, 4).put('box', 1, 7).put('box', 13, 7).put('jar', 13, 2); }
+  if (k === 'book') { m.row('bookcase', 1, 1, 3, 4).put('scrollcase', 13, 1).put('counter', 4, 5).put('f_lamp', 1, 8).put('box', 13, 7); }
+  m.exit(ex, h - 1, 4, 1, info.back, info.bx, info.by, 0, { door: true }); m.render();
+}
+// 세력 본거지. 아래가 산문, 위로 갈수록 외문 구역, 연무장, 내문 구역, 본전이다
+const YARD = { x: 8, y: 24, w: 30, h: 17 };
+function sectLayout(m, l, st, ft) {
+  const W = 46, H = 68, cx = 21, w = st.wall, ex = ft[4] || {}, trees = ex.trees || st.trees, R = fold(l.id), mid = cx + 2, hall = ex.hall || st.hall || 'hall', big = st.big || 'lodge', small = st.small;
+  // 가장자리. 산에 있는 문파는 바위와 나무를 두껍게 두른다
+  const west = l.id === 'hwasan'; m.border(trees, west ? [[cx - 1, H - 3, 6, 3], [0, 28, 3, 7]] : [[cx - 1, H - 3, 6, 3]], 3);
+  for (let y = 3; y < H - 3; y += 4) { const a = trees[Math.floor(R() * trees.length)], b = trees[Math.floor(R() * trees.length)]; if (!(west && y > 25 && y < 37)) m.put(a, 1 + R() * 2, y); m.put(b, W - 6 + R() * 2, y); }
+  if (west) m.fill(0, 30, 9, 4, 3);
+  const mt = ex.mount || st.mount;
+  if (mt) { m.put('rocks', 3, 8); m.put('rocks', 39, 8); }
+  // 구역을 층으로 나눈다. 산이면 바위 벼랑, 평지면 담장이고 가운데만 계단처럼 열려 있다
+  for (const y of [42, 20]) { if (mt) { for (let x = 2; x < 17; x += 4) m.put('rocks', x, y); for (let x = 29; x < 43; x += 4) m.put('rocks', x, y); } else { m.row(w, 3, y + 2, 15); m.row(w, 28, y + 2, 15); } }
+  if (st.water) { m.water(1, 54, 15, 5); m.water(32, 54, 13, 5); }
+  m.fill(cx, 9, 4, H - 9, 3);
+  // 산문
+  m.row(w, 3, 60, cx - 3); m.row(w, cx + 4, 60, W - cx - 7); m.put('gate_arch', cx, 58, { nosolid: true }); m.place(mid, 57.2, l.name); m.put(st.ban, cx - 2, 61); m.put(st.ban, cx + 5, 61);
+  // 외문 구역
+  room(m, l, big, 7, 45, 'dorm', '외문 숙소'); if (!st.water) { m.put(big, 13, 45); m.put('log', 7, 53); m.put('log', 10, 53); }
+  room(m, l, small, 33, 47, 'mess', '식당'); m.put('jar', 30, 52); m.put('jar', 32, 52); m.put('pot', 35, 52); m.put(st.ban, cx - 3, 50); m.put(st.ban, cx + 6, 50);
+  // 연무장
+  m.fill(YARD.x, YARD.y, YARD.w, YARD.h, 3); m.place(mid, YARD.y - 1, ft[1]);
+  for (let i = 0; i < 6; i++) m.put('f_dummy', YARD.x + 2 + i * 5, YARD.y + 1);
+  m.put('rack', YARD.x + 1, YARD.y + 13); m.put('rack', YARD.x + YARD.w - 4, YARD.y + 13); m.put(st.ban, YARD.x - 1, YARD.y); m.put(st.ban, YARD.x + YARD.w, YARD.y); m.put(st.ban, YARD.x - 1, YARD.y + 14); m.put(st.ban, YARD.x + YARD.w, YARD.y + 14);
+  // 내문 구역
+  room(m, l, big, 7, 12, 'lib', ft[2]); room(m, l, big, 35, 12, 'elder', ft[3]); m.put(small, 13, 13); m.put(small, 28, 13);
+  const dk = i => (ex.deco || st.deco)[i % (ex.deco || st.deco).length]; m.put(dk(0), 3, 18); m.put(dk(1), 41, 18); m.put(dk(0), 17, 19); m.put(dk(1), 28, 19);
+  // 본전
+  m.fill(cx - 5, 8, 14, 2, 3); room(m, l, hall, cx, 1, 'hall', ft[0]); m.put(dk(0), cx - 5, 3); m.put(dk(0), cx + 6, 3); m.put(st.ban, cx - 2, 6); m.put(st.ban, cx + 5, 6);
+  // 길가 나무와 석등. 사람 사는 곳처럼 보이게 빈 땅을 채운다
+  for (const y of [11, 15, 46, 50, 54]) { m.put(dk(y), cx - 3, y); m.put(y % 4 ? 'lantern' : dk(y + 1), cx + 6, y); }
+  for (const [x, y] of [[8, 26], [36, 26], [8, 38], [36, 38]]) m.put('pot', x, y);
+  for (const [x, y] of [[4, 28], [40, 28], [4, 34], [40, 34], [4, 48], [40, 46], [18, 56], [27, 56]]) if (!(west && x === 4 && y < 40)) m.put(trees[Math.floor(R() * trees.length)], x, y);
+  m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
 }
 function townLayout(m, l) {
-  m.border(['tree_round', 'grove_green'], [[17, 27, 6, 3]], 3);
-  m.road(18, 2, 18, 29, 4); m.road(2, 14, 37, 14, 4); m.fill(11, 10, 18, 11, 3);
-  m.put('house_red', 3, 3); m.put('shop_blue', 9, 4); m.put('lodge', 14, 2); m.put('shop_green', 23, 4); m.put('hut_b', 28, 3); m.put('hut_o', 33, 3);
-  m.put('wood_b', 3, 19); m.put('clay', 8, 20); m.put('hut_o2', 12, 21); m.put('wood_o', 24, 20); m.put('shop_blue', 29, 20); m.put('hut_b', 33, 21);
-  m.put('banner2', 11, 8); m.put('banner1', 28, 8); m.put('statue', 19, 8, { dx: 2 }); m.put('pot', 13, 21); m.put('jar', 27, 21); m.put('awning', 12, 9, { nosolid: true }); m.scatter(['flower1', 'fern1'], 10, 4);
+  const W = 60, H = 48, cx = 28;
+  m.border(['tree_round', 'grove_green'], [[cx - 1, H - 3, 6, 3]], 3);
+  m.fill(cx, 3, 4, H - 3, 1); m.fill(3, 21, W - 6, 4, 1); m.fill(20, 14, 20, 18, 3);
+  m.row('wall_h', 3, 43, cx - 3); m.row('wall_h', cx + 4, 43, W - cx - 7); m.put('gate_arch', cx, 41, { nosolid: true }); m.place(cx + 2, 40, l.name);
+  room(m, l, 'house_red', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); m.put('hall', 26, 2); m.label(cx, 1.4, '관아');
+  m.put('hut_b', 49, 13); m.put('hut_o', 34, 10); m.put('hut_o2', 18, 7); m.put('clay', 40, 6); m.put('wood_b', 6, 30); m.put('hut_o', 13, 30); m.put('clay', 40, 30); m.put('wood_o', 47, 30); m.put('hut_b', 6, 36); m.put('hut_o2', 13, 36); m.put('hut_b', 40, 36); m.put('hut_o', 47, 36);
+  m.put('banner2', 20, 13); m.put('banner1', 39, 13); m.put('statue', 29.5, 19, { nosolid: true }); m.put('awning', 21, 16, { nosolid: true }); m.put('awning', 34, 16, { nosolid: true }); m.put('jar', 22, 19); m.put('pot', 37, 19); m.put('sign_sword', 25, 26); m.scatter(['flower1', 'fern1'], 18, 4);
 }
 function make(id) {
+  if (id.startsWith('r_')) return makeRoom(id);
   const l = LOCS.find(q => q.map === id); if (!l) { console.warn('없는 지도', id); return; }
-  const st = l.style === 'town' ? { biome: l.px[1] > 480 ? 'grass' : 'sand', bgm: 'good', arena: 'village' } : ST[l.style], m = makeMap(id, 40, 30, { name: l.name, bgm: st.bgm, biome: st.biome, arena: st.arena, ambient: st.ambient, tint: st.tint });
-  if (l.style === 'town') townLayout(m, l); else layout(m, l, st);
-  const [wx, wy] = G.world.entry(id); m.exit(18, 29, 4, 1, 'world', wx, wy, 0);
+  const town = l.style === 'town', st = town ? { biome: l.px[1] > 480 ? 'grass' : 'sand', bgm: 'good', arena: 'village' } : ST[l.style], ft = FEAT[l.fac] || ['본전', '연무장', '서고', '장로원', {}], ex = ft[4] || {}, W = town ? 60 : 46, H = town ? 48 : 68;
+  const m = makeMap(id, W, H, { name: l.name, bgm: st.bgm, biome: ex.biome || st.biome, arena: st.arena, ambient: ex.ambient || st.ambient, tint: st.tint });
+  if (town) townLayout(m, l); else sectLayout(m, l, st, ft);
+  const [wx, wy] = G.world.entry(id), gate = town ? 26 : 19; m.exit(town ? 26 : 19, H - 1, 8, 1, 'world', wx, wy, 0); if (id === 'b_hwasan') m.exit(0, 30, 1, 5, 'hwasan', 28, 11, 2);
   m.render();
 }
 // ── 사람들 ──
@@ -94,30 +149,48 @@ async function boatTalk(l) {
   const to = LOCS.find(q => q.map === l.boat), fee = 20, c = await choice(`${to.name}까지 가는 배가 있다. 뱃삯은 은자 ${fee}냥.`, ['탄다', '그만둔다']); if (c) return;
   if (G.S.silver < fee) { await say(null, '뱃삯이 모자란다.'); return; } G.S.silver -= fee; Sound.sfx('select', .6); await ctx.warp(to.map, to.at[0], to.at[1], 1);
 }
+const elderName = (l, i) => { const R = fold(l.id + i); return `${SURNAME[Math.floor(R() * SURNAME.length)]} 장로`; };
+function roomNpcs(id, out) {
+  const r = ROOMS[id], l = r.owner, kind = r.kind, f = l.fac && G.free?.fac(l.fac), lv = () => G.S.lv;
+  if (kind === 'inn') out.npcs.push({ id: 'cinn', spr: 'OldWoman', x: 3, y: 4.6, dir: 0, hint: '객잔 주인', talk: () => innTalk(l) });
+  if (kind === 'shop') out.npcs.push({ id: 'cshop', spr: 'Noble', x: 6, y: 3.4, dir: 0, hint: '장사꾼', talk: () => shopTalk(l) });
+  if (kind === 'book') out.npcs.push({ id: 'cbook', spr: 'OldMan3', x: 6, y: 4.4, dir: 0, hint: '서점 주인', talk: () => G.arts.bookshop(l) });
+  if (!f || G.jh.fallen(f.id)) return;
+  const st = ST[l.style], folk = st.folk, hostile = G.jh.hostile(f.id);
+  if (kind === 'hall') { if (G.S.mode !== 'free' && f.hi && !hostile) out.npcs.push({ id: f.key, spr: f.spr, x: 11, y: 5, dir: 0, hint: f.name, talk: () => storyFac(f) }); if (G.S.mode !== 'free' && !f.hi) { const c = CLANS.find(q => q.id === f.id); if (c && !G.S.flags.boat_guhwa && !hostile) out.npcs.push({ ...G.clanNpc(c), x: 11, y: 5 }); else out.npcs.push({ id: 'keeper', spr: folk[0], x: 11, y: 5, dir: 0, hint: '본전을 지키는 제자', talk: async () => { await say(null, AWAY[f.group] || '어른은 지금 안 계십니다.'); } }); } }
+  if (hostile) return;
+  if (kind === 'elder') { out.npcs.push({ id: 'elder1', spr: 'OldMan', x: 5, y: 5, dir: 0, hint: elderName(l, 1), talk: () => G.arts.tutor(f) }, { id: 'elder2', spr: 'OldMan2', x: 14, y: 5, dir: 0, hint: elderName(l, 2), talk: async () => { await say(null, `${elderName(l, 2)}: 강호에서 ${f.name} 이름을 지키는 게 칼보다 어렵네. 우호가 쌓이면 가르칠 게 더 있을 걸세.`); } }); }
+  if (kind === 'lib') out.npcs.push({ id: 'elder3', spr: 'OldMan3', x: 9, y: 8.4, dir: 0, hint: `${elderName(l, 3)} (서고지기)`, talk: async () => { await narr(f.desc); await G.arts.library(f); } });
+  if (kind === 'dorm') out.npcs.push({ id: 'd1', spr: folk[0], x: 5, y: 5, dir: 3, hint: '제자', talk: async () => { await say(null, CHAT[l.style][0]); } }, { id: 'd2', spr: folk[1 % folk.length], x: 12, y: 5, dir: 2, hint: '제자', talk: async () => { await say(null, CHAT[l.style][1]); } });
+  if (kind === 'mess') out.npcs.push({ id: 'cook', spr: 'Villager4', x: 3, y: 3.6, dir: 0, hint: '밥 짓는 사람', talk: async () => { await say(null, '밥때 되면 오시오. 지금 와 봐야 물밖에 없소.'); } }, { id: 'd3', spr: folk[0], x: 13, y: 4, dir: 0, hint: '제자', talk: async () => { await say(null, CHAT[l.style][2]); } });
+}
 function provider(id) {
-  const out = { npcs: [], spots: [], trigs: [], roam: [] }, l = LOCS.find(q => q.map === id), F = G.S?.flags; if (!l || !F) return out;
+  const out = { npcs: [], spots: [], trigs: [], roam: [] }, F = G.S?.flags; if (!F) return out;
+  if (id.startsWith('r_')) { if (ROOMS[id]) { G.jh.ensure(); roomNpcs(id, out); } return out; }
+  const l = LOCS.find(q => q.map === id); if (!l) return out;
   if (G.S.mode !== 'free' && !F.world_open && G.after && G.after('c1a')) F.world_open = true;
   if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
-  G.jh.ensure(); const chat = CHAT[l.style], folk = l.style === 'town' ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy'] : ST[l.style].folk, R = fold(id), spots = l.style === 'town' ? [[13, 12], [26, 12], [20, 18], [9, 15], [31, 15]] : [[11, 13], [14, 14.5], [26, 13], [29, 14.5]];
-  spots.forEach(([x, y], i) => { const line = chat[(i + Math.floor(R() * 3)) % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 3 === 0 ? 0 : i % 2 ? 2 : 3, hint: '말 걸기', talk: async () => { await say(null, (l.style === 'town' && i < 2 && G.jh.talkOfDay()) || line); } }); });
-  if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: 24, y: 26.5, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
-  if (l.style === 'town') {
-    out.npcs.push({ id: 'cshop', spr: 'Noble', x: 12, y: 17, dir: 3, hint: '저잣거리', talk: () => shopTalk(l) }, { id: 'cinn', spr: 'OldWoman', x: 27, y: 17, dir: 2, hint: '객잔', talk: () => innTalk(l) }, { id: 'cbook', spr: 'OldMan3', x: 16, y: 12.5, dir: 0, hint: '고서점', talk: () => G.arts.bookshop(l) });
-    out.npcs.push({ id: 'cboard', spr: 'Gaebang', x: 20, y: 12, dir: 0, hint: '일거리 묻기', talk: () => G.freeBoard0() });
-    return out;
+  G.jh.ensure(); const chat = CHAT[l.style], town = l.style === 'town', folk = town ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy', 'Villager4', 'OldMan'] : ST[l.style].folk, R = fold(id);
+  if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: town ? 33 : 26, y: town ? 44.5 : 62, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
+  if (town) {
+    [[23, 18], [36, 18], [26, 28], [33, 26], [12, 23], [46, 23], [30, 33], [18, 28]].forEach(([x, y], i) => { const line = chat[(i + Math.floor(R() * 4)) % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: '말 걸기', talk: async () => { await say(null, (i < 2 && G.jh.talkOfDay()) || line); } }); });
+    out.npcs.push({ id: 'cboard', spr: 'Gaebang', x: 30, y: 15.5, dir: 0, hint: '일거리 묻기', talk: () => G.freeBoard0() }); return out;
   }
   const f = G.free?.fac(l.fac); if (!f) return out;
-  if (G.jh.fallen(f.id)) { out.npcs = [{ id: 'ash', spr: 'Villager', x: 20, y: 18, dir: 0, hint: '잿더미를 치우는 사람', talk: () => G.jh.rebuild(f) }]; return out; }
-  if (G.jh.hostile(f.id)) { out.trigs.push({ x: 17, y: 21, w: 6, h: 3, when: () => !G.S.daily['gate_' + f.id], run: async () => { G.S.daily['gate_' + f.id] = 1; await G.jh.gate(f); } }); out.npcs = out.npcs.filter(n => n.id === 'boat'); }
-  else out.npcs.push({ id: 'tutor', spr: folk[0], x: 24, y: 11.5, dir: 2, hint: '사범', talk: () => G.arts.tutor(f) });
-  if (G.S.mode === 'free') return out;
-  if (G.jh.hostile(f.id)) return out;
-  if (f.hi) out.npcs.push({ id: f.key, spr: f.spr, x: 20, y: 11.5, dir: 0, hint: f.name, talk: () => storyFac(f) });
-  else out.npcs.push({ id: 'keeper', spr: folk[0], x: 16.5, y: 23, dir: 3, hint: '문지기', talk: async () => { await say(null, AWAY[f.group] || '어른은 지금 안 계십니다.'); } });
+  if (G.jh.fallen(f.id)) { out.npcs = [{ id: 'ash', spr: 'Villager', x: 23, y: 44, dir: 0, hint: '잿더미를 치우는 사람', talk: () => G.jh.rebuild(f) }]; return out; }
+  if (G.jh.hostile(f.id)) { out.trigs.push({ x: 20, y: 56, w: 6, h: 4, when: () => !G.S.daily['gate_' + f.id], run: async () => { G.S.daily['gate_' + f.id] = 1; await G.jh.gate(f); } }); return out; }
+  // 문지기, 일하는 외문 제자, 연무장에서 수련하는 제자들, 사범
+  const say1 = t => async () => { await say(null, t); }, name = f.group === '세가' ? '가솔' : '제자';
+  out.npcs.push({ id: 'gate1', spr: folk[0], x: 19.6, y: 62, dir: 0, hint: '문지기', talk: say1(`어서 오십시오. 이곳은 ${l.name}입니다. 어른들은 안쪽 ${FEAT[l.fac]?.[0] || '본전'}에 계십니다.`) }, { id: 'gate2', spr: folk[1 % folk.length], x: 26.4, y: 62, dir: 0, hint: '문지기', talk: say1(chat[0]) });
+  [[17, 50], [28, 50], [12, 52], [34, 55]].forEach(([x, y], i) => out.npcs.push({ id: `work${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: `외문 ${name}`, talk: say1(chat[i % chat.length]) }));
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) out.npcs.push({ id: `drill${r}${c}`, spr: folk[(r + c) % folk.length], x: YARD.x + 3.5 + c * 4.6, y: YARD.y + 6 + r * 3.4, dir: 1, drill: 1, hint: name, talk: say1(pickLine(chat, r, c)) });
+  out.npcs.push({ id: 'tutor', spr: folk[0], x: YARD.x + YARD.w / 2 + 1.5, y: YARD.y + 4, dir: 0, hint: '사범', talk: () => G.arts.tutor(f) });
   return out;
 }
+const pickLine = (chat, r, c) => chat[(r * 2 + c) % chat.length];
 function init() {
   Story.providers.push(provider);
+  MAPS.hwasan?.exit(29, 9, 1, 5, 'b_hwasan', 1.5, 32, 3);
   for (const l of LOCS) if (l.kind === 'old' && MAPS[l.map]) { const m = MAPS[l.map], n = m.stamps.length; m.put('signpost', Math.floor(l.at[0] - 1.5), Math.floor(l.at[1] - 1.5), { nosolid: true }); if (m.objs) m.objs.push(m.stamps[n]); }
 }
-G.base = { make, init, folk: l => l && ST[l.style] ? ST[l.style].folk : null };
+G.base = { make, init, folk: l => l && ST[l.style] ? ST[l.style].folk : null, spot: id => id.startsWith('c_') ? [31, 19] : [31, 34] };

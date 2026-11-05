@@ -2,6 +2,7 @@
 export { Story } from './ctx.js';
 import './story1.js';
 import './part2.js';
+import './part2b.js';
 import './story2.js';
 import './clans.js';
 import './life.js';
@@ -23,5 +24,6 @@ import './party.js';
 import './compbonds.js';
 import './world.js';
 import './base.js';
+import './era.js';
 import './sect.js';
 import './evil.js';

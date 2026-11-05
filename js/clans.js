@@ -42,10 +42,12 @@ async function beggar() {
 }
 Object.assign(WHO, { beggar: { name: '개방 거지', face: 'Gaebang' } });
 
+const clanNpc = c => ({ id: 'clan_' + c.id, spr: c.spr, x: c.at[1], y: c.at[2], dir: 0, mark: () => !G.S.flags['clan_' + c.id] || !!G.ch.hook('clan_' + c.id), talk: () => { const h = G.ch.hook('clan_' + c.id); return h ? h() : talk(c); } });
+G.clanNpc = clanNpc;
 Story.providers.push(function content3(id) {
   const n = [], F = G.S.flags;
   if (id === 'cheongha' && F.burned) n.push({ id: 'beggar', spr: 'Gaebang', x: 20, y: 17, dir: 3, hint: '말 걸기', mark: () => !!G.ch.hook('beggar'), talk: beggar });
   if (id === 'guhwa') n.push({ id: 'beggar', spr: 'Gaebang', x: 28, y: 22, dir: 2, hint: '말 걸기', talk: beggar });
-  for (const c of CLANS) if (c.at[0] === id) n.push({ id: 'clan_' + c.id, spr: c.spr, x: c.at[1], y: c.at[2], dir: 0, mark: () => !G.S.flags['clan_' + c.id] || !!G.ch.hook('clan_' + c.id), talk: () => { const h = G.ch.hook('clan_' + c.id); return h ? h() : talk(c); } });
+  for (const c of CLANS) if (c.at[0] === id) n.push(clanNpc(c));
   return { npcs: n, spots: [], trigs: [], roam: [] };
 });
