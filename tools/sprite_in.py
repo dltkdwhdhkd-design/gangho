@@ -2,7 +2,7 @@
 # ChatGPT가 그린 시트를 잘라 게임 규격으로 넣는다. 받은 그림은 assets/hd/<종류>/<이름>.webp 가 된다
 #
 #   python3 tools/sprite_in.py walk   <걷기 시트> <battle 시트|-> <이름>     인물 (3열×3행 + 3열×3행 → 4열×7행)
-#   python3 tools/sprite_in.py grid   <시트> <열> <행> <칸폭> <칸높이> <종류/이름>   몬스터, 이펙트, 동물처럼 칸이 나뉜 시트
+#   python3 tools/sprite_in.py grid   <시트> <열> <행> <칸폭> <칸높이> <종류/이름> [돌릴 각도]   몬스터, 이펙트, 동물처럼 칸이 나뉜 시트. 이펙트는 오른쪽을 향해야 한다
 #   python3 tools/sprite_in.py stamp  <그림> <소품 이름> <폭> <높이>                건물, 나무, 가구 한 장
 #   python3 tools/sprite_in.py stamps <시트> <열> <행> <이름,이름,...>                건물이나 가구를 한 장에 모아 받았을 때 (빈칸은 -)
 #   python3 tools/sprite_in.py icons  <시트> <열> <행> <물건id,물건id,...>            아이콘 묶음
@@ -24,7 +24,12 @@ def cut_bg(im, tol=38):
     d = np.abs(a[..., :3].astype(int) - c).sum(axis=2) < tol * 3
     # 가장자리와 이어진 배경만 지운다. 옷 안쪽의 같은 색은 남긴다
     lab, n = ndimage.label(d); edge = set(lab[0]) | set(lab[-1]) | set(lab[:, 0]) | set(lab[:, -1]); edge.discard(0)
-    a[..., 3] = np.where(np.isin(lab, list(edge)), 0, 255); return a
+    a[..., 3] = np.where(np.isin(lab, list(edge)), 0, 255)
+    # 외곽선에 묻은 배경색을 지운다. 배경이 마젠타면 초록이 낮고 빨강과 파랑이 높은 칸이다
+    if c[0] > 180 and c[2] > 180 and c[1] < 90:
+        r, g, b = [a[..., i].astype(int) for i in range(3)]; fringe = (g < (r + b) * .36) & (r > 96) & (b > 96) & (np.abs(r - b) < 90)
+        near = ndimage.binary_dilation(a[..., 3] == 0, iterations=3); a[..., 3] = np.where(fringe & near, 0, a[..., 3])
+    return a
 def blobs(a, grow=None):
     """덩어리를 찾는다. 칼이나 머리끈이 떨어져 있어도 한 덩어리로 묶이게 살짝 부풀린다"""
     h = a.shape[0]; m = a[..., 3] > 0; m = ndimage.binary_dilation(m, iterations=grow or max(2, h // 120))
@@ -51,7 +56,7 @@ def down(p, s):
     w, h = max(1, round(p.shape[1] * s)), max(1, round(p.shape[0] * s)); im = Image.fromarray(p, 'RGBA')
     if s < 1: im = im.resize((w, h), Image.BOX)
     else: im = im.resize((w, h), Image.NEAREST)
-    q = np.array(im); al = q[..., 3] > 110; rgb = Image.fromarray(q[..., :3]).quantize(48, method=Image.MEDIANCUT, dither=Image.NONE).convert('RGB')
+    q = np.array(im); al = q[..., 3] > 110; rgb = Image.fromarray(q[..., :3]).quantize(128, method=Image.FASTOCTREE, dither=Image.NONE).convert('RGB')
     r = np.array(rgb); return np.dstack([r, al * 255]).astype('uint8')
 def paste(sheet, p, x, y, cw, ch):
     """칸의 아래 가운데에 맞춘다. 발이 칸 바닥에 닿는다"""
@@ -80,8 +85,24 @@ def walk(src, fight, name):
                 p = extra[r * 3 + src_col]; p = p[:, ::-1] if flip else p; paste(sheet, down(p, s2), dcol * 32, (4 + r) * 32, 32, 32)
     else: sheet[128:224] = np.vstack([sheet[:32], sheet[:32], sheet[:32]])
     save(sheet, f'chars/{name}')
-def grid(src, cols, rows, cw, ch, key):
-    a = load(src); bs, _ = cells(a, cols, rows); ps = [trim(a, b) for b in bs]; s = scale_for(ps, cw, ch); sheet = np.zeros((ch * rows, cw * cols, 4), 'uint8')
+def fx_sheet(a, cols, rows, cw, ch, key, rot=0):
+    # 이펙트는 칸을 똑같이 나눠 위치와 크기 변화를 그대로 살린다. 사라지는 프레임의 작은 조각도 남긴다
+    h, w = a.shape[:2]; sw, sh = w // cols, h // rows; sheet = np.zeros((ch * rows, cw * cols, 4), 'uint8'); s = 1
+    def cell(r, c):
+        p = a[r * sh:(r + 1) * sh, c * sw:(c + 1) * sw]
+        return np.array(Image.fromarray(p, 'RGBA').rotate(rot, Image.NEAREST, expand=True)) if rot else p
+    for r in range(rows):
+        for c in range(cols):
+            p = cell(r, c); yy, xx = np.where(p[..., 3] > 0)
+            if len(yy): s = min(s, cw / (xx.max() - xx.min() + 1), ch / (yy.max() - yy.min() + 1))
+    for r in range(rows):
+        for c in range(cols):
+            q = down(cell(r, c), s); y0, x0 = max(0, (ch - q.shape[0]) // 2), max(0, (cw - q.shape[1]) // 2); yc, xc = max(0, (q.shape[0] - ch) // 2), max(0, (q.shape[1] - cw) // 2); part = q[yc:yc + ch, xc:xc + cw]; sheet[r * ch + y0:r * ch + y0 + part.shape[0], c * cw + x0:c * cw + x0 + part.shape[1]] = part
+    save(sheet, key)
+def grid(src, cols, rows, cw, ch, key, rot=0):
+    a = load(src)
+    if key.startswith('fx/'): return fx_sheet(a, cols, rows, cw, ch, key, rot)
+    bs, _ = cells(a, cols, rows); ps = [trim(a, b) for b in bs]; s = scale_for(ps, cw, ch); sheet = np.zeros((ch * rows, cw * cols, 4), 'uint8')
     for i, p in enumerate(ps): paste(sheet, down(p, s), (i % cols) * cw, (i // cols) * ch, cw, ch)
     save(sheet, key)
 def one(src, w, h, key):
@@ -104,7 +125,7 @@ def check():
 if __name__ == '__main__':
     k, *x = sys.argv[1:]
     if k == 'walk': walk(x[0], x[1], x[2])
-    elif k == 'grid': grid(x[0], int(x[1]), int(x[2]), int(x[3]), int(x[4]), x[5])
+    elif k == 'grid': grid(x[0], int(x[1]), int(x[2]), int(x[3]), int(x[4]), x[5], int(x[6]) if len(x) > 6 else 0)
     elif k == 'stamp': one(x[0], int(x[2]) * 2, int(x[3]) * 2, f'stamp/{x[1]}')
     elif k == 'stamps': stamps(x[0], int(x[1]), int(x[2]), x[3])
     elif k == 'icons': icons(x[0], int(x[1]), int(x[2]), x[3])
