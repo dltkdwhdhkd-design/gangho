@@ -81,7 +81,7 @@ export async function openSect() {
   }, 1040);
   G.field.refresh();
 }
-function income() { const s = Se(), b = site(), up = s.d.length * 8 * (b.upkeep || 1) * (1 - blv('kitchen') * .2); return Math.round((20 + blv('farm') * 50 + s.d.filter(d => d.job === 'q_guard').length * 10) * (b.income || 1) - up); }
+function income() { const s = Se(), b = site(), up = s.d.length * 8 * (b.upkeep || 1) * (1 - blv('kitchen') * .2); return Math.round(Math.max(1, G.free.dayLen() / 600) * (20 + blv('farm') * 50 + s.d.filter(d => d.job === 'q_guard').length * 10) * (b.income || 1) - up); }
 function daily() {
   const s = Se(); if (!s) return; const fr = Fr(), b = site(), inc = income();
   S().silver = Math.max(0, S().silver + inc); if (S().silver === 0 && inc < 0 && s.d.length) { const d = s.d.splice(Math.floor(rnd(0, s.d.length)), 1)[0]; addLog(`${josa(d.n, '이/가')} 밥이 없다며 문을 나갔다.`); }

@@ -93,9 +93,10 @@ function makeJob(f, war) {
 const gatherSpot = id => { const p = id === 'cheongha' ? [20, 19] : id === 'cloudmt' ? [26, 20] : id === 'ninehall' ? [20, 13] : id === 'fiveclans' ? [18, 14] : id === 'fort' ? [18, 21] : id === 'shrine' ? [4, 8] : id.startsWith('b_') ? [24, 14] : [10, 10]; return p; };
 function boardFor(fid) {
   const b = Fr().board, k = fid || 'free';
-  if (!b[k] || b[k].day !== S().day) {
+  const stamp = `${S().day}:${period()}`; // 하루가 길어서 끼니마다 일거리가 바뀐다
+  if (!b[k] || b[k].day !== stamp) {
     const f = fid && fid !== 'my' ? fac(fid) : null, war = f ? warOf(f.id) : null;
-    b[k] = { day: S().day, list: [] };
+    b[k] = { day: stamp, list: [] };
     for (let i = 0; i < 3; i++) b[k].list.push(makeJob(f));
     if (war) b[k].list.unshift(makeJob(f, war.a === f.id ? war.b : war.a));
   }
@@ -203,7 +204,7 @@ async function promote(f) {
   fr.rank = r; grantRank(f); addRep(f.id, 10); Sound.sfx('ok3'); toast(`${rankName(f, r)}(으)로 올랐다`, 3.5);
   ctx.note(`${f.name} ${rankName(f, r)}가 되었다.`);
 }
-async function stipend(f) { const fr = Fr(), d = S().daily; d.stipend = 1; const v = 20 + fr.rank * 30; S().silver += v; Sound.sfx('coin'); await say(f.key, `이번 봉록이오. 은자 ${v}냥.`); }
+async function stipend(f) { const fr = Fr(), d = S().daily; d.stipend = 1; const v = Math.round((20 + fr.rank * 30) * Math.max(1, dayLen() / 600)); S().silver += v; Sound.sfx('coin'); await say(f.key, `이번 봉록이오. 은자 ${v}냥.`); }
 async function sparClan(f) {
   S().daily['duel_' + f.id] = 1;
   const won = await ctx.duel({ foes: ['clan_' + f.id], arena: MAPS[f.at[0]]?.arena || 'court', bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .25, optional: true, noLoot: true });
@@ -236,7 +237,7 @@ export async function facTalk(f) {
 export const warOf = id => Fr().wars.find(w => w.a === id || w.b === id);
 function warScore(id, n) { const w = warOf(id); if (w) { w.score += (w.a === id ? n : -n); } }
 const nameOf = id => fac(id)?.name || myName();
-function startWar(a, b) { Fr().wars.push({ a, b, days: 8 + Math.floor(rnd(0, 8)), score: 0 }); addNews(`${josa(nameOf(a), '이/가')} ${nameOf(b)}에 칼을 겨누었다.`); }
+function startWar(a, b) { Fr().wars.push({ a, b, days: 3 + Math.floor(rnd(0, 4)), score: 0 }); addNews(`${josa(nameOf(a), '이/가')} ${nameOf(b)}에 칼을 겨누었다.`); }
 const myName = () => Fr().sect?.name || '내 문파';
 function endWar(w) {
   const fr = Fr(), pa = (fr.power[w.a] || 60) + w.score * 10 + rnd(-20, 20), pb = (fr.power[w.b] || 60) - w.score * 10 + rnd(-20, 20), win = pa >= pb ? w.a : w.b, lose = win === w.a ? w.b : w.a;
@@ -268,8 +269,12 @@ async function order(fid) {
 }
 
 // ── 하루 ──
-function daily() { const fr = Fr(); if (!fr) return; worldTick(); if (fr.rep) for (const k in fr.board) if (fr.board[k].day !== S().day) delete fr.board[k]; if (G.sect) G.sect.daily(); if (G.evil) G.evil.daily(); }
-function tick(dt) { const fr = Fr(); if (!fr || G.field.busy) return; fr.clock += dt; if (fr.clock >= 420) { fr.clock = 0; nextDay(); toast(`${S().day}일째가 되었다`, 2.4); } }
+function daily() { const fr = Fr(); if (!fr) return; fr.clock = 0; F().night = false; fr.lastP = null; showTime(); worldTick(); if (fr.rep) for (const k in fr.board) if (!String(fr.board[k].day).startsWith(S().day + ':')) delete fr.board[k]; if (G.sect) G.sect.daily(); if (G.evil) G.evil.daily(); }
+export const dayLen = () => S().dayLen || 1800; // 게임 하루의 길이(초). 메뉴 설정에서 바꾼다
+const PERIOD = [[.25, '아침'], [.55, '낮'], [.75, '저녁'], [1.01, '밤']];
+const period = () => { const q = (Fr()?.clock || 0) / dayLen(); return PERIOD.find(p => q < p[0])[1]; };
+function showTime() { const e = document.querySelector('#dayl'); if (e) e.textContent = `${S().day}일째 ${period()}`; }
+function tick(dt) { const fr = Fr(); if (!fr || G.field.busy) return; fr.clock += dt; if (fr.clock >= dayLen()) { nextDay(); toast(`${S().day}일째 아침이 되었다`, 2.4); return; } const p = period(), nt = p === '밤'; if (p !== fr.lastP) { fr.lastP = p; showTime(); } if (nt !== !!F().night) { F().night = nt; toast(nt ? '해가 졌다' : '날이 밝았다', 2); } }
 
 // ── 사람들 ──
 async function gwakTalk() {
@@ -311,6 +316,6 @@ const duel0 = ctx.duel;
 ctx.duel = cfg => duel0(S()?.mode === 'free' && G.sect ? G.sect.withFollow(cfg) : cfg);
 G.freeBoard = () => openBoard('my', '일거리');
 G.freeBoard0 = roninBoard;
-G.free = { fac, start: startFree, npcs: npcsFree, spots: spotsFree, trigs: trigsFree, daily, tick, tab: tabFree, order, addRep, addNews, myName, foeFor, group, repOf, startWar, warOf, runJob, makeJob, boardFor, promote, join, facTalk, foes: FOES, rankOf: () => Fr().rank };
+G.free = { fac, start: startFree, npcs: npcsFree, spots: spotsFree, trigs: trigsFree, daily, tick, tab: tabFree, order, addRep, addNews, myName, foeFor, group, repOf, startWar, warOf, runJob, makeJob, boardFor, promote, join, facTalk, foes: FOES, period, dayLen, rankOf: () => Fr().rank };
 G.free.worldTick = worldTick;
 G.free.leaveForce = id => { const fr = Fr(); fr.left[id] = 1; fr.fac = null; fr.rank = 0; fr.merit = 0; fr.head = false; S().title = '파문당한 낭인'; addRep(id, -50); fr.jobs = fr.jobs.filter(j => j.fac !== id); syncGoal(); };

@@ -47,7 +47,7 @@ function click(c) { Input.press('ok'); setTimeout(() => Input.release('ok'), 30)
 // 이름 뒤 말끝은 받침에 맞춘다: 진소야, 강철아
 const sub = s => { const n = G.S ? G.S.name : '', j = hasJong(n); return s.replaceAll('{나}야', n + (j ? '아' : '야')).replaceAll('{나}구나', n + (j ? '이구나' : '구나')).replaceAll('{나}', n).replaceAll('{호}', G.S ? G.S.title : ''); };
 export function say(who, text, expr) { return new Promise(res => { const c = { type: 'say', who, text: sub(text), expr, n: 0, res }; D.cur = c; render(c); }); }
-export function narr(text, cg) { return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res, cg }; D.cur = c; render(c); }); }
+export function narr(text, cg) { if (G.jh) G.jh.heard(text); return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res, cg }; D.cur = c; render(c); }); }
 // 부와 장 표지: 까만 화면에 제목을 띄운다
 export function card(part, title, chap) { return new Promise(res => { const c = { type: 'narr', card: [part, title, chap], text: '', n: 0, res: v => { $('#dialog').classList.remove('over'); res(v); } }; D.cur = c; render(c); }); }
 export function choice(q, opts, who) {

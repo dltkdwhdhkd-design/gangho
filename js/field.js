@@ -34,7 +34,7 @@ export class Field {
   }
   flashPlace() { const e = $('#place'); if (!e) return; e.textContent = this.m.name; e.classList.add('on'); clearTimeout(this._pt); this._pt = setTimeout(() => e.classList.remove('on'), 1800); }
   showHud() {
-    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (B)</button>' : ''}<button class="btn sm" id="mapb">지도 (M)</button><button class="btn sm" id="mbtn">메뉴 (O)</button></div><canvas id="mm"></canvas><div class="keys" id="keys">${G.S.day}일째${G.touch ? '' : ' · 이동 WASD · 대화 E · 메뉴 O · 지도 M'}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
+    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (B)</button>' : ''}<button class="btn sm" id="mapb">지도 (M)</button><button class="btn sm" id="mbtn">메뉴 (O)</button></div><canvas id="mm"></canvas><div class="keys" id="keys"><span id="dayl">${G.S.day}일째${G.S.mode === 'free' ? ' ' + G.free.period() : ''}</span>${G.touch ? '' : ' · 이동 WASD · 대화 E · 메뉴 O · 지도 M'}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
     $('#mbtn').onclick = () => openMenu();
     $('#mapb').onclick = () => { if (!this.busy && !G.decor) openMap(); };
     bindMini(this);
