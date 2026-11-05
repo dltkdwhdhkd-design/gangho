@@ -106,7 +106,15 @@ const TYPES = {
   blade: { hint: '신병 쟁탈전', mk: () => { const l = pick(CITY), w = pick(LEG); return { map: l.map, place: l.name, w: w[0], left: 7, name: `${w[1]} 쟁탈전` }; }, start: e => `${WEAPONS[e.w].name}이(가) ${e.place}에 나타났다는 소문에 강호가 들썩인다.`, end: e => `${WEAPONS[e.w].name}은(는) ${pick(FACS).name} 손에 들어갔다.`,
     async run(e) { if (S().weapons.includes(e.w)) { await say(null, '이미 내 손에 있다.'); return; } await narr('칼 한 자루를 두고 사람들이 줄을 서서 서로를 베고 있었다.'); const lv = S().lv; for (let i = 1; i <= 2; i++) { const f = pick(FACS); if (!await round([disciple(f, lv + 2, true), disciple(f, lv + 1, true)], i, `${e.name} ${i}차`)) return; } e.done = 1; e.left = 0; e.won = 1; S().weapons.push(e.w); Sound.sfx('ok3'); toast(`${WEAPONS[e.w].name}을(를) 손에 넣었다`, 4); Fr().fame += 14; news(`${S().name}, ${WEAPONS[e.w].name}을(를) 차지하다.`); } },
 };
-function startEv(type) { const fr = Fr(), T = TYPES[type], e = { id: fr.evId++, type, ...T.mk() }; fr.ev.push(e); news(T.start(e)); toast(`강호 소식: ${e.name}`, 3.4); }
+let quiet = null;
+function startEv(type) { const fr = Fr(), T = TYPES[type], e = { id: fr.evId++, type, ...T.mk() }; fr.ev.push(e); news(T.start(e)); if (quiet) quiet.push(e.name); else toast(`강호 소식: ${e.name}`, 3.4); }
+// 이야기 모드의 시간은 이야기를 따라 흐른다. 장면이 끝날 때 몇 날이 지났는지 맞춘다
+function storyTime() {
+  const s = S(), step = s?.flags?.step; if (!step || s.mode === 'free') return; const last = s.lastStep, ch = s.chapter || '', lc = s.lastChap ?? ch; s.lastStep = step; s.lastChap = ch; if (last === undefined || last === step) return;
+  const part = c => (c.match(/^제\d+부/) || [''])[0], days = part(ch) !== part(lc) ? 10 : ch !== lc ? 4 : 1; quiet = [];
+  for (let i = 0; i < days; i++) { s.day++; s.daily = {}; daily(); G.party?.daily(); }
+  const L = quiet; quiet = null; if (days > 1) toast(L.length ? `${days}일이 지났다 · 강호 소식: ${L[L.length - 1]}` : `${days}일이 지났다`, 3.2); else if (L.length) toast(`강호 소식: ${L[L.length - 1]}`, 3.2);
+}
 function daily() {
   const fr = Fr(); if (!fr) return; for (const g of fr.grudge) g.wait--;
   for (const e of fr.ev) e.left--;
@@ -129,4 +137,4 @@ function tab(B) {
   B.innerHTML = `<div class="two"><div><h2>강호 사건</h2>${rows}<p class="hint">자리는 지도(M)에 별로 나온다. 끼어들지 않아도 날짜가 지나면 저절로 끝난다.</p><h2 style="margin-top:10px">원한</h2>${gr}<h2 style="margin-top:10px">적대</h2>${bad}${down ? `<h2 style="margin-top:10px">무너진 세력</h2><div class="hint">${down}</div>` : ''}</div><div><h2>소문</h2>${fr.news.slice(0, 16).map(n => `<div class="hint">${esc(n)}</div>`).join('') || '<div class="hint">아직 들리는 소문이 없다.</div>'}</div></div>`;
   B.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { peace(fac(b.dataset.p)); tab(B); });
 }
-G.jh = { ensure, rep, addRep, hostile, disciple, crew, kill, after, spawn, gate, challenge, peace, jobDone, daily, tab, rebuild, fallen: id => !!Fr()?.fallen[id], news, startEv, TYPES, marks: () => (Fr()?.ev || []).filter(e => !e.won), near };
+G.jh = { storyTime, ensure, rep, addRep, hostile, disciple, crew, kill, after, spawn, gate, challenge, peace, jobDone, daily, tab, rebuild, fallen: id => !!Fr()?.fallen[id], news, startEv, TYPES, marks: () => (Fr()?.ev || []).filter(e => !e.won), near };

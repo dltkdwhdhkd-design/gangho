@@ -45,7 +45,7 @@ export class Field {
   async run(fn) {
     if (this.busy) return; this.busy = true; Input.clear();
     try { await fn(); } catch (e) { console.error(e); }
-    this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x; G.S.py = this.p.y; G.S.dir = this.p.dir; save();
+    this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.jh && G.scene === 'field') G.jh.storyTime(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x; G.S.py = this.p.y; G.S.dir = this.p.dir; save();
   }
   async warp(id, tx, ty, dir = 0) {
     await fadeTo(1); this.load(id, tx, ty, dir); await wait(.08); await fadeTo(0);
