@@ -4,6 +4,7 @@
 #   python3 tools/iso_in.py placeall                                요청서의 건물 전부 임시 그림
 #   python3 tools/iso_in.py iso <그림> <이름> <fw> <fh>            ChatGPT 그림 한 장 (마젠타 배경)
 #   python3 tools/iso_in.py worldmap <그림>                         강호 전도
+#   python3 tools/iso_in.py isowalk <걷기 시트> <전투 시트|-> <이름>  인물 2열 3행 두 장 → chars/<이름>_q
 #   python3 tools/iso_in.py mapicons <그림> sect,evil,out,city,old,mine   지도 표식 3열 2행
 import json, math, os, re, sys
 from PIL import Image, ImageDraw
@@ -16,7 +17,7 @@ def save_meta(d):
     open(META, 'w', encoding='utf8').write('// tools/iso_in.py가 쓰는 쿼터뷰 소품 정보. 손으로 고치지 않는다\nexport const ISOMETA = {\n' + body + '\n};\n')
 def register(name, im, ax, ay, fw, fh):
     os.makedirs(OUT, exist_ok=True); im.save(os.path.join(OUT, name + '.webp'), lossless=True)
-    d = load_meta(); d[name] = {'w': im.width // 2, 'h': im.height // 2, 'ax': ax // 2, 'ay': ay // 2, 'fw': fw, 'fh': fh}; save_meta(d)
+    d = load_meta(); d[name] = {'w': int(im.width) // 2, 'h': int(im.height) // 2, 'ax': int(ax) // 2, 'ay': int(ay) // 2, 'fw': float(fw) if fw % 1 else int(fw), 'fh': float(fh) if fh % 1 else int(fh)}; save_meta(d)
     L = json.load(open(os.path.join(ROOT, 'assets/hd/list.json'))); k = 'iso/' + name
     if k not in L: L.append(k); json.dump(L, open(os.path.join(ROOT, 'assets/hd/list.json'), 'w'), ensure_ascii=False)
 
@@ -106,12 +107,63 @@ def mapicons(path, names, cols=3, rows=2, h=60):  # 지도 표식: 칸마다 잘
         c = im.crop((int(i % cols * cw), int(i // cols * ch), int((i % cols + 1) * cw), int((i // cols + 1) * ch))); bb = c.getbbox()
         if not bb: continue
         c = c.crop(bb); c = c.resize((max(1, round(c.width * h / c.height)), h), Image.LANCZOS); c.save(os.path.join(ROOT, f'assets/hd/map/{n}.webp'), lossless=True); reg_key('map/' + n)
+def figures(im, n):  # 그림 속 인물(덩어리) n개를 찾아 줄 순서(위에서 아래, 왼쪽에서 오른쪽)로 돌려준다
+    import numpy as np
+    from scipy import ndimage
+    a = np.array(im)[..., 3] > 0; lab, k = ndimage.label(ndimage.binary_dilation(a, iterations=6))
+    objs = sorted(ndimage.find_objects(lab), key=lambda sl: -(sl[0].stop - sl[0].start) * (sl[1].stop - sl[1].start))[:n]
+    boxes = [(sl[1].start, sl[0].start, sl[1].stop, sl[0].stop) for sl in objs]
+    rows = sorted(boxes, key=lambda b: (b[1] + b[3]) / 2); out = []; per = max(1, n // 3) if n in (6, 4) else n
+    if n == 6: per = 2
+    if n == 4: per = 2
+    for i in range(0, len(rows), per): out += sorted(rows[i:i + per], key=lambda b: b[0])
+    return [im.crop(b) for b in out]
+def isoin(path, name, fw, fh):  # 건물, 소품 한 장: 배경을 지우고 바닥 마름모 앞 모서리를 찾아 크기를 맞춘다
+    import numpy as np
+    im = cutbg(Image.open(path)); im = im.crop(im.getbbox()); Wf = (fw + fh) * IS
+    def measure(img):
+        a = np.array(img)[..., 3] > 0; h, w = a.shape; bot = np.array([np.nonzero(a[:, x])[0].max() if a[:, x].any() else -1 for x in range(w)])
+        fy = bot.max(); xs = np.nonzero(bot >= fy - 1)[0]; fx = int(xs.mean())
+        # 앞 모서리에서 좌우로 2:1 기울기 바닥선을 따라가다 처마나 기둥 때문에 위로 뜨는 곳에서 멈춘다
+        lx = fx
+        for x in range(fx, -1, -1):
+            if bot[x] >= fy - (fx - x) / 2 - 3: lx = x
+            elif fx - x > 6: break
+        rx = fx
+        for x in range(fx, w):
+            if bot[x] >= fy - (x - fx) / 2 - 3: rx = x
+            elif x - fx > 6: break
+        return fx, fy, lx, rx
+    s = Wf * 1.1 / im.width
+    for _ in range(3):
+        t = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS); fx, fy, lx, rx = measure(t)
+        if rx - lx < 8: break
+        s *= Wf / (rx - lx)
+    t = im.resize((max(2, round(im.width * s)) // 2 * 2, max(2, round(im.height * s)) // 2 * 2), Image.LANCZOS)
+    A = np.array(t); A[..., 3] = np.where(A[..., 3] > 110, 255, 0); t = Image.fromarray(A)
+    fx, fy, lx, rx = measure(t); mw, mh = (fx - lx) / IS, (rx - fx) / IS
+    k = (fw + fh) / max(.5, mw + mh); register(name, t, fx, fy + 1, round(mw * k * 4) / 4, round(mh * k * 4) / 4)
+    print(name, '크기', t.size, '바닥', round(mw * k, 2), round(mh * k, 2))
+def isowalk(walk, fight, name, H=44, C=64):  # 걷기 2열 3행(+전투 2열 3행) → chars/<이름>_q.webp (2열 6행, 칸 C)
+    import numpy as np
+    cells = figures(cutbg(Image.open(walk)), 6); fc = figures(cutbg(Image.open(fight)), 6) if fight and fight != '-' else cells
+    allc = cells + fc; base = cells[0]; bb = base.getbbox(); s = H / (bb[3] - bb[1])
+    out = Image.new('RGBA', (C * 2, C * 6), (0, 0, 0, 0))
+    for i, c in enumerate(allc):
+        c = c.crop(c.getbbox()); c = c.resize((max(1, round(c.width * s)), max(1, round(c.height * s))), Image.NEAREST if s > 1 else Image.LANCZOS)
+        a = np.array(c)[..., 3] > 0; feet = np.nonzero(a[-4:].any(axis=0))[0]; fx = int(feet.mean()) if len(feet) else c.width // 2
+        col, row = i % 2, i // 2; x = col * C + C // 2 - fx; y = row * C + C - 2 - c.height
+        if c.width > C or c.height > C - 2: c.thumbnail((C, C - 2)); x = col * C + (C - c.width) // 2; y = row * C + C - 2 - c.height
+        out.alpha_composite(c, (max(col * C, x), max(row * C, y)))
+    os.makedirs(os.path.join(ROOT, 'assets/hd/chars'), exist_ok=True); out.save(os.path.join(ROOT, f'assets/hd/chars/{name}_q.webp'), lossless=True); reg_key(f'chars/{name}_q')
 STYLE = {'thatch': 'thatch', 'thatch_long': 'thatch', 'tavern': 'thatch', 'barn': 'wood', 'shack': 'wood', 'stilt': 'wood', 'watchtower': 'wood', 'tent': 'adobe', 'yurt': 'ice', 'adobe': 'adobe', 'cabin': 'wood',
          'hall_temple': 'gold', 'temple_town': 'gold', 'hall_manor': 'red', 'gamble': 'red', 'yamen': 'red', 'restaurant': 'red', 'hall_dark': 'dark', 'hall_ice': 'ice', 'hall_west': 'adobe', 'ruin': 'dark'}
 if __name__ == '__main__':
     cmd = sys.argv[1]
     if cmd == 'place': place(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5] if len(sys.argv) > 5 else 'tile')
+    elif cmd == 'iso': isoin(sys.argv[2], sys.argv[3], float(sys.argv[4]), float(sys.argv[5]))
     elif cmd == 'worldmap': worldmap(sys.argv[2])
+    elif cmd == 'isowalk': isowalk(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == 'mapicons': mapicons(sys.argv[2], sys.argv[3].split(','))
     elif cmd == 'placeall':
         order = json.load(open(os.path.join(ROOT, 'docs/iso-order.json'), encoding='utf8')); n = 0

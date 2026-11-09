@@ -2,7 +2,7 @@
 import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast } from './core.js';
 import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
-import { drawIso, orderKeys } from './iso.js';
+import { drawIso, orderKeys, inside as isoInside } from './iso.js';
 import { drawStamp, STAMPS } from './tiles.js';
 import { save } from './state.js';
 import { Story } from './story.js';
@@ -32,6 +32,9 @@ export class Field {
     this.npcs = c.npcs.map(n => { const q = { dir: 0, walk: 0, ...n, x: n.x * TS, y: n.y * TS, hx: n.x * TS, hy: n.y * TS }, o = old.get(n.id);
       if (o && o.hx === q.hx && o.hy === q.hy && q.life && q.life !== 'still') Object.assign(q, { x: o.x, y: o.y, dir: o.dir, lt: o.lt, greetT: o.greetT, trip: o.trip, hide: o.hide, ri: o.ri, off: o.off, door: o.door });  // 같은 사람이면 서 있던 자리를 지킨다
       return q; });
+    // 쿼터뷰 건물 바닥 안에 선 사람은 가까운 빈자리로 비켜 세운다
+    if (this.m.polys) for (const n of this.npcs) { if (!this.m.polys.some(c => isoInside(c, n.x, n.y, -2))) continue;
+      out: for (let r = 6; r < 80; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (!this.m.blocked(x, y) && !this.m.polys.some(c => isoInside(c, x, y, -4))) { n.x = n.hx = x; n.y = n.hy = y; break out; } } }
     if (fresh) this.barkT = 2.5;
     this.spots = c.spots; this.trigs = c.trigs;
     if (fresh) this.animals = c.hunt.map(a => ({ ...a, ...G.life.animals[a.kind], x: a.x * TS, y: a.y * TS, vx: 0, vy: 0, t: rnd(1, 3), walk: 0 }));

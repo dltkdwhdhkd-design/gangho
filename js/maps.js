@@ -63,6 +63,7 @@ class MapDef {
   }
   render() {
     const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
+    if (!this.room && isoMode()) isoRetrofit(this);
     if (this.room) { const doors = this.portals.filter(q => q.y + q.h >= this.h * TS - 2).map(q => [Math.round(q.x / TS), Math.round((q.x + q.w) / TS)]); paintRoom(x, this.w, this.h, this.roomStyle || 0, { doors, carpet: this.carpet }); }
     else if (G.world?.paintArea) { // 강호 전도와 같은 땅 칠하기: 길섶과 물가가 둥글고, 바닥 얼룩과 돌바닥 턱이 또렷하다
       const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.g.map(r => r.map(() => bi));
@@ -84,6 +85,33 @@ class MapDef {
 }
 
 export const MAPS = {};
+// ── 쿼터뷰 미리보기: 정면 집을 비스듬한 집으로 바꿔 끼운다. 문 자리는 그대로라 이야기와 사람 자리가 안 어긋난다 ──
+const ISO_OF = { hall: 'hall_dao', lodge: 'lodge', house_red: 'rich', inn: 'inn', hut_o: 'tile_house', hut_b: 'tile_house', hut_o2: 'thatch', shop_blue: 'store', shop_green: 'clinic', clay: 'adobe', wood_o: 'barn', wood_b: 'thatch_long', mud: 'shack', straw: 'thatch' };
+const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn', gamble: 'gamble', gov: 'yamen', book: 'books', bokun: 'shrine', myhouse: 'thatch' };
+export const isoMode = () => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } };
+// 바닥 마름모를 쿼터뷰 좌표(a: 왼쪽 앞면 방향, b: 오른쪽 앞면 방향)로 바꾸면 네모가 된다. 겹침은 네모끼리 본다
+const isoRect = (F, fw, fh) => { const a = (-F[1] / 8 - F[0] / 16) / 2, b = (-F[1] / 8 + F[0] / 16) / 2; return [a, b, a + fw, b + fh]; };
+const isoHit = (r, q, pad = .2) => r[0] < q[2] + pad && r[2] > q[0] - pad && r[1] < q[3] + pad && r[3] > q[1] - pad;
+export function isoRetrofit(m, o = {}) {
+  if (m._isoDone || m.room || (m.live && !o.live)) return; m._isoDone = true; const cxm = m.w * TS / 2, placed = [], leftOf = o.leftOf || (x => x < cxm);
+  const houses = m.stamps.filter(st => ISO_OF[st.name] && STAMPS[st.name]).map(st => { const s = STAMPS[st.name], w = s[3], h = s[4], dy = st.y + h; return { st, door: m.portals.find(q => q.door && q.x < st.x + w && q.x + q.w > st.x && Math.abs(q.y + q.h / 2 - dy) < 20) }; });
+  houses.sort((a, b) => (b.door ? 1 : 0) - (a.door ? 1 : 0)); // 문 달린 집 먼저 자리를 잡는다
+  for (const { st, door } of houses) {
+    const s = STAMPS[st.name], w = s[3], h = s[4], dx = st.x + w / 2, dy = st.y + h;
+    const first = (door && ISO_ROOM[String(door.to).replace(/^r_\w+?_/, '')]) || (door && /^r_\w+_hall$/.test(door.to) ? 'hall_dao' : null) || ISO_OF[st.name];
+    // 문이 앞면 가운데에 오게 앞 모서리를 잡는다. 이웃과 겹치면 반대로 돌리거나 작은 집으로 바꾸고, 문 없는 집은 빼 버린다
+    let pick = null; const D = door ? [door.x + door.w / 2, door.y + door.h / 2] : [dx, dy];
+    for (const name of [first, 'tile_house', 'thatch', 'barn', 'shack']) for (const flip of leftOf(dx) ? [true, false] : [false, true]) {
+      const q = meta(name, flip); if (!q || pick) continue;
+      const F = flip ? [D[0] - q.fh / 2 * 16, D[1] + q.fh / 2 * 8] : [D[0] + q.fw / 2 * 16, D[1] + q.fw / 2 * 8], r = isoRect(F, q.fw, q.fh);
+      if (!placed.some(p => isoHit(r, p))) pick = { name, flip, F, r };
+    }
+    if (!pick && door) { const flip = leftOf(dx), q = meta(first, flip); pick = { name: first, flip, F: flip ? [D[0] - q.fh / 2 * 16, D[1] + q.fh / 2 * 8] : [D[0] + q.fw / 2 * 16, D[1] + q.fw / 2 * 8] }; pick.r = isoRect(pick.F, q.fw, q.fh); }
+    m.stamps.splice(m.stamps.indexOf(st), 1);
+    if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6] && r.w === s[7] && r.h === s[8]); if (k >= 0) m.solids.splice(k, 1); }
+    if (!pick) continue; placed.push(pick.r); m.iso(pick.name, pick.F[0] / TS, pick.F[1] / TS, { flip: pick.flip });
+  }
+}
 // 내 집은 가구가 바뀔 때마다 다시 만든다
 export function buildHouse(S) {
   const h = HOUSES[S.house.lv], m = new MapDef('myhouse', h.w, h.h, { name: h.name, bgm: 'peaceful', room: true, arena: 'yard' });

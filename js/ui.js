@@ -176,6 +176,11 @@ function tabSet(B) {
   <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 평타 키로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 대화 키<br>집: 청하진 복덕방에서 구입, 집 안에서 꾸미기 키, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
   <h2>설정</h2><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">진행은 이 브라우저에 자동으로 저장되고, 제목 화면의 이어 하기로 이어집니다. 지금 이 순간을 따로 남기려면 저장 탭의 칸에 저장하세요. 파일로 내보내면 그 순간이 파일 한 장으로 남아서 다른 기기에서도 불러올 수 있습니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">저장 칸 열기</button><button class="btn" id="svf">지금 상태를 파일로 내보내기</button><button class="btn" id="tt">제목으로</button></div>`;
   drawKeys($('#keyTable', B));
+  { // 쿼터뷰 미리보기: 그림을 바꾸는 동안 비스듬한 집으로 바꿔 보는 스위치. 지도를 다시 만들어야 해서 저장하고 새로 연다
+    const on = (() => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } })();
+    const d = el('div', 'note', `쿼터뷰 미리보기 <b style="font-weight:400">${on ? '켜짐' : '꺼짐'}</b> · 그림을 쿼터뷰로 바꾸는 중이라 아직 임시 그림이 섞여 있습니다. `); d.style.marginTop = '8px';
+    const b = el('button', 'btn', on ? '끄기' : '켜기'); b.onclick = () => { try { save(); localStorage.setItem('gangho_iso', on ? '0' : '1'); } catch (e) { } location.reload(); }; d.appendChild(b); B.appendChild(d);
+  }
   if (G.S.mode === 'free') { const d = el('div', 'note', `자유 모드의 하루는 현실 시간으로 <b style="font-weight:400">${Math.round(G.free.dayLen() / 60)}분</b>입니다. `); d.style.marginTop = '8px'; for (const [n, v] of [['15분', 900], ['30분', 1800], ['1시간', 3600]]) { const q = el('button', 'btn sm', n); q.style.marginLeft = '5px'; q.onclick = () => { G.S.dayLen = v; G.S.fr.clock = 0; Sound.sfx('tick'); drawMenu(); }; d.appendChild(q); } B.appendChild(d); }
   $('#vBgm').oninput = e => { Sound.setBgm(e.target.value / 100); $('#vBgmN').textContent = e.target.value; };
   $('#vSfx').oninput = e => { Sound.setSfx(e.target.value / 100); $('#vSfxN').textContent = e.target.value; };

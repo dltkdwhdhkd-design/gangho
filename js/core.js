@@ -150,7 +150,18 @@ const DIRROW = { down: 0, up: 1, left: 2, right: 3 };
 export function drawFrame(ctx, img, sx, sy, sw, sh, x, y, w = sw, h = sh) { if (img) ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h); }
 export const snap = v => Math.round(v * SCALE) / SCALE;
 // 스프라이트 시트: 열은 방향(아래, 위, 왼쪽, 오른쪽), 행은 걷기 네 칸 + 공격 + 점프 + 특수
+// 쿼터뷰 인물 시트(키_q): 2열(비스듬한 앞, 비스듬한 뒤, 둘 다 왼쪽을 본다) × 6행(차렷, 왼발, 오른발, 공격, 도약, 막기), 칸은 HD 64×64
+// 방향 0 아래, 1 위, 2 왼쪽, 3 오른쪽. 대각선 0 오른아래, 1 오른위, 2 왼아래, 3 왼위. 오른쪽을 보면 뒤집는다
+const QROW = [0, 1, 0, 2, 3, 4, 5];
+function isoPose(dirCol, diag) { if (diag !== undefined) return [diag % 2, diag < 2]; return [[0, false], [1, false], [0, false], [0, true]][dirCol] || [0, false]; }
 export function drawActorSprite(ctx, key, dirCol, row, x, y, opt = {}) {
+  const qi = IMG[key + '_q'];
+  if (qi) {
+    const k = 32 * (qi.hd || 1), [col, flip] = isoPose(dirCol, opt.diag), r = QROW[Math.min(row, 6)] ?? 0, z = (opt.size || 16) * 2, top = snap(y - z + 2);
+    ctx.save(); if (opt.alpha !== undefined) ctx.globalAlpha = opt.alpha;
+    if (flip) { ctx.translate(snap(x), 0); ctx.scale(-1, 1); ctx.drawImage(qi, col * k, r * k, k, k, -z / 2, top, z, z); } else ctx.drawImage(qi, col * k, r * k, k, k, snap(x - z / 2), top, z, z);
+    ctx.restore(); return;
+  }
   const img = IMG[key]; if (!img) return;
   const f = 16 * (img.hd || 1), r = Math.min(row, Math.floor(img.height / f) - 1);
   ctx.save();

@@ -1,6 +1,7 @@
 // 강호 전도: 중원과 변방을 한 장으로 걸어 다니는 큰 지도. 좌표는 804×658 참고 지도 기준
 import { G, IMG, TS, VW, VH, rnd, pick, toast, el, esc, Sound } from './core.js';
-import { MAPS, makeMap } from './maps.js';
+import { MAPS, makeMap, isoMode, isoRetrofit } from './maps.js';
+import { hitsBox } from './iso.js';
 import { BIOME, AUTO, STAMPS, hasTex, texTile, drawStamp, flagOf, curbs, mottle } from './tiles.js';
 import { DB } from './items.js';
 import { give, nextDay } from './state.js';
@@ -83,16 +84,18 @@ export function buildWorld() {
   for (const t of STOPS) { reserve(t.x - 5, t.y - 6, t.x + 5, t.y + 3); m.put('hut_o', t.x - 2, t.y - 4); m.put('banner4', t.x + 2, t.y - 2); m.put('jar', t.x - 3.2, t.y - 1.6); m.put('log', t.x + 3.3, t.y - .6); m.label(t.x, t.y - 5, '주막'); }
   for (const l of LOCS) compound(l);
   nature();
+  if (isoMode()) { const C = LOCS.map(l => [Math.round(l.px[0] * K) * TS, Math.round(l.px[1] * K) * TS]); isoRetrofit(m, { live: true, leftOf: x => { let b = C[0]; for (const c of C) if (Math.abs(c[0] - x) < Math.abs(b[0] - x)) b = c; return x < b[0]; } }); }
   m.objs = m.stamps; m.canvas = null;
   // 칸 묶음별 충돌과 소품
   m.sg = new Map(); m.og = new Map();
   const add = (M, cx, cy, v) => { const k = cx + cy * 4096; (M.get(k) || M.set(k, []).get(k)).push(v); }, S = CH * TS;
   for (const s of m.solids) for (let cy = Math.floor(s.y / S); cy <= Math.floor((s.y + s.h) / S); cy++) for (let cx = Math.floor(s.x / S); cx <= Math.floor((s.x + s.w) / S); cx++) add(m.sg, cx, cy, s);
-  for (const s of m.stamps) add(m.og, Math.floor((s.x + STAMPS[s.name][3] / 2) / S), Math.floor(s.base / S), s);
+  for (const s of m.stamps) add(m.og, Math.floor((s.x + (s.w || STAMPS[s.name][3]) / 2) / S), Math.floor(s.base / S), s);
+  m.pg = new Map(); for (const c of m.polys || []) for (let cy = Math.floor(c.K[1] / S); cy <= Math.floor(c.F[1] / S); cy++) for (let cx = Math.floor(c.L[0] / S); cx <= Math.floor(c.R[0] / S); cx++) add(m.pg, cx, cy, c);
   m.blocked = function (px, py, w = 9, h = 5) {
     const x0 = px - w / 2, y0 = py - h, x1 = px + w / 2, y1 = py; if (x0 < 0 || y0 < 0 || x1 > WW * TS || y1 > WH * TS) return true;
     for (let ty = Math.floor(y0 / TS); ty <= Math.floor((y1 - .01) / TS); ty++) for (let tx = Math.floor(x0 / TS); tx <= Math.floor((x1 - .01) / TS); tx++) { const v = g[ty][tx]; if (v === 2 || v === 6) return true; }
-    for (let cy = Math.floor(y0 / S); cy <= Math.floor(y1 / S); cy++) for (let cx = Math.floor(x0 / S); cx <= Math.floor(x1 / S); cx++) { const L = m.sg.get(cx + cy * 4096); if (L) for (const s of L) if (s.x < x1 && s.x + s.w > x0 && s.y < y1 && s.y + s.h > y0) return true; }
+    for (let cy = Math.floor(y0 / S); cy <= Math.floor(y1 / S); cy++) for (let cx = Math.floor(x0 / S); cx <= Math.floor(x1 / S); cx++) { const L = m.sg.get(cx + cy * 4096); if (L) for (const s of L) if (s.x < x1 && s.x + s.w > x0 && s.y < y1 && s.y + s.h > y0) return true; const P = m.pg.get(cx + cy * 4096); if (P) for (const c of P) if (hitsBox(c, px, py, w, h)) return true; }
     return false;
   };
 }
@@ -156,7 +159,7 @@ function compound(l) {
     wall(X0, Y0, X1, Y1, L.wall, [tx - 2, tx + 1]); gate(L.wall);
     stone(tx - 4, Y0 + 6, tx + 3, Y1); stone(tx - 1, Y1, tx, Y1);
     at(L.hall, tx, Y0 + 6); at(L.side, tx - 6, Y0 + 4.2); at(L.side, tx + 6, Y0 + 4.2); if (!L.pond) at(L.small, tx - 6, Y1 - .5); at(L.small, tx + 6, Y1 - .5);
-    if (L.pond) { for (let y = Y1 - 3; y <= Y1 - 2; y++) for (let x = X0 + 2; x <= X0 + 5; x++) g[y][x] = 2; at('rocks_s', X0 + 6.6, Y1 - 1.2); plantIn(L.trees[0], X1 - 2, Y0 + 7.6); }
+    if (L.pond) { for (let y = Y1 - 3; y <= Y1 - 2; y++) for (let x = X0 + 2; x <= X0 + 5; x++) g[y][x] = 2; at('rocks', X0 + 6.6, Y1 - 1.2); plantIn(L.trees[0], X1 - 2, Y0 + 7.6); }
     else plantIn(L.trees[0], X0 + 3, Y0 + 7.6), plantIn(L.trees[0], X1 - 2, Y0 + 7.6);
     at(L.deco, tx - 2.2, Y0 + 7.4); at(L.deco, tx + 2.2, Y0 + 7.4);
     if (L.lion) { at('statue', tx - 2.5, ty + .9); at('statue', tx + 2.5, ty + .9); m.flag(fid, tx - 3.7, ty + 1.2, true); m.flag(fid, tx + 3.7, ty + 1.2); } else flags(ty + .85);
