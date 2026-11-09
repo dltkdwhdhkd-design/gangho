@@ -284,7 +284,7 @@ export class Field {
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
       if (o.s) { if (o.s.iso) drawIso(c, o.s); else drawStamp(c, o.s.name, o.s.x, o.s.y); }
-      else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
+      else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (IMG[a.spr + '_q']) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
         if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }

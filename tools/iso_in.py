@@ -6,6 +6,12 @@
 #   python3 tools/iso_in.py worldmap <그림>                         강호 전도
 #   python3 tools/iso_in.py isowalk <걷기 시트> <전투 시트|-> <이름>  인물 2열 3행 두 장 → chars/<이름>_q
 #   python3 tools/iso_in.py mapicons <그림> sect,evil,out,city,old,mine   지도 표식 3열 2행
+#   python3 tools/iso_in.py isosheet <그림> <열> <행> 이름,이름,...      소품 여러 개 한 장
+#   python3 tools/iso_in.py isogrid <그림> <열> <행> ani/chicken           동물, 몬스터 2열 2행 → <키>_q
+#   python3 tools/iso_in.py tex <그림> <이름>                          땅 텍스처(이음매를 지운다)
+#   python3 tools/iso_in.py arena <그림> <테마>                        전투 배경
+#   python3 tools/iso_in.py qb <번호> <그림> [그림2]                     요청서 번호(QB12, QC4)로 알아서 넣는다
+#   python3 tools/iso_in.py batch <폴더>                               파일 이름에 번호가 든 그림을 몽땅 넣는다(QB62.png, QC4_fight.png)
 import json, math, os, re, sys
 from PIL import Image, ImageDraw
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); OUT = os.path.join(ROOT, 'assets/hd/iso'); META = os.path.join(ROOT, 'js/isometa.js')
@@ -179,6 +185,100 @@ def wallseg(name, h, kind):  # 이어 붙이는 담 한 칸 임시 그림: 왼�
             if A[x, y] == 0 and any(0 <= x + a < W and 0 <= y + b < H and A[x + a, y + b] > 0 for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): P[x, y] = OL
     bb = im.getbbox(); x0, y0 = bb[0] - bb[0] % 2, bb[1] - bb[1] % 2; im = im.crop((x0, y0, x0 + (bb[2] - x0 + 1) // 2 * 2, y0 + (bb[3] - y0 + 1) // 2 * 2))
     register(name, im, F[0] - x0, F[1] - y0, fw, fh)
+# ── 소품 한 장에 여러 개: 덩어리를 찾아 줄 순서로 자르고, 이름마다 정한 너비(논리 점)와 바닥 칸으로 맞춘다 ──
+PROPS = {  # 이름: (너비, fw, fh)
+  'well': (30, 1, 1), 'cart': (40, 1.5, 1), 'haystack': (30, 1, 1), 'woodpile': (34, 1.5, .75), 'millstone': (28, 1, 1), 'bench': (30, 1.25, .5),
+  'jars': (26, 1, .75), 'crates': (28, 1, 1), 'ricebags': (28, 1, .75), 'laundry': (40, 1.5, .3), 'herbrack': (30, 1.25, .5), 'coop': (30, 1, 1),
+  'stall': (56, 2, 1.5), 'stall_fruit': (56, 2, 1.5), 'stall_meat': (56, 2, 1.5), 'stall_pot': (56, 2, 1.5), 'signpole': (14, .4, .4), 'lamppost': (14, .4, .4),
+  'dummy': (16, .5, .5), 'rack': (34, 1.5, .5), 'target': (22, .6, .6), 'censer': (26, 1, 1), 'lion': (24, .8, .8), 'stonelamp': (16, .5, .5),
+  'signpost': (16, .4, .4), 'cairn': (22, .8, .8), 'log': (32, 1.5, .6), 'bridge': (64, 2, 3), 'grave': (24, 1, .75), 'stele': (20, .6, .6),
+  'banner_red': (14, .3, .3), 'banner_blue': (14, .3, .3), 'banner_gold': (14, .3, .3), 'banner_inn': (16, .3, .3), 'flagpole': (14, .3, .3), 'lantern_string': (48, 2, .2),
+  'tree_round': (48, .75, .75), 'tree_big': (64, 1, 1), 'willow': (52, .75, .75), 'pine': (40, .6, .6), 'pine_tall': (36, .6, .6), 'tree_old': (60, 1, 1),
+  'peach': (46, .75, .75), 'plum': (46, .75, .75), 'maple': (48, .75, .75), 'tree_dead': (40, .6, .6), 'pine_snow': (40, .6, .6), 'bamboo': (36, .75, .75),
+  'bush': (22, .75, .75), 'bush2': (24, .75, .75), 'grass': (18, .5, .5), 'flowers': (20, .5, .5), 'flowers2': (20, .5, .5), 'reed': (20, .5, .5),
+  'rock_big': (48, 2, 1.5), 'rocks': (30, 1, 1), 'rock_moss': (32, 1.25, 1), 'rock_snow': (32, 1.25, 1), 'rock_dark': (32, 1.25, 1), 'stones': (20, .75, .5),
+  'mountain': (128, 4, 4), 'mountain_snow': (128, 4, 4), 'cliff': (110, 4, 3), 'mountain_dark': (128, 4, 4), 'lotus': (36, 1.5, 1), 'boat': (48, 2, 1),
+  'pillar': (10, .3, .3),
+  'bed': (48, 2, 1.25), 'table': (36, 1.25, 1.25), 'table_round': (28, 1, 1), 'longbench': (36, 1.5, .5), 'wardrobe': (28, 1, .6), 'bookshelf': (32, 1.25, .5),
+  'screen': (40, 1.75, .3), 'altar': (40, 1.5, .75), 'throne': (30, 1, 1), 'flowerpot': (18, .6, .6), 'standlamp': (12, .4, .4), 'scroll': (16, .2, .2),
+  'stove': (40, 1.5, 1), 'watertank': (24, .8, .8), 'ricechest': (26, 1, .6), 'counter': (48, 2, .75), 'wineshelf': (36, 1.5, .5), 'medchest': (34, 1.5, .5),
+  'weaponrack': (36, 1.5, .5), 'gambletable': (40, 1.5, 1), 'drum': (28, 1, 1), 'sutra': (32, 1.25, .5), 'cushion': (16, .6, .6), 'brazier': (22, .75, .75),
+}
+# 이어 붙이는 한 칸(왼쪽 위에서 오른쪽 아래로 뻗는다). 너비는 바닥 마름모 폭에 맞춘다. 오른쪽 뒷벽(_r)만 반대로 뻗는다
+SEGS = {'fence': 1, 'fence_gate': 1, 'wall_stone': 1, 'wall_tile': 1, 'fence_bamboo': 1, 'hedge': 1, 'wall_l': 1, 'wall_l_win': 1, 'wall_l_door': 1, 'wall_r': -1, 'wall_r_win': -1}
+def blobs_in(im, n, per):  # 덩어리 n개를 찾아 per개씩 줄로 묶어 왼쪽부터 돌려준다
+    import numpy as np
+    from scipy import ndimage
+    a = np.array(im)[..., 3] > 0; lab, k = ndimage.label(ndimage.binary_dilation(a, iterations=6)); objs = ndimage.find_objects(lab)
+    objs = sorted(objs, key=lambda sl: -(sl[0].stop - sl[0].start) * (sl[1].stop - sl[1].start))[:n]
+    boxes = sorted([(sl[1].start, sl[0].start, sl[1].stop, sl[0].stop) for sl in objs], key=lambda b: (b[1] + b[3]) / 2); out = []
+    for i in range(0, len(boxes), per): out += sorted(boxes[i:i + per], key=lambda b: b[0])
+    res = []
+    for b in out:  # 덩어리 상자 안에서도 다른 덩어리 조각은 지운다
+        c = im.crop(b); A = np.array(c); m = lab[b[1]:b[3], b[0]:b[2]]; ids = [v for v in np.unique(m) if v]; keep = max(ids, key=lambda v: (m == v).sum()) if ids else 0
+        A[..., 3] = np.where(m == keep, A[..., 3], 0); c = Image.fromarray(A); res.append(c.crop(c.getbbox()) if c.getbbox() else c)
+    return res
+def prop(name, c, w=None, fw=None, fh=None):  # 소품 한 개를 너비로 맞추고 맨 아래 점을 앞 모서리로 잡는다
+    import numpy as np
+    W0, FW, FH = PROPS.get(name, (32, 1, 1)); seg = SEGS.get(name)
+    if seg: FW, FH = (1, .3) if seg > 0 else (.3, 1); W0 = (FW + FH) * 16
+    w, fw, fh = w or W0, fw if fw is not None else FW, fh if fh is not None else FH
+    s = w * 2 / c.width; t = c.resize((max(2, round(c.width * s)) // 2 * 2, max(2, round(c.height * s)) // 2 * 2), Image.LANCZOS)
+    A = np.array(t); A[..., 3] = np.where(A[..., 3] > 110, 255, 0); t = Image.fromarray(A); a = A[..., 3] > 0
+    ys = np.nonzero(a.any(axis=1))[0]; fy = int(ys.max()); xs = np.nonzero(a[max(0, fy - 2):fy + 1].any(axis=0))[0]
+    fx = int(xs.max()) - 1 if seg and seg > 0 else int(xs.min()) + 1 if seg else int(round(xs.mean()))  # 담은 아래 끝, 오른쪽 뒷벽은 왼쪽 아래 끝
+    register(name, t, fx, fy + 1, fw, fh); print(name, '크기', (t.width // 2, t.height // 2), '바닥', fw, fh)
+def isosheet(path, cols, rows, names):
+    im = cutbg(Image.open(path)); cs = blobs_in(im, cols * rows, cols)
+    if len(cs) < len(names): print('덩어리가 모자라', len(cs), '/', len(names))
+    for nm, c in zip(names, cs): prop(nm, c)
+def isogrid(path, cols, rows, key, C=64):  # 동물, 몬스터: 2열(왼아래, 왼위) × 2행(걷기 두 동작) → 2열 6행 시트, 칸 C
+    import numpy as np
+    H = {'chicken': 16, 'cat': 16, 'rabbit': 14, 'pheasant': 18, 'badger': 16, 'piglet': 20, 'dog': 24, 'deer': 36, 'ox': 40, 'horse': 50, 'camel': 54,
+         'Beast': 34, 'Snake': 16, 'Snake2': 30, 'Racoon': 22, 'Bamboo': 46, 'Spirit': 46, 'Spirit2': 46, 'Lizard': 22, 'Skeleton': 46}.get(key.split('/')[-1], 40)
+    cs = blobs_in(cutbg(Image.open(path)), cols * rows, cols); s = H / max(c.height for c in cs); out = Image.new('RGBA', (C * 2, C * 6), (0, 0, 0, 0))
+    for r, src in enumerate([0, 1, 1, 1, 0, 0]):  # 차렷, 왼발, 오른발, 공격, 도약, 막기. 걸을 때 줄이 0,1,0,2로 돌아서 두 동작이 번갈아 나온다
+        for col in range(2):
+            c = cs[min(len(cs) - 1, src * 2 + col)]; c = c.resize((max(1, round(c.width * s)), max(1, round(c.height * s))), Image.LANCZOS)
+            A = np.array(c); A[..., 3] = np.where(A[..., 3] > 110, 255, 0); c = Image.fromarray(A)
+            if c.width > C or c.height > C - 2: c.thumbnail((C, C - 2))
+            out.alpha_composite(c, (col * C + (C - c.width) // 2, r * C + C - 2 - c.height))
+    os.makedirs(os.path.join(ROOT, 'assets/hd', os.path.dirname(key)), exist_ok=True); out.save(os.path.join(ROOT, f'assets/hd/{key}_q.webp'), lossless=True); reg_key(key + '_q'); print(key + '_q', '키', H // 2)
+TEXN = {'forest': 'deep', 'dirt': 'plain'}
+def tex(path, name, N=512):  # 땅 텍스처: 가운데 정사각형을 잘라 줄이고, 반 칸 밀어 겹쳐 이음매를 지운다
+    import numpy as np
+    name = TEXN.get(name, name); im = Image.open(path).convert('RGB'); m = min(im.size); im = im.crop(((im.width - m) // 2, (im.height - m) // 2, (im.width + m) // 2, (im.height + m) // 2)).resize((N, N), Image.LANCZOS)
+    A = np.array(im).astype(float); B = np.roll(np.roll(A, N // 2, 0), N // 2, 1); u = np.abs(np.arange(N) - (N - 1) / 2) / (N / 2)
+    w = np.clip((1 - np.maximum(u[:, None], u[None, :])) * 4, 0, 1)[..., None]  # 가장자리 1/4 폭에서만 섞는다
+    out = (A * w + B * (1 - w)).round().astype('uint8'); os.makedirs(os.path.join(ROOT, 'assets/hd/ground'), exist_ok=True)
+    Image.fromarray(out).save(os.path.join(ROOT, f'assets/hd/ground/{name}.webp'), quality=92); reg_key('ground/' + name); print('ground/' + name)
+def arena(path, theme):
+    im = Image.open(path).convert('RGB'); r = 768 / 480
+    if im.width / im.height > r: nw = round(im.height * r); im = im.crop(((im.width - nw) // 2, 0, (im.width - nw) // 2 + nw, im.height))
+    else: nh = round(im.width / r); im = im.crop((0, im.height - nh, im.width, im.height))  # 세로가 길면 바닥 쪽을 남긴다
+    os.makedirs(os.path.join(ROOT, 'assets/hd/arena'), exist_ok=True); im.resize((768, 480), Image.LANCZOS).save(os.path.join(ROOT, f'assets/hd/arena/{theme}.webp'), quality=92); reg_key('arena/' + theme); print('arena/' + theme)
+def qb(no, paths):  # 요청서 번호로 넣는 법을 찾아 부른다
+    order = json.load(open(os.path.join(ROOT, 'docs/iso-order.json'), encoding='utf8')); o = next((x for x in order if x['no'].upper() == no.upper()), None)
+    if not o: print('번호 없음', no); return
+    h = o['how'].split(); c = h[0]; p = paths[0]
+    if c == 'iso': isoin(p, h[1], float(h[2]), float(h[3]))
+    elif c == 'isosheet': isosheet(p, int(h[1]), int(h[2]), h[3].split(','))
+    elif c == 'isogrid': isogrid(p, int(h[1]), int(h[2]), h[3])
+    elif c == 'isowalk': isowalk(p, paths[1] if len(paths) > 1 else '-', h[1])
+    elif c == 'tex': tex(p, h[1])
+    elif c == 'arena': arena(p, h[1])
+    elif c == 'worldmap': worldmap(p)
+    elif c == 'mapicons': mapicons(p, h[1].split(','))
+    print(o['no'], o['name'], '→', o['how'])
+def batch(folder):  # QB62.png, qc4-walk.png, QC4_fight.png처럼 번호가 든 파일을 번호별로 모아 넣는다
+    got = {}
+    for f in sorted(os.listdir(folder)):
+        m = re.search(r'(Q[BC]\d+)', f, re.I)
+        if m and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')): got.setdefault(m.group(1).upper(), []).append(os.path.join(folder, f))
+    for no, ps in sorted(got.items(), key=lambda kv: (kv[0][:2], int(kv[0][2:]))):
+        ps.sort(key=lambda q: ('fight' in q.lower() or '전투' in q, q))  # 걷기 먼저, 전투 나중
+        try: qb(no, ps)
+        except Exception as e: print(no, '실패', e)
 STYLE = {'thatch': 'thatch', 'thatch_long': 'thatch', 'tavern': 'thatch', 'barn': 'wood', 'shack': 'wood', 'stilt': 'wood', 'watchtower': 'wood', 'tent': 'adobe', 'yurt': 'ice', 'adobe': 'adobe', 'cabin': 'wood',
          'hall_temple': 'gold', 'temple_town': 'gold', 'hall_manor': 'red', 'gamble': 'red', 'yamen': 'red', 'restaurant': 'red', 'hall_dark': 'dark', 'hall_ice': 'ice', 'hall_west': 'adobe', 'ruin': 'dark'}
 if __name__ == '__main__':
@@ -188,6 +288,12 @@ if __name__ == '__main__':
     elif cmd == 'worldmap': worldmap(sys.argv[2])
     elif cmd == 'isowalk': isowalk(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == 'mapicons': mapicons(sys.argv[2], sys.argv[3].split(','))
+    elif cmd == 'isosheet': isosheet(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5].split(','))
+    elif cmd == 'isogrid': isogrid(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
+    elif cmd == 'tex': tex(sys.argv[2], sys.argv[3])
+    elif cmd == 'arena': arena(sys.argv[2], sys.argv[3])
+    elif cmd == 'qb': qb(sys.argv[2], sys.argv[3:])
+    elif cmd == 'batch': batch(sys.argv[2])
     elif cmd == 'placeall':
         order = json.load(open(os.path.join(ROOT, 'docs/iso-order.json'), encoding='utf8')); n = 0
         for o in order:
