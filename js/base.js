@@ -3,7 +3,7 @@ import { G, Sound, toast, josa, pick } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { MAPS, makeMap } from './maps.js';
-import { STAMPS } from './tiles.js';
+import { STAMPS, flagOf } from './tiles.js';
 import { TS } from './core.js';
 import { LOOT } from './items.js';
 import { learn } from './state.js';
@@ -61,9 +61,10 @@ function makeRoom(id) {
   const info = ROOMS[id] || (() => { if (id.startsWith('h_')) return null; const o = LOCS.find(q => id.startsWith(`r_${q.id}_`)); if (o) { G.world.ensure(o.map); return ROOMS[id]; } })(); if (!info) { console.warn('없는 방', id); return; }
   const [w, h, ex] = ROOM[info.kind], dark = ['fort', 'dark'].includes(info.owner.style), m = makeMap(id, w, h, { name: `${info.owner.name} ${info.name}`, bgm: info.owner.style === 'temple' ? 'temple' : 'quiet', room: true, roomStyle: dark ? 1 : 0, arena: 'room', tint: dark ? 'rgba(30,8,20,.22)' : undefined });
   const k = info.kind;
-  if (k === 'hall') { m.put('tablet', 10, 1).put('f_chair', 10.5, 3).put('lantern', 3, 2).put('lantern', 18, 2).put('lantern', 3, 7).put('lantern', 18, 7).put('longtable', 5, 8).put('longtable', 14, 8).put('rack', 1, 2).put('rack', 19, 2).put('plant', 1, 11).put('plant', 20, 11).put('f_scroll', 6, 1).put('f_scroll', 15, 1); }
+  // 본전: 문에서 장문인 자리까지 붉은 깔개, 양옆으로 붉은 기둥, 자리 뒤에 병풍, 앞에 향로
+  if (k === 'hall') { m.carpet = [9, 3, 4, 11]; m.put('screen', 9.25, .55).put('f_chair', 10.5, 2.6).put('censer', 6.6, 2.2).put('censer', 14.3, 2.2).put('f_scroll', 3.5, 1).put('f_scroll', 17.5, 1).put('rack', 1, 2).put('rack', 19, 2); for (const y of [3.4, 8]) m.put('pillar', 7.6, y).put('pillar', 13.65, y); m.put('lantern', 3, 6).put('lantern', 18, 6).put('longtable', 2.6, 9.4).put('longtable', 16.4, 9.4).put('plant', 1, 11).put('plant', 20, 11); }
   if (k === 'lib') { m.row('bookcase', 1, 1, 4, 4).row('bookcase2', 2, 5, 4, 4).put('scrollcase', 14, 8).put('counter', 2, 8).put('f_lamp', 9, 8); }
-  if (k === 'elder') { m.put('tablet2', 8, 1).put('f_scroll', 3, 1).put('f_scroll', 13, 1).put('f_chair', 4, 3).put('f_chair', 13, 3).put('teapot', 8.5, 5).put('longtable', 7, 5).put('f_bonsai', 1, 9).put('f_bonsai', 16, 9); }
+  if (k === 'elder') { m.carpet = [7, 3, 4, 9]; m.put('screen', 7.25, .55).put('f_scroll', 3, 1).put('f_scroll', 13, 1).put('f_chair', 4, 3).put('f_chair', 13, 3).put('teapot', 8.5, 5).put('longtable', 7, 5).put('f_bonsai', 1, 9).put('f_bonsai', 16, 9); }
   if (k === 'dorm') { m.row('f_bed', 1, 1, 5, 3).row('f_bed', 1, 6, 5, 3).put('chest', 16, 9).put('f_lamp', 1, 10); }
   if (k === 'mess') { m.put('f_stove', 1, 1).put('f_stove', 4, 1).put('jar', 8, 1).put('pot', 10, 1).put('longtable', 3, 5).put('longtable', 10, 5).put('longtable', 3, 8).put('longtable', 10, 8).row('stool', 3, 4, 3, 1).row('stool', 10, 4, 3, 1); }
   if (k === 'inn') { m.put('counter', 1, 2).put('shelf', 5, 1).put('rack', 11, 1).put('longtable', 3, 6).put('longtable', 11, 6).put('longtable', 3, 9).put('longtable', 11, 9).row('stool', 3, 5, 3, 1).row('stool', 11, 5, 3, 1).put('plant', 16, 2); }
@@ -71,9 +72,9 @@ function makeRoom(id) {
   if (k === 'book') { m.row('bookcase', 1, 1, 3, 4).put('scrollcase', 13, 1).put('counter', 4, 5).put('f_lamp', 1, 8).put('box', 13, 7); }
   if (k === 'clinic') { m.put('shelf2', 1, 1).put('shelf2', 4, 1).put('drawer', 8, 1).put('bed', 9, 5).put('counter', 1, 5).put('jar', 12, 8).put('plant', 1, 8); }
   if (k === 'armory') { m.row('rack', 1, 1, 4, 3).put('box', 1, 7).put('box', 12, 7).put('chest', 11, 5).put('counter', 2, 5); }
-  if (k === 'gov') { m.put('f_chair', 9.5, 2).put('longtable', 8, 4).put('tablet', 9, 1).put('f_scroll', 3, 1).put('f_scroll', 16, 1).put('rack', 1, 5).put('rack', 17, 5).put('lantern', 3, 9).put('lantern', 16, 9); }
+  if (k === 'gov') { m.carpet = [8, 5, 4, 8]; m.put('pillar', 6.6, 5).put('pillar', 12.65, 5).put('f_chair', 9.5, 2).put('longtable', 8, 4).put('screen', 8.25, .55).put('f_scroll', 3, 1).put('f_scroll', 16, 1).put('rack', 1, 5).put('rack', 17, 5).put('lantern', 3, 9).put('lantern', 16, 9); }
   if (k === 'gamble') { m.put('counter', 8, 4).put('f_scroll', 5, 1).put('f_scroll', 13, 1).put('shelf', 15, 1).put('jar', 2, 1).put('lantern', 1, 2).put('lantern', 18, 2).put('lantern', 1, 8).put('lantern', 18, 8).put('longtable', 3, 7).put('longtable', 13, 7).put('box', 17, 11).put('plant', 1, 11); }
-  if (k === 'temple') { m.put('tablet', 7, 1).put('tablet2', 3, 2).put('tablet2', 12, 2).put('lantern', 1, 4).put('lantern', 14, 4).put('longtable', 6, 5).put('plant', 1, 9).put('plant', 14, 9); }
+  if (k === 'temple') { m.carpet = [6, 3, 4, 8]; m.put('censer', 7.5, 3.4).put('tablet', 7, 1).put('tablet2', 3, 2).put('tablet2', 12, 2).put('lantern', 1, 4).put('lantern', 14, 4).put('longtable', 6, 5).put('plant', 1, 9).put('plant', 14, 9); }
   if (k === 'home') { const v = [...id].reduce((a, c) => a + c.charCodeAt(0), 0) % 4; if (v === 0) m.put('f_bed', 1, 1).put('chest', 4, 1).put('longtable', 6, 5).row('stool', 6, 4, 3, 1).put('jar', 12, 1).put('f_stove', 10, 1); if (v === 1) m.put('bed', 9, 1).put('drawer', 1, 1).put('shelf', 4, 1).put('longtable', 3, 6).put('plant', 12, 7); if (v === 2) m.put('shelf2', 1, 1).put('box', 5, 1).put('box', 7, 1).put('jar', 10, 1).put('pot', 12, 1).put('counter', 2, 5).put('f_bed', 10, 6); if (v === 3) m.put('f_stove', 1, 1).put('longtable', 5, 5).put('f_bed', 10, 1).put('f_lamp', 8, 1).put('f_bonsai', 1, 7).put('stool', 5, 4).put('stool', 7, 4); }
   m.exit(ex, h - 1, 4, 1, info.back, info.bx, info.by, 0, { door: true }); m.render();
 }
@@ -92,19 +93,22 @@ function sectLayout(m, l, st, ft) {
   if (st.water) { m.water(1, 54, 15, 5); m.water(32, 54, 13, 5); }
   m.fill(cx, 9, 4, H - 9, 3);
   // 산문
-  m.row(w, 3, 60, cx - 3); m.row(w, cx + 4, 60, W - cx - 7); m.put('gate_arch', cx, 58, { nosolid: true }); m.place(mid, 57.2, l.name); m.put(st.ban, cx - 4, 61); m.put(st.ban, cx + 7, 61);  // 깃발은 문지기 바깥쪽에. 문지기를 가리지 않게
+  m.row(w, 3, 60, cx - 3); m.row(w, cx + 4, 60, W - cx - 7); m.put('gate_arch', cx, 58, { nosolid: true }); m.place(mid, 57.2, l.name);
+  // 산문 양옆의 큰 깃발. 문지기 바깥쪽에 세워 천이 밖으로 날린다. 문지기를 가리지 않게
+  const fid = flagOf(l.id); if (fid) { m.flag(fid, cx - 2.4, 62.7, true); m.flag(fid, cx + 6.4, 62.7); } else { m.put(st.ban, cx - 4, 61); m.put(st.ban, cx + 7, 61); }
+  const pen = (x, y) => fid ? m.pen(fid, x + .31, y + 1.75) : m.put(st.ban, x, y);
   // 외문 구역
   room(m, l, big, 7, 45, 'dorm', '외문 숙소'); if (!st.water) { room(m, l, big, 13, 45, 'dorm', '외문 숙소', { n: 2, quiet: 1 }); m.put('log', 7, 53); m.put('log', 10, 53); }
-  room(m, l, small, 33, 47, 'mess', '식당'); m.put('jar', 30, 52); m.put('jar', 32, 52); m.put('pot', 35, 52); m.put(st.ban, cx - 3, 50); m.put(st.ban, cx + 6, 50);
+  room(m, l, small, 33, 47, 'mess', '식당'); m.put('jar', 30, 52); m.put('jar', 32, 52); m.put('pot', 35, 52); pen(cx - 3, 50); pen(cx + 6, 50);
   // 연무장
   m.fill(YARD.x, YARD.y, YARD.w, YARD.h, 3); m.place(mid, YARD.y - 1, ft[1]);
   for (let i = 0; i < 6; i++) m.put('f_dummy', YARD.x + 2 + i * 5, YARD.y + 1);
-  m.put('rack', YARD.x + 1, YARD.y + 13); m.put('rack', YARD.x + YARD.w - 4, YARD.y + 13); m.put(st.ban, YARD.x - 1, YARD.y); m.put(st.ban, YARD.x + YARD.w, YARD.y); m.put(st.ban, YARD.x - 1, YARD.y + 14); m.put(st.ban, YARD.x + YARD.w, YARD.y + 14);
+  m.put('rack', YARD.x + 1, YARD.y + 13); m.put('rack', YARD.x + YARD.w - 4, YARD.y + 13); pen(YARD.x - 1, YARD.y); pen(YARD.x + YARD.w, YARD.y); pen(YARD.x - 1, YARD.y + 14); pen(YARD.x + YARD.w, YARD.y + 14);
   // 내문 구역
   room(m, l, big, 7, 12, 'lib', ft[2]); room(m, l, big, 35, 12, 'elder', ft[3]); room(m, l, small, 13, 13, 'clinic', '약방'); room(m, l, small, 28, 13, 'armory', '무기고');
   const dk = i => (ex.deco || st.deco)[i % (ex.deco || st.deco).length]; m.put(dk(0), 3, 18); m.put(dk(1), 41, 18); m.put(dk(0), 17, 19); m.put(dk(1), 28, 19);
   // 본전
-  m.fill(cx - 5, 8, 14, 2, 3); room(m, l, hall, cx, 1, 'hall', ft[0]); m.put(dk(0), cx - 5, 3); m.put(dk(0), cx + 6, 3); m.put(st.ban, cx - 2, 6); m.put(st.ban, cx + 5, 6);
+  m.fill(cx - 5, 8, 14, 2, 3); room(m, l, hall, cx, 1, 'hall', ft[0]); m.put(dk(0), cx - 5, 3); m.put(dk(0), cx + 6, 3); if (fid) { m.flag(fid, cx - .5, 8.7, true); m.flag(fid, cx + 4.5, 8.7); } else { m.put(st.ban, cx - 2, 6); m.put(st.ban, cx + 5, 6); }  // 본전 계단 양옆
   // 길가 나무와 석등. 사람 사는 곳처럼 보이게 빈 땅을 채운다
   for (const y of [11, 15, 46, 50, 54]) { m.put(dk(y), cx - 3, y); m.put(y % 4 ? 'lantern' : dk(y + 1), cx + 6, y); }
   for (const [x, y] of [[8, 26], [36, 26], [8, 38], [36, 38]]) m.put('pot', x, y);
@@ -119,7 +123,7 @@ function townLayout(m, l) {
   m.row('wall_h', 3, 43, cx - 3); m.row('wall_h', cx + 4, 43, W - cx - 7); m.put('gate_arch', cx, 41, { nosolid: true }); m.place(cx + 2, 40, l.name);
   room(m, l, 'inn', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); room(m, l, 'hall', 26, 2, 'gov', '관아'); room(m, l, 'house_red', 49, 13, 'gamble', '도박장');
   [['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => room(m, l, st, x, y, 'home', '민가', { n: i + 1, quiet: 1 }));
-  m.put('banner2', 20, 13); m.put('banner1', 39, 13); m.put('statue', 29.5, 19, { nosolid: true });
+  m.pen('gwan', 20.3, 14.75); m.pen('gwan', 39.3, 14.75); m.flag('gwan', 25.5, 9.6, true); m.flag('gwan', 30.5, 9.6); m.put('banner4', 10.1, 14.3, { nosolid: true });  // 관아 앞 관기, 객잔 옆 밥그릇 기 m.put('statue', 29.5, 19, { nosolid: true });
   // 광장 네 귀퉁이의 좌판. 차양 밑에 매대를 놓고 장사꾼은 그 뒤에 선다
   for (const [x, y] of [[21, 16], [34, 16], [21, 26], [34, 26]]) { m.put('awning', x, y, { nosolid: true }); m.put('counter', x + 1.5, y + 2); }
   m.put('jar', 21, 18.6); m.put('pot', 38.7, 18.6); m.put('box', 21, 28.6); m.put('jar', 38.7, 28.6); m.put('sign_sword', 9, 25.3); m.scatter(['flower1', 'fern1'], 18, 4);

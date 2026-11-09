@@ -47,6 +47,7 @@ export const Story = {
     let npcs = L.flatMap(x => x.npcs).filter(n => !n.when || n.when()), spots = L.flatMap(x => x.spots), trigs = L.flatMap(x => x.trigs);
     if (G.S.mode === 'free' && G.free) { npcs = G.free.npcs(id, npcs); spots = G.free.spots(id, spots); trigs = G.free.trigs(id, trigs); }
     if (Story.wrapNpc) npcs.forEach(Story.wrapNpc);
+    if (G.crime) npcs = G.crime.apply(id, npcs);
     return { npcs, spots, trigs, roam: L.flatMap(x => x.roam), hunt: L.flatMap(x => x.hunt || []) };
   },
   begin() { G.scene = 'field'; G.field.load('cheongha', 22, 25, 1); $('#fade').style.opacity = 1; G.field.run(Story.scenes.opening); },

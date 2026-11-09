@@ -139,6 +139,7 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 #touch .stick i{position:absolute;left:66px;top:66px;width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,.34)}
 #touch .tb{position:absolute;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.4);color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;text-shadow:0 2px 0 #000;pointer-events:auto;text-align:center;line-height:1.15}
 #touch .tb.s{width:76px;height:76px;font-size:14px}
+#touch .tb.on{background:rgba(255,214,120,.38);border-color:#ffd678}
 
 /* 생활 */
 .ic{width:32px;height:32px;image-rendering:pixelated;vertical-align:middle;margin-right:6px}

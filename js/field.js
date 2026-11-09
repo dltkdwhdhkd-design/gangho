@@ -1,8 +1,8 @@
 // 마을과 산길을 걸어 다니는 화면
 import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast } from './core.js';
-import { Keys } from './core.js';
+import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
-import { drawStamp } from './tiles.js';
+import { drawStamp, STAMPS } from './tiles.js';
 import { save } from './state.js';
 import { Story } from './story.js';
 import { openMenu } from './ui.js';
@@ -19,7 +19,7 @@ export class Field {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
     if (id === 'mysect') G.sect.build();
     G.world.ensure(id);
-    this.trail = []; const m = MAPS[id]; this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
+    this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS; this.p.y = ty * TS; this.p.dir = dir;
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];
@@ -39,7 +39,7 @@ export class Field {
   }
   flashPlace() { const e = $('#place'); if (!e) return; e.textContent = this.m.name; e.classList.add('on'); clearTimeout(this._pt); this._pt = setTimeout(() => e.classList.remove('on'), 1800); }
   showHud() {
-    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (' + Keys.label('decor') + ')</button>' : ''}<button class="btn sm" id="mapb">지도 (${Keys.label('map')})</button><button class="btn sm" id="mbtn">메뉴 (${Keys.label('opt')})</button></div><canvas id="mm"></canvas><div class="keys" id="keys"><span id="dayl">${G.S.day}일째${G.S.mode === 'free' ? ' ' + G.free.period() : ''}</span>${G.touch ? '' : ` · 대화 ${Keys.label('ok')} · 메뉴 ${Keys.label('opt')} · 지도 ${Keys.label('map')}`}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
+    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (' + Keys.label('decor') + ')</button>' : ''}<button class="btn sm" id="mapb">지도 (${Keys.label('map')})</button><button class="btn sm" id="mbtn">메뉴 (${Keys.label('opt')})</button></div><canvas id="mm"></canvas><div class="keys" id="keys"><span id="dayl">${G.S.day}일째${G.S.mode === 'free' ? ' ' + G.free.period() : ''}</span>${G.touch ? '' : ` · 대화 ${Keys.label('ok')} · 경공 ${Keys.label('dash')}${[...(Keys.map.dash || []), ...(Keys.map.guard || [])].includes('ShiftLeft') ? '·Shift' : ''} · 메뉴 ${Keys.label('opt')} · 지도 ${Keys.label('map')}`}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
     $('#mbtn').onclick = () => openMenu();
     $('#mapb').onclick = () => { if (!this.busy && !G.decor) openMap(); };
     bindMini(this);
@@ -62,16 +62,21 @@ export class Field {
     if (Input.take('menu') || Input.take('opt')) { openMenu(); return; }
     if (Input.take('map')) { openMap(); return; }
     if (Input.take('decor') && this.m.id === 'myhouse') { G.life.openDecor(); return; }
-    const p = this.p, m = this.m, d = Input.dir(), S = G.S, sp = 76;
-    let moving = false;
+    if (Input.take('frun')) { G.runOn = !G.runOn; toast(G.runOn ? '경공으로 달린다' : '걸어서 간다', 1.4); }
+    const p = this.p, m = this.m, d = Input.dir(), S = G.S, run = !!(Input.down.dash || Input.down.guard || G.runOn), sp = run ? (m.id === 'world' ? 230 : 180) : 84;
+    let moving = false; this.dashing = false;
     if (d.x || d.y) {
       moving = true;
       p.dir = Math.abs(d.x) >= Math.abs(d.y) * .55 ? (d.x < 0 ? 2 : 3) : (d.y < 0 ? 1 : 0); p.diag = d.x && d.y && Math.min(Math.abs(d.x), Math.abs(d.y)) > .3 ? (d.y > 0 ? 0 : 1) + (d.x < 0 ? 2 : 0) : undefined;
       const nx = p.x + d.x * sp * dt, ny = p.y + d.y * sp * dt;
       const blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && hyp(n.x - x, (n.y - 1) - y) < 8);
-      if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
-      p.walk += dt * 8; this.trail.unshift({ x: p.x, y: p.y, dir: p.dir, diag: p.diag }); if (this.trail.length > 70) this.trail.pop();
+      const ox = p.x, oy = p.y; if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
+      // 발자취는 거리마다 남긴다. 경공으로 달려도 뒤따르는 동료와의 거리가 같다
+      p.walk += dt * (run ? 13 : 8); this.dashing = run && (p.x !== ox || p.y !== oy); this._acc = (this._acc || 0) + hyp(p.x - ox, p.y - oy);
+      const k = Math.min(8, Math.floor(this._acc / 1.4)); this._acc -= k * 1.4; for (let i = k; i >= 1; i--) this.trail.unshift({ x: ox + (p.x - ox) * i / k, y: oy + (p.y - oy) * i / k, dir: p.dir, diag: p.diag }); if (this.trail.length > 70) this.trail.length = 70;
     } else p.walk = 0;
+    // 눈앞의 사람에게 곧장 칼을 뽑는다
+    { const t0 = this.target(); if (t0 && t0.talk && G.crime?.can(t0) && Input.take('atk')) { this.face(t0); this.run(() => G.crime.attack(t0)); return; } }
     this.tickNpcs(dt); this.tickRoam(dt); this.tickHunt(dt); this.camera(.14);
     // 포탈
     for (const q of m.portals) {
@@ -89,7 +94,7 @@ export class Field {
     }
     // 대화 대상
     const tgt = this.target(), hint = $('#thint');
-    if (hint) { if (tgt) { const txt = (G.touch ? '' : 'E ') + (tgt.hint || '말 걸기'); if (hint._t !== txt) { hint._t = txt; hint.textContent = txt; } hint.style.display = 'block'; } else hint.style.display = 'none'; }
+    if (hint) { if (tgt) { const txt = (G.touch ? '' : 'E ') + (tgt.hint || '말 걸기') + (tgt.talk && G.crime?.can(tgt) ? (G.touch ? ' · 공격' : ` · ${Keys.label('atk')} 공격`) : ''); if (hint._t !== txt) { hint._t = txt; hint.textContent = txt; } hint.style.display = 'block'; } else hint.style.display = 'none'; }
     if (tgt && Input.take('ok')) { if (tgt.talk) { this.face(tgt); this.run(tgt.talk); } else if (tgt.act) this.run(tgt.act); }
     else Input.take('ok');
   }
@@ -262,7 +267,7 @@ export class Field {
     const ox = -snap(cam.x), oy = -snap(cam.y); c.translate(ox, oy);
     if (m.live) G.world.ground(c, cam); else c.drawImage(m.canvas, 0, 0);
     const list = [];
-    for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x > cam.x - 120 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
+    for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x + (STAMPS[s.name]?.[3] || 120) > cam.x - 8 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
     for (const n of this.npcs) if (!(n.hide > 0)) list.push({ y: n.y, n });
     for (const r of this.roam) if (!r.gone) list.push({ y: r.y, n: r, mon: true });
     if (G.party && this.m.id !== 'world0') G.party.members().forEach((id, i) => { if (this.npcs.some(n => n.id === id)) return; const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q) return; list.push({ y: q.y, n: { spr: G.party.spr(id), x: q.x, y: q.y, dir: q.dir, diag: q.diag, walk: p.walk } }); });
@@ -274,7 +279,10 @@ export class Field {
       if (o.s) drawStamp(c, o.s.name, o.s.x, o.s.y);
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
-      else if (o.me) { drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined }); }
+      else if (o.me) {
+        if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }
+        drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
+      }
       else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined); drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
         mark(n); }
     }
@@ -295,8 +303,27 @@ export class Field {
       c.setTransform(1, 0, 0, 1, 0, 0); c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const x = (l.x * TS + ox) * SCALE, y = (l.y * TS + oy) * SCALE; if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); }
     }
+    this.drawExits(c, ox, oy);
     this.drawBubbles(c, ox, oy);
     tickMini(this);
+  }
+  // 나가는 곳 표시: 맵 가장자리 출구와 방문에 들썩이는 화살표, 가까이 가면 어디로 가는지 적는다
+  drawExits(c, ox, oy) {
+    const m = this.m, p = this.p, S = G.S; if (m.live || this.busy) return;
+    const W = m.w * TS, H = m.h * TS, t = performance.now() / 1000; c.setTransform(1, 0, 0, 1, 0, 0);
+    for (const q of m.portals) {
+      if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) continue;
+      let dir = q.y + q.h >= H - 2 ? 'd' : q.y <= 2 ? 'u' : q.x <= 2 ? 'l' : q.x + q.w >= W - 2 ? 'r' : null; const door = !dir && q.door;
+      if (!dir && !door) continue;
+      const cx = q.x + q.w / 2, cy = q.y + q.h / 2, d = Math.hypot(p.x - cx, p.y - cy) / TS; if (d > (dir ? 10 : 3.5)) continue;
+      let ax = cx, ay = cy; if (dir === 'd') ay = q.y + q.h - 12; if (dir === 'u') ay = q.y + 12; if (dir === 'l') ax = q.x + 12; if (dir === 'r') ax = q.x + q.w - 12; if (door) { dir = 'u'; ay = q.y + q.h + 10; }
+      const b = Math.sin(t * 5) * 3, a = Math.max(.25, Math.min(1, (10 - d) / 4)), [vx, vy] = { d: [0, 1], u: [0, -1], l: [-1, 0], r: [1, 0] }[dir];
+      const X = (ax + ox) * SCALE + vx * b * 2, Y = (ay + oy) * SCALE + vy * b * 2, k = door ? 9 : 13, px = -vy, py = vx;
+      c.globalAlpha = a; c.lineJoin = 'round';
+      for (const [col, lw] of [['#2a1608', 9], ['#ffe08a', 4]]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); for (const o of [0, -k * .9]) { c.moveTo(X + px * k - vx * k * .6 + vx * o, Y + py * k - vy * k * .6 + vy * o); c.lineTo(X + vx * k * .4 + vx * o, Y + vy * k * .4 + vy * o); c.lineTo(X - px * k - vx * k * .6 + vx * o, Y - py * k - vy * k * .6 + vy * o); } c.stroke(); }
+      if (!door && d < 7) { const to = q.to === 'world' ? '강호' : MAPS[q.to]?.name || ''; if (to) { c.font = '18px Galmuri11Bold, Galmuri14, sans-serif'; c.textAlign = 'center'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8'; const tx = X - vx * 40 + (vx ? 0 : 0), ty = Y - vy * 34 - (vy ? 0 : 22); const lab = m.room ? '나가기' : josa(to, '으로/로'); c.strokeText(lab, tx, ty); c.fillText(lab, tx, ty); } }
+      c.globalAlpha = 1;
+    }
   }
   ambient(c) {
     const kind = this.m.ambient || ({ cheongha: 'leafpink', bamboo: 'leaf', cloudmt: 'leafpink', guhwa: 'leafpink', wolha: 'snow' })[this.m.id];

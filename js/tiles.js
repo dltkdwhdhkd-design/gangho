@@ -8,7 +8,7 @@ export const STAMPS = {
   hall: [H, 400, 112, 64, 112, 2, 64, 60, 46], lodge: [H, 400, 225, 64, 80, 2, 34, 60, 44], mud: [H, 3, 120, 42, 39, 2, 18, 38, 19], straw: [H, 48, 128, 47, 32, 2, 12, 43, 18],
   gate: [H, 7, 82, 34, 29, 0, 22, 4, 6], gate_arch: [H, 464, 320, 64, 48, 0, 30, 10, 16], statue: [H, 49, 242, 30, 30, 2, 14, 26, 14], statue_big: [H, 16, 242, 34, 46, 2, 26, 30, 18],
   banner1: [H, 352, 320, 16, 28], banner2: [H, 368, 320, 16, 28], banner3: [H, 384, 320, 16, 28], banner4: [H, 400, 320, 16, 28], banner5: [H, 416, 320, 16, 28], banner6: [H, 432, 320, 16, 28], banner7: [H, 448, 320, 16, 28],
-  wall_h: [H, 176, 144, 16, 16, 0, 4, 16, 12], wood_h: [H, 176, 80, 16, 16, 0, 4, 16, 12], fence_h: [H, 176, 112, 16, 16, 0, 6, 16, 8],
+  wall_h: [H, 176, 144, 16, 16, 0, 4, 16, 12], wall_m: [H, 176, 144, 16, 16, 0, 4, 16, 12], wall_v: [H, 176, 144, 16, 16, 5, 0, 6, 16], wood_v: [H, 176, 80, 16, 16, 5, 0, 6, 16], mtn: [N, 193, 83, 125, 75], mtn_s: [N, 193, 83, 125, 75], mtn_d: [N, 193, 83, 125, 75], rocks_s: [N, 193, 83, 61, 44], wood_h: [H, 176, 80, 16, 16, 0, 4, 16, 12], fence_h: [H, 176, 112, 16, 16, 0, 6, 16, 8],
   pot: [H, 256, 235, 16, 20, 2, 10, 12, 8], jar: [H, 272, 235, 16, 20, 2, 10, 12, 8], sign_sword: [H, 96, 64, 32, 16], sign_dojo: [H, 64, 64, 32, 16], awning: [H, 256, 256, 96, 24],
   tree_round: [N, 0, 0, 32, 32, 10, 24, 12, 6], tree_pine: [N, 32, 0, 32, 32, 10, 24, 12, 6], tree_dead: [N, 64, 0, 32, 32, 10, 24, 12, 6], tree_big: [N, 97, 0, 32, 32, 10, 24, 12, 6], tree_snow: [N, 128, 0, 32, 32, 10, 24, 12, 6], tree_white: [N, 192, 0, 32, 32, 10, 24, 12, 6], tree_pink: [N, 224, 0, 32, 32, 10, 24, 12, 6],
   grove_pine: [N, 0, 32, 64, 48, 6, 34, 52, 12], grove_green: [N, 64, 32, 64, 48, 6, 34, 52, 12], grove_pink: [N, 192, 32, 64, 48, 6, 34, 52, 12], grove_dead: [N, 0, 80, 64, 48, 6, 34, 52, 12], grove_white: [N, 128, 32, 64, 48, 6, 34, 52, 12], rocks: [N, 193, 83, 61, 44, 4, 24, 54, 18],
@@ -20,6 +20,13 @@ export const STAMPS = {
   f_bed: [E, 160, 0, 16, 32, 1, 8, 14, 22], f_stool: [E, 17, 19, 14, 13, 1, 6, 12, 7], f_lamp: [E, 176, 0, 16, 16, 4, 8, 8, 7], f_scroll: [E, 16, 80, 16, 32, 1, 18, 14, 13], f_chair: [E, 64, 60, 32, 20, 2, 6, 28, 13], f_stove: [E, 192, 0, 16, 16, 1, 5, 14, 10], f_bench: [E, 80, 16, 16, 16, 1, 5, 14, 10], f_dummy: [H, 241, 229, 14, 25, 2, 15, 10, 9], f_bonsai: [E, 0, 120, 16, 24, 2, 14, 12, 8], rack2: [E, 224, 41, 32, 21, 1, 8, 30, 12],
   stool: [E, 17, 19, 14, 13, 1, 6, 12, 7], box: [E, 32, 16, 16, 16, 1, 6, 14, 9], chest: [E, 48, 16, 16, 16, 1, 6, 14, 9], bed: [E, 176, 39, 48, 22, 2, 2, 44, 18], counter: [E, 32, 160, 48, 16, 0, 2, 48, 13], plant: [E, 0, 120, 16, 24, 2, 14, 12, 8], teapot: [E, 1, 160, 15, 15, 1, 6, 13, 8], rack: [E, 224, 41, 32, 21, 1, 8, 30, 12], lantern: [E, 96, 72, 16, 32, 4, 24, 8, 7], tablet: [E, 66, 32, 12, 15, 1, 8, 10, 6], tablet2: [E, 83, 32, 9, 16, 0, 8, 9, 7], scrollcase: [E, 17, 84, 14, 27, 1, 14, 12, 12],
 };
+// 문파 깃발(tools/flag_gen.py). flag_: 장대가 왼쪽, 천이 오른쪽으로 날린다. flagl_: 반대. pen_: 작은 기
+export const FLAG_IDS = ['shaolin', 'wudang', 'hwasan', 'jongnam', 'emei', 'gonryun', 'gongdong', 'jeomchang', 'cheongseong', 'gaebang', 'namgung', 'moyong', 'jegal', 'dang', 'paeng', 'hwangbo', 'ak', 'yang', 'eon', 'jin', 'janggang', 'haenam', 'pota', 'haomun', 'odok', 'hyeoleui', 'cheonma', 'cheonsan', 'jeonjin', 'mosan', 'jangbaek', 'bukhae', 'noeum', 'podalra', 'cloudmt', 'heukpung', 'gwan'];
+for (const id of FLAG_IDS) { STAMPS['flag_' + id] = [H, 352, 320, 20, 44]; STAMPS['flagl_' + id] = [H, 352, 320, 20, 44]; STAMPS['pen_' + id] = [H, 352, 320, 16, 28]; }
+// 전각 안 꾸밈(tools/decor_gen.py): 붉은 기둥, 병풍, 향로
+STAMPS.pillar = [H, 352, 320, 12, 44, 1, 38, 10, 6]; STAMPS.screen = [H, 352, 320, 56, 30, 0, 22, 56, 8]; STAMPS.censer = [H, 352, 320, 18, 22, 2, 15, 14, 7];
+// 세력 자리 id → 깃발 id
+export const flagOf = id => FLAG_IDS.includes(id) ? id : ({ fort: 'heukpung', blackpalace: 'cheonma' }[id] || null);
 export function drawStamp(ctx, name, x, y) { const s = STAMPS[name]; if (!s) return; const hd = IMG['stamp/' + name]; if (hd) { ctx.drawImage(hd, x, y, s[3], s[4]); return; } const im = IMG['tiles/' + s[0]]; if (im) ctx.drawImage(im, s[1], s[2], s[3], s[4], x, y, s[3], s[4]); }
 
 export const BIOME = {
@@ -27,6 +34,7 @@ export const BIOME = {
   deep: { sheet: 'Floor', fill: [11, 12], block: [11, 7], det: [[12, 12], [13, 12], [14, 12], [15, 12]] },
   sand: { sheet: 'Floor', fill: [0, 5], block: [0, 0], det: [[1, 5], [2, 5], [3, 5], [4, 5]] },
   rose: { sheet: 'Floor', fill: [11, 5], block: [11, 0], det: [[12, 5], [13, 5], [14, 5], [15, 5]] },
+  plain: { sheet: 'Floor', fill: [11, 5], block: [11, 0], det: [[12, 5], [13, 5], [14, 5], [15, 5]] },
   snow: { sheet: 'Floor', fill: [0, 19], block: [0, 14], det: [[1, 19], [2, 19], [3, 19], [4, 19]] },
   dusk: { sheet: 'Floor', fill: [11, 19], block: [11, 14], det: [[12, 19], [13, 19], [14, 19], [15, 19]] },
 };
@@ -84,8 +92,41 @@ export function paintGround(c, g, biome, opt = {}) {
     if (v === 5) { const f = IMG['tiles/InteriorFloor']; c.drawImage(f, 12 * TS, 1 * TS, TS, TS, x * TS, y * TS, TS, TS); }
   }
 }
-// 방 안 바닥과 벽
-export function paintRoom(c, w, h, style = 0) {
+// 땅 얼룩: 맨땅에 큼직한 구름 모양 얼룩을 두세 톤으로 깔고, 짙은 얼룩 가장자리에 선을 한 점 둔다. 경계는 번지지 않고 또렷하다
+let MOT = null;
+const hh = (x, y, k) => { let h = (x * 374761393 + y * 668265263 + k * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+function motTable() {
+  if (MOT) return MOT; const N = 256; MOT = new Float32Array(N * N);
+  const vn = (x, y, c, k) => { const X = x / c, Y = y / c, i = Math.floor(X), j = Math.floor(Y), u = X - i, v = Y - j, su = u * u * (3 - 2 * u), sv = v * v * (3 - 2 * v), n = N / c, L = (a, b) => hh(((a % n) + n) % n, ((b % n) + n) % n, k), a = L(i, j), b = L(i + 1, j), cc = L(i, j + 1), d = L(i + 1, j + 1); return a + (b - a) * su + (cc - a) * sv + (a - b - cc + d) * su * sv; };
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) MOT[y * N + x] = vn(x, y, 64, 3) * .55 + vn(x, y, 32, 4) * .3 + vn(x, y, 16, 5) * .15;
+  return MOT;
+}
+const MOTK = { sand: 1, plain: 1, dusk: .8, grass: .6, deep: .45, snow: .5, rose: .7, stone: 0 };
+const zone = (wx, wy) => { const v = MOT[((wy & 255) << 8) | (wx & 255)]; return v > .6 ? 1 : v < .4 ? -1 : 0; };
+// D: 픽셀 자료(폭 W, 높이 H), (ox, oy): 그 왼쪽 위의 땅 좌표, kind(x, y): 그 점의 바닥 이름. 맨땅이 아니면 null
+export function mottle(D, W, H, ox, oy, kind) {
+  motTable();
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const bn = kind(x, y); if (!bn) continue; const s = MOTK[bn] ?? .6; if (!s) continue;
+    const wx = x + ox, wy = y + oy, z = zone(wx, wy); let f = z > 0 ? 1 + .07 * s : z < 0 ? 1 - .12 * s : 1;
+    if (z < 0 && (zone(wx + 1, wy) > z || zone(wx - 1, wy) > z || zone(wx, wy + 1) > z || zone(wx, wy - 1) > z)) f = 1 - .22 * s;
+    if (f === 1) continue; const i = (y * W + x) * 4; D[i] = Math.min(255, D[i] * f); D[i + 1] = Math.min(255, D[i + 1] * f); D[i + 2] = Math.min(255, D[i + 2] * (f < 1 ? f * .97 : f));
+  }
+}
+// 깔린 돌바닥 가장자리: 밝은 턱, 바깥 테두리 선, 맨땅 쪽 그늘. 경계가 칸 가장자리에서 또렷하게 끊긴다
+export function curbs(c, g, o = {}) {
+  const w = g[0].length, h = g.length, at = (x, y) => (y < 0 || y >= h || x < 0 || x >= w) ? 3 : g[y][x];
+  for (let y = o.y0 || 0; y < (o.y1 ?? h); y++) for (let x = o.x0 || 0; x < (o.x1 ?? w); x++) {
+    if (g[y][x] !== 3) continue; const X = x * TS + (o.ox || 0), Y = y * TS + (o.oy || 0);
+    const n = at(x, y - 1) !== 3, s = at(x, y + 1) !== 3, wv = at(x - 1, y) !== 3, e = at(x + 1, y) !== 3;
+    c.fillStyle = '#3c3a40'; if (n) c.fillRect(X, Y, TS, 1); if (s) c.fillRect(X, Y + TS - 1, TS, 1); if (wv) c.fillRect(X, Y, 1, TS); if (e) c.fillRect(X + TS - 1, Y, 1, TS);
+    c.fillStyle = '#d6d2c6'; if (n) c.fillRect(X + (wv ? 1 : 0), Y + 1, TS - (wv ? 1 : 0) - (e ? 1 : 0), 1); if (wv) c.fillRect(X + 1, Y + 1, 1, TS - 1 - (s ? 1 : 0));
+    c.fillStyle = '#8e8a84'; if (s) c.fillRect(X + (wv ? 1 : 0), Y + TS - 3, TS - (wv ? 1 : 0) - (e ? 1 : 0), 2); if (e) c.fillRect(X + TS - 3, Y + (n ? 1 : 0), 2, TS - (n ? 1 : 0) - (s ? 1 : 0));
+    c.fillStyle = 'rgba(0,0,0,.26)'; if (s && at(x, y + 1) !== 2) c.fillRect(X - (wv ? 0 : 0), Y + TS, TS + (e ? 2 : 0), 3); if (e && at(x + 1, y) !== 2) c.fillRect(X + TS, Y + 2, 2, TS - 2);
+  }
+}
+// 방 안 바닥과 벽. doors: 아래 벽에서 문으로 트인 칸 [x0, x1). carpet: 붉은 깔개 [x, y, w, h]
+export function paintRoom(c, w, h, style = 0, opt = {}) {
   const f = style === 1 ? IMG['tiles/InteriorFloor'] : IMG['tiles/Water'], wall = IMG['tiles/WallSimple'];
   c.fillStyle = '#000'; c.fillRect(0, 0, w * TS, h * TS);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
@@ -93,11 +134,25 @@ export function paintRoom(c, w, h, style = 0) {
     else if (IMG['ground/wood']) texAt(c, 'wood', x, y, x * TS, y * TS);
     else c.drawImage(f, 6 * TS, 13 * TS, TS, TS, x * TS, y * TS, TS, TS);
   }
-  const ox = style === 1 ? 0 : 5, oy = style === 1 ? 6 : 0;
+  if (opt.carpet) { // 문에서 윗자리까지 이어지는 붉은 깔개. 금테 두 줄
+    const [cx, cy, cw, ch] = opt.carpet, X = cx * TS, Y = cy * TS, W = cw * TS, H = ch * TS;
+    c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(X + 1, Y + 2, W, H);
+    c.fillStyle = '#7e1a1a'; c.fillRect(X, Y, W, H); c.fillStyle = '#c9a046'; c.fillRect(X + 2, Y + 2, W - 4, 1); c.fillRect(X + 2, Y + 2, 1, H - 2); c.fillRect(X + W - 3, Y + 2, 1, H - 2);
+    c.fillStyle = '#9a2622'; c.fillRect(X + 4, Y + 4, W - 8, H - 4); c.fillStyle = '#b8902e'; for (let y = Y + 10; y < Y + H - 4; y += 12) { c.fillRect(X + W / 2 - 2, y, 4, 1); c.fillRect(X + W / 2 - 1, y - 1, 2, 3); }
+  }
+  const ox = style === 1 ? 0 : 5, oy = style === 1 ? 6 : 0, doors = opt.doors || [], isDoor = x => doors.some(([a, b]) => x >= a && x < b);
   const t = (sx, sy, x, y) => c.drawImage(wall, (ox + sx) * TS, (oy + sy) * TS, TS, TS, x * TS, y * TS, TS, TS);
-  for (let x = 1; x < w - 1; x++) { t(1 + (x % 2), 0, x, 0); t(1 + (x % 2), 4, x, h - 1); }
+  for (let x = 1; x < w - 1; x++) { t(1 + (x % 2), 0, x, 0); if (!isDoor(x)) t(1 + (x % 2), 4, x, h - 1); }
   for (let y = 1; y < h - 1; y++) { t(0, 1 + (y % 2), 0, y); t(4, 1 + (y % 2), w - 1, y); }
   t(0, 0, 0, 0); t(4, 0, w - 1, 0); t(0, 4, 0, h - 1); t(4, 4, w - 1, h - 1);
+  // 문: 벽을 터서 문지방을 놓고, 문설주를 세우고, 바깥 빛이 들게 한다
+  for (const [a, b] of doors) {
+    const X = a * TS, W = (b - a) * TS, Y = (h - 1) * TS, g = c.createLinearGradient(0, Y, 0, Y + TS);
+    g.addColorStop(0, 'rgba(255,236,186,0)'); g.addColorStop(.55, 'rgba(255,236,186,.35)'); g.addColorStop(1, 'rgba(255,244,214,.85)'); c.fillStyle = g; c.fillRect(X, Y, W, TS);
+    c.fillStyle = '#4a3c30'; c.fillRect(X, Y + 3, W, 1); c.fillStyle = '#a89a86'; c.fillRect(X, Y + 4, W, 3); c.fillStyle = '#6e6252'; c.fillRect(X, Y + 7, W, 1);
+    for (const px of [X - 3, X + W - 1]) { c.fillStyle = '#2a140c'; c.fillRect(px, Y - 10, 4, TS + 10); c.fillStyle = '#7a3018'; c.fillRect(px + 1, Y - 9, 2, TS + 8); c.fillStyle = '#a84a26'; c.fillRect(px + 1, Y - 9, 1, TS + 8); }
+    c.fillStyle = '#2a140c'; c.fillRect(X - 3, Y - 12, W + 4, 3); c.fillStyle = '#7a3018'; c.fillRect(X - 2, Y - 11, W + 2, 1);
+  }
 }
 function mk(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 const ARENA = {};
@@ -117,7 +172,7 @@ export function arena(theme) {
     case 'forest': paintGround(c, grid((x, y) => (Math.abs(x - 12) < 8 && Math.abs(y - 7) < 5) ? 1 : 0), 'deep', { detail: .2 }); plant(['fern1', 'fern2', 'bush2', 'bush4'], 12); for (let x = 0; x < W * TS; x += 11) drawStamp(c, 'bamboo', x, -30); break;
     case 'fort': paintGround(c, grid((x, y) => (x > 0 && x < W - 1 && y > 1 && y < Ht - 1) ? 1 : 0), 'dusk'); edge('wood_h'); break;
     case 'court': paintGround(c, grid((x, y) => (x > 2 && x < W - 3 && y > 2 && y < Ht - 3) ? 3 : 0), 'grass'); edge('wall_h'); for (let x = 16; x < W * TS; x += 64) drawStamp(c, 'banner3', x, 6); break;
-    case 'ring': paintGround(c, grid((x, y) => (x > 1 && x < W - 2 && y > 1 && y < Ht - 2) ? 5 : 3), 'sand'); edge('wall_h'); for (let x = 16; x < W * TS; x += 48) drawStamp(c, ['banner1', 'banner2', 'banner5'][(x / 48 | 0) % 3], x, 6); break;
+    case 'ring': paintGround(c, grid((x, y) => (x > 1 && x < W - 2 && y > 1 && y < Ht - 2) ? 5 : 3), 'sand'); edge('wall_h'); for (let x = 16; x < W * TS; x += 48) drawStamp(c, ['banner1', 'banner2', 'banner3'][(x / 48 | 0) % 3], x, 6); break;
     case 'dock': paintGround(c, grid((x, y) => (y < 3 || y > Ht - 3) ? 2 : 4), 'grass', { detail: 0 }); break;
     case 'room': paintRoom(c, W, Ht, 0); break;
     case 'moon': paintGround(c, grid((x, y) => (Math.abs(x - 12) < 9 && Math.abs(y - 7) < 6) ? 1 : 0), 'dusk'); for (let x = 0; x < W * TS; x += 32) drawStamp(c, 'tree_dead', x, -14); c.fillStyle = 'rgba(40,20,70,.32)'; c.fillRect(0, 0, W * TS, Ht * TS); break;

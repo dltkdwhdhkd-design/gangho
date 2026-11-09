@@ -27,3 +27,4 @@ import './base.js';
 import './era.js';
 import './sect.js';
 import './evil.js';
+import './crime.js';
