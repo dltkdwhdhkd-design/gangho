@@ -1804,5 +1804,311 @@
 "code": "ui/hud",
 "name": "hud",
 "how": "ui hud"
+},
+{
+"no": "C68",
+"code": "T4",
+"name": "시험: 주인공 대각선",
+"how": "diag BlueSamurai"
+},
+{
+"no": "C69",
+"code": "chars/BlueSamurai_d",
+"name": "BlueSamurai 대각선",
+"how": "diag BlueSamurai"
+},
+{
+"no": "C70",
+"code": "chars/Princess_d",
+"name": "Princess 대각선",
+"how": "diag Princess"
+},
+{
+"no": "C71",
+"code": "chars/RedSamurai_d",
+"name": "RedSamurai 대각선",
+"how": "diag RedSamurai"
+},
+{
+"no": "C72",
+"code": "chars/Cavegirl_d",
+"name": "Cavegirl 대각선",
+"how": "diag Cavegirl"
+},
+{
+"no": "C73",
+"code": "chars/Hyeok_d",
+"name": "Hyeok 대각선",
+"how": "diag Hyeok"
+},
+{
+"no": "C74",
+"code": "chars/Dang_d",
+"name": "Dang 대각선",
+"how": "diag Dang"
+},
+{
+"no": "C75",
+"code": "chars/Moyong_d",
+"name": "Moyong 대각선",
+"how": "diag Moyong"
+},
+{
+"no": "C76",
+"code": "chars/Namgung_d",
+"name": "Namgung 대각선",
+"how": "diag Namgung"
+},
+{
+"no": "C77",
+"code": "chars/Monk2_d",
+"name": "Monk2 대각선",
+"how": "diag Monk2"
+},
+{
+"no": "C78",
+"code": "chars/OldWoman_d",
+"name": "OldWoman 대각선",
+"how": "diag OldWoman"
+},
+{
+"no": "C79",
+"code": "chars/Inspector_d",
+"name": "Inspector 대각선",
+"how": "diag Inspector"
+},
+{
+"no": "C80",
+"code": "chars/Hwasan_d",
+"name": "Hwasan 대각선",
+"how": "diag Hwasan"
+},
+{
+"no": "C81",
+"code": "chars/Jegal_d",
+"name": "Jegal 대각선",
+"how": "diag Jegal"
+},
+{
+"no": "C82",
+"code": "chars/Paeng_d",
+"name": "Paeng 대각선",
+"how": "diag Paeng"
+},
+{
+"no": "C83",
+"code": "chars/Samaung_d",
+"name": "Samaung 대각선",
+"how": "diag Samaung"
+},
+{
+"no": "C84",
+"code": "chars/Master_d",
+"name": "Master 대각선",
+"how": "diag Master"
+},
+{
+"no": "C85",
+"code": "chars/Gaebang_d",
+"name": "Gaebang 대각선",
+"how": "diag Gaebang"
+},
+{
+"no": "C86",
+"code": "chars/Monk_d",
+"name": "Monk 대각선",
+"how": "diag Monk"
+},
+{
+"no": "C87",
+"code": "chars/Sodi_d",
+"name": "Sodi 대각선",
+"how": "diag Sodi"
+},
+{
+"no": "C88",
+"code": "chars/EggGirl_d",
+"name": "EggGirl 대각선",
+"how": "diag EggGirl"
+},
+{
+"no": "C89",
+"code": "chars/Eskimo_d",
+"name": "Eskimo 대각선",
+"how": "diag Eskimo"
+},
+{
+"no": "C90",
+"code": "chars/EskimoNinja_d",
+"name": "EskimoNinja 대각선",
+"how": "diag EskimoNinja"
+},
+{
+"no": "C91",
+"code": "chars/Greenman_d",
+"name": "Greenman 대각선",
+"how": "diag Greenman"
+},
+{
+"no": "C92",
+"code": "chars/BlueNinja_d",
+"name": "BlueNinja 대각선",
+"how": "diag BlueNinja"
+},
+{
+"no": "C93",
+"code": "chars/GreenNinja_d",
+"name": "GreenNinja 대각선",
+"how": "diag GreenNinja"
+},
+{
+"no": "C94",
+"code": "chars/GrayNinja_d",
+"name": "GrayNinja 대각선",
+"how": "diag GrayNinja"
+},
+{
+"no": "C95",
+"code": "chars/DarkNinja_d",
+"name": "DarkNinja 대각선",
+"how": "diag DarkNinja"
+},
+{
+"no": "C96",
+"code": "chars/RedNinja_d",
+"name": "RedNinja 대각선",
+"how": "diag RedNinja"
+},
+{
+"no": "C97",
+"code": "chars/RedNinja2_d",
+"name": "RedNinja2 대각선",
+"how": "diag RedNinja2"
+},
+{
+"no": "C98",
+"code": "chars/MaskedNinja_d",
+"name": "MaskedNinja 대각선",
+"how": "diag MaskedNinja"
+},
+{
+"no": "C99",
+"code": "chars/Knight_d",
+"name": "Knight 대각선",
+"how": "diag Knight"
+},
+{
+"no": "C100",
+"code": "chars/GoldKnight_d",
+"name": "GoldKnight 대각선",
+"how": "diag GoldKnight"
+},
+{
+"no": "C101",
+"code": "chars/Samurai_d",
+"name": "Samurai 대각선",
+"how": "diag Samurai"
+},
+{
+"no": "C102",
+"code": "chars/Lion_d",
+"name": "Lion 대각선",
+"how": "diag Lion"
+},
+{
+"no": "C103",
+"code": "chars/Caveman_d",
+"name": "Caveman 대각선",
+"how": "diag Caveman"
+},
+{
+"no": "C104",
+"code": "chars/Caveman2_d",
+"name": "Caveman2 대각선",
+"how": "diag Caveman2"
+},
+{
+"no": "C105",
+"code": "chars/Villager_d",
+"name": "Villager 대각선",
+"how": "diag Villager"
+},
+{
+"no": "C106",
+"code": "chars/Villager2_d",
+"name": "Villager2 대각선",
+"how": "diag Villager2"
+},
+{
+"no": "C107",
+"code": "chars/Villager3_d",
+"name": "Villager3 대각선",
+"how": "diag Villager3"
+},
+{
+"no": "C108",
+"code": "chars/Villager4_d",
+"name": "Villager4 대각선",
+"how": "diag Villager4"
+},
+{
+"no": "C109",
+"code": "chars/Woman_d",
+"name": "Woman 대각선",
+"how": "diag Woman"
+},
+{
+"no": "C110",
+"code": "chars/OldMan_d",
+"name": "OldMan 대각선",
+"how": "diag OldMan"
+},
+{
+"no": "C111",
+"code": "chars/OldMan2_d",
+"name": "OldMan2 대각선",
+"how": "diag OldMan2"
+},
+{
+"no": "C112",
+"code": "chars/OldMan3_d",
+"name": "OldMan3 대각선",
+"how": "diag OldMan3"
+},
+{
+"no": "C113",
+"code": "chars/Noble_d",
+"name": "Noble 대각선",
+"how": "diag Noble"
+},
+{
+"no": "C114",
+"code": "chars/Boy_d",
+"name": "Boy 대각선",
+"how": "diag Boy"
+},
+{
+"no": "C115",
+"code": "chars/Child_d",
+"name": "Child 대각선",
+"how": "diag Child"
+},
+{
+"no": "C116",
+"code": "chars/EggBoy_d",
+"name": "EggBoy 대각선",
+"how": "diag EggBoy"
+},
+{
+"no": "C117",
+"code": "chars/Skeleton_d",
+"name": "Skeleton 대각선",
+"how": "diag Skeleton"
+},
+{
+"no": "C118",
+"code": "chars/Cavegirl2_d",
+"name": "Cavegirl2 대각선",
+"how": "diag Cavegirl2"
 }
 ]

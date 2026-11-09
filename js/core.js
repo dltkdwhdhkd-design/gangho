@@ -154,6 +154,9 @@ export function drawActorSprite(ctx, key, dirCol, row, x, y, opt = {}) {
   const f = 16 * (img.hd || 1), r = Math.min(row, Math.floor(img.height / f) - 1);
   ctx.save();
   if (opt.alpha !== undefined) ctx.globalAlpha = opt.alpha;
+  // 대각선 시트가 있으면 쓴다: 0 오른쪽 아래, 1 오른쪽 위, 2 왼쪽 아래, 3 왼쪽 위
+  const dg = opt.diag !== undefined && IMG[key + '_d'];
+  if (dg) { const k = 16 * (dg.hd || 1), left = opt.diag > 1, sx = (opt.diag % 2) * k, sy = Math.min(row, 3) * k; if (left) { ctx.translate(snap(x), 0); ctx.scale(-1, 1); ctx.drawImage(dg, sx, sy, k, k, -8, snap(y - 15), 16, 16); } else ctx.drawImage(dg, sx, sy, k, k, snap(x - 8), snap(y - 15), 16, 16); ctx.restore(); return; }
   ctx.drawImage(img, dirCol * f, r * f, f, f, snap(x - 8), snap(y - 15), 16, 16);
   ctx.restore();
 }

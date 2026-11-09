@@ -62,11 +62,11 @@ export class Field {
     let moving = false;
     if (d.x || d.y) {
       moving = true;
-      p.dir = Math.abs(d.x) > Math.abs(d.y) ? (d.x < 0 ? 2 : 3) : (d.y < 0 ? 1 : 0);
+      p.dir = Math.abs(d.x) >= Math.abs(d.y) * .55 ? (d.x < 0 ? 2 : 3) : (d.y < 0 ? 1 : 0); p.diag = d.x && d.y && Math.min(Math.abs(d.x), Math.abs(d.y)) > .3 ? (d.y > 0 ? 0 : 1) + (d.x < 0 ? 2 : 0) : undefined;
       const nx = p.x + d.x * sp * dt, ny = p.y + d.y * sp * dt;
       const blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => hyp(n.x - x, (n.y - 1) - y) < 8);
       if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
-      p.walk += dt * 8; this.trail.unshift({ x: p.x, y: p.y, dir: p.dir }); if (this.trail.length > 70) this.trail.pop();
+      p.walk += dt * 8; this.trail.unshift({ x: p.x, y: p.y, dir: p.dir, diag: p.diag }); if (this.trail.length > 70) this.trail.pop();
     } else p.walk = 0;
     this.tickNpcs(dt); this.tickRoam(dt); this.tickHunt(dt); this.camera(.14);
     // 포탈
@@ -153,7 +153,7 @@ export class Field {
     for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x > cam.x - 120 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
     for (const n of this.npcs) list.push({ y: n.y, n });
     for (const r of this.roam) if (!r.gone) list.push({ y: r.y, n: r, mon: true });
-    if (G.party && this.m.id !== 'world0') G.party.members().forEach((id, i) => { if (this.npcs.some(n => n.id === id)) return; const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q) return; list.push({ y: q.y, n: { spr: G.party.spr(id), x: q.x, y: q.y, dir: q.dir, walk: p.walk } }); });
+    if (G.party && this.m.id !== 'world0') G.party.members().forEach((id, i) => { if (this.npcs.some(n => n.id === id)) return; const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q) return; list.push({ y: q.y, n: { spr: G.party.spr(id), x: q.x, y: q.y, dir: q.dir, diag: q.diag, walk: p.walk } }); });
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });
     if (!this.hideMe) list.push({ y: p.y, me: true });
     list.sort((a, b) => a.y - b.y);
@@ -162,8 +162,8 @@ export class Field {
       if (o.s) drawStamp(c, o.s.name, o.s.x, o.s.y);
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
-      else if (o.me) { drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y); }
-      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y); drawActorSprite(c, key, n.dir, Math.floor(n.walk || 0) % 4, n.x, n.y);
+      else if (o.me) { drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined }); }
+      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y); drawActorSprite(c, key, n.dir, Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined });
         mark(n); }
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha') { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }

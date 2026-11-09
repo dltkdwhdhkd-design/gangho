@@ -113,6 +113,13 @@ for i in range(0, len(L), 36):
     part = L[i:i + 36]; item(f'icon/sheet{i // 36 + 1}', f'아이콘 묶음 {i // 36 + 1}', '도트 아이템 아이콘을 6열 6행으로 그려. 왼쪽 위부터 순서대로: ' + ', '.join(n for _, n in part) + '. 칸마다 물건 하나만, 글자는 넣지 마.', f'icons 6 6 ' + ','.join(k for k, _ in part))
 use('B'); w('## 3순위: 화면 장식 (5장)'); w()
 for k, v in {'title': '제목 화면 배경. 안개 낀 산과 강, 작은 나룻배. 가로세로 16대 9. 글자는 넣지 마', 'window': '대화창 틀. 가로로 긴 어두운 나무판에 금속 모서리. 가운데는 비워', 'button': '작은 버튼 틀. 나무판에 금속 테두리', 'menu': '메뉴 창 틀. 낡은 양피지 두루마리, 가운데는 비워', 'hud': '체력과 내력 막대의 빈 틀. 가로로 긴 금속 틀 두 줄'}.items(): item(f'ui/{k}', k, f'무협 게임의 도트 화면 장식. {v}.', f'ui {k}')
+use('C'); w('## 추가: 대각선 걷기'); w()
+DIAG = '방금 그 인물을 정사각형 한 장에 2열 3행으로 6번 그려. 1열은 오른쪽 아래를 보며 걷는 비스듬한 앞모습, 2열은 오른쪽 위를 보며 걷는 비스듬한 뒷모습이야. 1행은 차렷, 2행은 왼발 내딛기, 3행은 오른발 내딛기. 걷기 시트와 키, 머리 크기, 옷, 색이 완전히 같아야 해. 칸끼리 넉넉히 떼고, 겹치지 마.'
+w('나중에 추가한 요청이야. 지금 인물은 앞, 뒤, 옆 네 방향뿐이라 비스듬히 걸어도 옆모습으로 나와. 이 시트를 받으면 대각선으로 걷는 모습이 나와. 왼쪽 대각선은 게임이 뒤집어 그리니까 오른쪽 두 방향만 그리면 돼.'); w()
+w('그 인물의 걷기 시트를 뽑은 대화방에서 이어서 요청해. 걷기 시트를 보여 주고 "방금 그 인물로"라고 하면 잘 맞아.'); w()
+w('**대각선 시트 문장**'); w(); w('```'); w(DIAG); w('```'); w()
+item('T4', '시험: 주인공 대각선', f'{DIAG}\n인물: 시험 T1에서 그린 주인공.', 'diag BlueSamurai')
+for k in keys: item(f'chars/{k}_d', f'{k} 대각선', f'{DIAG}\n인물: {CH[k]}', f'diag {k}')
 for k, path in {'B': 'docs/pixel-background.md', 'E': 'docs/pixel-effects.md', 'C': 'docs/pixel-characters.md'}.items():
     n = no[k] + (len(keys) if k == 'C' else 0); docs[k].append(f'이 문서는 {no[k]}번까지야.' + (f' 인물은 번호 하나에 걷기와 전투 두 장이니 실제로는 {n}장이야.' if k == 'C' else '')); open(path, 'w', encoding='utf8').write('\n'.join(docs[k]) + '\n'); print(path, no[k])
 json.dump(order, open('docs/pixel-order.json', 'w', encoding='utf8'), ensure_ascii=False, indent=0)

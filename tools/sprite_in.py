@@ -2,6 +2,7 @@
 # ChatGPT가 그린 시트를 잘라 게임 규격으로 넣는다. 받은 그림은 assets/hd/<종류>/<이름>.webp 가 된다
 #
 #   python3 tools/sprite_in.py walk   <걷기 시트> <battle 시트|-> <이름>     인물 (3열×3행 + 3열×3행 → 4열×7행)
+#   python3 tools/sprite_in.py diag   <대각선 시트> <이름> [left]                    인물 대각선 걷기 (2열 3행). 왼쪽을 보게 그려 왔으면 left
 #   python3 tools/sprite_in.py grid   <시트> <열> <행> <칸폭> <칸높이> <종류/이름> [돌릴 각도]   몬스터, 이펙트, 동물처럼 칸이 나뉜 시트. 이펙트는 오른쪽을 향해야 한다
 #   python3 tools/sprite_in.py stamp  <그림> <소품 이름> <폭> <높이>                건물, 나무, 가구 한 장
 #   python3 tools/sprite_in.py stamps <시트> <열> <행> <이름,이름,...>                건물이나 가구를 한 장에 모아 받았을 때 (빈칸은 -)
@@ -85,6 +86,15 @@ def walk(src, fight, name):
                 p = extra[r * 3 + src_col]; p = p[:, ::-1] if flip else p; paste(sheet, down(p, s2), dcol * 32, (4 + r) * 32, 32, 32)
     else: sheet[128:224] = np.vstack([sheet[:32], sheet[:32], sheet[:32]])
     save(sheet, f'chars/{name}')
+def diag(src, name, flip=False):
+    # 받는 시트: 2열 3행. 1열은 오른쪽 아래, 2열은 오른쪽 위를 본다. 행은 서기, 왼발, 오른발. 왼쪽은 게임이 뒤집어 그린다
+    a = load(src); bs, _ = cells(a, 2, 3); ps = [trim(a, b) for b in bs]; ps = [p[:, ::-1] for p in ps] if flip else ps
+    tgt = 30; wp = f'{OUT}/chars/{name}.webp'
+    if os.path.exists(wp): w = np.array(Image.open(wp).convert('RGBA'))[:32, :32]; ys = np.where(w[..., 3] > 0)[0]; tgt = (ys.max() - ys.min() + 1) if len(ys) else 30
+    s = min(tgt / max(p.shape[0] for p in ps[:2]), 31 / max(p.shape[1] for p in ps)); sheet = np.zeros((128, 64, 4), 'uint8')
+    for r, fr in enumerate([0, 1, 0, 2]):
+        for c in range(2): paste(sheet, down(ps[fr * 2 + c], s), c * 32, r * 32, 32, 32)
+    save(sheet, f'chars/{name}_d')
 def fx_sheet(a, cols, rows, cw, ch, key, rot=0):
     # 이펙트는 칸을 똑같이 나눠 위치와 크기 변화를 그대로 살린다. 사라지는 프레임의 작은 조각도 남긴다
     h, w = a.shape[:2]; sw, sh = w // cols, h // rows; sheet = np.zeros((ch * rows, cw * cols, 4), 'uint8'); s = 1
@@ -127,6 +137,7 @@ if __name__ == '__main__':
     if k == 'walk': walk(x[0], x[1], x[2])
     elif k == 'grid': grid(x[0], int(x[1]), int(x[2]), int(x[3]), int(x[4]), x[5], int(x[6]) if len(x) > 6 else 0)
     elif k == 'stamp': one(x[0], int(x[2]) * 2, int(x[3]) * 2, f'stamp/{x[1]}')
+    elif k == 'diag': diag(x[0], x[1], len(x) > 2 and x[2] == 'left')
     elif k == 'stamps': stamps(x[0], int(x[1]), int(x[2]), x[3])
     elif k == 'icons': icons(x[0], int(x[1]), int(x[2]), x[3])
     elif k == 'one': one(x[0], int(x[1]), int(x[2]), x[3])

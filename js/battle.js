@@ -13,7 +13,8 @@ const PARRY = .17, D2R = Math.PI / 180;
 const FX = { slash: [32, 32, 4], curve: [32, 32, 4], double: [32, 32, 4], double2: [32, 32, 4], circle: [32, 32, 4], cut: [32, 32, 5], claw: [32, 32, 4], smoke: [32, 32, 6], flam: [32, 32, 5], thunder: [40, 28, 4], rock: [30, 30, 14], spark: [32, 32, 5], spirit: [32, 32, 5], spiritb: [32, 32, 5], aura: [32, 32, 4], aurap: [32, 32, 4], ring: [32, 32, 4], ringw: [32, 32, 4], shieldy: [24, 26, 6], shieldb: [24, 26, 6] };
 const PJ = { p_arrow: [13, 5, 1], p_kunai: [14, 5, 1], p_shuriken: [16, 16, 2], p_energy: [16, 16, 4], p_fire: [16, 16, 4], p_bigenergy: [24, 24, 4] };
 
-function faceOf(x, y) { return Math.abs(x) > Math.abs(y) ? (x < 0 ? 2 : 3) : (y < 0 ? 1 : 0); }
+// 대각선으로 움직일 때는 옆모습이 먼저다. 그래야 어느 쪽으로 가는지 보인다
+function faceOf(x, y) { return Math.abs(x) >= Math.abs(y) * .55 ? (x < 0 ? 2 : 3) : (y < 0 ? 1 : 0); }
 
 class Actor {
   constructor(o) {
@@ -512,7 +513,8 @@ export class Battle {
     else if (a.st === 'guard') row = 6;
     else if (a.st === 'move') row = Math.floor(a.walk) % 4;
     const f = 16 * (im.hd || 1); row = Math.min(row, Math.floor(im.height / f) - 1);
-    const w = 16 * s;
+    const w = 16 * s, dg = row < 4 && !a.mon && IMG[a.spr + '_d'] && Math.min(Math.abs(a.ax), Math.abs(a.ay)) > .38 ? (white ? whiteOf(a.spr + '_d') : IMG[a.spr + '_d']) : null;
+    if (dg) { const k = 16 * (dg.hd || 1), sx = (a.ay < 0 ? 1 : 0) * k; c.save(); if (a.ax < 0) { c.translate(snap(x), 0); c.scale(-1, 1); c.drawImage(dg, sx, Math.min(row, 3) * k, k, k, -w / 2, snap(y - 15 * s), w, w); } else c.drawImage(dg, sx, Math.min(row, 3) * k, k, k, snap(x - w / 2), snap(y - 15 * s), w, w); c.restore(); return; }
     c.drawImage(im, face * f, row * f, f, f, snap(x - w / 2), snap(y - 15 * s), w, w);
   }
   drawWeapon(c, a) {
