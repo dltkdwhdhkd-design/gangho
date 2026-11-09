@@ -512,6 +512,12 @@ export class Battle {
     else if (a.dead) row = 0;
     else if (a.st === 'guard') row = 6;
     else if (a.st === 'move') row = Math.floor(a.walk) % 4;
+    // 쿼터뷰 인물 시트(_q): 비스듬한 앞모습과 뒷모습, 오른쪽을 보면 뒤집는다
+    const qi = !a.mon && IMG[a.spr + '_q'];
+    if (qi) {
+      const im2 = white ? whiteOf(a.spr + '_q') : qi, k = 32 * (qi.hd || 1), r = [0, 1, 0, 2, 3, 4, 5][Math.min(row, 6)], back = face === 1 || (a.ay < -.38 && a.st === 'move'), flip = face === 3 || (a.ax > .2 && face !== 2), w = 32 * s, top = snap(y - 31 * s);
+      if (!im2) return; c.save(); if (flip) { c.translate(snap(x), 0); c.scale(-1, 1); c.drawImage(im2, (back ? 1 : 0) * k, r * k, k, k, -w / 2, top, w, w); } else c.drawImage(im2, (back ? 1 : 0) * k, r * k, k, k, snap(x - w / 2), top, w, w); c.restore(); return;
+    }
     const f = 16 * (im.hd || 1); row = Math.min(row, Math.floor(im.height / f) - 1);
     const w = 16 * s, dg = row < 4 && !a.mon && IMG[a.spr + '_d'] && Math.min(Math.abs(a.ax), Math.abs(a.ay)) > .38 ? (white ? whiteOf(a.spr + '_d') : IMG[a.spr + '_d']) : null;
     if (dg) { const k = 16 * (dg.hd || 1), sx = (a.ay < 0 ? 1 : 0) * k; c.save(); if (a.ax < 0) { c.translate(snap(x), 0); c.scale(-1, 1); c.drawImage(dg, sx, Math.min(row, 3) * k, k, k, -w / 2, snap(y - 15 * s), w, w); } else c.drawImage(dg, sx, Math.min(row, 3) * k, k, k, snap(x - w / 2), snap(y - 15 * s), w, w); c.restore(); return; }
