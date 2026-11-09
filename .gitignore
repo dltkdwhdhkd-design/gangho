@@ -4,3 +4,4 @@ desktop/game
 desktop/dist
 desktop/node_modules
 desktop/package-lock.json
+__pycache__/
