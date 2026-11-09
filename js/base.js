@@ -123,7 +123,7 @@ function townLayout(m, l) {
   m.row('wall_h', 3, 43, cx - 3); m.row('wall_h', cx + 4, 43, W - cx - 7); m.put('gate_arch', cx, 41, { nosolid: true }); m.place(cx + 2, 40, l.name);
   room(m, l, 'inn', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); room(m, l, 'hall', 26, 2, 'gov', '관아'); room(m, l, 'house_red', 49, 13, 'gamble', '도박장');
   [['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => room(m, l, st, x, y, 'home', '민가', { n: i + 1, quiet: 1 }));
-  m.pen('gwan', 20.3, 14.75); m.pen('gwan', 39.3, 14.75); m.flag('gwan', 25.5, 9.6, true); m.flag('gwan', 30.5, 9.6); m.put('banner4', 10.1, 14.3, { nosolid: true });  // 관아 앞 관기, 객잔 옆 밥그릇 기 m.put('statue', 29.5, 19, { nosolid: true });
+  m.pen('gwan', 20.3, 14.75); m.pen('gwan', 39.3, 14.75); m.flag('gwan', 25.5, 9.6, true); m.flag('gwan', 30.5, 9.6); m.put('banner4', 10.1, 14.3, { nosolid: true }); m.put('statue', 29.5, 19, { nosolid: true });  // 관아 앞 관기, 객잔 옆 밥그릇 기
   // 광장 네 귀퉁이의 좌판. 차양 밑에 매대를 놓고 장사꾼은 그 뒤에 선다
   for (const [x, y] of [[21, 16], [34, 16], [21, 26], [34, 26]]) { m.put('awning', x, y, { nosolid: true }); m.put('counter', x + 1.5, y + 2); }
   m.put('jar', 21, 18.6); m.put('pot', 38.7, 18.6); m.put('box', 21, 28.6); m.put('jar', 38.7, 28.6); m.put('sign_sword', 9, 25.3); m.scatter(['flower1', 'fern1'], 18, 4);
