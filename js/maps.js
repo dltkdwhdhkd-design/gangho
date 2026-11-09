@@ -29,6 +29,10 @@ class MapDef {
     return this;
   }
   exit(tx, ty, w, h, to, ex, ey, dir, o = {}) { this.portals.push({ x: tx * TS, y: ty * TS, w: w * TS, h: h * TS, to, tx: ex, ty: ey, dir, ...o }); return this; }
+  // 쿼터뷰 담: (x, y) 앞 끝에서 n칸. dir 'l'이면 왼쪽 위로, 'r'이면 오른쪽 위로 뻗는다
+  isoWall(name, x, y, n, dir = 'l', o = {}) { for (let i = 0; i < n; i++) this.iso(name, x + (dir === 'l' ? -i : i), y - i * .5, { ...o, flip: dir === 'r' }); return this; }
+  // 깔린 돌바닥 마름모: 가운데 (cx, cy), 가로 반폭 hw칸. 세로는 그 절반(2:1)
+  paveDiamond(cx, cy, hw, kind = 'stone') { (this.pave = this.pave || []).push({ kind, poly: [[cx, cy - hw / 2], [cx + hw, cy], [cx, cy + hw / 2], [cx - hw, cy]].map(([a, b]) => [a * TS, b * TS]) }); return this; }
   // 쿼터뷰 소품: (fx, fy)는 바닥 마름모의 앞 모서리 자리(칸). flip이면 좌우를 뒤집어 입구가 오른쪽 앞면에 온다
   iso(name, fx, fy, o = {}) {
     const q = meta(name, o.flip); if (!q) { console.warn('쿼터뷰 소품 없음', name); return this; }
@@ -69,6 +73,7 @@ class MapDef {
       const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.g.map(r => r.map(() => bi));
       G.world.paintArea(x, 0, 0, this.w, this.h, this.g, Bm, this.w, this.h);
     } else paintGround(x, this.g, this.biome);
+    if (this.pave) for (const p of this.pave) paintPave(x, p);
     for (const s of this.stamps) if (s.flat) drawStamp(x, s.name, s.x, s.y);
     this.canvas = c; this.objs = this.stamps.filter(s => !s.flat);
     if (this.room) { this.solids.push({ x: 0, y: 0, w: this.w * TS, h: TS + 4 }, { x: 0, y: 0, w: 10, h: this.h * TS }, { x: this.w * TS - 10, y: 0, w: 10, h: this.h * TS }, { x: 0, y: this.h * TS - 10, w: this.w * TS, h: 10 }); }
@@ -85,6 +90,17 @@ class MapDef {
 }
 
 export const MAPS = {};
+// 깔린 돌바닥 다각형: 돌 무늬를 채우고, 위쪽 두 변은 밝은 턱, 아래쪽 두 변은 그늘과 짙은 테두리
+let PAT = {};
+export function paintPave(c, p) {
+  const t = IMG['ground/' + p.kind]; if (!t) return;
+  if (!PAT[p.kind]) { const k = (t.hd || 1) * TS, n = Math.floor(t.width / k), cv = document.createElement('canvas'); cv.width = cv.height = n * TS; const q = cv.getContext('2d'); q.drawImage(t, 0, 0, n * k, n * k, 0, 0, n * TS, n * TS); PAT[p.kind] = cv; }
+  const P = p.poly; c.save(); c.beginPath(); P.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.closePath();
+  c.fillStyle = 'rgba(0,0,0,.28)'; c.save(); c.translate(2, 3); c.fill(); c.restore();
+  c.fillStyle = c.createPattern(PAT[p.kind], 'repeat'); c.fill(); c.clip();
+  for (let i = 0; i < P.length; i++) { const [a, b] = P[i], [e, f] = P[(i + 1) % P.length], top = (b + f) / 2 < (P.reduce((s, q) => s + q[1], 0) / P.length); c.strokeStyle = top ? 'rgba(236,232,220,.9)' : 'rgba(70,66,64,.9)'; c.lineWidth = top ? 3 : 4; c.beginPath(); c.moveTo(a, b); c.lineTo(e, f); c.stroke(); }
+  c.restore(); c.beginPath(); P.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.closePath(); c.strokeStyle = '#3a3638'; c.lineWidth = 1; c.stroke();
+}
 // ── 쿼터뷰 미리보기: 정면 집을 비스듬한 집으로 바꿔 끼운다. 문 자리는 그대로라 이야기와 사람 자리가 안 어긋난다 ──
 const ISO_OF = { hall: 'hall_dao', lodge: 'lodge', house_red: 'rich', inn: 'inn', hut_o: 'tile_house', hut_b: 'tile_house', hut_o2: 'thatch', shop_blue: 'store', shop_green: 'clinic', clay: 'adobe', wood_o: 'barn', wood_b: 'thatch_long', mud: 'shack', straw: 'thatch' };
 const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn', gamble: 'gamble', gov: 'yamen', book: 'books', bokun: 'shrine', myhouse: 'thatch' };

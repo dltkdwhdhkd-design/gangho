@@ -2,7 +2,7 @@
 import { G, Sound, toast, josa, pick } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
-import { MAPS, makeMap } from './maps.js';
+import { MAPS, makeMap, isoMode } from './maps.js';
 import { STAMPS, flagOf } from './tiles.js';
 import { TS } from './core.js';
 import { LOOT } from './items.js';
@@ -114,6 +114,26 @@ function sectLayout(m, l, st, ft) {
   for (const [x, y] of [[8, 26], [36, 26], [8, 38], [36, 38]]) m.put('pot', x, y);
   for (const [x, y] of [[4, 28], [40, 28], [4, 34], [40, 34], [4, 48], [40, 46], [18, 56], [27, 56]]) if (!(west && x === 4 && y < 40)) m.put(trees[Math.floor(R() * trees.length)], x, y);
   m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
+  if (isoMode()) isoSect(m, cx, w, mt);
+}
+// 쿼터뷰 미리보기의 고을: 성벽을 산문 양쪽으로 비스듬히, 광장을 마름모 돌마당으로
+function isoTown(m, cx) {
+  for (const st of [...m.stamps]) if (st.name === 'wall_h' && Math.round(st.y / TS) === 43) { m.stamps.splice(m.stamps.indexOf(st), 1); const s = STAMPS[st.name]; if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6]); if (k >= 0) m.solids.splice(k, 1); } }
+  m.isoWall('city_wall', cx - .2, 44, 7, 'l').isoWall('city_wall', cx + 4.2, 44, 7, 'r');
+  for (let y = 14; y < 32; y++) for (let x = 20; x < 40; x++) if (m.g[y][x] === 3) m.g[y][x] = 0;
+  m.paveDiamond(30, 23, 13);
+}
+// 쿼터뷰 미리보기의 문파: 가로로 곧은 담과 네모 돌바닥을 걷어내고, 산문에서 비스듬히 뻗는 담과 마름모 마당으로 바꾼다
+function isoSect(m, cx, w, mt) {
+  const WALLS = new Set(['wall_h', 'wall_m', 'wall_v', 'wood_h', 'fence_h', w]);
+  for (const st of [...m.stamps]) if (WALLS.has(st.name) && [60, 44, 22].includes(Math.round(st.y / TS))) { m.stamps.splice(m.stamps.indexOf(st), 1); const s = STAMPS[st.name]; if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6]); if (k >= 0) m.solids.splice(k, 1); } }
+  const kind = w === 'wood_h' ? 'palisade' : w === 'fence_h' ? 'fence' : 'wall_tile', mid = cx + 2;
+  // 산문 양쪽 날개담, 연무장 앞뒤 담. 가운데 길만 열어 둔다
+  for (const y of [61, 45, 23]) { if (mt && y !== 61) continue; m.isoWall(kind, cx - .2, y - .2, 9, 'l'); m.isoWall(kind, cx + 4.2, y - .2, 9, 'r'); }
+  // 연무장과 본전 앞을 마름모 돌마당으로
+  for (let y = YARD.y; y < YARD.y + YARD.h; y++) for (let x = YARD.x; x < YARD.x + YARD.w; x++) if (m.g[y][x] === 3 && (x < cx || x >= cx + 4)) m.g[y][x] = 0;
+  for (let y = 8; y < 10; y++) for (let x = cx - 5; x < cx + 9; x++) if (m.g[y][x] === 3 && (x < cx || x >= cx + 4)) m.g[y][x] = 0;
+  m.paveDiamond(mid, YARD.y + YARD.h / 2, YARD.w / 2 + 1).paveDiamond(mid, 10, 7);
 }
 const SLAVE = ['guangzhou', 'changan', 'suzhou'];  // 노예 시장이 서는 고을
 function townLayout(m, l) {
@@ -128,6 +148,7 @@ function townLayout(m, l) {
   for (const [x, y] of [[21, 16], [34, 16], [21, 26], [34, 26]]) { m.put('awning', x, y, { nosolid: true }); m.put('counter', x + 1.5, y + 2); }
   m.put('jar', 21, 18.6); m.put('pot', 38.7, 18.6); m.put('box', 21, 28.6); m.put('jar', 38.7, 28.6); m.put('sign_sword', 9, 25.3); m.scatter(['flower1', 'fern1'], 18, 4);
   if (SLAVE.includes(l.id)) { m.fill(47, 6, 9, 3, 4); m.row('wood_h', 47, 5, 9); m.put('banner7', 46.4, 5.4); m.put('banner7', 55.8, 5.4); m.put('log', 45.6, 9.6); m.put('box', 55.6, 9.4); m.label(51.5, 4.4, '노예 시장'); }
+  if (isoMode()) isoTown(m, cx);
 }
 // 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다
 function autoDoors(m, owner) {

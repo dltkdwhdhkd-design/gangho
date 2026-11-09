@@ -156,6 +156,29 @@ def isowalk(walk, fight, name, H=44, C=64):  # 걷기 2열 3행(+전투 2열 3�
         if c.width > C or c.height > C - 2: c.thumbnail((C, C - 2)); x = col * C + (C - c.width) // 2; y = row * C + C - 2 - c.height
         out.alpha_composite(c, (max(col * C, x), max(row * C, y)))
     os.makedirs(os.path.join(ROOT, 'assets/hd/chars'), exist_ok=True); out.save(os.path.join(ROOT, f'assets/hd/chars/{name}_q.webp'), lossless=True); reg_key(f'chars/{name}_q')
+def wallseg(name, h, kind):  # 이어 붙이는 담 한 칸 임시 그림: 왼쪽 앞면 방향으로 한 칸, 두께 0.3칸
+    fw, fh = 1, .3; W, H = 64, h * 2 + 40; im = Image.new('RGBA', (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    add = lambda p, q, k=1: (p[0] + q[0] * k, p[1] + q[1] * k); F = (40, H - 4); L = add(F, (-IS, -IH), fw); R = add(F, (IS, -IH), fh); K = add(L, (IS, -IH), fh); up = (0, -h * 2)
+    col = {'wall_tile': ((236, 228, 210), (190, 182, 166)), 'wall_stone': ((150, 144, 134), (112, 108, 100)), 'city_wall': ((140, 136, 130), (104, 100, 96)), 'palisade': ((150, 104, 62), (110, 74, 44)), 'fence': ((168, 120, 72), (124, 86, 50))}[kind]
+    if kind == 'fence':
+        for t in (.12, .5, .88): a = add(F, (-IS, -IH), fw * t); d.line([a, add(a, up)], fill=col[1], width=3)
+        for y in (.35, .75): d.line([add(F, (0, -h * 2 * y)), add(L, (0, -h * 2 * y))], fill=col[0], width=3)
+    elif kind == 'palisade':
+        for i in range(6): a = add(F, (-IS, -IH), fw * (i + .5) / 6); d.polygon([add(a, (-3, 0)), add(a, (3, 0)), add(a, (3, -h * 2 + 4)), add(a, (0, -h * 2 - 2)), add(a, (-3, -h * 2 + 4))], fill=col[i % 2])
+    else:
+        d.polygon([L, F, add(F, up), add(L, up)], fill=col[0]); d.polygon([F, R, add(R, up), add(F, up)], fill=col[1]); d.polygon([add(L, up), add(F, up), add(R, up), add(K, up)], fill=col[1])
+        if kind == 'wall_tile':  # 기와 갓
+            e = 3; c1 = add(add(L, up), (-e, 2)); c2 = add(add(F, up), (0, 4)); c3 = add(add(R, up), (e, 2)); c4 = add(add(K, up), (0, -3)); top = (0, -8)
+            d.polygon([c1, c2, add(c2, top), add(c1, top)], fill=(110, 116, 128)); d.polygon([c2, c3, add(c3, top), add(c2, top)], fill=(84, 88, 100)); d.polygon([add(c1, top), add(c2, top), add(c3, top), add(c4, top)], fill=(130, 136, 148))
+        if kind == 'city_wall':
+            for i in range(4): a = add(add(F, (-IS, -IH), fw * (i * 2 + 1) / 8), up); d.rectangle([a[0] - 3, a[1] - 7, a[0] + 3, a[1]], fill=col[0])
+        for y in range(8, h * 2, 6): d.line([add(F, (0, -y)), add(L, (0, -y))], fill=tuple(int(v * .9) for v in col[0]))
+    A = im.split()[3].load(); P = im.load()
+    for x in range(W):
+        for y in range(H):
+            if A[x, y] == 0 and any(0 <= x + a < W and 0 <= y + b < H and A[x + a, y + b] > 0 for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): P[x, y] = OL
+    bb = im.getbbox(); x0, y0 = bb[0] - bb[0] % 2, bb[1] - bb[1] % 2; im = im.crop((x0, y0, x0 + (bb[2] - x0 + 1) // 2 * 2, y0 + (bb[3] - y0 + 1) // 2 * 2))
+    register(name, im, F[0] - x0, F[1] - y0, fw, fh)
 STYLE = {'thatch': 'thatch', 'thatch_long': 'thatch', 'tavern': 'thatch', 'barn': 'wood', 'shack': 'wood', 'stilt': 'wood', 'watchtower': 'wood', 'tent': 'adobe', 'yurt': 'ice', 'adobe': 'adobe', 'cabin': 'wood',
          'hall_temple': 'gold', 'temple_town': 'gold', 'hall_manor': 'red', 'gamble': 'red', 'yamen': 'red', 'restaurant': 'red', 'hall_dark': 'dark', 'hall_ice': 'ice', 'hall_west': 'adobe', 'ruin': 'dark'}
 if __name__ == '__main__':
@@ -174,4 +197,5 @@ if __name__ == '__main__':
             if fw <= 1: continue  # 이어 붙이는 한 칸은 따로
             place(name, fw, fh, STYLE.get(name, 'tile'), open_=name in ('pavilion', 'gate_sect', 'platform', 'stairs', 'dock'), roof=name not in ('platform', 'stairs', 'dock')); n += 1
         place('inn', 5, 4, 'tile', hw=34); n += 1
+        for nm, h in (('wall_tile', 14), ('wall_stone', 9), ('city_wall', 24), ('palisade', 15), ('fence', 9)): wallseg(nm, h, nm); n += 1
         print('임시 그림', n)
