@@ -303,21 +303,33 @@ function roadLayer() { // 강호의 길을 지도에 얹을 한 장. 칸 하나�
   x.putImageData(d, 0, 0); return ROADMAP = c;
 }
 function china(c, W, H, o = {}) {
-  const sx = W / 804, sy = H / 658, P = (x, y) => [x * sx, y * sy], art = IMG['world/concept'];
+  const sx = W / 804, sy = H / 658, P = (x, y) => [x * sx, y * sy], art = IMG['world/map'] || IMG['world/concept'];
   if (art) { c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; c.drawImage(art, 0, 0, W, H); } else { c.fillStyle = '#e6d6b2'; c.fillRect(0, 0, W, H); }
   if (!o.mini && ready && roadLayer()) c.drawImage(ROADMAP, 0, 0, W, H);
   if (o.mini) { c.fillStyle = '#2a2018'; for (const l of LOCS) { const [a, b] = P(...l.px); c.fillRect(a - 1, b - 1, 2, 2); } return; }
   c.textAlign = 'center'; const seen = G.S.seen || {}, free = G.S.mode === 'free', F = G.S.flags;
   c.font = '22px Galmuri11, sans-serif'; c.lineJoin = 'round'; for (const [n, x, y] of PROV) { const [a, b] = P(x, y); c.lineWidth = 4; c.strokeStyle = 'rgba(40,28,16,.35)'; c.strokeText(n, a, b); c.fillStyle = 'rgba(255,244,214,.62)'; c.fillText(n, a, b); }
   if (!ready) { c.strokeStyle = 'rgba(122,90,58,.5)'; c.lineWidth = 2; for (const [a, b] of ROADS) { const p = LOCS.find(q => q.id === a), q = LOCS.find(z => z.id === b); if (!free && (p.need && !F[p.need] || q.need && !F[q.need])) continue; const [x0, y0] = P(...p.px), [x1, y1] = P(...q.px); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); } }
-  c.font = '19px Galmuri11Bold, Galmuri14, sans-serif'; c.lineJoin = 'round';
-  const COL = { sect: '#3f73c4', evil: '#c8483a', out: '#7a4fb0', city: '#2a2018', old: '#b08a3a' }; hits = [];
-  for (const l of LOCS) {
-    const k = !!seen[l.map], hide = !free && l.need && !F[l.need]; if (hide) continue;
-    const [x, y] = P(...l.px), me = l.map === G.S.map || l.map === o.here, col = COL[l.color || l.kind] || '#3f73c4';
-    c.fillStyle = '#2a2018'; c.fillRect(x - 7, y - 7, 14, 14); c.fillStyle = me ? '#ff3b2c' : k ? col : '#b8a888'; c.fillRect(x - 5, y - 5, 10, 10);
-    c.lineWidth = 5; c.strokeStyle = '#efe2c2'; c.strokeText(l.name, x, y + 24); c.fillStyle = k ? '#2a2018' : '#7a6a52'; c.fillText(l.name, x, y + 24); hits.push({ l, x, y, k });
+  // 표식과 이름표. 이름표끼리 겹치면 자리를 옮기고, 그래도 겹치면 이름은 빼고 표식만 둔다(손을 대면 이름이 뜬다)
+  const COL = { sect: '#3f73c4', evil: '#c8483a', out: '#7a4fb0', city: '#2a2018', old: '#b08a3a' }, ICON = { sect: 'map/sect', evil: 'map/evil', out: 'map/out', city: 'map/city', old: 'map/old' }; hits = [];
+  const fs = Math.round(15 * Math.max(1, W / 1206)); c.font = `${fs}px Galmuri11Bold, Galmuri14, sans-serif`; c.textBaseline = 'middle';
+  const list = LOCS.filter(l => free || !l.need || F[l.need]).map(l => { const [x, y] = P(...l.px), me = l.map === G.S.map || l.map === o.here, k = !!seen[l.map]; return { l, x, y, me, k, pr: me ? 0 : k ? 1 : l.kind === 'city' ? 2 : 3 }; }).sort((a, b) => a.pr - b.pr);
+  const boxes = [], hitBox = b => boxes.some(q => b[0] < q[2] && b[2] > q[0] && b[1] < q[3] && b[3] > q[1]);
+  for (const q of list) boxes.push([q.x - 7, q.y - 7, q.x + 7, q.y + 7]);
+  for (const q of list) {
+    const { l, x, y, me, k } = q, col = COL[l.color || l.kind] || '#3f73c4', ic = IMG[ICON[l.kind] || ''];
+    if (ic) { const h = 30, w = ic.width / ic.height * h; c.globalAlpha = k || me ? 1 : .55; c.drawImage(ic, x - w / 2, y - h + 8, w, h); c.globalAlpha = 1; }
+    else { c.save(); c.translate(x, y); c.rotate(Math.PI / 4); c.fillStyle = '#2a2018'; c.fillRect(-7, -7, 14, 14); c.fillStyle = me ? '#ff3b2c' : k ? col : '#b8a888'; c.fillRect(-5, -5, 10, 10); c.restore(); }
+    hits.push({ l, x, y, k });
+    const tw = c.measureText(l.name).width + 10, th = fs + 6;
+    for (const [dx, dy] of [[0, 8 + th / 2], [0, -8 - th / 2], [tw / 2 + 9, 0], [-tw / 2 - 9, 0], [tw / 2 + 4, 8 + th / 2], [-tw / 2 - 4, 8 + th / 2], [tw / 2 + 4, -8 - th / 2], [-tw / 2 - 4, -8 - th / 2]]) {
+      const b = [x + dx - tw / 2, y + dy - th / 2, x + dx + tw / 2, y + dy + th / 2]; if (hitBox(b) || b[0] < 0 || b[2] > W || b[1] < 0 || b[3] > H) continue;
+      boxes.push(b); c.fillStyle = me ? 'rgba(122,26,18,.92)' : k ? 'rgba(244,232,204,.92)' : 'rgba(210,196,168,.78)'; c.fillRect(b[0], b[1], tw, th);
+      c.strokeStyle = me ? '#ffd27a' : k ? col : 'rgba(90,70,50,.6)'; c.lineWidth = 2; c.strokeRect(b[0] + 1, b[1] + 1, tw - 2, th - 2);
+      c.fillStyle = me ? '#fff4d6' : k ? '#2a2018' : '#6a5a44'; c.fillText(l.name, x + dx, y + dy + 1); break;
+    }
   }
+  c.textBaseline = 'alphabetic';
   const ms = G.S.fr?.sect; if (ms) { const sl = LOCS.find(q => q.map === ms.site) || LOCS[0]; hits.push({ l: { name: ms.name, map: 'mysect', at: [20, 25], px: sl.px }, x: sl.px[0] * sx, y: sl.px[1] * sy, k: true }); }
   for (const e of G.jh.marks()) { const l = e.map === 'world' ? null : LOCS.find(q => q.map === e.map), a = l ? l.px[0] * sx : e.x / K * sx, b = l ? l.px[1] * sy : e.y / K * sy; c.fillStyle = '#ffd23c'; c.strokeStyle = '#7a2a18'; c.lineWidth = 3; c.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 7 : 16, q = i * Math.PI / 5 - 1.57; c.lineTo(a + Math.cos(q) * r, b + Math.sin(q) * r); } c.closePath(); c.fill(); c.stroke(); }
   for (const j of G.S.fr?.jobs || []) if (j.map === 'world') { const a = j.x / K * sx, b = j.y / K * sy; c.fillStyle = '#ffd23c'; c.strokeStyle = '#2a2018'; c.lineWidth = 3; c.beginPath(); c.arc(a, b, 9, 0, 7); c.fill(); c.stroke(); }

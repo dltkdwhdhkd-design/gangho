@@ -3,6 +3,8 @@
 #   python3 tools/iso_in.py place <이름> <fw> <fh> [양식]          그림이 오기 전 임시 그림(상자 집)을 그린다
 #   python3 tools/iso_in.py placeall                                요청서의 건물 전부 임시 그림
 #   python3 tools/iso_in.py iso <그림> <이름> <fw> <fh>            ChatGPT 그림 한 장 (마젠타 배경)
+#   python3 tools/iso_in.py worldmap <그림>                         강호 전도
+#   python3 tools/iso_in.py mapicons <그림> sect,evil,out,city,old,mine   지도 표식 3열 2행
 import json, math, os, re, sys
 from PIL import Image, ImageDraw
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); OUT = os.path.join(ROOT, 'assets/hd/iso'); META = os.path.join(ROOT, 'js/isometa.js')
@@ -82,11 +84,35 @@ def place(name, fw, fh, style='tile', hw=None, roof=True, open_=False):
     ax, ay = F[0] - (bb[0] - 1), F[1] - (bb[1] - 1) + (1 if (bb[3] - bb[1] + 2) % 2 else 0)
     register(name, im, ax, ay, fw, fh)
 
+def cutbg(im):  # 마젠타 배경을 지우고 외곽선에 묻은 분홍을 걷어낸다
+    im = im.convert('RGBA'); px = im.load()
+    for y in range(im.height):
+        for x in range(im.width):
+            r, g, b, a = px[x, y]
+            if r > 170 and b > 170 and g < 110: px[x, y] = (0, 0, 0, 0)
+            elif r > 150 and b > 130 and g < r - 70 and g < b - 50: px[x, y] = (r // 2, g, b // 2, a)
+    return im
+def reg_key(k):
+    L = json.load(open(os.path.join(ROOT, 'assets/hd/list.json')))
+    if k not in L: L.append(k); json.dump(L, open(os.path.join(ROOT, 'assets/hd/list.json'), 'w'), ensure_ascii=False)
+def worldmap(path):  # 강호 전도: 804×658의 두 배로 맞춘다
+    im = Image.open(path).convert('RGB'); W, H = 1608, 1316; r = W / H
+    if im.width / im.height > r: nw = round(im.height * r); im = im.crop(((im.width - nw) // 2, 0, (im.width - nw) // 2 + nw, im.height))
+    else: nh = round(im.width / r); im = im.crop((0, (im.height - nh) // 2, im.width, (im.height - nh) // 2 + nh))
+    im.resize((W, H), Image.LANCZOS).save(os.path.join(ROOT, 'assets/hd/world/map.webp'), quality=90); reg_key('world/map')
+def mapicons(path, names, cols=3, rows=2, h=60):  # 지도 표식: 칸마다 잘라 배경을 지우고 높이 h(HD)로
+    im = cutbg(Image.open(path)); cw, ch = im.width / cols, im.height / rows; os.makedirs(os.path.join(ROOT, 'assets/hd/map'), exist_ok=True)
+    for i, n in enumerate(names):
+        c = im.crop((int(i % cols * cw), int(i // cols * ch), int((i % cols + 1) * cw), int((i // cols + 1) * ch))); bb = c.getbbox()
+        if not bb: continue
+        c = c.crop(bb); c = c.resize((max(1, round(c.width * h / c.height)), h), Image.LANCZOS); c.save(os.path.join(ROOT, f'assets/hd/map/{n}.webp'), lossless=True); reg_key('map/' + n)
 STYLE = {'thatch': 'thatch', 'thatch_long': 'thatch', 'tavern': 'thatch', 'barn': 'wood', 'shack': 'wood', 'stilt': 'wood', 'watchtower': 'wood', 'tent': 'adobe', 'yurt': 'ice', 'adobe': 'adobe', 'cabin': 'wood',
          'hall_temple': 'gold', 'temple_town': 'gold', 'hall_manor': 'red', 'gamble': 'red', 'yamen': 'red', 'restaurant': 'red', 'hall_dark': 'dark', 'hall_ice': 'ice', 'hall_west': 'adobe', 'ruin': 'dark'}
 if __name__ == '__main__':
     cmd = sys.argv[1]
     if cmd == 'place': place(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5] if len(sys.argv) > 5 else 'tile')
+    elif cmd == 'worldmap': worldmap(sys.argv[2])
+    elif cmd == 'mapicons': mapicons(sys.argv[2], sys.argv[3].split(','))
     elif cmd == 'placeall':
         order = json.load(open(os.path.join(ROOT, 'docs/iso-order.json'), encoding='utf8')); n = 0
         for o in order:

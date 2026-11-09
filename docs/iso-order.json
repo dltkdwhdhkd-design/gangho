@@ -19,498 +19,510 @@
 },
 {
 "no": "QB4",
+"code": "world/map",
+"name": "강호 전도",
+"how": "worldmap"
+},
+{
+"no": "QB5",
+"code": "map/icons",
+"name": "지도 표식",
+"how": "mapicons sect,evil,out,city,old,mine"
+},
+{
+"no": "QB6",
 "code": "ground/grass",
 "name": "땅: grass",
 "how": "tex grass"
 },
 {
-"no": "QB5",
+"no": "QB7",
 "code": "ground/forest",
 "name": "땅: forest",
 "how": "tex forest"
 },
 {
-"no": "QB6",
+"no": "QB8",
 "code": "ground/sand",
 "name": "땅: sand",
 "how": "tex sand"
 },
 {
-"no": "QB7",
+"no": "QB9",
 "code": "ground/snow",
 "name": "땅: snow",
 "how": "tex snow"
 },
 {
-"no": "QB8",
+"no": "QB10",
 "code": "ground/dusk",
 "name": "땅: dusk",
 "how": "tex dusk"
 },
 {
-"no": "QB9",
+"no": "QB11",
 "code": "ground/path",
 "name": "땅: path",
 "how": "tex path"
 },
 {
-"no": "QB10",
+"no": "QB12",
 "code": "ground/stone",
 "name": "땅: stone",
 "how": "tex stone"
 },
 {
-"no": "QB11",
+"no": "QB13",
 "code": "ground/wood",
 "name": "땅: wood",
 "how": "tex wood"
 },
 {
-"no": "QB12",
+"no": "QB14",
 "code": "ground/water",
 "name": "땅: water",
 "how": "tex water"
 },
 {
-"no": "QB13",
+"no": "QB15",
 "code": "bld/thatch",
 "name": "초가집",
 "how": "iso thatch 4 3"
 },
 {
-"no": "QB14",
+"no": "QB16",
 "code": "bld/thatch_long",
 "name": "긴 초가집",
 "how": "iso thatch_long 6 3"
 },
 {
-"no": "QB15",
+"no": "QB17",
 "code": "bld/tile_house",
 "name": "기와집",
 "how": "iso tile_house 4 3"
 },
 {
-"no": "QB16",
+"no": "QB18",
 "code": "bld/tavern",
 "name": "주막",
 "how": "iso tavern 4 3"
 },
 {
-"no": "QB17",
+"no": "QB19",
 "code": "bld/smithy",
 "name": "대장간",
 "how": "iso smithy 4 3"
 },
 {
-"no": "QB18",
+"no": "QB20",
 "code": "bld/clinic",
 "name": "약방",
 "how": "iso clinic 4 3"
 },
 {
-"no": "QB19",
+"no": "QB21",
 "code": "bld/store",
 "name": "잡화점",
 "how": "iso store 4 3"
 },
 {
-"no": "QB20",
+"no": "QB22",
 "code": "bld/barn",
 "name": "헛간",
 "how": "iso barn 3 3"
 },
 {
-"no": "QB21",
+"no": "QB23",
 "code": "bld/pavilion",
 "name": "정자",
 "how": "iso pavilion 2 2"
 },
 {
-"no": "QB22",
+"no": "QB24",
 "code": "bld/shrine",
 "name": "성황당",
 "how": "iso shrine 2 2"
 },
 {
-"no": "QB23",
+"no": "QB25",
 "code": "bld/dock",
 "name": "나루터",
 "how": "iso dock 3 5"
 },
 {
-"no": "QB24",
+"no": "QB26",
 "code": "bld/yamen",
 "name": "관아",
 "how": "iso yamen 6 4"
 },
 {
-"no": "QB25",
+"no": "QB27",
 "code": "bld/teahouse",
 "name": "찻집",
 "how": "iso teahouse 5 4"
 },
 {
-"no": "QB26",
+"no": "QB28",
 "code": "bld/restaurant",
 "name": "주루",
 "how": "iso restaurant 5 5"
 },
 {
-"no": "QB27",
+"no": "QB29",
 "code": "bld/gamble",
 "name": "도박장",
 "how": "iso gamble 5 4"
 },
 {
-"no": "QB28",
+"no": "QB30",
 "code": "bld/silk",
 "name": "비단 가게",
 "how": "iso silk 4 3"
 },
 {
-"no": "QB29",
+"no": "QB31",
 "code": "bld/books",
 "name": "서점",
 "how": "iso books 4 3"
 },
 {
-"no": "QB30",
+"no": "QB32",
 "code": "bld/rich",
 "name": "부잣집",
 "how": "iso rich 5 4"
 },
 {
-"no": "QB31",
+"no": "QB33",
 "code": "bld/temple_town",
 "name": "사당",
 "how": "iso temple_town 4 4"
 },
 {
-"no": "QB32",
+"no": "QB34",
 "code": "bld/city_gate",
 "name": "성문 누각",
 "how": "iso city_gate 4 3"
 },
 {
-"no": "QB33",
+"no": "QB35",
 "code": "bld/city_wall",
 "name": "성벽 한 칸",
 "how": "iso city_wall 1 3"
 },
 {
-"no": "QB34",
+"no": "QB36",
 "code": "bld/hall_temple",
 "name": "사찰 대웅전",
 "how": "iso hall_temple 6 5"
 },
 {
-"no": "QB35",
+"no": "QB37",
 "code": "bld/hall_dao",
 "name": "도관 삼청전",
 "how": "iso hall_dao 6 5"
 },
 {
-"no": "QB36",
+"no": "QB38",
 "code": "bld/hall_manor",
 "name": "세가 본채",
 "how": "iso hall_manor 6 4"
 },
 {
-"no": "QB37",
+"no": "QB39",
 "code": "bld/hall_dark",
 "name": "마교 대전",
 "how": "iso hall_dark 6 5"
 },
 {
-"no": "QB38",
+"no": "QB40",
 "code": "bld/hall_ice",
 "name": "빙궁 전각",
 "how": "iso hall_ice 6 5"
 },
 {
-"no": "QB39",
+"no": "QB41",
 "code": "bld/hall_west",
 "name": "서역 사원",
 "how": "iso hall_west 6 5"
 },
 {
-"no": "QB40",
+"no": "QB42",
 "code": "bld/lodge",
 "name": "곁채 전각",
 "how": "iso lodge 4 3"
 },
 {
-"no": "QB41",
+"no": "QB43",
 "code": "bld/dorm",
 "name": "제자 숙소",
 "how": "iso dorm 6 2"
 },
 {
-"no": "QB42",
+"no": "QB44",
 "code": "bld/library",
 "name": "장경각",
 "how": "iso library 4 4"
 },
 {
-"no": "QB43",
+"no": "QB45",
 "code": "bld/kitchen",
 "name": "부엌채",
 "how": "iso kitchen 4 3"
 },
 {
-"no": "QB44",
+"no": "QB46",
 "code": "bld/bell",
 "name": "종루",
 "how": "iso bell 2 2"
 },
 {
-"no": "QB45",
+"no": "QB47",
 "code": "bld/pagoda",
 "name": "석탑",
 "how": "iso pagoda 2 2"
 },
 {
-"no": "QB46",
+"no": "QB48",
 "code": "bld/gate_sect",
 "name": "산문",
 "how": "iso gate_sect 4 1"
 },
 {
-"no": "QB47",
+"no": "QB49",
 "code": "bld/gate_manor",
 "name": "솟을대문",
 "how": "iso gate_manor 3 1"
 },
 {
-"no": "QB48",
+"no": "QB50",
 "code": "bld/stairs",
 "name": "돌계단",
 "how": "iso stairs 2 3"
 },
 {
-"no": "QB49",
+"no": "QB51",
 "code": "bld/platform",
 "name": "연무대",
 "how": "iso platform 5 5"
 },
 {
-"no": "QB50",
+"no": "QB52",
 "code": "bld/stilt",
 "name": "수상 가옥",
 "how": "iso stilt 4 3"
 },
 {
-"no": "QB51",
+"no": "QB53",
 "code": "bld/watchtower",
 "name": "망루",
 "how": "iso watchtower 2 2"
 },
 {
-"no": "QB52",
+"no": "QB54",
 "code": "bld/ship",
 "name": "큰 배",
 "how": "iso ship 3 7"
 },
 {
-"no": "QB53",
+"no": "QB55",
 "code": "bld/tent",
 "name": "산채 천막",
 "how": "iso tent 3 3"
 },
 {
-"no": "QB54",
+"no": "QB56",
 "code": "bld/shack",
 "name": "판잣집",
 "how": "iso shack 3 2"
 },
 {
-"no": "QB55",
+"no": "QB57",
 "code": "bld/adobe",
 "name": "흙벽돌 집",
 "how": "iso adobe 4 3"
 },
 {
-"no": "QB56",
+"no": "QB58",
 "code": "bld/yurt",
 "name": "게르",
 "how": "iso yurt 3 3"
 },
 {
-"no": "QB57",
+"no": "QB59",
 "code": "bld/cabin",
 "name": "눈 덮인 통나무집",
 "how": "iso cabin 4 3"
 },
 {
-"no": "QB58",
+"no": "QB60",
 "code": "bld/palisade",
 "name": "목책 한 칸",
 "how": "iso palisade 1 3"
 },
 {
-"no": "QB59",
+"no": "QB61",
 "code": "bld/ruin",
 "name": "무너진 전각",
 "how": "iso ruin 4 4"
 },
 {
-"no": "QB60",
+"no": "QB62",
 "code": "sheet/well",
 "name": "마을 살림 1",
 "how": "isosheet 3 2 well,cart,haystack,woodpile,millstone,bench"
 },
 {
-"no": "QB61",
+"no": "QB63",
 "code": "sheet/jars",
 "name": "마을 살림 2",
 "how": "isosheet 3 2 jars,crates,ricebags,laundry,herbrack,coop"
 },
 {
-"no": "QB62",
+"no": "QB64",
 "code": "sheet/stall",
 "name": "장터",
 "how": "isosheet 3 2 stall,stall_fruit,stall_meat,stall_pot,signpole,lamppost"
 },
 {
-"no": "QB63",
+"no": "QB65",
 "code": "sheet/fence",
 "name": "울타리와 담",
 "how": "isosheet 3 2 fence,fence_gate,wall_stone,wall_tile,fence_bamboo,hedge"
 },
 {
-"no": "QB64",
+"no": "QB66",
 "code": "sheet/dummy",
 "name": "연무장",
 "how": "isosheet 3 2 dummy,rack,target,censer,lion,stonelamp"
 },
 {
-"no": "QB65",
+"no": "QB67",
 "code": "sheet/signpost",
 "name": "길가",
 "how": "isosheet 3 2 signpost,cairn,log,bridge,grave,stele"
 },
 {
-"no": "QB66",
+"no": "QB68",
 "code": "sheet/banner_red",
 "name": "깃발",
 "how": "isosheet 3 2 banner_red,banner_blue,banner_gold,banner_inn,flagpole,lantern_string"
 },
 {
-"no": "QB67",
+"no": "QB69",
 "code": "sheet/tree_round",
 "name": "나무 1",
 "how": "isosheet 3 2 tree_round,tree_big,willow,pine,pine_tall,tree_old"
 },
 {
-"no": "QB68",
+"no": "QB70",
 "code": "sheet/peach",
 "name": "나무 2",
 "how": "isosheet 3 2 peach,plum,maple,tree_dead,pine_snow,bamboo"
 },
 {
-"no": "QB69",
+"no": "QB71",
 "code": "sheet/bush",
 "name": "풀과 꽃",
 "how": "isosheet 3 2 bush,bush2,grass,flowers,flowers2,reed"
 },
 {
-"no": "QB70",
+"no": "QB72",
 "code": "sheet/rock_big",
 "name": "바위",
 "how": "isosheet 3 2 rock_big,rocks,rock_moss,rock_snow,rock_dark,stones"
 },
 {
-"no": "QB71",
+"no": "QB73",
 "code": "sheet/mountain",
 "name": "산",
 "how": "isosheet 3 2 mountain,mountain_snow,cliff,mountain_dark,lotus,boat"
 },
 {
-"no": "QB72",
+"no": "QB74",
 "code": "sheet/wall_l",
 "name": "실내 벽",
 "how": "isosheet 3 2 wall_l,wall_r,wall_l_win,wall_r_win,wall_l_door,pillar"
 },
 {
-"no": "QB73",
+"no": "QB75",
 "code": "sheet/bed",
 "name": "가구 1",
 "how": "isosheet 3 2 bed,table,table_round,longbench,wardrobe,bookshelf"
 },
 {
-"no": "QB74",
+"no": "QB76",
 "code": "sheet/screen",
 "name": "가구 2",
 "how": "isosheet 3 2 screen,altar,throne,flowerpot,standlamp,scroll"
 },
 {
-"no": "QB75",
+"no": "QB77",
 "code": "sheet/stove",
 "name": "가구 3",
 "how": "isosheet 3 2 stove,watertank,ricechest,counter,wineshelf,medchest"
 },
 {
-"no": "QB76",
+"no": "QB78",
 "code": "sheet/weaponrack",
 "name": "가구 4",
 "how": "isosheet 3 2 weaponrack,gambletable,drum,sutra,cushion,brazier"
 },
 {
-"no": "QB77",
+"no": "QB79",
 "code": "arena/village",
 "name": "전투 배경 village",
 "how": "arena village"
 },
 {
-"no": "QB78",
+"no": "QB80",
 "code": "arena/yard",
 "name": "전투 배경 yard",
 "how": "arena yard"
 },
 {
-"no": "QB79",
+"no": "QB81",
 "code": "arena/court",
 "name": "전투 배경 court",
 "how": "arena court"
 },
 {
-"no": "QB80",
+"no": "QB82",
 "code": "arena/forest",
 "name": "전투 배경 forest",
 "how": "arena forest"
 },
 {
-"no": "QB81",
+"no": "QB83",
 "code": "arena/fort",
 "name": "전투 배경 fort",
 "how": "arena fort"
 },
 {
-"no": "QB82",
+"no": "QB84",
 "code": "arena/moon",
 "name": "전투 배경 moon",
 "how": "arena moon"
 },
 {
-"no": "QB83",
+"no": "QB85",
 "code": "arena/ring",
 "name": "전투 배경 ring",
 "how": "arena ring"
 },
 {
-"no": "QB84",
+"no": "QB86",
 "code": "arena/room",
 "name": "전투 배경 room",
 "how": "arena room"
 },
 {
-"no": "QB85",
+"no": "QB87",
 "code": "arena/sand",
 "name": "전투 배경 sand",
 "how": "arena sand"
 },
 {
-"no": "QB86",
+"no": "QB88",
 "code": "arena/snow",
 "name": "전투 배경 snow",
 "how": "arena snow"
