@@ -2,7 +2,7 @@
 import { G, TS, rint, pick, IMG } from './core.js';
 import { FURN, HOUSES } from './items.js';
 import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tiles.js';
-import { meta, corners, hitsBox } from './iso.js';
+import { meta, corners, hitsBox, inside } from './iso.js';
 
 // 쿼터뷰 미리보기에서는 바깥 지도를 k배 넓게 편다. 쿼터뷰 집이 크기 때문이다
 // 지도를 짜는 함수와 이야기 쪽 좌표는 그대로 두고, 여기와 Story.content, field.load에서 k를 곱한다
@@ -77,7 +77,7 @@ class MapDef {
   }
   render() {
     const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
-    if (!this.room && isoMode()) isoRetrofit(this);
+    if (!this.room && isoMode()) { isoRetrofit(this); isoDress(this); }
     if (this.room) { const doors = this.portals.filter(q => q.y + q.h >= this.h * TS - 2).map(q => [Math.round(q.x / TS), Math.round((q.x + q.w) / TS)]); paintRoom(x, this.w, this.h, this.roomStyle || 0, { doors, carpet: this.carpet }); }
     else if (G.world?.paintArea) { // 강호 전도와 같은 땅 칠하기: 길섶과 물가가 둥글고, 바닥 얼룩과 돌바닥 턱이 또렷하다
       const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.g.map(r => r.map(() => bi));
@@ -119,6 +119,30 @@ export const isoMode = () => { try { return localStorage.getItem('gangho_iso') =
 // 바닥 마름모를 쿼터뷰 좌표(a: 왼쪽 앞면 방향, b: 오른쪽 앞면 방향)로 바꾸면 네모가 된다. 겹침은 네모끼리 본다
 const isoRect = (F, fw, fh) => { const a = (-F[1] / 8 - F[0] / 16) / 2, b = (-F[1] / 8 + F[0] / 16) / 2; return [a, b, a + fw, b + fh]; };
 const isoHit = (r, q, pad = .2) => r[0] < q[2] + pad && r[2] > q[0] - pad && r[1] < q[3] + pad && r[3] > q[1] - pad;
+// 집 둘레 살림: 문 옆 독, 옆구리 장작더미와 짚더미, 뒤꼍 수레와 우물. 쿼터뷰 소품 그림이 오면 그걸 쓰고, 없으면 지금 소품으로 메운다
+const DRESS = [['jars', 'jar'], ['woodpile', 'log'], ['haystack', 'bush3'], ['crates', 'box'], ['bench', null], ['cart', null], ['well', null], ['laundry', null]];
+function isoDress(m) {
+  if (m._dressed || !m.hasIso) return; m._dressed = true; let seed = m.id.length * 97;
+  const R = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const ok = (x, y) => { const tx = Math.floor(x / TS), ty = Math.floor(y / TS); if (m.g[ty]?.[tx] !== 0) return false; if (m.blocked(x, y, 14, 8)) return false; if ((m.polys || []).some(c => inside(c, x, y, -6))) return false; return !m.portals.some(q => Math.abs(q.x + q.w / 2 - x) < 26 && Math.abs(q.y + q.h / 2 - y) < 20); };
+  const drop = (names, x, y) => { for (const [iso, flat] of names) { if (meta(iso)) { const q = meta(iso); m.isoAt(iso, x / TS + q.fh * .25, y / TS + .2, { flip: R() < .5 }); return true; } if (flat && STAMPS[flat]) { const st = STAMPS[flat]; m.put(flat, (x - st[3] / 2) / TS / m.k, (y - st[4]) / TS / m.k, { nosolid: false }); return true; } } return false; };
+  // 문 앞 오솔길: 문에서 가장 가까운 길까지 흙길을 낸다(집과 담은 비켜 간다)
+  const free = (tx, ty) => { if (m.g[ty]?.[tx] !== 0) return false; const x = tx * TS + 8, y = ty * TS + 8; return !(m.polys || []).some(c => inside(c, x, y, -3)) && !m.blocked(x, y, 12, 8); };
+  for (const q of m.portals) {
+    if (!q.door) continue; const sx = Math.floor((q.x + q.w / 2) / TS), sy = Math.floor((q.y + q.h) / TS) + 1; if (!m.g[sy]) continue;
+    const prev = new Map(), key = (x, y) => y * m.w + x, Q = [[sx, sy, 0]]; prev.set(key(sx, sy), -1); let end = null;
+    while (Q.length) { const [x, y, d] = Q.shift(); if (m.g[y]?.[x] === 1 && d) { end = [x, y]; break; } if (d > 16) continue; for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) { const X = x + dx, Y = y + dy; if (prev.has(key(X, Y)) || !m.g[Y] || m.g[Y][X] === undefined) continue; if (m.g[Y][X] !== 1 && !free(X, Y)) continue; prev.set(key(X, Y), key(x, y)); Q.push([X, Y, d + 1]); } }
+    if (!end) continue; for (let k = prev.get(key(...end)); k >= 0; k = prev.get(k)) { const x = k % m.w, y = Math.floor(k / m.w); m.g[y][x] = 1; }
+  }
+  for (const st of [...m.stamps]) {
+    if (!st.iso || !['thatch', 'thatch_long', 'tile_house', 'barn', 'shack', 'adobe', 'cabin', 'smithy', 'tavern', 'store', 'clinic', 'inn'].includes(st.name)) continue;
+    const c = st.iso, F = c.F, L = c.L, R2 = c.R, out = st.flip ? [.89, .45] : [-.89, .45], side = st.flip ? L : R2;
+    // 문 쪽 앞면 양 끝 바깥, 반대 옆구리 바깥, 뒤 모서리 옆
+    const cand = [[F[0] + out[0] * 14, F[1] + out[1] * 14 + 6], [(st.flip ? R2 : L)[0] + out[0] * 16, (st.flip ? R2 : L)[1] + out[1] * 16 + 6], [side[0] + (st.flip ? -18 : 18), side[1] + 10], [c.K[0] + (R() < .5 ? -30 : 30), c.K[1] + 6]];
+    const sets = [[DRESS[0]], [DRESS[3], DRESS[0]], [DRESS[1], DRESS[2]], [DRESS[5], DRESS[7], DRESS[6], DRESS[2]]];
+    cand.forEach(([x, y], i) => { if (R() < .78 && ok(x, y)) drop(sets[i], x, y); });
+  }
+}
 export function isoRetrofit(m, o = {}) {
   if (m._isoDone || m.room || (m.live && !o.live)) return; m._isoDone = true; const cxm = m.w * TS / 2, placed = [], leftOf = o.leftOf || (x => x < cxm);
   const houses = m.stamps.filter(st => ISO_OF[st.name] && STAMPS[st.name]).map(st => { const s = STAMPS[st.name], w = s[3], h = s[4], dy = st.y + h; return { st, door: m.portals.find(q => q.door && q.x < st.x + w && q.x + q.w > st.x && Math.abs(q.y + q.h / 2 - dy) < 20) }; });
