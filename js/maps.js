@@ -4,16 +4,24 @@ import { FURN, HOUSES } from './items.js';
 import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tiles.js';
 import { meta, corners, hitsBox } from './iso.js';
 
+// 쿼터뷰 미리보기에서는 바깥 지도를 k배 넓게 편다. 쿼터뷰 집이 크기 때문이다
+// 지도를 짜는 함수와 이야기 쪽 좌표는 그대로 두고, 여기와 Story.content, field.load에서 k를 곱한다
+const NOSCALE = new Set(['world', 'mysect', 'myhouse', 'isotest']);
+export const ISO_K = 1.5;
 class MapDef {
   constructor(id, w, h, o = {}) {
-    Object.assign(this, { id, w, h, biome: 'grass', name: '', bgm: 'village', arena: 'village', stamps: [], solids: [], portals: [], tint: null, room: false, encounters: null, ...o });
-    this.g = Array.from({ length: h }, () => new Array(w).fill(0));
+    const k = o.k ?? (!o.room && !NOSCALE.has(id) && isoMode() ? ISO_K : 1);
+    Object.assign(this, { id, w: Math.round(w * k), h: Math.round(h * k), k, biome: 'grass', name: '', bgm: 'village', arena: 'village', stamps: [], solids: [], portals: [], tint: null, room: false, encounters: null, ...o });
+    this.w = Math.round(w * k); this.h = Math.round(h * k); this.k = k;
+    this.g = Array.from({ length: this.h }, () => new Array(this.w).fill(0));
   }
-  road(x0, y0, x1, y1, wd = 2) { for (let y = Math.min(y0, y1); y <= Math.max(y0, y1) + (y0 === y1 ? wd - 1 : 0); y++) for (let x = Math.min(x0, x1); x <= Math.max(x0, x1) + (x0 === x1 ? wd - 1 : 0); x++) if (this.g[y] && this.g[y][x] !== undefined && this.g[y][x] !== 2) this.g[y][x] = 1; return this; }
-  fill(x0, y0, w, h, v) { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (this.g[y] && this.g[y][x] !== undefined) this.g[y][x] = v; return this; }
+  road(x0, y0, x1, y1, wd = 2) { const k = this.k; if (k !== 1) { x0 = Math.round(x0 * k); y0 = Math.round(y0 * k); x1 = Math.round(x1 * k); y1 = Math.round(y1 * k); wd = Math.max(1, Math.round(wd * k)); } return this.roadRaw(x0, y0, x1, y1, wd); }
+  roadRaw(x0, y0, x1, y1, wd = 2) { for (let y = Math.min(y0, y1); y <= Math.max(y0, y1) + (y0 === y1 ? wd - 1 : 0); y++) for (let x = Math.min(x0, x1); x <= Math.max(x0, x1) + (x0 === x1 ? wd - 1 : 0); x++) if (this.g[y] && this.g[y][x] !== undefined && this.g[y][x] !== 2) this.g[y][x] = 1; return this; }
+  fill(x0, y0, w, h, v) { const k = this.k; if (k !== 1) { const a = Math.round(x0 * k), b = Math.round(y0 * k); w = Math.round((x0 + w) * k) - a; h = Math.round((y0 + h) * k) - b; x0 = a; y0 = b; } return this.fillRaw(x0, y0, w, h, v); }
+  fillRaw(x0, y0, w, h, v) { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (this.g[y] && this.g[y][x] !== undefined) this.g[y][x] = v; return this; }
   water(x, y, w, h) { return this.fill(x, y, w, h, 2); }
   put(name, tx, ty, o = {}) {
-    const s = STAMPS[name], px = tx * TS + (o.dx || 0), py = ty * TS + (o.dy || 0);
+    const s = STAMPS[name], px = tx * this.k * TS + (o.dx || 0), py = ty * this.k * TS + (o.dy || 0);
     if (!s) { console.warn('소품 없음', name); return this; }
     this.stamps.push({ name, x: px, y: py, base: py + s[4] - (o.lift || 0), flat: o.flat });
     if (s.length > 5 && !o.nosolid) this.solids.push({ x: px + s[5], y: py + s[6], w: s[7], h: s[8] });
@@ -21,20 +29,21 @@ class MapDef {
   }
   row(name, tx, ty, n, step = 1, o = {}) { for (let i = 0; i < n; i++) this.put(name, tx + i * step, ty, o); return this; }
   col(name, tx, ty, n, step = 1, o = {}) { for (let i = 0; i < n; i++) this.put(name, tx, ty + i * step, o); return this; }
-  solid(tx, ty, w, h) { this.solids.push({ x: tx * TS, y: ty * TS, w: w * TS, h: h * TS }); return this; }
+  solid(tx, ty, w, h) { const k = this.k; this.solids.push({ x: tx * k * TS, y: ty * k * TS, w: w * TS, h: h * TS }); return this; }
   // 건물 입구: 스탬프 아래쪽 가운데에 포탈을 만든다
   house(name, tx, ty, to, ex, ey, dir = 1, o = {}) {
-    this.put(name, tx, ty, o); const s = STAMPS[name], cx = tx * TS + s[3] / 2 + (o.doorDx || 0), by = ty * TS + s[4];
+    this.put(name, tx, ty, o); const s = STAMPS[name], cx = tx * this.k * TS + s[3] / 2 + (o.doorDx || 0), by = ty * this.k * TS + s[4];
     this.portals.push({ x: cx - 9, y: by - 4, w: 18, h: 9, to, tx: ex, ty: ey, dir, door: true, when: o.when, lock: o.lock });
     return this;
   }
-  exit(tx, ty, w, h, to, ex, ey, dir, o = {}) { this.portals.push({ x: tx * TS, y: ty * TS, w: w * TS, h: h * TS, to, tx: ex, ty: ey, dir, ...o }); return this; }
+  exit(tx, ty, w, h, to, ex, ey, dir, o = {}) { const k = this.k, X = Math.round(tx * k * TS), Y = Math.round(ty * k * TS); this.portals.push({ x: X, y: Y, w: Math.round((tx + w) * k * TS) - X, h: Math.round((ty + h) * k * TS) - Y, to, tx: ex, ty: ey, dir, ...o }); return this; }
   // 쿼터뷰 담: (x, y) 앞 끝에서 n칸. dir 'l'이면 왼쪽 위로, 'r'이면 오른쪽 위로 뻗는다
-  isoWall(name, x, y, n, dir = 'l', o = {}) { for (let i = 0; i < n; i++) this.iso(name, x + (dir === 'l' ? -i : i), y - i * .5, { ...o, flip: dir === 'r' }); return this; }
+  isoWall(name, x, y, n, dir = 'l', o = {}) { const X = x * this.k, Y = y * this.k; for (let i = 0; i < n; i++) this.isoAt(name, X + (dir === 'l' ? -i : i), Y - i * .5, { ...o, flip: dir === 'r' }); return this; }
   // 깔린 돌바닥 마름모: 가운데 (cx, cy), 가로 반폭 hw칸. 세로는 그 절반(2:1)
-  paveDiamond(cx, cy, hw, kind = 'stone') { (this.pave = this.pave || []).push({ kind, poly: [[cx, cy - hw / 2], [cx + hw, cy], [cx, cy + hw / 2], [cx - hw, cy]].map(([a, b]) => [a * TS, b * TS]) }); return this; }
+  paveDiamond(cx, cy, hw, kind = 'stone') { const k = this.k; cx *= k; cy *= k; hw *= k; (this.pave = this.pave || []).push({ kind, poly: [[cx, cy - hw / 2], [cx + hw, cy], [cx, cy + hw / 2], [cx - hw, cy]].map(([a, b]) => [a * TS, b * TS]) }); return this; }
   // 쿼터뷰 소품: (fx, fy)는 바닥 마름모의 앞 모서리 자리(칸). flip이면 좌우를 뒤집어 입구가 오른쪽 앞면에 온다
-  iso(name, fx, fy, o = {}) {
+  iso(name, fx, fy, o = {}) { return this.isoAt(name, fx * this.k, fy * this.k, o); }
+  isoAt(name, fx, fy, o = {}) {
     const q = meta(name, o.flip); if (!q) { console.warn('쿼터뷰 소품 없음', name); return this; }
     const X = fx * TS, Y = fy * TS, c = corners(X, Y, q.fw, q.fh); this.hasIso = true;
     this.stamps.push({ name, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, base: Y, iso: c, flip: !!o.flip });
@@ -44,11 +53,11 @@ class MapDef {
   // 깃발: (px, by)는 장대 밑동 자리(칸). left면 천이 왼쪽으로 날린다. 작은 기는 pen
   flag(id, px, by, left = false, o = {}) { if (!id) return this; return this.put((left ? 'flagl_' : 'flag_') + id, px - (left ? 17.5 : 2.5) / TS, by - 44 / TS, { nosolid: true, ...o }); }
   pen(id, px, by, o = {}) { if (!id) return this; return this.put('pen_' + id, px - 5 / TS, by - 28 / TS, { nosolid: true, ...o }); }
-  label(tx, ty, text) { (this.labels = this.labels || []).push({ x: tx, y: ty, text }); return this; }
+  label(tx, ty, text) { (this.labels = this.labels || []).push({ x: tx * this.k, y: ty * this.k, text }); return this; }
   // 전체 지도에만 보이는 이름
-  place(tx, ty, text) { (this.names = this.names || []).push({ x: tx, y: ty, text }); return this; }
+  place(tx, ty, text) { (this.names = this.names || []).push({ x: tx * this.k, y: ty * this.k, text }); return this; }
   scatter(names, n, seed = 1) {
-    let r = seed * 9301 + 49297; const R = () => (r = (r * 9301 + 49297) % 233280) / 233280;
+    n = Math.round(n * this.k * this.k); let r = seed * 9301 + 49297; const R = () => (r = (r * 9301 + 49297) % 233280) / 233280;
     for (let i = 0; i < n * 4 && n > 0; i++) {
       const x = Math.floor(R() * this.w), y = Math.floor(R() * this.h); const nm = names[Math.floor(R() * names.length)];
       if (this.g[y][x] !== 0) continue;
@@ -61,8 +70,9 @@ class MapDef {
   border(names, gaps = [], step = 2) {
     const free = (x, y) => !gaps.some(g => x >= g[0] - 1 && x < g[0] + g[2] && y >= g[1] - 1 && y < g[1] + g[3]);
     let k = 0; const nm = () => names[k++ % names.length];
-    for (let x = -1; x < this.w; x += step) { if (free(x, 0)) this.put(nm(), x, -1); if (free(x, this.h - 1)) this.put(nm(), x, this.h - 2); }
-    for (let y = 1; y < this.h - 1; y += step) { if (free(0, y)) this.put(nm(), -1, y); if (free(this.w - 1, y)) this.put(nm(), this.w - 1, y); }
+    const W = this.w / this.k, H = this.h / this.k, st = step / this.k;  // 넓힌 지도에서도 가장자리 나무 간격은 그대로
+    for (let x = -1; x < W; x += st) { if (free(x, 0)) this.put(nm(), x, -1 / this.k); if (free(x, H - 1)) this.put(nm(), x, H - 2 / this.k); }
+    for (let y = 1; y < H - 1; y += st) { if (free(0, y)) this.put(nm(), -1 / this.k, y); if (free(W - 1, y)) this.put(nm(), W - 1 / this.k, y); }
     return this;
   }
   render() {
@@ -104,6 +114,7 @@ export function paintPave(c, p) {
 // ── 쿼터뷰 미리보기: 정면 집을 비스듬한 집으로 바꿔 끼운다. 문 자리는 그대로라 이야기와 사람 자리가 안 어긋난다 ──
 const ISO_OF = { hall: 'hall_dao', lodge: 'lodge', house_red: 'rich', inn: 'inn', hut_o: 'tile_house', hut_b: 'tile_house', hut_o2: 'thatch', shop_blue: 'store', shop_green: 'clinic', clay: 'adobe', wood_o: 'barn', wood_b: 'thatch_long', mud: 'shack', straw: 'thatch' };
 const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn', gamble: 'gamble', gov: 'yamen', book: 'books', bokun: 'shrine', myhouse: 'thatch' };
+G.mapK = id => MAPS[id]?.k || 1;
 export const isoMode = () => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } };
 // 바닥 마름모를 쿼터뷰 좌표(a: 왼쪽 앞면 방향, b: 오른쪽 앞면 방향)로 바꾸면 네모가 된다. 겹침은 네모끼리 본다
 const isoRect = (F, fw, fh) => { const a = (-F[1] / 8 - F[0] / 16) / 2, b = (-F[1] / 8 + F[0] / 16) / 2; return [a, b, a + fw, b + fh]; };
@@ -125,7 +136,7 @@ export function isoRetrofit(m, o = {}) {
     if (!pick && door) { const flip = leftOf(dx), q = meta(first, flip); pick = { name: first, flip, F: flip ? [D[0] - q.fh / 2 * 16, D[1] + q.fh / 2 * 8] : [D[0] + q.fw / 2 * 16, D[1] + q.fw / 2 * 8] }; pick.r = isoRect(pick.F, q.fw, q.fh); }
     m.stamps.splice(m.stamps.indexOf(st), 1);
     if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6] && r.w === s[7] && r.h === s[8]); if (k >= 0) m.solids.splice(k, 1); }
-    if (!pick) continue; placed.push(pick.r); m.iso(pick.name, pick.F[0] / TS, pick.F[1] / TS, { flip: pick.flip });
+    if (!pick) continue; placed.push(pick.r); m.isoAt(pick.name, pick.F[0] / TS, pick.F[1] / TS, { flip: pick.flip });
   }
 }
 // 내 집은 가구가 바뀔 때마다 다시 만든다

@@ -48,7 +48,14 @@ export const Story = {
     if (G.S.mode === 'free' && G.free) { npcs = G.free.npcs(id, npcs); spots = G.free.spots(id, spots); trigs = G.free.trigs(id, trigs); }
     if (Story.wrapNpc) npcs.forEach(Story.wrapNpc);
     if (G.crime) npcs = G.crime.apply(id, npcs);
-    return { npcs, spots, trigs, roam: L.flatMap(x => x.roam), hunt: L.flatMap(x => x.hunt || []) };
+    let roam = L.flatMap(x => x.roam), hunt = L.flatMap(x => x.hunt || []);
+    const k = G.mapK?.(id) || 1; // 쿼터뷰 미리보기로 넓힌 지도면 이야기 쪽 칸 좌표를 그만큼 늘린다
+    if (k !== 1) {
+      const P = o => Object.assign(o, { x: o.x * k, y: o.y * k }), R = o => Object.assign(o, { x: o.x * k, y: o.y * k, w: (o.w ?? 1) * k, h: (o.h ?? 1) * k });
+      npcs.forEach(n => { if (n._k) return; n._k = 1; P(n); if (n.route) n.route = n.route.map(([a, b]) => [a * k, b * k]); });
+      spots = spots.map(o => R({ ...o })); trigs = trigs.map(o => R({ ...o })); roam = roam.map(o => P({ ...o })); hunt = hunt.map(o => P({ ...o }));
+    }
+    return { npcs, spots, trigs, roam, hunt };
   },
   begin() { G.scene = 'field'; G.field.load('cheongha', 22, 25, 1); $('#fade').style.opacity = 1; G.field.run(Story.scenes.opening); },
   resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0); },

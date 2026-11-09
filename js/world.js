@@ -404,8 +404,9 @@ function linkEdges(mp) {
   else if (back) dest = [back.to, back.tx, back.ty, back.dir, { when: back.when, lock: back.lock, world: back.world }];
   if (!dest) return;
   const side = (n, f, put) => { let a = -1; for (let i = 0; i <= n; i++) { const ok = i < n && (([x, y]) => walk(mp.g[y]?.[x]) && !inP(x, y) && !mp.blocked(x * TS + 8, y * TS + 10))(f(i)); if (ok && a < 0) a = i; if (!ok && a >= 0) { put(a, i - a); a = -1; } } };
-  side(mp.w, x => [x, mp.h - 1], (a, n) => mp.exit(a, mp.h - 1, n, 1, ...dest)); side(mp.w, x => [x, 0], (a, n) => mp.exit(a, 0, n, 1, ...dest));
-  side(mp.h, y => [0, y], (a, n) => mp.exit(0, a, 1, n, ...dest)); side(mp.h, y => [mp.w - 1, y], (a, n) => mp.exit(mp.w - 1, a, 1, n, ...dest));
+  const ex = (x, y, w, h) => mp.portals.push({ x: x * TS, y: y * TS, w: w * TS, h: h * TS, to: dest[0], tx: dest[1], ty: dest[2], dir: dest[3], ...dest[4] }); // 칸 번호 그대로(넓힌 지도여도)
+  side(mp.w, x => [x, mp.h - 1], (a, n) => ex(a, mp.h - 1, n, 1)); side(mp.w, x => [x, 0], (a, n) => ex(a, 0, n, 1));
+  side(mp.h, y => [0, y], (a, n) => ex(0, a, 1, n)); side(mp.h, y => [mp.w - 1, y], (a, n) => ex(mp.w - 1, a, 1, n));
 }
 const entry = id => { const l = LOCS.find(q => q.map === id); return l ? [Math.round(l.px[0] * K) + .5, Math.round(l.px[1] * K) + 3.5] : [Math.round(598 * K), Math.round(440 * K)]; };
 Story.providers.push(id => id === 'world' && ready ? { npcs: npcsAt(), spots: [], trigs: [], roam: [] } : { npcs: [], spots: [], trigs: [], roam: [] });

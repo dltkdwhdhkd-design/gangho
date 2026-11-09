@@ -53,7 +53,7 @@ const SW = id => STAMPS[id][3] / TS, SH = id => STAMPS[id][4] / TS;
 const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 11], dorm: [18, 12, 7, 11], mess: [18, 12, 7, 11], inn: [18, 12, 7, 11], shop: [16, 11, 6, 10], book: [16, 11, 6, 10], clinic: [14, 10, 5, 9], armory: [14, 10, 5, 9], gov: [20, 13, 8, 12], gamble: [20, 13, 8, 12], home: [14, 10, 5, 9], temple: [16, 11, 6, 10] };
 const HOUSES = ['hall', 'lodge', 'house_red', 'inn', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];
 function room(m, l, stamp, x, y, kind, name, o) {
-  const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2, by: y + SH(stamp) + 1, kind, name, owner: l };
+  const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2 / m.k, by: y + (SH(stamp) + 1) / m.k, kind, name, owner: l };
   m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0 }); if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
 }
 function makeRoom(id) {
@@ -118,21 +118,22 @@ function sectLayout(m, l, st, ft) {
 }
 // 쿼터뷰 미리보기의 고을: 성벽을 산문 양쪽으로 비스듬히, 광장을 마름모 돌마당으로
 function isoTown(m, cx) {
-  for (const st of [...m.stamps]) if (st.name === 'wall_h' && Math.round(st.y / TS) === 43) { m.stamps.splice(m.stamps.indexOf(st), 1); const s = STAMPS[st.name]; if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6]); if (k >= 0) m.solids.splice(k, 1); } }
+  for (const st of [...m.stamps]) if (st.name === 'wall_h' && Math.round(st.y / TS / m.k) === 43) { m.stamps.splice(m.stamps.indexOf(st), 1); const s = STAMPS[st.name]; if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6]); if (k >= 0) m.solids.splice(k, 1); } }
   m.isoWall('city_wall', cx - .2, 44, 7, 'l').isoWall('city_wall', cx + 4.2, 44, 7, 'r');
-  for (let y = 14; y < 32; y++) for (let x = 20; x < 40; x++) if (m.g[y][x] === 3) m.g[y][x] = 0;
+  const k = m.k, K = v => Math.round(v * k); for (let y = K(14); y < K(32); y++) for (let x = K(20); x < K(40); x++) if (m.g[y][x] === 3) m.g[y][x] = 0;
   m.paveDiamond(30, 23, 13);
 }
 // 쿼터뷰 미리보기의 문파: 가로로 곧은 담과 네모 돌바닥을 걷어내고, 산문에서 비스듬히 뻗는 담과 마름모 마당으로 바꾼다
 function isoSect(m, cx, w, mt) {
   const WALLS = new Set(['wall_h', 'wall_m', 'wall_v', 'wood_h', 'fence_h', w]);
-  for (const st of [...m.stamps]) if (WALLS.has(st.name) && [60, 44, 22].includes(Math.round(st.y / TS))) { m.stamps.splice(m.stamps.indexOf(st), 1); const s = STAMPS[st.name]; if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6]); if (k >= 0) m.solids.splice(k, 1); } }
+  for (const st of [...m.stamps]) if (WALLS.has(st.name) && [60, 44, 22].includes(Math.round(st.y / TS / m.k))) { m.stamps.splice(m.stamps.indexOf(st), 1); const s = STAMPS[st.name]; if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6]); if (k >= 0) m.solids.splice(k, 1); } }
   const kind = w === 'wood_h' ? 'palisade' : w === 'fence_h' ? 'fence' : 'wall_tile', mid = cx + 2;
   // 산문 양쪽 날개담, 연무장 앞뒤 담. 가운데 길만 열어 둔다
   for (const y of [61, 45, 23]) { if (mt && y !== 61) continue; m.isoWall(kind, cx - .2, y - .2, 9, 'l'); m.isoWall(kind, cx + 4.2, y - .2, 9, 'r'); }
   // 연무장과 본전 앞을 마름모 돌마당으로
-  for (let y = YARD.y; y < YARD.y + YARD.h; y++) for (let x = YARD.x; x < YARD.x + YARD.w; x++) if (m.g[y][x] === 3 && (x < cx || x >= cx + 4)) m.g[y][x] = 0;
-  for (let y = 8; y < 10; y++) for (let x = cx - 5; x < cx + 9; x++) if (m.g[y][x] === 3 && (x < cx || x >= cx + 4)) m.g[y][x] = 0;
+  const k = m.k, K = v => Math.round(v * k), path = x => x >= K(cx) && x < K(cx + 4);
+  for (let y = K(YARD.y); y < K(YARD.y + YARD.h); y++) for (let x = K(YARD.x); x < K(YARD.x + YARD.w); x++) if (m.g[y][x] === 3 && !path(x)) m.g[y][x] = 0;
+  for (let y = K(8); y < K(10); y++) for (let x = K(cx - 5); x < K(cx + 9); x++) if (m.g[y][x] === 3 && !path(x)) m.g[y][x] = 0;
   m.paveDiamond(mid, YARD.y + YARD.h / 2, YARD.w / 2 + 1).paveDiamond(mid, 10, 7);
 }
 const SLAVE = ['guangzhou', 'changan', 'suzhou'];  // 노예 시장이 서는 고을
@@ -153,7 +154,7 @@ function townLayout(m, l) {
 // 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다
 function autoDoors(m, owner) {
   [...m.stamps].forEach((st, i) => { if (!HOUSES.includes(st.name)) return; const w = STAMPS[st.name][3], h = STAMPS[st.name][4], cx = st.x + w / 2, by = st.y + h; if (m.portals.some(q => q.x + q.w > st.x && q.x < st.x + w && Math.abs(q.y - by) < 28)) return;
-    const bx = cx / TS, byT = by / TS + 1; if (m.blocked(cx, by + 16) || m.blocked(cx, by + 8)) return; const big = st.name === 'hall' || st.name === 'lodge', kind = big ? 'temple' : 'home', id = `h_${m.id}_${i}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: m.id, bx, by: byT, kind, name: big ? '전각' : '집', owner };
+    const bx = cx / TS / m.k, byT = (by / TS + 1) / m.k; if (m.blocked(cx, by + 16) || m.blocked(cx, by + 8)) return; const big = st.name === 'hall' || st.name === 'lodge', kind = big ? 'temple' : 'home', id = `h_${m.id}_${i}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: m.id, bx, by: byT, kind, name: big ? '전각' : '집', owner };
     m.portals.push({ x: cx - 9, y: by - 4, w: 18, h: 9, to: id, tx: ex + 2, ty: ey - .6, dir: 1, door: true }); });
 }
 function make(id) {
