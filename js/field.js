@@ -29,7 +29,7 @@ export class Field {
     const id = this.m.id, c = Story.content(id);
     const old = fresh ? new Map() : new Map(this.npcs.map(n => [n.id, n]));
     this.npcs = c.npcs.map(n => { const q = { dir: 0, walk: 0, ...n, x: n.x * TS, y: n.y * TS, hx: n.x * TS, hy: n.y * TS }, o = old.get(n.id);
-      if (o && o.hx === q.hx && o.hy === q.hy && q.life && q.life !== 'still') Object.assign(q, { x: o.x, y: o.y, dir: o.dir, lt: o.lt, greetT: o.greetT });  // 같은 사람이면 서 있던 자리를 지킨다
+      if (o && o.hx === q.hx && o.hy === q.hy && q.life && q.life !== 'still') Object.assign(q, { x: o.x, y: o.y, dir: o.dir, lt: o.lt, greetT: o.greetT, trip: o.trip, hide: o.hide, ri: o.ri, off: o.off, door: o.door });  // 같은 사람이면 서 있던 자리를 지킨다
       return q; });
     if (fresh) this.barkT = 2.5;
     this.spots = c.spots; this.trigs = c.trigs;
@@ -68,7 +68,7 @@ export class Field {
       moving = true;
       p.dir = Math.abs(d.x) >= Math.abs(d.y) * .55 ? (d.x < 0 ? 2 : 3) : (d.y < 0 ? 1 : 0); p.diag = d.x && d.y && Math.min(Math.abs(d.x), Math.abs(d.y)) > .3 ? (d.y > 0 ? 0 : 1) + (d.x < 0 ? 2 : 0) : undefined;
       const nx = p.x + d.x * sp * dt, ny = p.y + d.y * sp * dt;
-      const blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => hyp(n.x - x, (n.y - 1) - y) < 8);
+      const blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && hyp(n.x - x, (n.y - 1) - y) < 8);
       if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
       p.walk += dt * 8; this.trail.unshift({ x: p.x, y: p.y, dir: p.dir, diag: p.diag }); if (this.trail.length > 70) this.trail.pop();
     } else p.walk = 0;
@@ -122,7 +122,7 @@ export class Field {
   target() {
     const p = this.p, [fx, fy] = DIRV[p.dir], x = p.x + fx * 10, y = p.y - 3 + fy * 10;
     let best = null, bd = 19;
-    for (const n of this.npcs) { const d = hyp(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
+    for (const n of this.npcs) { if (n.hide > 0) continue; const d = hyp(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
     for (const s of this.spots) { if (s.when && !s.when()) continue; if (x > s.x * TS - 6 && x < (s.x + s.w) * TS + 6 && y > s.y * TS - 6 && y < (s.y + s.h) * TS + 6) return s; }
     return null;
@@ -135,9 +135,12 @@ export class Field {
     const p = this.p, m = this.m, t = this.t, moving = Input.dir().x || Input.dir().y;
     const freeAt = (x, y, me) => !m.blocked(x, y) && hyp(p.x - x, p.y - y) > 12 && !this.npcs.some(o => o !== me && hyp(o.x - x, o.y - y) < 9);
     for (const n of this.npcs) {
-      if (n.bubT > 0) n.bubT -= dt; if (n.greetT > 0) n.greetT -= dt;
+      if (n.bubT > 0) n.bubT -= dt; if (n.greetT > 0) n.greetT -= dt; if (n.hopT > 0) n.hopT -= dt;
       if (n.stamp || n.path) continue;
       const life = n.life || (n.drill ? 'drill' : 'idle'); if (life === 'still') continue;
+      if (n.hide > 0) { n.hide -= dt; continue; }  // 집에 들어갔다
+      if (life === 'watch') { const lx = n.look[0] * TS, ly = n.look[1] * TS; n.dir = Math.abs(lx - n.x) > Math.abs(ly - n.y) ? (lx < n.x ? 2 : 3) : (ly < n.y ? 1 : 0); continue; }  // 구경꾼은 구경거리만 본다
+      if (life === 'perform') { const ph = (t + (n.lag || 0)) % 2.6; n.pose = ph < .45 ? 5 : ph < .9 ? 4 : ph < 1.35 ? 5 : undefined; n.dir = Math.floor(t / 2.6) % 3 === 2 ? 3 : 0; n.walk = 0; continue; }
       const d = hyp(p.x - n.x, p.y - n.y); n.lt = (n.lt ?? rnd(.4, 3)) - dt;
       if (n.greet && d < 40 && !(n.greetT > 0)) { n.greetT = 40; this.bubble(n, typeof n.greet === 'function' ? n.greet() : n.greet); }
       if (life === 'drill') {  // 다 같이 같은 순서로 초식을 밟는다
@@ -145,11 +148,12 @@ export class Field {
         n.pose = ph < .7 ? 4 : ph < 1.5 ? undefined : ph < 2.2 ? 6 : 4; n.walk = ph >= .7 && ph < 1.5 ? (ph - .7) * 6 : 0;
         n.dir = ph >= 2.2 ? (k ? 2 : 3) : 1; continue;
       }
-      if (d < 26 && !n.mv) { if (life !== 'work' || moving) this.face(n); n.pose = undefined; n.walk = 0; continue; }  // 다가오면 멈춰서 쳐다본다
+      if (d < 26 && !n.mv && !n.trip) { if (life !== 'work' || moving) this.face(n); n.pose = undefined; n.walk = 0; continue; }  // 다가오면 멈춰서 쳐다본다
       if (life === 'work') {
-        if (n.lt <= 0) { n.lt = rnd(1.4, 2.6); n.wk = (n.wk || 0) + 1; if (n.wk % 3 === 0) n.dir = [0, 2, 3][Math.floor(rnd(3))]; }
+        if (n.lt <= 0) { n.lt = rnd(1.4, 2.6); n.wk = (n.wk || 0) + 1; if (n.wk % 3 === 0 && !n.fix) n.dir = [0, 2, 3][Math.floor(rnd(3))]; }
         n.pose = n.lt > 1 ? 4 : undefined; n.walk = 0; continue;
       }
+      if (life === 'stroll' || life === 'patrol') { this.stroll(n, life, dt); continue; }
       if (life === 'wander' && n.mv) {
         const dx = n.mv[0] - n.x, dy = n.mv[1] - n.y, q = hyp(dx, dy), sp = n.speed || 22;
         if (q < 2 || n.lt < -6) { n.mv = null; n.walk = 0; n.lt = rnd(1.5, 4.5); continue; }
@@ -169,12 +173,55 @@ export class Field {
     // 혼잣말: 가까이 있는 사람 하나가 가끔 입을 연다
     this.barkT = (this.barkT ?? 3) - dt;
     if (this.barkT <= 0) {
-      this.barkT = rnd(3.5, 7.5);
-      const c = this.npcs.filter(n => n.barks && !(n.bubT > 0) && hyp(p.x - n.x, p.y - n.y) < 110 && n !== this._lastBark);
-      if (c.length) { const n = c[Math.floor(rnd(c.length))], b = typeof n.barks === 'function' ? n.barks() : n.barks; if (b && b.length) { this.bubble(n, b[Math.floor(rnd(b.length))]); this._lastBark = n; } }
+      const c = this.npcs.filter(n => n.barks && !(n.bubT > 0) && !(n.hide > 0) && hyp(p.x - n.x, p.y - n.y) < 110 && n !== this._lastBark);
+      this.barkT = c.length > 5 ? rnd(2.2, 4.5) : rnd(3.5, 7.5);
+      if (c.length) { const n = c[Math.floor(rnd(c.length))], b = typeof n.barks === 'function' ? n.barks() : n.barks; if (b && b.length) { const line = b[Math.floor(rnd(b.length))]; if (Array.isArray(line)) { this.bubble(n, line[0]); this._reply = { id: n.duo, text: line[1], t: 1.9 }; } else this.bubble(n, line); this._lastBark = n; } }
     }
+    // 둘이 주고받는 말: 한 사람이 말하면 옆 사람이 받는다
+    if (this._reply && (this._reply.t -= dt) <= 0) { const o = this.npcs.find(q => q.id === this._reply.id); if (o) this.bubble(o, this._reply.text); this._reply = null; }
+    // 장사꾼은 손님을 부르느라 저 혼자 계속 외친다
+    for (const n of this.npcs) if (n.hawk && !(n.bubT > 0)) { n.hawkT = (n.hawkT ?? rnd(1, 6)) - dt; if (n.hawkT <= 0) { n.hawkT = rnd(...(n.gap || [8, 15])); const h = typeof n.hawk === 'function' ? n.hawk() : n.hawk; if (h && h.length && hyp(p.x - n.x, p.y - n.y) < 170) this.bubble(n, h[Math.floor(rnd(h.length))]); } }
   }
-  bubble(n, text) { if (!text) return; n.bub = text; n.bubT = Math.min(5, 2.2 + text.length * .07); }
+  // 길을 따라 걷는다. stroll은 아무 데나, patrol은 route를 돈다. enters가 있으면 가끔 집 문 앞까지 가서 들어갔다가 나온다
+  stroll(n, life, dt) {
+    const p = this.p;
+    if (!n.trip) {
+      if (n.lt > 0) return;
+      const w = this.walkTiles(), at = [Math.floor(n.x / TS), Math.floor((n.y - 4) / TS)]; let goal = null; n.door = null;
+      if (life === 'patrol' && n.route) { n.ri = ((n.ri ?? -1) + 1) % n.route.length; goal = n.route[n.ri]; }
+      else if (n.enters && Math.random() < .3) { const d = this.m.portals.filter(q => q.door && !q.lock && !q.when); if (d.length) { const q = d[Math.floor(rnd(d.length))]; n.door = [q.x + q.w / 2, q.y + 3]; goal = [Math.floor(n.door[0] / TS), Math.floor((q.y + q.h) / TS)]; } }
+      for (let i = 0; i < 14 && !goal && w.list.length; i++) { const q = w.list[Math.floor(rnd(w.list.length))], dd = Math.abs(q[0] - at[0]) + Math.abs(q[1] - at[1]); if (dd > 4 && dd < (n.far || 28)) goal = q; }
+      const path = goal && this.roadPath(at, goal), o = n.off ?? (n.off = rnd(-3, 3));
+      if (path && path.length) { n.trip = path.map(([x, y]) => [x * TS + 8 + o, y * TS + 12 + o * .4]); if (n.door) n.trip.push(n.door); } else { n.door = null; n.lt = rnd(1.5, 3); }
+      return;
+    }
+    const [tx, ty] = n.trip[0], dx = tx - n.x, dy = ty - n.y, q = hyp(dx, dy), sp = n.speed || 24;
+    if (q < 1.5) { n.trip.shift(); if (!n.trip.length) { n.trip = null; n.walk = 0; n.lt = life === 'patrol' ? rnd(.4, 1.6) : rnd(1.5, 5); if (n.door) { n.hide = rnd(5, 12); n.dir = 0; n.y += 6; n.door = null; } } return; }
+    if (hyp(p.x - (n.x + dx / q * 8), p.y - (n.y + dy / q * 8)) < 11) { n.walk = 0; return; }  // 주인공이 길을 막으면 기다린다
+    const k = Math.min(q, sp * dt); n.x += dx / q * k; n.y += dy / q * k; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 6.5;
+  }
+  // 걸을 수 있는 칸. 길(1), 돌바닥(3), 나무 바닥(4), 광장(5)은 road, 풀밭은 돌아갈 길이 없을 때만 밟는다
+  walkTiles() {
+    const m = this.m; if (m._walk) return m._walk; const road = new Set(), grass = new Set(), list = [], W = new Set(m.walkOn || [1, 3, 4, 5]);
+    if (m.w * m.h < 12000) for (let y = 1; y < m.h - 1; y++) for (let x = 1; x < m.w - 1; x++) { const v = m.g[y][x]; if (v === 2 || m.blocked(x * TS + 8, y * TS + 12)) continue; if (W.has(v)) { road.add(x + ',' + y); list.push([x, y]); } else grass.add(x + ',' + y); }
+    return m._walk = { road, grass, list };
+  }
+  roadPath(a, b) {
+    const { road, grass } = this.walkTiles(), k = (x, y) => x + ',' + y, ok = kk => road.has(kk) || grass.has(kk), N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    let s = ok(k(a[0], a[1])) ? a : null;
+    if (!s) for (const [dx, dy] of [...N4, [1, 1], [-1, 1], [1, -1], [-1, -1]]) if (ok(k(a[0] + dx, a[1] + dy))) { s = [a[0] + dx, a[1] + dy]; break; }
+    if (!s || !ok(k(b[0], b[1]))) return null;
+    // 길은 1, 풀밭은 5로 치는 다익스트라. 칸 수가 적어서 칸막이 큐로 충분하다
+    const dist = new Map([[k(s[0], s[1]), 0]]), prev = new Map([[k(s[0], s[1]), null]]), Q = [[s]], bk = k(b[0], b[1]);
+    for (let c = 0; c < Q.length && c < 4000; c++) for (const cur of Q[c] || []) {
+      const ck = k(cur[0], cur[1]); if (dist.get(ck) !== c) continue; if (ck === bk) { c = Q.length; break; }
+      for (const [dx, dy] of N4) { const nx = cur[0] + dx, ny = cur[1] + dy, kk = k(nx, ny); if (!ok(kk)) continue; const nd = c + (road.has(kk) ? 1 : 5); if (dist.has(kk) && dist.get(kk) <= nd) continue; dist.set(kk, nd); prev.set(kk, cur); (Q[nd] = Q[nd] || []).push([nx, ny]); }
+    }
+    if (!prev.has(bk)) return null;
+    const out = []; for (let c = b; c; c = prev.get(k(c[0], c[1]))) out.push(c); out.reverse();
+    return out.filter((c, i) => i === 0 || i === out.length - 1 || !((out[i - 1][0] === c[0] && c[0] === out[i + 1][0]) || (out[i - 1][1] === c[1] && c[1] === out[i + 1][1])));
+  }
+  bubble(n, text) { if (!text) return; n.bub = text; n.bubT = Math.min(5, 2.2 + text.length * .07); if (n.lively) n.hopT = .4; }  // lively면 말할 때 들썩인다
   drawBubbles(c, ox, oy) {
     if (this.busy) return; const on = this.npcs.filter(n => n.bubT > 0 && n.bub); if (!on.length) return;
     c.setTransform(1, 0, 0, 1, 0, 0); c.font = '15px Galmuri11, Galmuri14, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
@@ -216,7 +263,7 @@ export class Field {
     if (m.live) G.world.ground(c, cam); else c.drawImage(m.canvas, 0, 0);
     const list = [];
     for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x > cam.x - 120 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
-    for (const n of this.npcs) list.push({ y: n.y, n });
+    for (const n of this.npcs) if (!(n.hide > 0)) list.push({ y: n.y, n });
     for (const r of this.roam) if (!r.gone) list.push({ y: r.y, n: r, mon: true });
     if (G.party && this.m.id !== 'world0') G.party.members().forEach((id, i) => { if (this.npcs.some(n => n.id === id)) return; const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q) return; list.push({ y: q.y, n: { spr: G.party.spr(id), x: q.x, y: q.y, dir: q.dir, diag: q.diag, walk: p.walk } }); });
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });
@@ -228,7 +275,7 @@ export class Field {
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) { drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined }); }
-      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y); drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined });
+      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined); drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
         mark(n); }
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha') { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }
