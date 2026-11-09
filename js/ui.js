@@ -11,7 +11,9 @@ import { CLANS, SAPA, clansWon } from './clandata.js';
 
 const LOOK = 'BlueSamurai'; // 주인공 도트는 일러스트에 맞춰 하나로 고정
 function titleBg(c) {
-  c.setTransform(1, 0, 0, 1, 0, 0); const g = c.createLinearGradient(0, 0, 0, 720); g.addColorStop(0, '#1b2348'); g.addColorStop(.62, '#4b3560'); g.addColorStop(1, '#c0694a'); c.fillStyle = g; c.fillRect(0, 0, 1280, 720);
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  if (IMG['ui/title']) { c.drawImage(IMG['ui/title'], 0, 0, 1280, 720); const v = c.createLinearGradient(0, 0, 0, 720); v.addColorStop(0, 'rgba(10,8,6,.35)'); v.addColorStop(.45, 'rgba(10,8,6,.1)'); v.addColorStop(1, 'rgba(10,8,6,.55)'); c.fillStyle = v; c.fillRect(0, 0, 1280, 720); return; }
+  const g = c.createLinearGradient(0, 0, 0, 720); g.addColorStop(0, '#1b2348'); g.addColorStop(.62, '#4b3560'); g.addColorStop(1, '#c0694a'); c.fillStyle = g; c.fillRect(0, 0, 1280, 720);
   c.fillStyle = '#f7eecb'; c.beginPath(); c.arc(960, 170, 76, 0, 7); c.fill(); c.fillStyle = 'rgba(247,238,203,.12)'; c.beginPath(); c.arc(960, 170, 120, 0, 7); c.fill();
   const hill = (b, a, col) => { c.fillStyle = col; c.beginPath(); c.moveTo(0, 720); for (let x = 0; x <= 1280; x += 40) c.lineTo(x, b + Math.sin(x * .006 + a) * 50 + Math.sin(x * .017 + a * 2) * 20); c.lineTo(1280, 720); c.fill(); };
   hill(500, 1, '#3a2b52'); hill(570, 2.6, '#2a2038'); hill(650, 4, '#17121f');

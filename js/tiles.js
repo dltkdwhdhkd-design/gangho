@@ -32,13 +32,45 @@ export const BIOME = {
 };
 // 십자 이웃만 보고 고르는 간단한 자동 타일: 위1 오른2 아래4 왼8
 export const AUTO = { 0: [3, 3], 1: [3, 2], 4: [3, 0], 5: [3, 1], 2: [0, 3], 8: [2, 3], 10: [1, 3], 6: [0, 0], 12: [2, 0], 3: [0, 2], 9: [2, 2], 7: [0, 1], 13: [2, 1], 14: [1, 0], 11: [1, 2], 15: [1, 1] };
+// 새 땅 텍스처(assets/hd/ground). 있으면 옛 타일 대신 깐다. 텍스처 한 장이 16칸을 덮는다
+const PAL = {}, PIECE = {}, TT = (() => { try { const c = document.createElement('canvas'); c.width = c.height = TS; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; return x; } catch (e) { return null; } })();
+const pix = (im, sx, sy) => { const c = document.createElement('canvas'); c.width = c.height = TS; const x = c.getContext('2d'); x.drawImage(im, sx, sy, TS, TS, 0, 0, TS, TS); return x.getImageData(0, 0, TS, TS).data; };
+const keyOf = (d, i) => (d[i] >> 3) + ',' + (d[i + 1] >> 3) + ',' + (d[i + 2] >> 3);
+function palOf(biome) { // 바탕 타일에 쓰인 색. 길과 물 타일에서 이 색은 바탕으로 본다
+  if (PAL[biome]) return PAL[biome]; const b = BIOME[biome], fl = IMG['tiles/' + b.sheet], set = new Set(), add = (sx, sy) => { const d = pix(fl, sx * TS, sy * TS); for (let i = 0; i < d.length; i += 4) set.add(keyOf(d, i)); };
+  add(b.fill[0], b.fill[1]); for (const q of b.det) add(q[0], q[1]); return PAL[biome] = set;
+}
+function piece(biome, kind, m) { // [가릴 모양, 남길 테두리] 16×16
+  const k = biome + kind + m; if (PIECE[k]) return PIECE[k]; const b = BIOME[biome], pal = palOf(biome), [ax, ay] = AUTO[m];
+  const d = kind === 1 ? pix(IMG['tiles/' + b.sheet], (b.block[0] + ax) * TS, (b.block[1] + ay) * TS) : pix(IMG['tiles/Water'], ax * TS, (6 + ay) * TS);
+  const mask = document.createElement('canvas'), keep = document.createElement('canvas'); mask.width = mask.height = keep.width = keep.height = TS;
+  const mx = mask.getContext('2d'), kx = keep.getContext('2d'), md = mx.createImageData(TS, TS), kd = kx.createImageData(TS, TS), inn = new Uint8Array(TS * TS);
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) { if (d[i + 3] < 128 || pal.has(keyOf(d, i)) || (kind === 2 && d[i + 1] > d[i + 2] + 15 && d[i + 1] >= d[i] - 12)) continue; const water = d[i + 2] > d[i] + 40 && d[i + 2] > 120 && !(d[i] > 200 && d[i + 1] > 200); if (kind === 1 || water) inn[j] = 1; else { kd.data[i] = d[i]; kd.data[i + 1] = d[i + 1]; kd.data[i + 2] = d[i + 2]; kd.data[i + 3] = 255; } }
+  for (let j = 0; j < TS * TS; j++) if (inn[j]) { md.data[j * 4 + 3] = 255; const x = j % TS, y = (j / TS) | 0, edge = kind === 1 && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([u, v]) => { const X = x + u, Y = y + v; return X >= 0 && X < TS && Y >= 0 && Y < TS && !inn[Y * TS + X]; }); if (edge) { kd.data[j * 4] = 120; kd.data[j * 4 + 1] = 82; kd.data[j * 4 + 2] = 52; kd.data[j * 4 + 3] = 255; } }
+  mx.putImageData(md, 0, 0); kx.putImageData(kd, 0, 0); return PIECE[k] = [mask, keep];
+}
+const texAt = (c, name, tx, ty, X, Y) => { const t = IMG['ground/' + name], k = (t.hd || 1) * TS, n = Math.floor(t.width / k); c.drawImage(t, (((tx % n) + n) % n) * k, (((ty % n) + n) % n) * k, k, k, X, Y, TS, TS); };
+export const hasTex = biome => !!IMG['ground/' + biome];
+// 칸 하나를 텍스처로 그린다. v: 0 바닥, 1 길, 2 물, 3 돌바닥. m은 길과 물의 이웃 모양
+export function texTile(c, biome, v, m, tx, ty, X, Y) {
+  texAt(c, biome, tx, ty, X, Y);
+  if (v === 3 && IMG['ground/stone']) { texAt(c, 'stone', tx, ty, X, Y); return true; }
+  if (v === 4 && IMG['ground/wood']) { texAt(c, 'wood', tx, ty, X, Y); return true; }
+  if (v !== 1 && v !== 2) return v === 0;
+  const name = v === 1 ? 'path' : 'water'; if (!IMG['ground/' + name] || !TT) return false;
+  const [mask, keep] = piece(biome, v, m); TT.globalCompositeOperation = 'source-over'; TT.clearRect(0, 0, TS, TS); texAt(TT, name, tx, ty, 0, 0);
+  TT.globalCompositeOperation = 'destination-in'; TT.drawImage(mask, 0, 0); TT.globalCompositeOperation = 'source-over';
+  c.drawImage(TT.canvas, X, Y); c.drawImage(keep, X, Y); return true;
+}
 export function paintGround(c, g, biome, opt = {}) {
   // g[y][x]: 0 바닥, 1 길, 2 물, 3 깔린 돌바닥
   const b = BIOME[biome], fl = IMG['tiles/' + b.sheet], wa = IMG['tiles/Water'], w = g[0].length, h = g.length;
   const at = (x, y) => (y < 0 || y >= h || x < 0 || x >= w) ? -1 : g[y][x];
+  const tex = hasTex(biome); if (tex) c.imageSmoothingEnabled = false;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    c.drawImage(fl, b.fill[0] * TS, b.fill[1] * TS, TS, TS, x * TS, y * TS, TS, TS);
     const v = g[y][x];
+    if (tex) { const same = (a, q) => { const k = at(a, q); return k === v || k === -1; }, m = (same(x, y - 1) ? 1 : 0) | (same(x + 1, y) ? 2 : 0) | (same(x, y + 1) ? 4 : 0) | (same(x - 1, y) ? 8 : 0); if (texTile(c, biome, v, m, x, y, x * TS, y * TS)) continue; }
+    else c.drawImage(fl, b.fill[0] * TS, b.fill[1] * TS, TS, TS, x * TS, y * TS, TS, TS);
     if (v === 0 && Math.random() < (opt.detail ?? .13)) { const d = pick(b.det); c.drawImage(fl, d[0] * TS, d[1] * TS, TS, TS, x * TS, y * TS, TS, TS); }
     if (v === 1 || v === 2) {
       const same = (a, q) => { const k = at(a, q); return k === v || k === -1; };
@@ -58,6 +90,7 @@ export function paintRoom(c, w, h, style = 0) {
   c.fillStyle = '#000'; c.fillRect(0, 0, w * TS, h * TS);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     if (style === 1) c.drawImage(f, (11 + (x + y) % 3) * TS, 12 * TS, TS, TS, x * TS, y * TS, TS, TS);
+    else if (IMG['ground/wood']) texAt(c, 'wood', x, y, x * TS, y * TS);
     else c.drawImage(f, 6 * TS, 13 * TS, TS, TS, x * TS, y * TS, TS, TS);
   }
   const ox = style === 1 ? 0 : 5, oy = style === 1 ? 6 : 0;

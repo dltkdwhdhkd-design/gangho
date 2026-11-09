@@ -1,7 +1,7 @@
 // 강호 전도: 중원과 변방을 한 장으로 걸어 다니는 큰 지도. 좌표는 804×658 참고 지도 기준
 import { G, IMG, TS, VW, VH, rnd, pick, toast, el, esc, Sound } from './core.js';
 import { MAPS, makeMap } from './maps.js';
-import { BIOME, AUTO } from './tiles.js';
+import { BIOME, AUTO, hasTex, texTile } from './tiles.js';
 import { DB } from './items.js';
 import { give, nextDay } from './state.js';
 import { Story, ctx, say, choice } from './ctx.js';
@@ -107,6 +107,8 @@ function chunk(cx, cy) {
   const at = (a, b) => (b < 0 || b >= WH || a < 0 || a >= WW) ? -1 : g[b][a];
   for (let ty = cy * CH; ty < Math.min(WH, (cy + 1) * CH); ty++) for (let tx = cx * CH; tx < Math.min(WW, (cx + 1) * CH); tx++) {
     const b = fillOf(BN[B[ty][tx]]), v = g[ty][tx], X = (tx - cx * CH) * TS, Y = (ty - cy * CH) * TS;
+    const bn = BN[B[ty][tx]];
+    if (hasTex(bn)) { const same = (q, r) => { const u = at(q, r); return u === v || u === -1 || (v !== 0 && u === 4); }, mk = (same(tx, ty - 1) ? 1 : 0) | (same(tx + 1, ty) ? 2 : 0) | (same(tx, ty + 1) ? 4 : 0) | (same(tx - 1, ty) ? 8 : 0); R(); if (texTile(x, bn, v, mk, tx, ty, X, Y)) continue; }
     x.drawImage(fl, b.fill[0] * TS, b.fill[1] * TS, TS, TS, X, Y, TS, TS);
     if (v === 0 && R() < .12) { const d = b.det[Math.floor(R() * b.det.length)]; x.drawImage(fl, d[0] * TS, d[1] * TS, TS, TS, X, Y, TS, TS); }
     if (v === 1 || v === 2) { const same = (q, r) => { const u = at(q, r); return u === v || u === -1 || (v === 1 && u === 4) || (v === 2 && u === 4); }, mk = (same(tx, ty - 1) ? 1 : 0) | (same(tx + 1, ty) ? 2 : 0) | (same(tx, ty + 1) ? 4 : 0) | (same(tx - 1, ty) ? 8 : 0), [ax, ay] = AUTO[mk]; if (v === 1) x.drawImage(fl, (b.block[0] + ax) * TS, (b.block[1] + ay) * TS, TS, TS, X, Y, TS, TS); else x.drawImage(wa, ax * TS, (6 + ay) * TS, TS, TS, X, Y, TS, TS); }

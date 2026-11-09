@@ -23,8 +23,8 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 /* 제목 */
 #title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--paper);text-shadow:0 4px 0 #000}
 #title .logo{font-family:Galmuri11Bold;font-size:112px;letter-spacing:12px;color:#fff3d6;text-shadow:0 6px 0 var(--red),0 10px 0 #000}
-#title .han{font-size:26px;letter-spacing:22px;margin:14px 0 8px;padding-left:22px;color:var(--gold)}
-#title .sub{font-size:18px;margin-bottom:44px;opacity:.92}
+#title .han{font-size:26px;letter-spacing:22px;margin:14px 0 8px;padding-left:22px;color:var(--gold);text-shadow:0 2px 0 #1a120c,0 0 8px rgba(0,0,0,.7)}
+#title .sub{font-size:18px;margin-bottom:44px;text-shadow:0 2px 0 #1a120c,0 0 10px rgba(0,0,0,.85),0 0 3px #000}
 #title .col{display:flex;flex-direction:column;gap:14px;width:300px}
 #title .foot{position:absolute;bottom:14px;right:18px;font-size:13px;opacity:.75}
 /* 주인공 만들기 */
