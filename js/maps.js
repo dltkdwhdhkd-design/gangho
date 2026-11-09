@@ -131,7 +131,8 @@ function isoDress(m) {
   for (const q of m.portals) {
     if (!q.door) continue; const sx = Math.floor((q.x + q.w / 2) / TS), sy = Math.floor((q.y + q.h) / TS) + 1; if (!m.g[sy]) continue;
     const prev = new Map(), key = (x, y) => y * m.w + x, Q = [[sx, sy, 0]]; prev.set(key(sx, sy), -1); let end = null;
-    while (Q.length) { const [x, y, d] = Q.shift(); if (m.g[y]?.[x] === 1 && d) { end = [x, y]; break; } if (d > 16) continue; for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) { const X = x + dx, Y = y + dy; if (prev.has(key(X, Y)) || !m.g[Y] || m.g[Y][X] === undefined) continue; if (m.g[Y][X] !== 1 && !free(X, Y)) continue; prev.set(key(X, Y), key(x, y)); Q.push([X, Y, d + 1]); } }
+    const road = v => v === 1 || v === 3;
+    while (Q.length) { const [x, y, d] = Q.shift(); if (road(m.g[y]?.[x]) && d) { end = [x, y]; break; } if (d > 30) continue; for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) { const X = x + dx, Y = y + dy; if (prev.has(key(X, Y)) || !m.g[Y] || m.g[Y][X] === undefined) continue; if (!road(m.g[Y][X]) && !free(X, Y)) continue; prev.set(key(X, Y), key(x, y)); Q.push([X, Y, d + 1]); } }
     if (!end) continue; for (let k = prev.get(key(...end)); k >= 0; k = prev.get(k)) { const x = k % m.w, y = Math.floor(k / m.w); m.g[y][x] = 1; }
   }
   for (const st of [...m.stamps]) {
