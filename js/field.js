@@ -2,6 +2,7 @@
 import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast } from './core.js';
 import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
+import { drawIso, orderKeys } from './iso.js';
 import { drawStamp, STAMPS } from './tiles.js';
 import { save } from './state.js';
 import { Story } from './story.js';
@@ -267,16 +268,17 @@ export class Field {
     const ox = -snap(cam.x), oy = -snap(cam.y); c.translate(ox, oy);
     if (m.live) G.world.ground(c, cam); else c.drawImage(m.canvas, 0, 0);
     const list = [];
-    for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x + (STAMPS[s.name]?.[3] || 120) > cam.x - 8 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
+    for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x + (s.w || STAMPS[s.name]?.[3] || 120) > cam.x - 8 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
     for (const n of this.npcs) if (!(n.hide > 0)) list.push({ y: n.y, n });
     for (const r of this.roam) if (!r.gone) list.push({ y: r.y, n: r, mon: true });
     if (G.party && this.m.id !== 'world0') G.party.members().forEach((id, i) => { if (this.npcs.some(n => n.id === id)) return; const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q) return; list.push({ y: q.y, n: { spr: G.party.spr(id), x: q.x, y: q.y, dir: q.dir, diag: q.diag, walk: p.walk } }); });
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });
     if (!this.hideMe) list.push({ y: p.y, me: true });
+    if (m.hasIso || m.live) { for (const o of list) if (!o.s) { o.actor = true; o.x = o.me ? p.x : (o.n || o.ani || {}).x ?? 0; } orderKeys(list); }
     list.sort((a, b) => a.y - b.y);
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
-      if (o.s) drawStamp(c, o.s.name, o.s.x, o.s.y);
+      if (o.s) { if (o.s.iso) drawIso(c, o.s); else drawStamp(c, o.s.name, o.s.x, o.s.y); }
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {

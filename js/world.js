@@ -218,30 +218,30 @@ function pathDark() { // 황토 땅 위의 길은 색이 비슷해 안 보인다
 }
 const PRI = [4, 5, 1, 3, 2, 3.5]; // 바닥 높낮이: grass, deep, sand, plain, snow, dusk
 const DECAL = { grass: [['bush1', 'bush2', 'fern1', 'bush1', 'fern2'], .1, ['flower1', 'flower2', 'flower3', 'flower4', 'fern1']], plain: [['bush1', 'bush4', 'fern2', 'bush2', 'fern1', 'bush1'], .13, ['flower2', 'flower3', 'fern2', 'bush4']], deep: [['fern1', 'fern2', 'bush4', 'fern1'], .09], sand: [['bush3'], .014], snow: [[], 0], dusk: [['bush3'], .012] };
-function chunk(cx, cy) {
-  const k = cx + ',' + cy; let e = chunks.get(k); if (e) { e.t = G.field.t; return e.c; }
-  if (chunks.size >= 24) { let old = null; for (const [q, v] of chunks) if (!old || v.t < chunks.get(old).t) old = q; chunks.delete(old); }
-  const c = document.createElement('canvas'); c.width = c.height = CH * TS; const x = c.getContext('2d', { willReadFrequently: true }), g = m.g, mixed = [], calm = new Set();
-  const at = (a, b) => { if (b < 0 || b >= WH || a < 0 || a >= WW) return -1; const v = g[b][a]; return v === 6 ? 0 : v; };
-  const bio = (a, b) => (b < 0 || b >= WH || a < 0 || a >= WW) ? -1 : B[b][a];
-  for (let ty = cy * CH; ty < Math.min(WH, (cy + 1) * CH); ty++) for (let tx = cx * CH; tx < Math.min(WW, (cx + 1) * CH); tx++) {
-    const v = at(tx, ty), X = (tx - cx * CH) * TS, Y = (ty - cy * CH) * TS, bi = B[ty][tx], bn = BN[bi];
+// 땅 칠하기: 바닥 텍스처, 바닥끼리와 길과 물가의 점 단위 경계, 얼룩, 돌바닥 턱. 강호 조각과 마을 지도가 같이 쓴다
+// (X0, Y0)부터 NW×NH칸을 x에 칠한다. g는 바닥 갈래, Bm은 칸마다 바닥 이름 번호(BN), 지도 크기 MW×MH
+function paintArea(x, X0, Y0, NW, NH, g, Bm, MW, MH) {
+  const mixed = [], calm = new Set();
+  const at = (a, b) => { if (b < 0 || b >= MH || a < 0 || a >= MW) return -1; const v = g[b][a]; return v === 6 ? 0 : v; };
+  const bio = (a, b) => (b < 0 || b >= MH || a < 0 || a >= MW) ? -1 : Bm[b][a];
+  for (let ty = Y0; ty < Y0 + NH; ty++) for (let tx = X0; tx < X0 + NW; tx++) {
+    const v = at(tx, ty), X = (tx - X0) * TS, Y = (ty - Y0) * TS, bi = Bm[ty][tx], bn = BN[bi];
     const same = (q, r) => { const u = at(q, r); return u === v || u === -1 || (v !== 0 && u === 4); }, mk = (same(tx, ty - 1) ? 1 : 0) | (same(tx + 1, ty) ? 2 : 0) | (same(tx, ty + 1) ? 4 : 0) | (same(tx - 1, ty) ? 8 : 0);
     const P = IMG['ground/path']; if (v === 1 && bn === 'sand' && pathDark()) IMG['ground/path'] = PATHD;
     texTile(x, bn, v, mk, tx, ty, X, Y); IMG['ground/path'] = P;
     if (v > 2) continue;
     let mix = false, shore = false, fixd = false;
-    for (let q = -1; q <= 1; q++) for (let p = -1; p <= 1; p++) { const u = at(tx + p, ty + q); if (u < 0) continue; if (u > 2) fixd = true; else if (u !== v) shore = true; if (B[ty + q][tx + p] !== bi) mix = true; }
-    if (fixd) { if (v === 0 && shore) calm.add(tx + ty * WW); continue; } // 다리, 돌바닥 곁은 칸 그림 그대로
-    if (shore && v === 0) calm.add(tx + ty * WW);
+    for (let q = -1; q <= 1; q++) for (let p = -1; p <= 1; p++) { const u = at(tx + p, ty + q); if (u < 0) continue; if (u > 2) fixd = true; else if (u !== v) shore = true; if (Bm[ty + q][tx + p] !== bi) mix = true; }
+    if (fixd) { if (v === 0 && shore) calm.add(tx + ty * MW); continue; } // 다리, 돌바닥 곁은 칸 그림 그대로
+    if (shore && v === 0) calm.add(tx + ty * MW);
     if (mix || shore) mixed.push(tx, ty);
   }
   // 바닥, 길, 물이 갈리는 칸은 점 단위로 다시 칠한다. 물가와 길섶은 칸 중심 사이를 이어 둥글게 돈다
-  const N = CH * TS, img = x.getImageData(0, 0, N, N), D = img.data, ox = cx * CH * TS, oy = cy * CH * TS, PB = new Int8Array(N * N).fill(-1);
-  for (let ty = 0; ty < CH; ty++) for (let tx = 0; tx < CH; tx++) { const gx = cx * CH + tx, gy = cy * CH + ty; if (gx >= WW || gy >= WH || at(gx, gy) !== 0 || calm.has(gx + gy * WW)) continue; const b = B[gy][gx]; for (let py = 0; py < TS; py++) PB.fill(b, (ty * TS + py) * N + tx * TS, (ty * TS + py) * N + tx * TS + TS); }
+  const N = NW * TS, NHp = NH * TS, img = x.getImageData(0, 0, N, NHp), D = img.data, ox = X0 * TS, oy = Y0 * TS, PB = new Int8Array(N * NHp).fill(-1);
+  for (let ty = 0; ty < NH; ty++) for (let tx = 0; tx < NW; tx++) { const gx = X0 + tx, gy = Y0 + ty; if (at(gx, gy) !== 0 || calm.has(gx + gy * MW)) continue; const b = Bm[gy][gx]; for (let py = 0; py < TS; py++) PB.fill(b, (ty * TS + py) * N + tx * TS, (ty * TS + py) * N + tx * TS + TS); }
   if (mixed.length) {
     noiseTables(); const W = TS + 4, K2 = new Int8Array(W * W), BI = new Int8Array(W * W);
-    const sc = (a, b) => { a = Math.min(WW - 1, Math.max(0, a)); b = Math.min(WH - 1, Math.max(0, b)); const u = at(a, b); return u > 2 ? -1 : u; };
+    const sc = (a, b) => { a = Math.min(MW - 1, Math.max(0, a)); b = Math.min(MH - 1, Math.max(0, b)); const u = at(a, b); return u > 2 ? -1 : u; };
     const kindAt = (wx, wy) => { // 0 바닥, 1 길, 2 물
       const fx = wx / TS - .5, fy = wy / TS - .5, i = Math.floor(fx), j = Math.floor(fy), u = fx - i, w = fy - j, n = (wx & 127) + (wy & 127) * 128;
       const a = sc(i, j), b = sc(i + 1, j), c = sc(i, j + 1), d = sc(i + 1, j + 1), wt = [(1 - u) * (1 - w), u * (1 - w), (1 - u) * w, u * w], ks = [a, b, c, d];
@@ -249,7 +249,7 @@ function chunk(cx, cy) {
       const own = sc(Math.round(fx), Math.round(fy));
       if (pp + NX[n] * .14 > .5 && (own === 1 || pw + NY[n] * .3 <= .5)) return 1; if (pw + NY[n] * .3 > .5) return 2; return 0;
     };
-    const bioAt = (wx, wy) => { const n = (wx & 127) + (wy & 127) * 128; return B[Math.min(WH - 1, Math.max(0, Math.round(wy / TS - .5 + NY[n])))][Math.min(WW - 1, Math.max(0, Math.round(wx / TS - .5 + NX[n])))]; };
+    const bioAt = (wx, wy) => { const n = (wx & 127) + (wy & 127) * 128; return Bm[Math.min(MH - 1, Math.max(0, Math.round(wy / TS - .5 + NY[n])))][Math.min(MW - 1, Math.max(0, Math.round(wx / TS - .5 + NX[n])))]; };
     const PD = pathDark() ? texData('pathd', PATHD) : null, PT = texData('path'), WT = texData('water');
     for (let i = 0; i < mixed.length; i += 2) {
       const tx = mixed[i], ty = mixed[i + 1];
@@ -270,9 +270,18 @@ function chunk(cx, cy) {
       }
     }
   }
-  mottle(D, N, N, ox, oy, (px, py) => { const b = PB[py * N + px]; return b < 0 ? null : BN[b]; });
+  mottle(D, N, NHp, ox, oy, (px, py) => { const b = PB[py * N + px]; return b < 0 ? null : BN[b]; });
   x.putImageData(img, 0, 0);
-  curbs(x, g, { x0: cx * CH, y0: cy * CH, x1: Math.min(WW, (cx + 1) * CH), y1: Math.min(WH, (cy + 1) * CH), ox: -cx * CH * TS, oy: -cy * CH * TS });
+  curbs(x, g, { x0: X0, y0: Y0, x1: X0 + NW, y1: Y0 + NH, ox: -X0 * TS, oy: -Y0 * TS });
+  return calm;
+}
+
+function chunk(cx, cy) {
+  const k = cx + ',' + cy; let e = chunks.get(k); if (e) { e.t = G.field.t; return e.c; }
+  if (chunks.size >= 24) { let old = null; for (const [q, v] of chunks) if (!old || v.t < chunks.get(old).t) old = q; chunks.delete(old); }
+  const c = document.createElement('canvas'); c.width = c.height = CH * TS; const x = c.getContext('2d', { willReadFrequently: true }), g = m.g;
+  const at = (a, b) => { if (b < 0 || b >= WH || a < 0 || a >= WW) return -1; const v = g[b][a]; return v === 6 ? 0 : v; };
+  const calm = paintArea(x, cx * CH, cy * CH, Math.min(CH, WW - cx * CH), Math.min(CH, WH - cy * CH), g, B, WW, WH);
   for (let ty = cy * CH; ty < Math.min(WH, (cy + 1) * CH); ty++) for (let tx = cx * CH; tx < Math.min(WW, (cx + 1) * CH); tx++) {
     const v = at(tx, ty), X = (tx - cx * CH) * TS, Y = (ty - cy * CH) * TS, bn = BN[B[ty][tx]]; if (v !== 0 || calm.has(tx + ty * WW)) continue;
     // 풀포기와 꽃. 꽃은 무리 지어 핀다
@@ -382,4 +391,4 @@ function linkEdges(mp) {
 }
 const entry = id => { const l = LOCS.find(q => q.map === id); return l ? [Math.round(l.px[0] * K) + .5, Math.round(l.px[1] * K) + 3.5] : [Math.round(598 * K), Math.round(440 * K)]; };
 Story.providers.push(id => id === 'world' && ready ? { npcs: npcsAt(), spots: [], trigs: [], roam: [] } : { npcs: [], spots: [], trigs: [], roam: [] });
-G.world = { linkEdges, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };
+G.world = { linkEdges, paintArea, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };

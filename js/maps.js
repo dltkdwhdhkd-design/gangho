@@ -1,7 +1,8 @@
 // 지도. 타일 단위로 길과 물을 깔고 소품을 얹는다.
-import { TS, rint, pick, IMG } from './core.js';
+import { G, TS, rint, pick, IMG } from './core.js';
 import { FURN, HOUSES } from './items.js';
 import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tiles.js';
+import { meta, corners, hitsBox } from './iso.js';
 
 class MapDef {
   constructor(id, w, h, o = {}) {
@@ -28,6 +29,14 @@ class MapDef {
     return this;
   }
   exit(tx, ty, w, h, to, ex, ey, dir, o = {}) { this.portals.push({ x: tx * TS, y: ty * TS, w: w * TS, h: h * TS, to, tx: ex, ty: ey, dir, ...o }); return this; }
+  // 쿼터뷰 소품: (fx, fy)는 바닥 마름모의 앞 모서리 자리(칸). flip이면 좌우를 뒤집어 입구가 오른쪽 앞면에 온다
+  iso(name, fx, fy, o = {}) {
+    const q = meta(name, o.flip); if (!q) { console.warn('쿼터뷰 소품 없음', name); return this; }
+    const X = fx * TS, Y = fy * TS, c = corners(X, Y, q.fw, q.fh); this.hasIso = true;
+    this.stamps.push({ name, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, base: Y, iso: c, flip: !!o.flip });
+    if (!o.nosolid) (this.polys = this.polys || []).push(c);
+    return this;
+  }
   // 깃발: (px, by)는 장대 밑동 자리(칸). left면 천이 왼쪽으로 날린다. 작은 기는 pen
   flag(id, px, by, left = false, o = {}) { if (!id) return this; return this.put((left ? 'flagl_' : 'flag_') + id, px - (left ? 17.5 : 2.5) / TS, by - 44 / TS, { nosolid: true, ...o }); }
   pen(id, px, by, o = {}) { if (!id) return this; return this.put('pen_' + id, px - 5 / TS, by - 28 / TS, { nosolid: true, ...o }); }
@@ -55,11 +64,10 @@ class MapDef {
   render() {
     const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
     if (this.room) { const doors = this.portals.filter(q => q.y + q.h >= this.h * TS - 2).map(q => [Math.round(q.x / TS), Math.round((q.x + q.w) / TS)]); paintRoom(x, this.w, this.h, this.roomStyle || 0, { doors, carpet: this.carpet }); }
-    else {
-      paintGround(x, this.g, this.biome);
-      const W = this.w * TS, H = this.h * TS, im = x.getImageData(0, 0, W, H), g = this.g, bn = this.biome; mottle(im.data, W, H, 0, 0, (px, py) => g[py >> 4][px >> 4] === 0 ? bn : null); x.putImageData(im, 0, 0);
-      curbs(x, this.g);
-    }
+    else if (G.world?.paintArea) { // 강호 전도와 같은 땅 칠하기: 길섶과 물가가 둥글고, 바닥 얼룩과 돌바닥 턱이 또렷하다
+      const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.g.map(r => r.map(() => bi));
+      G.world.paintArea(x, 0, 0, this.w, this.h, this.g, Bm, this.w, this.h);
+    } else paintGround(x, this.g, this.biome);
     for (const s of this.stamps) if (s.flat) drawStamp(x, s.name, s.x, s.y);
     this.canvas = c; this.objs = this.stamps.filter(s => !s.flat);
     if (this.room) { this.solids.push({ x: 0, y: 0, w: this.w * TS, h: TS + 4 }, { x: 0, y: 0, w: 10, h: this.h * TS }, { x: this.w * TS - 10, y: 0, w: 10, h: this.h * TS }, { x: 0, y: this.h * TS - 10, w: this.w * TS, h: 10 }); }
@@ -70,6 +78,7 @@ class MapDef {
     if (x0 < 0 || y0 < 0 || x1 > this.w * TS || y1 > this.h * TS) return true;
     for (let ty = Math.floor(y0 / TS); ty <= Math.floor((y1 - .01) / TS); ty++) for (let tx = Math.floor(x0 / TS); tx <= Math.floor((x1 - .01) / TS); tx++) if (this.g[ty] && this.g[ty][tx] === 2) return true;
     for (const s of this.solids) if (s.x < x1 && s.x + s.w > x0 && s.y < y1 && s.y + s.h > y0) return true;
+    if (this.polys) for (const c of this.polys) if (hitsBox(c, px, py, w, h)) return true;
     return false;
   }
 }
@@ -85,6 +94,15 @@ export function buildHouse(S) {
 function M(id, w, h, o) { return MAPS[id] = new MapDef(id, w, h, o); }
 export const makeMap = M;
 
+// 쿼터뷰 시험 마을: 임시 상자 집으로 앞뒤 가림과 충돌을 맞춰 본다
+export function isoTest() {
+  const m = M('isotest', 40, 30, { name: '쿼터뷰 시험', bgm: 'village', biome: 'plain', arena: 'village' });
+  for (let y = 0; y < 30; y++) for (let x = 0; x < 40; x++) m.g[y][x] = 0;
+  for (let i = 0; i < 40; i++) { const y = Math.round(22 - i * .5); for (let d = 0; d < 3; d++) if (m.g[y + d]) m.g[y + d][i] = 1; }
+  m.iso('inn', 12, 14).iso('thatch', 24, 11).iso('thatch', 30, 20, { flip: true }).iso('tile_house', 9, 25, { flip: true }).iso('hall_dao', 34, 9).iso('pavilion', 20, 24).iso('gate_sect', 18, 18);
+  m.put('tree_round', 4, 4).put('tree_round', 36, 24).put('jar', 15, 15.5);
+  m.exit(0, 20, 1, 4, 'cheongha', 20, 20, 0); m.render(); return m;
+}
 export function buildMaps() {
   // 청하진: 강변 나루 마을
   let m = M('cheongha', 46, 34, { name: '청하진', bgm: 'village', biome: 'grass', arena: 'village' });

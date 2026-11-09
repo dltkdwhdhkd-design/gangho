@@ -1,5 +1,5 @@
 import { G, STEP, $, Input, IMG, Sound, loadAll, loadArtList, toast } from './core.js';
-import { buildMaps } from './maps.js';
+import { buildMaps, isoTest } from './maps.js';
 import { tickDialog, talking } from './dialog.js';
 import { Field } from './field.js';
 import { showTitle } from './ui.js';
@@ -60,6 +60,6 @@ G.fast = (n) => { for (let i = 0; i < n; i++) tick(STEP); render(); };
   G.field = new Field();
   showTitle();
   requestAnimationFrame(frame);
-  G.dbg = { fight, Story, ctx: sctx, MAPS, newState, stats, dialog, state };
+  G.dbg = { fight, Story, ctx: sctx, MAPS, newState, stats, dialog, state, isoTest };
   window.__G = G;
 })();

@@ -3,6 +3,7 @@ import { G, Input, Sound, $, $$, el, esc, TS } from './core.js';
 import { Keys } from './core.js';
 import { MAPS } from './maps.js';
 import { drawStamp } from './tiles.js';
+import { drawIso } from './iso.js';
 
 const burnedInn = (c, m, k, ox = 0, oy = 0) => { if (m.id === 'cheongha' && G.S.flags.burned && !G.S.flags.inn_rebuilt) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(ox + 19 * TS * k, oy + 8 * TS * k, 4 * TS * k, (3 * TS - 2) * k); } };
 // 소품까지 다 그린 지도 한 장. 지도마다 한 번만 만든다
@@ -10,7 +11,7 @@ export function whole(m) {
   if (m._whole) return m._whole;
   const c = document.createElement('canvas'); c.width = m.w * TS; c.height = m.h * TS;
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(m.canvas, 0, 0);
-  for (const s of [...m.objs].sort((a, b) => a.base - b.base)) drawStamp(x, s.name, s.x, s.y);
+  for (const s of [...m.objs].sort((a, b) => a.base - b.base)) s.iso ? drawIso(x, s) : drawStamp(x, s.name, s.x, s.y);
   return m._whole = c;
 }
 const open = q => !q.when || !!G.S.flags[q.when];
