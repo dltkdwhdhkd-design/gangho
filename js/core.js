@@ -50,7 +50,7 @@ export const ART = new Map();
 export async function loadArtList() {
   try {
     const r = await fetch('assets/art/list.json'); if (!r.ok) return;
-    const l = await r.json();
+    const l = await r.json(); l.sort((a, b) => (b === 'cg_title') - (a === 'cg_title'));  // 제목 화면 그림부터 받는다
     await Promise.all(l.map(n => new Promise(res => { const im = new Image(); im.onload = () => { ART.set(n, im); res(); }; im.onerror = res; im.src = `assets/art/${n}.webp`; })));
   } catch (e) { /* 일러스트가 아직 없으면 그대로 진행 */ }
 }

@@ -20,11 +20,11 @@ async function wharf() {
   await say('me', '뭐 하러 온 건데요?');
   await say('boat', '뭐 하긴, 뜯어먹으러 왔지.');
   await say('pirate', '어이, 영감. 이 나루는 오늘부터 우리가 지켜 준다. 배 한 척에 은자 두 냥씩 내. 그리고 객잔 터 땅문서도 가져오고.');
-  await say('me', '땅문서는 곽 아주머니 거야.');
+  await say('me', '땅문서는 곽 아주머니 거야.', 'a');
   await say('pirate', '곽 아주머니? 그 여편네 없어졌다며. 주인 없는 땅은 먼저 먹는 놈이 임자야.');
   F().pirate_met = true;
   const c = await choice('수적이 뱃사공의 멱살을 잡는다.', ['쟁반을 든다', '좋게 말해 본다']);
-  if (c === 0) { await say('me', '손 놔. 우리 객잔 단골이야.'); ctx.rep('jeong', 1); }
+  if (c === 0) { await say('me', '손 놔. 우리 객잔 단골이야.', 'a'); ctx.rep('jeong', 1); }
   else { await say('me', '아주머니 돌아오시면 그때 얘기하세요. 일단 국수라도 드시고 가시죠.'); await say('pirate', '국수? 장난하냐, 이 자식이?'); ctx.rep('sa', 1); }
   await ctx.duel({ foes: ['pirate', 'pirate', 'pirate'], arena: 'dock', title: '검은물고기패', tip: '적이 많을 때는 <b>K 경공</b>으로 빠져나와 한 명씩 상대하세요.' });
   await say('pirate', '크윽… 너 우리 두목이 누군지 모르지? 낭리비어한테 덤빈 거야, 넌.');
@@ -79,13 +79,13 @@ async function qWife() {
 }
 async function qKid() {
   await say('kid', '아저씨, 저 좀 숨겨 주세요. 수적 아저씨 주머니에서 뭘 좀 꺼냈는데 지금 쫓아와요.');
-  await say('me', '그걸 왜 꺼냈어.');
+  await say('me', '그걸 왜 꺼냈어.', 'a');
   await say('kid', '저도 강호인 될 거예요. 강호인은 원래 남의 물건 가져가잖아요.');
-  await say('me', '그건 도둑이야.');
+  await say('me', '그건 도둑이야.', 'a');
   await say('pirate', '이 꼬맹이 어디 갔어! 내 패 내놔!');
   await ctx.duel({ foes: ['pirate', 'pirate'], arena: 'village', title: '꼬마를 지켜라' });
   await say('kid', '와, 진짜 멋있다. 이거 아저씨 가져요. 복(福) 자 새겨진 나무패인데요, 마을에 낮에는 문 닫아 놓고 밤에만 불이 켜지는 집이 있거든요? 그 집 문에 이거랑 똑같은 게 걸려 있어요.');
-  await say('me', '다음부터 남의 주머니에 손대지 마.');
+  await say('me', '다음부터 남의 주머니에 손대지 마.', 'a');
   await say('kid', '네! 근데 쟁반 던지는 거 가르쳐 주세요.');
   F().q_kid = true; await checkAll();
 }
@@ -93,21 +93,21 @@ async function gamble() {
   let win = 0;
   for (let i = 0; i < 3; i++) {
     const c = await choice(`${i + 1}판째. 주사위 통이 멈췄다. 이긴 판 ${win}`, ['홀', '짝']);
-    const r = Math.random() < .5 ? 0 : 1; if (r === c) { win++; Sound.sfx('coin'); await say('baekrang', '맞았네요.'); } else await say('baekrang', '아쉬워라.');
+    const r = Math.random() < .5 ? 0 : 1; if (r === c) { win++; Sound.sfx('coin'); await say('baekrang', '맞았네요.', 'h'); } else await say('baekrang', '아쉬워라.', 'h');
   }
   return win;
 }
 async function baekrang() {
-  await say('baekrang', '어머, 이게 누구야. 우리 점소이 아니에요? 한판 하러 왔어요, 소문 사러 왔어요?');
+  await say('baekrang', '어머, 이게 누구야. 우리 점소이 아니에요? 한판 하러 왔어요, 소문 사러 왔어요?', 'h');
   await say('me', '검은물고기패가 왜 객잔 우물을 찾는지 알고 싶어요.');
-  await say('baekrang', '그건 은자 서른 냥이에요. 돈 없으면 홀짝 세 판 해요. 두 판 이기면 그냥 알려 주고, 지면 내 심부름 하나 해 주고.');
+  await say('baekrang', '그건 은자 서른 냥이에요. 돈 없으면 홀짝 세 판 해요. 두 판 이기면 그냥 알려 주고, 지면 내 심부름 하나 해 주고.', 'h');
   const c = await choice('백랑이 주사위를 굴린다.', ['은자 서른 냥을 낸다', '홀짝을 한다']);
   if (c === 0 && S().silver >= 30) { S().silver -= 30; Sound.sfx('coin'); }
   else {
-    if (c === 0) await say('baekrang', '돈이 모자라네요. 그럼 홀짝이나 해요.');
+    if (c === 0) await say('baekrang', '돈이 모자라네요. 그럼 홀짝이나 해요.', 'h');
     const w = await gamble();
-    if (w < 2) { await say('baekrang', '졌네요. 그럼 저기 저 손님 좀 내보내 줘요. 석 달째 외상만 긋거든요. 그런 거 잘한다면서요.'); await say('me', '어딜 가나 이 일이네.'); await ctx.duel({ foes: ['debtor'], arena: 'room', title: '외상 손님' }); await say('baekrang', '어머, 잘하네요.'); }
-    else await say('baekrang', '운이 좋네요. 그럼 그냥 알려 줄게요.');
+    if (w < 2) { await say('baekrang', '졌네요. 그럼 저기 저 손님 좀 내보내 줘요. 석 달째 외상만 긋거든요. 그런 거 잘한다면서요.', 'h'); await say('me', '어딜 가나 이 일이네.'); await ctx.duel({ foes: ['debtor'], arena: 'room', title: '외상 손님' }); await say('baekrang', '어머, 잘하네요.', 'h'); }
+    else await say('baekrang', '운이 좋네요. 그럼 그냥 알려 줄게요.', 'h');
   }
   await say('baekrang', '두목 위충은 어디에도 못 낀 떠돌이예요. 강호 큰 어른들은 이런 시골 나루에 관심도 없고요.');
   await say('me', '그럼 위충한테 돈을 준 건 사파예요?');
@@ -116,7 +116,7 @@ async function baekrang() {
   await say('baekrang', '그건 저도 입에 못 올려요. 그 이름 잘못 꺼냈다가 혀 잘린 사람이 있거든요. 강호에 정파랑 사파만 있는 건 아니라는 정도만 알아 둬요.');
   await say('baekrang', '그믐에 위충이 직접 올 거예요. 물 위에서 싸우면 못 이기니까 나루로 끌어내요.');
   await say('me', '왜 도와주세요?');
-  await say('baekrang', '수적이 나루를 먹으면 우리 손님이 줄거든요. 그리고 곽 아주머니 국수를 좋아했어요.');
+  await say('baekrang', '수적이 나루를 먹으면 우리 손님이 줄거든요. 그리고 곽 아주머니 국수를 좋아했어요.', 'h');
   F().demon_hint = true; ctx.rep('sa', 1); ctx.note('백랑: 우물을 찾는 손님은 정파도 사파도 아니다. 강호에는 세 번째 길이 있다.');
   set('s4'); ctx.goal('준비를 마치고 광장의 촌장 어른에게 말하기 (그믐밤 시작)');
 }
@@ -127,19 +127,19 @@ async function newmoon() {
   await say('smith', '작살 들어! 맨 앞은 내가 선다!');
   await say('boat', '이놈들아, 내 나루에서 썩 꺼져!');
   await ctx.duel({ foes: ['pirate', 'pirate', 'pirate', 'pirate'], allies: ['smith_ally'], arena: 'yard', bgm: 'fight', title: '객잔 터 방어전' });
-  await say('me', '아직 안 끝났어요. 배가 또 와요!');
+  await say('me', '아직 안 끝났어요. 배가 또 와요!', 'a');
   await ctx.duel({ foes: ['pirate_hook', 'pirate_hook', 'pirate_bow', 'pirate_bow'], allies: ['smith_ally'], arena: 'dock', bgm: 'fight', title: '나루 끝에서' });
   await say('wei', '점소이 하나 때문에 배를 세 번이나 띄웠다. 내 체면이 뭐가 되냐.');
-  await say('me', '땅문서는 없어. 우물도 네 것이 아니고. 돌아가.');
+  await say('me', '땅문서는 없어. 우물도 네 것이 아니고. 돌아가.', 'a');
   await say('wei', '하나만 묻자. 관아가 걷으면 세금이고, 큰 문파가 걷으면 의연금이고, 내가 걷으면 약탈이냐?');
-  await say('me', '그래서 남의 마을을 태우겠다고?');
+  await say('me', '그래서 남의 마을을 태우겠다고?', 'a');
   await say('wei', '말로는 안 되겠군. 덤벼라.');
   await ctx.duel({ foes: ['wei'], arena: 'dock', bgm: 'boss', title: '낭리비어 위충' });
   await say('wei', '졌다. 제대로 배운 것 같지도 않은 놈한테.');
-  await say('me', '우물은 왜 찾은 거야.');
+  await say('me', '우물은 왜 찾은 거야.', 'a');
   await say('wei', '나도 몰라. 얼굴 가린 손님이 돈을 미리 줬어. 그 돈 없으면 우리 애들 서른이 굶는다.');
   const c = await choice('위충이 칼을 내려놓는다.', ['살려서 보낸다', '포박해 관아로 넘긴다']);
-  if (c === 0) { await say('me', '가. 다시는 이 나루에 오지 마.'); await say('wei', '이 빚은 잊지 않으마, 점소이.'); F().wei_spared = true; ctx.rep('sa', 3); }
+  if (c === 0) { await say('me', '가. 다시는 이 나루에 오지 마.', 'a'); await say('wei', '이 빚은 잊지 않으마, 점소이.'); F().wei_spared = true; ctx.rep('sa', 3); }
   else { await say('elder', '현령이 제대로 처리할지는 모르겠네만, 그래도 법대로 해야지.'); await say('wei', '사흘이면 풀려날 거다. 그래도 네 뜻은 알겠다.'); ctx.rep('jeong', 3); }
   await fadeTo(1); F().night = false; G.field.load('cheongha', 21, 16, 0); await fadeTo(0);
   await say('elder', '다들 고생했네. 죽은 사람이 없다니 천만다행일세.');
@@ -164,6 +164,6 @@ Story.providers.push(function content5(id) {
       if (!F().q_kid) n.push({ id: 'q_kid', spr: 'Child', x: 30, y: 24.5, dir: 2, mark: () => true, talk: qKid });
     }
   }
-  if (id === 'bokun') n.push({ id: 'baekrang', spr: 'Cavegirl', x: 7, y: 5.6, dir: 0, mark: () => at('s3'), talk: async () => { if (at('s3')) await baekrang(); else await say('baekrang', '또 놀러 와요.'); } });
+  if (id === 'bokun') n.push({ id: 'baekrang', spr: 'Cavegirl', x: 7, y: 5.6, dir: 0, mark: () => at('s3'), talk: async () => { if (at('s3')) await baekrang(); else await say('baekrang', '또 놀러 와요.', 'h'); } });
   return { npcs: n, spots: [], trigs: tr, roam: [] };
 });

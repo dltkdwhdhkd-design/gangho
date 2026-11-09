@@ -1,6 +1,6 @@
 // 제목 화면, 주인공 만들기, 메뉴, 상점, 결과창
 import { TITLES } from './titles.js';
-import { G, IMG, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS, josa } from './core.js';
+import { G, IMG, ART, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS, josa } from './core.js';
 import { Keys, KEY_ACTIONS, KEY_PRESETS } from './core.js';
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take } from './state.js';
@@ -12,7 +12,9 @@ import { CLANS, SAPA, clansWon } from './clandata.js';
 const LOOK = 'BlueSamurai'; // 주인공 도트는 일러스트에 맞춰 하나로 고정
 function titleBg(c) {
   c.setTransform(1, 0, 0, 1, 0, 0);
-  if (IMG['ui/title']) { c.drawImage(IMG['ui/title'], 0, 0, 1280, 720); const v = c.createLinearGradient(0, 0, 0, 720); v.addColorStop(0, 'rgba(10,8,6,.35)'); v.addColorStop(.45, 'rgba(10,8,6,.1)'); v.addColorStop(1, 'rgba(10,8,6,.55)'); c.fillStyle = v; c.fillRect(0, 0, 1280, 720); return; }
+  // 도트 그림을 먼저 깔고, 일러스트가 도착하면 천천히 겹친다
+  const pic = ART.get('cg_title'); if (pic && !titleBg.t0) titleBg.t0 = performance.now();
+  if (IMG['ui/title'] || pic) { if (IMG['ui/title']) c.drawImage(IMG['ui/title'], 0, 0, 1280, 720); if (pic) { c.globalAlpha = Math.min(1, (performance.now() - titleBg.t0) / 900); const s = Math.max(1280 / pic.width, 720 / pic.height), w = pic.width * s, h = pic.height * s; c.drawImage(pic, (1280 - w) / 2, (720 - h) / 2, w, h); c.globalAlpha = 1; } const v = c.createLinearGradient(0, 0, 0, 720); v.addColorStop(0, 'rgba(10,8,6,.35)'); v.addColorStop(.45, 'rgba(10,8,6,.1)'); v.addColorStop(1, 'rgba(10,8,6,.55)'); c.fillStyle = v; c.fillRect(0, 0, 1280, 720); return; }
   const g = c.createLinearGradient(0, 0, 0, 720); g.addColorStop(0, '#1b2348'); g.addColorStop(.62, '#4b3560'); g.addColorStop(1, '#c0694a'); c.fillStyle = g; c.fillRect(0, 0, 1280, 720);
   c.fillStyle = '#f7eecb'; c.beginPath(); c.arc(960, 170, 76, 0, 7); c.fill(); c.fillStyle = 'rgba(247,238,203,.12)'; c.beginPath(); c.arc(960, 170, 120, 0, 7); c.fill();
   const hill = (b, a, col) => { c.fillStyle = col; c.beginPath(); c.moveTo(0, 720); for (let x = 0; x <= 1280; x += 40) c.lineTo(x, b + Math.sin(x * .006 + a) * 50 + Math.sin(x * .017 + a * 2) * 20); c.lineTo(1280, 720); c.fill(); };

@@ -199,12 +199,12 @@ async function propose(id) {
   const c = CAND[id];
   if (!F().own_house) { await say(id, c.house); return; }
   if (have('jade_ring') < 1) { await say('me', '(옥가락지가 있어야 한다. 대장간에서 옥돌로 만들 수 있다.)'); return; }
-  take('jade_ring'); await say('me', '저랑 혼인해 주세요.'); for (const l of c.propose) await say(id, l);
+  take('jade_ring'); await say('me', '저랑 혼인해 주세요.', 'b'); for (const l of c.propose) await say(id, l);
   ctx.cg('wedding'); await narr(`${F().inn_rebuilt ? '달맞이 객잔 마당에 혼례상이 차려졌다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니는 그날만큼은 밥값을 받지 않았다.' : '청하진 사람들이 내 집 마당에 혼례상을 차렸다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니 자리는 비워 두었다.'}\n\n${josa(S().name, '과/와')} ${josa(c.name, '은/는')} 부부가 되었다.`); ctx.cgOff();
   S().married = id; addLove(id, 100); Sound.sfx('ok3'); toast('혼인했다! 배우자가 집에서 기다린다.', 3.5); G.field.refresh();
 }
 async function swear(id) {
-  const c = CAND[id]; await say('me', '형님으로 모실게요.'); for (const l of c.sworn) await say(id, l);
+  const c = CAND[id]; await say('me', '형님으로 모실게요.', 'h'); for (const l of c.sworn) await say(id, l);
   S().sworn = id; Sound.sfx('ok3'); toast(`${josa(c.name, '과/와')} 의형제를 맺었다`, 3); ctx.note(`${josa(c.name, '과/와')} 의형제를 맺었다.`);
 }
 async function romance(id, base) {

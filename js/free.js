@@ -49,10 +49,10 @@ async function opening() {
   await say('gwak', '{나}야, 이리 와 봐.');
   await say('me', '바닥 다 닦았는데요.');
   await say('gwak', '안다. 짐 싸.');
-  await say('me', '네?');
-  await say('gwak', '요즘 네 눈이 자꾸 나루 쪽으로 가더라. 평생 국수만 나를 놈이 아니야. 나가서 살아 봐. 문파에 들어가도 좋고 네가 하나 차려도 좋고.');
-  await say('gwak', '못된 짓을 하고 다니면 내 국자가 찾아간다. 알았어?');
-  await say('gwak', '이건 석 달 치 품삯이다. 배고프면 와. 밥값은 받는다.');
+  await say('me', '네?', 'b');
+  await say('gwak', '요즘 네 눈이 자꾸 나루 쪽으로 가더라. 평생 국수만 나를 놈이 아니야. 나가서 살아 봐. 문파에 들어가도 좋고 네가 하나 차려도 좋고.', 'h');
+  await say('gwak', '못된 짓을 하고 다니면 내 국자가 찾아간다. 알았어?', 'a');
+  await say('gwak', '이건 석 달 치 품삯이다. 배고프면 와. 밥값은 받는다.', 'h');
   await narr('그렇게 나는 강호로 나왔다. 어디로 갈지는 아무도 정해 주지 않았다.');
   ctx.goal('강호를 둘러보기 (청하진 나루 팻말에서 강호로 나갈 수 있다)');
   toast('지도(M)로 강호 전도를 봅니다. 가 본 곳은 눌러서 빠르게 갈 수 있습니다', 5);
@@ -279,8 +279,8 @@ function tick(dt) { const fr = Fr(); if (!fr || G.field.busy) return; fr.clock +
 // ── 사람들 ──
 async function gwakTalk() {
   const c = await choice('곽 아주머니가 국자를 들고 쳐다본다.', ['하룻밤 묵는다 (은자 5냥)', '국수를 먹는다 (은자 3냥)', '요즘 어떠시냐고 묻는다', '그만둔다']);
-  if (c === 0) { if (S().silver < 5) { await say('gwak', '외상은 안 된다, 이놈아.'); return; } S().silver -= 5; await G.life.sleepNow(); }
-  if (c === 1) { if (S().silver < 3) { await say('gwak', '돈 벌어서 와.'); return; } S().silver -= 3; S().potion = Math.max(S().potion, S().potionMax); await say('gwak', '먹어. 국물까지 다 먹고.'); }
+  if (c === 0) { if (S().silver < 5) { await say('gwak', '외상은 안 된다, 이놈아.', 'a'); return; } S().silver -= 5; await G.life.sleepNow(); }
+  if (c === 1) { if (S().silver < 3) { await say('gwak', '돈 벌어서 와.', 'h'); return; } S().silver -= 3; S().potion = Math.max(S().potion, S().potionMax); await say('gwak', '먹어. 국물까지 다 먹고.', 'h'); }
   if (c === 2) await say('gwak', Fr().infamy >= 40 ? '네 소문이 여기까지 온다. 내 국자 어디 뒀더라.' : Fr().fac ? '문파 밥은 먹을 만하냐? 살 빠졌다.' : '아직도 떠돌아? 밥은 먹고 다니냐.');
 }
 async function roninBoard() { await openBoard(null, '일거리'); }

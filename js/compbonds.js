@@ -83,7 +83,7 @@ Object.assign(BONDS, {
       await narr('옛 싸움터 들판을 지날 때 혜공이 호리병을 내려놓았다. 처음 보는 일이었다. 그는 들판을 향해 합장하고 오래 경을 외웠다.');
       await say('c_hyegong', '소림에 있을 때 그 전쟁에 염불하러 왔었네. 시신 하나에 한 번씩. 삼천 번을 외웠어.');
       await say('c_hyegong', '삼천 번째에 입에서 경이 안 나오더군. 그 뒤로 입에 술이 들어갔지.');
-      await say('me', '저도 그 전쟁에 있었어요. 시체를 날랐어요.');
+      await say('me', '저도 그 전쟁에 있었어요. 시체를 날랐어요.', 's');
       await say('c_hyegong', '그럼 만났겠군. 자네가 나르고 내가 외웠으니.');
     } },
     { at: 70, run: async () => {
@@ -126,7 +126,7 @@ Object.assign(BONDS, {
     { at: 40, run: async () => {
       await narr('갈 선생이 길가에서 앓는 아이를 보더니 농담을 멈췄다. 손놀림이 달랐다. 맥을 짚는 손가락이 흔들리지 않았다.');
       await narr('밤새 곁을 지켰고, 새벽에 아이의 열이 내렸다.');
-      await say('me', '돌팔이라면서요.');
+      await say('me', '돌팔이라면서요.', 'h');
       await say('c_gal', '입 다물게. 소문나면 사람들이 기대를 해.');
     } },
     { at: 70, run: async () => {
@@ -140,7 +140,7 @@ Object.assign(BONDS, {
   c_yang: [
     { at: 15, run: async () => {
       await narr('은자 주머니가 가벼웠다. 양춘을 쳐다봤다. 그는 먼 산을 봤다.');
-      await say('me', '내놔요.');
+      await say('me', '내놔요.', 'a');
       await say('c_yang', '형님 걸 훔치겠습니까. 잠깐 맡아 둔 거지.');
       await narr('돌려받은 주머니에는 전보다 세 냥이 더 들어 있었다.');
       await say('c_yang', '이자요. 딴 데서 좀 벌었습니다.'); S().silver += 3;
@@ -178,14 +178,14 @@ Object.assign(BONDS, {
       await say('c_gu', '마지막 명령서는 내가 전했네. 보급기지를 치라는 것. 매복이 있다는 걸 알았어. 위에서는 이미 휴전을 얘기하고 있었으니까. 견대는 없어져야 할 부대였지.');
       await say('c_gu', '서른이 갔는데 돌아온 건 하나였지. 위에서 그 하나를 도망자로 적으라고 했어. 그 장부에 내가 도장을 찍었네.');
       await say('c_gu', '왼발이 늦는 아이가 있었어. 처음 자네 걷는 걸 봤을 때 알았네.');
-      await say('me', '왜 이제 말해요?');
+      await say('me', '왜 이제 말해요?', 'a');
       await say('c_gu', '자네가 강해지길 기다렸네. 찌를 사람이 제대로 찌르게.');
       await narr('그는 창을 거꾸로 쥐어 내게 내밀었다.');
       const c = await choice('창대가 손앞에 있다.', ['창을 받아 땅에 꽂는다', '가시라고 한다']);
-      if (c === 1) { await say('me', '가세요. 다시는 보고 싶지 않아요.'); await narr('구 노창은 고개를 한 번 숙이고 창을 짚은 채 걸어갔다. 왼쪽으로 조금 기울어 있었다. 나도 아는 걸음이었다.'); G.party.dismiss('c_gu'); return; }
+      if (c === 1) { await say('me', '가세요. 다시는 보고 싶지 않아요.', 'a'); await narr('구 노창은 고개를 한 번 숙이고 창을 짚은 채 걸어갔다. 왼쪽으로 조금 기울어 있었다. 나도 아는 걸음이었다.'); G.party.dismiss('c_gu'); return; }
       await narr('나는 창을 받아 땅에 꽂고 왼발부터 한 걸음 걸었다.');
       await say('c_gu', '…여전히 늦구먼.');
-      await say('me', '그러니까 좀 가르쳐 주세요. 교관님.'); grow('c_gu', 8);
+      await say('me', '그러니까 좀 가르쳐 주세요. 교관님.', 'h'); grow('c_gu', 8);
     } },
   ],
 });

@@ -6,7 +6,7 @@ import { FOES } from './foes.js';
 import { set, at } from './story1.js';
 
 const S = () => G.S, F = () => G.S.flags;
-Object.assign(WHO, { jangpal: { name: '장팔', face: 'GreenNinja', art: 'disc' }, naemun: { name: '내문 제자', face: 'GreenNinja' } });
+Object.assign(WHO, { jangpal: { name: '장팔', face: 'GreenNinja', art: 'disc' }, naemun: { name: '내문 제자', face: 'GreenNinja', art: 'disc' } });
 FOES.go_ally = { ...FOES.senior_go, name: '고진', hp: 1400, atk: 30, boss: 0, poise: 0 };
 
 const chores = () => F().ch_well && F().ch_dummy && F().ch_kitchen;
@@ -37,15 +37,15 @@ async function water() {
   const c = await choice('장팔이 물동이를 내려놓고 쳐다본다.', ['견대에 있었다고 말한다', '말을 돌린다']);
   if (c === 0) {
     F().jang_bond = true;
-    await say('me', '군대요. 번호로 불리면서 맨 앞에 서는 부대였어요.');
+    await say('me', '군대요. 번호로 불리면서 맨 앞에 서는 부대였어요.', 's');
     await say('jangpal', '밥은 줬어유?');
     await say('me', '하루 한 끼요.');
     await narr('장팔이 품에서 주먹밥 반쪽을 꺼내 내밀었다. 아침에 먹다 남긴 것 같았다.');
-    await say('me', '지금은 세 끼 먹어요.');
+    await say('me', '지금은 세 끼 먹어요.', 'h');
     await say('jangpal', '그래도 드셔유.');
   } else await say('me', '여기저기요. 물이나 길어요.');
   await say('jangpal', '내문 사형들은 물 안 길어유. 어느 장원 아들이다, 누구 조카다, 그런 사람들이니께유. 우리는 삼 년을 길어야 내문 시험을 볼 수 있어유.');
-  await say('me', '삼 년이요?');
+  await say('me', '삼 년이요?', 'b');
   await say('jangpal', '고진 사형도 여기서 물 길었대유. 외문에서 대사형까지 올라간 사람은 그 양반뿐이래유. 그래서 우리한테 더 독해유.');
   F().ch_well = true; await done();
 }

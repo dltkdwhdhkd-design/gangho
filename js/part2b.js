@@ -6,7 +6,7 @@ import { FOES } from './foes.js';
 import { set, at } from './story1.js';
 
 const S = () => G.S, F = () => G.S.flags;
-Object.assign(WHO, { wangchung: { name: '왕충', face: 'GreenNinja' }, seokdu: { name: '석두', face: 'Villager' }, gomom: { name: '두부 파는 노파', face: 'OldWoman' } });
+Object.assign(WHO, { wangchung: { name: '왕충', face: 'GreenNinja' }, seokdu: { name: '석두', face: 'Villager' }, gomom: { name: '두부 파는 노파', face: 'OldWoman', art: 'flower' } });
 FOES.jang_spar = { ...FOES.disciple, name: '장팔', hp: Math.round(FOES.disciple.hp * .7), atk: FOES.disciple.atk * .7, spd: 42 };
 FOES.wang = { ...FOES.disciple, name: '왕충', hp: Math.round(FOES.disciple.hp * 1.9), atk: FOES.disciple.atk * 1.2, guard: .4 };
 FOES.mask_low = { ...FOES.disciple, name: '복면 사내', spr: 'chars/DarkNinja', hp: Math.round(FOES.disciple.hp * 1.3), atk: FOES.disciple.atk * 1.1 };
@@ -21,7 +21,7 @@ async function soNight() {
   await narr('밤에 물을 마시러 나왔더니 연무장에서 칼 소리가 났다. 소연하가 혼자 목인을 베고 있었다.');
   await say('so', '안 자? 외문은 묘시에 일어난다며.');
   await say('me', '목이 말라서요.');
-  await say('so', '거짓말. 너 밤마다 걸음 연습하지. 어제도 봤어.');
+  await say('so', '거짓말. 너 밤마다 걸음 연습하지. 어제도 봤어.', 'h');
   await say('so', '왼발로 밀고 오른발은 따라오게 두는 거. 누가 가르쳤는지는 안 물을게. 근데 네 걸음은 앞으로만 가더라.');
   await say('me', '앞으로 가야 칼이 닿잖아요.');
   await say('so', '그러다 죽어. 벽수궁에서는 물러서는 걸음을 먼저 배워. 해 봐. 나한테 안 맞으면 되는 거야.');
@@ -29,12 +29,12 @@ async function soNight() {
   await say('so', '봐, 두 걸음 물러서니까 내 칼이 보이지?');
   await say('me', '네. 조금요.');
   await say('so', '사부님 말씀이야. 강호에서 오래 사는 사람은 제일 잘 도망친 사람이라고.');
-  await say('so', '그러고는 안 돌아오셨지만.');
+  await say('so', '그러고는 안 돌아오셨지만.', 's');
   await narr('소연하는 칼을 칼집에 넣었다. 그쪽은 쳐다보지 않았다.');
   await say('so', '넌 왜 앞으로만 가? 뒤에 뭐가 있어?');
   const c = await choice('달이 목인 그림자를 길게 늘어뜨렸다.', ['돌아갈 데가 없었어요', '칼이 짧아서요']);
-  if (c === 0) { await say('me', '돌아갈 데가 없었어요.'); await say('so', '이제 있잖아. 밥은 맛없어도.'); ctx.love('so'); }
-  else { await say('me', '칼이 짧아서요.'); await say('so', '네 칼이 내 칼보다 길거든. 재미없는 놈.'); await narr('그래 놓고 소연하는 조금 웃었다.'); }
+  if (c === 0) { await say('me', '돌아갈 데가 없었어요.'); await say('so', '이제 있잖아. 밥은 맛없어도.', 'h'); ctx.love('so'); }
+  else { await say('me', '칼이 짧아서요.'); await say('so', '네 칼이 내 칼보다 길거든. 재미없는 놈.', 'h'); await narr('그래 놓고 소연하는 조금 웃었다.'); }
   F().m_so = true; next();
 }
 async function jangRope() {
@@ -74,11 +74,11 @@ async function well() {
     await say('go', '내가 언제 사람 봐 가며 벌을 주더냐.');
   } else {
     await narr('석두를 업고 약방으로 뛰었다. 업어 보니 생각보다 가벼웠다. 열아홉이라는데 밥을 제대로 못 먹은 등이었다.');
-    await say('yun', '갈비뼈 하나 금 갔어요. 어쩌다 그랬어요?');
+    await say('yun', '갈비뼈 하나 금 갔어요. 어쩌다 그랬어요?', 'a');
     await say('seokdu', '넘어졌어요.');
-    await say('yun', '넘어져서 발자국 모양으로 멍이 드는 사람은 처음 보네요.');
-    await say('yun', '이 산은 칼 가르치는 데라면서 왜 아픈 사람은 다 외문이에요?');
-    await say('me', '내문은 안 다치거든요. 외문이 대신 맞으니까요.');
+    await say('yun', '넘어져서 발자국 모양으로 멍이 드는 사람은 처음 보네요.', 'a');
+    await say('yun', '이 산은 칼 가르치는 데라면서 왜 아픈 사람은 다 외문이에요?', 'a');
+    await say('me', '내문은 안 다치거든요. 외문이 대신 맞으니까요.', 's');
     await narr('윤설은 아무 말 없이 붕대를 감았다. 평소보다 세게 묶어서 석두가 한 번 소리를 질렀다.');
     ctx.love('yun');
   }
@@ -144,7 +144,7 @@ async function exam() {
   await ctx.duel({ foes: ['disciple', 'disciple'], arena: 'court', title: '월말 시험 · 내문 제자', bgm: 'fight', optional: true, noIntro: true });
   await ctx.duel({ foes: ['senior_go'], arena: 'court', bgm: 'boss', title: '월말 시험 · 고진', yieldAt: .3, optional: true, noIntro: true });
   await say('go', '목은 끝내 안 쳤구나.');
-  await say('me', '칠 뻔했어요. 세 번쯤.');
+  await say('me', '칠 뻔했어요. 세 번쯤.', 'h');
   await say('go', '네 번이다. 다음 달에도 물을 길어라.');
   ctx.silver(60);
   await narr('그날 밤 외문 숙소에서 석두가 내 신발을 고쳐 놓았다. 말은 없었다. 뒤축이 전보다 단단해져 있었다.');

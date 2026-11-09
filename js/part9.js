@@ -37,7 +37,7 @@ async function part9() {
   await say('cheonma', '삼백 년을 잤더니 배가 고프구나. 문을 연 것이 너냐.');
   await say('me', '…….');
   await say('cheonma', '수고했다. 뭐라도 먹어야겠다.');
-  await say('so', '{나}! 뒤로 빠져!');
+  await say('so', '{나}! 뒤로 빠져!', 'a');
   await ctx.duel({ foes: ['tianmo0'], arena: 'moon', bgm: 'boss', title: '천마', survive: 22, tip: '칼이 통하지 않습니다. 22초를 버티세요.' });
   await narr('무엇을 해도 닿지 않았다. 칠식을 차례로 쏟아부었는데 칼끝이 달빛에 미끄러졌다. 낙월까지 썼다. 일곱 번째 달이 떨어졌는데 그 사람은 옷깃을 털었다.');
   await say('cheonma', '달을 베러 왔느냐. 달은 먹는 것이다.');
@@ -57,11 +57,11 @@ async function part9() {
 const SPOTS = [[4, 8, '문턱', '허리를 세웠다. 숨이 찼다. 칼 쓰던 팔로 걸레 하나를 못 밀었다.'], [9, 9, '가운데 탁자 밑', '왼발로 밀었다. 오른발이 따라오질 않아서 넘어졌다. 다시 밀었다.'], [14, 8, '구석방 앞', '오른발이 조금 따라왔다. 스무 살 봄에 내가 닦던 자리였다.']];
 async function home() {
   await ctx.chap(9, PART, '제2장 객잔으로');
-  await say('gwak', '{나}야! 거기서 뭐 해! 해가 중천이다!');
-  await say('me', '…아주머니.');
-  await say('gwak', '일어났으면 걸레 들어. 누워서 밥만 축낼래?');
-  await say('me', '내공이 없어요. 칼도 못 들어요.');
-  await say('gwak', '누가 칼 들랬어? 걸레 들랬지. 내공 없어도 바닥은 닦이더라. 얼른 가!');
+  await say('gwak', '{나}야! 거기서 뭐 해! 해가 중천이다!', 'a');
+  await say('me', '…아주머니.', 's');
+  await say('gwak', '일어났으면 걸레 들어. 누워서 밥만 축낼래?', 'a');
+  await say('me', '내공이 없어요. 칼도 못 들어요.', 's');
+  await say('gwak', '누가 칼 들랬어? 걸레 들랬지. 내공 없어도 바닥은 닦이더라. 얼른 가!', 'a');
   ctx.goal('달맞이 객잔 바닥 세 군데 닦기');
   ctx.note('무공을 잃었다. 달맞이 객잔으로 돌아왔다. 곽 아주머니가 걸레를 쥐여 주었다.');
 }
@@ -75,26 +75,26 @@ async function preface() {
   await narr('어느 날 아침, 닦아 놓은 바닥을 돌아보다가 알았다. 오른발이 저절로 따라오고 있었다. 숨이 끊기지 않았다. 배꼽 밑에서 아주 작은 뭔가가 같이 밀리고 있었다.');
   ctx.cgOff();
   await say('kid', '쟁반 아저씨, 이제 칼 못 들어요?');
-  await say('me', '응.');
+  await say('me', '응.', 'h');
   await say('kid', '그럼 쟁반이라도 던져요. 쟁반 잘 던지잖아요.');
   await narr('쟁반은 들렸다. 던지면 두 칸도 못 날아가서 문제였다. 꼬마가 주워다 주기를 열 번쯤 하더니 자기가 던져 보겠다고 했다. 나보다 멀리 날아갔다.');
   await say('gwak', '늦었어. 국수 다 불겠다. 이리 와서 국물 끓이는 거나 배워.');
-  await say('me', '국물이요? 나중에 가르쳐 주신다면서요.');
+  await say('me', '국물이요? 나중에 가르쳐 주신다면서요.', 'b');
   await say('gwak', '지금이 나중이다. 민물새우 한 줌에 무 한 토막. 끓으면 불 줄이고 딴생각 말고 앉아 있어.');
-  await say('me', '그게 다예요?');
-  await say('gwak', '그럼 뭐, 비법이라도 있는 줄 알았냐.');
+  await say('me', '그게 다예요?', 'b');
+  await say('gwak', '그럼 뭐, 비법이라도 있는 줄 알았냐.', 'h');
   await say('me', '이걸 왜 그렇게 안 가르쳐 주셨어요?');
-  await say('gwak', '그것까지 알려 주면 너 나갈 거 아냐.');
-  await say('gwak', '…이제 다 배웠네.');
+  await say('gwak', '그것까지 알려 주면 너 나갈 거 아냐.', 'h');
+  await say('gwak', '…이제 다 배웠네.', 's');
   await narr('곽 아주머니가 장부를 꺼냈다. 내 이름 옆에 ‘갚음’이라고 적혀 있던 그 장부였다. 표지를 젖히더니 맨 앞 장을 조심스럽게 뜯어냈다. 뒷면에 옛날 글씨가 빼곡했다.');
   ctx.cg('preface');
-  await say('gwak', '서문이다. 네 어미가 불길 속에서 나한테 넘겨준 거야. 찢지 말고 맨 앞에 두라고 해서 맨 앞에 뒀다. 장부 맨 앞에.');
-  await say('me', '이걸 장부에 붙여 놓으셨어요?');
-  await say('gwak', '누가 국숫집 장부를 뒤지겠냐.');
+  await say('gwak', '서문이다. 네 어미가 불길 속에서 나한테 넘겨준 거야. 찢지 말고 맨 앞에 두라고 해서 맨 앞에 뒀다. 장부 맨 앞에.', 's');
+  await say('me', '이걸 장부에 붙여 놓으셨어요?', 's');
+  await say('gwak', '누가 국숫집 장부를 뒤지겠냐.', 'h');
   await say(null, '“이 글을 먼저 읽는 이에게. 일곱 초식은 천마를 베는 법이 아니다. 천마는 베이지 않는다. 사람 마음에 쌓인 먼지 같은 것이라 닦아 낼 수 있을 뿐이다.”');
   await say(null, '“허리를 세우고, 왼발로 밀고, 오른발은 따라오게 둔다. 이것이 전부다. 일곱 초식은 이 걸음을 잊지 않으려고 적어 둔 것이다.”');
-  await say('me', '…걸레질인데요.');
-  await say('gwak', '그래. 네 어미가 처음 배운 것도 바닥 닦기였어. 월하문 아이들은 칼을 잡기 전에 삼 년을 닦았다. 백 영감이 왜 너한테 그걸 시켰겠냐.');
+  await say('me', '…걸레질인데요.', 's');
+  await say('gwak', '그래. 네 어미가 처음 배운 것도 바닥 닦기였어. 월하문 아이들은 칼을 잡기 전에 삼 년을 닦았다. 백 영감이 왜 너한테 그걸 시켰겠냐.', 's');
   ctx.cgOff();
   S().skills.includes('moon0') || learn('moon0');
   F().crippled = false;
@@ -122,19 +122,19 @@ async function siege() {
   await narr('곽 아주머니가 국자를 들고 맨 앞으로 걸어 나갔다. 나는 쟁반을 집어 들었다.');
   ctx.cgOff();
   await ctx.duel({ foes: ['majang', 'majang', 'majang'], allies: ['gwak_ally', 'town_ally'], arena: 'dock', bgm: 'fight', title: '나루' });
-  await say('me', '아주머니, 물러나세요!');
-  await say('gwak', '네가 물러나, 이놈아. 나는 여기서 십칠 년을 살았다.');
+  await say('me', '아주머니, 물러나세요!', 'b');
+  await say('gwak', '네가 물러나, 이놈아. 나는 여기서 십칠 년을 살았다.', 'a');
   await ctx.duel({ foes: ['majang', 'majang', 'hyeol_elite', 'hyeol_elite'], allies: ['gwak_ally', 'town_ally', 'smith_ally'], arena: 'village', bgm: 'fight', title: '광장' });
   await narr('광장이 뚫렸다. 객잔 마당까지 밀렸을 때 붉은 갑옷을 입은 자가 지붕 위로 뛰어올랐다. 객잔이 불타던 그믐밤처럼 기왓장 밟는 소리가 났다.');
-  await say('me', '남의 집 지붕에서 뭐 하는 짓이야!');
+  await say('me', '남의 집 지붕에서 뭐 하는 짓이야!', 'a');
   await ctx.duel({ foes: ['moon_envoy'], allies: ['gwak_ally'], arena: 'yard', bgm: 'boss', title: '붉은 달 사자' });
   await narr('날이 밝았다. 군세가 강 건너로 물러났다. 객잔은 지붕이 반쯤 날아갔는데 서 있었고, 곽 아주머니는 오른쪽 어깨를 누르고 부뚜막 앞에 앉아 있었다. 옛날 칼자국 위로 새 칼자국이 나 있었다.');
   await say('yun', '팔 줘 봐요. 아니, 아주머니 어깨부터요.');
-  await say('gwak', '약 너무 쓰게 달이지 말고 감초 많이 넣어.');
-  await say('me', '아주머니.');
+  await say('gwak', '약 너무 쓰게 달이지 말고 감초 많이 넣어.', 'h');
+  await say('me', '아주머니.', 's');
   await say('gwak', '왜.');
-  await say('me', '다녀올게요.');
-  await say('gwak', '…밥은 먹고 가.');
+  await say('me', '다녀올게요.', 's');
+  await say('gwak', '…밥은 먹고 가.', 's');
   await narr('마지막 국수는 내가 끓였다. 곽 아주머니는 한 숟갈 뜨고 나서 소금이 모자란다고 했다. 그릇은 다 비웠다.');
   ctx.note('달맞이 객잔을 지켰다. 천마를 치러 다시 천산으로 간다.');
   set('x4'); await palaceStart();
@@ -153,7 +153,7 @@ async function palaceStart() {
 async function bridge() {
   await narr('다리 중간쯤 갔을 때 양쪽 벼랑에서 마장들이 쏟아져 나왔다. 앞뒤로 끝이 보이지 않았다.');
   await say('samaung', '이 다리, 폭이 딱 칼 하나 휘두를 만하네.');
-  await say('me', '패천도. 왜 여기 계세요. 분명 강호에 남으신다고…');
+  await say('me', '패천도. 왜 여기 계세요. 분명 강호에 남으신다고…', 'b');
   await say('samaung', '네놈 메고 나올 때 등에 뭘 흘렸는지 아냐. 그 빚은 받아야지.');
   await ctx.duel({ foes: ['majang', 'majang', 'majang', 'hyeol_elite'], allies: ['samaung_last'], arena: 'moon', bgm: 'boss', title: '흑운궁 다리' });
   await say('samaung', '가라.');
@@ -166,17 +166,17 @@ async function bridge() {
 }
 async function hall() {
   await narr('제단으로 가는 복도는 길었다. 복도 끝에 사람이 서 있었다. 가면도 없이, 눈 쌓인 머리 그대로였다.');
-  await say('me', '형.');
+  await say('me', '형.', 's');
   slotPreface();
   await ctx.duel({ foes: ['cheon2'], arena: 'moon', bgm: 'boss', title: '월천', yieldAt: .5, noLoot: true, tip: '<b>서문</b>을 쓰세요. 먼지를 닦아 내듯.' });
   ctx.cg('cheon_end');
   await narr('칼을 맞대다 말고 나는 칼을 내렸다. 왼발로 밀었다. 칼 대신 걸음을 들이밀었다. 형 얼굴에 쌓인 눈이 천천히 벗겨졌다.');
   await say('cheon', '…{나}.');
-  await say('me', '형.');
+  await say('me', '형.', 's');
   await say('cheon', '그 말… 하지 말랬지.');
   await narr('그 순간 복도 끝에서 붉은 빛이 날아왔다. 내가 고개를 돌리기도 전에 형이 나를 등 뒤로 밀쳤다. 빛은 형의 가슴에서 멈췄다.');
   await say('cheon', '아주머니한테… 밥은 먹고 다녔다고 해라.');
-  await say('me', '형!');
+  await say('me', '형!', 's');
   await say('cheon', '달이 뜨면… 베지 말고… 닦아라.');
   ctx.cgOff();
   await narr('이번에는 내가 직접 눈을 감겨 주었다.');
@@ -191,18 +191,18 @@ async function finale() {
   await say('cheonma', '또 왔구나. 무공을 뺏었는데 어찌 걸어 왔느냐.');
   await say('me', '걸레질했습니다.');
   await say('cheonma', '…걸레질.');
-  await say('me', '당신 먼지 닦으러 왔어요.');
+  await say('me', '당신 먼지 닦으러 왔어요.', 'a');
   await say('cheonma', '삼백 년 전에 그 말을 한 계집이 있었지. 배가 고프구나. 너는 어떤 맛이냐.');
   const allies = []; { const a = await G.bond.join(side(), allies); if (a) allies.push(a); }
   if (F().hyeok_join && !allies.includes('hyeok_ally')) { await say('hyeok', '제단의 불은 제가 끄겠습니다. 저는 소야입니다.'); allies.push('hyeok_ally'); }
-  if (!allies.includes('so_ally')) { await say('so', '왼발 늦지 마라.'); allies.push('so_ally'); }
+  if (!allies.includes('so_ally')) { await say('so', '왼발 늦지 마라.', 'h'); allies.push('so_ally'); }
   slotPreface();
   await ctx.duel({ foes: ['tianmo'], allies, foeHpMul: G.S.diff === 'hard' ? .75 : 1, arena: 'moon', bgm: 'boss', title: '천마 혁련무극', tip: '칼이 닿지 않습니다. 초식 <b>서문</b>으로 달빛을 닦아 내면 잠시 닿습니다. 메뉴에서 칸에 넣으세요.' });
   ctx.cg('fall');
   await narr('허리를 세웠다. 왼발로 밀었다. 오른발이 따라왔다. 칠식은 하나도 쓰지 않았다. 군막에서 배운 것도, 강호에서 배운 것도 쓰지 않았다. 객잔 바닥을 닦던 걸음으로 그 사람에게 걸어갔다.');
   await narr('손바닥이 그 사람 가슴에 닿았다. 먼지가 닦이듯 붉은빛이 밀려났다. 그 밑에 나온 것은 맨발에 비쩍 마른 사람 하나였다. 그 사람이 빈 그릇을 내려다봤다.');
   await say('cheonma', '…배가 고팠을 뿐인데.');
-  await say('me', '내려가시면 국수 한 그릇 드릴게요.');
+  await say('me', '내려가시면 국수 한 그릇 드릴게요.', 'h');
   await narr('그 사람은 뭐라고 대답하려다 말고 웃는 것 같았다. 그리고 먼지처럼 흩어졌다. 달이 천천히 지기 시작했다. 붉은빛이 빠져나간 달은 처음 보는 것처럼 하얬다.');
   ctx.cgOff();
   F().tianmo_down = true;
@@ -219,9 +219,9 @@ async function lastChoice() {
   if (c === 0) {
     ctx.cg('end_table');
     await narr('달맞이 객잔 지붕을 다시 올렸다. 나는 아침마다 바닥을 닦고 손님상에 국수를 나른다. 곽 아주머니는 내 국물에 아직도 소금이 모자란다고 한다.');
-    await say('gwak', '{나}야! 거기서 뭐 해! 해가 중천이다!');
-    await say('me', '바닥 닦았는데요.');
-    await say('gwak', '이게 닦은 거야? …됐다. 밥 먹어.');
+    await say('gwak', '{나}야! 거기서 뭐 해! 해가 중천이다!', 'a');
+    await say('me', '바닥 닦았는데요.', 'h');
+    await say('gwak', '이게 닦은 거야? …됐다. 밥 먹어.', 'h');
   }
   if (c === 1) { ctx.cg({ jeong: 'end_jeong', sa: 'end_sa', ma: 'end_ma', free: 'end_free' }[s]); await narr(lead[1]); await narr('일 년에 한 번은 달맞이 객잔에 들른다. 어느 자리에 앉아 있든 곽 아주머니는 걸레부터 던져 준다.'); }
   if (c === 2) { ctx.cg('end_ma'); await narr('천산 돌문 앞에 움막을 지었다. 백 노인이 쓰던 술병을 옆에 두고, 아침마다 돌계단을 닦는다. 사흘만 안 닦아도 먼지가 앉는다.'); }

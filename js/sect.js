@@ -10,7 +10,7 @@ import { SKILLS } from './data.js';
 import { SURNAME, GIVEN } from './freedata.js';
 
 const S = () => G.S, Fr = () => G.S.fr, Se = () => G.S.fr.sect;
-Object.assign(WHO, { sect_d: { name: '제자', face: 'GreenNinja' }, guest: { name: '입문 희망자', face: 'Villager' }, challenger: { name: '떠돌이 고수', face: 'Samurai' } });
+Object.assign(WHO, { sect_d: { name: '제자', face: 'GreenNinja', art: 'disc' }, guest: { name: '입문 희망자', face: 'Villager', art: 'town' }, challenger: { name: '떠돌이 고수', face: 'Samurai', art: 'wander' } });
 export const SITES = [
   { id: 'valley', name: '청풍골 강변', map: 'valley', back: [35, 15.5], desc: '물과 풀이 넉넉해 제자 유지비가 적다.', upkeep: .75 },
   { id: 'pass', name: '창운산 기슭', map: 'pass', back: [20, 12], desc: '기운이 맑아 제자가 빨리 자란다.', grow: 1.35 },
@@ -141,12 +141,12 @@ const EV = {
     S().tp = (S().tp || 0) + 1; toast('수련 점수 1점을 얻었다', 3);
   },
   async gwak() {
-    await say('gwak', '문파를 차렸다길래 와 봤더니 바닥 꼴이 이게 뭐야.');
+    await say('gwak', '문파를 차렸다길래 와 봤더니 바닥 꼴이 이게 뭐야.', 'a');
     await say('me', '아주머니.');
-    await say('gwak', '장문인이면 뭐 해. 제자들 걸레부터 쥐여. 허리 세우고 왼발로 밀고.');
+    await say('gwak', '장문인이면 뭐 해. 제자들 걸레부터 쥐여. 허리 세우고 왼발로 밀고.', 'a');
     await narr('그날 제자들은 곽 아주머니 국자 밑에서 마당을 네 번 닦았다. 그러고 나니 다들 걸음이 조금 달라져 있었다.');
     Se().d.forEach(d => { d.lv++; });
-    await say('gwak', '국수는 내가 끓일 테니 먹고 또 닦아. 밥값은 받는다.');
+    await say('gwak', '국수는 내가 끓일 테니 먹고 또 닦아. 밥값은 받는다.', 'h');
   },
 };
 async function runEv() { const k = Se().ev; Se().ev = null; if (EV[k]) await EV[k](); }

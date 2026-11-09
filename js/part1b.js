@@ -21,7 +21,7 @@ Object.assign(FOES, {
 async function toShaolin() {
   await say('yun', '소림이면 숭산이죠? 저도 갈래요. 장경각에 의서가 많다고 들었어요.');
   await say('me', '약방은 어쩌고요?');
-  await say('yun', '아버지가 계시잖아요. 그리고 혼자 보냈다가 또 어디서 물려 올 거잖아요.');
+  await say('yun', '아버지가 계시잖아요. 그리고 혼자 보냈다가 또 어디서 물려 올 거잖아요.', 'h');
   await ctx.part(3, '강호 유람', '제1장 소림의 바닥');
   await narr('창운산을 내려와 뱃길과 산길로 보름을 갔다. 숭산에 가까워지자 절보다 종소리가 먼저 들렸다.');
   set('t2'); ctx.goal('소림사 산문 앞의 지객승에게 서찰 전하기');
@@ -34,8 +34,8 @@ async function jigaek() {
   await say('me', '무슨 일이요?');
   await say('jigaek', '장경각 청소입니다. 스님들이 수련하느라 손이 모자라서요.');
   await say('me', '…바닥이요?');
-  await say('yun', '왜 웃어요?');
-  await say('me', '안 웃었어요. 그건 제가 좀 하거든요.');
+  await say('yun', '왜 웃어요?', 'a');
+  await say('me', '안 웃었어요. 그건 제가 좀 하거든요.', 'h');
   set('t3'); ctx.goal('장경각(왼쪽 건물) 바닥을 세 군데 닦기');
 }
 const mops = [
@@ -101,12 +101,12 @@ async function luohanHall() {
   await ctx.duel({ foes: ['jongnam_d', 'jongnam_d', 'jongnam_d'], arena: 'forest', title: '절벽길 시비', bgm: 'fight', tip: '길이 좁아 둘러싸이기 쉽습니다. <b>K 경공</b>으로 빠져나오세요.' });
   await say('me', '끝났죠? 이제 약초만…');
   await say(null, '그때 발밑 바위가 부서지면서 몸이 뒤로 기울었다.');
-  await say('yun', '{나} 씨!');
-  await say('me', '아—');
+  await say('yun', '{나} 씨!', 'b');
+  await say('me', '아—', 'b');
   await fadeTo(1); await narr('얼마나 떨어졌는지 모르겠다. 나뭇가지에 몇 번 부딪히고 나서 차가운 물에 빠졌다.');
   set('t5'); ctx.goal('동굴을 살펴보고 나갈 길 찾기');
   G.field.load('cliffcave', 7.5, 9, 1); await fadeTo(0);
-  await say('me', '살았네.');
+  await say('me', '살았네.', 'h');
   await say('me', '벼랑 밑에 동굴이 있네. 이야기책에서나 나오는 건 줄 알았는데.');
 }
 async function bones() {
@@ -131,14 +131,14 @@ async function ginseng() {
   await say('me', '죄송합니다. 잘 쓰겠습니다.');
   await say(null, '폭포 뒤로 빛이 보였다. 물길을 따라 나가니 매화나무 숲이었다.');
   await fadeTo(1); G.field.load('hwasan', 22, 11.5, 2); await fadeTo(0);
-  await say('yun', '살아 있었네요.');
+  await say('yun', '살아 있었네요.', 's');
   await say('me', '네.');
-  await say('yun', '나흘을 찾아다녔어요. 사람들은 죽었을 거라고 하는데, 시체라도 찾아야 하잖아요.');
+  await say('yun', '나흘을 찾아다녔어요. 사람들은 죽었을 거라고 하는데, 시체라도 찾아야 하잖아요.', 's');
   const c = await choice('윤설의 소매가 젖어 있다.', ['미안하다고 한다', '벼랑 밑에서 비급을 찾았다고 말한다']);
-  if (c === 0) { await say('me', '미안해요. 걱정 끼쳐서.'); await say('yun', '됐어요. 팔 줘 봐요.'); ctx.love('yun'); } else await say('yun', '지금 그 얘기가 나와요? 팔 줘 봐요.');
+  if (c === 0) { await say('me', '미안해요. 걱정 끼쳐서.', 's'); await say('yun', '됐어요. 팔 줘 봐요.', 's'); ctx.love('yun'); } else await say('yun', '지금 그 얘기가 나와요? 팔 줘 봐요.', 'a');
   await say('clan_hwasan', '살아 있었어? 내 잘못은 아니지만 미안하긴 하네. 구화성에서 보자.');
   await say('me', '대회까지 얼마나 남았죠?');
-  await say('yun', '한 달이요. 가요. 이번엔 제가 앞에서 걸을게요.');
+  await say('yun', '한 달이요. 가요. 이번엔 제가 앞에서 걸을게요.', 'h');
   set('c3a'); await toGuhwa();
 }
 

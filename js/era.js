@@ -39,7 +39,7 @@ async function frontline() {
   await say('jangpal', '어젯밤에 석두가 그랬어유. 형씨 신발 뒤축 안 터졌느냐고유.');
   await narr('내 신발을 내려다보았다. 뒤축은 멀쩡했다.');
   await say('wangchung', '남은 애들은 내가 데리고 간다. 어디로든. 순찰사한테는 다 죽었다고 적으라 할 거다.');
-  await say('me', '명부에서 지워지는 거예요. 없던 사람이 돼요.');
+  await say('me', '명부에서 지워지는 거예요. 없던 사람이 돼요.', 's');
   await say('wangchung', F().jang_bond ? '안다. 장팔이 말하더군. 너도 그랬다며. 그래도 살아 있잖아.' : '안다. 그래도 살아 있는 게 낫지.');
   await narr('장팔과 왕충이 남은 사람들을 데리고 갈대밭으로 들어갔다. 장팔은 목검을 지팡이처럼 짚고 있었다. 새끼줄은 그대로였다.');
   await narr('석두는 내가 묻었다. 신발은 신겨 주었다. 어깨, 손목, 무릎을 차례로 바르게 놓아 주었다. 다른 건 해 줄 게 없었다.');
@@ -53,23 +53,23 @@ async function elder() {
   await narr('산문 뒤 비탈에서 발자국을 찾았다. 일부러 늦게 움직인 발자국이었다. 쫓아오라는 뜻이었다.');
   const f = G.free.fac('hyeoleui'); await ctx.duel({ foes: crew('hyeoleui', Math.max(S().lv, 20), 2), arena: 'forest', title: '혈의방 살수', bgm: 'fight', optional: true, noIntro: true });
   await narr('살수의 품에서 접힌 표가 나왔다. 값이 적혀 있고 그 옆에 인장이 찍혀 있었다. 정천맹 군수부 인장이었다.');
-  await say('me', '이 사람 죽이라고 돈 낸 쪽이 우리 편이라는 건가.');
+  await say('me', '이 사람 죽이라고 돈 낸 쪽이 우리 편이라는 건가.', 'a');
   await narr('서 장로는 지난달 회의에서 징발을 반대했다고 한다. 표를 품에 넣었다. 이 전쟁에서 편이라는 말이 점점 쓸모없어지고 있었다.');
   G.arts.drop('hyeoleui', 1); ctx.note('종남 서 장로 암살. 혈의방 살수의 품에 정천맹 군수부 인장이 찍힌 표가 있었다.');
 }
 async function dangWell() {
   await say('clan_dang', '오셨네요. 때를 잘못 고르셨어요. 지금 저 독 만드는 중이에요.');
   await say('me', '무슨 독요?');
-  await say('clan_dang', '오독문이 우리 쪽 우물에 독을 풀었거든요. 애들이 셋 죽었어요. 어른들이 똑같이 해 주라네요. 오독문 마을 우물에.');
-  await say('clan_dang', '독은 제가 제일 잘 만들어요. 그래서 저한테 시킨 거죠. 그 마을에도 애들이 있다는 건 어른들도 알아요.');
+  await say('clan_dang', '오독문이 우리 쪽 우물에 독을 풀었거든요. 애들이 셋 죽었어요. 어른들이 똑같이 해 주라네요. 오독문 마을 우물에.', 's');
+  await say('clan_dang', '독은 제가 제일 잘 만들어요. 그래서 저한테 시킨 거죠. 그 마을에도 애들이 있다는 건 어른들도 알아요.', 's');
   const c = await choice('당소연이 작은 병을 흔들어 본다.', ['풀지 말라고 한다', '당신이 정할 일이라고 한다', '내가 대신 들고 가겠다고 한다']);
-  if (c === 0) { await say('me', '풀지 마요.'); await say('clan_dang', '쉽게 말하네요. 그래도 말해 줘서 고마워요.'); }
-  else if (c === 1) { await say('me', '소연 씨가 정할 일이에요.'); await say('clan_dang', '다들 그렇게 말하고 가더라고요. 그쪽은 남아 있네요.'); ctx.love('clan_dang'); }
-  else { await say('me', '제가 들고 갈게요. 무슨 일이 있어도 소연 씨 손으로 푼 건 아니게.'); await say('clan_dang', '바보예요? 그럼 그쪽 손으로 푼 게 되잖아요.'); await narr('당소연이 한참 나를 보다가 병을 뺏어 갔다.'); ctx.love('clan_dang'); }
+  if (c === 0) { await say('me', '풀지 마요.'); await say('clan_dang', '쉽게 말하네요. 그래도 말해 줘서 고마워요.', 's'); }
+  else if (c === 1) { await say('me', '소연 씨가 정할 일이에요.'); await say('clan_dang', '다들 그렇게 말하고 가더라고요. 그쪽은 남아 있네요.', 'h'); ctx.love('clan_dang'); }
+  else { await say('me', '제가 들고 갈게요. 무슨 일이 있어도 소연 씨 손으로 푼 건 아니게.'); await say('clan_dang', '바보예요? 그럼 그쪽 손으로 푼 게 되잖아요.', 'b'); await narr('당소연이 한참 나를 보다가 병을 뺏어 갔다.'); ctx.love('clan_dang'); }
   await narr('이튿날 새벽, 당소연과 오독문 마을 우물가까지 갔다. 그녀는 병을 기울였다. 투명한 액체가 우물로 들어갔다.');
   await say('me', '결국 넣었어요?');
-  await say('clan_dang', '해독약이에요. 우리 우물에 풀린 독의. 저쪽 사람들도 자기네 독에 당하는 날이 올 테니까요.');
-  await say('clan_dang', '어른들한테는 넣었다고 할 거예요. 넣긴 넣었잖아요.');
+  await say('clan_dang', '해독약이에요. 우리 우물에 풀린 독의. 저쪽 사람들도 자기네 독에 당하는 날이 올 테니까요.', 'h');
+  await say('clan_dang', '어른들한테는 넣었다고 할 거예요. 넣긴 넣었잖아요.', 'h');
   await narr('돌아오는 길에 당가 감시자들이 뒤를 밟고 있었다는 걸 알았다. 당소연은 그쪽으로 작은 표창 하나를 던졌다. 나무에 박혔다. 맞히려 했으면 맞혔을 것이다.');
   ctx.note('당소연이 오독문 마을 우물에 해독약을 넣었다.');
 }
@@ -80,7 +80,7 @@ async function cheongseong() {
   await narr('말이 끝나기 전에 피난민 줄 뒤쪽이 흩어졌다. 붉은 옷을 입은 사람들이 사람들 사이로 걸어오고 있었다. 뛰지 않았다.');
   await ctx.duel({ foes: crew('cheonma', Math.max(S().lv, 28), 3), arena: 'village', title: '성도 성문', bgm: 'fight', optional: true, noIntro: true });
   await say('uncheong', '고맙습니다. 저는 아미로 갑니다.');
-  await say('me', '한 팔로 그 길을요?');
+  await say('me', '한 팔로 그 길을요?', 'b');
   await say('uncheong', '청성파가 이제 저 하나입니다. 제가 안 가면 청성은 없던 곳이 됩니다.');
   await narr('운청은 칼을 풀어 내 앞에서 한 번 뽑았다. 왼팔로 서툴게 초식 하나를 보였다. 솔바람처럼 가벼운 칼이었다.');
   await say('uncheong', '이것만은 누가 기억해 주십시오. 저는 칼을 제일 못 쓰니까 제가 쓰는 걸 보면 누구나 따라 할 수 있습니다.');

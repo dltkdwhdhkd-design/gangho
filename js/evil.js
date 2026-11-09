@@ -49,12 +49,12 @@ async function tax(k) {
 async function raid(k) {
   const t = TOWNS[k], lv = S().lv, c = await choice(`${josa(t.name, '을/를')} 칠까? 돌이킬 수 없다.`, ['친다', '그만둔다']); if (c) return;
   if (k === 'cheongha') {
-    await say('gwak', '{나}야. 그 칼 어디다 대려고 그러냐.');
-    await say('me', '비키세요.');
-    await say('gwak', '내가 말했지. 못된 짓 하고 다니면 내 국자가 찾아간다고.');
+    await say('gwak', '{나}야. 그 칼 어디다 대려고 그러냐.', 'a');
+    await say('me', '비키세요.', 'a');
+    await say('gwak', '내가 말했지. 못된 짓 하고 다니면 내 국자가 찾아간다고.', 'a');
     const w = await ctx.duel({ foes: ['gwak_foe'], arena: 'village', bgm: 'boss', title: '곽 아주머니', optional: true, noLoot: true, noFollow: true });
     if (!w) { await narr('눈을 뜨니 나루 밖 갈대밭이었다. 머리에 혹이 나 있었고 품에 주먹밥 하나가 들어 있었다.'); infamy(5); await ctx.warp('valley', 35, 15.5, 2); return; }
-    await say('gwak', '많이 컸네.');
+    await say('gwak', '많이 컸네.', 's');
     await narr('곽 아주머니는 국자를 내려놓고 돌아서서 객잔으로 들어갔다. 그 뒤로 달맞이 객잔 문은 내게 열리지 않았다.');
     F().gwak_shut = true;
   }

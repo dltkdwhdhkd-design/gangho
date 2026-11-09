@@ -38,24 +38,24 @@ async function part8() {
   set('w1'); await ctx.warp('silk', 41, 15.5, 2);
   await say('hyeok', '사주성까지 열흘입니다. 낮에는 쉬고 밤에 별을 보고 걷습니다.');
   await say('yun', '물은 하루 세 번만 마셔요. 목마르다고 더 마시면 배탈 나요.');
-  await say('so', '더워 죽겠다. 천산에 눈 있다며?');
+  await say('so', '더워 죽겠다. 천산에 눈 있다며?', 'a');
   await say('hyeok', '이 모래를 지나야 눈이 나옵니다.');
   if (S().sworn === 'cheol') await say('cheol', '아우, 소승 물통 좀 열어 주시오. 한 손으로는 안 되오.');
   await narr('닷새째 밤에 바람이 자길래 모래 언덕 밑에 불을 피웠다. 곽 아주머니가 싸 준 보따리를 풀었더니 마른국수 한 묶음과 쪽지가 나왔다. 쪽지에는 삐뚤빼뚤한 글씨로 ‘소금 넣어라’라고 적혀 있었다.');
-  await say('so', '이게 끝이야? 편지가 소금 넣어라?');
-  await say('me', '제일 길게 쓰신 거예요.');
+  await say('so', '이게 끝이야? 편지가 소금 넣어라?', 'a');
+  await say('me', '제일 길게 쓰신 거예요.', 'h');
   await say('hyeok', '제가 끓여 보겠습니다.');
   await narr('혁련하는 찬물에 국수를 넣고 불을 붙이더니 물이 끓을 때까지 손을 모으고 앉아 있었다. 다들 궁금해서 아무도 말리지 않았다. 다 끓고 나니 풀이 되어 있었다.');
   await say('hyeok', '교리에 없는 일이라 그렇습니다.');
-  await say('yun', '먹을 만해요.');
-  await say('so', '거짓말하지 마.');
+  await say('yun', '먹을 만해요.', 'h');
+  await say('so', '거짓말하지 마.', 'h');
   if (!F().plague) {
     await narr('다들 잠든 뒤에도 윤설은 불 옆에서 아버지 장부를 넘기고 있었다.');
-    await say('yun', '아버지 마지막 장에 {나} 씨 이름이 있어요.');
+    await say('yun', '아버지 마지막 장에 {나} 씨 이름이 있어요.', 's');
     await say('me', '제 이름이요?');
-    await say('yun', '‘왼쪽 어깨 쓰는 버릇 못 고침. 딸이 볼 것.’ 그게 끝이에요. 앓아누워서까지 왕진 기록을 쓰고 있었어요.');
-    await say('me', '고칠게요.');
-    await say('yun', '아니요. 제가 볼게요. 그렇게 적혀 있잖아요.');
+    await say('yun', '‘왼쪽 어깨 쓰는 버릇 못 고침. 딸이 볼 것.’ 그게 끝이에요. 앓아누워서까지 왕진 기록을 쓰고 있었어요.', 's');
+    await say('me', '고칠게요.', 's');
+    await say('yun', '아니요. 제가 볼게요. 그렇게 적혀 있잖아요.', 's');
   }
   ctx.goal('비단길을 따라 서쪽 끝 사주성으로 가기');
   ctx.note('천산으로 원정을 떠났다. 비단길 끝에 사주성이 있다.');
@@ -72,7 +72,7 @@ async function oasisCome() {
 }
 async function wormFight() {
   await narr('동굴은 생각보다 깊었다. 바닥이 젖어 있는데 물은 없었다. 안쪽 벽이 숨을 쉬듯 움직였고, 나는 그제야 그게 벽이 아니라는 걸 알았다.');
-  await say('me', '뭘 먹고 저렇게 컸어.');
+  await say('me', '뭘 먹고 저렇게 컸어.', 'b');
   await say('so', '물 먹고 컸겠지. 비켜, 내가 왼쪽 맡을게.');
   await ctx.duel({ foes: ['sand_worm'], allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '물길의 괴물' });
   await narr('괴물이 쓰러지자 동굴 벽에서 물이 터져 나왔다. 물살에 떠밀려 나오다시피 동굴을 빠져나왔다. 그날 저녁 사주성 우물이 찼고, 성문이 활짝 열렸다.');
@@ -89,7 +89,7 @@ async function hyeokMother() {
   await say('hyeok', '따님은 어디 있습니까.');
   await say('flower', '열일곱 해 전에 천산 사람들이 데려갔어요. 네 살이었는데, 눈이 붉다고요. 그래도 꽃은 계속 심어요. 돌아오면 있어야 하니까.');
   await narr('노파가 고개를 들다가 멈췄다. 혁련하의 눈을 한참 들여다봤다. 혁련하는 평소처럼 아무 표정이 없었는데 꽃을 쥔 손가락이 하얬다.');
-  await say('hyeok', '…그 아이를 뭐라고 부르셨습니까.');
+  await say('hyeok', '…그 아이를 뭐라고 부르셨습니까.', 's');
   await say('flower', '소야요. 소야라고 불렀어요.');
   await narr('그날 밤 잠이 안 와 일어났더니 혁련하가 달빛 아래 앉아 작은 소리로 소야, 소야 하고 부르고 있었다.');
   ctx.love('hyeok');
@@ -101,36 +101,36 @@ async function iceStart() {
   await narr('고개를 넘자 모래가 자갈이 되고 자갈이 눈이 됐다. 하루 사이에 땀이 얼어붙었다.');
   await say('so', '이거 봐. 이 깃발.');
   await narr('눈 속에 찢어진 깃발이 박혀 있었다. 파란 물결 무늬였다. 소연하가 언 손으로 눈을 털어 냈다.');
-  await say('so', '벽수궁 깃발이야. 이게 왜 여기 있어.');
+  await say('so', '벽수궁 깃발이야. 이게 왜 여기 있어.', 'b');
   await say('hyeok', '빙마는 십칠 년 전에 교단에 왔다고 들었습니다. 정파에서 왔다는 것 말고는 아는 사람이 없습니다.');
-  await say('so', '…가자.');
+  await say('so', '…가자.', 's');
   ctx.goal('설산 북쪽 끝의 빙궁으로 가기');
 }
 async function icePalace() {
   await narr('빙궁 벽은 얼음이었다. 얼음 속에 사람들이 서 있었다. 칼을 든 채였고, 옷은 정파 것이었다. 십칠 년 전 토벌에 나갔다 돌아오지 않은 사람들이었다.');
   await say('me', '이 사람들을 왜 여기 세워 놨을까요.');
-  await say('so', '말 시키지 마. 나 지금 얼굴 보고 다니는 중이니까.');
+  await say('so', '말 시키지 마. 나 지금 얼굴 보고 다니는 중이니까.', 's');
   await ctx.duel({ foes: ['icefolk', 'icefolk', 'icefolk'], allies: ['so_ally'], arena: 'snow', bgm: 'fight', title: '빙궁 회랑' });
   await narr('궁 맨 안쪽에 얼음 의자가 있었다. 여인이 앉아 있었고, 허리에 찬 칼에는 칼집이 없었다. 칼날을 그대로 띠에 꽂고 있었다.');
-  await say('so', '…사부님.');
+  await say('so', '…사부님.', 's');
   await say('bingma', '누구냐.');
-  await say('so', '저 연하예요. 벽수궁 문 앞에 버려졌던 애요. 금방 온다면서요.');
+  await say('so', '저 연하예요. 벽수궁 문 앞에 버려졌던 애요. 금방 온다면서요.', 's');
   await say('bingma', '그런 이름은 없다. 나는 빙마다. 교주님께서 깨어나시는데 시끄럽구나.');
-  await say('so', '{나}, 도와줘. 마지막은 내가 할게. 그건 내가 해야 돼.');
+  await say('so', '{나}, 도와줘. 마지막은 내가 할게. 그건 내가 해야 돼.', 's');
   await ctx.duel({ foes: ['bingma'], allies: ['so_ally'], arena: 'snow', bgm: 'boss', title: '빙마', yieldAt: .15, noLoot: true });
   ctx.cg('sheath');
   await narr('빙마가 무릎을 꿇었다. 소연하가 걸어가 칼을 들었다. 칼끝이 떨리지 않았다. 나는 그게 더 무서웠다. 칼이 들어가는 순간 빙마의 눈에서 서리가 걷혔다.');
   await say('bingma', '…연하야.');
-  await say('so', '네.');
+  await say('so', '네.', 's');
   await say('bingma', '칼집은.');
-  await say('so', '십칠 년째 닦았어요.');
+  await say('so', '십칠 년째 닦았어요.', 's');
   await say('bingma', '금방… 온다고 했는데.');
-  await say('so', '늦었어요. 많이요.');
+  await say('so', '늦었어요. 많이요.', 's');
   await narr('소연하는 사부의 허리에서 칼을 뽑아 등에 메고 다니던 빈 칼집에 넣었다. 소리도 없이 들어갔다.');
   ctx.cgOff();
-  await say('so', '울지 마.');
-  await say('me', '안 우는데요.');
-  await say('so', '너한테 한 말 아니야.');
+  await say('so', '울지 마.', 's');
+  await say('me', '안 우는데요.', 's');
+  await say('so', '너한테 한 말 아니야.', 's');
   F().bing_dead = true; ctx.love('so');
   ctx.note('빙마는 소연하의 사부였다. 소연하가 직접 칼을 받았다. 빈 칼집에 칼이 돌아갔다.');
   set('w3'); await thirdStart();
@@ -146,20 +146,20 @@ async function thirdStart() {
 async function ghostPass() {
   ctx.cg('ghost');
   await narr('고개 마루에 사람이 혼자 서 있었다. 머리에 눈이 쌓여도 털지 않았다. 가면은 없었다. 나와 닮은 얼굴이었다.');
-  await say('me', '…형.');
+  await say('me', '…형.', 's');
   await narr('처음 불러 본 말이었다. 형이라고 부르지 말라던 사람은 고개도 돌리지 않았다.');
   ctx.cgOff();
   await say('gwima', '불러 봐야 소용없다. 내가 일으킨 것들은 귀가 없다.');
-  await say('me', '내려와. 네 얼굴부터 보자.');
+  await say('me', '내려와. 네 얼굴부터 보자.', 'a');
   await say('gwima', '먼저 네 형이랑 놀아라. 곽란이 키운 아이들이 서로 베는 걸 보고 싶구나.');
   await ctx.duel({ foes: ['cheon2'], arena: 'snow', bgm: 'boss', title: '월천', yieldAt: .3, noLoot: true });
   await narr('칼을 맞대는 내내 형은 숨소리도 내지 않았다. 내가 왼발을 밀면 똑같이 왼발이 나왔다. 칼끝에 어깨가 베여도 얼굴은 그대로였다. 무릎이 꺾인 형을 두고 나는 칼을 돌렸다.');
-  await say('me', '이제 네 차례야.');
+  await say('me', '이제 네 차례야.', 'a');
   await ctx.duel({ foes: ['gwima'], foeHpMul: G.S.diff === 'hard' ? .85 : 1, allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '귀마' });
   await say('gwima', '죽은 것은… 다시 일어난다… 나도…');
   await narr('귀마가 흩어지자 고개를 메우고 있던 망자들이 눈 위로 픽픽 쓰러졌다. 나는 형을 찾아 뒤를 돌아봤다.');
   await narr('형은 쓰러지지 않았다. 잠깐 제 손을 내려다보더니 천산 쪽으로 걸어가기 시작했다. 불러도 돌아보지 않았고, 금방 눈보라에 가려 보이지 않게 됐다.');
-  await say('yun', '귀마가 죽었는데 왜 안 쓰러져요?');
+  await say('yun', '귀마가 죽었는데 왜 안 쓰러져요?', 'b');
   await say('hyeok', '저분을 부르는 것이 귀마만은 아니었던 모양입니다.');
   F().gwi_dead = true;
   ctx.note('고개에서 월천을 만났다. 귀마를 쓰러뜨렸지만 월천은 천산으로 걸어갔다.');
@@ -178,14 +178,14 @@ async function lastRent() {
   if (F().baek_live) {
     await narr('돌문 앞에 움막이 하나 있었다. 모닥불이 꺼져 가고 있었고, 그 옆에 낯익은 술병이 누워 있었다.');
     await say('baek', '왔느냐.');
-    await say('me', '어르신! 여기서 뭐 하세요?');
+    await say('me', '어르신! 여기서 뭐 하세요?', 'b');
     await say('baek', '문지기를 하고 있다. 내가 연 문이니 내가 닫아야지. 석 달째다.');
     await say('baek', '허리가 많이 펴졌구나. 왼발은 아직 늦고.');
-    await say('me', '방값 받으러 왔어요.');
+    await say('me', '방값 받으러 왔어요.', 'h');
     await say('baek', '허허, 이놈이.');
     await narr('백 노인이 품에서 봉투를 꺼냈다. 그믐마다 객잔 앞에 놓이던 그 봉투였다. 안에는 은자 다섯 냥이 들어 있었다.');
     await say('baek', '이번 달 몫이다. 곽란한테 갖다 줘라. 열일곱 해를 하루도 안 빠지고 보냈다고, 그건 꼭 말해라.');
-    await say('me', '직접 드리시면 되잖아요.');
+    await say('me', '직접 드리시면 되잖아요.', 'h');
     await say('baek', '저것들이 오는구나.');
     await narr('돌문 틈으로 붉은 빛이 새어 나왔다. 틈을 비집고 시커먼 것들이 기어 나오고 있었다. 백 노인은 술병을 내려놓고 허리를 폈다.');
     await say('baek', '잘 봐라. 다시는 안 가르쳐 준다.');
@@ -193,7 +193,7 @@ async function lastRent() {
     ctx.cg('last_rent');
     await narr('마지막 마장이 쓰러졌을 때 백 노인은 돌문에 등을 기대고 앉아 있었다. 칼이 어깨부터 옆구리까지 들어가 있었다. 십칠 년 전 그 어깨였다.');
     await say('baek', '방값은… 그걸로 된 거냐.');
-    await say('me', '이자가 남았어요.');
+    await say('me', '이자가 남았어요.', 'h');
     await say('baek', '허허… 깎아라.');
     await narr('백 노인의 허리는 끝까지 펴져 있었다.');
     ctx.cgOff();
@@ -202,7 +202,7 @@ async function lastRent() {
     await narr('출발하던 날 곽 아주머니가 봉투 하나를 쥐여 주었다. 백 영감이 월하곡에 가기 전 마지막 그믐에 보낸 거라고, 뜯지도 않았으니 천산에서 뜯으라고 했다.');
     await narr('돌문 앞에서 봉투를 뜯었다. 은자 다섯 냥과 찢어진 술집 종이가 들어 있었다.');
     await say(null, '“점소이. 이걸 읽는다면 나는 방값을 못 갚은 것이다. 왼발이 늦다. 그래도 거기까지 갔으면 허리는 폈겠지. 문을 열지 마라. 문은 내가 연 것으로 족하다.”');
-    await say('me', '끝까지 잔소리네.');
+    await say('me', '끝까지 잔소리네.', 'h');
     await narr('돌문 틈으로 붉은 빛이 새어 나왔다. 틈을 비집고 시커먼 것들이 기어 나오고 있었다.');
     await ctx.duel({ foes: ['gate_guard', 'gate_guard', 'gate_guard'], allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '돌문 앞' });
   }
@@ -215,18 +215,18 @@ async function fifthStart() {
   await ctx.chap(8, PART, '제5장 심마');
   await narr('돌문은 잠겨 있지 않았다. 안쪽으로 돌계단이 이어졌고, 그 끝에 탁자가 하나 놓여 있었다. 천산 뱃속 한가운데 찻잔 두 개가 김을 올리고 있었다.');
   await say('chief', '왔나. 앉게. 차가 식겠네.');
-  await say('me', '살아 있었네.');
+  await say('me', '살아 있었네.', 'a');
   await say('chief', '그 정도로 죽을 거였으면 이 자리까지 못 왔지.');
   await say('chief', '나도 어디서 왔는지 아무도 모르는 아이였네. 제단 앞에 버려졌지. 위에 앉은 놈들을 다 끌어내리고 싶었어. 정파든 마교든.');
-  await say('me', '그래서 애들을 모아다 개처럼 부렸어?');
+  await say('me', '그래서 애들을 모아다 개처럼 부렸어?', 'a');
   await say('chief', '자네는 살았잖나. 살아서 일곱 장을 모았어. 고맙네.');
-  await say('so', '내 사부님 머리에 얼음 넣은 것도 고맙다고 해 보지 그래.');
+  await say('so', '내 사부님 머리에 얼음 넣은 것도 고맙다고 해 보지 그래.', 'a');
   await say('chief', '소 낭자도 왔군. 다들 모였어. 시작하지.');
   await ctx.duel({ foes: ['chief2'], allies: ['so_ally'], foeHpMul: G.S.diff === 'hard' ? .85 : 1, arena: 'moon', bgm: 'boss', title: '심마 연경추' });
   await narr('연경추의 칼이 부러졌다. 내 칼이 가슴을 뚫고 나갔는데, 그 사람은 웃고 있었다.');
   await say('chief', '일곱 초식이 한 몸에서 펼쳐져야 문이 열린다고 했지. 자네 몸에는 진작 다 있었네.');
   await say('chief', '모자란 건 하나였어. 문을 잠근 자의 핏줄이, 문을 판 자를 베는 것. 자네 아버지는 끝내 나를 안 베었네. 그래서 내가 벤 거고.');
-  await say('me', '…뭐?');
+  await say('me', '…뭐?', 'b');
   await say('chief', '내가 왜 자네 손에 죽으러 이 산속까지 왔겠나.');
   ctx.cg('chief_end');
   await narr('연경추의 피가 바닥에 닿자 돌바닥에 달 일곱 개가 차례로 떠올랐다. 초승, 월영, 반월, 월광, 만월, 월식, 낙월. 내가 익힌 순서 그대로였다. 곧이어 산 전체가 크게 울렸다.');

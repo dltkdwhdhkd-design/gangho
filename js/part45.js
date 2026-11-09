@@ -28,7 +28,7 @@ async function ogangTalk() {
 }
 async function namhwaTalk() {
   await say('namhwa', '여기 술 마실 때는 조심해요. 저는 안 탔지만 누가 탔는지는 몰라요.');
-  await say('me', '그런 농담이 재밌어요?');
+  await say('me', '그런 농담이 재밌어요?', 'a');
   await say('namhwa', '농담 아니에요. 사마웅 형제 열둘이 죽은 날 강호 사람들이 제일 먼저 뭐라고 했는지 알아요? 오독문 독이라고 했어요. 제 사부님은 그 말 때문에 정천맹 옥에서 돌아가셨고요.');
   await say('me', '오독문 독이 아니었어요?');
   await say('namhwa', '입 안이 붉게 마르고 맥이 거꾸로 뛰는 독이요. 그런 건 저희도 못 만들어요. 어디서 나왔는지 짐작은 가는데 증거가 없어요.');
@@ -49,7 +49,7 @@ export async function crossFire() {
   await say('lion', '배 붙여! 붙이면 다 탄다, 떼라! 야, 떼라고!');
   await ctx.duel({ foes: ['jeong_elite', 'jeong_elite', 'shadow2'], allies: ['samaung_ally'], arena: 'dock', bgm: 'boss', title: '불붙은 배', survive: 35, tip: '35초를 버티면 강을 건넙니다.' });
   await narr('날이 밝았을 때 삼백 척 가운데 아흔 척이 없었다. 강가로 밀려온 사람들을 건져 올리는 데 한나절이 걸렸다.');
-  if (F().lion_debt) { await say('lion', '봐라. 왼팔이 안 올라간다. 도끼는 오른손으로 드니까 괜찮아.'); await say('yun', '안 괜찮아요. 앉아요.'); }
+  if (F().lion_debt) { await say('lion', '봐라. 왼팔이 안 올라간다. 도끼는 오른손으로 드니까 괜찮아.'); await say('yun', '안 괜찮아요. 앉아요.', 'a'); }
   else await narr('윤설은 강가에 앉아 붕대를 찢다가 나중에는 자기 치맛단을 찢기 시작했다.');
   await say('samaung', '내 뱃길을 아는 놈은 수뇌 열둘뿐이다.');
   await say('makgo', '찾았습니다.');
@@ -76,7 +76,7 @@ async function altarTalk() {
   await say('hyeok', '무엇을 하십니까.');
   await say('me', '더러워서요.');
   await say('hyeok', '이 제단은 천 년 동안 불로 닦은 것입니다.');
-  await say('me', '그래서 안 닦이나 보네요.');
+  await say('me', '그래서 안 닦이나 보네요.', 'h');
   await narr('혁련하는 아무 말 없이 옆에 앉더니 걸레 한 장을 집었다. 잡는 법을 몰라서 손가락 두 개로 들고 있었다.');
   await say('hyeok', '왼발로 민다고 들었습니다.');
   await say('me', '앉아서 닦을 때는 안 그래요.');
