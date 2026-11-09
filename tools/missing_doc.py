@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-# 아직 못 받은 그림만 모아 docs/missing.md로 뽑는다: python3 tools/missing_doc.py
+# 아직 못 받은 그림만 모아 두 문서로 뽑는다: python3 tools/missing_doc.py
+#   docs/missing-bg-fx.md          배경·이펙트 대화방용
+#   docs/missing-chars-scenes.md   인물·이벤트 장면 대화방용
 # 받은 그림은 assets/를 보고 알아서 빠진다. 그림을 넣을 때마다 다시 돌리면 된다
-import json, os, re
+import json, os, re, subprocess
 import numpy as np
 from PIL import Image
 
@@ -97,14 +99,34 @@ chars = [x for x in pix if x[2].startswith('chars/') and not x[2].endswith('_d')
 mons = [x for x in pix if x[2].split('/')[0] in ('mon', 'boss', 'ani') and not got(x[2])]
 diags = [x for x in pix if (x[2].endswith('_d') or x[2] == 'T4') and not got(x[2])]
 
-w('# 강호행: 아직 못 받은 그림만 모은 요청서'); w('')
-w('받은 그림은 빼고 남은 것만 모았어. 그림을 넣을 때마다 `python3 tools/missing_doc.py`로 다시 뽑으니까, 이 문서에 남아 있는 건 아직 게임에 없는 거야.'); w('')
+
+# ── 배경·이펙트 ──
+bgdoc, fxdoc = read('docs/pixel-background.md'), read('docs/pixel-effects.md')
+bg_first = re.search(r'\*\*대화방 첫 줄에 붙일 문장\*\*\n+```\n(.*?)\n```', bgdoc, re.S).group(1)
+order = json.load(open('docs/pixel-order.json', encoding='utf8'))
+nb = max(int(x['no'][1:]) for x in order if x['no'][0] == 'B'); ne = max(int(x['no'][1:]) for x in order if x['no'][0] == 'E')
+game = json.loads(subprocess.check_output(['node', '--input-type=module', '-e', """
+import fs from 'fs';
+const I = await import(process.cwd() + '/js/items.js'), D = await import(process.cwd() + '/js/data.js');
+const items = {}; for (const [k, v] of [...Object.entries(I.DB), ...Object.entries(D.ITEMS)]) items[k] = [v.name, v.desc || ''];
+for (const [k, v] of Object.entries(I.ACCS)) items[k] = [v.name, v.desc || ''];
+const src = fs.readdirSync('js').map(f => fs.readFileSync('js/' + f, 'utf8')).join('\\n');
+const arenas = [...new Set([...src.matchAll(/arena: '([a-z]+)'/g)].map(m => m[1]))];
+console.log(JSON.stringify({ items, arenas }));
+"""]))
+ICON_TXT = {'hp': '상처에 바르는 가루약. 붉은 천으로 입구를 막은 작은 흰 도자기 약병'}
+ARENA_TXT = {'dock': '강나루의 넓은 나무 선착장. 판자 바닥이 화면 대부분이고, 맨 위에 강물과 매어 둔 나룻배'}
+arenas = [a for a in game['arenas'] if not has_hd('arena/' + a)]
+icons = [(k, v) for k, v in game['items'].items() if not has_hd('icon/' + k)]
+
+out.clear()
+w('# 강호행: 못 받은 그림 (인물·이벤트 장면)'); w('')
+w('인물과 이벤트 장면 쪽에서 아직 못 받은 것만 모았어. 배경과 이펙트는 [missing-bg-fx.md](missing-bg-fx.md)에 따로 있어. 그림을 넣을 때마다 다시 뽑으니까, 여기 남은 건 아직 게임에 없는 거야.'); w('')
 w('| 묶음 | 남은 수 | 어느 대화방에서 |'); w('|---|---|---|')
 w(f'| [1. 대화 일러스트](#1-대화-일러스트) | 인물 {len(people)}장, 표정 {len(exprs)}장 | 인물 일러스트를 뽑던 대화방 |')
 w(f'| [2. 장면 그림](#2-장면-그림) | {len(scenes)}장 | 장면 그림을 뽑던 대화방 |')
 w(f'| [3. 도트 인물](#3-도트-인물) | 인물 {len(chars)}명(2장씩), 몬스터와 동물 {len(mons)}장 | 도트 인물을 뽑던 대화방 |')
 w(f'| [4. 대각선 걷기](#4-대각선-걷기) | {len(diags)}장 (없어도 게임은 돌아가) | 도트 인물을 뽑던 대화방 |'); w('')
-w('배경과 이펙트(B, E 번호)는 다 받아서 여기 없어.'); w('')
 w('예전 대화방이 남아 있으면 거기서 이어서 하는 게 그림체가 제일 잘 맞아. 새 대화방을 열 때는 각 묶음 맨 앞의 문장부터 붙이고, 이미 받은 그림 한 장을 같이 올려서 "이 그림체 그대로"라고 해 줘.'); w('')
 w('파일 이름은 제목에 적힌 대로 저장해 줘. 이름이 달라도 누구인지만 알 수 있으면 내가 찾아 넣을게.'); w('')
 
@@ -143,5 +165,25 @@ if diags:
     for no, n, code, t, who in diags: w(f'- **{no}.** {n}' + (f' (`{code}`)' if code != 'T4' else '') + ' · ' + t.strip().split('\n')[-1].replace('인물: ', ''))
     w('')
 else: w('다 받았어.'); w('')
-open('docs/missing.md', 'w', encoding='utf8').write('\n'.join(out).rstrip() + '\n')
-print('일러스트', len(people), '표정', len(exprs), '장면', len(scenes), '도트 인물', len(chars), '몬스터', len(mons), '대각선', len(diags))
+open('docs/missing-chars-scenes.md', 'w', encoding='utf8').write('\n'.join(out).rstrip() + '\n')
+out.clear()
+w('# 강호행: 못 받은 그림 (배경·이펙트)'); w('')
+w('배경과 이펙트 쪽에서 아직 못 받은 것만 모았어. 인물과 이벤트 장면은 [missing-chars-scenes.md](missing-chars-scenes.md)에 따로 있어. 번호는 원래 요청서 다음 번호부터 이어 붙였어.'); w('')
+if arenas or icons:
+    w('배경·이펙트를 뽑던 대화방에서 이어서 하면 돼. 새 대화방이면 이 문장부터 붙여.'); w(''); block(bg_first)
+    n = nb
+    if arenas:
+        w('## 전투 배경'); w(''); w('가로세로 8대 5. 마젠타 배경은 쓰지 말고 화면 끝까지 꽉 채워.'); w('')
+        for a in arenas:
+            n += 1; w(f'**B{n}. 전투 배경 {a}** `arena/{a}`'); w(''); block(f'도트 전투 배경 한 장. 가로세로 8대 5. {ARENA_TXT.get(a, a)}. 인물과 글자는 그리지 마. 바닥이 화면의 85%를 차지하고 평평하게 보여야 해. 마젠타 배경은 쓰지 마.')
+    n = ne
+    if icons:
+        w('## 아이콘'); w('')
+        for k, (nm, ds) in icons:
+            n += 1; w(f'**E{n}. 아이콘 {nm}** `icon/{k}`'); w(''); block(f'도트 아이템 아이콘 하나를 정사각형으로 그려. 물건: {nm}. {ICON_TXT.get(k, ds)}. 물건 하나만 가운데에 크게, 글자는 넣지 마.')
+else: w('다 받았어. 지금은 요청할 게 없어.'); w('')
+w('## 받았지만 아직 안 쓴 것'); w('')
+w('- 지도 배치도 B51~B94: 이걸 보고 맵을 다시 짜는 중이야.'); w('- 대화창, 버튼, 메뉴, 체력 막대 B96~B99: 화면 틀을 손볼 때 쓸게.'); w('')
+open('docs/missing-bg-fx.md', 'w', encoding='utf8').write('\n'.join(out).rstrip() + '\n')
+if os.path.exists('docs/missing.md'): os.remove('docs/missing.md')
+print('배경', len(arenas), '아이콘', len(icons), '일러스트', len(people), '표정', len(exprs), '장면', len(scenes), '도트 인물', len(chars), '몬스터', len(mons), '대각선', len(diags))

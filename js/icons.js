@@ -6,8 +6,9 @@ const cache = {};
 function rectUrl(key, x, y, w, h) {
   const k = [key, x, y, w, h].join(); if (cache[k]) return cache[k];
   const im = IMG[key]; if (!im) return '';
-  const c = document.createElement('canvas'); c.width = 16; c.height = 16; const q = c.getContext('2d'); q.imageSmoothingEnabled = false;
-  q.drawImage(im, x, y, w, h, Math.floor((16 - Math.min(w, 16)) / 2), Math.floor((16 - Math.min(h, 16)) / 2), Math.min(w, 16), Math.min(h, 16));
+  // 새로 그린 아이콘(hd)은 32칸 그대로 쓴다. 16칸으로 줄이면 화면에서 다시 늘어나 뭉개진다
+  const S = 16 * (im.hd || 1), c = document.createElement('canvas'); c.width = S; c.height = S; const q = c.getContext('2d'); q.imageSmoothingEnabled = false;
+  q.drawImage(im, x, y, w, h, Math.floor((S - Math.min(w, S)) / 2), Math.floor((S - Math.min(h, S)) / 2), Math.min(w, S), Math.min(h, S));
   return cache[k] = c.toDataURL();
 }
 export function iconUrl(id) {
