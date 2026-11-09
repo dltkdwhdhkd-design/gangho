@@ -18,7 +18,7 @@ Object.assign(FOES, {
   tianmo0: foe('천마', 'chars/Master', 99999, 90, 40, 70, 0, 0, .9, ['flurry', 'ring8', 'quake', 'blink'], { wpn: 'BigSword', boss: 1, poise: 99999, immune: 1, title: '삼백 년 만에 깨어난', scale: 1.8 }),
   tianmo: foe('천마 혁련무극', 'chars/Master', 8500, 62, 18, 84, 0, 0, .76, ['sky_sword', 'ring8', 'moon5', 'flurry', 'blink', 'quake', 'rain'], { wpn: 'BigSword', boss: 1, poise: 900, immune: 1, scale: 1.8, phases: [{ hp: .6, say: '배가 고프구나.', add: ['fan5', 'charge'], pause: .6 }, { hp: .3, say: '달을 내놓아라.', add: ['moon3', 'tide'], pause: .5 }] }),
   majang: foe('마장', 'chars/DarkNinja', 1200, 62, 14, 74, 320, 30, 1, ['flurry', 'heavy', 'lunge', 'blink'], { wpn: 'Axe', guard: .4 }),
-  moon_envoy: foe('붉은 달 사자', 'chars/RedSamurai', 6000, 68, 16, 84, 1400, 600, .78, ['flurry', 'cloud_flash', 'fan5', 'rain', 'blink'], { wpn: 'Katana', guard: .7, boss: 1, poise: 480 }),
+  moon_envoy: foe('붉은 달 사자', 'chars/RedArmor', 6000, 68, 16, 84, 1400, 600, .78, ['flurry', 'cloud_flash', 'fan5', 'rain', 'blink'], { wpn: 'Katana', guard: .7, boss: 1, poise: 480 }),
   gwak_ally: foe('곽 아주머니', 'chars/OldWoman', 2400, 72, 16, 70, 0, 0, 1, ['flurry', 'cloud_flash', 'quick'], { wpn: 'Stick' }),
   town_ally: foe('청하진 사람들', 'chars/Villager', 900, 34, 8, 52, 0, 0, 1.3, ['slash', 'lunge'], { wpn: 'Club' }),
   samaung_last: foe('사마웅', 'chars/Samaung', 3000, 60, 18, 62, 0, 0, 1, ['heavy', 'quake', 'spin'], { wpn: 'BigSword' }),

@@ -23,7 +23,7 @@ const ST = {
   fort: { big: 'wood_b', hall: 'wood_b', biome: 'dusk', bgm: 'dungeon', arena: 'fort', wall: 'wood_h', trees: ['tree_dead', 'grove_dead'], side: 'wood_b', small: 'mud', deco: ['boulder_b', 'jar'], folk: ['DarkNinja', 'RedNinja', 'Caveman'], ban: 'banner7' },
   dark: { biome: 'dusk', bgm: 'curse', arena: 'moon', tint: 'rgba(60,8,30,.28)', wall: 'wall_h', trees: ['tree_dead', 'grove_dead'], side: 'lodge', small: 'mud', deco: ['statue_big', 'boulder_b'], folk: ['Skeleton', 'RedNinja2', 'MaskedNinja'], ban: 'banner7' },
   slum: { big: 'straw', hall: 'mud', biome: 'sand', bgm: 'good', arena: 'village', wall: 'fence_h', trees: ['tree_dead', 'bush3'], side: 'straw', small: 'mud', deco: ['jar', 'log'], folk: ['Gaebang', 'Villager2', 'Boy'], ban: 'banner2' },
-  ice: { biome: 'snow', bgm: 'mystic', arena: 'snow', ambient: 'snow', tint: 'rgba(120,170,230,.14)', wall: 'wall_h', trees: ['tree_snow', 'boulder_w'], side: 'lodge', small: 'wood_b', deco: ['boulder_w', 'statue'], folk: ['Eskimo', 'Cavegirl'], water: true, ban: 'banner5' },
+  ice: { biome: 'snow', bgm: 'mystic', arena: 'snow', ambient: 'snow', tint: 'rgba(120,170,230,.14)', wall: 'wall_h', trees: ['tree_snow', 'boulder_w'], side: 'lodge', small: 'wood_b', deco: ['boulder_w', 'statue'], folk: ['Eskimo', 'IceGirl'], water: true, ban: 'banner5' },
   west: { mount: 1, big: 'clay', biome: 'sand', bgm: 'temple', arena: 'sand', wall: 'wall_h', trees: ['tree_dead', 'boulder'], side: 'clay', small: 'clay', deco: ['statue_big', 'pot'], folk: ['Monk2', 'Master'], ban: 'banner3' },
 };
 const CHAT = {

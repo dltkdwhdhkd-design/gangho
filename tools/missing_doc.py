@@ -98,6 +98,9 @@ def got(code):
 chars = [x for x in pix if x[2].startswith('chars/') and not x[2].endswith('_d') and not got(x[2])]
 mons = [x for x in pix if x[2].split('/')[0] in ('mon', 'boss', 'ani') and not got(x[2])]
 diags = [x for x in pix if (x[2].endswith('_d') or x[2] == 'T4') and not got(x[2])]
+# 일러스트와 생김새가 달라 다시 뽑을 도트. 새 시트를 넣으면 docs/redo.json에서 지운다
+redo_list = json.load(open('docs/redo.json', encoding='utf8')) if os.path.exists('docs/redo.json') else {}
+redo = [(x, redo_list[x[2]]) for x in pix if x[2] in redo_list]
 
 
 # ── 배경·이펙트 ──
@@ -126,7 +129,8 @@ w('| 묶음 | 남은 수 | 어느 대화방에서 |'); w('|---|---|---|')
 w(f'| [1. 대화 일러스트](#1-대화-일러스트) | 인물 {len(people)}장, 표정 {len(exprs)}장 | 인물 일러스트를 뽑던 대화방 |')
 w(f'| [2. 장면 그림](#2-장면-그림) | {len(scenes)}장 | 장면 그림을 뽑던 대화방 |')
 w(f'| [3. 도트 인물](#3-도트-인물) | 인물 {len(chars)}명(2장씩), 몬스터와 동물 {len(mons)}장 | 도트 인물을 뽑던 대화방 |')
-w(f'| [4. 대각선 걷기](#4-대각선-걷기) | {len(diags)}장 (없어도 게임은 돌아가) | 도트 인물을 뽑던 대화방 |'); w('')
+w(f'| [4. 대각선 걷기](#4-대각선-걷기) | {len(diags)}장 (없어도 게임은 돌아가) | 도트 인물을 뽑던 대화방 |')
+w(f'| [5. 다시 뽑을 도트](#5-다시-뽑을-도트) | 인물 {len(redo)}명(2장씩) | 도트 인물을 뽑던 대화방 |'); w('')
 w('예전 대화방이 남아 있으면 거기서 이어서 하는 게 그림체가 제일 잘 맞아. 새 대화방을 열 때는 각 묶음 맨 앞의 문장부터 붙이고, 이미 받은 그림 한 장을 같이 올려서 "이 그림체 그대로"라고 해 줘.'); w('')
 w('파일 이름은 제목에 적힌 대로 저장해 줘. 이름이 달라도 누구인지만 알 수 있으면 내가 찾아 넣을게.'); w('')
 
@@ -164,6 +168,14 @@ if diags:
     w('비스듬히 걸을 때 쓰는 그림이야. 없으면 옆모습으로 걸어. 그 인물의 걷기 시트를 뽑은 대화방에서 걷기 시트를 보여 주고 이 문장을 붙여. 주인공(C68)부터 해 보고 괜찮으면 나머지를 해. 걷기 시트를 아직 안 뽑은 인물은 3번 묶음부터 해야 해.'); w(''); block(diag_t)
     for no, n, code, t, who in diags: w(f'- **{no}.** {n}' + (f' (`{code}`)' if code != 'T4' else '') + ' · ' + t.strip().split('\n')[-1].replace('인물: ', ''))
     w('')
+else: w('다 받았어.'); w('')
+w('## 5. 다시 뽑을 도트'); w('')
+if redo:
+    w('일러스트와 생김새가 달라서 다시 뽑아야 하는 히로인이야. 색은 내가 일단 일러스트에 맞춰 칠해 놨는데, 머리 모양이나 옷 모양은 새로 그려야 맞아. 번호는 원래 요청서와 같아.'); w('')
+    w('도트 인물을 뽑던 대화방에서 그 인물의 일러스트(`_n`)를 같이 올리고 아래 칸을 붙여. 걷기 시트를 받은 뒤 같은 대화에서 3번 묶음의 전투 시트 문장을 붙이면 돼. 대각선 걷기(4번 묶음)는 새 걷기 시트를 받은 다음에 해야 같은 모습으로 나와.'); w('')
+    for (no, n, code, t, who), r in redo:
+        w(f'### {no}. {n} (첨부: `{r["art"]}_n`)'); w(''); w(f'지금 다른 점: {r["diff"]}'); w('')
+        block(walk_t + '\n' + t.strip() + '\n첨부한 일러스트와 머리 모양, 머리색, 옷, 장신구가 같아야 해. 키와 머리 크기, 그림체는 전에 뽑은 걷기 시트 그대로 맞춰.')
 else: w('다 받았어.'); w('')
 open('docs/missing-chars-scenes.md', 'w', encoding='utf8').write('\n'.join(out).rstrip() + '\n')
 out.clear()
