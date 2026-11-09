@@ -3,11 +3,11 @@ const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 400))); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
-  await p.goto(process.env.GAME_URL); await p.waitForTimeout(1300);
+  await p.goto(process.env.GAME_URL); await p.waitForFunction(() => window.__G && __G.scene === 'title', null, { timeout: 30000 }); await p.waitForTimeout(300);  // 그림을 다 받고 제목 화면이 뜬 뒤에 시작한다
   const r = await p.evaluate(async () => {
     const G = __G, D = G.dbg, L = G.life, o = {}; const sleep = ms => new Promise(r => setTimeout(r, ms));
     G.S = D.newState('진소', 'BlueSamurai', 'm', 'normal'); const S = G.S; Object.assign(S, { lv: 20, str: 24, con: 16, agi: 12, inn: 18, silver: 9000, tp: 15, weapon: 'iron_sword', weapons: ['stick', 'iron_sword'] });
-    S.flags = { step: 'end', burned: true, boat_guhwa: true, bow: true, rod: true, yun_join: true, met_yun: true }; document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; G.scene = 'field'; G.manual = true; G.auto = true; G.speedup = 3000; G.bot = { skill: .7 };
+    S.flags = { step: 'end', ended: true, burned: true, boat_guhwa: true, bow: true, rod: true, yun_join: true, met_yun: true }; /* ended: 6부 뒤 3막 시작 사건이 끼어들지 않게 */ document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; G.scene = 'field'; G.manual = true; G.auto = true; G.speedup = 3000; G.bot = { skill: .7 };
     const f = G.field; f.load('cheongha', 21, 16, 0);
     const pump = async (n = 6) => { for (let i = 0; i < n; i++) { G.fast(30); await sleep(1); } };
     const until = async (fn, n = 400) => { for (let i = 0; i < n; i++) { if (fn()) return true; G.fast(30); await sleep(1); } return false; };
