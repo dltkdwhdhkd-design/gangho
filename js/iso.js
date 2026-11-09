@@ -2,6 +2,7 @@
 // 바닥 마름모는 앞 모서리 F(화면에서 가장 아래 점)를 기준으로 잡는다.
 //   왼쪽 앞면: F에서 왼쪽 위로 fw칸 → L,  오른쪽 앞면: F에서 오른쪽 위로 fh칸 → R,  뒷 모서리 K
 //   한 칸은 화면에서 가로 32, 세로 16 마름모다. 한 칸 걸음은 (±16, -8)
+//   그림마다 바닥선 기울기가 조금씩 다르면(ls, rs: 가로 1에 세로 몇) 그 기울기를 그대로 따른다. 없으면 0.5
 import { IMG } from './core.js';
 import { ISOMETA } from './isometa.js';
 
@@ -10,10 +11,10 @@ export const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 // 소품 정보: 그림 크기(w, h, 논리 점), 그림 안 앞 모서리 자리(ax, ay), 바닥 칸(fw, fh)
 export const ISO = { ...ISOMETA };
 // 좌우를 뒤집으면 왼쪽 앞면과 오른쪽 앞면이 바뀐다
-export function meta(name, flip) { const q = ISO[name]; if (!q) return null; return flip ? { ...q, ax: q.w - q.ax, fw: q.fh, fh: q.fw } : q; }
-export function corners(fx, fy, fw, fh) {
-  const L = [fx - fw * IS, fy - fw * IH], R = [fx + fh * IS, fy - fh * IH];
-  return { F: [fx, fy], L, R, K: [L[0] + fh * IS, L[1] - fh * IH], fw, fh };
+export function meta(name, flip) { const q = ISO[name]; if (!q) return null; return flip ? { ...q, ax: q.w - q.ax, fw: q.fh, fh: q.fw, ls: q.rs, rs: q.ls } : q; }
+export function corners(fx, fy, fw, fh, ls = .5, rs = .5) {
+  const L = [fx - fw * IS, fy - fw * IS * ls], R = [fx + fh * IS, fy - fh * IS * rs];
+  return { F: [fx, fy], L, R, K: [L[0] + R[0] - fx, L[1] + R[1] - fy], fw, fh };
 }
 // 앞쪽 테두리(L-F-R)가 x 자리에서 갖는 높이. 이 선보다 아래(큰 y)에 선 사람은 소품 앞에 그린다
 export function frontY(c, x) {
@@ -22,7 +23,8 @@ export function frontY(c, x) {
 }
 // 마름모 안인가. pad만큼 안으로 줄여서 본다
 export function inside(c, x, y, pad = 0) {
-  const dx = x - c.F[0], dy = y - c.F[1], a = (-dy / IH - dx / IS) / 2, b = (-dy / IH + dx / IS) / 2, p = pad / IS;
+  const ux = c.L[0] - c.F[0], uy = c.L[1] - c.F[1], vx = c.R[0] - c.F[0], vy = c.R[1] - c.F[1], det = ux * vy - uy * vx; if (!det) return false;
+  const dx = x - c.F[0], dy = y - c.F[1], a = (dx * vy - dy * vx) / det * c.fw, b = (ux * dy - uy * dx) / det * c.fh, p = pad / IS;
   return a > p && b > p && a < c.fw - p && b < c.fh - p;
 }
 // 발 상자(가로 w, 세로 h, 발끝 px,py)가 마름모와 겹치나

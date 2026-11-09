@@ -21,9 +21,10 @@ def load_meta():
 def save_meta(d):
     body = ',\n'.join(f'  {json.dumps(k)}: {json.dumps(v)}' for k, v in sorted(d.items()))
     open(META, 'w', encoding='utf8').write('// tools/iso_in.py가 쓰는 쿼터뷰 소품 정보. 손으로 고치지 않는다\nexport const ISOMETA = {\n' + body + '\n};\n')
-def register(name, im, ax, ay, fw, fh):
+def register(name, im, ax, ay, fw, fh, **extra):  # extra: ls, rs(바닥선 기울기), door(문 자리, 앞 모서리에서 잰 비율)
     os.makedirs(OUT, exist_ok=True); im.save(os.path.join(OUT, name + '.webp'), lossless=True)
-    d = load_meta(); d[name] = {'w': int(im.width) // 2, 'h': int(im.height) // 2, 'ax': int(ax) // 2, 'ay': int(ay) // 2, 'fw': float(fw) if fw % 1 else int(fw), 'fh': float(fh) if fh % 1 else int(fh)}; save_meta(d)
+    d = load_meta(); d[name] = {'w': int(im.width) // 2, 'h': int(im.height) // 2, 'ax': int(ax) // 2, 'ay': int(ay) // 2, 'fw': float(fw) if fw % 1 else int(fw), 'fh': float(fh) if fh % 1 else int(fh)}
+    d[name].update({k: round(float(v), 3) for k, v in extra.items() if v is not None}); save_meta(d)
     L = json.load(open(os.path.join(ROOT, 'assets/hd/list.json'))); k = 'iso/' + name
     if k not in L: L.append(k); json.dump(L, open(os.path.join(ROOT, 'assets/hd/list.json'), 'w'), ensure_ascii=False)
 
@@ -124,32 +125,35 @@ def figures(im, n):  # 그림 속 인물(덩어리) n개를 찾아 줄 순서(�
     if n == 4: per = 2
     for i in range(0, len(rows), per): out += sorted(rows[i:i + per], key=lambda b: b[0])
     return [im.crop(b) for b in out]
-def isoin(path, name, fw, fh):  # 건물, 소품 한 장: 배경을 지우고 바닥 마름모 앞 모서리를 찾아 크기를 맞춘다
+def base_corners(img):  # 밑선 아래쪽 껍질을 앞 모서리에서 좌우로 감아 나가 바닥 모서리를 찾는다. 처마나 벽 끝처럼 가파르게 꺾이면 멈춘다
+    import numpy as np
+    a = np.array(img)[..., 3] > 0; h, w = a.shape; bot = np.array([np.nonzero(a[:, x])[0].max() if a[:, x].any() else -1 for x in range(w)])
+    fy = int(bot.max()); xs = np.nonzero(bot == fy)[0]; fx = int(xs[np.argmin(np.abs(xs - xs.mean()))])
+    def walk(sign):
+        cx, cy = fx, fy
+        while True:
+            X = np.arange(cx + sign, -1 if sign < 0 else w, sign); X = X[bot[X] >= 0] if len(X) else X
+            if len(X) < 2: return cx, cy
+            sl = (cy - bot[X]) / np.abs(X - cx); m = sl.min()
+            if m > 1.0: return cx, cy
+            j = np.nonzero(sl <= m + 1e-9)[0].max(); cx, cy = int(X[j]), int(bot[X[j]])  # 같은 기울기면 가장 먼 점
+    (lx, ly), (rx, ry) = walk(-1), walk(1)
+    return fx, fy, lx, ly, rx, ry
+def isoin(path, name, fw, fh, door=None):  # 건물, 소품 한 장: 배경을 지우고 바닥 모서리 셋을 찾아 크기와 기울기를 맞춘다
     import numpy as np
     im = cutbg(Image.open(path)); im = im.crop(im.getbbox()); Wf = (fw + fh) * IS
-    def measure(img):
-        a = np.array(img)[..., 3] > 0; h, w = a.shape; bot = np.array([np.nonzero(a[:, x])[0].max() if a[:, x].any() else -1 for x in range(w)])
-        fy = bot.max(); xs = np.nonzero(bot >= fy - 1)[0]; fx = int(xs.mean())
-        # 앞 모서리에서 좌우로 2:1 기울기 바닥선을 따라가다 처마나 기둥 때문에 위로 뜨는 곳에서 멈춘다
-        lx = fx
-        for x in range(fx, -1, -1):
-            if bot[x] >= fy - (fx - x) / 2 - 3: lx = x
-            elif fx - x > 6: break
-        rx = fx
-        for x in range(fx, w):
-            if bot[x] >= fy - (x - fx) / 2 - 3: rx = x
-            elif x - fx > 6: break
-        return fx, fy, lx, rx
     s = Wf * 1.1 / im.width
     for _ in range(3):
-        t = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS); fx, fy, lx, rx = measure(t)
+        t = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS); fx, fy, lx, ly, rx, ry = base_corners(t)
         if rx - lx < 8: break
         s *= Wf / (rx - lx)
     t = im.resize((max(2, round(im.width * s)) // 2 * 2, max(2, round(im.height * s)) // 2 * 2), Image.LANCZOS)
     A = np.array(t); A[..., 3] = np.where(A[..., 3] > 110, 255, 0); t = Image.fromarray(A)
-    fx, fy, lx, rx = measure(t); mw, mh = (fx - lx) / IS, (rx - fx) / IS
-    k = (fw + fh) / max(.5, mw + mh); register(name, t, fx, fy + 1, round(mw * k * 4) / 4, round(mh * k * 4) / 4)
-    print(name, '크기', t.size, '바닥', round(mw * k, 2), round(mh * k, 2))
+    fx, fy, lx, ly, rx, ry = base_corners(t); mw, mh = max(1, fx - lx) / IS, max(1, rx - fx) / IS
+    clampv = lambda v: min(.8, max(.12, v)); ls, rs = clampv((fy - ly) / max(1, fx - lx)), clampv((fy - ry) / max(1, rx - fx))
+    k = (fw + fh) / max(.5, mw + mh); FW, FH = round(mw * k * 4) / 4, round(mh * k * 4) / 4
+    register(name, t, fx, fy + 1, FW, FH, ls=None if abs(ls - .5) < .04 else ls, rs=None if abs(rs - .5) < .04 else rs, door=door)
+    print(name, '크기', t.size, '바닥', FW, FH, '기울기', round(ls, 2), round(rs, 2))
 def isowalk(walk, fight, name, H=44, C=64):  # 걷기 2열 3행(+전투 2열 3행) → chars/<이름>_q.webp (2열 6행, 칸 C)
     import numpy as np
     cells = figures(cutbg(Image.open(walk)), 6); fc = figures(cutbg(Image.open(fight)), 6) if fight and fight != '-' else cells
@@ -193,7 +197,7 @@ PROPS = {  # 이름: (너비, fw, fh)
   'dummy': (16, .5, .5), 'rack': (34, 1.5, .5), 'target': (22, .6, .6), 'censer': (26, 1, 1), 'lion': (24, .8, .8), 'stonelamp': (16, .5, .5),
   'signpost': (16, .4, .4), 'cairn': (22, .8, .8), 'log': (32, 1.5, .6), 'bridge': (64, 2, 3), 'grave': (24, 1, .75), 'stele': (20, .6, .6),
   'banner_red': (14, .3, .3), 'banner_blue': (14, .3, .3), 'banner_gold': (14, .3, .3), 'banner_inn': (16, .3, .3), 'flagpole': (14, .3, .3), 'lantern_string': (48, 2, .2),
-  'tree_round': (48, .75, .75), 'tree_big': (64, 1, 1), 'willow': (52, .75, .75), 'pine': (40, .6, .6), 'pine_tall': (36, .6, .6), 'tree_old': (60, 1, 1),
+  'tree_round': (68, .75, .75), 'tree_big': (64, 1, 1), 'willow': (52, .75, .75), 'pine': (40, .6, .6), 'pine_tall': (36, .6, .6), 'tree_old': (60, 1, 1),
   'peach': (46, .75, .75), 'plum': (46, .75, .75), 'maple': (48, .75, .75), 'tree_dead': (40, .6, .6), 'pine_snow': (40, .6, .6), 'bamboo': (36, .75, .75),
   'bush': (22, .75, .75), 'bush2': (24, .75, .75), 'grass': (18, .5, .5), 'flowers': (20, .5, .5), 'flowers2': (20, .5, .5), 'reed': (20, .5, .5),
   'rock_big': (48, 2, 1.5), 'rocks': (30, 1, 1), 'rock_moss': (32, 1.25, 1), 'rock_snow': (32, 1.25, 1), 'rock_dark': (32, 1.25, 1), 'stones': (20, .75, .5),
@@ -261,7 +265,8 @@ def qb(no, paths):  # 요청서 번호로 넣는 법을 찾아 부른다
     order = json.load(open(os.path.join(ROOT, 'docs/iso-order.json'), encoding='utf8')); o = next((x for x in order if x['no'].upper() == no.upper()), None)
     if not o: print('번호 없음', no); return
     h = o['how'].split(); c = h[0]; p = paths[0]
-    if c == 'iso': isoin(p, h[1], float(h[2]), float(h[3]))
+    if c == 'iso' and h[1].startswith('tree'): prop(h[1], cutbg(Image.open(p)).crop(cutbg(Image.open(p)).getbbox()))  # 나무는 밑동이 바닥이라 너비로 맞춘다
+    elif c == 'iso': isoin(p, h[1], float(h[2]), float(h[3]))
     elif c == 'isosheet': isosheet(p, int(h[1]), int(h[2]), h[3].split(','))
     elif c == 'isogrid': isogrid(p, int(h[1]), int(h[2]), h[3])
     elif c == 'isowalk': isowalk(p, paths[1] if len(paths) > 1 else '-', h[1])
@@ -284,7 +289,7 @@ STYLE = {'thatch': 'thatch', 'thatch_long': 'thatch', 'tavern': 'thatch', 'barn'
 if __name__ == '__main__':
     cmd = sys.argv[1]
     if cmd == 'place': place(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5] if len(sys.argv) > 5 else 'tile')
-    elif cmd == 'iso': isoin(sys.argv[2], sys.argv[3], float(sys.argv[4]), float(sys.argv[5]))
+    elif cmd == 'iso': isoin(sys.argv[2], sys.argv[3], float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]) if len(sys.argv) > 6 else None)
     elif cmd == 'worldmap': worldmap(sys.argv[2])
     elif cmd == 'isowalk': isowalk(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == 'mapicons': mapicons(sys.argv[2], sys.argv[3].split(','))

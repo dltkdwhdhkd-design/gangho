@@ -79,7 +79,7 @@ export function buildIsoRoom(m, floor) {
   m.isoObjs = m.objs.map(s => {
     const st = STAMPS[s.name]; if (!st) return s; const w = st[3], h = st[4], box = st.length > 5 ? { x: s.x + st[5], y: s.y + st[6], w: st[7], h: st[8] } : null;
     const iso = FURN_ISO[s.name], q = iso && meta(iso);
-    if (q && box) { const [fx, fy] = P(box.x + box.w, box.y + box.h), cn = corners(fx, fy, q.fw, q.fh); return { name: iso, x: Math.round(fx - q.ax), y: Math.round(fy - q.ay), w: q.w, h: q.h, base: fy, iso: cn }; }
+    if (q && box) { const [fx, fy] = P(box.x + box.w, box.y + box.h), cn = corners(fx, fy, q.fw, q.fh, q.ls, q.rs); return { name: iso, x: Math.round(fx - q.ax), y: Math.round(fy - q.ay), w: q.w, h: q.h, base: fy, iso: cn }; }
     const [ax, ay] = box ? P(box.x + box.w / 2, box.y + box.h / 2) : P(s.x + w / 2, s.base), bottom = ay + (box ? 3 : 0);
     return { name: s.name, x: Math.round(ax - w / 2), y: Math.round(bottom - h), base: bottom, w };
   });

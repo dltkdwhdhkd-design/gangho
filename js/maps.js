@@ -46,7 +46,7 @@ class MapDef {
   iso(name, fx, fy, o = {}) { return this.isoAt(name, fx * this.k, fy * this.k, o); }
   isoAt(name, fx, fy, o = {}) {
     const q = meta(name, o.flip); if (!q) { console.warn('쿼터뷰 소품 없음', name); return this; }
-    const X = fx * TS, Y = fy * TS, c = corners(X, Y, q.fw, q.fh); this.hasIso = true;
+    const X = fx * TS, Y = fy * TS, c = corners(X, Y, q.fw, q.fh, q.ls, q.rs); this.hasIso = true;
     this.stamps.push({ name, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, base: Y, iso: c, flip: !!o.flip });
     if (!o.nosolid) (this.polys = this.polys || []).push(c);
     return this;
@@ -123,8 +123,11 @@ const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn',
 G.mapK = id => MAPS[id]?.k || 1;
 export const isoMode = () => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } };
 // 바닥 마름모를 쿼터뷰 좌표(a: 왼쪽 앞면 방향, b: 오른쪽 앞면 방향)로 바꾸면 네모가 된다. 겹침은 네모끼리 본다
-const isoRect = (F, fw, fh) => { const a = (-F[1] / 8 - F[0] / 16) / 2, b = (-F[1] / 8 + F[0] / 16) / 2; return [a, b, a + fw, b + fh]; };
-const isoHit = (r, q, pad = .2) => r[0] < q[2] + pad && r[2] > q[0] - pad && r[1] < q[3] + pad && r[3] > q[1] - pad;
+// 바닥 네 모서리끼리 겹치나(볼록 사각형 분리축). 그림마다 바닥선 기울기가 달라서 실제 모서리로 본다
+const isoRect = (F, q) => { const c = corners(F[0], F[1], q.fw, q.fh, q.ls, q.rs); return [c.F, c.L, c.K, c.R]; };
+// 앞에 선 집 그림이 뒤에 선 집 문을 가리나
+const hides = (front, back) => back.D && front.fy > back.fy && back.D[0] > front.box[0] + 6 && back.D[0] < front.box[2] - 6 && back.D[1] > front.box[1] + 10 && back.D[1] < front.box[3];
+const isoHit = (A, B, pad = 3) => { for (const P of [A, B]) for (let i = 0; i < 4; i++) { const [x1, y1] = P[i], [x2, y2] = P[(i + 1) % 4], nx = y1 - y2, ny = x2 - x1, l = Math.hypot(nx, ny) || 1; let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity; for (const [x, y] of A) { const t = (x * nx + y * ny) / l; a0 = Math.min(a0, t); a1 = Math.max(a1, t); } for (const [x, y] of B) { const t = (x * nx + y * ny) / l; b0 = Math.min(b0, t); b1 = Math.max(b1, t); } if (a1 + pad < b0 || b1 + pad < a0) return false; } return true; };
 // 집 둘레 살림: 문 옆 독, 옆구리 장작더미와 짚더미, 뒤꼍 수레와 우물. 쿼터뷰 소품 그림이 오면 그걸 쓰고, 없으면 지금 소품으로 메운다
 const DRESS = [['jars', 'jar'], ['woodpile', 'log'], ['haystack', 'bush3'], ['crates', 'box'], ['bench', null], ['cart', null], ['well', null], ['laundry', null]];
 function isoDress(m) {
@@ -150,26 +153,38 @@ function isoDress(m) {
     cand.forEach(([x, y], i) => { if (R() < .78 && ok(x, y)) drop(sets[i], x, y); });
   }
 }
+// 문 자리 D가 문 난 면 가운데(그림에 문 자리가 적혀 있으면 그 자리)에 오게 앞 모서리를 잡는다. 문은 왼쪽 앞면, 뒤집으면 오른쪽 앞면에 있다
+const doorF = (q, flip, D) => { const t = q.door ?? .5; return flip ? [D[0] - q.fh * t * 16, D[1] + q.fh * t * 16 * (q.rs ?? .5)] : [D[0] + q.fw * t * 16, D[1] + q.fw * t * 16 * (q.ls ?? .5)]; };
 export function isoRetrofit(m, o = {}) {
   if (m._isoDone || m.room || (m.live && !o.live)) return; m._isoDone = true; const cxm = m.w * TS / 2, placed = [], leftOf = o.leftOf || (x => x < cxm);
   const houses = m.stamps.filter(st => ISO_OF[st.name] && STAMPS[st.name]).map(st => { const s = STAMPS[st.name], w = s[3], h = s[4], dy = st.y + h; return { st, door: m.portals.find(q => q.door && q.x < st.x + w && q.x + q.w > st.x && Math.abs(q.y + q.h / 2 - dy) < 20) }; });
-  houses.sort((a, b) => (b.door ? 1 : 0) - (a.door ? 1 : 0)); // 문 달린 집 먼저 자리를 잡는다
-  for (const { st, door } of houses) {
+  const rank = h => !h.door ? 0 : /^h_/.test(h.door.to) ? 1 : 2; houses.sort((a, b) => rank(b) - rank(a)); // 이야기에 쓰는 문, 저절로 단 문, 문 없는 집 차례로 자리를 잡는다
+  for (let { st, door } of houses) {
     const s = STAMPS[st.name], w = s[3], h = s[4], dx = st.x + w / 2, dy = st.y + h;
-    const first = (door && ISO_ROOM[String(door.to).replace(/^r_\w+?_/, '')]) || (door && /^r_\w+_hall$/.test(door.to) ? 'hall_dao' : null) || ISO_OF[st.name];
+    let first = (door && ISO_ROOM[String(door.to).replace(/^r_\w+?_/, '')]) || (door && /^r_\w+_hall$/.test(door.to) ? 'hall_dao' : null) || ISO_OF[st.name];
+    if (first === 'inn' && /^c_/.test(m.id) && meta('inn_city')) first = 'inn_city';  // 큰 고을 객잔은 말끔한 쪽
     // 문이 앞면 가운데에 오게 앞 모서리를 잡는다. 이웃과 겹치면 반대로 돌리거나 작은 집으로 바꾸고, 문 없는 집은 빼 버린다
     let pick = null; const D = door ? [door.x + door.w / 2, door.y + door.h / 2] : [dx, dy];
     for (const name of [first, 'tile_house', 'thatch', 'barn', 'shack']) for (const flip of leftOf(dx) ? [true, false] : [false, true]) {
       const q = meta(name, flip); if (!q || pick) continue;
-      const F = flip ? [D[0] - q.fh / 2 * 16, D[1] + q.fh / 2 * 8] : [D[0] + q.fw / 2 * 16, D[1] + q.fw / 2 * 8], r = isoRect(F, q.fw, q.fh);
-      if (!placed.some(p => isoHit(r, p))) pick = { name, flip, F, r };
+      const F = doorF(q, flip, D), r = isoRect(F, q); r.box = [F[0] - q.ax, F[1] - q.ay, F[0] - q.ax + q.w, F[1] - q.ay + q.h]; r.fy = F[1]; r.D = door ? D : null;
+      if (!placed.some(p => isoHit(r, p) || hides(p, r) || hides(r, p))) pick = { name, flip, F, r };
     }
-    if (!pick && door) { const flip = leftOf(dx), q = meta(first, flip); pick = { name: first, flip, F: flip ? [D[0] - q.fh / 2 * 16, D[1] + q.fh / 2 * 8] : [D[0] + q.fw / 2 * 16, D[1] + q.fw / 2 * 8] }; pick.r = isoRect(pick.F, q.fw, q.fh); }
+    if (!pick && door && /^h_/.test(door.to)) { m.portals.splice(m.portals.indexOf(door), 1); door = null; }  // 저절로 단 문(아무 집)은 자리가 없으면 집째 뺀다
+    if (!pick && door) { const flip = leftOf(dx), q = meta(first, flip); pick = { name: first, flip, F: doorF(q, flip, D) }; pick.r = isoRect(pick.F, q); pick.r.box = [pick.F[0] - q.ax, pick.F[1] - q.ay, pick.F[0] - q.ax + q.w, pick.F[1] - q.ay + q.h]; pick.r.fy = pick.F[1]; pick.r.D = D; }
     m.stamps.splice(m.stamps.indexOf(st), 1);
     if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6] && r.w === s[7] && r.h === s[8]); if (k >= 0) m.solids.splice(k, 1); }
     if (!pick) continue; placed.push(pick.r); m.isoAt(pick.name, pick.F[0] / TS, pick.F[1] / TS, { flip: pick.flip });
   }
+  // 나무: 정면 나무를 밑동 자리 그대로 쿼터뷰 나무로 바꾼다. 막힘(밑동 상자나 막힌 칸)은 그대로 둔다
+  for (let i = 0; i < m.stamps.length; i++) {
+    const st = m.stamps[i], nm = TREE_ISO[st.name], s = STAMPS[st.name]; if (!nm || !s || st.iso || st.flat) continue;
+    const flip = ((Math.round(st.x) * 7 + Math.round(st.y) * 13) & 2) === 2, q = meta(nm, flip); if (!q) continue;
+    const fx = st.x + s[3] / 2, fy = st.base; m.hasIso = true;
+    m.stamps[i] = { name: nm, x: Math.round(fx - q.ax), y: Math.round(fy - q.ay), w: q.w, h: q.h, base: fy, iso: corners(fx, fy, q.fw, q.fh, q.ls, q.rs), flip };
+  }
 }
+const TREE_ISO = { tree_round: 'tree_round', tree_big: 'tree_round', grove_green: 'tree_round' };
 // 내 집은 가구가 바뀔 때마다 다시 만든다
 export function buildHouse(S) {
   const h = HOUSES[S.house.lv], m = new MapDef('myhouse', h.w, h.h, { name: h.name, bgm: 'peaceful', room: true, arena: 'yard' });

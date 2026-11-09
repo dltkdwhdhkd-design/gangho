@@ -153,7 +153,7 @@ function townLayout(m, l) {
 }
 // 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다
 function autoDoors(m, owner) {
-  [...m.stamps].forEach((st, i) => { if (!HOUSES.includes(st.name)) return; const w = STAMPS[st.name][3], h = STAMPS[st.name][4], cx = st.x + w / 2, by = st.y + h; if (m.portals.some(q => q.x + q.w > st.x && q.x < st.x + w && Math.abs(q.y - by) < 28)) return;
+  [...m.stamps].forEach((st, i) => { if (st.iso || !HOUSES.includes(st.name)) return; const w = STAMPS[st.name][3], h = STAMPS[st.name][4], cx = st.x + w / 2, by = st.y + h; if (m.portals.some(q => q.x + q.w > st.x && q.x < st.x + w && Math.abs(q.y - by) < 28)) return;  // 쿼터뷰 집(이름이 같은 inn 등)은 건너뛴다
     const bx = cx / TS / m.k, byT = (by / TS + 1) / m.k; if (m.blocked(cx, by + 16) || m.blocked(cx, by + 8)) return; const big = st.name === 'hall' || st.name === 'lodge', kind = big ? 'temple' : 'home', id = `h_${m.id}_${i}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: m.id, bx, by: byT, kind, name: big ? '전각' : '집', owner };
     m.portals.push({ x: cx - 9, y: by - 4, w: 18, h: 9, to: id, tx: ex + 2, ty: ey - .6, dir: 1, door: true }); });
 }
