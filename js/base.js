@@ -92,7 +92,7 @@ function sectLayout(m, l, st, ft) {
   if (st.water) { m.water(1, 54, 15, 5); m.water(32, 54, 13, 5); }
   m.fill(cx, 9, 4, H - 9, 3);
   // 산문
-  m.row(w, 3, 60, cx - 3); m.row(w, cx + 4, 60, W - cx - 7); m.put('gate_arch', cx, 58, { nosolid: true }); m.place(mid, 57.2, l.name); m.put(st.ban, cx - 2, 61); m.put(st.ban, cx + 5, 61);
+  m.row(w, 3, 60, cx - 3); m.row(w, cx + 4, 60, W - cx - 7); m.put('gate_arch', cx, 58, { nosolid: true }); m.place(mid, 57.2, l.name); m.put(st.ban, cx - 4, 61); m.put(st.ban, cx + 7, 61);  // 깃발은 문지기 바깥쪽에. 문지기를 가리지 않게
   // 외문 구역
   room(m, l, big, 7, 45, 'dorm', '외문 숙소'); if (!st.water) { room(m, l, big, 13, 45, 'dorm', '외문 숙소', { n: 2, quiet: 1 }); m.put('log', 7, 53); m.put('log', 10, 53); }
   room(m, l, small, 33, 47, 'mess', '식당'); m.put('jar', 30, 52); m.put('jar', 32, 52); m.put('pot', 35, 52); m.put(st.ban, cx - 3, 50); m.put(st.ban, cx + 6, 50);

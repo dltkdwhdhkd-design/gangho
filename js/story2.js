@@ -370,7 +370,7 @@ Story.providers.push(function content2(id) {
   if (id === 'cloudmt') {
     if (at('c2a')) tr.push({ x: 18, y: 28, w: 10, h: 6, when: () => at('c2a'), run: arrive });
     n.push({ id: 'go', spr: 'Inspector', x: 22.5, y: 19, dir: 0, mark: () => at('c2b') || (at('c2f') && !!F().jang_clue && !F().go_told), when: () => !after('c3a'), talk: async () => { if (at('c2b')) await exam(); else if (at('c2f') && F().jang_clue && !F().go_told) await after2.told(); else await say('go', '수련을 게을리하지 마라, 사제.'); } });
-    n.push({ id: 'disc', spr: 'GreenNinja', x: 15, y: 19, dir: 3, talk: async () => { const c = await choice('연무장에서 대련할까?', ['대련한다', '그만둔다'], 'disc'); if (c === 0) await ctx.duel({ foes: ['disciple', 'disciple'], arena: 'court', title: '대련', optional: true, bgm: 'fight' }); } });
+    n.push({ id: 'disc', spr: 'GreenNinja', x: 12.6, y: 21.6, dir: 3, talk: async () => { const c = await choice('연무장에서 대련할까?', ['대련한다', '그만둔다'], 'disc'); if (c === 0) await ctx.duel({ foes: ['disciple', 'disciple'], arena: 'court', title: '대련', optional: true, bgm: 'fight' }); } });
     n.push({ id: 'smith2', spr: 'Caveman2', x: 32, y: 23, dir: 2, talk: async () => { await say('smith', '창운문 병기창이오. 값은 치르시오.'); await ctx.shop('창운문 병기창', [ctx.item.weapon('blue_sword'), ctx.item.weapon('ghost_blade'), ctx.item.weapon('dragon_spear'), ctx.item.weapon('iron_gauntlet'), ctx.item.potion()]); } });
     sp.push({ x: 39, y: 7, w: 3, h: 3, hint: '살펴보기', act: moss });
     if (after('c2d') || at('c2d')) ro.push({ spr: 'chars/GrayNinja', x: 36, y: 12, foes: ['shadow'] });
