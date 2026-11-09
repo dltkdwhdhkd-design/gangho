@@ -84,7 +84,7 @@ export function buildMaps() {
   m.road(3, 15, 42, 15, 2).road(22, 3, 22, 27, 2).road(9, 16, 9, 20, 2).road(32, 16, 32, 21, 2).road(21, 26, 24, 27, 2);
   m.fill(20, 12, 6, 3, 1);
   m.road(22, 0, 22, 4, 2).road(43, 15, 45, 15, 2).road(0, 15, 3, 15, 2);
-  m.house('house_red', 19, 8, 'inn', 8, 10, 1, { doorDx: 0 });
+  m.house('inn', 19, 8, 'inn', 8, 10, 1, { doorDx: 0 });
   m.put('hut_b', 26, 8).put('sign_dojo', 0, 0, { flat: false, nosolid: true }); m.stamps.pop();
   m.house('clay', 8, 11, 'smith', 7, 8, 1);
   m.house('shop_green', 31, 11, 'clinic', 7, 8, 1);
@@ -181,7 +181,7 @@ export function buildMaps() {
   m.fill(4, 4, 42, 28, 3).road(24, 32, 24, 35, 2);
   m.row('wall_h', 2, 2, 46).row('wall_h', 2, 32, 22).row('wall_h', 26, 32, 22).col('wall_h', 2, 2, 31).col('wall_h', 47, 2, 31);
   m.put('gate', 23, 31, { nosolid: true });
-  m.house('house_red', 8, 6, 'inn2', 8, 10, 1).house('shop_blue', 16, 7, 'shop2', 6, 7, 1).house('shop_green', 37, 7, 'hall2', 7, 8, 1).put('hut_b', 8, 20).put('hut_o', 36, 20).put('hut_o2', 15, 22).put('hut_b', 30, 23).put('wood_o', 40, 14);
+  m.house('inn', 8, 6, 'inn2', 8, 10, 1).house('shop_blue', 16, 7, 'shop2', 6, 7, 1).house('shop_green', 37, 7, 'hall2', 7, 8, 1).put('hut_b', 8, 20).put('hut_o', 36, 20).put('hut_o2', 15, 22).put('hut_b', 30, 23).put('wood_o', 40, 14);
   m.fill(19, 11, 12, 9, 5);
   m.put('banner1', 19, 9, { nosolid: true }).put('banner2', 22, 9, { nosolid: true }).put('banner5', 27, 9, { nosolid: true }).put('banner1', 30, 9, { nosolid: true }).put('hall', 21.5, 0, { dy: 8 });
   m.put('plum', 5, 14).put('plum_o', 4, 26).put('plum_o', 44, 5).put('statue', 19, 18).put('statue', 29, 18);

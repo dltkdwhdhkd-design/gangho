@@ -51,7 +51,7 @@ const FEAT = {
 const ROOMS = {}; // 방 id → { back, bx, by, kind, name, owner }
 const SW = id => STAMPS[id][3] / TS, SH = id => STAMPS[id][4] / TS;
 const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 11], dorm: [18, 12, 7, 11], mess: [18, 12, 7, 11], inn: [18, 12, 7, 11], shop: [16, 11, 6, 10], book: [16, 11, 6, 10], clinic: [14, 10, 5, 9], armory: [14, 10, 5, 9], gov: [20, 13, 8, 12], home: [14, 10, 5, 9], temple: [16, 11, 6, 10] };
-const HOUSES = ['hall', 'lodge', 'house_red', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];
+const HOUSES = ['hall', 'lodge', 'house_red', 'inn', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];
 function room(m, l, stamp, x, y, kind, name, o) {
   const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2, by: y + SH(stamp) + 1, kind, name, owner: l };
   m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0 }); if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
@@ -114,7 +114,7 @@ function townLayout(m, l) {
   m.border(['tree_round', 'grove_green'], [[cx - 1, H - 3, 6, 3]], 3);
   m.fill(cx, 3, 4, H - 3, 1); m.fill(3, 21, W - 6, 4, 1); m.fill(20, 14, 20, 18, 3);
   m.row('wall_h', 3, 43, cx - 3); m.row('wall_h', cx + 4, 43, W - cx - 7); m.put('gate_arch', cx, 41, { nosolid: true }); m.place(cx + 2, 40, l.name);
-  room(m, l, 'house_red', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); room(m, l, 'hall', 26, 2, 'gov', '관아');
+  room(m, l, 'inn', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); room(m, l, 'hall', 26, 2, 'gov', '관아');
   [['hut_b', 49, 13], ['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => room(m, l, st, x, y, 'home', '민가', { n: i, quiet: 1 }));
   m.put('banner2', 20, 13); m.put('banner1', 39, 13); m.put('statue', 29.5, 19, { nosolid: true }); m.put('awning', 21, 16, { nosolid: true }); m.put('awning', 34, 16, { nosolid: true }); m.put('jar', 22, 19); m.put('pot', 37, 19); m.put('sign_sword', 25, 26); m.scatter(['flower1', 'fern1'], 18, 4);
 }

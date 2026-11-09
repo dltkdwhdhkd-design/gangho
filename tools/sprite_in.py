@@ -3,7 +3,7 @@
 #
 #   python3 tools/sprite_in.py walk   <걷기 시트> <battle 시트|-> <이름>     인물 (3열×3행 + 3열×3행 → 4열×7행)
 #   python3 tools/sprite_in.py diag   <대각선 시트> <이름> [left]                    인물 대각선 걷기 (2열 3행). 왼쪽을 보게 그려 왔으면 left
-#   python3 tools/sprite_in.py grid   <시트> <열> <행> <칸폭> <칸높이> <종류/이름> [돌릴 각도]   몬스터, 이펙트, 동물처럼 칸이 나뉜 시트. 이펙트는 오른쪽을 향해야 한다
+#   python3 tools/sprite_in.py grid   <시트> <열> <행> <칸폭> <칸높이> <종류/이름> [돌릴 각도|m]   몬스터, 이펙트, 동물처럼 칸이 나뉜 시트. 이펙트는 오른쪽을 향해야 한다. 왼쪽을 보면 m
 #   python3 tools/sprite_in.py stamp  <그림> <소품 이름> <폭> <높이>                건물, 나무, 가구 한 장
 #   python3 tools/sprite_in.py stamps <시트> <열> <행> <이름,이름,...>                건물이나 가구를 한 장에 모아 받았을 때 (빈칸은 -)
 #   python3 tools/sprite_in.py icons  <시트> <열> <행> <물건id,물건id,...>            아이콘 묶음
@@ -28,6 +28,7 @@ def cut_bg(im, tol=38):
     a[..., 3] = np.where(np.isin(lab, list(edge)), 0, 255)
     # 외곽선에 묻은 배경색을 지운다. 배경이 마젠타면 초록이 낮고 빨강과 파랑이 높은 칸이다
     if c[0] > 180 and c[2] > 180 and c[1] < 90:
+        a[..., 3] = np.where(d, 0, a[..., 3])  # 마젠타는 그림에 안 쓰는 색이다. 팔과 몸 사이에 갇힌 배경도 지운다
         r, g, b = [a[..., i].astype(int) for i in range(3)]; fringe = (g < (r + b) * .36) & (r > 96) & (b > 96) & (np.abs(r - b) < 90)
         near = ndimage.binary_dilation(a[..., 3] == 0, iterations=3); a[..., 3] = np.where(fringe & near, 0, a[..., 3])
     return a
@@ -100,6 +101,7 @@ def fx_sheet(a, cols, rows, cw, ch, key, rot=0):
     h, w = a.shape[:2]; sw, sh = w // cols, h // rows; sheet = np.zeros((ch * rows, cw * cols, 4), 'uint8'); s = 1
     def cell(r, c):
         p = a[r * sh:(r + 1) * sh, c * sw:(c + 1) * sw]
+        if rot == 'm': return p[:, ::-1].copy()  # 왼쪽을 보게 그려 온 이펙트는 좌우로 뒤집는다
         return np.array(Image.fromarray(p, 'RGBA').rotate(rot, Image.NEAREST, expand=True)) if rot else p
     for r in range(rows):
         for c in range(cols):
@@ -135,7 +137,7 @@ def check():
 if __name__ == '__main__':
     k, *x = sys.argv[1:]
     if k == 'walk': walk(x[0], x[1], x[2])
-    elif k == 'grid': grid(x[0], int(x[1]), int(x[2]), int(x[3]), int(x[4]), x[5], int(x[6]) if len(x) > 6 else 0)
+    elif k == 'grid': grid(x[0], int(x[1]), int(x[2]), int(x[3]), int(x[4]), x[5], (x[6] if x[6] == 'm' else int(x[6])) if len(x) > 6 else 0)
     elif k == 'stamp': one(x[0], int(x[2]) * 2, int(x[3]) * 2, f'stamp/{x[1]}')
     elif k == 'diag': diag(x[0], x[1], len(x) > 2 and x[2] == 'left')
     elif k == 'stamps': stamps(x[0], int(x[1]), int(x[2]), x[3])
