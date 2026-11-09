@@ -114,19 +114,19 @@ Story.providers.push(function content7(id) {
   if (at('p0a')) {
     if (id === 'inn') tr.push({ x: 0, y: 0, w: 99, h: 99, when: () => at('p0a'), run: firstMeal });
     if (id === 'cheongha') {
-      n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, talk: async () => { await say('boat', '내렸으면 저리 비켜. 밥은 저 위 달맞이 객잔이여. 칼 찬 손님은 돈부터 내야 할 거고.'); } });
-      n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, talk: async () => { await say('kid', '와, 칼이다! 그거 진짜예요?'); await say('me', '밥집이 어디냐.', 'a'); await say('kid', '달맞이 객잔이요! 저기 위에요!'); } });
-      n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, talk: async () => { await say('town', '낭인이구먼. 이 마을에선 칼 뽑지 말게. 곽씨 성질이 보통이 아니야.'); } });
+      n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, barks: ['배 떠나오!', '바람 좋다.'], talk: async () => { await say('boat', '내렸으면 저리 비켜. 밥은 저 위 달맞이 객잔이여. 칼 찬 손님은 돈부터 내야 할 거고.'); } });
+      n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, life: 'wander', r: 2.5, barks: ['쟁반 던져 봐요!', '와아, 칼이다!', '술래잡기 할 사람!'], talk: async () => { await say('kid', '와, 칼이다! 그거 진짜예요?'); await say('me', '밥집이 어디냐.', 'a'); await say('kid', '달맞이 객잔이요! 저기 위에요!'); } });
+      n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, life: 'work', barks: () => G.S.flags.plague ? ['콜록…', '물 좀…'] : ['오늘 물때가 좋네.', '그물 손봐야지.', '곽씨네 국수 냄새 좋다.'], talk: async () => { await say('town', '낭인이구먼. 이 마을에선 칼 뽑지 말게. 곽씨 성질이 보통이 아니야.'); } });
     }
   }
   if (at('p3')) {
     if (id === 'clinic') n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => !!F().errand && !F().e_yun, talk: async () => { if (F().errand && !F().e_yun) await yunFirst(); else await say('yun', '무슨 일이에요?'); } });
     if (id === 'smith') n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => !!F().errand && !F().e_smith, talk: async () => { if (F().errand && !F().e_smith) await smithFirst(); else await say('smith', '불 앞에서 얼쩡대지 마라.'); } });
     if (id === 'cheongha') {
-      n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, mark: () => !!F().errand && !F().e_boat, talk: async () => { if (F().errand && !F().e_boat) await boatFirst(); else await say('boat', '오늘 물이 좋구먼.'); } });
-      n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, talk: async () => { await say('kid', '진짜 낭인이에요? 사람 죽여 봤어요?'); await say('me', '심부름 가는 중이야. 저리 가.', 'a'); } });
-      n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, talk: async () => { await say('town', '곽씨한테 오늘은 안 혼났나?'); } });
-      n.push({ id: 'town2', spr: 'Villager4', x: 12, y: 16.8, dir: 3, talk: async () => { await say('town2', '곽씨가 낯선 사람을 한 달이나 붙들어 두다니, 별일이야. 십칠 년을 혼자 살던 사람이.'); await say('town2', '처음 이 마을에 왔을 땐 온몸이 피투성이였지. 산적을 만났다고 하더라만.'); } });
+      n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, barks: ['배 떠나오!', '바람 좋다.'], mark: () => !!F().errand && !F().e_boat, talk: async () => { if (F().errand && !F().e_boat) await boatFirst(); else await say('boat', '오늘 물이 좋구먼.'); } });
+      n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, life: 'wander', r: 2.5, barks: ['쟁반 던져 봐요!', '와아, 칼이다!', '술래잡기 할 사람!'], talk: async () => { await say('kid', '진짜 낭인이에요? 사람 죽여 봤어요?'); await say('me', '심부름 가는 중이야. 저리 가.', 'a'); } });
+      n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, life: 'work', barks: () => G.S.flags.plague ? ['콜록…', '물 좀…'] : ['오늘 물때가 좋네.', '그물 손봐야지.', '곽씨네 국수 냄새 좋다.'], talk: async () => { await say('town', '곽씨한테 오늘은 안 혼났나?'); } });
+      n.push({ id: 'town2', spr: 'Villager4', x: 12, y: 16.8, dir: 3, life: 'work', barks: ['빨래가 산더미네.', '애들 또 어디 갔어.', '날 좋다.'], talk: async () => { await say('town2', '곽씨가 낯선 사람을 한 달이나 붙들어 두다니, 별일이야. 십칠 년을 혼자 살던 사람이.'); await say('town2', '처음 이 마을에 왔을 땐 온몸이 피투성이였지. 산적을 만났다고 하더라만.'); } });
     }
   }
   return { npcs: n, spots: [], trigs: tr, roam: [] };

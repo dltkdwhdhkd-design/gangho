@@ -9,7 +9,7 @@ import { LOOT } from './items.js';
 import { learn } from './state.js';
 import { LOCS } from './worlddata.js';
 import { EXTRA, SURNAME } from './freedata.js';
-import { TALK, CITYTALK, HOME } from './talkdata.js';
+import { TALK, CITYTALK, HOME, REG, CTX } from './talkdata.js';
 import { WEAPONS } from './data.js';
 import { CLANS } from './clandata.js';
 
@@ -149,6 +149,43 @@ export async function storyFac(f) {
   const c = await choice(f.name, opts.map(o => o[0])); await opts[c][1]();
 }
 const AWAY = { 구파일방: '장문인께서는 구화성 구파 회관에 가 계십니다. 뵈러 오셨다면 그쪽으로 가십시오.', 오대세가: '가주님은 구화성 세가 거리에 나가 계십니다.', 사파: '어른은 여기 없어. 찾지 마.', 마교: '교주님을 뵐 자격이 아직 없습니다.' };
+// ── 이름 없는 사람들 ──
+// 말할 때 이름과 얼굴을 띄운다. 같은 사람에게 다시 걸면 다음 말을 한다
+const ARTOF = { Villager: 'town', Villager2: 'town', Villager3: 'town', Villager4: 'town2', Woman: 'town2', Boy: 'kid' };
+const SAID = new Map();
+function npcSay(name, spr, text, art) { WHO._npc = { name, face: spr, art: art === undefined ? ARTOF[spr] : art || undefined }; return say('_npc', text); }
+function nextLine(key, list) { const i = SAID.get(key) || 0; SAID.set(key, i + 1); return list[i % list.length]; }
+// 강호 소식을 그 사람 말투로 옮긴다. "~붙었다." → "~붙었답니다."
+function hearsay(reg) {
+  const S = G.S, fr = S.fr; let t = null;
+  if (S.mode !== 'free' && G.jh.talkOfDay && Math.random() < .5) t = G.jh.talkOfDay();
+  if (!t && fr && fr.news) { const n = fr.news.find(x => +x.split('일:')[0] >= (S.day || 1) - 6); if (n) t = n.replace(/^\d+일: /, ''); }
+  if (!t) return null; t = t.split(/(?<=[.?!])\s/)[0].trim();
+  if (/[?!]$/.test(t) || !/다\.$/.test(t)) return t;
+  const end = { hap: ['답니다.', '이랍니다.', '했답니다.'], hao: ['다더군.', '이라더군.', '했다더군.'], ban: ['다더라.', '이라더라.', '했다더라.'] }[reg];
+  if (/하다\.$/.test(t)) return t.slice(0, -3) + end[2]; if (/이다\.$/.test(t)) return t.slice(0, -3) + end[1]; return t.slice(0, -2) + end[0];
+}
+function ctxLines(f, role) {
+  const reg = REG[f.id] || 'hap', C = CTX[reg], S = G.S, rep = G.jh.rep(f.id), out = [];
+  if (S.flags.night) out.push(pick(C.night));
+  if (role === 'gate') { if (rep >= 60 && S.title) out.push(pick(C.known).replace('{t}', S.title)); else if (rep >= 25) out.push(pick(C.friend)); else if (rep < 0) out.push(pick(C.wary)); }
+  else if (Math.random() < .45) { const n = hearsay(reg); if (n) out.push(pick(C.news).replace('{n}', n)); }
+  return out.map(t => t.replace('{f}', f.name));
+}
+const GREET = { hap: '어서 오십시오.', hao: '어서 오시오.', ban: '볼일 있나.' };
+const SHOUT = { hap: ['하앗!', '하나! 둘!', '얍!'], hao: ['하앗!', '하나! 둘!', '이얍!'], ban: ['…….', '흡!'] };
+const COACH = { hap: ['자세 낮춰!', '칼끝 봐라!', '다시!', '숨 고르고!'], hao: ['허리 펴!', '다시!', '소리 크게!', '발 붙여!'], ban: ['다시.', '느려.', '숨 죽여.'] };
+const SLEEPY = ['하암…', '졸리다.', '불 끌까.'];
+const FACEART = { gaebang: 'beggar', janggang: 'pirate', cheonma: 'believer' };
+// 문지기에게 물어볼 수 있는 것
+async function gateAsk(f, l, name, spr, art) {
+  const reg = REG[f.id] || 'hap', c = await choice('무엇을 물을까?', ['이곳에 대해 묻는다', '요즘 소식을 묻는다', '그만둔다']); if (c === 2) return;
+  if (c === 0) {
+    const head = f.group === '세가' || f.group === '오대세가' ? '가주님' : f.align === 'jeong' ? '장문인' : '어른', main = FEAT[f.id]?.[0] || '본전', yard = FEAT[f.id]?.[1] || '연무장';
+    await npcSay(name, spr, { hap: `${f.name} 말씀입니까.`, hao: `${f.name} 말이오?`, ban: '여기?' }[reg], art); await narr(f.desc);
+    await npcSay(name, spr, { hap: `${head}의 거처는 맨 위 ${main}입니다. 비무를 청하시거나 일손을 보태시려면 ${yard}의 사범님을 찾으십시오.`, hao: `${head}은 맨 위 ${main}에 계시오. 비무든 일거리든 ${yard} 사범한테 말하시오.`, ban: `위에 ${main}. 일거리는 ${yard} 사범한테.` }[reg], art);
+  } else { const n = hearsay(reg); await npcSay(name, spr, n ? pick(CTX[reg].news).replace('{n}', n) : { hap: '요즘은 조용합니다. 조용한 게 제일입니다.', hao: '요즘은 별일 없소.', ban: '없다.' }[reg], art); }
+}
 async function shopTalk(l) {
   const c = await choice(`${l.name} 저잣거리다. 없는 게 없다.`, ['물건 사기', '물건 팔기', '그만둔다']);
   if (c === 0) await ctx.shop(`${l.name} 저잣거리`, [ctx.item.potion(), ctx.item.stuff('rice', 4), ctx.item.stuff('noodlep', 4), ctx.item.stuff('tea', 44), ctx.item.stuff('sweets', 24), ctx.item.weapon('iron_sword'), ctx.item.weapon('iron_blade'), ctx.item.weapon('iron_spear'), ctx.item.weapon('fist_wrap')]);
@@ -166,9 +203,9 @@ async function boatTalk(l) {
 const elderName = (l, i) => { const R = fold(l.id + i); return `${SURNAME[Math.floor(R() * SURNAME.length)]} 장로`; };
 function roomNpcs(id, out) {
   const r = ROOMS[id], l = r.owner, kind = r.kind; const hash = [...id].reduce((a, c) => a * 31 + c.charCodeAt(0) & 65535, 7);
-  if (kind === 'home') { const [who, spr, t] = HOME[hash % HOME.length]; out.npcs.push({ id: 'res', spr, x: 7, y: 4 + hash % 2, dir: 0, hint: who, talk: async () => { await say(null, `${who}: ${t.replace(/\{p\}/g, l.name)}`); } }); return; }
-  if (kind === 'temple') { out.npcs.push({ id: 'res', spr: 'Monk', x: 8, y: 7.4, dir: 0, hint: '전각지기', talk: async () => { await say(null, `전각지기: ${['여기는 향만 피우면 됩니다. 소리 내지 마십시오.', '오늘은 손님이 없습니다. 어제도 없었습니다.', '바닥을 닦고 있었습니다. 밟으신 데 다시 닦겠습니다.'][hash % 3]}`); } }); return; }
-  if (kind === 'gov') { out.npcs.push({ id: 'res', spr: 'Noble', x: 10, y: 6.4, dir: 0, hint: '아전', talk: async () => { await say(null, `아전: ${l.name} 관아요. 칼 찬 사람끼리 싸운 일은 우리 소관이 아니오. 말은 그렇게 하라고 위에서 그랬소.`); } }); return; }
+  if (kind === 'home') { const [who, spr, t] = HOME[hash % HOME.length]; out.npcs.push({ id: 'res', spr, x: 7, y: 4 + hash % 2, dir: 0, hint: who, talk: async () => { await npcSay(who, spr, nextLine(id + 'res', t).replace(/\{p\}/g, l.name)); } }); return; }
+  if (kind === 'temple') { out.npcs.push({ id: 'res', spr: 'Monk', x: 8, y: 7.4, dir: 0, life: 'work', hint: '전각지기', talk: async () => { await npcSay('전각지기', 'Monk', nextLine(id + 'res', ['향만 피우고 가시면 됩니다. 소리는 내지 마십시오.', '바닥을 막 닦았습니다. 밟으신 데는 제가 다시 닦겠습니다.', '오늘은 손님이 없었습니다. 이런 날은 부처님도 쉬십니다.'])); } }); return; }
+  if (kind === 'gov') { out.npcs.push({ id: 'res', spr: 'Noble', x: 10, y: 6.4, dir: 0, life: 'work', hint: '아전', talk: async () => { await npcSay('아전', 'Noble', nextLine(id + 'res', [`${l.name} 관아요. 칼 찬 사람끼리 싸운 일은 우리 소관이 아니오. 위에서 그렇게 말하라고 했소.`, '세금 내러 왔소? 아니면 나가시오. 오늘 장부가 산더미요.', '방은 저쪽 벽에 붙어 있소. 현상금 걸린 놈 얼굴도 거기 있고.'])); } }); return; }
   if (kind === 'inn') out.npcs.push({ id: 'cinn', spr: 'OldWoman', x: 3, y: 4.6, dir: 0, hint: '객잔 주인', talk: () => innTalk(l) });
   if (kind === 'shop') out.npcs.push({ id: 'cshop', spr: 'Noble', x: 6, y: 3.4, dir: 0, hint: '장사꾼', talk: () => shopTalk(l) });
   if (kind === 'book') out.npcs.push({ id: 'cbook', spr: 'OldMan3', x: 6, y: 4.4, dir: 0, hint: '서점 주인', talk: () => G.arts.bookshop(l) });
@@ -176,13 +213,13 @@ function roomNpcs(id, out) {
   const st = ST[l.style], folk = st.folk, hostile = G.jh.hostile(f.id);
   if (kind === 'hall') { if (G.S.mode !== 'free' && f.hi && !hostile) out.npcs.push({ id: f.key, spr: f.spr, x: 11, y: 5, dir: 0, hint: f.name, talk: () => storyFac(f) }); if (G.S.mode !== 'free' && !f.hi) { const c = CLANS.find(q => q.id === f.id); if (c && !G.S.flags.boat_guhwa && !hostile) out.npcs.push({ ...G.clanNpc(c), x: 11, y: 5 }); else out.npcs.push({ id: 'keeper', spr: folk[0], x: 11, y: 5, dir: 0, hint: '본전을 지키는 제자', talk: async () => { await say(null, AWAY[f.group] || '어른은 지금 안 계십니다.'); } }); } }
   if (hostile) return;
-  const T = TALK[f.id] || []; const line = (i, alt) => T[i] || CHAT[l.style][alt % CHAT[l.style].length];
+  const T = TALK[f.id] || {}, room = T.room || CHAT[l.style], who = f.group === '세가' || f.group === '오대세가' ? '가솔' : '제자', fart = FACEART[f.id];
   if (kind === 'clinic') out.npcs.push({ id: 'heal', spr: 'OldMan', x: 4, y: 7, dir: 0, hint: '의원', talk: async () => { await say(null, `${l.name} 의원: 상처를 봐 드리겠습니다. 금창약도 채워 드리지요.`); G.S.potion = Math.max(G.S.potion, G.S.potionMax); Sound.sfx('heal', .6); } });
-  if (kind === 'armory') out.npcs.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 7.4, dir: 0, hint: '무기고지기', talk: () => armory(f) });
+  if (kind === 'armory') out.npcs.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 7.4, dir: 0, life: 'work', hint: '무기고지기', talk: () => armory(f) });
   if (kind === 'elder') { out.npcs.push({ id: 'elder1', spr: 'OldMan', x: 5, y: 5, dir: 0, hint: elderName(l, 1), talk: () => G.arts.tutor(f) }, { id: 'elder2', spr: 'OldMan2', x: 14, y: 5, dir: 0, hint: elderName(l, 2), talk: async () => { await say(null, `${elderName(l, 2)}: 강호에서 ${f.name} 이름을 지키는 게 칼보다 어렵네. 우호가 쌓이면 가르칠 게 더 있을 걸세.`); } }); }
   if (kind === 'lib') out.npcs.push({ id: 'elder3', spr: 'OldMan3', x: 9, y: 8.4, dir: 0, hint: `${elderName(l, 3)} (서고지기)`, talk: async () => { await narr(f.desc); await G.arts.library(f); } });
-  if (kind === 'dorm') out.npcs.push({ id: 'd1', spr: folk[0], x: 5, y: 5, dir: 3, hint: '제자', talk: async () => { await say(null, line(5, 0)); } }, { id: 'd2', spr: folk[1 % folk.length], x: 12, y: 5, dir: 2, hint: '제자', talk: async () => { await say(null, CHAT[l.style][id.length % CHAT[l.style].length]); } });
-  if (kind === 'mess') out.npcs.push({ id: 'cook', spr: 'Villager4', x: 3, y: 3.6, dir: 0, hint: '밥 짓는 사람', talk: async () => { await say(null, '밥때 되면 오시오. 지금 와 봐야 물밖에 없소.'); } }, { id: 'd3', spr: folk[0], x: 13, y: 4, dir: 0, hint: '제자', talk: async () => { await say(null, line(5, 2)); } });
+  if (kind === 'dorm') out.npcs.push({ id: 'd1', spr: folk[0], x: 5, y: 5, dir: 3, hint: who, barks: () => G.S.flags.night ? SLEEPY : null, talk: async () => { await npcSay(`${f.name} ${who}`, folk[0], nextLine(id + 'd1', [...ctxLines(f, 'room'), ...room]), fart); } }, { id: 'd2', spr: folk[1 % folk.length], x: 12, y: 5, dir: 2, life: 'work', hint: who, talk: async () => { await npcSay(`${f.name} ${who}`, folk[1 % folk.length], nextLine(id + 'd2', [...room].reverse()), fart); } });
+  if (kind === 'mess') out.npcs.push({ id: 'cook', spr: 'Villager4', x: 3, y: 3.6, dir: 0, life: 'work', hint: '밥 짓는 사람', barks: ['불 세다!', '간 봐야지.', '그릇 내와!'], talk: async () => { await npcSay('밥 짓는 사람', 'Villager4', nextLine(id + 'cook', ['밥때 되면 오시오. 지금은 물밖에 없소.', '손님 밥은 따로 안 짓소. 같이 먹고 싶으면 그릇 들고 줄 서시오.', '반찬 투정하는 사람은 다음 끼니를 굶기오. 여기 법이오.'])); } }, { id: 'd3', spr: folk[0], x: 13, y: 4, dir: 0, hint: who, talk: async () => { await npcSay(`${f.name} ${who}`, folk[0], nextLine(id + 'd3', [...ctxLines(f, 'room'), ...room]), fart); } });
 }
 async function armory(f) {
   const s = G.S, w = (LOOT[f.id] || []).find(k => WEAPONS[k] && !s.weapons.includes(k)); if (!w) { await say(null, '무기고지기: 내줄 만한 칼이 없소.'); return; } if (G.jh.rep(f.id) < 35) { await say(null, `무기고지기: 우리 사람한테만 파는 물건이오. (우호 35)`); return; }
@@ -194,21 +231,25 @@ function provider(id) {
   const l = LOCS.find(q => q.map === id); if (!l) return out;
   if (G.S.mode !== 'free' && !F.world_open && G.after && G.after('c1a')) F.world_open = true;
   if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
-  G.jh.ensure(); const town = l.style === 'town', chat = town ? CITYTALK[l.id] : [...(TALK[l.fac] || []), ...CHAT[l.style]], folk = town ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy', 'Villager4', 'OldMan'] : ST[l.style].folk, R = fold(id);
+  G.jh.ensure(); const town = l.style === 'town', chat = CHAT[l.style] || CHAT.town, folk = town ? ['Villager', 'Woman', 'Noble', 'Villager2', 'Boy', 'Villager4', 'OldMan'] : ST[l.style].folk, R = fold(id);
   if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: town ? 33 : 26, y: town ? 44.5 : 62, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
   if (town) {
-    [[23, 18], [36, 18], [26, 28], [33, 26], [12, 23], [46, 23], [30, 33], [18, 28]].forEach(([x, y], i) => { const line = chat[i % chat.length]; out.npcs.push({ id: `folk${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: '말 걸기', talk: async () => { await say(null, (i < 2 && G.jh.talkOfDay()) || line); } }); });
+    const CT = CITYTALK[l.id] || { talk: CHAT.town, bark: [] }, night = G.S.flags.night, spots = [[23, 18], [36, 18], [26, 28], [33, 26], [12, 23], [46, 23], [30, 33], [18, 28]].slice(0, night ? 3 : 8);
+    spots.forEach(([x, y], i) => { const spr = folk[i % folk.length]; out.npcs.push({ id: `folk${i}`, spr, x, y, dir: i % 4, life: i < 6 ? 'wander' : 'idle', r: 3, hint: '말 걸기', barks: () => night ? SLEEPY : CT.bark, talk: async () => { const day = i < 2 && G.jh.talkOfDay(); await npcSay(`${l.name} 사람`, spr, day || nextLine(id + i, CT.talk.slice(i % CT.talk.length).concat(CT.talk.slice(0, i % CT.talk.length)))); } }); });
     out.npcs.push({ id: 'cboard', spr: 'Gaebang', x: 30, y: 15.5, dir: 0, hint: '일거리 묻기', talk: () => G.freeBoard0() }); return out;
   }
   const f = G.free?.fac(l.fac); if (!f) return out;
   if (G.jh.fallen(f.id)) { out.npcs = [{ id: 'ash', spr: 'Villager', x: 23, y: 44, dir: 0, hint: '잿더미를 치우는 사람', talk: () => G.jh.rebuild(f) }]; return out; }
   if (G.jh.hostile(f.id)) { out.trigs.push({ x: 20, y: 56, w: 6, h: 4, when: () => !G.S.daily['gate_' + f.id], run: async () => { G.S.daily['gate_' + f.id] = 1; await G.jh.gate(f); } }); return out; }
-  // 문지기, 일하는 외문 제자, 연무장에서 수련하는 제자들, 사범
-  const say1 = t => async () => { await say(null, t); }, name = f.group === '세가' ? '가솔' : '제자';
-  out.npcs.push({ id: 'gate1', spr: folk[0], x: 19.6, y: 62, dir: 0, hint: '문지기', talk: say1(TALK[l.fac]?.[0] || chat[0]) }, { id: 'gate2', spr: folk[1 % folk.length], x: 26.4, y: 62, dir: 0, hint: '문지기', talk: say1(`어른들은 위쪽 ${FEAT[l.fac]?.[0] || '본전'}에 계십니다. 연무장을 지나 곧장 올라가십시오.`) });
-  [[17, 50], [28, 50], [12, 52], [34, 55]].forEach(([x, y], i) => out.npcs.push({ id: `work${i}`, spr: folk[i % folk.length], x, y, dir: i % 4, hint: `외문 ${name}`, talk: say1(chat[1 + i % (chat.length - 1)]) }));
-  for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) out.npcs.push({ id: `drill${r}${c}`, spr: folk[(r + c) % folk.length], x: YARD.x + 3.5 + c * 4.6, y: YARD.y + 6 + r * 3.4, dir: 1, drill: 1, hint: name, talk: say1(chat[3 + (r * 6 + c) % (chat.length - 3)]) });
-  out.npcs.push({ id: 'tutor', spr: folk[0], x: YARD.x + YARD.w / 2 + 1.5, y: YARD.y + 4, dir: 0, hint: '사범', talk: () => G.arts.tutor(f) });
+  // 문지기, 일하는 외문 제자, 연무장에서 수련하는 제자들, 사범. 밤에는 수련을 쉬고 일꾼도 줄어든다
+  const T = TALK[l.fac] || {}, reg = REG[l.fac] || 'hap', name = f.group === '세가' || f.group === '오대세가' ? '가솔' : '제자', night = G.S.flags.night, fart = FACEART[f.id];
+  const pool = (role, base) => [...ctxLines(f, role), ...(base || chat)];
+  const gateName = `${f.name} 문지기`;
+  out.npcs.push({ id: 'gate1', spr: folk[0], x: 19.6, y: 62, dir: 0, dir0: 0, hint: '문지기', greet: GREET[reg], talk: async () => { await npcSay(gateName, folk[0], nextLine(id + 'g1', pool('gate', T.gate)), fart); await gateAsk(f, l, gateName, folk[0], fart); } },
+    { id: 'gate2', spr: folk[1 % folk.length], x: 26.4, y: 62, dir: 0, dir0: 0, hint: '문지기', barks: () => night ? SLEEPY : null, talk: async () => { await npcSay(gateName, folk[1 % folk.length], nextLine(id + 'g2', [`어른들은 맨 위 ${FEAT[l.fac]?.[0] || '본전'}에 계십니다. 연무장을 지나 곧장 올라가십시오.`, ...(T.gate || []).slice().reverse()]), fart); } });
+  [[17, 50], [28, 50], [12, 52], [34, 55]].slice(0, night ? 2 : 4).forEach(([x, y], i) => { const spr = folk[i % folk.length], w = T.work || chat; out.npcs.push({ id: `work${i}`, spr, x, y, dir: i % 4, life: i % 2 ? 'work' : 'wander', r: 2.2, hint: `외문 ${name}`, barks: () => night ? SLEEPY : T.bark, talk: async () => { await npcSay(`외문 ${name}`, spr, nextLine(id + 'w' + i, pool('work', w.slice(i % w.length).concat(w.slice(0, i % w.length)))), fart); } }); });
+  if (!night) for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) { const spr = folk[(r + c) % folk.length], k = r * 6 + c; out.npcs.push({ id: `drill${r}${c}`, spr, x: YARD.x + 3.5 + c * 4.6, y: YARD.y + 6 + r * 3.4, dir: 1, drill: 1, hint: name, barks: k % 4 ? null : SHOUT[reg], talk: async () => { const d = T.drill || chat; await npcSay(`수련하는 ${name}`, spr, nextLine(id + 'd' + k, d.slice(k % d.length).concat(d.slice(0, k % d.length))), fart); } }); }
+  out.npcs.push({ id: 'tutor', spr: folk[0], x: YARD.x + YARD.w / 2 + 1.5, y: YARD.y + 4, dir: 0, dir0: 0, life: night ? 'idle' : 'wander', r: 1.6, hint: '사범', barks: night ? null : COACH[reg], talk: () => G.arts.tutor(f) });
   return out;
 }
 function init() {

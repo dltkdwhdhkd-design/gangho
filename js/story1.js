@@ -316,10 +316,10 @@ Story.providers.push(function content1(id) {
   if (id === 'smith' && F().burned) n.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 4.6, dir: 0, mark: () => (at('c1e') && !F().smith_gift) || !!G.ch.hook('smith'), talk: async () => { const h = G.ch.hook('smith'); if (h && !(at('c1e') && !F().smith_gift)) return h(); await talkTown.smith(); } });
   if (id === 'shop') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: talkTown.shopk });
   if (id === 'cheongha' && F().burned) {
-    n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, mark: () => at('c1a') && !F().c1boat, talk: talkTown.boat });
-    n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, talk: async () => { await say('kid', '아저씨, 쟁반 또 던져 봐요! 저번에 진짜 멋있었어요!'); } });
-    n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, talk: async () => { await say('town', F().plague ? '콜록… 우물물은 마시지 말게… 콜록…' : S().side === 'ma' ? '자네가 마교로 갔다는 말이 돌던데, 설마 아니겠지?' : S().side === 'sa' ? '흑도맹에 들어갔다면서. 그래도 여기 오면 밥은 먹고 가게.' : after('c1h') ? '자네가 흑풍채를 혼내 줬다며? 객잔 다시 지을 때 부르게. 나도 거들 테니.' : '곽씨가 그렇게 될 줄 누가 알았겠나. 객잔 불은 우리가 껐네.'); } });
-    n.push({ id: 'town2', spr: 'Villager4', x: 12, y: 16.8, dir: 3, talk: async () => { await say('town2', '그믐만 되면 낯선 사람이 객잔 앞에 봉투를 두고 갔어. 십 년도 넘었을걸.'); if (!F().note_env) { F().note_env = true; ctx.note('마을 아낙: 그믐마다 낯선 사람이 객잔에 봉투를 두고 갔다.'); } } });
+    n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, barks: ['배 떠나오!', '바람 좋다.'], mark: () => at('c1a') && !F().c1boat, talk: talkTown.boat });
+    n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, life: 'wander', r: 2.5, barks: ['쟁반 던져 봐요!', '와아, 칼이다!', '술래잡기 할 사람!'], talk: async () => { await say('kid', '아저씨, 쟁반 또 던져 봐요! 저번에 진짜 멋있었어요!'); } });
+    n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, life: 'work', barks: () => G.S.flags.plague ? ['콜록…', '물 좀…'] : ['오늘 물때가 좋네.', '그물 손봐야지.', '곽씨네 국수 냄새 좋다.'], talk: async () => { await say('town', F().plague ? '콜록… 우물물은 마시지 말게… 콜록…' : S().side === 'ma' ? '자네가 마교로 갔다는 말이 돌던데, 설마 아니겠지?' : S().side === 'sa' ? '흑도맹에 들어갔다면서. 그래도 여기 오면 밥은 먹고 가게.' : after('c1h') ? '자네가 흑풍채를 혼내 줬다며? 객잔 다시 지을 때 부르게. 나도 거들 테니.' : '곽씨가 그렇게 될 줄 누가 알았겠나. 객잔 불은 우리가 껐네.'); } });
+    n.push({ id: 'town2', spr: 'Villager4', x: 12, y: 16.8, dir: 3, life: 'work', barks: ['빨래가 산더미네.', '애들 또 어디 갔어.', '날 좋다.'], talk: async () => { await say('town2', '그믐만 되면 낯선 사람이 객잔 앞에 봉투를 두고 갔어. 십 년도 넘었을걸.'); if (!F().note_env) { F().note_env = true; ctx.note('마을 아낙: 그믐마다 낯선 사람이 객잔에 봉투를 두고 갔다.'); } } });
     sp.push({ x: 24, y: 16, w: 1, h: 1, hint: '방 보기', act: wantedBoard });
     sp.push({ x: 41, y: 13, w: 1, h: 1, hint: '이정표', act: async () => { await say(null, '동쪽: 산길. 산길을 지나 북쪽은 흑풍채, 남쪽은 창운산.'); } });
     sp.push({ x: 26, y: 13, w: 2, h: 1, hint: '수련하기', act: practice });

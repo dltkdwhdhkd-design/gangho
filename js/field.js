@@ -27,7 +27,11 @@ export class Field {
   }
   refresh(fresh) {
     const id = this.m.id, c = Story.content(id);
-    this.npcs = c.npcs.map(n => ({ dir: 0, walk: 0, ...n, x: n.x * TS, y: n.y * TS, hx: n.x * TS, hy: n.y * TS }));
+    const old = fresh ? new Map() : new Map(this.npcs.map(n => [n.id, n]));
+    this.npcs = c.npcs.map(n => { const q = { dir: 0, walk: 0, ...n, x: n.x * TS, y: n.y * TS, hx: n.x * TS, hy: n.y * TS }, o = old.get(n.id);
+      if (o && o.hx === q.hx && o.hy === q.hy && q.life && q.life !== 'still') Object.assign(q, { x: o.x, y: o.y, dir: o.dir, lt: o.lt, greetT: o.greetT });  // 같은 사람이면 서 있던 자리를 지킨다
+      return q; });
+    if (fresh) this.barkT = 2.5;
     this.spots = c.spots; this.trigs = c.trigs;
     if (fresh) this.animals = c.hunt.map(a => ({ ...a, ...G.life.animals[a.kind], x: a.x * TS, y: a.y * TS, vx: 0, vy: 0, t: rnd(1, 3), walk: 0 }));
     if (fresh) this.roam = c.roam.map(r => ({ ...r, x: r.x * TS, y: r.y * TS, hx: r.x * TS, hy: r.y * TS, dir: 0, walk: 0, t: rnd(1, 3), vx: 0, vy: 0 }));
@@ -123,7 +127,68 @@ export class Field {
     for (const s of this.spots) { if (s.when && !s.when()) continue; if (x > s.x * TS - 6 && x < (s.x + s.w) * TS + 6 && y > s.y * TS - 6 && y < (s.y + s.h) * TS + 6) return s; }
     return null;
   }
-  tickNpcs(dt) { for (const n of this.npcs) { if (n.drill) n.walk = (n.walk || 0) + dt * 2.2; if (n.path) { const t = n.path[0]; if (!t) { n.path = null; n.moving = false; n.done && n.done(); continue; } const dx = t[0] * TS - n.x, dy = t[1] * TS - n.y, d = hyp(dx, dy); if (d < 1.5) { n.path.shift(); continue; } n.x += dx / d * 56 * dt; n.y += dy / d * 56 * dt; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 8; } } }
+  tickNpcs(dt) { for (const n of this.npcs) { if (n.path) { const t = n.path[0]; if (!t) { n.path = null; n.moving = false; n.done && n.done(); continue; } const dx = t[0] * TS - n.x, dy = t[1] * TS - n.y, d = hyp(dx, dy); if (d < 1.5) { n.path.shift(); continue; } n.x += dx / d * 56 * dt; n.y += dy / d * 56 * dt; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 8; } } if (!this.busy) this.tickLife(dt); }
+  // ── 사람들의 하루 ──
+  // life: idle 둘러보기(기본), wander 근처를 오가기, work 제자리에서 일하기, drill 연무장 수련, still 꼼짝 않기
+  // barks: 주인공이 근처를 지날 때 머리 위에 뜨는 혼잣말. greet: 가까이 오면 한 번 건네는 인사
+  tickLife(dt) {
+    const p = this.p, m = this.m, t = this.t, moving = Input.dir().x || Input.dir().y;
+    const freeAt = (x, y, me) => !m.blocked(x, y) && hyp(p.x - x, p.y - y) > 12 && !this.npcs.some(o => o !== me && hyp(o.x - x, o.y - y) < 9);
+    for (const n of this.npcs) {
+      if (n.bubT > 0) n.bubT -= dt; if (n.greetT > 0) n.greetT -= dt;
+      if (n.stamp || n.path) continue;
+      const life = n.life || (n.drill ? 'drill' : 'idle'); if (life === 'still') continue;
+      const d = hyp(p.x - n.x, p.y - n.y); n.lt = (n.lt ?? rnd(.4, 3)) - dt;
+      if (n.greet && d < 40 && !(n.greetT > 0)) { n.greetT = 40; this.bubble(n, typeof n.greet === 'function' ? n.greet() : n.greet); }
+      if (life === 'drill') {  // 다 같이 같은 순서로 초식을 밟는다
+        const ph = (t + (n.lag || 0)) % 3.2, k = Math.floor(t / 3.2) % 2;
+        n.pose = ph < .7 ? 4 : ph < 1.5 ? undefined : ph < 2.2 ? 6 : 4; n.walk = ph >= .7 && ph < 1.5 ? (ph - .7) * 6 : 0;
+        n.dir = ph >= 2.2 ? (k ? 2 : 3) : 1; continue;
+      }
+      if (d < 26 && !n.mv) { if (life !== 'work' || moving) this.face(n); n.pose = undefined; n.walk = 0; continue; }  // 다가오면 멈춰서 쳐다본다
+      if (life === 'work') {
+        if (n.lt <= 0) { n.lt = rnd(1.4, 2.6); n.wk = (n.wk || 0) + 1; if (n.wk % 3 === 0) n.dir = [0, 2, 3][Math.floor(rnd(3))]; }
+        n.pose = n.lt > 1 ? 4 : undefined; n.walk = 0; continue;
+      }
+      if (life === 'wander' && n.mv) {
+        const dx = n.mv[0] - n.x, dy = n.mv[1] - n.y, q = hyp(dx, dy), sp = n.speed || 22;
+        if (q < 2 || n.lt < -6) { n.mv = null; n.walk = 0; n.lt = rnd(1.5, 4.5); continue; }
+        const nx = n.x + dx / q * sp * dt, ny = n.y + dy / q * sp * dt;
+        if (!freeAt(nx, ny, n)) { n.mv = null; n.walk = 0; n.lt = rnd(.8, 2); continue; }
+        n.x = nx; n.y = ny; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 6; continue;
+      }
+      if (n.lt > 0) continue;
+      if (life === 'wander' && Math.random() < .6) {
+        const r = (n.r || 2.5) * TS;
+        for (let i = 0; i < 6; i++) { const x = n.hx + rnd(-r, r), y = n.hy + rnd(-r * .7, r * .7); if (freeAt(x, y, n)) { n.mv = [x, y]; n.lt = 0; break; } }
+        if (n.mv) continue;
+      }
+      n.lt = rnd(2.2, 5.5); n.pose = undefined;
+      n.dir = d < 90 && Math.random() < .5 ? (Math.abs(p.x - n.x) > Math.abs(p.y - n.y) ? (p.x < n.x ? 2 : 3) : (p.y < n.y ? 1 : 0)) : Math.random() < .5 && n.dir0 !== undefined ? n.dir0 : Math.floor(rnd(4));
+    }
+    // 혼잣말: 가까이 있는 사람 하나가 가끔 입을 연다
+    this.barkT = (this.barkT ?? 3) - dt;
+    if (this.barkT <= 0) {
+      this.barkT = rnd(3.5, 7.5);
+      const c = this.npcs.filter(n => n.barks && !(n.bubT > 0) && hyp(p.x - n.x, p.y - n.y) < 110 && n !== this._lastBark);
+      if (c.length) { const n = c[Math.floor(rnd(c.length))], b = typeof n.barks === 'function' ? n.barks() : n.barks; if (b && b.length) { this.bubble(n, b[Math.floor(rnd(b.length))]); this._lastBark = n; } }
+    }
+  }
+  bubble(n, text) { if (!text) return; n.bub = text; n.bubT = Math.min(5, 2.2 + text.length * .07); }
+  drawBubbles(c, ox, oy) {
+    if (this.busy) return; const on = this.npcs.filter(n => n.bubT > 0 && n.bub); if (!on.length) return;
+    c.setTransform(1, 0, 0, 1, 0, 0); c.font = '15px Galmuri11, Galmuri14, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (const n of on) {
+      const x = (n.x + ox) * SCALE, y = (n.y - 27 + oy) * SCALE; if (x < -200 || x > 1480 || y < 0 || y > 760) continue;
+      const w = Math.min(420, c.measureText(n.bub).width + 22), h = 30, a = Math.min(1, n.bubT / .35);
+      c.globalAlpha = a; c.fillStyle = '#fbf3df'; c.strokeStyle = '#2a2018'; c.lineWidth = 3;
+      c.beginPath(); c.roundRect(Math.round(x - w / 2), Math.round(y - h), Math.round(w), h, 8); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(x - 6, y - 1.5); c.lineTo(x, y + 8); c.lineTo(x + 6, y - 1.5); c.fill();
+      c.beginPath(); c.moveTo(x - 6, y); c.lineTo(x, y + 8); c.lineTo(x + 6, y); c.stroke();
+      c.fillStyle = '#2a2018'; c.fillText(n.bub, x, y - h / 2 + 1, 400);
+    }
+    c.globalAlpha = 1; c.textBaseline = 'alphabetic';
+  }
   tickRoam(dt) {
     const p = this.p, m = this.m;
     for (const r of this.roam) {
@@ -163,7 +228,7 @@ export class Field {
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) { drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined }); }
-      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y); drawActorSprite(c, key, n.dir, Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined });
+      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y); drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined });
         mark(n); }
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha') { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }
@@ -183,6 +248,7 @@ export class Field {
       c.setTransform(1, 0, 0, 1, 0, 0); c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const x = (l.x * TS + ox) * SCALE, y = (l.y * TS + oy) * SCALE; if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); }
     }
+    this.drawBubbles(c, ox, oy);
     tickMini(this);
   }
   ambient(c) {
