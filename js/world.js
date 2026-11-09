@@ -314,7 +314,8 @@ function china(c, W, H, o = {}) {
   if (!o.mini && ready && roadLayer()) c.drawImage(ROADMAP, 0, 0, W, H);
   if (o.mini) { c.fillStyle = '#2a2018'; for (const l of LOCS) { const [a, b] = P(...l.px); c.fillRect(a - 1, b - 1, 2, 2); } return; }
   c.textAlign = 'center'; const seen = G.S.seen || {}, free = G.S.mode === 'free', F = G.S.flags;
-  c.font = '22px Galmuri11, sans-serif'; c.lineJoin = 'round'; for (const [n, x, y] of PROV) { const [a, b] = P(x, y); c.lineWidth = 4; c.strokeStyle = 'rgba(40,28,16,.35)'; c.strokeText(n, a, b); c.fillStyle = 'rgba(255,244,214,.62)'; c.fillText(n, a, b); }
+  // 지방 이름은 땅 이름처럼 옅고 크게. 고을 표식과 겹치는 자리면 빼 둔다
+  c.font = '22px Galmuri11, sans-serif'; c.lineJoin = 'round'; for (const [n, x, y] of PROV) { const [a, b] = P(x, y); if (!o.mini && LOCS.some(l => (free || !l.need || F[l.need]) && Math.abs(l.px[0] * sx - a) < 34 && Math.abs(l.px[1] * sy - b) < 22)) continue; c.lineWidth = 4; c.strokeStyle = 'rgba(40,28,16,.35)'; c.strokeText(n, a, b); c.fillStyle = 'rgba(255,244,214,.62)'; c.fillText(n, a, b); }
   if (!ready) { c.strokeStyle = 'rgba(122,90,58,.5)'; c.lineWidth = 2; for (const [a, b] of ROADS) { const p = LOCS.find(q => q.id === a), q = LOCS.find(z => z.id === b); if (!free && (p.need && !F[p.need] || q.need && !F[q.need])) continue; const [x0, y0] = P(...p.px), [x1, y1] = P(...q.px); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); } }
   // 표식과 이름표. 이름표끼리 겹치면 자리를 옮기고, 그래도 겹치면 이름은 빼고 표식만 둔다(손을 대면 이름이 뜬다)
   const COL = { sect: '#3f73c4', evil: '#c8483a', out: '#7a4fb0', city: '#2a2018', old: '#b08a3a' }, ICON = { sect: 'map/sect', evil: 'map/evil', out: 'map/out', city: 'map/city', old: 'map/old' }; hits = [];
