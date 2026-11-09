@@ -3,6 +3,7 @@ import { G, TS, rint, pick, IMG } from './core.js';
 import { FURN, HOUSES } from './items.js';
 import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tiles.js';
 import { meta, corners, hitsBox, inside } from './iso.js';
+import { buildIsoRoom } from './isoroom.js';
 
 // 쿼터뷰 미리보기에서는 바깥 지도를 k배 넓게 편다. 쿼터뷰 집이 크기 때문이다
 // 지도를 짜는 함수와 이야기 쪽 좌표는 그대로 두고, 여기와 Story.content, field.load에서 k를 곱한다
@@ -86,6 +87,11 @@ class MapDef {
     if (this.pave) for (const p of this.pave) paintPave(x, p);
     for (const s of this.stamps) if (s.flat) drawStamp(x, s.name, s.x, s.y);
     this.canvas = c; this.objs = this.stamps.filter(s => !s.flat);
+    if (this.room && isoMode() && this.id !== 'myhouse') { // 쿼터뷰 미리보기: 바닥만 칠해 눕히고 뒷벽 두 면을 세운다
+      const f = document.createElement('canvas'); f.width = c.width; f.height = c.height; const fx = f.getContext('2d'); fx.imageSmoothingEnabled = false;
+      paintRoom(fx, this.w, this.h, this.roomStyle || 0, { carpet: this.carpet, floorOnly: true }); for (const s of this.stamps) if (s.flat) drawStamp(fx, s.name, s.x, s.y);
+      buildIsoRoom(this, f);
+    }
     if (this.room) { this.solids.push({ x: 0, y: 0, w: this.w * TS, h: TS + 4 }, { x: 0, y: 0, w: 10, h: this.h * TS }, { x: this.w * TS - 10, y: 0, w: 10, h: this.h * TS }, { x: 0, y: this.h * TS - 10, w: this.w * TS, h: 10 }); }
     return this;
   }

@@ -3,6 +3,7 @@ import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, 
 import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
 import { drawIso, orderKeys, inside as isoInside } from './iso.js';
+import { proj, toGrid, toScreen } from './isoroom.js';
 import { drawStamp, STAMPS } from './tiles.js';
 import { save } from './state.js';
 import { Story } from './story.js';
@@ -74,7 +75,9 @@ export class Field {
     if (d.x || d.y) {
       moving = true;
       p.dir = Math.abs(d.x) >= Math.abs(d.y) * .55 ? (d.x < 0 ? 2 : 3) : (d.y < 0 ? 1 : 0); p.diag = d.x && d.y && Math.min(Math.abs(d.x), Math.abs(d.y)) > .3 ? (d.y > 0 ? 0 : 1) + (d.x < 0 ? 2 : 0) : undefined;
-      const nx = p.x + d.x * sp * dt, ny = p.y + d.y * sp * dt;
+      let [gx, gy] = m.isoRoom ? toGrid(d.x, d.y) : [d.x, d.y];  // 쿼터뷰 방은 화면 방향을 칸 방향으로 돌린다
+      if (m.isoRoom && d.y > 0) { const H = m.h * TS, q = m.portals.find(q => q.y + q.h >= H - 2 && p.y > H - 4 * TS && Math.abs(q.x + q.w / 2 - p.x) < 4 * TS); if (q) gx = clamp((q.x + q.w / 2 - p.x) / 12, -1, 1) * Math.max(.6, gy); }  // 문 가까이서 아래로 가면 문으로 끌어 준다
+      const nx = p.x + gx * sp * dt, ny = p.y + gy * sp * dt;
       const blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && hyp(n.x - x, (n.y - 1) - y) < 8);
       const ox = p.x, oy = p.y; if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
       // 발자취는 거리마다 남긴다. 경공으로 달려도 뒤따르는 동료와의 거리가 같다
@@ -129,9 +132,9 @@ export class Field {
     }
     this.arrows = this.arrows.filter(r => r.t > 0);
   }
-  face(n) { const dx = this.p.x - n.x, dy = this.p.y - n.y; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); }
+  face(n) { let dx = this.p.x - n.x, dy = this.p.y - n.y; if (this.m.isoRoom) [dx, dy] = toScreen(dx, dy); n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); }
   target() {
-    const p = this.p, [fx, fy] = DIRV[p.dir], x = p.x + fx * 10, y = p.y - 3 + fy * 10;
+    const p = this.p; let [fx, fy] = DIRV[p.dir]; if (this.m.isoRoom) { const [a, b] = toGrid(fx, fy), l = Math.hypot(a, b) || 1; fx = a / l; fy = b / l; } const x = p.x + fx * 10, y = p.y - 3 + fy * 10;
     let best = null, bd = 19;
     for (const n of this.npcs) { if (n.hide > 0) continue; const d = hyp(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
@@ -262,11 +265,18 @@ export class Field {
     }
   }
   camera(k) {
-    const m = this.m, W = m.w * TS, H = m.h * TS, p = this.p;
+    const m = this.m, ir = m.isoRoom, W = ir ? ir.W : m.w * TS, H = ir ? ir.H : m.h * TS, p = ir ? (([x, y]) => ({ x, y }))(proj(m, this.p.x, this.p.y)) : this.p;
     const x = W <= VW ? (W - VW) / 2 : clamp(p.x - VW / 2, 0, W - VW), y = H <= VH ? (H - VH) / 2 : clamp(p.y - VH / 2, 0, H - VH);
     this.cam.x += (x - this.cam.x) * k; this.cam.y += (y - this.cam.y) * k;
   }
   draw(c) {
+    const m = this.m; if (!m.isoRoom) return this.drawScene(c);
+    const seen = new Set(), saved = [], sw = o => { if (!o || seen.has(o) || o.x === undefined) return; seen.add(o); saved.push([o, o.x, o.y, o.dir, o.diag]); [o.x, o.y] = proj(m, o.x, o.y);
+      if (o !== this.p && o.walk && o.dir !== undefined && !this.trail.includes(o)) { const [sx, sy] = toScreen(...DIRV[o.dir]); o.dir = Math.abs(sx) >= Math.abs(sy) * .55 ? (sx < 0 ? 2 : 3) : (sy < 0 ? 1 : 0); o.diag = (sy > 0 ? 0 : 1) + (sx < 0 ? 2 : 0); } };  // 걷는 사람은 칸 방향을 화면 방향으로
+    this._gp = { x: this.p.x, y: this.p.y }; [this.p, ...this.npcs, ...this.trail, ...this.roam, ...this.animals, ...this.arrows].forEach(sw); const objs = m.objs; m.objs = m.isoObjs;
+    try { this.drawScene(c); } finally { for (const [o, x, y, d, g] of saved) { o.x = x; o.y = y; o.dir = d; o.diag = g; } m.objs = objs; }
+  }
+  drawScene(c) {
     const m = this.m, p = this.p, S = G.S, cam = this.cam;
     c.setTransform(SCALE, 0, 0, SCALE, 0, 0); c.imageSmoothingEnabled = false;
     c.fillStyle = '#000'; c.fillRect(0, 0, VW, VH);
@@ -316,7 +326,7 @@ export class Field {
   }
   // 나가는 곳 표시: 맵 가장자리 출구와 방문에 들썩이는 화살표, 가까이 가면 어디로 가는지 적는다
   drawExits(c, ox, oy) {
-    const m = this.m, p = this.p, S = G.S; if (m.live || this.busy) return;
+    const m = this.m, p = m.isoRoom ? this._gp : this.p, S = G.S; if (m.live || this.busy) return;
     const W = m.w * TS, H = m.h * TS, t = performance.now() / 1000; c.setTransform(1, 0, 0, 1, 0, 0);
     for (const q of m.portals) {
       if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) continue;
@@ -324,7 +334,8 @@ export class Field {
       if (!dir && !door) continue;
       const cx = q.x + q.w / 2, cy = q.y + q.h / 2, d = Math.hypot(p.x - cx, p.y - cy) / TS; if (d > (dir ? 10 : 3.5)) continue;
       let ax = cx, ay = cy; if (dir === 'd') ay = q.y + q.h - 12; if (dir === 'u') ay = q.y + 12; if (dir === 'l') ax = q.x + 12; if (dir === 'r') ax = q.x + q.w - 12; if (door) { dir = 'u'; ay = q.y + q.h + 10; }
-      const b = Math.sin(t * 5) * 3, a = Math.max(.25, Math.min(1, (10 - d) / 4)), [vx, vy] = { d: [0, 1], u: [0, -1], l: [-1, 0], r: [1, 0] }[dir];
+      let [vx, vy] = { d: [0, 1], u: [0, -1], l: [-1, 0], r: [1, 0] }[dir]; const b = Math.sin(t * 5) * 3, a = Math.max(.25, Math.min(1, (10 - d) / 4));
+      if (m.isoRoom) { [ax, ay] = proj(m, ax, ay); const [sx, sy] = toScreen(vx, vy), l = Math.hypot(sx, sy); vx = sx / l; vy = sy / l; }  // 쿼터뷰 방: 문은 왼쪽 아래 가장자리에 난다
       const X = (ax + ox) * SCALE + vx * b * 2, Y = (ay + oy) * SCALE + vy * b * 2, k = door ? 9 : 13, px = -vy, py = vx;
       c.globalAlpha = a; c.lineJoin = 'round';
       for (const [col, lw] of [['#2a1608', 9], ['#ffe08a', 4]]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); for (const o of [0, -k * .9]) { c.moveTo(X + px * k - vx * k * .6 + vx * o, Y + py * k - vy * k * .6 + vy * o); c.lineTo(X + vx * k * .4 + vx * o, Y + vy * k * .4 + vy * o); c.lineTo(X - px * k - vx * k * .6 + vx * o, Y - py * k - vy * k * .6 + vy * o); } c.stroke(); }

@@ -59,7 +59,7 @@ function room(m, l, stamp, x, y, kind, name, o) {
 function makeRoom(id) {
   if (/^r_\w+_home$/.test(id) && !ROOMS[id]) { const g = id.replace(/_home$/, '_gamble'); makeRoom(g); if (MAPS[g]) MAPS[id] = MAPS[g]; if (ROOMS[g]) ROOMS[id] = ROOMS[g]; return; }  // 예전 저장: 첫 민가 자리에 도박장이 섰다
   const info = ROOMS[id] || (() => { if (id.startsWith('h_')) return null; const o = LOCS.find(q => id.startsWith(`r_${q.id}_`)); if (o) { G.world.ensure(o.map); return ROOMS[id]; } })(); if (!info) { console.warn('없는 방', id); return; }
-  const [w, h, ex] = ROOM[info.kind], dark = ['fort', 'dark'].includes(info.owner.style), m = makeMap(id, w, h, { name: `${info.owner.name} ${info.name}`, bgm: info.owner.style === 'temple' ? 'temple' : 'quiet', room: true, roomStyle: dark ? 1 : 0, arena: 'room', tint: dark ? 'rgba(30,8,20,.22)' : undefined });
+  const [w, h, ex] = ROOM[info.kind], dark = ['fort', 'dark'].includes(info.owner.style), m = makeMap(id, w, h, { name: `${info.owner.name} ${info.name}`, bgm: info.owner.style === 'temple' ? 'temple' : 'quiet', room: true, roomStyle: dark ? 1 : 0, roomKind: info.kind, arena: 'room', tint: dark ? 'rgba(30,8,20,.22)' : undefined });
   const k = info.kind;
   // 본전: 문에서 장문인 자리까지 붉은 깔개, 양옆으로 붉은 기둥, 자리 뒤에 병풍, 앞에 향로
   if (k === 'hall') { m.carpet = [9, 3, 4, 11]; m.put('screen', 9.25, .55).put('f_chair', 10.5, 2.6).put('censer', 6.6, 2.2).put('censer', 14.3, 2.2).put('f_scroll', 3.5, 1).put('f_scroll', 17.5, 1).put('rack', 1, 2).put('rack', 19, 2); for (const y of [3.4, 8]) m.put('pillar', 7.6, y).put('pillar', 13.65, y); m.put('lantern', 3, 6).put('lantern', 18, 6).put('longtable', 2.6, 9.4).put('longtable', 16.4, 9.4).put('plant', 1, 11).put('plant', 20, 11); }

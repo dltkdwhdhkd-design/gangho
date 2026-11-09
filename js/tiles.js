@@ -140,6 +140,7 @@ export function paintRoom(c, w, h, style = 0, opt = {}) {
     c.fillStyle = '#7e1a1a'; c.fillRect(X, Y, W, H); c.fillStyle = '#c9a046'; c.fillRect(X + 2, Y + 2, W - 4, 1); c.fillRect(X + 2, Y + 2, 1, H - 2); c.fillRect(X + W - 3, Y + 2, 1, H - 2);
     c.fillStyle = '#9a2622'; c.fillRect(X + 4, Y + 4, W - 8, H - 4); c.fillStyle = '#b8902e'; for (let y = Y + 10; y < Y + H - 4; y += 12) { c.fillRect(X + W / 2 - 2, y, 4, 1); c.fillRect(X + W / 2 - 1, y - 1, 2, 3); }
   }
+  if (opt.floorOnly) return;  // 쿼터뷰 방은 벽을 따로 세운다
   const ox = style === 1 ? 0 : 5, oy = style === 1 ? 6 : 0, doors = opt.doors || [], isDoor = x => doors.some(([a, b]) => x >= a && x < b);
   const t = (sx, sy, x, y) => c.drawImage(wall, (ox + sx) * TS, (oy + sy) * TS, TS, TS, x * TS, y * TS, TS, TS);
   for (let x = 1; x < w - 1; x++) { t(1 + (x % 2), 0, x, 0); if (!isDoor(x)) t(1 + (x % 2), 4, x, h - 1); }
