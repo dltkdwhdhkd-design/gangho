@@ -3,7 +3,7 @@ import { TITLES } from './titles.js';
 import { G, IMG, ART, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS, josa } from './core.js';
 import { Keys, KEY_ACTIONS, KEY_PRESETS } from './core.js';
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
-import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take } from './state.js';
+import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take, SLOTS, slotInfo, autoInfo, saveSlot, loadSlot, delSlot, exportSlot, readSaveFile, importToSlot } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
 import { Story } from './story.js';
@@ -22,9 +22,10 @@ function titleBg(c) {
 }
 export function showTitle() {
   G.scene = 'title'; G.bgDraw = titleBg; $('#hud').innerHTML = '';
-  const s = $('#screen'); s.innerHTML = `<div id="title"><div class="logo">강호행</div><div class="han">江湖行</div><div class="sub">군적에서 지워진 낭인, 찢어진 비급 일곱 장</div><div class="col"><button class="btn pri" id="bNew">새로 시작</button><button class="btn" id="bLoad">이어 하기</button><button class="btn" id="bFile">저장 파일 불러오기</button><input type="file" id="fFile" accept=".json,application/json" hidden></div><div class="foot">도트 그림·소리: Ninja Adventure (CC0) · 글꼴: 갈무리 (OFL)</div></div>`;
+  const s = $('#screen'); s.innerHTML = `<div id="title"><div class="logo">강호행</div><div class="han">江湖行</div><div class="sub">군적에서 지워진 낭인, 찢어진 비급 일곱 장</div><div class="col"><button class="btn pri" id="bNew">새로 시작</button><button class="btn" id="bLoad">이어 하기</button><button class="btn" id="bSlot">저장 칸에서 불러오기</button><button class="btn" id="bFile">저장 파일 불러오기</button><input type="file" id="fFile" accept=".json,application/json" hidden></div><div class="foot">도트 그림·소리: Ninja Adventure (CC0) · 글꼴: 갈무리 (OFL)</div></div>`;
   $('#bNew').onclick = () => { Sound.init(); Sound.resume(); Sound.bgm('story'); showCreate(); };
   $('#bFile').onclick = () => $('#fFile').click();
+  $('#bSlot').onclick = () => { Sound.init(); Sound.resume(); showSlotScreen(); };
   $('#fFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { G.S = await loadFromFile(f); Sound.init(); Sound.resume(); s.innerHTML = ''; Story.resume(); } catch (err) { toast('저장 파일을 읽지 못했습니다', 3); } };
   const l = $('#bLoad'); if (!hasSave()) l.disabled = true; else l.classList.add('pri'); (hasSave() ? l : $('#bNew')).focus(); l.onclick = () => { Sound.init(); G.S = load(); s.innerHTML = ''; Story.resume(); };
 }
@@ -55,12 +56,12 @@ export function closeMenu() { G.keyWait = false; G.menuOpen = false; $('#modal')
 function menuKey(e) { if (G.keyWait) return; if (e.repeat || (Keys.is('opt', e.code) && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || Keys.is('opt', e.code)) { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['note', '수첩'], ['set', '설정']];
+  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['note', '수첩'], ['save', '저장'], ['set', '설정']];
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (${Keys.label('opt')})</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
@@ -173,16 +174,52 @@ function drawKeys(T) {
 function tabSet(B) {
   B.innerHTML = `<h2>조작</h2><div class="two"><div class="note" id="keyTable" style="grid-column:1 / -1"></div><div class="note">메뉴는 언제나 Esc로도 엽니다. 대사는 Enter로도 넘어갑니다.</div><div class="note">막기를 맞기 직전에 누르면 <b>튕겨내기</b>가 됩니다.<br>노란 예고는 막을 수 있습니다.<br>붉은 예고는 막을 수 없으니 경공으로 피하세요.</div></div>
   <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 평타 키로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 대화 키<br>집: 청하진 복덕방에서 구입, 집 안에서 꾸미기 키, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
-  <h2>설정</h2><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">지금 저장은 이 브라우저 안에 됩니다. 기기에 파일로 저장해 두면 브라우저 기록을 지워도, 다른 기기에서도 제목 화면의 저장 파일 불러오기로 이어 할 수 있습니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">지금 저장</button><button class="btn" id="svf">기기에 파일로 저장</button><button class="btn" id="tt">제목으로</button></div>`;
+  <h2>설정</h2><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">진행은 이 브라우저에 자동으로 저장되고, 제목 화면의 이어 하기로 이어집니다. 지금 이 순간을 따로 남기려면 저장 탭의 칸에 저장하세요. 파일로 내보내면 그 순간이 파일 한 장으로 남아서 다른 기기에서도 불러올 수 있습니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">저장 칸 열기</button><button class="btn" id="svf">지금 상태를 파일로 내보내기</button><button class="btn" id="tt">제목으로</button></div>`;
   drawKeys($('#keyTable', B));
   if (G.S.mode === 'free') { const d = el('div', 'note', `자유 모드의 하루는 현실 시간으로 <b style="font-weight:400">${Math.round(G.free.dayLen() / 60)}분</b>입니다. `); d.style.marginTop = '8px'; for (const [n, v] of [['15분', 900], ['30분', 1800], ['1시간', 3600]]) { const q = el('button', 'btn sm', n); q.style.marginLeft = '5px'; q.onclick = () => { G.S.dayLen = v; G.S.fr.clock = 0; Sound.sfx('tick'); drawMenu(); }; d.appendChild(q); } B.appendChild(d); }
   $('#vBgm').oninput = e => { Sound.setBgm(e.target.value / 100); $('#vBgmN').textContent = e.target.value; };
   $('#vSfx').oninput = e => { Sound.setSfx(e.target.value / 100); $('#vSfxN').textContent = e.target.value; };
   $('#vSfx').onchange = () => Sound.sfx('tick');
   $('#mute').onclick = () => { Sound.setMuted(!Sound.muted); drawMenu(); };
-  $('#sv').onclick = () => save(false);
-  $('#svf').onclick = () => { save(); saveToFile(); };
+  $('#sv').onclick = () => { tab = 'save'; Sound.sfx('tick'); drawMenu(); };
+  $('#svf').onclick = () => { keepPos(); save(); saveToFile(); };
   $('#tt').onclick = () => { save(); closeMenu(); G.field.busy = false; showTitle(); };
+}
+// ── 저장 칸: 고른 순간을 그대로 남긴다. 다시 저장하기 전에는 바뀌지 않는다 ──
+function keepPos() { const f = G.field; if (G.scene === 'field' && f?.m && G.S.map === f.m.id) { G.S.px = f.p.x; G.S.py = f.p.y; G.S.dir = f.p.dir; } }
+function placeName() { const m = G.field?.m; if (!m) return ''; if (m.live) { const p = $('#place')?.textContent; return '강호' + (p ? ' · ' + p : ''); } return m.name || ''; }
+function shot() { try { const cv = $('#cv'), c = document.createElement('canvas'); c.width = 192; c.height = 108; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.drawImage(cv, 0, 0, 192, 108); return c.toDataURL('image/jpeg', .7); } catch (e) { return ''; } }
+const when = t => { const d = new Date(t), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+const metaHtml = m => `<b>${esc(m.name)}</b> · ${m.lv}레벨 · ${m.day}일째 ${m.night ? '밤' : '낮'}<br><small>${m.mode === 'free' ? '자유' : '이야기'}${m.place ? ' · ' + esc(m.place) : ''}</small><br><small class="hint">${when(m.at)}</small>`;
+function arm(b, label, go) { // 한 번 더 눌러야 실행되는 단추
+  b.onclick = () => { if (b.dataset.arm) { delete b.dataset.arm; go(); return; } b.dataset.arm = 1; const old = b.textContent; b.textContent = label; b.classList.add('pri'); setTimeout(() => { if (b.dataset.arm) { delete b.dataset.arm; b.textContent = old; b.classList.remove('pri'); } }, 2600); };
+}
+function startFrom(S, inGame) {
+  if (inGame) { if (G.battle || G.field?.busy) { toast('싸움이나 이야기 중에는 불러올 수 없습니다', 2.6); return; } G.S = S; closeMenu(); G.field.busy = false; Story.resume(); }
+  else { G.S = S; save(); $('#screen').innerHTML = ''; Story.resume(); }
+  toast(`${S.day}일째로 돌아왔습니다`, 2.4);
+}
+function slotPanel(B, inGame) {
+  const auto = autoInfo(), redraw = () => inGame ? drawMenu() : slotPanel(B, false);
+  B.innerHTML = `<p class="hint">칸을 골라 <b style="font-weight:400">지금 이 순간</b>을 저장합니다. 저장한 칸은 그 순간 그대로 남고, 같은 칸에 다시 저장하기 전에는 바뀌지 않습니다. 진행하면서 계속 덮어쓰는 것은 자동 저장 하나뿐입니다.</p>
+  <div class="slots">${auto ? `<div class="slotc auto"><div class="th">자동</div><div class="mi"><b style="font-weight:400;color:var(--red)">자동 저장</b><br>${metaHtml(auto)}</div><div class="sb">${inGame ? '' : '<button class="btn sm" data-a="autoload">불러오기</button>'}<button class="btn sm" data-a="autoexp">파일로 내보내기</button></div></div>` : ''}
+  ${Array.from({ length: SLOTS }, (_, i) => { const m = slotInfo(i); return `<div class="slotc" data-i="${i}">${m && m.shot ? `<img class="th" src="${m.shot}" alt="">` : `<div class="th">${i + 1}</div>`}<div class="mi">${m ? `<small>${i + 1}번 칸</small><br>${metaHtml(m)}` : `<small>${i + 1}번 칸</small><br><span class="hint">비어 있음</span>`}</div><div class="sb">${inGame ? `<button class="btn sm" data-a="save">${m ? '덮어쓰기' : '여기에 저장'}</button>` : ''}${m ? '<button class="btn sm" data-a="load">불러오기</button><button class="btn sm" data-a="exp">내보내기</button><button class="btn sm" data-a="del">지우기</button>' : '<button class="btn sm" data-a="imp">파일 넣기</button>'}</div></div>`; }).join('')}</div><input type="file" id="slotFile" accept=".json,application/json" hidden>`;
+  let target = -1; const fi = $('#slotFile', B);
+  fi.onchange = async e => { const f = e.target.files[0]; fi.value = ''; if (!f || target < 0) return; try { const S = await readSaveFile(f); if (importToSlot(target, S)) { toast(`${target + 1}번 칸에 넣었습니다`, 2.4); redraw(); } else toast('저장 공간이 모자랍니다', 3); } catch (err) { toast('저장 파일을 읽지 못했습니다', 3); } };
+  $$('[data-a]', B).forEach(b => {
+    const card = b.closest('.slotc'), i = card.dataset.i !== undefined ? +card.dataset.i : -1, a = b.dataset.a, m = i >= 0 ? slotInfo(i) : null;
+    if (a === 'save') { const go = () => { keepPos(); save(); if (saveSlot(i, placeName(), shot())) { Sound.sfx('coin', .6); toast(`${i + 1}번 칸에 저장했습니다`, 2.4); } else toast('저장 공간이 모자랍니다. 다른 칸을 지워 주세요', 3.2); redraw(); }; if (m) arm(b, '덮어쓰려면 한 번 더', go); else b.onclick = go; }
+    if (a === 'load') arm(b, inGame ? '저장 안 한 진행은 사라집니다 · 한 번 더' : '불러오려면 한 번 더', () => { const S = loadSlot(i); if (S) startFrom(S, inGame); });
+    if (a === 'exp') b.onclick = () => exportSlot(i);
+    if (a === 'del') arm(b, '지우려면 한 번 더', () => { delSlot(i); Sound.sfx('cancel'); redraw(); });
+    if (a === 'imp') b.onclick = () => { target = i; fi.click(); };
+    if (a === 'autoload') b.onclick = () => { const S = load(); if (S) startFrom(S, false); };
+    if (a === 'autoexp') b.onclick = () => { if (inGame) { keepPos(); save(); } const S = load(); if (S) saveToFile(S); };
+  });
+}
+function showSlotScreen() {
+  const s = $('#screen'); s.innerHTML = `<div class="sheet"><div class="card wide"><h2>저장 칸</h2><div id="slotBody"></div><div class="row"><button class="btn" id="slotBack">돌아가기</button></div></div></div>`;
+  slotPanel($('#slotBody'), false); $('#slotBack').onclick = showTitle;
 }
 // ── 상점 ──
 export function openShop(title, goods) {

@@ -55,23 +55,40 @@ export function learn(id) {
   return true;
 }
 export const canEquip = (id, S = G.S) => { const k = SKILLS[id]; return k.w === '무관' || k.w === WEAPONS[S.weapon].type; };
-let fileHandle = null; // 기기에 고른 저장 파일. 지원하는 브라우저에서는 저장할 때마다 함께 갱신한다
-async function writeFile(handle, text) { const w = await handle.createWritable(); await w.write(text); await w.close(); }
+// 저장은 두 가지다. 자동 저장(이어 하기)은 이 브라우저에 계속 덮어쓰고, 저장 칸은 고른 순간을 그대로 남긴다.
+// 파일 내보내기는 누른 그 순간을 파일 한 장으로 받는다. 받은 파일은 다시 바뀌지 않는다
 export function save(slient = true) {
   try { localStorage.setItem(KEY, JSON.stringify(G.S)); if (!slient) toast('저장했습니다'); } catch (e) { if (!slient) toast('저장하지 못했습니다'); }
-  if (fileHandle) writeFile(fileHandle, JSON.stringify(G.S)).catch(() => { fileHandle = null; });
 }
-export async function saveToFile() {
-  const S = G.S, text = JSON.stringify(S), name = `강호행_${S.name}_${S.day}일째.json`;
-  if (window.showSaveFilePicker) {
-    try {
-      fileHandle = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: '강호행 저장 파일', accept: { 'application/json': ['.json'] } }] });
-      await writeFile(fileHandle, text); toast('기기에 저장했습니다. 이제 저장할 때마다 이 파일도 갱신됩니다.', 4); return;
-    } catch (e) { if (e.name === 'AbortError') return; fileHandle = null; }
-  }
+const fileName = S => `강호행_${S.name}_${S.day}일째_${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}.json`;
+function download(text, name) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  toast('다운로드 폴더에 저장했습니다', 3);
 }
+// 지금 이 순간을 파일 한 장으로 내보낸다
+export function saveToFile(S = G.S) { download(JSON.stringify(S), fileName(S)); toast('지금 상태를 파일로 내보냈습니다', 3); }
+// ── 저장 칸 ──
+export const SLOTS = 12;
+const SK = i => 'gangho_slot_' + i;
+function rec(i) { try { const r = localStorage.getItem(SK(i)); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+export function slotInfo(i) { return rec(i)?.meta || null; }
+export function autoInfo() { const S = load(); return S ? metaOf(S, '') : null; }
+export function metaOf(S, place, shot) { return { name: S.name, lv: S.lv, day: S.day, mode: S.mode, night: !!S.flags?.night, place: place || '', at: Date.now(), shot: shot || '' }; }
+export function saveSlot(i, place, shot) {
+  const S = G.S; try { localStorage.setItem(SK(i), JSON.stringify({ meta: metaOf(S, place, shot), data: S })); return true; }
+  catch (e) { // 그림이 커서 칸이 모자라면 그림을 빼고 한 번 더
+    try { localStorage.setItem(SK(i), JSON.stringify({ meta: metaOf(S, place, ''), data: S })); return true; } catch (e2) { return false; }
+  }
+}
+export function loadSlot(i) { const r = rec(i); return r ? fill(migrate(r.data)) : null; }
+export function delSlot(i) { try { localStorage.removeItem(SK(i)); } catch (e) { /* 지울 것이 없다 */ } }
+export function exportSlot(i) { const r = rec(i); if (!r) return; download(JSON.stringify(r.data), fileName(r.data)); toast(`${i + 1}번 칸을 파일로 내보냈습니다`, 3); }
+// 파일을 읽어 저장 상태로 바꾼다. 자동 저장에는 쓰지 않는다
+export async function readSaveFile(file) {
+  const d = JSON.parse(await file.text());
+  if (!d || !d.name || !d.flags) throw new Error('강호행 저장 파일이 아닙니다');
+  return fill(migrate(d));
+}
+export function importToSlot(i, S, place = '파일에서 가져옴') { try { localStorage.setItem(SK(i), JSON.stringify({ meta: metaOf(S, place, ''), data: S })); return true; } catch (e) { return false; } }
 export async function loadFromFile(file) {
   const d = JSON.parse(await file.text());
   if (!d || !d.name || !d.flags) throw new Error('강호행 저장 파일이 아닙니다');
