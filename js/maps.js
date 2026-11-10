@@ -4,6 +4,7 @@ import { FURN, HOUSES } from './items.js';
 import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tiles.js';
 import { meta, corners, hitsBox, inside, drawIso } from './iso.js';
 import { buildIsoRoom } from './isoroom.js';
+import { LOCS } from './worlddata.js';
 
 // 쿼터뷰 미리보기에서는 바깥 지도를 k배 넓게 편다. 쿼터뷰 집이 크기 때문이다
 // 지도를 짜는 함수와 이야기 쪽 좌표는 그대로 두고, 여기와 Story.content, field.load에서 k를 곱한다
@@ -127,6 +128,9 @@ export function paintPave(c, p) {
 }
 // ── 쿼터뷰 미리보기: 정면 집을 비스듬한 집으로 바꿔 끼운다. 문 자리는 그대로라 이야기와 사람 자리가 안 어긋난다 ──
 const ISO_OF = { hall: 'hall_dao', lodge: 'lodge', house_red: 'rich', inn: 'inn', hut_o: 'tile_house', hut_b: 'tile_house', hut_o2: 'thatch', shop_blue: 'store', shop_green: 'clinic', clay: 'adobe', wood_o: 'barn', wood_b: 'thatch_long', mud: 'shack', straw: 'thatch' };
+// 문파 본전은 문파 양식대로: 사찰, 도관, 세가, 마교, 빙궁, 서역. 나머지는 도관 본전으로
+const HALL = { temple: 'hall_temple', dao: 'hall_dao', manor: 'hall_manor', dark: 'hall_dark', ice: 'hall_ice', west: 'hall_west', fort: 'hall_dark' };
+const hallOf = id => { const l = LOCS.find(q => q.map === id), k = HALL[l?.style] || 'hall_dao'; return meta(k) ? k : 'hall_dao'; };
 const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn', gamble: 'gamble', gov: 'yamen', book: 'books', bokun: 'shrine', myhouse: 'thatch' };
 G.mapK = id => MAPS[id]?.k || 1;
 export const isoMode = () => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } };
@@ -176,7 +180,7 @@ export function isoRetrofit(m, o = {}) {
   const rank = h => !h.door ? 0 : /^h_/.test(h.door.to) ? 1 : 2; houses.sort((a, b) => rank(b) - rank(a)); // 이야기에 쓰는 문, 저절로 단 문, 문 없는 집 차례로 자리를 잡는다
   for (let { st, door } of houses) {
     const s = STAMPS[st.name], w = s[3], h = s[4], dx = st.x + w / 2, dy = st.y + h;
-    let first = st.isoAs && meta(st.isoAs) ? st.isoAs : (door && ISO_ROOM[String(door.to).replace(/^r_\w+?_/, '')]) || (door && /^r_\w+_hall$/.test(door.to) ? 'hall_dao' : null) || ISO_OF[st.name];
+    let first = st.isoAs && meta(st.isoAs) ? st.isoAs : (door && ISO_ROOM[String(door.to).replace(/^r_\w+?_/, '')]) || (door && /^r_\w+_hall$/.test(door.to) ? hallOf(m.id) : null) || ISO_OF[st.name];
     if (first === 'inn' && /^c_/.test(m.id) && meta('inn_city')) first = 'inn_city';  // 큰 고을 객잔은 말끔한 쪽
     // 문이 앞면 가운데에 오게 앞 모서리를 잡는다. 이웃과 겹치면 반대로 돌리거나 작은 집으로 바꾸고, 문 없는 집은 빼 버린다
     let pick = null; const D = door ? [door.x + door.w / 2, door.y + door.h / 2] : [dx, dy];

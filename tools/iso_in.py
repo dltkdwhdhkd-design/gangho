@@ -301,9 +301,9 @@ def batch(folder):  # QB62.png, qc4-walk.png, QC4_fight.png처럼 번호가 든 
     got = {}
     for f in sorted(os.listdir(folder)):
         m = re.search(r'(Q[BC]\d+)', f, re.I)
-        if m and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')): got.setdefault(m.group(1).upper(), []).append(os.path.join(folder, f))
+        if m and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')): got.setdefault(re.sub(r'(?<=\D)0+(?=\d)', '', m.group(1).upper()), []).append(os.path.join(folder, f))  # QC04 → QC4
     for no, ps in sorted(got.items(), key=lambda kv: (kv[0][:2], int(kv[0][2:]))):
-        ps.sort(key=lambda q: ('fight' in q.lower() or '전투' in q, q))  # 걷기 먼저, 전투 나중
+        ps.sort(key=lambda q: (any(k in q.lower() for k in ('fight', 'combat', 'battle', '전투')), q))  # 걷기 먼저, 전투 나중
         try: qb(no, ps)
         except Exception as e: print(no, '실패', e)
 STYLE = {'thatch': 'thatch', 'thatch_long': 'thatch', 'tavern': 'thatch', 'barn': 'wood', 'shack': 'wood', 'stilt': 'wood', 'watchtower': 'wood', 'tent': 'adobe', 'yurt': 'ice', 'adobe': 'adobe', 'cabin': 'wood',
