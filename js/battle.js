@@ -1,5 +1,5 @@
 // 직접 조작 전투
-import { G, IMG, Input, Sound, $, $$, el, esc, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait } from './core.js';
+import { G, IMG, Input, Sound, $, $$, el, esc, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait, qSheet, QZ } from './core.js';
 import { Keys } from './core.js';
 import { stageClear } from './dialog.js';
 import { SKILLS, BASIC, WEAPONS } from './data.js';
@@ -513,9 +513,9 @@ export class Battle {
     else if (a.st === 'guard') row = 6;
     else if (a.st === 'move') row = Math.floor(a.walk) % 4;
     // 쿼터뷰 인물 시트(_q): 비스듬한 앞모습과 뒷모습, 오른쪽을 보면 뒤집는다
-    const qi = !a.mon && IMG[a.spr + '_q'];
+    const qi = !a.mon && qSheet(a.spr);
     if (qi) {
-      const im2 = white ? whiteOf(a.spr + '_q') : qi, k = 32 * (qi.hd || 1), r = [0, 1, 0, 2, 3, 4, 5][Math.min(row, 6)], back = face === 1 || (a.ay < -.38 && a.st === 'move'), flip = face === 3 || (a.ax > .2 && face !== 2), w = 32 * s, top = snap(y - 31 * s);
+      const im2 = white ? whiteOf(a.spr + '_q') : qi, k = 32 * (qi.hd || 1), r = [0, 1, 0, 2, 3, 4, 5][Math.min(row, 6)], back = face === 1 || (a.ay < -.38 && a.st === 'move'), flip = face === 3 || (a.ax > .2 && face !== 2), w = Math.round(16 * QZ) * s, top = snap(y - w * 31 / 32);
       if (!im2) return; c.save(); if (flip) { c.translate(snap(x), 0); c.scale(-1, 1); c.drawImage(im2, (back ? 1 : 0) * k, r * k, k, k, -w / 2, top, w, w); } else c.drawImage(im2, (back ? 1 : 0) * k, r * k, k, k, snap(x - w / 2), top, w, w); c.restore(); return;
     }
     const f = 16 * (im.hd || 1); row = Math.min(row, Math.floor(im.height / f) - 1);

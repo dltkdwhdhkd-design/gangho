@@ -153,11 +153,16 @@ export const snap = v => Math.round(v * SCALE) / SCALE;
 // 쿼터뷰 인물 시트(키_q): 2열(비스듬한 앞, 비스듬한 뒤, 둘 다 왼쪽을 본다) × 6행(차렷, 왼발, 오른발, 공격, 도약, 막기), 칸은 HD 64×64
 // 방향 0 아래, 1 위, 2 왼쪽, 3 오른쪽. 대각선 0 오른아래, 1 오른위, 2 왼아래, 3 왼위. 오른쪽을 보면 뒤집는다
 const QROW = [0, 1, 0, 2, 3, 4, 5];
+// 쿼터뷰 시트는 쿼터뷰 보기를 켰을 때만 쓴다(켜고 끄면 새로 읽으니 한 번만 본다). 일반 보기는 예전 시트 그대로
+export const ISO_ON = (() => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } })();
+export const qSheet = key => ISO_ON ? IMG[key + '_q'] : null;
+// 쿼터뷰 시트의 칸(64)에서 사람 키는 44다. 예전 시트처럼 사람 키가 15쯤 되게 칸을 22로 그린다(예전 16칸 → 22)
+export const QZ = 22 / 16;
 function isoPose(dirCol, diag) { if (diag !== undefined) return [diag % 2, diag < 2]; return [[0, false], [1, false], [0, false], [0, true]][dirCol] || [0, false]; }
 export function drawActorSprite(ctx, key, dirCol, row, x, y, opt = {}) {
-  const qi = IMG[key + '_q'];
+  const qi = qSheet(key);
   if (qi) {
-    const k = 32 * (qi.hd || 1), [col, flip] = isoPose(dirCol, opt.diag), r = QROW[Math.min(row, 6)] ?? 0, z = (opt.size || 16) * 2, top = snap(y - z + 2);
+    const k = 32 * (qi.hd || 1), [col, flip] = isoPose(dirCol, opt.diag), r = QROW[Math.min(row, 6)] ?? 0, z = Math.round((opt.size || 16) * QZ), top = snap(y - z * 31 / 32);
     ctx.save(); if (opt.alpha !== undefined) ctx.globalAlpha = opt.alpha;
     if (flip) { ctx.translate(snap(x), 0); ctx.scale(-1, 1); ctx.drawImage(qi, col * k, r * k, k, k, -z / 2, top, z, z); } else ctx.drawImage(qi, col * k, r * k, k, k, snap(x - z / 2), top, z, z);
     ctx.restore(); return;
