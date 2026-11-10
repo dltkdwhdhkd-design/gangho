@@ -15,7 +15,8 @@ const { chromium } = require('playwright');
     const by = t => c => { const i = c.opts.findIndex(o => o.startsWith(t)); return i >= 0 ? i : 0; };
     const SG = G.saga, g = SG.st();
     // 1) 백이십 일을 그냥 흘려 보낸다
-    const seen = {}; for (let d = 0; d < 120; d++) { nextDay(); for (const a of g.arcs) (seen[a.kind] = seen[a.kind] || new Set()).add(a.phase); }
+    const seen = {}, cnt = {}, at = {}, ids = new Set(); for (let d = 1; d <= 365; d++) { nextDay(); for (const a of g.arcs) { (seen[a.kind] = seen[a.kind] || new Set()).add(a.phase); if (!ids.has(a.id)) { ids.add(a.id); cnt[a.kind] = (cnt[a.kind] || 0) + 1; (at[a.kind] = at[a.kind] || []).push(S.day); } } if (d === 120) out.push('120일까지 열린 판: ' + JSON.stringify(cnt)); }
+    out.push('한 해 동안 열린 판: ' + JSON.stringify(cnt) + ' 시작한 날: ' + JSON.stringify(at));
     out.push('저절로 돈 판: ' + Object.entries(seen).map(([k, v]) => `${k}(${[...v].join('>')})`).join(' '));
     out.push('지나간 일: ' + g.hist.slice(0, 8).join(' / '));
     out.push(`긴장 정사 ${Math.round(g.t.js)} 정마 ${Math.round(g.t.jm)} 점령 ${Object.keys(g.occ).join(',') || '없음'}`);

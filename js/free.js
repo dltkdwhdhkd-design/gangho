@@ -272,7 +272,7 @@ async function order(fid) {
 
 // ── 하루 ──
 function daily() { const fr = Fr(); if (!fr) return; fr.clock = 0; F().night = false; fr.lastP = null; showTime(); worldTick(); if (G.saga) G.saga.daily(); if (fr.rep) for (const k in fr.board) if (!String(fr.board[k].day).startsWith(S().day + ':')) delete fr.board[k]; if (G.sect) G.sect.daily(); if (G.evil) G.evil.daily(); }
-export const dayLen = () => S().dayLen || 1800; // 게임 하루의 길이(초). 메뉴 설정에서 바꾼다
+export const dayLen = () => S().dayLen || 2700; // 게임 하루의 길이(초). 메뉴 설정에서 바꾼다
 const PERIOD = [[.25, '아침'], [.55, '낮'], [.75, '저녁'], [1.01, '밤']];
 const period = () => { const q = (Fr()?.clock || 0) / dayLen(); return PERIOD.find(p => q < p[0])[1]; };
 function showTime() { const e = document.querySelector('#dayl'); if (e) e.textContent = `${S().day}일째 ${period()}`; }

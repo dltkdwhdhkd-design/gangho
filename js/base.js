@@ -277,9 +277,11 @@ async function armory(f) {
 const rot = (a, i) => a.slice(i % a.length).concat(a.slice(0, i % a.length));
 function townNpcs(l, id, out, folk) {
   const CT = CITYTALK[l.id] || { talk: CHAT.town, bark: [] }, night = G.S.flags.night, kid = G.S.gender === 'f' ? '누나' : '형';
-  const talkOf = (i, spr, who = `${l.name} 사람`) => async () => { const t = i < 2 && G.jh.talkOfDay(); await npcSay(who, spr, t || nextLine(id + i, rot(CT.talk, i))); };
+  // 길 가는 사람마다 직업과 말투가 다르다(js/voices.js). 이야기 모드의 그날 소문은 앞의 두 사람이 먼저 꺼낸다
+  const VO = G.voices.assign(id, [0, 1, 2, 3, 4, 5, 6].map(i => folk[i % folk.length]));
+  const talkOf = (i, spr) => async () => { const t = i < 2 && G.jh.talkOfDay(), P = VO[i]; await npcSay(P.who, P.spr, t || G.voices.line(id + ':folk' + i, P.p, { map: id, place: l.name, local: rot(CT.talk, i) })); };
   // 길을 오가는 사람들. 짝수 번째는 가끔 집이나 가게에 들어갔다 나온다
-  [[29, 12], [24, 22], [36, 23], [29, 30], [12, 22], [46, 22], [29, 36]].slice(0, night ? 2 : 7).forEach(([x, y], i) => { const spr = folk[i % folk.length]; out.npcs.push({ id: `folk${i}`, spr, x: x + .5, y: y + .75, dir: i % 4, life: 'stroll', enters: i % 2 === 0, speed: 17 + (i * 7) % 11, hint: '말 걸기', barks: () => night ? SLEEPY : CT.bark, talk: talkOf(i, spr) }); });
+  [[29, 12], [24, 22], [36, 23], [29, 30], [12, 22], [46, 22], [29, 36]].slice(0, night ? 2 : 7).forEach(([x, y], i) => { const P = VO[i], spr = P.spr; out.npcs.push({ id: `folk${i}`, spr, x: x + .5, y: y + .75, dir: i % 4, life: 'stroll', enters: i % 2 === 0, speed: 17 + (i * 7) % 11, hint: P.who, barks: () => night ? SLEEPY : [...CT.bark, ...P.p.bark], talk: talkOf(i, spr) }); });
   // 순라군 둘. 하나는 광장을 돌고 하나는 큰길을 오간다
   [[[20, 15], [39, 15], [39, 31], [20, 31]], [[30, 10], [30, 38], [30, 23], [55, 23], [4, 23], [30, 23]]].forEach((route, i) => out.npcs.push({ id: 'guard' + i, spr: 'Knight', x: route[0][0] + .5, y: route[0][1] + .75, dir: 0, life: 'patrol', route, speed: 19, hint: '순라군', barks: () => night ? PATROL.night : PATROL.day, talk: async () => { await npcSay('순라군', 'Knight', nextLine(id + 'pt', PATROL.talk)); } }));
   // 문 앞 거지는 밤낮없이 앉아 있다

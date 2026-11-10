@@ -21,6 +21,7 @@ import './free.js';
 import './arts.js';
 import './jianghu.js';
 import './saga.js';
+import './voices.js';
 import './party.js';
 import './compbonds.js';
 import './world.js';

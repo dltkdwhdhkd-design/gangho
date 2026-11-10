@@ -79,7 +79,7 @@ const CITY = LOCS.filter(l => l.kind === 'city'), RIGHT = () => LOCS.filter(l =>
 const canFall = f => S().mode === 'free' || !!f.hi;
 function fall(id) { const fr = Fr(), f = fac(id); if (!f || fr.fallen[id] || fr.fac === id || !canFall(f)) return; fr.fallen[id] = S().day; news(`${josa(f.name, '이/가')} 무너졌다. 산문에 불이 났다는 소문이다.`); toast(`${josa(f.name, '이/가')} 무너졌다`, 4); }
 function hurt(id, n) { const fr = Fr(); fr.power[id] = Math.max(10, (fr.power[id] || 60) - n); if (fr.power[id] <= 25) fall(id); }
-const gain = (id, n) => { const fr = Fr(); fr.power[id] = (fr.power[id] || 60) + n; };
+const gain = (id, n) => { const fr = Fr(); fr.power[id] = Math.min(150, (fr.power[id] || 60) + n); };  // 한 해를 돌려도 세력이 끝없이 불지 않게
 const rich = lv => 200 + lv * 16;
 const VILLAIN = [['살수 조칠', '현상금이 붙은 지 십 년째다.'], ['독수 왕팔', '우물에 독을 풀고 다녔다.'], ['인면 곽노', '여관 손님만 골라 털었다.'], ['쌍도 마륭', '관군 셋을 베고 달아났다.'], ['흑호 나삼', '산길 표국을 혼자 털었다.'], ['귀면 서노', '얼굴을 본 사람이 없다.']];
 const LEG = [['leg_sword', '의천검', '검', 42, 'Sword', '하늘에 기댄다는 칼. 세상에 한 자루뿐이다.'], ['leg_blade', '도룡도', '도', 44, 'BigSword', '용을 잡는다는 큰 칼. 무겁다.'], ['leg_spear', '패왕창', '창', 43, 'Lance2', '옛 패왕이 들었다는 창.'], ['leg_fist', '금강수갑', '권', 41, 'Club', '금강석을 박은 권갑.']];

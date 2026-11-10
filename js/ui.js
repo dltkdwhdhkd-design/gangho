@@ -181,7 +181,7 @@ function tabSet(B) {
     const d = el('div', 'note', `쿼터뷰 미리보기 <b style="font-weight:400">${on ? '켜짐' : '꺼짐'}</b> · 그림을 쿼터뷰로 바꾸는 중이라 아직 임시 그림이 섞여 있습니다. `); d.style.marginTop = '8px';
     const b = el('button', 'btn', on ? '끄기' : '켜기'); b.onclick = () => { try { save(); localStorage.setItem('gangho_iso', on ? '0' : '1'); } catch (e) { } location.reload(); }; d.appendChild(b); B.appendChild(d);
   }
-  if (G.S.mode === 'free') { const d = el('div', 'note', `자유 모드의 하루는 현실 시간으로 <b style="font-weight:400">${Math.round(G.free.dayLen() / 60)}분</b>입니다. `); d.style.marginTop = '8px'; for (const [n, v] of [['15분', 900], ['30분', 1800], ['1시간', 3600]]) { const q = el('button', 'btn sm', n); q.style.marginLeft = '5px'; q.onclick = () => { G.S.dayLen = v; G.S.fr.clock = 0; Sound.sfx('tick'); drawMenu(); }; d.appendChild(q); } B.appendChild(d); }
+  if (G.S.mode === 'free') { const d = el('div', 'note', `자유 모드의 하루는 현실 시간으로 <b style="font-weight:400">${Math.round(G.free.dayLen() / 60)}분</b>입니다. `); d.style.marginTop = '8px'; for (const [n, v] of [['15분', 900], ['30분', 1800], ['45분', 2700], ['1시간', 3600]]) { const q = el('button', 'btn sm', n); q.style.marginLeft = '5px'; q.onclick = () => { G.S.dayLen = v; G.S.fr.clock = 0; Sound.sfx('tick'); drawMenu(); }; d.appendChild(q); } B.appendChild(d); }
   $('#vBgm').oninput = e => { Sound.setBgm(e.target.value / 100); $('#vBgmN').textContent = e.target.value; };
   $('#vSfx').oninput = e => { Sound.setSfx(e.target.value / 100); $('#vSfxN').textContent = e.target.value; };
   $('#vSfx').onchange = () => Sound.sfx('tick');

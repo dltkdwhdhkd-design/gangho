@@ -33,7 +33,9 @@ const hero = f => ['shaolin', 'noeum', 'podalra'].includes(f.id) ? `${pick(['혜
 // ── 상태 ──
 export function st() {
   const fr = Fr(); if (!fr) return null;
-  return fr.saga = fr.saga || { t: { js: 30, jm: 15 }, arcs: [], cool: { tourney: 2, jsw: 6, demon: 16 }, hist: [], occ: {}, side: null, id: 1, warn: {} };
+  const g = fr.saga = fr.saga || { v: 2, t: { js: 10, jm: 0 }, arcs: [], cool: { tourney: 2, jsw: 60, demon: 200 }, hist: [], occ: {}, side: null, id: 1, warn: {} };
+  if (!g.v) { g.v = 2; g.t.js = Math.min(g.t.js, 30); g.t.jm = Math.min(g.t.jm, 10); g.cool.jsw = Math.max(g.cool.jsw, 30); g.cool.demon = Math.max(g.cool.demon, 150); }  // 첫 판 저장: 큰 싸움이 너무 잦던 때의 수치를 낮춘다
+  return g;
 }
 const arc = k => st()?.arcs.find(a => a.kind === k);
 const hist = t => { const g = st(); g.hist.unshift(`${S().day}일: ${t}`); g.hist.length = Math.min(g.hist.length, 12); };
@@ -63,8 +65,8 @@ function daily() {
   const g = st(); if (!g || !isFree()) return; const fr = Fr();
   // 긴장: 정파와 사파 문파끼리 붙은 싸움이 많을수록, 마교 세력이 클수록 빨리 오른다
   const jsWars = (fr.wars || []).filter(w => { const A = fac(w.a)?.align, B = fac(w.b)?.align; return (A === 'jeong' && B === 'sa') || (A === 'sa' && B === 'jeong'); }).length;
-  if (!arc('jsw')) g.t.js = clamp(g.t.js + 4 + jsWars * 6 + rnd(-2, 4), 0, 120);
-  if (!arc('demon')) g.t.jm = alive(fac('cheonma')) ? clamp(g.t.jm + 2.5 + Math.max(0, (pow('cheonma') - 80) / 10) + rnd(-1, 3), 0, 120) : 0;
+  if (!arc('jsw')) g.t.js = clamp(g.t.js + .75 + jsWars * .5 + rnd(-.3, .6), 0, 120);  // 넉 달에 한 번쯤 넘친다
+  if (!arc('demon')) g.t.jm = alive(fac('cheonma')) ? clamp(g.t.jm + .26 + Math.max(0, (pow('cheonma') - 80) / 400) + rnd(-.1, .15), 0, 120) : 0;  // 한 해에 한 번쯤
   for (const [k, lim, t] of [['js', 65, '정파와 사파 제자들이 저잣거리마다 부딪힌다. 누가 먼저 칼을 뽑아도 이상하지 않다.'], ['jm', 65, '서쪽에서 붉은 옷을 입은 자들이 내려온다는 말이 돈다. 마을 몇 곳에서 사람이 사라졌다.']]) {
     if (g.t[k] >= lim && !g.warn[k]) { g.warn[k] = 1; news(t); } if (g.t[k] < 40) g.warn[k] = 0;
   }
@@ -98,7 +100,7 @@ END.tourney = a => {
   for (let r = a.res.length; r < 3; r++) a.res[r] = pairs(a, r).map(p => sim(a, p));  // 내가 안 나온 판은 기권
   const w = a.ent[a.res[2][0]], g = st();
   if (!w.me) { G.jh.gain(w.fac, 6); news(`${a.place} 무림대회에서 ${josa(label(w), '이/가')} 우승했다.`); hist(`${a.place} 무림대회 — ${label(w)} 우승`); }
-  g.lastT = { place: a.place, ent: a.ent, res: a.res }; g.cool.tourney = 10 + Math.floor(rnd(0, 6));
+  g.lastT = { place: a.place, ent: a.ent, res: a.res, day: S().day, w: label(w) }; g.cool.tourney = 16 + Math.floor(rnd(0, 7));  // 넉 달에 대여섯 번
 };
 function master(a, i, r) {
   const e = a.ent[i], f = fac(e.fac), L = Math.max(e.lv, lv() - 1) + r, base = G.jh.disciple(f, L, true), id = `sg_m${i}`;
@@ -115,7 +117,7 @@ const showBracket = (T, title) => panel(title || `${T.place} 무림대회 대진
 async function tourTalk(a) {
   const s = S();
   if (a.phase === 'notice') {
-    if (a.me >= 0) { await say(null, `접수처 서기: 본선은 ${a.left}일 뒤요. 그날 이 단상 앞으로 오시오.`); return; }
+    if (a.me >= 0) { await say(null, `접수처 서기: ${pick([`본선은 ${a.left}일 뒤요. 그날 이 단상 앞으로 오시오.`, `이름은 올려 두었소. ${a.left}일 뒤에 늦지 마시오. 늦으면 기권이오.`, '대진표 붙은 거 보셨소? 첫 상대가 만만치 않을 거요.'])}`); return; }
     if (a.cut) { await say(null, '접수처 서기: 예선에서 떨어진 분은 다음 대회를 기다리시오.'); return; }
     const c = await choice(`${a.place} 무림대회. 참가비 은자 50냥. 예선을 이기면 본선 여덟 자리에 든다.`, ['나간다', '대진표를 본다', '그만둔다']);
     if (c === 1) { await showBracket(a); return; } if (c) return;
@@ -164,13 +166,16 @@ END.jsw = a => {
   side(win).forEach(f => G.jh.gain(f.id, 5));
   news(`정사대전이 끝났다. ${josa(CAMP[win], '이/가')} 이겼다. ${CAMP[lose]} 문파들이 산문을 걸어 잠갔다.`); hist(`정사대전 — ${CAMP[win]} 승리`);
   const me = mySide(); if (me && a.helped) { if (me === win) { const v2 = 300 + lv() * 15; S().silver += v2; Fr().fame += 30; S().flags['saga_jsw_' + me] = 1; toast(`우리 편이 이겼다. 은자 ${v2}냥`, 4); } else toast('우리 편이 졌다', 4); }
-  g.t.js = 5; g.cool.jsw = 22; g.side = null;
+  g.t.js = 0; g.cool.jsw = 70; g.side = null; g.lastJsw = { win: CAMP[win], day: S().day };
 };
 async function recruit(a, al) {
   const me = mySide(), nm = CAMP[al];
-  if (me === al) { await say(null, `${nm} 모병관: 이미 우리 편이시오. 게시판에 일이 올라와 있소.`); return; }
-  if (me) { await say(null, `${nm} 모병관: …${CAMP[me]} 사람이 여긴 왜 왔소. 칼 뽑기 전에 돌아가시오.`); return; }
-  const c = await choice(`${nm} 모병관이 붓을 들었다. "이름을 올리면 우리 일을 맡을 수 있소. 대신 저쪽은 당신을 적으로 볼 거요."`, [`${nm} 편에 선다`, '그만둔다']); if (c) return;
+  // 정파 모병관은 점잖고, 흑도맹 모병관은 거칠다
+  const V = al === 'jeong' ? { ours: ['이미 우리 편이시오. 게시판에 일이 올라와 있소.', '몸조심하시오. 이번 싸움은 길게 갈 거요.', '대협 같은 분이 있어 든든하오. 다친 데는 없소?'], foe: [`…${CAMP[me]} 사람이 여긴 왜 왔소. 칼 뽑기 전에 돌아가시오.`, '여기는 당신 올 곳이 아니오. 오늘은 못 본 걸로 하겠소.'], ask: '이름을 올리면 의리를 지켜야 하오. 대신 강호가 당신을 의협으로 기억할 거요.' }
+    : { ours: ['우리 편이잖아. 일은 게시판에 있어. 돈 받으려면 피 좀 묻혀 와.', '또 왔냐. 술은 싸움 끝나고 먹자.', '저쪽 놈들 목 하나에 은자 몇 냥인지 알지? 많이 따 와.'], foe: ['정파 냄새가 나는데. 오늘은 봐준다. 꺼져.', '여기서 칼 뽑으면 너만 손해야. 돌아가.'], ask: '돈은 정파보다 많이 줘. 대신 저쪽은 너를 사파 놈이라고 부르겠지. 상관없지?' };
+  if (me === al) { await say(null, `${nm} 모병관: ${pick(V.ours)}`); return; }
+  if (me) { await say(null, `${nm} 모병관: ${pick(V.foe)}`); return; }
+  const c = await choice(`${nm} 모병관이 붓을 들었다. "${V.ask}"`, [`${nm} 편에 선다`, '그만둔다']); if (c) return;
   st().side = al; G.jh.addRep(al === 'jeong' ? a.j : a.s, 8); G.jh.addRep(al === 'jeong' ? a.s : a.j, -12);
   news(`${josa(S().name, '이/가')} ${nm} 편에 섰다.`); toast(`${nm} 편에 섰다. 일거리 게시판에 싸움 일이 올라온다`, 3.6);
 }
@@ -221,7 +226,7 @@ TICK.demon = a => {
 END.demon = a => {
   const g = st(), win = a.finalWon || a.score + a.freed * 2 + rnd(-2, 2) > 0;  // 나 없이도 무림맹이 이길 때가 있다. 끼어들면 훨씬 낫다
   if (win) {
-    G.jh.hurt('cheonma', a.finalWon ? 200 : 45); for (const m in g.occ) delete g.occ[m];  // 총단을 깨면 마교가 무너진다(몇 해 뒤 다시 일어난다)
+    G.jh.hurt('cheonma', a.finalWon ? 999 : 45); for (const m in g.occ) delete g.occ[m];  // 총단을 깨면 마교가 무너진다(몇 해 뒤 다시 일어난다)
     news(`무림맹이 마교를 물리쳤다. 천마의 깃발이 강물에 떠내려갔다.`); hist('정마대전 — 무림맹 승리');
     if (a.helped && !cultMember()) { const v = 500 + lv() * 20; S().silver += v; Fr().fame += 60; S().flags.saga_demon = 1; if (a.lord === 'me') S().flags.saga_lord = 1; toast(`마교를 물리쳤다. 은자 ${v}냥`, 4); }
   } else {
@@ -229,7 +234,7 @@ END.demon = a => {
     news(`무림맹이 무너졌다. 마교의 깃발이 ${Object.keys(g.occ).map(pname).join(', ') || '서쪽 하늘'}에 펄럭인다.`); hist('정마대전 — 마교 승리');
     if (cultMember()) { S().flags.saga_cult = 1; Fr().fame += 20; }
   }
-  g.t.jm = 0; g.cool.demon = 35;
+  g.t.jm = 0; g.cool.demon = 200; g.lastDemon = { win: !!win, day: S().day };
 };
 async function leagueTalk(a) {
   const s = S(), fr = Fr();
@@ -245,10 +250,10 @@ async function leagueTalk(a) {
 }
 async function liberate(map) {
   const g = st(), o = g.occ[map], L = lv(), cf = CULT(); if (!o) return;
-  await say(null, `${o.boss}: 무림맹의 개가 왔구나. 이 고을은 이제 천마의 것이다.`);
+  await say(null, `${o.boss}: ${pick(['무림맹의 개가 왔구나. 이 고을은 이제 천마의 것이다.', '혼자 왔느냐? 배짱 하나는 칭찬해 주마.', '천마께서 너 같은 놈을 좋아하신다. 제물로.', '이 고을 사람들은 벌써 무릎 꿇는 법을 배웠다. 너도 배워라.'])}`);
   const base0 = G.jh.disciple(cf, L + 2, true), k = 'sg_boss'; FOES[k] = { ...FOES[base0], name: o.boss, title: cf.name, hp: Math.round(FOES[base0].hp * 1.7), boss: 1 };
   if (!await ctx.duel({ foes: [k, ...G.jh.crew(cf, L, L < 10 ? 1 : 2)], arena: G.field.m.arena, bgm: 'boss', title: `${pname(map)} 해방`, optional: true, noIntro: true })) return;
-  delete g.occ[map]; const a = arc('demon'); if (a) { a.freed++; a.score += 2; a.helped = 1; (a.lib = a.lib || []).push(map); }
+  delete g.occ[map]; (g.hero = g.hero || {})[map] = S().day; const a = arc('demon'); if (a) { a.freed++; a.score += 2; a.helped = 1; (a.lib = a.lib || []).push(map); }
   const v = 150 + L * 8; S().silver += v; Fr().fame += 20; G.jh.addRep(top('jeong')?.id, 6);
   news(`${josa(S().name, '이/가')} ${pname(map)}을(를) 마교에게서 되찾았다.`); hist(`${pname(map)} 해방`); toast(`${pname(map)} 해방. 은자 ${v}냥`, 3.6); G.field.refresh();
 }
@@ -333,7 +338,8 @@ function npcs(id, out) {
     const folk = out.filter(n => /^folk/.test(n.id)).slice(0, 2); folk.forEach(n => { n.hint = '겁먹은 사람'; n.talk = async () => say(null, pick(SCARED)); });
     out = out.filter(n => !gone.test(n.id) && !/^folk/.test(n.id)).concat(folk);
     const cult = (x, y, i) => ({ id: 'sg_c' + i, spr: 'DarkNinja', x, y, dir: 0, life: 'still', hint: '마교도', talk: async () => {
-      if (friend) { await say(null, '마교도: 형제여, 천마의 뜻이 함께하길.'); return; }
+      if (friend) { await say(null, `마교도: ${pick(['형제여, 천마의 뜻이 함께하길.', '향주님은 광장에 계시오.', '이 고을 놈들은 겁이 많소. 다루기 쉽지.'])}`); return; }
+      await say(null, `마교도: ${pick(['멈춰라. 어디 소속이냐.', '천마께 고개를 숙여라.', '여기서부턴 교의 땅이다.', '칼을 내려놓으면 살려는 준다.'])}`);
       const lv0 = lv(), foes = G.jh.crew(CULT(), lv0, lv0 < 10 ? 1 : 2); if (await ctx.duel({ foes, arena: G.field.m.arena, bgm: 'fight', title: '마교도', optional: true, noIntro: true })) { const a = arc('demon'); if (a) a.score += .3; }
     } });
     [[25.5, 31.75], [34.5, 31.75], [28, 37.75], [32, 37.75], [12, 23.75], [47, 23.75]].forEach(([x, y], i) => out.push(cult(x, y, i)));
@@ -372,6 +378,19 @@ TITLES.push(
   { id: 'sg_lord', name: '무림맹주', how: '무림맹주로서 마교를 물리친다', ok: S => !!S.flags.saga_lord },
   { id: 'sg_cult', name: '천마의 그림자', how: '천마신교 사람으로 정마대전을 이긴다', ok: S => !!S.flags.saga_cult },
 );
+// 거리 사람들이 할 수 있는 화제와 그 값(js/voices.js). 숫자는 화제를 고를 가중치
+function talkCtx(map) {
+  const g = st(); if (!g || !isFree()) return null; const v = {}, on = {}, day = S().day;
+  const t = arc('tourney'); if (t) { v.tp = t.place; on.tourNotice = 2; }
+  if (g.lastT?.day && day - g.lastT.day <= 12) { v.tw = g.lastT.w; v.tl = g.lastT.place; on.tourDone = 1.5; }
+  const j = arc('jsw'); if (j) { if (j.phase === 'omen') on.jswOmen = 3; else { on.jswWar = 3; v.ja = CAMP[j.score >= 0 ? 'jeong' : 'sa']; v.jf = pname(j.front[0]); } }
+  if (g.lastJsw && day - g.lastJsw.day <= 12) { v.jw = g.lastJsw.win; on.jswAfter = 2; }
+  const d = arc('demon'); if (d) { if (d.phase === 'omen') on.demonOmen = 3; else { v.hq = pname(d.hq); v.lord = d.lord === 'me' ? S().name : fac(d.lord)?.who || fac(d.lord)?.name; on.league = 2; } }
+  const oc = Object.keys(g.occ).filter(m => m !== map); if (oc.length) { v.oc = pname(pick(oc)); on.occOther = 3; }
+  if (g.lastDemon?.win && day - g.lastDemon.day <= 12) on.demonAfter = 2;
+  if (g.hero?.[map]) on.savior = 1;
+  return { v, on };
+}
 // 시험용: 판을 바로 띄운다
 const debug = { start, next: k => { const a = arc(k); if (a) { a.left = 0; next(a); } }, tension: (k, v) => { st().t[k] = v; } };
-G.saga = { st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug };
+G.saga = { talkCtx, st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug };
