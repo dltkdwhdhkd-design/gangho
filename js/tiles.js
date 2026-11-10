@@ -128,8 +128,8 @@ export function curbs(c, g, o = {}) {
 // 방 안 바닥과 벽. doors: 아래 벽에서 문으로 트인 칸 [x0, x1). carpet: 붉은 깔개 [x, y, w, h]
 export function paintRoom(c, w, h, style = 0, opt = {}) {
   const f = style === 1 ? IMG['tiles/InteriorFloor'] : IMG['tiles/Water'], wall = IMG['tiles/WallSimple'];
-  c.fillStyle = '#000'; c.fillRect(0, 0, w * TS, h * TS);
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+  if (!opt.noFloor) { c.fillStyle = '#000'; c.fillRect(0, 0, w * TS, h * TS); }
+  for (let y = 0; y < h && !opt.noFloor; y++) for (let x = 0; x < w; x++) {
     if (style === 1) c.drawImage(f, (11 + (x + y) % 3) * TS, 12 * TS, TS, TS, x * TS, y * TS, TS, TS);
     else if (IMG['ground/wood']) texAt(c, 'wood', x, y, x * TS, y * TS);
     else c.drawImage(f, 6 * TS, 13 * TS, TS, TS, x * TS, y * TS, TS, TS);

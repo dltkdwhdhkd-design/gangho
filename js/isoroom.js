@@ -22,7 +22,7 @@ export function toGrid(dx, dy) { return [dy + dx / 2, dy - dx / 2]; }
 // 칸 방향 → 화면 방향
 export function toScreen(dx, dy) { return [dx - dy, (dx + dy) / 2]; }
 
-export function buildIsoRoom(m, floor) {
+export function buildIsoRoom(m, floor, flatTex) {  // flatTex: 이미 비스듬히 그린 마루 그림. 있으면 화면에 그대로 깐다
   const W = m.w * TS, H = m.h * TS, x0 = 6, y0 = TS, x1 = W - 6, y1 = H - 6;
   const ox = y1 - x0 + M, oy = WH + M + 4 - (x0 + y0) / 2;
   m.isoRoom = { ox, oy, x0, y0, x1, y1 };
@@ -34,7 +34,8 @@ export function buildIsoRoom(m, floor) {
   // 앞쪽 바닥 두께: 방이 어둠 위에 떠 있는 판처럼 보이게
   const L = P(x0, y1), F = P(x1, y1), R = P(x1, y0), K = P(x0, y0);
   poly([L, F, R, [R[0], R[1] + LIP], [F[0], F[1] + LIP], [L[0], L[1] + LIP]], pal.lip);
-  // 바닥: 네모 방 바닥 그림을 그대로 눕힌다
+  if (flatTex) { c.save(); c.beginPath(); [K, R, F, L].forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.closePath(); c.clip(); const pt = c.createPattern(flatTex, 'repeat'); pt.setTransform(new DOMMatrix().scale(1 / (flatTex.hd || 1))); c.fillStyle = pt; c.fillRect(0, 0, cv.width, cv.height); c.restore(); }
+  // 바닥: 네모 방 바닥 그림을 그대로 눕힌다(새 마루면 깔개와 바닥 소품만)
   c.save(); c.setTransform(1, .5, -1, .5, ox, oy); c.beginPath(); c.rect(x0, y0, x1 - x0, y1 - y0); c.clip(); c.drawImage(floor, 0, 0);
   // 벽 밑 그늘
   let g = c.createLinearGradient(0, y0, 0, y0 + 22); g.addColorStop(0, 'rgba(0,0,0,.34)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(x0, y0, x1 - x0, 22);

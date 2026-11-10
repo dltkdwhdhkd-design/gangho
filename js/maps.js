@@ -2,7 +2,7 @@
 import { G, TS, rint, pick, IMG } from './core.js';
 import { FURN, HOUSES } from './items.js';
 import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tiles.js';
-import { meta, corners, hitsBox, inside } from './iso.js';
+import { meta, corners, hitsBox, inside, drawIso } from './iso.js';
 import { buildIsoRoom } from './isoroom.js';
 
 // 쿼터뷰 미리보기에서는 바깥 지도를 k배 넓게 편다. 쿼터뷰 집이 크기 때문이다
@@ -24,12 +24,13 @@ class MapDef {
   put(name, tx, ty, o = {}) {
     const s = STAMPS[name], px = tx * this.k * TS + (o.dx || 0), py = ty * this.k * TS + (o.dy || 0);
     if (!s) { console.warn('소품 없음', name); return this; }
-    this.stamps.push({ name, x: px, y: py, base: py + s[4] - (o.lift || 0), flat: o.flat });
+    this.stamps.push({ name, x: px, y: py, base: py + s[4] - (o.lift || 0), flat: o.flat, ...(o.isoAs ? { isoAs: o.isoAs } : {}) });
     if (s.length > 5 && !o.nosolid) this.solids.push({ x: px + s[5], y: py + s[6], w: s[7], h: s[8] });
     return this;
   }
-  row(name, tx, ty, n, step = 1, o = {}) { for (let i = 0; i < n; i++) this.put(name, tx + i * step, ty, o); return this; }
-  col(name, tx, ty, n, step = 1, o = {}) { for (let i = 0; i < n; i++) this.put(name, tx, ty + i * step, o); return this; }
+  // 줄지어 놓기. 넓힌 지도에서 한 칸짜리를 촘촘히 잇던 줄(담, 목책)은 조각을 더 넣어 틈이 생기지 않게 한다
+  row(name, tx, ty, n, step = 1, o = {}) { const k = step === 1 ? this.k : 1, N = Math.ceil(n * k - (k - 1)); for (let i = 0; i < N; i++) this.put(name, tx + i * step / k, ty, o); return this; }
+  col(name, tx, ty, n, step = 1, o = {}) { const k = step === 1 ? this.k : 1, N = Math.ceil(n * k - (k - 1)); for (let i = 0; i < N; i++) this.put(name, tx, ty + i * step / k, o); return this; }
   solid(tx, ty, w, h) { const k = this.k; this.solids.push({ x: tx * k * TS, y: ty * k * TS, w: w * TS, h: h * TS }); return this; }
   // 건물 입구: 스탬프 아래쪽 가운데에 포탈을 만든다
   house(name, tx, ty, to, ex, ey, dir = 1, o = {}) {
@@ -44,6 +45,7 @@ class MapDef {
   paveDiamond(cx, cy, hw, kind = 'stone') { const k = this.k; cx *= k; cy *= k; hw *= k; (this.pave = this.pave || []).push({ kind, poly: [[cx, cy - hw / 2], [cx + hw, cy], [cx, cy + hw / 2], [cx - hw, cy]].map(([a, b]) => [a * TS, b * TS]) }); return this; }
   // 쿼터뷰 소품: (fx, fy)는 바닥 마름모의 앞 모서리 자리(칸). flip이면 좌우를 뒤집어 입구가 오른쪽 앞면에 온다
   iso(name, fx, fy, o = {}) { return this.isoAt(name, fx * this.k, fy * this.k, o); }
+  isoGround(name, X, Y, o = {}) { const q = meta(name, o.flip); if (!q) return this; (this.ground = this.ground || []).push({ name, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, flip: !!o.flip, iso: corners(X, Y, q.fw, q.fh, q.ls, q.rs) }); return this; }
   isoAt(name, fx, fy, o = {}) {
     const q = meta(name, o.flip); if (!q) { console.warn('쿼터뷰 소품 없음', name); return this; }
     const X = fx * TS, Y = fy * TS, c = corners(X, Y, q.fw, q.fh, q.ls, q.rs); this.hasIso = true;
@@ -85,12 +87,13 @@ class MapDef {
       G.world.paintArea(x, 0, 0, this.w, this.h, this.g, Bm, this.w, this.h);
     } else paintGround(x, this.g, this.biome);
     if (this.pave) for (const p of this.pave) paintPave(x, p);
+    for (const s of this.ground || []) drawIso(x, s);
     for (const s of this.stamps) if (s.flat) drawStamp(x, s.name, s.x, s.y);
     this.canvas = c; this.objs = this.stamps.filter(s => !s.flat);
     if (this.room && isoMode() && this.id !== 'myhouse') { // 쿼터뷰 미리보기: 바닥만 칠해 눕히고 뒷벽 두 면을 세운다
       const f = document.createElement('canvas'); f.width = c.width; f.height = c.height; const fx = f.getContext('2d'); fx.imageSmoothingEnabled = false;
-      paintRoom(fx, this.w, this.h, this.roomStyle || 0, { carpet: this.carpet, floorOnly: true }); for (const s of this.stamps) if (s.flat) drawStamp(fx, s.name, s.x, s.y);
-      buildIsoRoom(this, f);
+      const flat = !this.roomStyle && IMG['ground/wood']; paintRoom(fx, this.w, this.h, this.roomStyle || 0, { carpet: this.carpet, floorOnly: true, noFloor: flat }); for (const s of this.stamps) if (s.flat) drawStamp(fx, s.name, s.x, s.y);
+      buildIsoRoom(this, f, flat ? IMG['ground/wood'] : null);
     }
     if (this.room) { this.solids.push({ x: 0, y: 0, w: this.w * TS, h: TS + 4 }, { x: 0, y: 0, w: 10, h: this.h * TS }, { x: this.w * TS - 10, y: 0, w: 10, h: this.h * TS }, { x: 0, y: this.h * TS - 10, w: this.w * TS, h: 10 }); }
     return this;
@@ -155,13 +158,20 @@ function isoDress(m) {
 }
 // 문 자리 D가 문 난 면 가운데(그림에 문 자리가 적혀 있으면 그 자리)에 오게 앞 모서리를 잡는다. 문은 왼쪽 앞면, 뒤집으면 오른쪽 앞면에 있다
 const doorF = (q, flip, D) => { const t = q.door ?? .5; return flip ? [D[0] - q.fh * t * 16, D[1] + q.fh * t * 16 * (q.rs ?? .5)] : [D[0] + q.fw * t * 16, D[1] + q.fw * t * 16 * (q.ls ?? .5)]; };
+function isoDock(m, x, y, w, h) {
+  const k = m.k, q = meta('dock'); for (let Y = Math.floor(y * k); Y < Math.ceil((y + h) * k); Y++) for (let X = Math.floor(x * k); X < Math.ceil((x + w) * k); X++) if (m.g[Y]?.[X] === 4) m.g[Y][X] = Y < (y + 1) * k ? 1 : 2;
+  const Kx = (x + w / 2) * k * TS, Ky = (y + 1) * k * TS - 6, ls = q.ls ?? .5, rs = q.rs ?? .5, F = [Kx + 16 * (q.fw - q.fh), Ky + 16 * (q.fw * ls + q.fh * rs)];
+  m.isoGround('dock', F[0], F[1]); const c = m.ground[m.ground.length - 1].iso;
+  for (let Y = Math.floor(c.K[1] / TS) - 1; Y <= Math.ceil(c.F[1] / TS); Y++) for (let X = Math.floor(c.L[0] / TS); X <= Math.ceil(c.R[0] / TS); X++) if (m.g[Y]?.[X] === 2 && inside(c, X * TS + 8, Y * TS + 8, -3)) m.g[Y][X] = 4;
+  m.dockDeck = true;
+}
 export function isoRetrofit(m, o = {}) {
   if (m._isoDone || m.room || (m.live && !o.live)) return; m._isoDone = true; const cxm = m.w * TS / 2, placed = [], leftOf = o.leftOf || (x => x < cxm);
   const houses = m.stamps.filter(st => ISO_OF[st.name] && STAMPS[st.name]).map(st => { const s = STAMPS[st.name], w = s[3], h = s[4], dy = st.y + h; return { st, door: m.portals.find(q => q.door && q.x < st.x + w && q.x + q.w > st.x && Math.abs(q.y + q.h / 2 - dy) < 20) }; });
   const rank = h => !h.door ? 0 : /^h_/.test(h.door.to) ? 1 : 2; houses.sort((a, b) => rank(b) - rank(a)); // 이야기에 쓰는 문, 저절로 단 문, 문 없는 집 차례로 자리를 잡는다
   for (let { st, door } of houses) {
     const s = STAMPS[st.name], w = s[3], h = s[4], dx = st.x + w / 2, dy = st.y + h;
-    let first = (door && ISO_ROOM[String(door.to).replace(/^r_\w+?_/, '')]) || (door && /^r_\w+_hall$/.test(door.to) ? 'hall_dao' : null) || ISO_OF[st.name];
+    let first = st.isoAs && meta(st.isoAs) ? st.isoAs : (door && ISO_ROOM[String(door.to).replace(/^r_\w+?_/, '')]) || (door && /^r_\w+_hall$/.test(door.to) ? 'hall_dao' : null) || ISO_OF[st.name];
     if (first === 'inn' && /^c_/.test(m.id) && meta('inn_city')) first = 'inn_city';  // 큰 고을 객잔은 말끔한 쪽
     // 문이 앞면 가운데에 오게 앞 모서리를 잡는다. 이웃과 겹치면 반대로 돌리거나 작은 집으로 바꾸고, 문 없는 집은 빼 버린다
     let pick = null; const D = door ? [door.x + door.w / 2, door.y + door.h / 2] : [dx, dy];
@@ -221,7 +231,7 @@ export function buildMaps() {
   m.put('plum', 2, 22).put('plum', 40, 8).put('plum_g', 18, 22).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
   m.put('jar', 18, 12).put('pot', 26, 12).put('pot', 27, 12).put('signpost', 24, 16).put('signpost', 41, 13);
   m.fill(21, 28, 4, 4, 4);
-  m.solids.push({ x: 21 * TS - 4, y: 29 * TS, w: 4, h: 3 * TS }, { x: 25 * TS, y: 29 * TS, w: 4, h: 3 * TS }, { x: 21 * TS, y: 32 * TS, w: 4 * TS, h: 8 });
+  { const K = m.k * TS; if (isoMode() && meta('dock')) isoDock(m, 21, 28, 4, 4); else m.solids.push({ x: 21 * K - 4, y: 29 * K, w: 4, h: 3 * K }, { x: 25 * K, y: 29 * K, w: 4, h: 3 * K }, { x: 21 * K, y: 32 * K, w: 4 * K, h: 8 }); }  // 쿼터뷰에선 나루 그림으로 바꾼다
   m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2], [0, 13, 3, 5]], 3);
   m.put('plum', 8, 25).put('plum_o', 34, 24).put('tree_round', 38, 25).put('stump', 13, 25).put('boulder', 29, 26).put('jar', 19, 25).put('pot', 26, 25).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 40, 21);
   m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
@@ -276,11 +286,11 @@ export function buildMaps() {
   m.exit(0, 11, 1, 4, 'cheongha', 43.5, 15.5, 2).exit(39, 4, 1, 4, 'fort', 1, 13, 3, { when: 'fort_open', lock: '산채 입구다. 준비가 끝나면 다시 오자.' }).exit(39, 17, 1, 4, 'cloudmt', 22, 36, 1, { when: 'cloud_open', lock: '이 길 너머는 창운산이다. 지금은 갈 이유가 없다.' });
   // 흑풍채
   m = M('fort', 36, 26, { name: '흑풍채', bgm: 'dungeon', biome: 'dusk', arena: 'fort' });
-  m.fill(0, 0, 36, 26, 1);
-  m.row('wood_h', 2, 2, 33).col('wood_h', 1, 3, 8).col('wood_h', 34, 3, 20).row('wood_h', 2, 23, 33).col('wood_h', 1, 15, 9);
+  m.fill(1, 2, 34, 22, 1).fill(0, 11, 2, 4, 1).fill(16, 23, 4, 3, 1);  // 목책 안 마당, 서쪽 샛문 길, 남쪽 정문 길. 목책 밖은 맨땅
+  m.row('wood_h', 2, 2, 33).col('wood_h', 1, 3, 8).col('wood_h', 34, 3, 20).row('wood_h', 2, 23, 14).row('wood_h', 20, 23, 15).col('wood_h', 1, 15, 9);  // 아래 목책 가운데는 강호로 나가는 문
   m.put('wood_b', 8, 4).put('wood_o', 16, 4).put('hut_b', 26, 4).put('lodge', 15, 14).put('straw', 6, 15).put('mud', 26, 16);
   for (const [x, y] of [[13, 9], [22, 9], [5, 12], [30, 12], [10, 20], [24, 21]]) m.put('jar', x, y);
-  m.flag('heukpung', 14.6, 14.75, true).flag('heukpung', 20.4, 14.75);
+  m.flag('heukpung', 14.6, 14.75, true).flag('heukpung', 20.4, 14.75).flag('heukpung', 15.2, 23.9, true).flag('heukpung', 20.2, 23.9);  // 아래 문 양옆에도 산채 깃발
   m.exit(0, 12, 1, 3, 'pass', 37.5, 5.5, 2);
   // 창운산
   m = M('cloudmt', 46, 38, { name: '창운산', bgm: 'temple', biome: 'deep', arena: 'court' });
@@ -324,7 +334,7 @@ export function buildMaps() {
   // 청풍골: 사냥과 낚시, 벌목
   m = M('valley', 40, 30, { name: '청풍골', bgm: 'peaceful', biome: 'deep', arena: 'forest', ambient: 'leaf' });
   m.water(19, 0, 2, 30).fill(19, 13, 2, 3, 4).road(21, 14, 39, 14, 2).road(4, 14, 18, 14, 2);
-  m.solids.push({ x: 0, y: -8, w: 40 * TS, h: 8 });
+  m.solids.push({ x: 0, y: -8, w: 40 * m.k * TS, h: 8 });
   m.border(['grove_pine', 'tree_big', 'grove_green', 'tree_pine'], [[38, 13, 3, 5], [0, 13, 4, 4]], 3);
   for (const [nm, x, y] of [['tree_pine', 9, 5], ['tree_round', 14, 7], ['tree_big', 26, 4], ['tree_pine', 32, 11], ['plum_g', 14, 19], ['tree_round', 7, 22], ['tree_pine', 25, 24], ['tree_big', 34, 26], ['boulder', 23, 10], ['boulder', 15, 25], ['plum', 30, 17], ['tree_round', 5, 9]]) m.put(nm, x, y);
   m.scatter(['fern1', 'fern2', 'bush2', 'bush4', 'flower3'], 34, 41);
@@ -367,7 +377,7 @@ export function buildMaps() {
   const nine = [['house_red', 4, 5, '소림사', 'tree_big', 'shaolin'], ['hut_b', 12, 5, '무당파', 'tree_pine', 'wudang'], ['hut_o', 20, 5, '화산파', 'plum', 'hwasan'], ['hut_o2', 28, 5, '종남파', 'tree_pine', 'jongnam'], ['shop_green', 36, 5, '아미파', 'plum_w', 'emei'],
     ['wood_b', 4, 15, '곤륜파', 'tree_snow', 'gonryun'], ['clay', 12.5, 15, '공동파', 'boulder', 'gongdong'], ['wood_o', 20.5, 15, '점창파', 'tree_round', 'jeomchang'], ['hut_b', 28, 15, '청성파', 'bamboo', 'cheongseong'], ['straw', 36.5, 15.8, '개방', 'stump', 'gaebang']];
   for (const [st, x, y, nm, tr, fid] of nine) { m.put(st, x, y, { nosolid: false }).flag(fid, x + STAMPS[st][3] / TS + .3, y + STAMPS[st][4] / TS + .15).label(x + 2, y - .5, nm); m.put(tr, x - 2.4, y - .4 + (tr === 'plum' || tr === 'plum_w' ? -1 : 0)); }
-  m.solids.push({ x: 0, y: 0, w: 44 * TS, h: 3 * TS }, { x: 0, y: 23 * TS, w: 44 * TS, h: 2 * TS });
+  m.solids.push({ x: 0, y: 0, w: 44 * m.k * TS, h: 3 * m.k * TS }, { x: 0, y: 23 * m.k * TS, w: 44 * m.k * TS, h: 2 * m.k * TS });
   m.border(['grove_green', 'tree_big', 'grove_pine'], [[0, 8, 2, 5]], 3);
   m.scatter(['flower1', 'flower3', 'fern1', 'bush2'], 22, 21);
   m.exit(0, 9, 1, 3, 'guhwa', 46.5, 19.5, 2);
@@ -379,7 +389,7 @@ export function buildMaps() {
   m.put('house_red', 26, 6).label(28, 5.5, '제갈세가').flag('jegal', 25.6, 9.6, true).flag('jegal', 30.4, 9.6).put('tree_pine', 22, 5).put('bamboo', 33, 5).put('bamboo', 34, 5.4).put('bamboo', 35, 5);
   m.put('shop_green', 8, 15).label(10, 14.5, '사천당가').flag('dang', 7.6, 18.6, true).flag('dang', 12.4, 18.6).put('tree_dead', 4, 15).row('jar', 3, 18, 2, 1);
   m.put('clay', 22, 15).label(24, 14.5, '하북팽가').flag('paeng', 21.6, 18.6, true).flag('paeng', 25.4, 18.6).put('stump', 17, 16).put('stump_o', 27, 16).put('pot', 19, 18);
-  m.solids.push({ x: 0, y: 23 * TS, w: 42 * TS, h: 2 * TS });
+  m.solids.push({ x: 0, y: 23 * m.k * TS, w: 42 * m.k * TS, h: 2 * m.k * TS });
   m.border(['grove_pine', 'tree_big', 'grove_green'], [[40, 9, 3, 5]], 3);
   m.scatter(['fern1', 'fern2', 'bush2', 'bush4'], 20, 31);
   m.exit(41, 10, 1, 3, 'guhwa', 3.5, 19.5, 3);

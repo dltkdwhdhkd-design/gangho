@@ -81,7 +81,7 @@ export function buildWorld() {
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const c = T[y * WW + x]; g[y][x] = c === SEA || c === RIVER ? 2 : c === ROAD ? 1 : c === BRIDGE ? 4 : 0; if (c === INN) STOPS.push({ x, y }); }
   // 길가 두 칸은 비워 둔다
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const c = T[y * WW + x]; if (c === ROAD || c === BRIDGE) reserve(x - 2, y - 2, x + 2, y + 2); }
-  for (const t of STOPS) { reserve(t.x - 5, t.y - 6, t.x + 5, t.y + 3); m.put('hut_o', t.x - 2, t.y - 4); m.put('banner4', t.x + 2, t.y - 2); m.put('jar', t.x - 3.2, t.y - 1.6); m.put('log', t.x + 3.3, t.y - .6); m.label(t.x, t.y - 5, '주막'); }
+  for (const t of STOPS) { reserve(t.x - 5, t.y - 6, t.x + 5, t.y + 3); m.put('hut_o', t.x - 2, t.y - 4, { isoAs: 'tavern' }); m.put('banner4', t.x + 2, t.y - 2); m.put('jar', t.x - 3.2, t.y - 1.6); m.put('log', t.x + 3.3, t.y - .6); m.label(t.x, t.y - 5, '주막'); }
   for (const l of LOCS) compound(l);
   nature();
   if (isoMode()) { const C = LOCS.map(l => [Math.round(l.px[0] * K) * TS, Math.round(l.px[1] * K) * TS]); isoRetrofit(m, { live: true, leftOf: x => { let b = C[0]; for (const c of C) if (Math.abs(c[0] - x) < Math.abs(b[0] - x)) b = c; return x < b[0]; } }); }
@@ -404,7 +404,11 @@ function linkEdges(mp) {
   if (l) { const [wx, wy] = entry(mp.id); dest = ['world', wx, wy, 0, { world: true, when: 'world_open', lock: '아직 먼 길을 나설 때가 아니다.' }]; }
   else if (back) dest = [back.to, back.tx, back.ty, back.dir, { when: back.when, lock: back.lock, world: back.world }];
   if (!dest) return;
-  const side = (n, f, put) => { let a = -1; for (let i = 0; i <= n; i++) { const ok = i < n && (([x, y]) => walk(mp.g[y]?.[x]) && !inP(x, y) && !mp.blocked(x * TS + 8, y * TS + 10))(f(i)); if (ok && a < 0) a = i; if (!ok && a >= 0) { put(a, i - a); a = -1; } } };
+  // 걸어서 닿는 가장 큰 땅(담 안 마을)과 이어진 가장자리에만 출구를 낸다. 담 밖 가장자리에 길이 깔려 있어도 거기엔 내지 않는다
+  // 맨 가장자리 줄은 빼고 본다(담 밖 가장자리를 빙 돌아 이어지는 것을 막는다). 가장자리 칸은 바로 안쪽 칸이 그 땅에 들면 출구가 된다
+  const W = mp.w, H = mp.h, free = (x, y) => x > 0 && y > 0 && x < W - 1 && y < H - 1 && !mp.blocked(x * TS + 8, y * TS + 10), lab = new Int32Array(W * H).fill(-1), sz = []; let main = -1;
+  for (let i = 0; i < W * H; i++) { if (lab[i] >= 0 || !free(i % W, Math.floor(i / W))) continue; const n = sz.length, Q = [i]; lab[i] = n; let c = 0; while (Q.length) { const k = Q.pop(), x = k % W, y = (k - x) / W; c++; for (const [X, Y] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) { if (X < 0 || Y < 0 || X >= W || Y >= H) continue; const j = Y * W + X; if (lab[j] < 0 && free(X, Y)) { lab[j] = n; Q.push(j); } } } sz.push(c); if (main < 0 || c > sz[main]) main = n; }
+  const side = (n, f, put) => { let a = -1; for (let i = 0; i <= n; i++) { const ok = i < n && (([x, y]) => walk(mp.g[y]?.[x]) && !inP(x, y) && !mp.blocked(x * TS + 8, y * TS + 10) && lab[Math.min(H - 2, Math.max(1, y)) * W + Math.min(W - 2, Math.max(1, x))] === main)(f(i)); if (ok && a < 0) a = i; if (!ok && a >= 0) { put(a, i - a); a = -1; } } };
   const ex = (x, y, w, h) => mp.portals.push({ x: x * TS, y: y * TS, w: w * TS, h: h * TS, to: dest[0], tx: dest[1], ty: dest[2], dir: dest[3], ...dest[4] }); // 칸 번호 그대로(넓힌 지도여도)
   side(mp.w, x => [x, mp.h - 1], (a, n) => ex(a, mp.h - 1, n, 1)); side(mp.w, x => [x, 0], (a, n) => ex(a, 0, n, 1));
   side(mp.h, y => [0, y], (a, n) => ex(0, a, 1, n)); side(mp.h, y => [mp.w - 1, y], (a, n) => ex(mp.w - 1, a, 1, n));

@@ -249,13 +249,35 @@ def isogrid(path, cols, rows, key, C=64):  # 동물, 몬스터: 2열(왼아래, 
             out.alpha_composite(c, (col * C + (C - c.width) // 2, r * C + C - 2 - c.height))
     os.makedirs(os.path.join(ROOT, 'assets/hd', os.path.dirname(key)), exist_ok=True); out.save(os.path.join(ROOT, f'assets/hd/{key}_q.webp'), lossless=True); reg_key(key + '_q'); print(key + '_q', '키', H // 2)
 TEXN = {'forest': 'deep', 'dirt': 'plain'}
-def tex(path, name, N=512):  # 땅 텍스처: 가운데 정사각형을 잘라 줄이고, 반 칸 밀어 겹쳐 이음매를 지운다
+def tex(path, name, N=None, D=512 / 1100):  # D: 원본 한 점이 HD 몇 점이 되나. 텍스처마다 되풀이 길이가 달라도 결 크기를 같게  # 땅 텍스처: 이어 붙는 길이를 골라 자르고, 이음매 띠를 가장 덜 티 나는 금(최소 비용 이음매)으로 꿰매 타일로 만든다
     import numpy as np
-    name = TEXN.get(name, name); im = Image.open(path).convert('RGB'); m = min(im.size); im = im.crop(((im.width - m) // 2, (im.height - m) // 2, (im.width + m) // 2, (im.height + m) // 2)).resize((N, N), Image.LANCZOS)
-    A = np.array(im).astype(float); B = np.roll(np.roll(A, N // 2, 0), N // 2, 1); u = np.abs(np.arange(N) - (N - 1) / 2) / (N / 2)
-    w = np.clip((1 - np.maximum(u[:, None], u[None, :])) * 4, 0, 1)[..., None]  # 가장자리 1/4 폭에서만 섞는다
-    out = (A * w + B * (1 - w)).round().astype('uint8'); os.makedirs(os.path.join(ROOT, 'assets/hd/ground'), exist_ok=True)
-    Image.fromarray(out).save(os.path.join(ROOT, f'assets/hd/ground/{name}.webp'), quality=92); reg_key('ground/' + name); print('ground/' + name)
+    name = TEXN.get(name, name); im = Image.open(path).convert('RGB'); m = min(im.size); im = im.crop(((im.width - m) // 2, (im.height - m) // 2, (im.width + m) // 2, (im.height + m) // 2))
+    if m > 1400: im = im.resize((1400, 1400), Image.LANCZOS); m = 1400
+    A = np.array(im).astype(np.float32); ov = max(48, m // 9)
+    # 되풀이 길이: 가로세로로 S만큼 밀었을 때 가장 닮은 S (무늬가 반듯한 돌바닥, 마루에서 중요하다)
+    def diff(S): return np.abs(A[:, :m - S] - A[:, S:]).mean() + np.abs(A[:m - S] - A[S:]).mean()
+    S = min(range(int(m * .62), m - ov), key=diff)
+    def seam(cost):  # 위에서 아래로 가는 가장 싼 금. 각 줄에서 금의 열 번호
+        H, W = cost.shape; M = cost.copy(); back = np.zeros((H, W), int)
+        for i in range(1, H):
+            L = np.r_[np.inf, M[i - 1, :-1]]; R = np.r_[M[i - 1, 1:], np.inf]; st = np.stack([L, M[i - 1], R]); k = st.argmin(0); back[i] = k - 1; M[i] += st.min(0)
+        j = int(M[-1].argmin()); out = [0] * H
+        for i in range(H - 1, -1, -1): out[i] = j; j = min(W - 1, max(0, j + back[i, j]))
+        return out
+    def stitch(X):  # 가로로 이어 붙게: 오른쪽 끝 다음 띠(O)를 왼쪽 띠에 금을 따라 덮는다
+        T = X[:, :S].copy(); O = X[:, S:S + ov]; Lb = T[:, :ov]; cut = seam(np.abs(O - Lb).sum(2))
+        for i, j in enumerate(cut): T[i, :j] = O[i, :j]
+        return T
+    B = stitch(A); B = stitch(B.transpose(1, 0, 2)).transpose(1, 0, 2)[:S, :S]; N = N or max(256, round(S * m / 1254 * D / 32) * 32 if m < 1254 else round(S * D / 32) * 32)
+    big = Image.fromarray(np.tile(B, (3, 3, 1)).clip(0, 255).astype('uint8')).resize((N * 3, N * 3), Image.LANCZOS)  # 둘레까지 이어진 채로 줄인다
+    out = big.crop((N, N, 2 * N, 2 * N)); os.makedirs(os.path.join(ROOT, 'assets/hd/ground'), exist_ok=True)
+    out.save(os.path.join(ROOT, f'assets/hd/ground/{name}.webp'), quality=92); reg_key('ground/' + name); print('ground/' + name, '되풀이', S, '/', m, '→', N)
+def tint(src, name, dh=-.04, ks=.72, kv=.94):  # 이미 들어온 땅 텍스처의 빛깔만 돌려 새 땅을 만든다(들판 = 풀밭을 누렇게)
+    import numpy as np
+    im = Image.open(os.path.join(ROOT, f'assets/hd/ground/{src}.webp')).convert('HSV'); a = np.array(im).astype(np.float32)
+    g = (a[..., 0] > 35) & (a[..., 0] < 120)  # 초록 계열만 돌리고(흙빛은 그대로 두어 분홍이 되지 않게) 모두 조금 바랜다
+    a[..., 0] = np.where(g, a[..., 0] + dh * 255, a[..., 0]); a[..., 1] *= np.where(g, ks, .9); a[..., 2] *= kv
+    Image.fromarray(a.clip(0, 255).astype('uint8'), 'HSV').convert('RGB').save(os.path.join(ROOT, f'assets/hd/ground/{name}.webp'), quality=92); reg_key('ground/' + name); print('ground/' + name, '←', src)
 def arena(path, theme):
     im = Image.open(path).convert('RGB'); r = 768 / 480
     if im.width / im.height > r: nw = round(im.height * r); im = im.crop(((im.width - nw) // 2, 0, (im.width - nw) // 2 + nw, im.height))
@@ -297,6 +319,7 @@ if __name__ == '__main__':
     elif cmd == 'isogrid': isogrid(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
     elif cmd == 'tex': tex(sys.argv[2], sys.argv[3])
     elif cmd == 'arena': arena(sys.argv[2], sys.argv[3])
+    elif cmd == 'tint': tint(sys.argv[2], sys.argv[3], *map(float, sys.argv[4:7]))
     elif cmd == 'qb': qb(sys.argv[2], sys.argv[3:])
     elif cmd == 'batch': batch(sys.argv[2])
     elif cmd == 'placeall':
