@@ -125,7 +125,7 @@ function compound(l) {
   // 터를 고르고 둘레에 길을 낸다. 어느 쪽에서 오든 정문으로 돌아 들어간다
   reserve(x0 - 4, y0 - 5, x1 + 4, y1 + 6);
   for (let y = y0 - 1; y <= y1 + 3; y++) for (let x = x0 - 1; x <= x1 + 1; x++) if (g[y]?.[x] !== undefined) { const edge = y === y0 - 1 || y === y1 + 3 || x === x0 - 1 || x === x1 + 1; g[y][x] = edge ? 1 : y > y1 ? 1 : 0; }
-  m.label(tx, ty + 4.6, l.name);
+  m.label(tx, ty + 4.6, l.name); (m.sites = m.sites || []).push({ map: l.map, x0: x0 - 2, y0: y0 - 3, x1: x1 + 2, y1: y1 + 4 });  // 전쟁 흔적(js/warfx.js)이 이 터 안의 건물을 찾는다
   // 밑동 가운데 자리로 놓기
   const at = (name, cx, by, o) => { const s = STAMPS[name]; if (s) m.put(name, cx - s[3] / 32, by - s[4] / TS, o); };
   const stone = (ax, ay, bx, by) => { if (isoMode() && bx - ax > 2) { m.paveDiamond((ax + bx + 1) / 2, (ay + by + 1) / 2, (bx - ax + 1) / 2 + 1); return; } for (let y = ay; y <= by; y++) for (let x = ax; x <= bx; x++) if (g[y]?.[x] !== undefined) g[y][x] = 3; };

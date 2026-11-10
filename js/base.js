@@ -287,7 +287,7 @@ function roomNpcs(id, out) {
 }
 async function armory(f) {
   const s = G.S, w = (LOOT[f.id] || []).find(k => WEAPONS[k] && !s.weapons.includes(k)); if (!w) { await say(null, '무기고지기: 내줄 만한 칼이 없소.'); return; } if (G.jh.rep(f.id) < 35) { await say(null, `무기고지기: 우리 사람한테만 파는 물건이오. (우호 35)`); return; }
-  const c = await choice(`${WEAPONS[w].name}을(를) 살까? (은자 800냥)`, ['산다', '그만둔다']); if (c) return; if (s.silver < 800) { await say(null, '은자가 모자란다.'); return; } s.silver -= 800; s.weapons.push(w); Sound.sfx('coin'); toast(`${WEAPONS[w].name}을(를) 샀다`, 3);
+  const c = await choice(`${josa(WEAPONS[w].name, '을/를')} 살까? (은자 800냥)`, ['산다', '그만둔다']); if (c) return; if (s.silver < 800) { await say(null, '은자가 모자란다.'); return; } s.silver -= 800; s.weapons.push(w); Sound.sfx('coin'); toast(`${josa(WEAPONS[w].name, '을/를')} 샀다`, 3);
 }
 // ── 저잣거리 사람들 ──
 const rot = (a, i) => a.slice(i % a.length).concat(a.slice(0, i % a.length));
@@ -436,7 +436,12 @@ function provider(id) {
   }
   const f = G.free?.fac(l.fac); if (!f) return out;
   if (G.jh.fallen(f.id)) { out.npcs = [{ id: 'ash', spr: 'Villager', x: 23, y: 44, dir: 0, hint: '잿더미를 치우는 사람', talk: () => G.jh.rebuild(f) }]; return out; }
-  if (G.jh.hostile(f.id)) { out.trigs.push({ x: 20, y: 56, w: 6, h: 4, when: () => !G.S.daily['gate_' + f.id], run: async () => { G.S.daily['gate_' + f.id] = 1; await G.jh.gate(f); } }); return out; }
+  if (G.jh.hostile(f.id)) {  // 원수의 산문: 사람들이 칼을 들고 기다린다. 눈에 띄면 덤빈다
+    const lv = G.S.lv, home = /세가/.test(f.group) ? '본가' : '본문', who = /세가/.test(f.group) ? '가솔' : '제자', FO = G.free.foes;
+    const LINES = [`원수 놈이 제 발로 걸어 들어왔다!`, `${home} 사람을 죽인 놈이다. 살려 보내지 마라!`, `어른들께 알려라! 놈이 왔다!`, `여기서 나갈 생각은 하지 마라.`, `피값은 피로 받는다.`];
+    [[23, 58], [14, 47], [32, 47], [23, 34], [23, 20]].forEach(([x, y], i, A) => { const foes = i === A.length - 1 ? [G.jh.disciple(f, lv + 2, true), ...G.jh.crew(f, lv + 1, 2)] : G.jh.crew(f, lv, i === 0 || lv >= 10 ? 2 : 1); out.roam.push({ spr: FO[foes[0]].spr, x, y, foes, fac: f.id, intro: `${f.name} ${i === A.length - 1 ? '사범' : who}: ${LINES[i % LINES.length]}` }); });
+    return out;
+  }
   // 문지기, 일하는 외문 제자, 연무장에서 수련하는 제자들, 사범. 밤에는 수련을 쉬고 일꾼도 줄어든다
   const T = TALK[l.fac] || {}, reg = REG[l.fac] || 'hap', name = f.group === '세가' || f.group === '오대세가' ? '가솔' : '제자', night = G.S.flags.night, fart = FACEART[f.id];
   const pool = (role, base) => [...ctxLines(f, role), ...(base || chat)];

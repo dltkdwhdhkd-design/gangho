@@ -155,6 +155,7 @@ export class Field {
       const life = n.life || (n.drill ? 'drill' : 'idle'); if (life === 'still') continue;
       if (n.hide > 0) { n.hide -= dt; continue; }  // 집에 들어갔다
       if (life === 'watch') { const lx = n.look[0] * TS, ly = n.look[1] * TS; n.dir = Math.abs(lx - n.x) > Math.abs(ly - n.y) ? (lx < n.x ? 2 : 3) : (ly < n.y ? 1 : 0); continue; }  // 구경꾼은 구경거리만 본다
+      if (life === 'fight') { const ph = (t + (n.lag || 0)) % 1.5; n.pose = ph < .3 ? 4 : ph < .65 ? 6 : undefined; n.dir = n.face ?? n.dir; n.walk = 0; continue; }  // 길에서 맞붙은 무리: 베고 막기를 되풀이한다
       if (life === 'perform') { const ph = (t + (n.lag || 0)) % 2.6; n.pose = ph < .45 ? 5 : ph < .9 ? 4 : ph < 1.35 ? 5 : undefined; n.dir = Math.floor(t / 2.6) % 3 === 2 ? 3 : 0; n.walk = 0; continue; }
       const d = hyp(p.x - n.x, p.y - n.y); n.lt = (n.lt ?? rnd(.4, 3)) - dt;
       if (n.greet && d < 40 && !(n.greetT > 0)) { n.greetT = 40; this.bubble(n, typeof n.greet === 'function' ? n.greet() : n.greet); }
@@ -283,6 +284,7 @@ export class Field {
     c.fillStyle = '#000'; c.fillRect(0, 0, VW, VH);
     const ox = -snap(cam.x), oy = -snap(cam.y); c.translate(ox, oy);
     if (m.live) G.world.ground(c, cam); else c.drawImage(m.canvas, 0, 0);
+    G.warfx?.under(c, m, cam, this.t);  // 전쟁의 흔적: 잿더미, 깃발, 진채
     const list = [];
     for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x + (s.w || STAMPS[s.name]?.[3] || 120) > cam.x - 8 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
     for (const n of this.npcs) if (!(n.hide > 0)) list.push({ y: n.y, n });
@@ -294,7 +296,7 @@ export class Field {
     list.sort((a, b) => a.y - b.y);
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
-      if (o.s) { if (o.s.iso) { const burnt = o.s.name === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); if (burnt) c.filter = 'none'; } else drawStamp(c, o.s.name, o.s.x, o.s.y); }
+      if (o.s) { const wf = G.warfx?.tint(m, o.s); if (wf) c.filter = wf; if (o.s.iso) { const burnt = o.s.name === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y); c.filter = 'none'; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (IMG[a.spr + '_q']) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
@@ -307,6 +309,7 @@ export class Field {
     // 쿼터뷰: 집이나 나무 뒤로 들어가면 흐린 그림자로 한 번 더 그려 어디 있는지 보이게 한다
     if (m.hasIso || m.live) { const i = list.findIndex(o => o.me), y = p.y - 12; if (i >= 0 && list.slice(i + 1).some(o => o.s && o.s.iso && p.x > o.s.x + 4 && p.x < o.s.x + o.s.w - 4 && y > o.s.y + 4 && y < o.s.y + o.s.h)) { c.globalAlpha = .42; drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined }); c.globalAlpha = 1; } }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha' && !m.hasIso) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }
+    G.warfx?.over(c, m, cam, this.t);  // 불길, 연기, 비계, 교전 칼빛
     const ar = IMG['fx/p_arrow']; for (const r of this.arrows) { c.save(); c.translate(r.x, r.y); c.rotate(r.an); if (ar) c.drawImage(ar, -6, -2, ar.width / (ar.hd || 1), ar.height / (ar.hd || 1)); c.restore(); }
     if (G.decor) {
       const d = G.decor; c.strokeStyle = '#ffe36a'; c.lineWidth = .75;

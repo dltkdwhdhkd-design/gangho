@@ -184,7 +184,8 @@ async function join(f) {
   const fr = Fr();
   if (fr.fac) { await say(f.key, '다른 곳에 몸담은 사람은 받지 않습니다.'); return; }
   if (f.align === 'jeong' && fr.infamy >= 30) { await say(f.key, '손에 묻은 것부터 씻고 오시오. 그런 사람은 받을 수 없소.'); return; }
-  if (repOf(f.id) <= -30 || fr.left[f.id]) { await say(f.key, '한 번 나간 문은 다시 열지 않소.'); return; }
+  if (fr.left[f.id]) { await say(f.key, '한 번 나간 문은 다시 열지 않소.'); return; }
+  if (repOf(f.id) < 0 || fr.grudge.some(g => g.fac === f.id)) { await say(f.key, pick(['우리 사람에게 칼을 댄 자를 받을 문은 없소.', '네가 한 짓을 모를 줄 알았느냐. 썩 꺼져라.', '입문? 먼저 갚을 것부터 갚고 오너라.'])); return; }
   await say(f.key, f.group === '사파' ? '들어오고 싶다고? 절차는 간단하다. 여기 애들이랑 붙어서 서 있으면 된다.' : f.group === '마교' ? '입교하려면 먼저 시험을 치러야 합니다.' : '입문을 원하면 시험을 봐야 하오.');
   const won = await ctx.duel({ foes: group('guard', Math.max(1, S().lv), 2), arena: MAPS[f.at[0]]?.arena || 'court', bgm: 'fight', title: '입문 시험', optional: true, noIntro: true });
   if (!won) { await say(f.key, '다음에 다시 오시오.'); return; }
@@ -203,7 +204,7 @@ async function promote(f) {
   if (r === 3) { const t = TRIALS[f.id]; for (const [w, l] of t.lines) await say(w, l); if (!await ctx.duel({ foes: group(t.kind, lv, 3), arena, bgm: 'fight', title: '장로 시험', optional: true, noIntro: true })) return; await narr(t.end); }
   else if (r === 4) { await say(f.key, '내 자리를 원하는군. 칼로 말하시오.'); if (!await ctx.duel({ foes: ['clan_' + f.id], arena, bgm: 'boss', title: `${f.name} 승계전`, yieldAt: .2, optional: true, noLoot: true })) return; fr.head = true; addNews(`${S().name}, ${f.name}의 ${rankName(f, 4)} 자리에 오르다.`); }
   else { await say(f.key, '실력을 보겠소.'); if (!await ctx.duel({ foes: group('guard', lv, r + 1), arena, bgm: 'fight', title: '승급 시험', optional: true, noIntro: true })) return; }
-  fr.rank = r; grantRank(f); addRep(f.id, 10); Sound.sfx('ok3'); toast(`${rankName(f, r)}(으)로 올랐다`, 3.5);
+  fr.rank = r; grantRank(f); addRep(f.id, 10); Sound.sfx('ok3'); toast(`${josa(rankName(f, r), '으로/로')} 올랐다`, 3.5);
   ctx.note(`${f.name} ${rankName(f, r)}가 되었다.`);
 }
 async function stipend(f) { const fr = Fr(), d = S().daily; d.stipend = 1; const v = Math.round((20 + fr.rank * 30) * Math.max(1, dayLen() / 600)); S().silver += v; Sound.sfx('coin'); await say(f.key, `이번 봉록이오. 은자 ${v}냥.`); }
@@ -224,7 +225,7 @@ export async function facTalk(f) {
     if (head) opts.push(['장문인 명령', () => order(f.id)]);
     opts.push([`${josa(f.name, '을/를')} 떠난다`, () => leave(f)]);
   } else {
-    if (G.jh.hostile(f.id)) { await say(f.key, '네가 여기까지 걸어 들어온 건 칭찬해 주지.'); const won = await ctx.duel({ foes: ['clan_' + f.id], arena: G.field.m.arena, bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .2, optional: true, noLoot: true }); if (won) { const c = await choice(`${f.who}이(가) 쓰러졌다. 칼을 어떻게 할까?`, ['거둔다', '목을 벤다']); if (c === 0) { await say(f.key, '오늘 일은 기억하겠다.'); G.jh.addRep(f.id, 20, false); } else { await narr(`${f.name}의 어른이 내 칼에 죽었다. 강호가 이 일을 오래 말할 것이다.`); Fr().dead[f.id] = 1; Fr().infamy += 20; G.jh.news(`${S().name}, ${f.name}의 ${f.who}을(를) 베다.`); G.jh.addRep(f.id, -40); Fr().power[f.id] = 20; G.field.refresh(); } } return; }
+    if (G.jh.hostile(f.id)) { await say(f.key, '네가 여기까지 걸어 들어온 건 칭찬해 주지.'); const won = await ctx.duel({ foes: ['clan_' + f.id], arena: G.field.m.arena, bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .2, optional: true, noLoot: true }); if (won) { const c = await choice(`${josa(f.who, '이/가')} 쓰러졌다. 칼을 어떻게 할까?`, ['거둔다', '목을 벤다']); if (c === 0) { await say(f.key, '오늘 일은 기억하겠다.'); G.jh.addRep(f.id, 20, false); } else { await narr(`${f.name}의 어른이 내 칼에 죽었다. 강호가 이 일을 오래 말할 것이다.`); Fr().dead[f.id] = 1; Fr().infamy += 20; G.jh.news(`${S().name}, ${f.name}의 ${josa(f.who, '을/를')} 베다.`); G.jh.addRep(f.id, -40); Fr().power[f.id] = 20; G.field.refresh(); } } return; }
     if (!S().daily['duel_' + f.id]) opts.push(['비무를 청한다', () => sparClan(f)]);
     if (!fr.fac) opts.push(['입문을 청한다', () => join(f)]);
     opts.push(['이곳에 대해 묻는다', async () => { await narr(f.desc); }]);

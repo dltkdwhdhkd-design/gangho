@@ -155,11 +155,11 @@ INIT.jsw = a => {
 const sumPow = al => side(al).slice().sort((x, y) => pow(y.id) - pow(x.id)).slice(0, 4).reduce((t, f) => t + pow(f.id), 0);
 ENTER.jsw = {
   omen: a => { news(`${fac(a.s).name} 사람들이 ${fac(a.j).name} 제자를 베었다. 정파와 사파 사이에 피바람이 분다.`); toast('강호 소식: 정사대전의 전운', 3.4); hist('정사대전 전운'); },
-  war: a => { news(`정파와 사파가 끝내 칼을 뽑았다. ${josa(fac(a.j).name, '이/가')} 정파를, ${josa(fac(a.s).name, '이/가')} 흑도맹을 이끈다.`); toast('정사대전이 터졌다', 3.4); },
-  battle: a => { news(`${pname(a.front[0])} 밖에 양쪽이 진을 쳤다. 사흘 안에 큰 싸움이 난다.`); toast(`정사대전: ${pname(a.front[0])}에서 결전`, 3.4); },
+  war: a => { skirm(a); news(`정파와 사파가 끝내 칼을 뽑았다. ${josa(fac(a.j).name, '이/가')} 정파를, ${josa(fac(a.s).name, '이/가')} 흑도맹을 이끈다.`); toast('정사대전이 터졌다', 3.4); },
+  battle: a => { skirm(a); news(`${pname(a.front[0])} 밖에 양쪽이 진을 쳤다. 사흘 안에 큰 싸움이 난다.`); toast(`정사대전: ${pname(a.front[0])}에서 결전`, 3.4); },
 };
 TICK.jsw = a => {
-  if (a.phase === 'omen') return;
+  if (a.phase === 'omen') return; skirm(a);
   a.score += (sumPow('jeong') - sumPow('sa')) / 400 + rnd(-1.2, 1.2);
   if (Math.random() < .5) { const lose = a.score >= 0 ? 'sa' : 'jeong', win = lose === 'sa' ? 'jeong' : 'sa', L = side(lose), W = side(win); if (L.length && W.length) { const f = pick(L), o = pick(W); G.jh.hurt(f.id, 3); news(`${o.name} 사람들이 ${f.name}의 거점 하나를 불태웠다.`); } }
 };
@@ -214,18 +214,72 @@ INIT.demon = a => {
 ENTER.demon = {
   omen: a => { news(`${pname(a.order[0])} 근처에서 사람들이 사라진다. 붉은 옷을 입은 자들을 봤다는 말이 돈다.`); toast('강호 소식: 서쪽에서 불길한 소문', 3.4); hist('마교의 징조'); },
   league: a => { a.lord = top('jeong').id; news(`정파 문파들이 ${pname(a.hq)}에 모여 무림맹을 세웠다. 맹주 자리를 두고 말이 많다.`); toast(`무림맹 결성: ${pname(a.hq)}`, 3.4); hist('무림맹 결성'); },
-  invade: a => { occupy(a); toast('마교가 내려왔다', 3.4); },
+  invade: a => { occupy(a); skirm(a); toast('마교가 내려왔다', 3.4); },
   final: a => { news(`무림맹이 ${fac('cheonma').name} 본거지로 진군한다. 이번에 끝을 보겠다고 한다.`); toast('정마대전: 마교 본거지 결전', 3.4); },
 };
 function occupy(a) {
   const g = st(), m = a.order.find(x => !g.occ[x] && !(a.lib || []).includes(x)); if (!m || Object.keys(g.occ).length >= 3) return;  // 되찾은 고을은 이번 싸움에선 다시 안 뺏긴다
-  g.occ[m] = { boss: `혈마 향주 ${pick(SURNAME)}${pick(['혈', '귀', '량', '참', '천'])}`, day: S().day };
-  news(`마교가 ${pname(m)}을(를) 차지했다. 성문에 천마의 깃발이 걸렸다.`); hist(`마교, ${pname(m)} 점령`);
+  g.occ[m] = { boss: `혈마 향주 ${pick(SURNAME)}${pick(['혈', '귀', '량', '참', '천'])}`, day: S().day, next: S().day + 3 };
+  news(`마교가 ${josa(pname(m), '을/를')} 차지했다. 성문에 천마의 깃발이 걸렸다.`); hist(`마교, ${pname(m)} 점령`);
   const t = arc('tourney'); if (t && t.map === m) { g.arcs = g.arcs.filter(x => x !== t); g.cool.tourney = 6; news(`${pname(m)} 무림대회는 없던 일이 됐다. 단상이 부서졌다.`); }
 }
 TICK.demon = a => {
   if (a.phase === 'invade') { a.score += (sumPow('jeong') / 4 - pow('cheonma')) / 240 + rnd(-.6, .6); if (a.left > 0 && a.left % 3 === 0) occupy(a); }  // 나 없이 붙으면 반반에 가깝다
+  if (a.phase === 'invade' || a.phase === 'final') { for (const m of Object.keys(st().occ)) siege(a, m); skirm(a); }
 };
+// 무림맹 탈환전: 점령된 고을마다 사흘에 한 번 성문을 친다. 내가 없어도 되찾을 때가 있고, 실패하면 형세가 기운다
+function siege(a, m) {
+  const g = st(), o = g.occ[m]; if (!o || S().day < (o.next || 0)) return; o.next = S().day + 3; o.tries = (o.tries || 0) + 1;
+  const p = clamp(.3 + a.score * .04 + (sumPow('jeong') / 4 - pow('cheonma')) / 300, .12, .6);
+  if (Math.random() < p) { delete g.occ[m]; a.freed++; (a.lib = a.lib || []).push(m); a.score += 1; news(`무림맹이 ${josa(pname(m), '을/를')} 되찾았다. ${pick(['성문에 걸렸던 천마의 깃발이 불탔다.', '향주는 성벽을 넘어 달아났다.', '사람들이 거리로 쏟아져 나와 울었다.'])}`); hist(`무림맹, ${pname(m)} 탈환`); }
+  else { a.score -= .5; news(`무림맹의 ${pname(m)} 탈환전이 실패했다. ${pick(['성문 앞에 시신이 쌓였다.', '공성 사다리가 모두 불탔다.', '선봉장이 화살에 맞아 물러났다.'])}`); }
+}
+// 강호 길의 교전: 전선 근처에 두 무리가 맞붙어 있다. 셋까지 두고, 끝났거나 오래된 것은 걷는다
+function skirm(a) {
+  a.sk = (a.sk || []).filter(q => !q.done && S().day - q.day < 4);
+  const near = a.kind === 'jsw' ? a.front : Object.keys(st().occ).length ? Object.keys(st().occ) : [a.order[0]];
+  for (let i = 0; a.sk.length < 3 && i < 6; i++) {
+    const l = loc(pick(near)); if (!l) break; const at = openField(l); if (!at) continue; const [x, y] = at, q = { id: st().id++, day: S().day, x, y };
+    const busy = [...a.sk.map(o => [o.x, o.y]), ...Object.keys(st().occ).map(m => G.world.entry(m))]; if (busy.some(([bx, by]) => Math.hypot(bx - x, by - y) < 7)) continue;  // 진채나 다른 싸움판과 겹치지 않게
+    if (a.kind === 'jsw') { const J = side('jeong'), Sa = side('sa'); if (!J.length || !Sa.length) break; q.A = { fac: pick(J).id, label: '정파' }; q.B = { fac: pick(Sa).id, label: '흑도맹' }; }
+    else { const J = side('jeong'); if (!J.length || !alive(CULT())) break; q.A = { fac: pick(J).id, label: '무림맹' }; q.B = { fac: 'cheonma', label: '마교' }; }
+    a.sk.push(q);
+  }
+}
+// 교전 자리: 담이나 집에 걸리지 않는 빈 들판이어야 양쪽이 마주 선다
+function openField(l) {
+  const soft = /tree|bush|grass|flower|rock|stone|reed|fern|weed|pebble/;
+  for (let i = 0; i < 24; i++) {
+    const [x, y] = nearLoc(l), m = MAPS.world, X = x * 16, Y = y * 16; let ok = true;
+    for (let dx = -2; dx <= 2 && ok; dx++) for (let dy = -1; dy <= 1 && ok; dy++) if (m.blocked(X + dx * 16, Y + dy * 16, 10, 8)) ok = false;
+    if (ok && !(m.objs || []).some(o => !soft.test(o.name || '') && o.x < X + 44 && o.x + (o.w || 32) > X - 44 && o.y < Y + 26 && o.y + (o.h || 32) > Y - 34)) return [x, y];
+  }
+  return null;
+}
+async function joinSkirm(a, q) {
+  if (q.done) return; const FA = fac(q.A.fac), FB = fac(q.B.fac); if (!FA || !FB) return;
+  const c = await choice(`${FA.name} 사람들과 ${FB.name} 사람들이 길 한복판에서 칼을 섞고 있다.`, [`${q.A.label} 편을 든다`, `${q.B.label} 편을 든다`, '지나간다']); if (c === 2) return;
+  const mine = c === 0 ? FA : FB, foe = c === 0 ? FB : FA, L = lv();
+  const won = await ctx.duel({ foes: [...G.jh.crew(foe, L, 2), ...(L >= 15 ? [G.jh.disciple(foe, L + 1, true)] : [])], allies: [ally(mine, L, 0), ally(mine, L, 2)], arena: G.field.m.arena, bgm: 'fight', title: `${q.A.label} 대 ${q.B.label}`, optional: true, noIntro: true });
+  if (!won) { await narr('밀려났다. 등 뒤에서 함성과 비명이 엉켰다.'); return; }
+  q.done = 1; G.jh.addRep(mine.id, 5, false); G.jh.addRep(foe.id, -8);
+  const pro = a.kind === 'jsw' ? (mine.align === 'jeong' ? 1 : -1) : (mine.id === 'cheonma' ? -1 : 1); a.score += pro * .8;
+  if (a.kind === 'jsw' ? mySide() === mine.align : mine.id !== 'cheonma' && !cultMember()) a.helped = 1;
+  await narr(`${foe.name} 사람들이 흩어졌다. ${mine.name} 사람들이 고개를 숙였다.`); G.field.refresh();
+}
+// 점령지 앞 무림맹 진채: 지휘관과 함께 성문을 칠 수 있다
+async function campTalk(a, m) {
+  const o = st().occ[m]; if (!o) { await say(null, '무림맹 진채 지휘관: 고을은 되찾았소. 진채도 곧 걷을 거요.'); return; }
+  if (cultMember()) { await say(null, '무림맹 진채 지휘관이 칼자루를 잡았다. "천마의 개가 여긴 왜 왔느냐."'); return; }
+  const days = Math.max(0, (o.next || 0) - S().day);
+  const c = await choice(`무림맹 진채 지휘관: ${pname(m)} 성문을 ${days ? `${days}일 뒤에` : '오늘'} 친다.${o.tries ? ` 벌써 ${o.tries}번 밀렸소.` : ''} 함께 가겠소?`, ['지금 함께 성문을 친다', '성안 사정을 묻는다', '지나간다']);
+  if (c === 1) { await say(null, `무림맹 진채 지휘관: 광장에 ${josa(o.boss, '이/가')} 버티고 있소. 사람들을 광장에 묶어 두고 저녁마다 하나씩 끌고 간다더군. 그놈만 쓰러뜨리면 나머지는 흩어질 거요.`); return; }
+  if (c) return;
+  const L = lv(), cf = CULT(), A = side('jeong').slice(0, 2).map((f, i) => ally(f, L, i));
+  await narr('함성과 함께 성문으로 달려들었다. 성벽 위에서 돌과 화살이 쏟아졌다.');
+  if (!await ctx.duel({ foes: G.jh.crew(cf, L, 3), allies: A, arena: G.field.m.arena, bgm: 'fight', title: `${pname(m)} 성문`, optional: true, noIntro: true })) { o.next = S().day + 3; a.score -= .5; await narr('밀려났다. 무림맹 무사들이 다친 사람을 끌고 진채로 물러났다.'); return; }
+  await narr(`성문이 열렸다. 광장 한가운데 ${josa(o.boss, '이/가')} 기다리고 있었다.`); await liberate(m, A);
+}
 END.demon = a => {
   const g = st(), win = a.finalWon || a.score + a.freed * 2 + rnd(-2, 2) > 0;  // 나 없이도 무림맹이 이길 때가 있다. 끼어들면 훨씬 낫다
   if (win) {
@@ -273,14 +327,14 @@ async function leagueTalk(a) {
   }
   await say(null, `무림맹 집사: 맹주는 ${a.lord === 'me' ? s.name : fac(a.lord)?.who || fac(a.lord)?.name}${a.lord === 'me' ? '' : ' 어른'}입니다. 마교를 치는 일이라면 누구든 환영합니다. 일거리 게시판을 보십시오.`);
 }
-async function liberate(map) {
+async function liberate(map, allies = []) {
   const g = st(), o = g.occ[map], L = lv(), cf = CULT(); if (!o) return;
   await say(null, `${o.boss}: ${pick(['무림맹의 개가 왔구나. 이 고을은 이제 천마의 것이다.', '혼자 왔느냐? 배짱 하나는 칭찬해 주마.', '천마께서 너 같은 놈을 좋아하신다. 제물로.', '이 고을 사람들은 벌써 무릎 꿇는 법을 배웠다. 너도 배워라.'])}`);
   const base0 = G.jh.disciple(cf, L + 2, true), k = 'sg_boss'; FOES[k] = { ...FOES[base0], name: o.boss, title: cf.name, hp: Math.round(FOES[base0].hp * 1.7), boss: 1 };
-  if (!await ctx.duel({ foes: [k, ...G.jh.crew(cf, L, L < 10 ? 1 : 2)], arena: G.field.m.arena, bgm: 'boss', title: `${pname(map)} 해방`, optional: true, noIntro: true })) return;
+  if (!await ctx.duel({ foes: [k, ...G.jh.crew(cf, L, L < 10 ? 1 : 2)], allies, arena: G.field.m.arena, bgm: 'boss', title: `${pname(map)} 해방`, optional: true, noIntro: true })) return;
   delete g.occ[map]; (g.hero = g.hero || {})[map] = S().day; const a = arc('demon'); if (a) { a.freed++; a.score += 2; a.helped = 1; (a.lib = a.lib || []).push(map); }
   const v = 150 + L * 8; S().silver += v; Fr().fame += 20; G.jh.addRep(top('jeong')?.id, 6);
-  news(`${josa(S().name, '이/가')} ${pname(map)}을(를) 마교에게서 되찾았다.`); hist(`${pname(map)} 해방`); toast(`${pname(map)} 해방. 은자 ${v}냥`, 3.6); G.field.refresh();
+  news(`${josa(S().name, '이/가')} ${josa(pname(map), '을/를')} 마교에게서 되찾았다.`); hist(`${pname(map)} 해방`); toast(`${pname(map)} 해방. 은자 ${v}냥`, 3.6); G.field.refresh();
 }
 async function finalBattle(a) {
   if (cultMember()) { await say(null, '무림맹 선봉장이 나를 보더니 칼자루를 잡았다. 여기 있을 곳이 아니다.'); return; }
@@ -357,6 +411,28 @@ function npcs(id, out) {
   const d = arc('demon');
   if (d && id === d.hq && d.phase !== 'omen') out.push({ id: 'sg_league', spr: 'Noble', x: 33.5, y: 19.75, dir: 0, hint: '무림맹 집사', mark: () => d.phase === 'league' && !d.asked && Fr().fame >= 80, talk: () => leagueTalk(d) });
   if (d && d.phase === 'final' && id === 'b_cheonma') out.push({ id: 'sg_van', spr: 'Knight', x: sp[0], y: sp[1] + 2, dir: 1, hint: '무림맹 선봉장', mark: () => !d.finalWon && !cultMember(), talk: () => finalBattle(d) });
+  // 무림맹 본거지: 무사들이 광장을 돈다
+  if (d && id === d.hq && d.phase !== 'omen') {
+    const oc = Object.keys(g.occ).map(pname)[0], L = ['맹주께서 오늘도 밤을 새우셨소.', oc ? `마교 놈들이 ${oc}에 깃발을 꽂았다더군. 오래는 못 갈 거요.` : '서쪽이 조용하오. 조용할 때가 더 무섭소.', '우리 문파에서만 열둘이 왔소. 돌아갈 땐 몇이나 남을지.', '진채에서 사람을 구하오. 칼 쓸 줄 알면 성문 밖 진채로 가 보시오.', '무림맹이라고 다 한마음은 아니오. 화산과 종남은 아직도 서로 눈을 흘기오.', '밥은 잘 나오오. 이게 마지막 밥일지도 모르니까.'];
+    const route = [[21, 16], [38, 16], [38, 30], [21, 30]];
+    ['Knight', 'Samurai', 'Hwasan', 'Namgung'].forEach((spr, i) => out.push({ id: 'sg_lm' + i, spr, x: route[i][0] + .5, y: route[i][1] + .75, dir: 0, life: 'patrol', route: [...route.slice(i), ...route.slice(0, i)], speed: 18, hint: '무림맹 무사', barks: ['맹을 위하여!', '교대 시간이다.', '마교 놈들….'], talk: async () => say(null, `무림맹 무사: ${L[(i + S().day) % L.length]}`) }));
+  }
+  // 강호 길: 점령지 앞 진채, 전선 근처 교전
+  if (id === 'world') {
+    if (d && (d.phase === 'invade' || d.phase === 'final') && !cultMember()) for (const m of Object.keys(g.occ)) {
+      const [ex, ey] = G.world.entry(m);
+      out.push({ id: 'sg_camp' + m, spr: 'Knight', x: ex + 3.5, y: ey + 2.5, dir: 1, life: 'still', hint: '무림맹 진채 지휘관', mark: () => true, talk: () => campTalk(d, m) });
+      [[2.4, 3.4, 'Samurai'], [4.6, 3.4, 'Hwasan'], [3, 1.6, 'Namgung']].forEach(([dx, dy, spr], i) => out.push({ id: `sg_cw${m}${i}`, spr, x: ex + dx, y: ey + dy, dir: 1, life: 'still', hint: '무림맹 무사', talk: async () => say(null, `무림맹 무사: ${pick(['지휘관께 말씀하시오.', '성벽 위 궁수가 성가시오.', '다음엔 넘을 거요. 반드시.'])}`) }));
+    }
+    for (const a of [arc('jsw'), d]) for (const q of a?.sk || []) {
+      if (q.done) continue; const FA = fac(q.A.fac), FB = fac(q.B.fac); if (!FA || !FB) continue; const L = lv();
+      const pal = f => (G.base?.folk(LOCS.find(o => o.fac === f.id)) || ['Knight']).filter(s => s !== 'Skeleton'), sa = pal(FA), sb = pal(FB), hint = `${q.A.label}와 ${q.B.label}의 싸움`;  // 길바닥 싸움은 사람 모습으로
+      [0, 1].forEach(k => {
+        out.push({ id: `sk${q.id}a${k}`, spr: sa[k % sa.length] || 'Knight', x: q.x - .95, y: q.y + k * 1.1 - .55, dir: 3, face: 3, life: 'fight', lag: k * .5 + q.id % 3 * .3, hint, talk: () => joinSkirm(a, q) });
+        out.push({ id: `sk${q.id}b${k}`, spr: sb[k % sb.length] || 'DarkNinja', x: q.x + .95, y: q.y + k * 1.1 - .55, dir: 2, face: 2, life: 'fight', lag: k * .5 + .8, hint, talk: () => joinSkirm(a, q) });
+      });
+    }
+  }
   const o = g.occ[id];
   if (o) {
     const friend = cultMember(), gone = /^(guard|tout|drunk|cboard|gatebeg|stall_|teller|listen|perf|watch|kid|old\d|boat)/;  // 장터, 구경꾼, 순라군은 사라진다
@@ -368,6 +444,9 @@ function npcs(id, out) {
       const lv0 = lv(), foes = G.jh.crew(CULT(), lv0, lv0 < 10 ? 1 : 2); if (await ctx.duel({ foes, arena: G.field.m.arena, bgm: 'fight', title: '마교도', optional: true, noIntro: true })) { const a = arc('demon'); if (a) a.score += .3; }
     } });
     [[25.5, 31.75], [34.5, 31.75], [28, 37.75], [32, 37.75], [12, 23.75], [47, 23.75]].forEach(([x, y], i) => out.push(cult(x, y, i)));
+    // 광장에 묶인 사람들
+    const CAP = friend ? ['당신도 저들과 한패죠…. 제발 아이만은….', '아무 말도 안 했어요. 정말이에요.'] : ['살려 주세요…. 향주가 저녁마다 한 사람씩 데려가요.', '우리 아이가 저 안에 있어요. 제발요.', '무림맹은 언제 와요? 오기는 와요?', '손목이 끊어질 것 같아요. 밧줄 좀….'];
+    [[23.5, 20.25, 'Villager'], [24.6, 20.9, 'Woman'], [22.4, 20.9, 'OldMan'], [25.5, 21.6, 'Villager4']].forEach(([x, y, spr], i) => out.push({ id: 'sg_cap' + i, spr, x, y, dir: 0, life: 'still', hint: '붙잡힌 사람', talk: async () => say(null, CAP[i % CAP.length]) }));
     out.push({ id: 'sg_boss', spr: 'DarkNinja', x: 29.5, y: 21.75, dir: 0, hint: friend ? o.boss : `${o.boss} (해방)`, mark: () => !friend, talk: async () => { if (friend) { await say(null, `${o.boss}: 교의 일은 잘 되어 가오.`); return; } await liberate(id); } });
   }
   return out;
@@ -416,6 +495,17 @@ function talkCtx(map) {
   if (g.hero?.[map]) on.savior = 1;
   return { v, on };
 }
+// 화면 효과(js/warfx.js)에 넘길 것: 점령, 본거지 깃발, 진채, 교전 자리
+function fx(id) {
+  const g = st(); if (!g || !isFree()) return null; const d = arc('demon'), out = {};
+  if (g.occ[id]) out.occ = 1;
+  if (d && d.phase !== 'omen' && id === d.hq) out.hq = side('jeong').sort((x, y) => pow(y.id) - pow(x.id)).slice(0, 3).map(f => f.id);
+  if (id === 'world') {
+    out.camps = d && (d.phase === 'invade' || d.phase === 'final') && !cultMember() ? Object.keys(g.occ).map(m => { const [x, y] = G.world.entry(m); return { x: x + 3.5, y: y + 1.2, flag: d.lord && d.lord !== 'me' ? d.lord : top('jeong')?.id }; }) : [];
+    out.sk = [arc('jsw'), d].flatMap(a => (a?.sk || []).filter(q => !q.done));
+  }
+  return out;
+}
 // 시험용: 판을 바로 띄운다
 const debug = { start, next: k => { const a = arc(k); if (a) { a.left = 0; next(a); } }, tick: a => TICK[a.kind]?.(a), tension: (k, v) => { st().t[k] = v; } };
-G.saga = { guard, ruined, talkCtx, st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug };
+G.saga = { fx, guard, ruined, talkCtx, st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug };

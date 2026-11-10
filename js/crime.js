@@ -69,7 +69,7 @@ async function threaten(n, mapId) {
   if (k === 'martial' && Math.random() < .7) { await say(who, pick(DEFY)); return fight(n, mapId, false); }
   await say(who, pick(YIELD[k])); loot(k, .55); infamy(k === 'beggar' ? 1 : 3);
   if (townish(mapId) && k !== 'beggar' && Math.random() < .3) { await narr('누가 소리를 질렀다. 포졸들이 골목 끝에서 달려온다.'); return guards(mapId); }
-  const f = factionOf(mapId); if (f) G.jh?.addRep?.(f, -4);
+  const f = factionOf(mapId); if (f) G.jh?.feud?.(f, nameOf(n), 'threat');
 }
 // 칼을 뽑는다. 말을 건 뒤든 평타 키든
 export async function attack(n, mapId = G.field.m.id, asked = false) {
@@ -95,11 +95,12 @@ async function fight(n, mapId, meant) {
   loot(k, c === 0 ? 1 : .7);
   if (c === 0) {
     (s.dead_npc = s.dead_npc || {})[deadKey(mapId, n)] = s.day + (s.mode === 'free' ? 12 : 4);
-    infamy(k === 'martial' ? 6 : 10); if (f && G.jh?.kill) await G.jh.kill(f, name);
+    infamy(k === 'martial' ? 6 : 10); if (f && G.jh?.kill) { await G.jh.kill(f, name); G.jh.feud(f, name, 'kill'); }
     if (s.rep) { s.rep.jeong = (s.rep.jeong || 0) - 2; s.rep.sa = (s.rep.sa || 0) + 1; }
     news(`${G.field.m.name}에서 ${josa(name, '이/가')} 칼에 맞아 죽었다. ${s.name}의 짓이라는 소문이다.`);
     await narr(pick(['피를 닦고 품을 뒤졌다. 구경하던 사람들이 하나둘 문을 닫았다.', '숨이 멎은 걸 확인하고 전대를 풀었다. 아무도 다가오지 않았다.', '칼을 거두었다. 뒤에서 누군가 우는 소리가 났다.']));
-  } else { infamy(k === 'martial' ? 2 : 4); if (f) G.jh?.addRep?.(f, -6); await narr(pick(['전대를 빼앗고 등을 떠밀었다. 다리를 절며 도망쳤다.', '목숨은 두고 가진 것만 거뒀다. 원망하는 눈빛이 등에 꽂혔다.'])); }
+  } else { infamy(k === 'martial' ? 2 : 4); if (f) G.jh?.feud?.(f, name, 'rob'); await narr(pick(['전대를 빼앗고 등을 떠밀었다. 다리를 절며 도망쳤다.', '목숨은 두고 가진 것만 거뒀다. 원망하는 눈빛이 등에 꽂혔다.'])); }
+  if (f && G.jh?.alarm && (c === 0 || Math.random() < .5)) await G.jh.alarm(G.free.fac(f) || { name: f, group: '' });  // 본가 안에서 일을 벌이면 경종이 울린다
   G.field.refresh();
 }
 G.crime = { can, apply, attack, kindOf };
