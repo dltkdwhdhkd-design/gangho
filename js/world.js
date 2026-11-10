@@ -338,7 +338,7 @@ function china(c, W, H, o = {}) {
   }
   c.textBaseline = 'alphabetic';
   const ms = G.S.fr?.sect; if (ms) { const sl = LOCS.find(q => q.map === ms.site) || LOCS[0]; hits.push({ l: { name: ms.name, map: 'mysect', at: [20, 25], px: sl.px }, x: sl.px[0] * sx, y: sl.px[1] * sy, k: true }); }
-  for (const e of G.jh.marks()) { const l = e.map === 'world' ? null : LOCS.find(q => q.map === e.map), a = l ? l.px[0] * sx : e.x / K * sx, b = l ? l.px[1] * sy : e.y / K * sy; c.fillStyle = '#ffd23c'; c.strokeStyle = '#7a2a18'; c.lineWidth = 3; c.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 7 : 16, q = i * Math.PI / 5 - 1.57; c.lineTo(a + Math.cos(q) * r, b + Math.sin(q) * r); } c.closePath(); c.fill(); c.stroke(); }
+  for (const e of G.jh.marks()) { const l = e.map === 'world' ? null : LOCS.find(q => q.map === e.map), a = l ? l.px[0] * sx : e.x / K * sx, b = l ? l.px[1] * sy : e.y / K * sy; c.fillStyle = e.color || '#ffd23c'; c.strokeStyle = '#7a2a18'; c.lineWidth = 3; c.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 7 : 16, q = i * Math.PI / 5 - 1.57; c.lineTo(a + Math.cos(q) * r, b + Math.sin(q) * r); } c.closePath(); c.fill(); c.stroke(); }
   for (const j of G.S.fr?.jobs || []) if (j.map === 'world') { const a = j.x / K * sx, b = j.y / K * sy; c.fillStyle = '#ffd23c'; c.strokeStyle = '#2a2018'; c.lineWidth = 3; c.beginPath(); c.arc(a, b, 9, 0, 7); c.fill(); c.stroke(); }
   if (G.S.map === 'world') { const a = G.field.p.x / TS / K * sx, b = G.field.p.y / TS / K * sy; c.fillStyle = '#ff3b2c'; c.beginPath(); c.arc(a, b, 11, 0, 7); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 3; c.stroke(); }
 }
@@ -390,6 +390,7 @@ function tick(dt) {
   const a = Math.random() * 6.28, x = p.x + Math.cos(a) * 210, y = p.y + Math.sin(a) * 150; if (f.m.blocked(x, y, 14, 12)) return;
   if (S.flags.bow && f.animals.length < 3 && Math.random() < .5) { const k = pick(b === 'snow' ? ['rabbit', 'deer'] : ['rabbit', 'pheasant', 'deer']); f.animals.push({ kind: k, ...G.life.animals[k], x, y, vx: 0, vy: 0, t: 1, walk: 0 }); return; }
   if (f.roam.length >= 3 || !S.flags.world_open && S.mode !== 'free') return;
+  const sg = G.saga?.spawn(x, y); if (sg) { f.roam.push(sg); return; }  // 정사대전 순찰대, 마교도
   const hunted = G.jh.spawn(x, y); if (hunted) { f.roam.push(hunted); return; }
   const lv = Math.max(1, S.lv + (Math.random() < .3 ? 1 : 0)), onRoad = f.m.g[ty]?.[tx] === 1 || f.m.g[ty]?.[tx] === 4, kind = pick(wet ? ['pirate', 'pirate', 'bandit'] : onRoad ? ['bandit', 'rogue', 'bandit'] : ['bandit', 'rogue']), n = lv < 5 ? 1 : lv < 14 ? 2 : 3, foes = G.free.group(kind, lv, n), FO = G.free.foes;
   f.roam.push({ spr: FO[foes[0]].spr, x, y, hx: x, hy: y, foes, dir: 0, walk: 0, t: 1 + Math.random() * 2, vx: 0, vy: 0 });

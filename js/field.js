@@ -91,6 +91,7 @@ export class Field {
     for (const q of m.portals) {
       if (p.x > q.x && p.x < q.x + q.w && p.y > q.y && p.y < q.y + q.h) {
         if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) { if (q.lock && !this._locked) { this._locked = true; const msg = q.lock; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(msg); this._locked = false; }); } return; }
+        const shut = q.door && G.saga?.shut(m.id, q.to); if (shut) { if (!this._locked) { this._locked = true; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(shut); this._locked = false; }); } return; }  // 마교가 차지한 고을은 가게 문이 닫힌다
         if (q.door && Input.dir().y > 0 && q.dir !== 0 && false) continue;
         this.run(async () => { Sound.sfx('select', .6); await this.warp(q.to, q.tx, q.ty, q.dir); });
         return;

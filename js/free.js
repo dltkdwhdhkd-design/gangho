@@ -99,6 +99,7 @@ function boardFor(fid) {
     b[k] = { day: stamp, list: [] };
     for (let i = 0; i < 3; i++) b[k].list.push(makeJob(f));
     if (war) b[k].list.unshift(makeJob(f, war.a === f.id ? war.b : war.a));
+    if (G.saga) b[k].list.unshift(...G.saga.jobsFor(fid));  // 무림 정세에 따라 올라오는 일
   }
   return b[k].list;
 }
@@ -134,6 +135,7 @@ const duelJob = (j, foes, title, extra = {}) => ctx.duel({ foes, arena: MAPS[j.m
 const HINT = { hunt: '토벌하기', escort: '상단 만나기', deliver: '서찰 전하기', spar: '비무하기', gather: '납품하기', raid: '상단 덮치기', extort: '자릿세 받기', assassin: '표적 찾기', war: '전선 합류' };
 const SPR = { hunt: 'Villager2', escort: 'Noble', deliver: 'Villager', spar: 'Samurai', gather: 'Villager4', raid: 'Noble', extort: 'Villager', assassin: 'OldMan', war: 'Knight' };
 async function runJob(j) {
+  if (j.type === 'saga') return G.saga.runJob(j, finish, duelJob);
   const n = () => 2 + (j.lv >= 10 ? 1 : 0) + (j.lv >= 24 ? 1 : 0), g = (kind = j.kind, c = n()) => group(kind, j.lv, c);
   if (j.type === 'gather') {
     if (have(j.item) < j.qty) { await say(null, `${DB[j.item].name} ${j.qty}개가 있어야 한다. 지금 ${have(j.item)}개 있다.`); return; }
@@ -269,7 +271,7 @@ async function order(fid) {
 }
 
 // ── 하루 ──
-function daily() { const fr = Fr(); if (!fr) return; fr.clock = 0; F().night = false; fr.lastP = null; showTime(); worldTick(); if (fr.rep) for (const k in fr.board) if (!String(fr.board[k].day).startsWith(S().day + ':')) delete fr.board[k]; if (G.sect) G.sect.daily(); if (G.evil) G.evil.daily(); }
+function daily() { const fr = Fr(); if (!fr) return; fr.clock = 0; F().night = false; fr.lastP = null; showTime(); worldTick(); if (G.saga) G.saga.daily(); if (fr.rep) for (const k in fr.board) if (!String(fr.board[k].day).startsWith(S().day + ':')) delete fr.board[k]; if (G.sect) G.sect.daily(); if (G.evil) G.evil.daily(); }
 export const dayLen = () => S().dayLen || 1800; // 게임 하루의 길이(초). 메뉴 설정에서 바꾼다
 const PERIOD = [[.25, '아침'], [.55, '낮'], [.75, '저녁'], [1.01, '밤']];
 const period = () => { const q = (Fr()?.clock || 0) / dayLen(); return PERIOD.find(p => q < p[0])[1]; };
@@ -286,7 +288,7 @@ async function gwakTalk() {
 async function roninBoard() { await openBoard(null, '일거리'); }
 const HIDE = ['bruiser', 'go', 'disc', 'gwak2'];
 const NO_SPOT = ['살펴보기', '우물 뚜껑', '구석방 탁자', '석상', '무너진 부엌', '쓰러진 돌문', '돌계단', '칼자국'];
-export const jobNpcs = id => Fr().jobs.filter(j => j.map === id).map(j => ({ id: 'q' + j.id, spr: SPR[j.type] || 'Villager', x: j.x, y: j.y, dir: 0, mark: () => true, hint: HINT[j.type] || j.title, talk: () => runJob(j) }));
+export const jobNpcs = id => Fr().jobs.filter(j => j.map === id).map(j => ({ id: 'q' + j.id, spr: j.spr || SPR[j.type] || 'Villager', x: j.x, y: j.y, dir: 0, mark: () => true, hint: j.hint || HINT[j.type] || j.title, talk: () => runJob(j) }));
 function npcsFree(id, L) {
   let out = L.filter(n => !HIDE.includes(n.id) && !FACS.some(f => f.key === n.id && f.at[0] !== id));
   out.forEach(n => { const f = FACS.find(x => x.key === n.id && x.at[0] === id); if (f) { n.talk = () => facTalk(f); n.mark = () => Fr().fac === f.id && canPromote(); } });
@@ -297,6 +299,7 @@ function npcsFree(id, L) {
   out.push(...jobNpcs(id));
   if (G.sect) out = G.sect.npcs(id, out);
   if (G.evil) out = G.evil.npcs(id, out);
+  if (G.saga) out = G.saga.npcs(id, out);
   return out;
 }
 export function spotsFree(id, sp) { let out = sp.filter(s => !NO_SPOT.includes(s.hint)); if (G.evil) out = G.evil.spots(id, out); return out; }

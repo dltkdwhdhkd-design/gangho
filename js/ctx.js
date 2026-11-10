@@ -63,7 +63,7 @@ export const Story = {
   async encounter(r) {
     if (r.intro) await say(null, r.intro);
     const won = await ctx.duel({ foes: r.foes, arena: G.field.m.arena, bgm: 'fight', noIntro: true, optional: true, expMul: 1 });
-    if (won) { if (r.fac && G.jh) await G.jh.after(r); if (G.arts && G.field.m?.live) G.arts.drop(r.fac, r.fac ? .2 : .06); }
+    if (won) { r.win?.(); if (r.fac && G.jh) await G.jh.after(r); if (G.arts && G.field.m?.live) G.arts.drop(r.fac, r.fac ? .2 : .06); }
     return won;
   },
   scenes: {}, providers: [],
