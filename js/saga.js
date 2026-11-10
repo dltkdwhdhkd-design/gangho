@@ -33,8 +33,10 @@ const hero = f => ['shaolin', 'noeum', 'podalra'].includes(f.id) ? `${pick(['혜
 // ── 상태 ──
 export function st() {
   const fr = Fr(); if (!fr) return null;
-  const g = fr.saga = fr.saga || { v: 2, t: { js: 10, jm: 0 }, arcs: [], cool: { tourney: 2, jsw: 60, demon: 200 }, hist: [], occ: {}, side: null, id: 1, warn: {} };
+  const g = fr.saga = fr.saga || { v: 3, t: { js: 10, jm: 0 }, arcs: [], cool: { tourney: 2, jsw: 60, demon: 330 }, hist: [], occ: {}, side: null, id: 1, warn: {} };
+  if (g.dm === undefined) g.dm = 0; g.ruin = g.ruin || {};  // 정마 대세: +3이면 마교가, -3이면 무림맹이 완전히 무너진다
   if (!g.v) { g.v = 2; g.t.js = Math.min(g.t.js, 30); g.t.jm = Math.min(g.t.jm, 10); g.cool.jsw = Math.max(g.cool.jsw, 30); g.cool.demon = Math.max(g.cool.demon, 150); }  // 첫 판 저장: 큰 싸움이 너무 잦던 때의 수치를 낮춘다
+  if (g.v < 3) { g.v = 3; g.cool.demon = Math.max(g.cool.demon, 200); }  // 정마대전을 한 해 한 번으로 늦춘 판
   return g;
 }
 const arc = k => st()?.arcs.find(a => a.kind === k);
@@ -66,12 +68,13 @@ function daily() {
   // 긴장: 정파와 사파 문파끼리 붙은 싸움이 많을수록, 마교 세력이 클수록 빨리 오른다
   const jsWars = (fr.wars || []).filter(w => { const A = fac(w.a)?.align, B = fac(w.b)?.align; return (A === 'jeong' && B === 'sa') || (A === 'sa' && B === 'jeong'); }).length;
   if (!arc('jsw')) g.t.js = clamp(g.t.js + .75 + jsWars * .5 + rnd(-.3, .6), 0, 120);  // 넉 달에 한 번쯤 넘친다
-  if (!arc('demon')) g.t.jm = alive(fac('cheonma')) ? clamp(g.t.jm + .26 + Math.max(0, (pow('cheonma') - 80) / 400) + rnd(-.1, .15), 0, 120) : 0;  // 한 해에 한 번쯤
+  if (!arc('demon')) g.t.jm = alive(fac('cheonma')) ? clamp(g.t.jm + .3 + rnd(-.05, .05), 0, 120) : 0;  // 한 해에 한 번(쉬는 날 330일이 끝날 무렵 넘친다)
   for (const [k, lim, t] of [['js', 65, '정파와 사파 제자들이 저잣거리마다 부딪힌다. 누가 먼저 칼을 뽑아도 이상하지 않다.'], ['jm', 65, '서쪽에서 붉은 옷을 입은 자들이 내려온다는 말이 돈다. 마을 몇 곳에서 사람이 사라졌다.']]) {
     if (g.t[k] >= lim && !g.warn[k]) { g.warn[k] = 1; news(t); } if (g.t[k] < 40) g.warn[k] = 0;
   }
   for (const k in g.cool) if (g.cool[k] > 0) g.cool[k]--;
   for (const a of [...g.arcs]) { a.left--; TICK[a.kind]?.(a); if (a.left <= 0) next(a); }
+  for (const id in g.ruin) if (S().day >= g.ruin[id]) { delete g.ruin[id]; news(id === 'cheonma' ? '흩어졌던 마교 잔당이 서쪽에서 다시 모인다는 소문이 돈다.' : `${fac(id)?.name || id} 사람들이 무너진 산문을 다시 쌓기 시작했다.`); }
   // 점령이 풀리는 날
   for (const m in g.occ) if (g.occ[m].until && S().day >= g.occ[m].until) { delete g.occ[m]; news(`${pname(m)}에서 마교가 물러갔다. 사람들이 하나둘 문을 열었다.`); }
   // 새 판
@@ -221,21 +224,43 @@ function occupy(a) {
   const t = arc('tourney'); if (t && t.map === m) { g.arcs = g.arcs.filter(x => x !== t); g.cool.tourney = 6; news(`${pname(m)} 무림대회는 없던 일이 됐다. 단상이 부서졌다.`); }
 }
 TICK.demon = a => {
-  if (a.phase === 'invade') { a.score += (sumPow('jeong') / 4 - pow('cheonma')) / 120 + rnd(-.6, .6); if (a.left > 0 && a.left % 3 === 0) occupy(a); }
+  if (a.phase === 'invade') { a.score += (sumPow('jeong') / 4 - pow('cheonma')) / 240 + rnd(-.6, .6); if (a.left > 0 && a.left % 3 === 0) occupy(a); }  // 나 없이 붙으면 반반에 가깝다
 };
 END.demon = a => {
   const g = st(), win = a.finalWon || a.score + a.freed * 2 + rnd(-2, 2) > 0;  // 나 없이도 무림맹이 이길 때가 있다. 끼어들면 훨씬 낫다
   if (win) {
-    G.jh.hurt('cheonma', a.finalWon ? 999 : 45); for (const m in g.occ) delete g.occ[m];  // 총단을 깨면 마교가 무너진다(몇 해 뒤 다시 일어난다)
-    news(`무림맹이 마교를 물리쳤다. 천마의 깃발이 강물에 떠내려갔다.`); hist('정마대전 — 무림맹 승리');
+    for (const m in g.occ) delete g.occ[m]; g.dm = Math.min(3, g.dm + 1);
+    if (g.dm >= 3) cultFalls();
+    else { Fr().power.cheonma = Math.max(35, pow('cheonma') - (a.finalWon ? 60 : 40));
+      news(a.finalWon ? `무림맹이 ${CULT().name} 총단에 불을 질렀다. 그러나 교주는 잔당을 이끌고 서쪽 깊은 곳으로 사라졌다.` : '무림맹이 마교를 서쪽으로 밀어냈다. 천마의 깃발이 물러갔지만 꺾이지는 않았다.'); hist(`정마대전 — 무림맹 승리 (대세 ${dmText()})`); }
     if (a.helped && !cultMember()) { const v = 500 + lv() * 20; S().silver += v; Fr().fame += 60; S().flags.saga_demon = 1; if (a.lord === 'me') S().flags.saga_lord = 1; toast(`마교를 물리쳤다. 은자 ${v}냥`, 4); }
   } else {
-    for (const m in g.occ) g.occ[m].until = S().day + 15; side('jeong').sort((x, y) => pow(y.id) - pow(x.id)).slice(0, 3).forEach(f => G.jh.hurt(f.id, 15)); G.jh.gain('cheonma', 15);
-    news(`무림맹이 무너졌다. 마교의 깃발이 ${Object.keys(g.occ).map(pname).join(', ') || '서쪽 하늘'}에 펄럭인다.`); hist('정마대전 — 마교 승리');
+    g.dm = Math.max(-3, g.dm - 1);
+    if (g.dm <= -3) leagueFalls();
+    else { for (const m in g.occ) g.occ[m].until = S().day + (g.dm <= -2 ? 60 : 20); side('jeong').sort((x, y) => pow(y.id) - pow(x.id)).slice(0, 3).forEach(f => G.jh.hurt(f.id, 15)); G.jh.gain('cheonma', 8);
+      news(`무림맹이 물러났다. 마교의 깃발이 ${Object.keys(g.occ).map(pname).join(', ') || '서쪽 하늘'}에 펄럭인다.`); hist(`정마대전 — 마교 승리 (대세 ${dmText()})`); }
     if (cultMember()) { S().flags.saga_cult = 1; Fr().fame += 20; }
   }
-  g.t.jm = 0; g.cool.demon = 200; g.lastDemon = { win: !!win, day: S().day };
+  g.t.jm = 0; g.cool.demon = 330; g.lastDemon = { win: !!win, day: S().day };
 };
+// 대세 표시. 양수면 무림맹, 음수면 마교 쪽으로 기울었다
+const dmText = () => { const d = st().dm; return d > 0 ? `무림맹 쪽 ${d}/3` : d < 0 ? `마교 쪽 ${-d}/3` : '팽팽함'; };
+// 마교 멸문: 총단이 잿더미가 되고 두 해 동안은 다시 못 일어선다
+function cultFalls() {
+  const g = st(); g.collapsing = 1; G.jh.hurt('cheonma', 999); g.collapsing = 0; g.ruin.cheonma = S().day + 730; g.dm = 0; g.t.jm = 0;
+  news(`여러 해에 걸친 싸움 끝에 ${josa(CULT().name, '이/가')} 무너졌다. 총단은 잿더미가 되고 교도들은 뿔뿔이 흩어졌다.`); hist('마교 멸문'); toast('천마신교가 무너졌다', 4.4); S().flags.saga_cultfall = 1;
+}
+// 무림맹 붕괴: 정파 명문 넷이 산문을 닫고(여덟 달), 마교가 세 고을을 한 해 동안 쥔다
+function leagueFalls() {
+  const g = st(), d = arc('demon'), L = side('jeong').sort((x, y) => pow(y.id) - pow(x.id)).slice(0, 4);
+  for (const f of L) { G.jh.hurt(f.id, 999); g.ruin[f.id] = S().day + 240; }
+  const order = d?.order || CITY.map(l => l.map); for (const m of order) { if (Object.keys(g.occ).length >= 3) break; if (!g.occ[m]) g.occ[m] = { boss: `혈마 향주 ${pick(SURNAME)}${pick(['혈', '귀', '량', '참', '천'])}`, day: S().day }; }
+  for (const m in g.occ) g.occ[m].until = S().day + 365; G.jh.gain('cheonma', 40); g.dm = 0;
+  news(`무림맹이 끝내 무너졌다. ${josa(L.map(f => f.name).join(', '), '이/가')} 산문을 닫았고, 천마의 깃발이 ${Object.keys(g.occ).map(pname).join(', ')}에 걸렸다.`); hist('무림맹 붕괴'); toast('무림맹이 무너졌다', 4.4);
+}
+// 마교는 정마대전으로만 무너진다(습격 몇 번으로 무너지지 않게). 멸문한 세력은 정해진 날까지 다시 못 일어선다
+const guard = id => id === 'cheonma' && isFree() && !st()?.collapsing;
+const ruined = id => isFree() && (st()?.ruin?.[id] || 0) > S().day;
 async function leagueTalk(a) {
   const s = S(), fr = Fr();
   if (cultMember()) { await say(null, '무림맹 집사가 나를 위아래로 훑어보더니 문을 닫았다.'); return; }
@@ -365,7 +390,7 @@ function html() {
     return `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400">${K[a.kind].name}</b> <small class="hint">${esc(where)} · ${pn} · ${a.left}일 남음${extra}</small></div>`; }).join('') || '<p class="hint">큰 판은 아직 없다.</p>';
   const occ = Object.keys(g.occ).length ? `<div class="hint">마교가 차지한 곳: ${Object.keys(g.occ).map(m => pname(m) + (g.occ[m].until ? ` (${Math.max(0, g.occ[m].until - S().day)}일 뒤 물러감)` : '')).join(', ')}. 고을 광장의 향주를 쓰러뜨리면 되찾는다.</div>` : '';
   const me = mySide(), T = arc('tourney') || g.lastT;
-  return `<h2>무림 정세</h2><div class="hint" style="margin-bottom:6px">정파와 사파 ${bar(g.t.js, '#e0703a')} · 정파와 마교 ${bar(g.t.jm, '#b03ad0')}${me ? ` · 나는 <b style="font-weight:400">${CAMP[me]}</b> 편` : ''}</div>${rows}${occ}`
+  return `<h2>무림 정세</h2><div class="hint" style="margin-bottom:6px">정파와 사파 ${bar(g.t.js, '#e0703a')} · 정파와 마교 ${bar(g.t.jm, '#b03ad0')} · 정마 대세 <b style="font-weight:400">${dmText()}</b>${g.ruin.cheonma > S().day ? ' · 마교는 멸문했다' : ''}${me ? ` · 나는 <b style="font-weight:400">${CAMP[me]}</b> 편` : ''}</div>${rows}${occ}`
     + (T ? `<h2 style="margin-top:10px">${esc(T.place)} 무림대회</h2>${bracketHtml(T)}` : '')
     + (g.hist.length ? `<h2 style="margin-top:10px">지나간 일</h2>${g.hist.slice(0, 6).map(h => `<div class="hint">${esc(h)}</div>`).join('')}` : '') + '<div style="height:10px"></div>';
 }
@@ -392,5 +417,5 @@ function talkCtx(map) {
   return { v, on };
 }
 // 시험용: 판을 바로 띄운다
-const debug = { start, next: k => { const a = arc(k); if (a) { a.left = 0; next(a); } }, tension: (k, v) => { st().t[k] = v; } };
-G.saga = { talkCtx, st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug };
+const debug = { start, next: k => { const a = arc(k); if (a) { a.left = 0; next(a); } }, tick: a => TICK[a.kind]?.(a), tension: (k, v) => { st().t[k] = v; } };
+G.saga = { guard, ruined, talkCtx, st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug };

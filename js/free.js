@@ -243,7 +243,7 @@ function startWar(a, b) { Fr().wars.push({ a, b, days: 3 + Math.floor(rnd(0, 4))
 const myName = () => Fr().sect?.name || '내 문파';
 function endWar(w) {
   const fr = Fr(), pa = (fr.power[w.a] || 60) + w.score * 10 + rnd(-20, 20), pb = (fr.power[w.b] || 60) - w.score * 10 + rnd(-20, 20), win = pa >= pb ? w.a : w.b, lose = win === w.a ? w.b : w.a;
-  fr.power[win] = (fr.power[win] || 60) + 12; fr.power[lose] = Math.max(20, (fr.power[lose] || 60) - 12);
+  fr.power[win] = Math.min(150, (fr.power[win] || 60) + 12); fr.power[lose] = Math.max(20, (fr.power[lose] || 60) - 12);
   addNews(`${josa(nameOf(win), '이/가')} ${josa(nameOf(lose), '과/와')}의 싸움에서 이겼다.`);
   const me = fr.fac === 'my' ? 'my' : fr.fac;
   if (me === win) { const v = 200 + fr.rank * 100; S().silver += v; fr.merit += 60; toast(`우리 쪽이 이겼다. 은자 ${v}냥`, 4); }

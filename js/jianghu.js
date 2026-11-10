@@ -77,7 +77,7 @@ function jobDone(j) { const t = j.type; if (!j.rival) return; if (t === 'raid' |
 // ── 강호 사건 ──
 const CITY = LOCS.filter(l => l.kind === 'city'), RIGHT = () => LOCS.filter(l => l.kind === 'sect' && fac(l.fac)?.align === 'jeong');
 const canFall = f => S().mode === 'free' || !!f.hi;
-function fall(id) { const fr = Fr(), f = fac(id); if (!f || fr.fallen[id] || fr.fac === id || !canFall(f)) return; fr.fallen[id] = S().day; news(`${josa(f.name, '이/가')} 무너졌다. 산문에 불이 났다는 소문이다.`); toast(`${josa(f.name, '이/가')} 무너졌다`, 4); }
+function fall(id) { const fr = Fr(), f = fac(id); if (!f || fr.fallen[id] || fr.fac === id || !canFall(f) || G.saga?.guard(id)) return; fr.fallen[id] = S().day; news(`${josa(f.name, '이/가')} 무너졌다. 산문에 불이 났다는 소문이다.`); toast(`${josa(f.name, '이/가')} 무너졌다`, 4); }
 function hurt(id, n) { const fr = Fr(); fr.power[id] = Math.max(10, (fr.power[id] || 60) - n); if (fr.power[id] <= 25) fall(id); }
 const gain = (id, n) => { const fr = Fr(); fr.power[id] = Math.min(150, (fr.power[id] || 60) + n); };  // 한 해를 돌려도 세력이 끝없이 불지 않게
 const rich = lv => 200 + lv * 16;
@@ -124,7 +124,7 @@ function daily() {
   for (const e of fr.ev.filter(q => q.left <= 0)) if (!e.won) news(TYPES[e.type].end(e)); fr.ev = fr.ev.filter(e => e.left > 0);
   if (fr.ev.length < 3 && Math.random() < (S().mode === 'free' ? .55 : .3) && G.world.open()) startEv(pick([...(S().mode === 'free' && G.saga ? [] : ['tourney']), 'treasure', 'raid', 'plague', 'famine', 'bounty', 'bounty', 'caravan', 'blade']));
   // 세력의 부침
-  for (const f of FACS) { if (fr.fallen[f.id]) { if (S().day - fr.fallen[f.id] > (S().mode === 'free' ? 12 : 24)) { delete fr.fallen[f.id]; fr.power[f.id] = 40; news(`${josa(f.name, '이/가')} 다시 일어섰다.`); } continue; } if (Math.random() < .15) fr.power[f.id] = Math.max(25, (fr.power[f.id] || 60) + (Math.random() < .5 ? 2 : -2)); }
+  for (const f of FACS) { if (fr.fallen[f.id]) { if (S().day - fr.fallen[f.id] > (S().mode === 'free' ? 12 : 24) && !G.saga?.ruined(f.id)) { delete fr.fallen[f.id]; fr.power[f.id] = 40; news(`${josa(f.name, '이/가')} 다시 일어섰다.`); } continue; } if (Math.random() < .15) fr.power[f.id] = Math.min(150, Math.max(25, (fr.power[f.id] || 60) + (Math.random() < .5 ? 2 : -2))); fr.power[f.id] += (40 + f.tier * 20 - fr.power[f.id]) * .012; }  // 세력은 몇 달에 걸쳐 제 크기로 돌아온다
   if (S().mode !== 'free' && G.free.worldTick) G.free.worldTick();
 }
 const evNpcs = id => { const fr = Fr(); return (fr?.ev || []).filter(e => e.map === id && !e.won).map(e => ({ id: 'ev' + e.id, spr: e.type === 'plague' ? 'OldMan' : e.type === 'bounty' ? 'DarkNinja' : e.type === 'raid' ? 'GreenNinja' : e.type === 'treasure' ? 'Villager2' : 'Noble', x: e.x ?? G.base.spot(e.map)[0], y: e.y ?? G.base.spot(e.map)[1], dir: 0, mark: () => true, hint: TYPES[e.type].hint, talk: () => TYPES[e.type].run(e) })); };

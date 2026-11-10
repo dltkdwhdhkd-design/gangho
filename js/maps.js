@@ -40,7 +40,12 @@ class MapDef {
   }
   exit(tx, ty, w, h, to, ex, ey, dir, o = {}) { const k = this.k, X = Math.round(tx * k * TS), Y = Math.round(ty * k * TS); this.portals.push({ x: X, y: Y, w: Math.round((tx + w) * k * TS) - X, h: Math.round((ty + h) * k * TS) - Y, to, tx: ex, ty: ey, dir, ...o }); return this; }
   // 쿼터뷰 담: (x, y) 앞 끝에서 n칸. dir 'l'이면 왼쪽 위로, 'r'이면 오른쪽 위로 뻗는다
-  isoWall(name, x, y, n, dir = 'l', o = {}) { const X = x * this.k, Y = y * this.k; for (let i = 0; i < n; i++) this.isoAt(name, X + (dir === 'l' ? -i : i), Y - i * .5, { ...o, flip: dir === 'r' }); return this; }
+  // 담 잇기: 한 조각이 여러 칸 길이로 그려져 있으면 그 길이만큼 건너뛰며 잇고, 그림의 밑선 기울기를 따른다
+  isoWall(name, x, y, n, dir = 'l', o = {}) {
+    const q = meta(name, dir === 'r'); if (!q) return this; const len = Math.max(1, dir === 'r' ? q.fh : q.fw), sl = (dir === 'r' ? q.rs : q.ls) ?? .5;
+    let X = x * this.k, Y = y * this.k; for (let i = 0; i < n; i += len) { this.isoAt(name, X, Y, { ...o, flip: dir === 'r' }); X += dir === 'l' ? -len : len; Y -= len * sl; }
+    return this;
+  }
   // 깔린 돌바닥 마름모: 가운데 (cx, cy), 가로 반폭 hw칸. 세로는 그 절반(2:1)
   paveDiamond(cx, cy, hw, kind = 'stone') { const k = this.k; cx *= k; cy *= k; hw *= k; (this.pave = this.pave || []).push({ kind, poly: [[cx, cy - hw / 2], [cx + hw, cy], [cx, cy + hw / 2], [cx - hw, cy]].map(([a, b]) => [a * TS, b * TS]) }); return this; }
   // 쿼터뷰 소품: (fx, fy)는 바닥 마름모의 앞 모서리 자리(칸). flip이면 좌우를 뒤집어 입구가 오른쪽 앞면에 온다

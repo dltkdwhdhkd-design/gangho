@@ -4,6 +4,7 @@ import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { MAPS, makeMap, isoMode } from './maps.js';
 import { STAMPS, flagOf } from './tiles.js';
+import { meta } from './iso.js';
 import { TS } from './core.js';
 import { LOOT } from './items.js';
 import { learn } from './state.js';
@@ -117,10 +118,25 @@ function sectLayout(m, l, st, ft) {
   if (isoMode()) isoSect(m, cx, w, mt);
 }
 // 쿼터뷰 미리보기의 고을: 성벽을 산문 양쪽으로 비스듬히, 광장을 마름모 돌마당으로
+// 성문 누각: 아치가 왼쪽 앞면(바깥, 왼쪽 아래)을 보고, 문 안쪽 출구가 큰길 아래 끝에 닿게 놓는다. 담은 누각 양 모서리에서 뻗는다
+function isoGate(m, cx) {
+  const k = m.k, T = TS, q = meta('city_gate'), ls = q.ls ?? .5, rs = q.rs ?? .5, RF = [q.fh * 16, -q.fh * 16 * rs], FL = [-q.fw * 16, -q.fw * 16 * ls];
+  const Pin = [(cx + 2) * k * T, 44 * k * T - 10], D = [Pin[0] - RF[0], Pin[1] - RF[1]], F = [D[0] - FL[0] * .5, D[1] - FL[1] * .5];
+  m.isoAt('city_gate', F[0] / T, F[1] / T, { nosolid: true }); const c = m.stamps[m.stamps.length - 1].iso;
+  // 문길 양옆만 막는다
+  const part = (a, b) => { const P = t => [c.F[0] + (c.L[0] - c.F[0]) * t, c.F[1] + (c.L[1] - c.F[1]) * t], A = P(a), B = P(b), d = [c.R[0] - c.F[0], c.R[1] - c.F[1]]; return { F: A, L: B, R: [A[0] + d[0], A[1] + d[1]], K: [B[0] + d[0], B[1] + d[1]], fw: c.fw * (b - a), fh: c.fh }; };
+  (m.polys = m.polys || []).push(part(0, .36), part(.64, 1));
+  m.isoWall('city_wall', c.L[0] / T / k, c.L[1] / T / k, 7, 'l').isoWall('city_wall', c.R[0] / T / k, c.R[1] / T / k, 7, 'r');
+  // 길: 성벽 밑으로 곧게 가던 큰길은 걷어 내고, 문 안 출구에서 문길을 지나 왼쪽 아래 가장자리까지 낸다
+  const g = m.g, H = g.length, W = g[0].length, paint = (A, B, r) => { const n = Math.ceil(Math.hypot(B[0] - A[0], B[1] - A[1]) / 4); for (let i = 0; i <= n; i++) { const x = (A[0] + (B[0] - A[0]) * i / n) / T, y = (A[1] + (B[1] - A[1]) * i / n) / T; for (let yy = Math.floor(y - r); yy <= Math.floor(y + r); yy++) for (let xx = Math.floor(x - r); xx <= Math.floor(x + r); xx++) if (g[yy]?.[xx] === 0 || g[yy]?.[xx] === 1) g[yy][xx] = 1; } };
+  for (let y = Math.ceil(Pin[1] / T); y < H; y++) for (let x = Math.floor(cx * k); x < Math.ceil((cx + 4) * k); x++) if (g[y][x] === 1) g[y][x] = 0;
+  paint([Pin[0], Pin[1] - 24], Pin, 1.3); paint(Pin, D, 1.1);
+  const dir = [-RF[0], -RF[1]], l = Math.hypot(...dir), u = [dir[0] / l, dir[1] / l], steps = Math.max((H * T - D[1]) / u[1], 0); paint(D, [D[0] + u[0] * steps, D[1] + u[1] * steps], 1.3);
+}
 function isoTown(m, cx) {
   for (const st of [...m.stamps]) if (st.name === 'wall_h' && Math.round(st.y / TS / m.k) === 43) { m.stamps.splice(m.stamps.indexOf(st), 1); const s = STAMPS[st.name]; if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6]); if (k >= 0) m.solids.splice(k, 1); } }
-  m.isoWall('city_wall', cx - .2, 44, 7, 'l').isoWall('city_wall', cx + 4.2, 44, 7, 'r');
-  const k = m.k, K = v => Math.round(v * k); for (let y = K(14); y < K(32); y++) for (let x = K(20); x < K(40); x++) if (m.g[y][x] === 3) m.g[y][x] = 0;
+  const k = m.k, K = v => Math.round(v * k), G0 = meta('city_gate');
+  if (G0 && G0.h > 60) isoGate(m, cx); else m.isoWall('city_wall', cx - .2, 44, 7, 'l').isoWall('city_wall', cx + 4.2, 44, 7, 'r'); for (let y = K(14); y < K(32); y++) for (let x = K(20); x < K(40); x++) if (m.g[y][x] === 3) m.g[y][x] = 0;
   m.paveDiamond(30, 23, 13);
 }
 // 쿼터뷰 미리보기의 문파: 가로로 곧은 담과 네모 돌바닥을 걷어내고, 산문에서 비스듬히 뻗는 담과 마름모 마당으로 바꾼다
