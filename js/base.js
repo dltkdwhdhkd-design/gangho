@@ -54,8 +54,46 @@ const SW = id => STAMPS[id][3] / TS, SH = id => STAMPS[id][4] / TS;
 const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 11], dorm: [18, 12, 7, 11], mess: [18, 12, 7, 11], inn: [18, 12, 7, 11], shop: [16, 11, 6, 10], book: [16, 11, 6, 10], clinic: [14, 10, 5, 9], armory: [14, 10, 5, 9], gov: [20, 13, 8, 12], gamble: [20, 13, 8, 12], home: [14, 10, 5, 9], temple: [16, 11, 6, 10] };
 const HOUSES = ['hall', 'lodge', 'house_red', 'inn', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];
 function room(m, l, stamp, x, y, kind, name, o) {
-  const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2 / m.k, by: y + (SH(stamp) + 1) / m.k, kind, name, owner: l };
-  m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0 }); if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
+  const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2 / m.k, by: y + (SH(stamp) + 1) / m.k, kind, name, owner: l, as: o?.as };
+  m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0, ...(o?.iso ? { isoAs: o.iso } : {}) }); if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
+}
+// 고을 가게 안: 찻집, 주루, 비단 가게, 사당
+function shopRoom(m, as) {
+  if (as === 'tea') m.put('counter', 1, 2).put('shelf', 4, 1).put('f_scroll', 8, 1).put('f_scroll', 11, 1).put('longtable', 2, 6).put('teapot', 3.5, 6).put('longtable', 8, 6).put('teapot', 9.5, 6).row('stool', 2, 5, 3, 1).row('stool', 8, 5, 3, 1).put('f_bonsai', 12, 3).put('plant', 1, 8);
+  if (as === 'rest') m.put('f_stove', 1, 1).put('f_stove', 3, 1).put('jar', 5.5, 1).put('pot', 7, 1).put('counter', 9, 2).put('longtable', 2, 6).put('longtable', 8, 6).row('stool', 2, 5, 3, 1).row('stool', 8, 5, 3, 1).put('lantern', 1, 8).put('lantern', 12.5, 8);
+  if (as === 'silk') m.put('shelf', 1, 1).put('shelf2', 4, 1).put('shelf', 8, 1).put('counter', 4, 4).put('box', 1, 7).put('box', 11, 7).put('jar', 11.5, 2);
+  if (as === 'shrine') { m.carpet = [5, 3, 4, 6]; m.put('tablet', 5.5, 1).put('censer', 6.5, 3.4).put('tablet2', 2, 2).put('tablet2', 10, 2).put('lantern', 1, 4).put('lantern', 12.5, 4).put('f_bonsai', 1, 8).put('f_bonsai', 12, 8); }
+}
+const DISH = [['skewer', '고기 꼬치에 술 한 병', 24], ['fish_soup', '매운탕 한 상', 40], ['ginseng_soup', '삼계탕', 150]];
+const FORTUNE = ['대길이오. 오늘은 무얼 해도 되오. 노름만 빼고.', '길이오. 동쪽에서 반가운 사람이 오오. 빚쟁이일 수도 있고.', '평이오. 아무 일도 없을 거요. 그게 제일 좋은 점괘요.', '소흉이오. 오늘은 칼을 늦게 뽑으시오. 먼저 뽑으면 뉘우치오.',
+  '흉이오. 물가를 조심하시오. 아니, 사람을 조심하시오. 둘 다 조심하시오.', '길이오. 잃어버린 것이 돌아오오. 돌려받고 싶지 않은 것일 수도 있소.', '대흉… 이라고 나왔는데, 향이 비뚤게 꽂혀서 그렇소. 마음에 두지 마시오.', '중길이오. 오래 기다린 소식이 오오. 너무 기대하지는 마시오.', '길이오. 오늘 만나는 사람 가운데 하나가 나중에 목숨을 구해 주오. 누군지는 안 나왔소.'];
+const PAY = async n => { if (G.S.silver >= n) { G.S.silver -= n; return true; } await say(null, '주머니가 모자란다.'); return false; };
+function shopNpcs(r, id, out) {
+  const l = r.owner, V = G.voices, P = V.PERSONAS[{ tea: 'tea', rest: 'host', silk: 'silk', shrine: 'keeper' }[r.as]], who = r.as === 'tea' ? '찻집 주인' : P.who[0], spr = P.spr || 'Woman', opt = { map: l.map, place: l.name };
+  const own = () => npcSay(who, spr, V.line(id + 'own', P, opt));
+  const guests = (sprs, at) => V.assign(id, sprs).forEach((q, i) => out.npcs.push({ id: 'gu' + i, spr: q.spr, x: at[i][0], y: at[i][1], dir: 0, life: 'still', lively: 1, hint: q.who, barks: q.p.bark, talk: () => npcSay(q.who, q.spr, V.line(id + 'gu' + i, q.p, opt)) }));
+  if (r.as === 'tea') {
+    out.npcs.push({ id: 'res', spr, x: 2.6, y: 3.6, dir: 0, hint: who, barks: P.bark, talk: async () => {
+      const c = await choice(`${who}: 어서 오세요. 자리는 아무 데나요.`, ['차 한 잔 (은자 3냥)', '요즘 강호 소식을 묻는다', '그만둔다']);
+      if (c === 0 && await PAY(3)) { await narr('따뜻한 찻잔이 손에 들린다.'); await own(); }
+      if (c === 1) { const N = (G.S.fr?.news || []).slice(0, 3).map(t => t.replace(/^\d+일: /, '')); if (N.length) for (const [i, t] of N.entries()) await npcSay(who, spr, `${['손님들 말로는 이래요.', '이건 어제 들어온 얘기예요.', '이것도 들은 얘기예요.'][i]} "${t}"`); else { const n = hearsay('hao'); await npcSay(who, spr, n ? pick(CTX.hao.news).replace('{n}', n) : '요즘은 조용해요. 조용할 때가 제일 무섭다던데.'); } }
+    } });
+    guests(['Villager2', 'Villager'], [[3.4, 5.8], [9.4, 5.8]]);
+  }
+  if (r.as === 'rest') {
+    out.npcs.push({ id: 'res', spr, x: 10.4, y: 3.6, dir: 0, hint: who, barks: P.bark, talk: async () => {
+      const c = await choice(`${who}: 뭘 드시겠소?`, [...DISH.map(([, n, p]) => `${n} (은자 ${p}냥)`), '말만 나눈다', '그만둔다']);
+      if (c < DISH.length) { const [k, n, p] = DISH[c]; if (!await PAY(p)) return; G.S.meal = { id: k, left: 3 }; G.S.potion = Math.max(G.S.potion, G.S.potionMax); await say(null, `${josa(n, '을/를')} 비웠다. 다음 싸움 세 번은 힘이 난다. 금창약도 채웠다.`); }
+      if (c === DISH.length) await own();
+    } }, { id: 'cook', spr: 'Caveman2', x: 2.4, y: 2.6, dir: 0, life: 'still', hint: '숙수', barks: ['불 세게!', '양념 어디 갔어!', '오리 뒤집어!'], talk: () => npcSay('숙수', 'Caveman2', pick(['말 걸지 마시오. 지금 오리가 타고 있소.', '맛있으면 주인한테 말하고, 맛없으면 나한테 말하시오. 고쳐 주겠소. 다음 손님한테.', '칼질은 무공이랑 같소. 힘 빼야 잘 들어가오.'])) });
+    guests(['Villager3', 'Greenman', 'Villager2'], [[3.4, 5.8], [9.4, 5.8], [4.6, 7.4]]);
+  }
+  if (r.as === 'silk') out.npcs.push({ id: 'res', spr, x: 6, y: 3.4, dir: 0, hint: who, barks: P.bark, talk: own });
+  if (r.as === 'shrine') out.npcs.push({ id: 'res', spr, x: 9.2, y: 4.4, dir: 0, hint: who, talk: async () => {
+    const c = await choice(`${who}: 향 한 대 올리고 가시오.`, ['향을 올리고 점괘를 본다 (은자 1냥)', '이야기를 듣는다', '그만둔다']);
+    if (c === 0) { const k = 'incense_' + l.id; if (G.S.daily?.[k]) { await npcSay(who, spr, '점괘는 하루 한 번이오. 두 번 물으면 신령님도 귀찮아하시오.'); return; } if (!await PAY(1)) return; (G.S.daily = G.S.daily || {})[k] = 1; await narr('향 연기가 천천히 올라간다.'); await npcSay(who, spr, '오늘 점괘는… ' + pick(FORTUNE)); }
+    if (c === 1) await own();
+  } });
 }
 function makeRoom(id) {
   if (/^r_\w+_home$/.test(id) && !ROOMS[id]) { const g = id.replace(/_home$/, '_gamble'); makeRoom(g); if (MAPS[g]) MAPS[id] = MAPS[g]; if (ROOMS[g]) ROOMS[id] = ROOMS[g]; return; }  // 예전 저장: 첫 민가 자리에 도박장이 섰다
@@ -76,7 +114,8 @@ function makeRoom(id) {
   if (k === 'gov') { m.carpet = [8, 5, 4, 8]; m.put('pillar', 6.6, 5).put('pillar', 12.65, 5).put('f_chair', 9.5, 2).put('longtable', 8, 4).put('screen', 8.25, .55).put('f_scroll', 3, 1).put('f_scroll', 16, 1).put('rack', 1, 5).put('rack', 17, 5).put('lantern', 3, 9).put('lantern', 16, 9); }
   if (k === 'gamble') { m.put('counter', 8, 4).put('f_scroll', 5, 1).put('f_scroll', 13, 1).put('shelf', 15, 1).put('jar', 2, 1).put('lantern', 1, 2).put('lantern', 18, 2).put('lantern', 1, 8).put('lantern', 18, 8).put('longtable', 3, 7).put('longtable', 13, 7).put('box', 17, 11).put('plant', 1, 11); }
   if (k === 'temple') { m.carpet = [6, 3, 4, 8]; m.put('censer', 7.5, 3.4).put('tablet', 7, 1).put('tablet2', 3, 2).put('tablet2', 12, 2).put('lantern', 1, 4).put('lantern', 14, 4).put('longtable', 6, 5).put('plant', 1, 9).put('plant', 14, 9); }
-  if (k === 'home') { const v = [...id].reduce((a, c) => a + c.charCodeAt(0), 0) % 4; if (v === 0) m.put('f_bed', 1, 1).put('chest', 4, 1).put('longtable', 6, 5).row('stool', 6, 4, 3, 1).put('jar', 12, 1).put('f_stove', 10, 1); if (v === 1) m.put('bed', 9, 1).put('drawer', 1, 1).put('shelf', 4, 1).put('longtable', 3, 6).put('plant', 12, 7); if (v === 2) m.put('shelf2', 1, 1).put('box', 5, 1).put('box', 7, 1).put('jar', 10, 1).put('pot', 12, 1).put('counter', 2, 5).put('f_bed', 10, 6); if (v === 3) m.put('f_stove', 1, 1).put('longtable', 5, 5).put('f_bed', 10, 1).put('f_lamp', 8, 1).put('f_bonsai', 1, 7).put('stool', 5, 4).put('stool', 7, 4); }
+  if (k === 'home' && info.as) shopRoom(m, info.as);
+  else if (k === 'home') { const v = [...id].reduce((a, c) => a + c.charCodeAt(0), 0) % 4; if (v === 0) m.put('f_bed', 1, 1).put('chest', 4, 1).put('longtable', 6, 5).row('stool', 6, 4, 3, 1).put('jar', 12, 1).put('f_stove', 10, 1); if (v === 1) m.put('bed', 9, 1).put('drawer', 1, 1).put('shelf', 4, 1).put('longtable', 3, 6).put('plant', 12, 7); if (v === 2) m.put('shelf2', 1, 1).put('box', 5, 1).put('box', 7, 1).put('jar', 10, 1).put('pot', 12, 1).put('counter', 2, 5).put('f_bed', 10, 6); if (v === 3) m.put('f_stove', 1, 1).put('longtable', 5, 5).put('f_bed', 10, 1).put('f_lamp', 8, 1).put('f_bonsai', 1, 7).put('stool', 5, 4).put('stool', 7, 4); }
   m.exit(ex, h - 1, 4, 1, info.back, info.bx, info.by, 0, { door: true }); m.render();
 }
 // 세력 본거지. 아래가 산문, 위로 갈수록 외문 구역, 연무장, 내문 구역, 본전이다
@@ -153,13 +192,14 @@ function isoSect(m, cx, w, mt) {
   m.paveDiamond(mid, YARD.y + YARD.h / 2, YARD.w / 2 + 1).paveDiamond(mid, 10, 7);
 }
 const SLAVE = ['guangzhou', 'changan', 'suzhou'];  // 노예 시장이 서는 고을
+const SHOPS = { 0: ['rest', '주루', 'restaurant'], 1: ['tea', '찻집', 'teahouse'], 2: ['silk', '비단 가게', 'silk'], 6: ['shrine', '사당', 'temple_town'] };  // 고을 민가 자리 가운데 가게가 되는 곳
 function townLayout(m, l) {
   const W = 60, H = 48, cx = 28; m.walkOn = [1, 3];
   m.border(['tree_round', 'grove_green'], [[cx - 1, H - 3, 6, 3]], 3);
   m.fill(cx, 3, 4, H - 3, 1); m.fill(3, 21, W - 6, 4, 1); m.fill(20, 14, 20, 18, 3);
   m.row('wall_h', 3, 43, cx - 3); m.row('wall_h', cx + 4, 43, W - cx - 7); m.put('gate_arch', cx, 41, { nosolid: true }); m.place(cx + 2, 40, l.name);
   room(m, l, 'inn', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); room(m, l, 'hall', 26, 2, 'gov', '관아'); room(m, l, 'house_red', 49, 13, 'gamble', '도박장');
-  [['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => room(m, l, st, x, y, 'home', '민가', { n: i + 1, quiet: 1 }));
+  [['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => { const sp = SHOPS[i]; room(m, l, st, x, y, 'home', sp ? sp[1] : '민가', { n: i + 1, quiet: !sp, as: sp?.[0], iso: sp?.[2] }); });  // 민가 몇 채는 가게다(방 이름표는 예전 저장과 같게 home 그대로)
   m.pen('gwan', 20.3, 14.75); m.pen('gwan', 39.3, 14.75); m.flag('gwan', 25.5, 9.6, true); m.flag('gwan', 30.5, 9.6); m.put('banner4', 10.1, 14.3, { nosolid: true }); m.put('statue', 29.5, 19, { nosolid: true });  // 관아 앞 관기, 객잔 옆 밥그릇 기
   // 광장 네 귀퉁이의 좌판. 차양 밑에 매대를 놓고 장사꾼은 그 뒤에 선다
   for (const [x, y] of [[21, 16], [34, 16], [21, 26], [34, 26]]) { m.put('awning', x, y, { nosolid: true }); m.put('counter', x + 1.5, y + 2); }
@@ -252,6 +292,7 @@ async function boatTalk(l) {
 const elderName = (l, i) => { const R = fold(l.id + i); return `${SURNAME[Math.floor(R() * SURNAME.length)]} 장로`; };
 function roomNpcs(id, out) {
   const r = ROOMS[id], l = r.owner, kind = r.kind; const hash = [...id].reduce((a, c) => a * 31 + c.charCodeAt(0) & 65535, 7);
+  if (kind === 'home' && r.as) return shopNpcs(r, id, out);
   if (kind === 'home') { const [who, spr, t] = HOME[hash % HOME.length]; out.npcs.push({ id: 'res', spr, x: 7, y: 4 + hash % 2, dir: 0, hint: who, talk: async () => { await npcSay(who, spr, nextLine(id + 'res', t).replace(/\{p\}/g, l.name)); } }); return; }
   if (kind === 'temple') { out.npcs.push({ id: 'res', spr: 'Monk', x: 8, y: 7.4, dir: 0, life: 'work', hint: '전각지기', talk: async () => { await npcSay('전각지기', 'Monk', nextLine(id + 'res', ['향만 피우고 가시면 됩니다. 소리는 내지 마십시오.', '바닥을 막 닦았습니다. 밟으신 데는 제가 다시 닦겠습니다.', '오늘은 손님이 없었습니다. 이런 날은 부처님도 쉬십니다.'])); } }); return; }
   if (kind === 'gov') { out.npcs.push({ id: 'res', spr: 'Inspector', x: 10, y: 6.4, dir: 0, life: 'work', hint: '아전', talk: async () => { await npcSay('아전', 'Inspector', nextLine(id + 'res', [`${l.name} 관아요. 칼 찬 사람끼리 싸운 일은 우리 소관이 아니오. 위에서 그렇게 말하라고 했소.`, '세금 내러 왔소? 아니면 나가시오. 오늘 장부가 산더미요.', '방은 저쪽 벽에 붙어 있소. 현상금 걸린 놈 얼굴도 거기 있고.'])); } }); return; }

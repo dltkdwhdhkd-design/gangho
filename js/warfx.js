@@ -29,6 +29,25 @@ export function tint(m, s) {
   if (m.live) { for (const w of m._wsl || []) if (w.has.has(s)) return FILTER[w.st.kind]; return null; }
   const st = m._wst; return hit(st, s) ? FILTER[st.kind] : null;
 }
+// 잿더미 단계: 지붕이 내려앉아 벽만 남는다. 위에서 이만큼을 잘라 그린다
+const CUT = s => s.iso ? .56 : .55;
+const siteOf = (m, s, k = 'has') => { for (const w of m._wsl || []) if (w[k].has(s)) return w.st; return null; };
+export function cut(m, s) { const st = m.live ? siteOf(m, s) : hit(m._wst, s) ? m._wst : null; return st?.kind === 'ash' ? CUT(s) : 0; }
+// 지붕 없이 벽만 그리도록 들쭉날쭉한 윗선으로 잘라 낸다(그린 뒤 c.restore())
+export function clip(c, s, cu) {
+  const b = box(s), y0 = b.y + b.h * cu, h = hash(s); let i = 0; c.save(); c.beginPath(); c.moveTo(b.x - 8, b.y + b.h + 4);
+  for (let x = b.x - 8; x <= b.x + b.w + 8; x += 5, i++) c.lineTo(x, Math.round(y0 + ((h >> (i % 13)) % 7) - (i % 2) * 3));
+  c.lineTo(b.x + b.w + 8, b.y + b.h + 4); c.closePath(); c.clip();
+}
+// 무너진 문파의 깃발은 불타는 동안과 잿더미일 때 쓰러져 있다
+const FLAG = /^flagl?_/, down = st => st?.all && (st.kind === 'burning' || st.kind === 'ash');
+export function hide(m, s) { return FLAG.test(s.name) && down(m.live ? siteOf(m, s, 'fl') : m._wst); }
+function fallenFlag(c, s, cam) {
+  const b = box(s); if (!view(b, cam)) return; const left = s.name.startsWith('flagl_'), x = Math.round(left ? b.x + b.w - 3 : b.x + 3), y = Math.round(b.y + b.h), d = left ? -1 : 1;
+  c.fillStyle = '#3a2a1a'; c.fillRect(x - 1, y - 4, 3, 4);  // 부러진 밑동
+  c.fillStyle = '#5a4028'; for (let i = 0; i < 26; i++) c.fillRect(x + d * (3 + i), y - 1 + Math.round(i / 13), 1, 1);  // 쓰러진 깃대
+  c.fillStyle = 'rgba(40,34,44,.9)'; c.fillRect(Math.min(x + d * 18, x + d * 27), y - 2, 9, 4); c.fillStyle = 'rgba(20,16,20,.9)'; c.fillRect(Math.min(x + d * 22, x + d * 25), y - 2, 3, 2);  // 그을린 깃발 천
+}
 const box = s => { const sz = STAMPS[s.name]; return { x: s.x, y: s.y, w: s.w || sz?.[3] || 32, h: s.h || sz?.[4] || 32 }; };
 const view = (b, cam) => b.x + b.w > cam.x - 40 && b.x < cam.x + 360 && b.y + b.h > cam.y - 60 && b.y < cam.y + 240;
 
@@ -39,8 +58,9 @@ function worldSites(m) {
   m._wsk = key; m._wsl = [];
   for (const q of m.sites) {
     const st = state({ id: q.map }); if (!st?.kind) continue;
-    const list = (m.objs || []).filter(s => { if (!hit(st, s)) return false; const b = box(s), cx = b.x + b.w / 2, by = b.y + b.h; return cx >= q.x0 * TS && cx <= q.x1 * TS && by >= q.y0 * TS && by <= q.y1 * TS; });
-    if (list.length) m._wsl.push({ st, list, has: new Set(list) });
+    const inn = s => { const b = box(s), cx = b.x + b.w / 2, by = b.y + b.h; return cx >= q.x0 * TS && cx <= q.x1 * TS && by >= q.y0 * TS && by <= q.y1 * TS; };
+    const list = (m.objs || []).filter(s => hit(st, s) && inn(s)), fl = down(st) ? (m.objs || []).filter(s => FLAG.test(s.name) && inn(s)) : [];
+    if (list.length || fl.length) m._wsl.push({ st, list, has: new Set(list), fls: fl, fl: new Set(fl) });
   }
   return m._wsl;
 }
@@ -54,8 +74,8 @@ function ground(c, st, s, cam) {
 // 땅 위, 사람과 건물 아래: 잿더미, 목재 더미, 깃발, 진채
 export function under(c, m, cam, t) {
   m._wst = state(m); const st = m._wst;
-  if (st?.kind) for (const s of m.objs || []) if (hit(st, s)) ground(c, st, s, cam);
-  if (m.live) for (const w of worldSites(m)) for (const s of w.list) ground(c, w.st, s, cam);
+  if (st?.kind) for (const s of m.objs || []) if (hit(st, s)) ground(c, st, s, cam); else if (down(st) && FLAG.test(s.name)) fallenFlag(c, s, cam);
+  if (m.live) for (const w of worldSites(m)) { for (const s of w.list) ground(c, w.st, s, cam); for (const s of w.fls) fallenFlag(c, s, cam); }
   const flags = st?.flags; if (flags && !m.room) {
     const k = m.k || 1, spots = [[20.5, 15.4], [38.5, 15.4], [20.5, 31.4], [38.5, 31.4], [27, 39.6], [33, 39.6]];
     spots.forEach(([x, y], i) => { const id = flags[i % flags.length], nm = STAMPS['flag_' + id] ? 'flag_' + id : 'banner4'; drawStamp(c, nm, Math.round(x * k * TS - 2.5), Math.round(y * k * TS - 44)); });
@@ -80,15 +100,20 @@ function fire(c, x, y, t, s = 1) {
 function puff(c, x, y, r, col, al) { x = Math.round(x); y = Math.round(y); r = Math.max(1, Math.round(r)); c.fillStyle = `rgba(${col},${al})`; c.fillRect(x - r, y - r + 1, r * 2, r * 2 - 2); c.fillRect(x - r + 1, y - r, r * 2 - 2, r * 2); }
 // 건물 위: 불길, 연기, 불씨, 비계
 function air(c, st, s, cam, t) {
-  const b = box(s); if (!view(b, cam)) return; const h = hash(s), cx = b.x + b.w / 2, top = b.y + b.h * .28, by = b.y + b.h;
+  const b = box(s); if (!view(b, cam)) return; const h = hash(s), cx = b.x + b.w / 2, by = b.y + b.h;
   {
     if (st.kind === 'rebuild') { c.strokeStyle = 'rgba(120,86,48,.95)'; c.lineWidth = 1.5; c.beginPath(); for (let i = 0; i <= 3; i++) { const x = b.x + b.w * (.2 + i * .2); c.moveTo(x, by - 2); c.lineTo(x, b.y + b.h * .35); } for (let j = 0; j < 3; j++) { const y = by - 6 - j * b.h * .18; c.moveTo(b.x + b.w * .18, y); c.lineTo(b.x + b.w * .82, y); } c.stroke(); return; }
-    const thick = st.kind === 'burning' ? .62 : st.kind === 'occupied' ? .5 : .32, n = st.kind === 'burning' ? 8 : 5, col = st.kind === 'ash' ? '96,92,88' : '52,46,44';
+    const top = st.kind === 'ash' ? b.y + b.h * CUT(s) : b.y + b.h * .28, thick = st.kind === 'burning' ? .62 : st.kind === 'occupied' ? .5 : .32, n = st.kind === 'burning' ? 8 : 5, col = st.kind === 'ash' ? '96,92,88' : '52,46,44';
     for (let i = 0; i < n; i++) { const ph = (t * (.16 + (h % 5) * .01) + i / n + (h % 97) / 97) % 1, x = cx + ((h >> i) % 21 - 10) + Math.sin(ph * 6 + i) * 5 + ph * 14, y = top - ph * 50, r = 2 + ph * 7;
       puff(c, x, y, r, col, (1 - ph * ph) * thick); }
+    if (st.kind === 'ash') {  // 내려앉은 지붕 자리에 삐죽 남은 기둥과 걸친 서까래
+      const y0 = Math.round(b.y + b.h * CUT(s)); c.fillStyle = '#1c1410';
+      for (let i = 0; i < 4; i++) { const x = Math.round(b.x + b.w * (.24 + i * .17) + ((h >> i) % 5) - 2), hh = 5 + ((h >> (i + 3)) % 10); c.fillRect(x, y0 - hh, 2, hh + 3); c.fillRect(x + ((h >> i) & 1 ? 2 : -1), y0 - hh, 1, 2); }
+      c.save(); c.translate(Math.round(b.x + b.w * (.35 + (h % 3) * .1)), y0 - 3); c.rotate(((h >> 5) % 2 ? 1 : -1) * .3); c.fillRect(-b.w * .18, -1, b.w * .36, 2); c.restore();
+    }
     if (st.kind === 'ash') for (let i = 0; i < 2; i++) { const ph = (t * .4 + i * .5 + (h % 7) / 7) % 1; c.fillStyle = `rgba(255,120,50,${(1 - ph) * .8})`; c.fillRect(Math.round(cx + ((h >> (i + 4)) % 24) - 12), Math.round(by - 6 - ph * 10), 1, 1); }  // 잿더미 속 남은 불씨
     if (st.kind === 'burning') {
-      for (let i = 0; i < 3; i++) fire(c, b.x + b.w * (.25 + i * .25) + ((h >> i) % 7 - 3), top + b.h * (.15 + (i % 2) * .2), t + i * .3, .9);
+      const top = b.y + b.h * .28; for (let i = 0; i < 3; i++) fire(c, b.x + b.w * (.25 + i * .25) + ((h >> i) % 7 - 3), top + b.h * (.15 + (i % 2) * .2), t + i * .3, .9);
       for (let i = 0; i < 6; i++) { const ph = (t * .5 + i / 6 + (h % 13) / 13) % 1; c.fillStyle = `rgba(255,${150 + (i * 30) % 90},60,${1 - ph})`; c.fillRect(Math.round(cx + ((h >> (i + 2)) % 30) - 15 + Math.sin(ph * 9) * 4), Math.round(top + 10 - ph * 50), 1, 1); }
     }
   }
@@ -104,4 +129,4 @@ export function over(c, m, cam, t) {
   }
   if (m.live) { const f = G.saga?.fx?.('world'); for (const q of f?.sk || []) { const X = q.x * TS, Y = q.y * TS - 10; if (X < cam.x - 40 || X > cam.x + 360 || Y < cam.y - 40 || Y > cam.y + 220) continue; const ph = (t * 1.6 + q.id * .37) % 1; if (ph < .25) { c.strokeStyle = `rgba(255,255,240,${1 - ph * 4})`; c.lineWidth = 1; c.beginPath(); c.arc(X + Math.sin(q.id) * 3, Y + (q.id % 2) * 8, 6 + ph * 10, -.9 + q.id, .4 + q.id); c.stroke(); } } }
 }
-G.warfx = { tint, under, over };
+G.warfx = { tint, cut, clip, hide, under, over };

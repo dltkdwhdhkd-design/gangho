@@ -29,7 +29,7 @@ function addRep(id, n, spread = true) {
 }
 const news = t => { const fr = Fr(); fr.news.unshift(`${S().day}일: ${t}`); fr.news.length = Math.min(fr.news.length, 30); };
 // 세력 제자
-function folk(f) { const l = LOCS.find(q => q.fac === f.id); return (G.base?.folk(l) || ['Knight'])[0]; }
+function folk(f) { const l = LOCS.find(q => q.fac === f.id), L = G.base?.folk(l) || ['Knight']; return L.find(s => s !== 'Skeleton') || L[0]; }  // 마교 제자도 사람 모습(해골은 혈마와 강시 몫)
 function disciple(f, lv, sp) {
   const k = `fd_${f.id}${sp ? '_s' : ''}`, m = G.arts.usable(f.id).slice(0, sp ? 3 : 2);
   FOES[k] = { name: sp ? `${f.name} 사범` : `${f.name} 제자`, spr: 'chars/' + folk(f), hp: Math.round((30 + lv * 24) * (sp ? 1.8 : 1)), atk: (6 + lv * 1.4) * (sp ? 1.05 : .95), def: 1 + lv * .33, spd: Math.min(80, 52 + lv * .6), exp: Math.round((8 + lv * 5.4) * (sp ? 1.6 : 1)), silver: Math.round(4 + lv * 1.1), pause: sp ? 1 : 1.15, moves: ['slash', ...m], wpn: f.wpn, guard: sp ? .6 : .3, poise: sp ? 30 + lv * 2 : 0 };
