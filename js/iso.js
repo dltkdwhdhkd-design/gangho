@@ -9,7 +9,12 @@ import { ISOMETA } from './isometa.js';
 export const IS = 16, IH = 8;
 export const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 // 소품 정보: 그림 크기(w, h, 논리 점), 그림 안 앞 모서리 자리(ax, ay), 바닥 칸(fw, fh)
-export const ISO = { ...ISOMETA };
+// 바깥 건물과 나무는 받은 그림보다 작게 앉힌다. 사람 키(15)에 견주어 집이 너무 커서 마을이 듬성해 보였다. 방 안 가구는 그대로
+export const ISO_SC = .62;
+const ROOMY = new Set(['bed', 'table', 'counter', 'bookshelf', 'wineshelf', 'medchest', 'weaponrack', 'screen', 'throne', 'stove', 'watertank', 'ricechest', 'censer', 'pillar', 'standlamp', 'flowerpot', 'scroll', 'crates']);
+// 본전과 큰 관청은 조금 덜 줄여 위엄을 남기고, 담 한 칸은 사람 어깨 높이가 되게 줄이지 않는다
+const SC_OF = k => ROOMY.has(k) || /^(wall_tile|wall_stone|hedge|fence_bamboo)$/.test(k) ? 1 : /^hall_/.test(k) ? .8 : /^(yamen|city_gate)$/.test(k) ? .7 : ISO_SC;
+export const ISO = Object.fromEntries(Object.entries(ISOMETA).map(([k, v]) => { const sc = SC_OF(k); return [k, sc === 1 ? v : { ...v, w: v.w * sc, h: v.h * sc, ax: v.ax * sc, ay: v.ay * sc, fw: v.fw * sc, fh: v.fh * sc }]; }));
 // 좌우를 뒤집으면 왼쪽 앞면과 오른쪽 앞면이 바뀐다
 export function meta(name, flip) { const q = ISO[name]; if (!q) return null; return flip ? { ...q, ax: q.w - q.ax, fw: q.fh, fh: q.fw, ls: q.rs, rs: q.ls } : q; }
 export function corners(fx, fy, fw, fh, ls = .5, rs = .5) {
@@ -38,6 +43,9 @@ export function hitsBox(c, px, py, w, h) {
 // 그리기. flip이면 좌우를 뒤집는다
 export function drawIso(ctx, s) {
   const im = IMG['iso/' + s.name], q = ISO[s.name]; if (!im || !q) return;
+  if (s.sk) { // 담 한 칸을 이웃 집 밑선 기울기에 맞춰 세로로만 민다(기둥은 곧게 선 채로)
+    const Fx = s.x + (s.flip ? q.w - q.ax : q.ax), k = s.flip ? s.sk : -s.sk; ctx.save(); ctx.transform(1, k, 0, 1, 0, -k * Fx); drawIso(ctx, { ...s, sk: 0 }); ctx.restore(); return;
+  }
   if (!s.flip) { ctx.drawImage(im, s.x, s.y, q.w, q.h); return; }
   ctx.save(); ctx.translate(s.x + q.w, s.y); ctx.scale(-1, 1); ctx.drawImage(im, 0, 0, q.w, q.h); ctx.restore();
 }

@@ -11,7 +11,7 @@ export function whole(m) {
   if (m._whole) return m._whole;
   const c = document.createElement('canvas'); c.width = m.w * TS; c.height = m.h * TS;
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(m.canvas, 0, 0);
-  for (const s of [...m.objs].sort((a, b) => a.base - b.base)) s.iso ? drawIso(x, s) : drawStamp(x, s.name, s.x, s.y);
+  for (const s of [...m.objs].sort((a, b) => a.base - b.base)) s.iso ? drawIso(x, s) : drawStamp(x, s.name, s.x, s.y, s.sc);
   return m._whole = c;
 }
 const open = q => !q.when || !!G.S.flags[q.when];

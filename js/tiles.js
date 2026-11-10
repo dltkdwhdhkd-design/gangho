@@ -27,7 +27,7 @@ for (const id of FLAG_IDS) { STAMPS['flag_' + id] = [H, 352, 320, 20, 44]; STAMP
 STAMPS.pillar = [H, 352, 320, 12, 44, 1, 38, 10, 6]; STAMPS.screen = [H, 352, 320, 56, 30, 0, 22, 56, 8]; STAMPS.censer = [H, 352, 320, 18, 22, 2, 15, 14, 7];
 // 세력 자리 id → 깃발 id
 export const flagOf = id => FLAG_IDS.includes(id) ? id : ({ fort: 'heukpung', blackpalace: 'cheonma' }[id] || null);
-export function drawStamp(ctx, name, x, y) { const s = STAMPS[name]; if (!s) return; const hd = IMG['stamp/' + name]; if (hd) { ctx.drawImage(hd, x, y, s[3], s[4]); return; } const im = IMG['tiles/' + s[0]]; if (im) ctx.drawImage(im, s[1], s[2], s[3], s[4], x, y, s[3], s[4]); }
+export function drawStamp(ctx, name, x, y, sc = 1) { const s = STAMPS[name]; if (!s) return; const hd = IMG['stamp/' + name]; if (hd) { ctx.drawImage(hd, x, y, s[3] * sc, s[4] * sc); return; } const im = IMG['tiles/' + s[0]]; if (im) ctx.drawImage(im, s[1], s[2], s[3], s[4], x, y, s[3] * sc, s[4] * sc); }  // sc: 쿼터뷰 마을에서 정면 소품을 사람 키에 맞게 줄인다
 
 export const BIOME = {
   grass: { sheet: 'Floor', fill: [0, 12], block: [0, 7], det: [[1, 12], [2, 12], [3, 12], [4, 12], [2, 11], [3, 11]] },

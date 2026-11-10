@@ -225,6 +225,8 @@ const PRI = [4, 5, 1, 3, 2, 3.5]; // 바닥 높낮이: grass, deep, sand, plain,
 const DECAL = { grass: [['bush1', 'bush2', 'fern1', 'bush1', 'fern2'], .1, ['flower1', 'flower2', 'flower3', 'flower4', 'fern1']], plain: [['bush1', 'bush4', 'fern2', 'bush2', 'fern1', 'bush1'], .13, ['flower2', 'flower3', 'fern2', 'bush4']], deep: [['fern1', 'fern2', 'bush4', 'fern1'], .09], sand: [['bush3'], .014], snow: [[], 0], dusk: [['bush3'], .012] };
 // 땅 칠하기: 바닥 텍스처, 바닥끼리와 길과 물가의 점 단위 경계, 얼룩, 돌바닥 턱. 강호 조각과 마을 지도가 같이 쓴다
 // (X0, Y0)부터 NW×NH칸을 x에 칠한다. g는 바닥 갈래, Bm은 칸마다 바닥 이름 번호(BN), 지도 크기 MW×MH
+// 쿼터뷰 마을의 흙 얼룩은 옅게: 짙게 누른 길 그림과 짙은 테두리를 안 쓴다(지도 render가 켰다 끈다)
+export const SOFT = { on: false };
 function paintArea(x, X0, Y0, NW, NH, g, Bm, MW, MH) {
   const mixed = [], calm = new Set();
   const at = (a, b) => { if (b < 0 || b >= MH || a < 0 || a >= MW) return -1; const v = g[b][a]; return v === 6 ? 0 : v; };
@@ -232,7 +234,7 @@ function paintArea(x, X0, Y0, NW, NH, g, Bm, MW, MH) {
   for (let ty = Y0; ty < Y0 + NH; ty++) for (let tx = X0; tx < X0 + NW; tx++) {
     const v = at(tx, ty), X = (tx - X0) * TS, Y = (ty - Y0) * TS, bi = Bm[ty][tx], bn = BN[bi];
     const same = (q, r) => { const u = at(q, r); return u === v || u === -1 || (v !== 0 && u === 4); }, mk = (same(tx, ty - 1) ? 1 : 0) | (same(tx + 1, ty) ? 2 : 0) | (same(tx, ty + 1) ? 4 : 0) | (same(tx - 1, ty) ? 8 : 0);
-    const P = IMG['ground/path']; if (v === 1 && bn === 'sand' && pathDark()) IMG['ground/path'] = PATHD;
+    const P = IMG['ground/path']; if (v === 1 && bn === 'sand' && !SOFT.on && pathDark()) IMG['ground/path'] = PATHD;
     texTile(x, bn, v, mk, tx, ty, X, Y); IMG['ground/path'] = P;
     if (v > 2) continue;
     let mix = false, shore = false, fixd = false;
@@ -262,11 +264,11 @@ function paintArea(x, X0, Y0, NW, NH, g, Bm, MW, MH) {
       for (let py = 0; py < TS; py++) for (let px = 0; px < TS; px++) {
         const wx = tx * TS + px, wy = ty * TS + py, j = (py + 2) * W + px + 2, k = K2[j], di = ((wy - oy) * N + (wx - ox)) * 4;
         const n1 = [K2[j - 1], K2[j + 1], K2[j - W], K2[j + W]], n2 = [K2[j - 2], K2[j + 2], K2[j - 2 * W], K2[j + 2 * W], K2[j - W - 1], K2[j - W + 1], K2[j + W - 1], K2[j + W + 1]];
-        const bn = BN[BI[j]], T2 = k === 2 ? WT : k === 1 ? (bn === 'sand' && PD ? PD : PT) : texData(bn); if (!T2) continue;
+        const bn = BN[BI[j]], T2 = k === 2 ? WT : k === 1 ? (bn === 'sand' && PD && !SOFT.on ? PD : PT) : texData(bn); if (!T2) continue;
         const si = ((wy % T2.L) * T2.L + (wx % T2.L)) * 4; let r = T2.d[si], gg = T2.d[si + 1], bb = T2.d[si + 2];
         if (k === 2) { if (n1.some(q => q !== 2)) r = gg = bb = 255; else if (n2.some(q => q !== 2) && hash(wx, wy, 31) < .45) { r = (r + 255) >> 1; gg = (gg + 255) >> 1; bb = (bb + 255) >> 1; } }
         else if (n1.includes(2) || n2.includes(2)) { r = 150; gg = 83; bb = 64; }
-        else if (k === 1 && n1.includes(0)) { r = r * .64 | 0; gg = gg * .64 | 0; bb = bb * .62 | 0; }
+        else if (k === 1 && n1.includes(0)) { const f = SOFT.on ? .9 : .64; r = r * f | 0; gg = gg * f | 0; bb = bb * (f - .02) | 0; }
         else if (k === 0) { // 바닥끼리 갈리는 자리: 높은 쪽(숲, 풀)에 진한 테두리 한 점, 낮은 쪽에 옅은 그늘
           const me = PRI[BI[j]]; let hi = false, lo = false; for (const q of [j - 1, j + 1, j - W, j + W]) { if (K2[q] !== 0 || BI[q] === BI[j]) continue; if (PRI[BI[q]] < me) hi = true; else lo = true; }
           if (hi) { r = r * .66 | 0; gg = gg * .7 | 0; bb = bb * .66 | 0; } else if (lo) { r = r * .9 | 0; gg = gg * .9 | 0; bb = bb * .88 | 0; }
@@ -416,4 +418,4 @@ function linkEdges(mp) {
 }
 const entry = id => { const l = LOCS.find(q => q.map === id); return l ? [Math.round(l.px[0] * K) + .5, Math.round(l.px[1] * K) + 3.5] : [Math.round(598 * K), Math.round(440 * K)]; };
 Story.providers.push(id => id === 'world' && ready ? { npcs: npcsAt(), spots: [], trigs: [], roam: [] } : { npcs: [], spots: [], trigs: [], roam: [] });
-G.world = { linkEdges, paintArea, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };
+G.world = { linkEdges, paintArea, SOFT, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };

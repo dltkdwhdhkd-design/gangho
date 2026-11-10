@@ -23,7 +23,7 @@ export class Field {
     G.world.ensure(id);
     const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir;
     // 넓힌 지도로 방에서 나오면 그 방 문 바로 앞에 선다
-    if (m.k > 1 && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
+    if ((m.k > 1 || m.hasIso) && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];
@@ -296,7 +296,7 @@ export class Field {
     list.sort((a, b) => a.y - b.y);
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
-      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); if (o.s.iso) { const burnt = o.s.name === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y); if (cu) c.restore(); c.filter = 'none'; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
+      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); if (o.s.iso) { const burnt = o.s.name === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {

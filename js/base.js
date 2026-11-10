@@ -2,9 +2,10 @@
 import { G, Sound, toast, josa, pick } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
-import { MAPS, makeMap, isoMode } from './maps.js';
+import { MAPS, makeMap, isoMode, hallOf } from './maps.js';
 import { STAMPS, flagOf } from './tiles.js';
 import { meta } from './iso.js';
+import { Lay } from './isovil.js';
 import { TS } from './core.js';
 import { LOOT } from './items.js';
 import { learn } from './state.js';
@@ -121,6 +122,7 @@ function makeRoom(id) {
 // 세력 본거지. 아래가 산문, 위로 갈수록 외문 구역, 연무장, 내문 구역, 본전이다
 const YARD = { x: 8, y: 24, w: 30, h: 17 };
 function sectLayout(m, l, st, ft) {
+  if (isoMode()) return isoSectLayout(m, l, st, ft);
   const W = 46, H = 68, cx = 21, w = st.wall, ex = ft[4] || {}, trees = ex.trees || st.trees, R = fold(l.id), mid = cx + 2, hall = ex.hall || st.hall || 'hall', big = st.big || 'lodge', small = st.small;
   // 가장자리. 산에 있는 문파는 바위와 나무를 두껍게 두른다
   const west = l.id === 'hwasan'; m.border(trees, west ? [[cx - 1, H - 3, 6, 3], [0, 28, 3, 7]] : [[cx - 1, H - 3, 6, 3]], 3);
@@ -194,6 +196,7 @@ function isoSect(m, cx, w, mt) {
 const SLAVE = ['guangzhou', 'changan', 'suzhou'];  // 노예 시장이 서는 고을
 const SHOPS = { 0: ['rest', '주루', 'restaurant'], 1: ['tea', '찻집', 'teahouse'], 2: ['silk', '비단 가게', 'silk'], 6: ['shrine', '사당', 'temple_town'] };  // 고을 민가 자리 가운데 가게가 되는 곳
 function townLayout(m, l) {
+  if (isoMode()) return isoTownLayout(m, l);
   const W = 60, H = 48, cx = 28; m.walkOn = [1, 3];
   m.border(['tree_round', 'grove_green'], [[cx - 1, H - 3, 6, 3]], 3);
   m.fill(cx, 3, 4, H - 3, 1); m.fill(3, 21, W - 6, 4, 1); m.fill(20, 14, 20, 18, 3);
@@ -206,6 +209,86 @@ function townLayout(m, l) {
   m.put('jar', 21, 18.6); m.put('pot', 38.7, 18.6); m.put('box', 21, 28.6); m.put('jar', 38.7, 28.6); m.put('sign_sword', 9, 25.3); m.scatter(['flower1', 'fern1'], 18, 4);
   if (SLAVE.includes(l.id)) { m.fill(47, 6, 9, 3, 4); m.row('wood_h', 47, 5, 9); m.put('banner7', 46.4, 5.4); m.put('banner7', 55.8, 5.4); m.put('log', 45.6, 9.6); m.put('box', 55.6, 9.4); m.label(51.5, 4.4, '노예 시장'); }
   if (isoMode()) isoTown(m, cx);
+}
+// 쿼터뷰 문파·세가: 산문 → 외문 마당(숙소, 식당) → 연무장 → 내문 마당(서고, 장로원, 약방, 무기고) → 본전. 가운데 돌길로 이어진다
+// 구역 사이는 가운데 돌길에서 양쪽으로 비스듬히 뻗는 담(산이면 바위). 사람이 서는 자리(문지기, 연무장 수련, 일꾼)는 정면 지도와 같다
+const SECT_ISO = { manor: ['rich', 'tile_house', 'wall_tile'], temple: ['tile_house', 'rich', 'wall_tile'], dao: ['tile_house', 'rich', 'wall_tile'], peak: ['tile_house', 'thatch_long', 'wall_stone'], ice: ['tile_house', 'rich', 'wall_stone'], west: ['rich', 'tile_house', 'wall_stone'], dark: ['rich', 'tile_house', 'wall_stone'], water: ['thatch_long', 'barn', 'fence'], fort: ['thatch_long', 'barn', 'fence'], slum: ['thatch', 'barn', 'fence'] };
+function isoSectLayout(m, l, st, ft) {
+  const W = 46, H = 68, cx = 21, mid = cx + 2, ex = ft[4] || {}, trees = ex.trees || st.trees, mt = ex.mount || st.mount, [BIG, SMALL, WALL] = SECT_ISO[l.style] || SECT_ISO.manor, L = new Lay(m, fold(l.id)() * 1000 | 0);
+  const fid = flagOf(l.id), poor = ['water', 'fort', 'slum'].includes(l.style);
+  // 가운데 돌길과 비워 둘 자리: 산문 앞(문지기), 외문 일꾼 자리, 연무장, 본전 앞
+  m.fill(cx, 9, 4, H - 9, 3); L.keep(cx - .6, 9, 5.2, H - 9).keep(16, 59.4, 14, 8.6).keep(10.5, 48.6, 26, 3.4).keep(YARD.x, YARD.y, YARD.w, YARD.h).keep(cx - 6, 7.6, 16, 3).keep(10, 49, 4.5, 5).keep(32, 52, 4.5, 5);
+  if (st.water) { m.water(2, 29, 5, 9); m.water(39, 29, 5, 9); }  // 연무장 양옆 연못
+  const sroom = (iso, kind, name, dx, dy, flip, o = {}) => { const id = roomReg(m, l, kind, name, o), [, , ex2, ey2] = ROOM[kind], n0 = L.lots.length; L.bld(iso, dx, dy, flip, { to: id, tx: ex2 + 2, ty: ey2 - .6, must: 1, street: o.street }); const lot = L.lots[L.lots.length - 1]; if (L.lots.length > n0 && !o.quiet) m.label((lot.bx[0] + lot.bx[2] / 2) / TS, lot.bx[1] / TS + .3, name); };
+  // 본전: 본전 앞 돌마당에 서서 올려다보는 자리
+  sroom(hallOf(l.map), 'hall', ft[0], mid + .4, 8.6, false, { street: true }); m.paveDiamond(mid, 10.4, 7.4);
+  if (fid) { m.flag(fid, mid - 4.6, 10.6, true); m.flag(fid, mid + 4.4, 10.6); }
+  // 내문 마당
+  sroom(BIG, 'lib', ft[2], 9.4, 19.4, true); sroom(SMALL, 'clinic', '약방', 16.6, 20.2, true); sroom(poor ? 'barn' : 'smithy', 'armory', '무기고', 30.4, 20.2, false); sroom(BIG, 'elder', ft[3], 37, 19.4, false);
+  // 연무장: 마름모 돌마당에 허수아비와 무기 시렁
+  m.paveDiamond(mid, YARD.y + YARD.h / 2, YARD.w / 2 + 1); m.place(mid, YARD.y - 1, ft[1]);
+  for (let i = 0; i < 6; i++) m.put('f_dummy', YARD.x + 2 + i * 5, YARD.y + 1, { sc: .8 });
+  m.put('rack', YARD.x + 1, YARD.y + 13, { sc: .7 }); m.put('rack', YARD.x + YARD.w - 4, YARD.y + 13, { sc: .7 });
+  // 외문 마당: 숙소 둘, 식당, 살림살이
+  sroom(BIG, 'dorm', '외문 숙소', 8.6, 55.6, true); sroom(SMALL, 'dorm', '외문 숙소', 16.4, 56.4, true, { n: 2, quiet: 1 }); sroom(poor ? 'thatch_long' : 'tavern', 'mess', '식당', 37.4, 57.4, false);
+  L.iso('well', 13.6, 50.6).iso('woodpile', 30, 53.4).iso('jars', 36.6, 52.6, true).iso('laundry', 5.6, 50.4).iso('ricebags', 38.6, 50.6);
+  // 산문: 성문 누각을 가운데 돌길 아래 끝에 걸치고, 양쪽 담이 비스듬히 올라가 경내 전체를 감싼다(V자). 경내 안은 담으로 나누지 않는다
+  { const q = meta('city_gate'), ls = q.ls ?? .5, rs = q.rs ?? .5, RF = [q.fh * 16, -q.fh * 16 * rs], FL = [-q.fw * 16, -q.fw * 16 * ls], Pin = [(cx + 2) * TS, 65.2 * TS], D = [Pin[0] - RF[0] * .5, Pin[1] - RF[1] * .5], F = [D[0] - FL[0] * .5, D[1] - FL[1] * .5];
+    m.isoAt('city_gate', F[0] / TS, F[1] / TS, { nosolid: true }); const c = m.stamps[m.stamps.length - 1].iso;
+    const part = (a, b) => { const P = t => [c.F[0] + (c.L[0] - c.F[0]) * t, c.F[1] + (c.L[1] - c.F[1]) * t], A = P(a), B = P(b), d = [c.R[0] - c.F[0], c.R[1] - c.F[1]]; return { F: A, L: B, R: [A[0] + d[0], A[1] + d[1]], K: [B[0] + d[0], B[1] + d[1]], fw: c.fw * (b - a), fh: c.fh }; };
+    (m.polys = m.polys || []).push(part(0, .2), part(.8, 1)); m.isoWall(WALL, c.L[0] / TS, c.L[1] / TS, 26, 'l').isoWall(WALL, c.R[0] / TS, c.R[1] / TS, 26, 'r'); }
+  m.place(mid, 60.2, l.name);
+  if (fid) { m.flag(fid, cx - 2.2, 62.6, true); m.flag(fid, cx + 6.2, 62.6); }
+  // 구역마다 문 없는 전각과 곁채를 더 앉혀 빽빽하게(정자, 종루 자리는 그림이 오면 바꾼다)
+  const PAL = [[BIG, 3], [SMALL, 4], ['pavilion', 1], [poor ? 'barn' : 'shrine', 1]], B = { bare: [1.2, .6, .6], tries: 220 };
+  L.pack([1, 11, 20, 11], PAL, { ...B, flip: true }).pack([25, 11, 20, 11], PAL, { ...B, flip: false }).pack([1, 46, 19, 13], PAL, { ...B, flip: true }).pack([26, 46, 19, 13], PAL, { ...B, flip: false });
+  L.pack([0.5, 24, 7, 18], [['pavilion', 1], [SMALL, 2]], { ...B, flip: true, max: 3 }).pack([38.5, 24, 7, 18], [['pavilion', 1], [SMALL, 2]], { ...B, flip: false, max: 3 });
+  // 땅: 마당은 다진 흙, 가장자리는 풀
+  if (!['peak', 'ice'].includes(l.style)) L.dirt([[mid, 16, 22, 6], [mid, 33, 21, 10], [mid, 52, 21, 8], [mid, 62, 6, 6]], 'sand').blotch(.5);
+  // 나무와 풀: 가장자리는 두껍게, 구역 안은 띄엄띄엄
+  const T = trees.filter(t => STAMPS[t] || meta(t));
+  for (let y = 1; y < H - 1; y += 2.4) { L.grove(1.6 + (y * 7 % 2), y, 3, 1.6, T); L.grove(44 - (y * 5 % 2), y, 3, 1.6, T); }
+  L.litter([4, 12, 38, 10], [...T, 'jars', 'herbrack'], 6, { sc: .8 }).litter([3, 46, 40, 14], [...T, 'woodpile', 'crates', 'jars'], 8, { sc: .8 }).litter([0, 0, 46, 68], ['bush1', 'bush2', 'flower1', 'fern1', 'fern2'], 40, { sc: 1 });
+  if (L.warn.length) console.warn(l.name + ' 쿼터뷰', L.warn.join(' / ')); m.layWarn = L.warn;
+}
+// 쿼터뷰 고을: 큰길 두 줄과 광장, 사람들이 서는 자리는 정면 지도와 같게 비워 두고, 가게는 큰길을 보고, 살림집은 담을 두른 마당 안에 앉힌다
+// 방 이름표(r_고을_가게)와 들어가는 문은 정면 지도와 같다. 나올 때는 그 집 문 앞에 선다
+function roomReg(m, l, kind, name, o) { const id = `r_${l.id}_${kind}${o?.n || ''}`; ROOMS[id] = { back: l.map, bx: 0, by: 0, kind, name, owner: l, as: o?.as }; return id; }
+function isoTownLayout(m, l) {
+  const cx = 28, L = new Lay(m, fold(l.id)() * 1000 | 0); m.walkOn = [1, 3];
+  // 비워 둘 자리: 큰길, 광장, 이야기꾼과 재주꾼 마당, 성문 앞, 도박장 호객꾼, 노예 시장
+  L.open(cx - .4, 7.6, 4.8, 40.4).open(1, 20.6, 58, 4.8); L.keep(19.4, 13.4, 21.2, 19.2).keep(11.8, 25.4, 6.4, 4.2).keep(32.4, 33, 6.4, 4.4).keep(23.5, 37.5, 13, 10.5).keep(52, 16.4, 2.6, 1.8).keep(24.6, 19.6, 3.2, 1.6);
+  for (let y = 14; y < 32; y++) for (let x = 20; x < 40; x++) m.g[y][x] = 1;
+  if (SLAVE.includes(l.id)) { m.fill(47, 6, 9, 3, 4); L.keep(45.4, 3.6, 12, 8); L.fence(56.4, 9.4, 9, 'l', 'fence').fence(47.4, 9.4, 4, 'r', 'fence'); m.put('banner7', 46.4, 5.4); m.put('banner7', 55.8, 5.4); m.label(51.5, 4.4, '노예 시장'); }
+  const shop = (iso, kind, name, dx, dy, flip, o = {}) => { const id = roomReg(m, l, kind, name, o), [, , ex, ey] = ROOM[kind], n0 = L.lots.length; L.bld(iso, dx, dy, flip, { to: id, tx: ex + 2, ty: ey - .6, street: o.street }); const lot = L.lots[L.lots.length - 1]; if (L.lots.length > n0 && !o.quiet) m.label((lot.bx[0] + lot.bx[2] / 2) / TS, lot.bx[1] / TS + .3, name); };
+  // 관아는 남북 큰길 북쪽 끝에서 길을 내려다본다
+  shop('yamen', 'gov', '관아', cx + 1.6, 7.4, false); m.flag('gwan', cx - 1.6, 9.2, true); m.flag('gwan', cx + 5.6, 9.2);
+  // 동서 큰길 북쪽 가게들
+  shop('inn_city', 'inn', '객잔', 9.6, 20.4, true); shop('store', 'shop', '저잣거리', 17.4, 20.4, true); shop('books', 'book', '고서점', 42.6, 20.4, false); shop('gamble', 'gamble', '도박장', 50.4, 20.4, false);
+  shop('restaurant', 'home', '주루', 23.6, 13.2, true, { n: 1, as: 'rest' }); shop('teahouse', 'home', '찻집', 36.6, 13.2, false, { n: 2, as: 'tea' });
+  // 동서 큰길 남쪽
+  shop('silk', 'home', '비단 가게', 18.6, 31.6, true, { n: 3, as: 'silk' }); shop('temple_town', 'home', '사당', 44.2, 31.2, false, { n: 7, as: 'shrine' });
+  // 나머지 민가(문은 있어도 이름표는 없다): 담 두른 기와집, 바깥쪽은 울타리 친 초가
+  const homes = [4, 5, 6, 8, 9, 10, 11];
+  const HOME_AT = [[7.6, 33, true, 'tile_house'], [13.4, 39.6, true, 'thatch'], [50.4, 27.8, false, 'rich'], [8.6, 10.8, true, 'rich'], [41.2, 39.8, false, 'tile_house'], [55, 36, false, 'thatch'], [47.6, 10.6, false, 'tile_house']];
+  HOME_AT.forEach(([x, y, f, iso], i) => { const n = homes[i], id = roomReg(m, l, 'home', '민가', { n }), [, , ex, ey] = ROOM.home; L.bld(iso, x, y, f, { to: id, tx: ex + 2, ty: ey - .6, yard: iso === 'thatch' ? [3, .8, .5] : [2.6, .7, .4], fence: iso === 'thatch' ? 'fence' : 'wall_tile', inside: iso === 'thatch' ? ['woodpile', 'jars', 'laundry'] : ['jars', 'bench', 'herbrack'] }); });
+  // 빈 구역을 살림집으로 채운다
+  const PAL = [['tile_house', 4, ['jars', 'bench']], ['rich', 2, ['jars', 'herbrack']], ['thatch', 2, ['woodpile', 'laundry']]];
+  const Y = { yard: [2.6, .7, .4], tries: 260 };
+  for (const r of [[1, 1, 26, 19], [33, 1, 26, 19], [1, 26, 26, 11], [33, 26, 26, 11], [1, 37, 22, 10], [37, 37, 22, 10]]) L.pack(r, PAL.map(p => [...p]), { ...Y, fence: 'wall_tile' });
+  // 광장 좌판과 장터 살림, 길가 등
+  [[22, 19.4, 'stall'], [35.8, 19.4, 'stall_fruit'], [22, 29.4, 'stall_meat'], [35.8, 29.4, 'stall_pot']].forEach(([x, y, n], i) => L.iso(n, x, y, i % 2 === 1, { force: true }));
+  L.iso('well', 30.6, 26.8, false, { force: true }).iso('lamppost', 27.2, 15, false, { force: true }).iso('lamppost', 33, 15, false, { force: true }).iso('lamppost', 27.2, 32, false, { force: true }).iso('lamppost', 33, 32, false, { force: true }).iso('signpole', 26.6, 26, false, { force: true });
+  m.pen('gwan', 20.3, 14.75); m.pen('gwan', 39.3, 14.75); m.put('statue', 29.5, 19, { nosolid: true, sc: .7 });
+  const STUFF = ['jars', 'crates', 'ricebags', 'cart', 'woodpile', 'jars'];
+  for (const r of [[1, 1, 26, 19], [33, 1, 26, 19], [1, 26, 26, 21], [33, 26, 26, 21]]) L.litter(r, STUFF, 8);
+  L.litter([0, 0, 60, 48], ['tree_round', 'tree_round', 'plum_g', 'tree_big'], 18, { sc: .8 }).litter([0, 0, 60, 48], ['bush1', 'bush2', 'flower1', 'fern1'], 30, { sc: 1 });
+  // 성문과 성벽(아래쪽), 땅: 거리는 흙, 광장은 돌바닥
+  isoGate(m, cx); m.paveDiamond(30, 23, 12.6);
+  { const [wx, wy] = G.world.entry(l.map); m.exit(0, 47, 60, 1, 'world', wx, wy, 0).exit(0, 30, 1, 18, 'world', wx, wy, 0); }  // 성문 밖 길은 왼쪽 아래로 빠진다. 그 끝도 강호로 나가는 길
+  L.dirt([[30, 23, 31, 26]], 'sand').blotch(.6);
+  m.place(cx + 2, 40, l.name);
+  if (L.warn.length) console.warn(l.name + ' 쿼터뷰', L.warn.join(' / ')); m.layWarn = L.warn;
 }
 // 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다
 function autoDoors(m, owner) {

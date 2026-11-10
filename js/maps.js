@@ -5,11 +5,13 @@ import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tile
 import { meta, corners, hitsBox, inside, drawIso } from './iso.js';
 import { buildIsoRoom } from './isoroom.js';
 import { LOCS } from './worlddata.js';
+import './isoprops.js';
+import { isoCheongha } from './isocheongha.js';
 
 // 쿼터뷰 미리보기에서는 바깥 지도를 k배 넓게 편다. 쿼터뷰 집이 크기 때문이다
 // 지도를 짜는 함수와 이야기 쪽 좌표는 그대로 두고, 여기와 Story.content, field.load에서 k를 곱한다
 const NOSCALE = new Set(['world', 'mysect', 'myhouse', 'isotest']);
-export const ISO_K = 1.5;
+export const ISO_K = 1;
 class MapDef {
   constructor(id, w, h, o = {}) {
     const k = o.k ?? (!o.room && !NOSCALE.has(id) && isoMode() ? ISO_K : 1);
@@ -25,8 +27,9 @@ class MapDef {
   put(name, tx, ty, o = {}) {
     const s = STAMPS[name], px = tx * this.k * TS + (o.dx || 0), py = ty * this.k * TS + (o.dy || 0);
     if (!s) { console.warn('소품 없음', name); return this; }
-    this.stamps.push({ name, x: px, y: py, base: py + s[4] - (o.lift || 0), flat: o.flat, ...(o.isoAs ? { isoAs: o.isoAs } : {}) });
-    if (s.length > 5 && !o.nosolid) this.solids.push({ x: px + s[5], y: py + s[6], w: s[7], h: s[8] });
+    const sc = o.sc || 1;  // sc: 줄여 그리기(쿼터뷰 마을의 정면 소품). 막힘 상자도 같이 줄인다
+    this.stamps.push({ name, x: px, y: py, base: py + s[4] * sc - (o.lift || 0), flat: o.flat, ...(sc !== 1 ? { sc, w: s[3] * sc } : {}), ...(o.isoAs ? { isoAs: o.isoAs } : {}) });
+    if (s.length > 5 && !o.nosolid) this.solids.push({ x: px + s[5] * sc, y: py + s[6] * sc, w: s[7] * sc, h: s[8] * sc });
     return this;
   }
   // 줄지어 놓기. 넓힌 지도에서 한 칸짜리를 촘촘히 잇던 줄(담, 목책)은 조각을 더 넣어 틈이 생기지 않게 한다
@@ -54,8 +57,9 @@ class MapDef {
   isoGround(name, X, Y, o = {}) { const q = meta(name, o.flip); if (!q) return this; (this.ground = this.ground || []).push({ name, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, flip: !!o.flip, iso: corners(X, Y, q.fw, q.fh, q.ls, q.rs) }); return this; }
   isoAt(name, fx, fy, o = {}) {
     const q = meta(name, o.flip); if (!q) { console.warn('쿼터뷰 소품 없음', name); return this; }
-    const X = fx * TS, Y = fy * TS, c = corners(X, Y, q.fw, q.fh, q.ls, q.rs); this.hasIso = true;
-    this.stamps.push({ name, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, base: Y, iso: c, flip: !!o.flip });
+    const sl = o.slope, ls = sl !== undefined && !o.flip ? sl : q.ls, rs = sl !== undefined && o.flip ? sl : q.rs;  // slope: 담 한 칸을 그 기울기로 민다
+    const X = fx * TS, Y = fy * TS, c = corners(X, Y, q.fw, q.fh, ls, rs); this.hasIso = true;
+    this.stamps.push({ name, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, base: Y, iso: c, flip: !!o.flip, ...(sl !== undefined ? { sk: .5 - sl } : {}) });
     if (!o.nosolid) (this.polys = this.polys || []).push(c);
     return this;
   }
@@ -86,15 +90,15 @@ class MapDef {
   }
   render() {
     const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
-    if (!this.room && isoMode()) { isoRetrofit(this); isoDress(this); }
+    if (!this.room && isoMode()) { isoRetrofit(this); if (!this.noDress) isoDress(this); }
     if (this.room) { const doors = this.portals.filter(q => q.y + q.h >= this.h * TS - 2).map(q => [Math.round(q.x / TS), Math.round((q.x + q.w) / TS)]); paintRoom(x, this.w, this.h, this.roomStyle || 0, { doors, carpet: this.carpet }); }
     else if (G.world?.paintArea) { // 강호 전도와 같은 땅 칠하기: 길섶과 물가가 둥글고, 바닥 얼룩과 돌바닥 턱이 또렷하다
-      const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.g.map(r => r.map(() => bi));
-      G.world.paintArea(x, 0, 0, this.w, this.h, this.g, Bm, this.w, this.h);
+      const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.bm || this.g.map(r => r.map(() => bi));  // 쿼터뷰 마을은 칸마다 바닥(bm)과 칠할 때만 쓰는 흙 얼룩(gPaint)을 따로 둔다
+      G.world.SOFT.on = !!this.isoNative; try { G.world.paintArea(x, 0, 0, this.w, this.h, this.gPaint || this.g, Bm, this.w, this.h); } finally { G.world.SOFT.on = false; }
     } else paintGround(x, this.g, this.biome);
     if (this.pave) for (const p of this.pave) paintPave(x, p);
     for (const s of this.ground || []) drawIso(x, s);
-    for (const s of this.stamps) if (s.flat) drawStamp(x, s.name, s.x, s.y);
+    for (const s of this.stamps) if (s.flat) drawStamp(x, s.name, s.x, s.y, s.sc);
     this.canvas = c; this.objs = this.stamps.filter(s => !s.flat);
     if (this.room && isoMode() && this.id !== 'myhouse') { // 쿼터뷰 미리보기: 바닥만 칠해 눕히고 뒷벽 두 면을 세운다
       const f = document.createElement('canvas'); f.width = c.width; f.height = c.height; const fx = f.getContext('2d'); fx.imageSmoothingEnabled = false;
@@ -130,7 +134,7 @@ export function paintPave(c, p) {
 const ISO_OF = { hall: 'hall_dao', lodge: 'lodge', house_red: 'rich', inn: 'inn', hut_o: 'tile_house', hut_b: 'tile_house', hut_o2: 'thatch', shop_blue: 'store', shop_green: 'clinic', clay: 'adobe', wood_o: 'barn', wood_b: 'thatch_long', mud: 'shack', straw: 'thatch' };
 // 문파 본전은 문파 양식대로: 사찰, 도관, 세가, 마교, 빙궁, 서역. 나머지는 도관 본전으로
 const HALL = { temple: 'hall_temple', dao: 'hall_dao', manor: 'hall_manor', dark: 'hall_dark', ice: 'hall_ice', west: 'hall_west', fort: 'hall_dark' };
-const hallOf = id => { const l = LOCS.find(q => q.map === id), k = HALL[l?.style] || 'hall_dao'; return meta(k) ? k : 'hall_dao'; };
+export const hallOf = id => { const l = LOCS.find(q => q.map === id), k = HALL[l?.style] || 'hall_dao'; return meta(k) ? k : 'hall_dao'; };
 const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn', gamble: 'gamble', gov: 'yamen', book: 'books', bokun: 'shrine', myhouse: 'thatch' };
 G.mapK = id => MAPS[id]?.k || 1;
 export const isoMode = () => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } };
@@ -194,6 +198,7 @@ export function isoRetrofit(m, o = {}) {
     m.stamps.splice(m.stamps.indexOf(st), 1);
     if (s.length > 5) { const k = m.solids.findIndex(r => r.x === st.x + s[5] && r.y === st.y + s[6] && r.w === s[7] && r.h === s[8]); if (k >= 0) m.solids.splice(k, 1); }
     if (!pick) continue; placed.push(pick.r); m.isoAt(pick.name, pick.F[0] / TS, pick.F[1] / TS, { flip: pick.flip });
+    if (door) Object.assign(door, { x: Math.round(D[0] - 9), y: Math.round(D[1] + 1), w: 18, h: 11 });  // 문 포탈은 문 난 면 바로 앞 땅에. 면 위에 걸려 있으면 발이 닿지 않는다
   }
   // 나무: 정면 나무를 밑동 자리 그대로 쿼터뷰 나무로 바꾼다. 막힘(밑동 상자나 막힌 칸)은 그대로 둔다
   for (let i = 0; i < m.stamps.length; i++) {
@@ -227,23 +232,25 @@ export function buildMaps() {
   // 청하진: 강변 나루 마을
   let m = M('cheongha', 46, 34, { name: '청하진', bgm: 'village', biome: 'grass', arena: 'village' });
   m.water(0, 29, 46, 5);
-  m.road(3, 15, 42, 15, 2).road(22, 3, 22, 27, 2).road(9, 16, 9, 20, 2).road(32, 16, 32, 21, 2).road(21, 26, 24, 27, 2);
-  m.fill(20, 12, 6, 3, 1);
-  m.road(22, 0, 22, 4, 2).road(43, 15, 45, 15, 2).road(0, 15, 3, 15, 2);
-  m.house('inn', 19, 8, 'inn', 8, 10, 1, { doorDx: 0 });
-  m.put('hut_b', 26, 8).put('sign_dojo', 0, 0, { flat: false, nosolid: true }); m.stamps.pop();
-  m.house('clay', 8, 11, 'smith', 7, 8, 1);
-  m.house('shop_green', 31, 11, 'clinic', 7, 8, 1);
-  m.house('shop_blue', 36, 18, 'shop', 6, 7, 1);
-  m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).house('hut_o2', 26, 18, 'bokun', 7, 8, 1, { when: 'bokun_open', lock: '낮에는 문이 잠겨 있다. 밤에만 불이 켜진다는 집이다.' }).put('wood_o', 4, 18).put('wood_b', 12, 8);
-  m.put('banner4', 17.6, 9.3, { nosolid: true }).put('banner4', 23.4, 9.3, { nosolid: true });  // 객잔 간판 기: 밥그릇
-  m.put('plum', 2, 22).put('plum', 40, 8).put('plum_g', 18, 22).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
-  m.put('jar', 18, 12).put('pot', 26, 12).put('pot', 27, 12).put('signpost', 24, 16).put('signpost', 41, 13);
+  if (isoMode()) isoCheongha(m); else {
+    m.road(3, 15, 42, 15, 2).road(22, 3, 22, 27, 2).road(9, 16, 9, 20, 2).road(32, 16, 32, 21, 2).road(21, 26, 24, 27, 2);
+    m.fill(20, 12, 6, 3, 1);
+    m.road(22, 0, 22, 4, 2).road(43, 15, 45, 15, 2).road(0, 15, 3, 15, 2);
+    m.house('inn', 19, 8, 'inn', 8, 10, 1, { doorDx: 0 });
+    m.put('hut_b', 26, 8).put('sign_dojo', 0, 0, { flat: false, nosolid: true }); m.stamps.pop();
+    m.house('clay', 8, 11, 'smith', 7, 8, 1);
+    m.house('shop_green', 31, 11, 'clinic', 7, 8, 1);
+    m.house('shop_blue', 36, 18, 'shop', 6, 7, 1);
+    m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).house('hut_o2', 26, 18, 'bokun', 7, 8, 1, { when: 'bokun_open', lock: '낮에는 문이 잠겨 있다. 밤에만 불이 켜진다는 집이다.' }).put('wood_o', 4, 18).put('wood_b', 12, 8);
+    m.put('banner4', 17.6, 9.3, { nosolid: true }).put('banner4', 23.4, 9.3, { nosolid: true });  // 객잔 간판 기: 밥그릇
+    m.put('plum', 2, 22).put('plum', 40, 8).put('plum_g', 18, 22).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
+    m.put('jar', 18, 12).put('pot', 26, 12).put('pot', 27, 12).put('signpost', 24, 16).put('signpost', 41, 13);
+    m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2], [0, 13, 3, 5]], 3);
+    m.put('plum', 8, 25).put('plum_o', 34, 24).put('tree_round', 38, 25).put('stump', 13, 25).put('boulder', 29, 26).put('jar', 19, 25).put('pot', 26, 25).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 40, 21);
+    m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
+  }
   m.fill(21, 28, 4, 4, 4);
   { const K = m.k * TS; if (isoMode() && meta('dock')) isoDock(m, 21, 28, 4, 4); else m.solids.push({ x: 21 * K - 4, y: 29 * K, w: 4, h: 3 * K }, { x: 25 * K, y: 29 * K, w: 4, h: 3 * K }, { x: 21 * K, y: 32 * K, w: 4 * K, h: 8 }); }  // 쿼터뷰에선 나루 그림으로 바꾼다
-  m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2], [0, 13, 3, 5]], 3);
-  m.put('plum', 8, 25).put('plum_o', 34, 24).put('tree_round', 38, 25).put('stump', 13, 25).put('boulder', 29, 26).put('jar', 19, 25).put('pot', 26, 25).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 40, 21);
-  m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
   m.exit(0, 14, 1, 4, 'valley', 37.5, 15.5, 2, { when: 'burned', lock: '서쪽 청풍골은 나중에 가 보자.' });
   m.label(3.5, 13.2, '← 청풍골');
   m.place(23, 13.8, '광장').place(23, 27, '나루터').place(13, 24.2, '복덕방');
