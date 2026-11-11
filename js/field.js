@@ -4,6 +4,7 @@ import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
 import { drawIso, orderKeys, inside as isoInside } from './iso.js';
 import { proj, toGrid, toScreen, walkDir } from './isoroom.js';
+import { mark as occMark, covered, behind } from './occl.js';
 import { drawStamp, STAMPS } from './tiles.js';
 import { save } from './state.js';
 import { Story } from './story.js';
@@ -39,6 +40,11 @@ export class Field {
     const ft = this.m.isoFoot, inFoot = (x, y, pad) => ft.some(b => x > b.x - pad && x < b.x + b.w + pad && y > b.y - pad && y < b.y + b.h + pad + 3);
     if (ft) for (const n of this.npcs) { if (!inFoot(n.x, n.y, 2)) continue;
       out: for (let r = 6; r < 120; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (!this.m.blocked(x, y) && !inFoot(x, y, 5)) { n.x = n.hx = x; n.y = n.hy = y; break out; } } }
+    // 쿼터뷰(방, 바깥 지도): 서 있는 자리가 가구나 건물 그림에 가려지면 가까운 보이는 자리로 비켜 세운다
+    const ir = this.m.isoRoom, objs = this.m.isoObjs;
+    if (ir && objs) { const m = this.m, hid = (x, y) => { const [X, Y] = proj(m, x, y); return objs.some(s => behind(s, X, Y, m.hasIso) && covered(s, X, Y) > 0); };
+      for (const n of this.npcs) { if (n.stamp || !hid(n.x, n.y)) continue;
+        out: for (let r = 6; r <= 72; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (m.blocked(x, y) || hid(x, y) || this.npcs.some(o => o !== n && hyp(o.x - x, o.y - y) < 10)) continue; n.x = n.hx = x; n.y = n.hy = y; break out; } } }
     if (fresh) this.barkT = 2.5;
     this.spots = c.spots; this.trigs = c.trigs;
     if (fresh) this.animals = c.hunt.map(a => ({ ...a, ...G.life.animals[a.kind], x: a.x * TS, y: a.y * TS, vx: 0, vy: 0, t: rnd(1, 3), walk: 0 }));
@@ -299,9 +305,10 @@ export class Field {
     if (!this.hideMe) list.push({ y: p.y, me: true });
     if (m.hasIso || m.live) { for (const o of list) if (!o.s) { o.actor = true; o.x = o.me ? p.x : (o.n || o.ani || {}).x ?? 0; } orderKeys(list); }
     list.sort((a, b) => a.y - b.y);
+    if (!m.live) occMark(list, p.x, p.y);  // 주인공이 건물이나 소품 뒤로 들어가면 그 그림을 옅게 그린다. 그 뒤에 선 사람도 같이 보인다
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
-      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
+      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; if (o.fade) c.globalAlpha = .42; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; c.globalAlpha = 1; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
@@ -311,8 +318,6 @@ export class Field {
       else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined); drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
         mark(n); }
     }
-    // 쿼터뷰: 집이나 나무 뒤로 들어가면 흐린 그림자로 한 번 더 그려 어디 있는지 보이게 한다
-    if (m.hasIso || m.live) { const i = list.findIndex(o => o.me), y = p.y - 12; if (i >= 0 && list.slice(i + 1).some(o => o.s && o.s.iso && p.x > o.s.x + 4 && p.x < o.s.x + o.s.w - 4 && y > o.s.y + 4 && y < o.s.y + o.s.h)) { c.globalAlpha = .42; drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined }); c.globalAlpha = 1; } }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha' && !m.hasIso) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }
     G.warfx?.over(c, m, cam, this.t);  // 불길, 연기, 비계, 교전 칼빛
     const ar = IMG['fx/p_arrow']; for (const r of this.arrows) { c.save(); c.translate(r.x, r.y); c.rotate(r.an); if (ar) c.drawImage(ar, -6, -2, ar.width / (ar.hd || 1), ar.height / (ar.hd || 1)); c.restore(); }

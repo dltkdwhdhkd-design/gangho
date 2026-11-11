@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message));
   await p.goto(process.env.GAME_URL); await p.waitForTimeout(2000);
   const r = await p.evaluate(async (mode) => {
-    const G = __G, sleep = () => new Promise(r => setTimeout(r, 0)), { STAMPS, drawStamp } = await import('./js/tiles.js'), { MAPS } = await import('./js/maps.js'), { LOCS } = await import('./js/worlddata.js'), { drawActorSprite } = await import('./js/core.js');
+    const G = __G, sleep = () => new Promise(r => setTimeout(r, 0)), { STAMPS, drawStamp } = await import('./js/tiles.js'), { MAPS } = await import('./js/maps.js'), { LOCS } = await import('./js/worlddata.js'), { drawActorSprite } = await import('./js/core.js'), O = await import('./js/occl.js'), R = await import('./js/isoroom.js');
     G.manual = true; G.auto = true; G.S = G.dbg.newState('진소', 'BlueSamurai', 'm', 'normal'); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null;
     if (mode === 'free') { G.free.start(); for (let i = 0; i < 400 && G.field.busy; i++) { G.fast(30); await sleep(); } G.free.tick = () => {}; }
     else { G.scene = 'field'; G.S.flags = { step: 'c3b', met_yun: true, met_so: true, boat_guhwa: true, burned: true, world_open: true, world_tip: 1 }; }
@@ -15,6 +15,10 @@ const { chromium } = require('playwright');
       if (seen.has(id)) return; seen.add(id);
       try { G.world.ensure(id); if (!MAPS[id]) return; G.field.load(id, 5, 5, 1); } catch (e) { out.push(`${id}: 불러오기 오류 ${e.message}`); return; }
       const m = G.field.m, st = m.objs || m.stamps || [];
+      if (m.isoRoom) {  // 쿼터뷰로 눕힌 지도와 방: 화면에 그려지는 자리(눕힌 좌표)와 쿼터뷰 그림으로 본다
+        for (const n of G.field.npcs) { if (n.stamp || !n.spr || n.hide > 0) continue; const [X, Y] = R.proj(m, n.x, n.y), hit = m.isoObjs.filter(s => O.behind(s, X, Y, m.hasIso) && O.covered(s, X, Y) > 0); if (hit.length) out.push(`${id} ${n.id}(${n.hint || ''}) ${(n.x / 16).toFixed(1)},${(n.y / 16).toFixed(1)} 쿼터뷰 ← ${[...new Set(hit.map(s => s.name))].join(',')}`); }
+        return;
+      }
       for (const n of G.field.npcs) {
         if (n.stamp || !n.spr || n.hide > 0) continue;
         const x0 = n.x - 8, y0 = n.y - 15; a.clearRect(0, 0, 16, 16); bb.clearRect(0, 0, 16, 16);
