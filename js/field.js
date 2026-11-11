@@ -124,12 +124,12 @@ export class Field {
       const d = hyp(p.x - a.x, p.y - a.y); a.t -= dt;
       if (d < 62) { const s = a.speed || 66; a.vx = (a.x - p.x) / d * s; a.vy = (a.y - p.y) / d * s; a.t = .4; }
       else if (a.t <= 0) { a.t = rnd(.8, 2.4); const q = rnd(6.28), on = Math.random() < .6; a.vx = on ? Math.cos(q) * 18 : 0; a.vy = on ? Math.sin(q) * 18 : 0; }
-      const nx = a.x + a.vx * dt, ny = a.y + a.vy * dt;
+      const nx = a.x + a.vx * dt * this.vk, ny = a.y + a.vy * dt * this.vk;
       if (!m.blocked(nx, a.y)) a.x = nx; else a.vx = -a.vx; if (!m.blocked(a.x, ny)) a.y = ny; else a.vy = -a.vy;
       if (a.vx || a.vy) a.walk += dt * 7;
     }
     for (const r of this.arrows) {
-      r.x += r.vx * dt; r.y += r.vy * dt; r.t -= dt;
+      r.x += r.vx * dt * this.vk; r.y += r.vy * dt * this.vk; r.t -= dt;
       for (const a of this.animals) if (!a.gone && hyp(a.x - r.x, a.y - 5 - r.y) < 9) { a.gone = true; r.t = 0; Sound.sfx('hit'); const got = a.drops.map(([k, n]) => { give(k, n); return `${DB[k].name} ${n}`; }); toast(`${a.name}: ${got.join(', ')}`, 2.4); break; }
     }
     this.arrows = this.arrows.filter(r => r.t > 0);
@@ -146,7 +146,8 @@ export class Field {
     for (const s of this.spots) { if (s.when && !s.when()) continue; if (x > s.x * TS - 6 && x < (s.x + s.w) * TS + 6 && y > s.y * TS - 6 && y < (s.y + s.h) * TS + 6) return s; }
     return null;
   }
-  tickNpcs(dt) { for (const n of this.npcs) { if (n.path) { const t = n.path[0]; if (!t) { n.path = null; n.moving = false; n.done && n.done(); continue; } const dx = t[0] * TS - n.x, dy = t[1] * TS - n.y, d = hyp(dx, dy); if (d < 1.5) { n.path.shift(); continue; } n.x += dx / d * 56 * dt; n.y += dy / d * 56 * dt; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 8; } } if (!this.busy) this.tickLife(dt); }
+  get vk() { const r = this.m?.isoRoom; return r?.out ? 1 / (r.a || 1) : 1; }  // 바깥 쿼터뷰는 세상을 줄여 그려서, 평면도 속도를 그만큼 올려야 화면에서 같은 빠르기로 걷는다
+  tickNpcs(dt) { const vk = this.vk; for (const n of this.npcs) { if (n.path) { const t = n.path[0]; if (!t) { n.path = null; n.moving = false; n.done && n.done(); continue; } const dx = t[0] * TS - n.x, dy = t[1] * TS - n.y, d = hyp(dx, dy); if (d < 1.5) { n.path.shift(); continue; } n.x += dx / d * 56 * vk * dt; n.y += dy / d * 56 * vk * dt; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 8; } } if (!this.busy) this.tickLife(dt); }
   // ── 사람들의 하루 ──
   // life: idle 둘러보기(기본), wander 근처를 오가기, work 제자리에서 일하기, drill 연무장 수련, still 꼼짝 않기
   // barks: 주인공이 근처를 지날 때 머리 위에 뜨는 혼잣말. greet: 가까이 오면 한 번 건네는 인사
@@ -175,7 +176,7 @@ export class Field {
       }
       if (life === 'stroll' || life === 'patrol') { this.stroll(n, life, dt); continue; }
       if (life === 'wander' && n.mv) {
-        const dx = n.mv[0] - n.x, dy = n.mv[1] - n.y, q = hyp(dx, dy), sp = n.speed || 22;
+        const dx = n.mv[0] - n.x, dy = n.mv[1] - n.y, q = hyp(dx, dy), sp = (n.speed || 22) * this.vk;
         if (q < 2 || n.lt < -6) { n.mv = null; n.walk = 0; n.lt = rnd(1.5, 4.5); continue; }
         const nx = n.x + dx / q * sp * dt, ny = n.y + dy / q * sp * dt;
         if (!freeAt(nx, ny, n)) { n.mv = null; n.walk = 0; n.lt = rnd(.8, 2); continue; }
@@ -215,7 +216,7 @@ export class Field {
       if (path && path.length) { n.trip = path.map(([x, y]) => [x * TS + 8 + o, y * TS + 12 + o * .4]); if (n.door) n.trip.push(n.door); } else { n.door = null; n.lt = rnd(1.5, 3); }
       return;
     }
-    const [tx, ty] = n.trip[0], dx = tx - n.x, dy = ty - n.y, q = hyp(dx, dy), sp = n.speed || 24;
+    const [tx, ty] = n.trip[0], dx = tx - n.x, dy = ty - n.y, q = hyp(dx, dy), sp = (n.speed || 24) * this.vk;
     if (q < 1.5) { n.trip.shift(); if (!n.trip.length) { n.trip = null; n.walk = 0; n.lt = life === 'patrol' ? rnd(.4, 1.6) : rnd(1.5, 5); if (n.door) { n.hide = rnd(5, 12); n.dir = 0; n.y += 6; n.door = null; } } return; }
     if (hyp(p.x - (n.x + dx / q * 8), p.y - (n.y + dy / q * 8)) < 11) { n.walk = 0; return; }  // 주인공이 길을 막으면 기다린다
     const k = Math.min(q, sp * dt); n.x += dx / q * k; n.y += dy / q * k; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 6.5;
@@ -264,7 +265,7 @@ export class Field {
       if (r.cool > 0) { r.cool -= dt; continue; }
       if (d < 78) { const s = 44; r.vx = (p.x - r.x) / d * s; r.vy = (p.y - r.y) / d * s; }
       else { r.t -= dt; if (r.t <= 0) { r.t = rnd(1, 2.6); const a = rnd(6.28), on = Math.random() < .6; r.vx = on ? Math.cos(a) * 22 : 0; r.vy = on ? Math.sin(a) * 22 : 0; if (hyp(r.hx - r.x, r.hy - r.y) > 50) { const q = hyp(r.hx - r.x, r.hy - r.y); r.vx = (r.hx - r.x) / q * 22; r.vy = (r.hy - r.y) / q * 22; } } }
-      const nx = r.x + r.vx * dt, ny = r.y + r.vy * dt;
+      const nx = r.x + r.vx * dt * this.vk, ny = r.y + r.vy * dt * this.vk;
       if (!m.blocked(nx, r.y)) r.x = nx; if (!m.blocked(r.x, ny)) r.y = ny;
       if (r.vx || r.vy) { r.walk += dt * 7; r.dir = Math.abs(r.vx) > Math.abs(r.vy) ? (r.vx < 0 ? 2 : 3) : (r.vy < 0 ? 1 : 0); }
       if (d < 11) { this.run(async () => { const won = await Story.encounter(r); if (won) r.gone = true; else { r.cool = 3; } }); return; }
