@@ -8,12 +8,12 @@ import { LOCS } from './worlddata.js';
 
 const A = ISO_SC, clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 // 정면 집 → 쿼터뷰 집. 아직 임시 상자인 그림(TEMP)은 쓰지 않고 받은 그림 가운데 비슷한 것으로 세운다
-const TEMP = new Set(['adobe', 'bell', 'cabin', 'dorm', 'gate_sect', 'kitchen', 'library', 'lodge', 'pagoda', 'platform', 'ruin', 'shack', 'ship', 'stairs', 'stilt', 'tent', 'watchtower', 'yurt']);
+const TEMP = new Set(['adobe', 'cabin', 'pagoda', 'platform', 'ruin', 'shack', 'ship', 'stairs', 'stilt', 'tent', 'watchtower', 'yurt']);
 const real = n => n && meta(n) && !TEMP.has(n) ? n : null;
 const ISO_OF = { hall: ['hall_dao'], lodge: ['lodge', 'rich'], house_red: ['rich'], inn: ['inn'], hut_o: ['tile_house'], hut_b: ['tile_house'], hut_o2: ['thatch'], shop_blue: ['store'], shop_green: ['clinic'], clay: ['adobe', 'barn'], wood_o: ['barn'], wood_b: ['thatch_long'], mud: ['shack', 'thatch'], straw: ['thatch'] };
 const HALL = { temple: 'hall_temple', dao: 'hall_dao', manor: 'hall_manor', dark: 'hall_dark', ice: 'hall_ice', west: 'hall_west', fort: 'hall_dark' };
 export const hallOf = id => { const l = LOCS.find(q => q.map === id); return real(HALL[l?.style]) || 'hall_dao'; };
-const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn', gamble: 'gamble', gov: 'yamen', book: 'books', bokun: 'shrine', myhouse: 'thatch', dorm: 'dorm', mess: 'kitchen', lib: 'library' };
+const ISO_ROOM = { smith: 'smithy', clinic: 'clinic', shop: 'store', inn: 'inn', gamble: 'gamble', gov: 'yamen', book: 'books', bokun: 'shrine', myhouse: 'thatch', dorm: 'dorm', mess: 'kitchen', lib: 'library', elder: 'lodge' };
 // 문파 양식마다 [큰 곁채, 작은 곁채, 담]
 const SECT = { manor: ['rich', 'tile_house', 'wall_tile'], temple: ['tile_house', 'tile_house', 'wall_tile'], dao: ['tile_house', 'tile_house', 'wall_tile'], peak: ['tile_house', 'thatch_long', 'wall_stone'], ice: ['tile_house', 'tile_house', 'wall_stone'], west: ['rich', 'tile_house', 'wall_stone'], dark: ['rich', 'tile_house', 'wall_stone'], water: ['thatch_long', 'barn', 'fence'], fort: ['thatch_long', 'barn', 'palisade'], slum: ['thatch', 'barn', 'fence'] };
 const WALLS = { wall_h: 'wall_tile', wall_m: 'wall_tile', wall_v: 'wall_tile', wood_h: 'palisade', wood_v: 'palisade', fence_h: 'fence' };

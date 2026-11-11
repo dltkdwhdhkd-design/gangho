@@ -39,8 +39,6 @@
 
 | 이름 | 쓰는 곳 | 지금 대신 선 그림 |
 | --- | --- | --- |
-| gate_sect | 문파 산문 | city_gate |
-| lodge, dorm, kitchen, library | 문파 곁채, 숙소, 식당, 서고 | rich, tile_house |
 | adobe, shack | 변방 흙집, 움막 | barn, thatch |
 | 방 안 가구 (bed, table, counter, bookshelf 등) | 방 안 | 정면 가구 그림을 세워서 |
 
@@ -50,4 +48,4 @@
 
 Higgsfield 생성 결과는 이 작업 공간에서 바로 내려받을 수 없어서, Higgsfield 작업 공간이 `gangho-art-inbox` 저장소의 `raw/`에 원본을 올리고 여기서 그걸 가져다 넣는다. 그 저장소에만 쓸 수 있는 열쇠를 줬다.
 
-받은 것: 세가 대문(gate_manor)
+받은 것: 세가 대문(gate_manor), 곁채(lodge, 장로원), 숙소(dorm), 식당(kitchen), 서고(library), 산문 패루(gate_sect, 돌담 문파), 종루(bell, 아직 안 씀)
