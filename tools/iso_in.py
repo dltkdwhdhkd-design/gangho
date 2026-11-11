@@ -166,6 +166,12 @@ def isowalk(walk, fight, name, H=44, C=64):  # 걷기 2열 3행(+전투 2열 3�
         if c.width > C or c.height > C - 2: c.thumbnail((C, C - 2)); x = col * C + (C - c.width) // 2; y = row * C + C - 2 - c.height
         out.alpha_composite(c, (max(col * C, x), max(row * C, y)))
     os.makedirs(os.path.join(ROOT, 'assets/hd/chars'), exist_ok=True); out.save(os.path.join(ROOT, f'assets/hd/chars/{name}_q.webp'), lossless=True); reg_key(f'chars/{name}_q')
+def walk2(path, a, b):  # 두 인물의 걷기를 한 장(4열 3행)에 그린 시트: 반으로 갈라 각각 isowalk로 넣는다. 이름이 -면 건너뛴다
+    import numpy as np
+    im = Image.open(path).convert('RGBA'); A = np.array(im); A[..., 3] = np.where(A[..., 3] > 110, 255, 0); im = Image.fromarray(A); w = im.width // 2
+    for nm, box in ((a, (0, 0, w, im.height)), (b, (w, 0, im.width, im.height))):
+        if nm in ('-', ''): continue
+        tmp = os.path.join('/tmp', f'_w2_{nm}.png'); im.crop(box).save(tmp); isowalk(tmp, '-', nm); print('걷기', nm)
 def wallseg(name, h, kind):  # 이어 붙이는 담 한 칸 임시 그림: 왼쪽 앞면 방향으로 한 칸, 두께 0.3칸
     fw, fh = 1, .3; W, H = 64, h * 2 + 40; im = Image.new('RGBA', (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     add = lambda p, q, k=1: (p[0] + q[0] * k, p[1] + q[1] * k); F = (40, H - 4); L = add(F, (-IS, -IH), fw); R = add(F, (IS, -IH), fh); K = add(L, (IS, -IH), fh); up = (0, -h * 2)
@@ -325,6 +331,7 @@ if __name__ == '__main__':
     elif cmd == 'isowalk': isowalk(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == 'mapicons': mapicons(sys.argv[2], sys.argv[3].split(','))
     elif cmd == 'isosheet': isosheet(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5].split(','))
+    elif cmd == 'walk2': walk2(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == 'bldsheet': bldsheet(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5].split(','))
     elif cmd == 'isogrid': isogrid(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
     elif cmd == 'tex': tex(sys.argv[2], sys.argv[3])
