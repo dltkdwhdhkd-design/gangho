@@ -40,9 +40,14 @@
 | 이름 | 쓰는 곳 | 지금 대신 선 그림 |
 | --- | --- | --- |
 | gate_sect | 문파 산문 | city_gate |
-| gate_manor | 세가 대문 | city_gate |
 | lodge, dorm, kitchen, library | 문파 곁채, 숙소, 식당, 서고 | rich, tile_house |
 | adobe, shack | 변방 흙집, 움막 | barn, thatch |
 | 방 안 가구 (bed, table, counter, bookshelf 등) | 방 안 | 정면 가구 그림을 세워서 |
 
-새 그림은 `tools/iso_in.py iso <파일> <이름> <가로 칸> <세로 칸>`으로 넣는다. 바닥선 기울기는 넣을 때 재서 적어 두니 2:1이 아니어도 된다.
+새 그림은 `tools/iso_in.py iso <파일> <이름> <가로 칸> <세로 칸>`으로, 여러 채를 한 장에 그린 시트는 `tools/iso_in.py bldsheet <파일> <열> <행> 이름:가로:세로,...`로 넣는다. 바닥선 기울기는 넣을 때 재서 적어 두니 2:1이 아니어도 된다.
+
+## Higgsfield 그림 받는 길
+
+Higgsfield 생성 결과는 이 작업 공간에서 바로 내려받을 수 없어서, Higgsfield 작업 공간이 `gangho-art-inbox` 저장소의 `raw/`에 원본을 올리고 여기서 그걸 가져다 넣는다. 그 저장소에만 쓸 수 있는 열쇠를 줬다.
+
+받은 것: 세가 대문(gate_manor)

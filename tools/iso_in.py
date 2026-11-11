@@ -236,6 +236,12 @@ def isosheet(path, cols, rows, names):
     im = cutbg(Image.open(path)); cs = blobs_in(im, cols * rows, cols)
     if len(cs) < len(names): print('덩어리가 모자라', len(cs), '/', len(names))
     for nm, c in zip(names, cs): prop(nm, c)
+def bldsheet(path, cols, rows, specs):  # 건물 여러 채를 한 장에 그린 시트: 칸마다 잘라 isoin으로 넣는다. specs: 이름:가로칸:세로칸
+    im = cutbg(Image.open(path)); cs = blobs_in(im, cols * rows, cols)
+    if len(cs) < len(specs): print('덩어리가 모자라', len(cs), '/', len(specs))
+    for spec, c in zip(specs, cs):
+        if spec in ('-', ''): continue
+        nm, fw, fh = spec.split(':'); tmp = os.path.join('/tmp', f'_bs_{nm}.png'); c.save(tmp); isoin(tmp, nm, float(fw), float(fh))
 def isogrid(path, cols, rows, key, C=64):  # 동물, 몬스터: 2열(왼아래, 왼위) × 2행(걷기 두 동작) → 2열 6행 시트, 칸 C
     import numpy as np
     H = {'chicken': 16, 'cat': 16, 'rabbit': 14, 'pheasant': 18, 'badger': 16, 'piglet': 20, 'dog': 24, 'deer': 36, 'ox': 40, 'horse': 50, 'camel': 54,
@@ -316,6 +322,7 @@ if __name__ == '__main__':
     elif cmd == 'isowalk': isowalk(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == 'mapicons': mapicons(sys.argv[2], sys.argv[3].split(','))
     elif cmd == 'isosheet': isosheet(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5].split(','))
+    elif cmd == 'bldsheet': bldsheet(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5].split(','))
     elif cmd == 'isogrid': isogrid(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
     elif cmd == 'tex': tex(sys.argv[2], sys.argv[3])
     elif cmd == 'arena': arena(sys.argv[2], sys.argv[3])
