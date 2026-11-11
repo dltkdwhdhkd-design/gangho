@@ -237,10 +237,13 @@ def isosheet(path, cols, rows, names):
     if len(cs) < len(names): print('덩어리가 모자라', len(cs), '/', len(names))
     for nm, c in zip(names, cs): prop(nm, c)
 def bldsheet(path, cols, rows, specs):  # 건물 여러 채를 한 장에 그린 시트: 칸마다 잘라 isoin으로 넣는다. specs: 이름:가로칸:세로칸
-    im = cutbg(Image.open(path)); cs = blobs_in(im, cols * rows, cols)
+    import numpy as np
+    im = cutbg(Image.open(path)); A = np.array(im); A[..., 3] = np.where(A[..., 3] > 110, A[..., 3], 0); im = Image.fromarray(A)  # 투명 배경에 남은 옅은 얼룩을 지워야 덩어리가 서로 붙지 않는다
+    cs = blobs_in(im, cols * rows, cols)
     if len(cs) < len(specs): print('덩어리가 모자라', len(cs), '/', len(specs))
     for spec, c in zip(specs, cs):
         if spec in ('-', ''): continue
+        if spec.startswith('p:'): _, nm, w, fw, fh = spec.split(':'); prop(nm, c, float(w), float(fw), float(fh)); continue  # 둥근 것(독, 향로, 기둥)은 바닥 모서리가 없어 너비로 맞춘다
         nm, fw, fh = spec.split(':'); tmp = os.path.join('/tmp', f'_bs_{nm}.png'); c.save(tmp); isoin(tmp, nm, float(fw), float(fh))
 def isogrid(path, cols, rows, key, C=64):  # 동물, 몬스터: 2열(왼아래, 왼위) × 2행(걷기 두 동작) → 2열 6행 시트, 칸 C
     import numpy as np

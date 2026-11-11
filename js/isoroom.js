@@ -7,6 +7,8 @@ import { meta, corners, normIso, scaledIso } from './iso.js';
 const WH = 46, M = 6, LIP = 7;  // 벽 높이, 둘레 여백, 바닥 두께
 // 방 가구를 쿼터뷰 소품으로 바꿔 그릴 이름. 그림이 오기 전엔 정면 그림을 그대로 세운다
 const FURN_ISO = { f_bed: 'bed', bed: 'bed', longtable: 'table', counter: 'counter', bookcase: 'bookshelf', bookcase2: 'bookshelf', shelf: 'wineshelf', shelf2: 'medchest', drawer: 'medchest', rack: 'weaponrack', screen: 'screen', f_chair: 'throne', f_stove: 'stove', jar: 'watertank', chest: 'ricechest', censer: 'censer', pillar: 'pillar', f_lamp: 'standlamp', lantern: 'standlamp', plant: 'flowerpot', f_bonsai: 'flowerpot', f_scroll: 'scroll', box: 'crates' };
+// 세로로 긴 가구(숙소 침상)는 좌우를 뒤집어 긴 쪽이 왼쪽 벽과 나란하게 선다
+const FURN_FLIP = new Set(['f_bed']);
 const PAL = {
   wood: { plaster: '#d8c7a2', plaster2: '#c9b48c', panel: '#7a5232', panel2: '#5e3c24', post: '#5a3420', beam: '#3a2414', win: '#f1e3b6', lip: '#2a1a10' },
   red: { plaster: '#dccaa4', plaster2: '#cbb48a', panel: '#7a3a26', panel2: '#5c2a1a', post: '#8a2a1c', beam: '#3a1a10', win: '#f3e1b0', lip: '#2a140c' },
@@ -88,8 +90,8 @@ export function buildIsoRoom(m, floor, flatTex) {  // flatTex: 이미 비스듬�
   const fsc = a < .99 ? Math.min(1, Math.max(.62, a * 1.3)) : 1;  // 방을 줄인 만큼 세워 그리는 가구도 줄인다
   m.isoObjs = m.objs.map(s => {
     const st = STAMPS[s.name]; if (!st) return s; const w = st[3], h = st[4], box = st.length > 5 ? { x: s.x + st[5], y: s.y + st[6], w: st[7], h: st[8] } : null;
-    const iso = FURN_ISO[s.name], key = iso && meta(iso) && scaledIso(normIso(iso, t) || iso, a), q = key && meta(key);
-    if (q && box) { const [fx, fy] = P(box.x + box.w, box.y + box.h), cn = corners(fx, fy, q.fw, q.fh, q.ls, q.rs); return { name: key, x: Math.round(fx - q.ax), y: Math.round(fy - q.ay), w: q.w, h: q.h, base: fy, iso: cn }; }
+    const iso = FURN_ISO[s.name], fl = FURN_FLIP.has(s.name), key = iso && meta(iso) && scaledIso(normIso(iso, t) || iso, a), q = key && meta(key, fl);
+    if (q && box) { const [fx, fy] = P(box.x + box.w, box.y + box.h), cn = corners(fx, fy, q.fw, q.fh, q.ls, q.rs); return { name: key, x: Math.round(fx - q.ax), y: Math.round(fy - q.ay), w: q.w, h: q.h, base: fy, iso: cn, flip: fl }; }
     const [ax, ay] = box ? P(box.x + box.w / 2, box.y + box.h / 2) : P(s.x + w / 2, s.base), bottom = ay + (box ? 3 : 0);
     return { name: s.name, x: Math.round(ax - w * fsc / 2), y: Math.round(bottom - h * fsc), base: bottom, w: w * fsc, ...(fsc !== 1 ? { sc: fsc } : {}) };
   });

@@ -40,7 +40,6 @@
 | 이름 | 쓰는 곳 | 지금 대신 선 그림 |
 | --- | --- | --- |
 | adobe, shack | 변방 흙집, 움막 | barn, thatch |
-| 방 안 가구 (bed, table, counter, bookshelf 등) | 방 안 | 정면 가구 그림을 세워서 |
 
 새 그림은 `tools/iso_in.py iso <파일> <이름> <가로 칸> <세로 칸>`으로, 여러 채를 한 장에 그린 시트는 `tools/iso_in.py bldsheet <파일> <열> <행> 이름:가로:세로,...`로 넣는다. 바닥선 기울기는 넣을 때 재서 적어 두니 2:1이 아니어도 된다.
 
@@ -48,4 +47,4 @@
 
 Higgsfield 생성 결과는 이 작업 공간에서 바로 내려받을 수 없어서, Higgsfield 작업 공간이 `gangho-art-inbox` 저장소의 `raw/`에 원본을 올리고 여기서 그걸 가져다 넣는다. 그 저장소에만 쓸 수 있는 열쇠를 줬다.
 
-받은 것: 세가 대문(gate_manor), 곁채(lodge, 장로원), 숙소(dorm), 식당(kitchen), 서고(library), 산문 패루(gate_sect, 돌담 문파), 종루(bell, 아직 안 씀)
+받은 것: 세가 대문(gate_manor), 곁채(lodge, 장로원), 숙소(dorm), 식당(kitchen), 서고(library), 산문 패루(gate_sect, 돌담 문파), 종루(bell, 아직 안 씀), 방 안 가구 16가지(침상, 탁자, 계산대, 책장, 술장, 약장, 무기걸이, 병풍, 태사의, 부뚜막, 물독, 쌀궤, 향로, 기둥, 등, 화분)
