@@ -10,7 +10,7 @@ const burnedInn = (c, m, k, ox = 0, oy = 0) => { if (m.id === 'cheongha' && G.S.
 export function whole(m) {
   if (m._whole) return m._whole;
   const c = document.createElement('canvas'); c.width = m.w * TS; c.height = m.h * TS;
-  const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(m.canvas, 0, 0);
+  const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(m.top || m.canvas, 0, 0);  // 쿼터뷰로 눕힌 지도도 전체 지도는 평면도로 보여 준다
   for (const s of [...m.objs].sort((a, b) => a.base - b.base)) s.iso ? drawIso(x, s) : drawStamp(x, s.name, s.x, s.y, s.sc);
   return m._whole = c;
 }

@@ -3,7 +3,7 @@ import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, 
 import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
 import { drawIso, orderKeys, inside as isoInside } from './iso.js';
-import { proj, toGrid, toScreen } from './isoroom.js';
+import { proj, toGrid, toScreen, walkDir } from './isoroom.js';
 import { drawStamp, STAMPS } from './tiles.js';
 import { save } from './state.js';
 import { Story } from './story.js';
@@ -36,8 +36,9 @@ export class Field {
       if (o && o.hx === q.hx && o.hy === q.hy && q.life && q.life !== 'still') Object.assign(q, { x: o.x, y: o.y, dir: o.dir, lt: o.lt, greetT: o.greetT, trip: o.trip, hide: o.hide, ri: o.ri, off: o.off, door: o.door });  // 같은 사람이면 서 있던 자리를 지킨다
       return q; });
     // 쿼터뷰 건물 바닥 안에 선 사람은 가까운 빈자리로 비켜 세운다
-    if (this.m.polys) for (const n of this.npcs) { if (!this.m.polys.some(c => isoInside(c, n.x, n.y, -2))) continue;
-      out: for (let r = 6; r < 80; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (!this.m.blocked(x, y) && !this.m.polys.some(c => isoInside(c, x, y, -4))) { n.x = n.hx = x; n.y = n.hy = y; break out; } } }
+    const ft = this.m.isoFoot, inFoot = (x, y, pad) => ft.some(b => x > b.x - pad && x < b.x + b.w + pad && y > b.y - pad && y < b.y + b.h + pad + 3);
+    if (ft) for (const n of this.npcs) { if (!inFoot(n.x, n.y, 2)) continue;
+      out: for (let r = 6; r < 120; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (!this.m.blocked(x, y) && !inFoot(x, y, 5)) { n.x = n.hx = x; n.y = n.hy = y; break out; } } }
     if (fresh) this.barkT = 2.5;
     this.spots = c.spots; this.trigs = c.trigs;
     if (fresh) this.animals = c.hunt.map(a => ({ ...a, ...G.life.animals[a.kind], x: a.x * TS, y: a.y * TS, vx: 0, vy: 0, t: rnd(1, 3), walk: 0 }));
@@ -75,10 +76,10 @@ export class Field {
     if (d.x || d.y) {
       moving = true;
       p.dir = Math.abs(d.x) >= Math.abs(d.y) * .55 ? (d.x < 0 ? 2 : 3) : (d.y < 0 ? 1 : 0); p.diag = d.x && d.y && Math.min(Math.abs(d.x), Math.abs(d.y)) > .3 ? (d.y > 0 ? 0 : 1) + (d.x < 0 ? 2 : 0) : undefined;
-      let [gx, gy] = m.isoRoom ? toGrid(d.x, d.y) : [d.x, d.y];  // 쿼터뷰 방은 화면 방향을 칸 방향으로 돌린다
-      if (m.isoRoom && d.y > 0) { const H = m.h * TS, q = m.portals.find(q => q.y + q.h >= H - 2 && p.y > H - 4 * TS && Math.abs(q.x + q.w / 2 - p.x) < 4 * TS); if (q) gx = clamp((q.x + q.w / 2 - p.x) / 12, -1, 1) * Math.max(.6, gy); }  // 문 가까이서 아래로 가면 문으로 끌어 준다
+      let [gx, gy] = m.isoRoom ? walkDir(m, d.x, d.y) : [d.x, d.y];  // 쿼터뷰 방은 화면 방향을 칸 방향으로 돌린다
+      if (m.isoRoom && !m.isoRoom.out && d.y > 0) { const H = m.h * TS, q = m.portals.find(q => q.y + q.h >= H - 2 && p.y > H - 4 * TS && Math.abs(q.x + q.w / 2 - p.x) < 4 * TS); if (q) gx = clamp((q.x + q.w / 2 - p.x) / 12, -1, 1) * Math.max(.6, gy); }  // 문 가까이서 아래로 가면 문으로 끌어 준다
       const nx = p.x + gx * sp * dt, ny = p.y + gy * sp * dt;
-      const blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && hyp(n.x - x, (n.y - 1) - y) < 8);
+      const nr = m.isoRoom ? Math.min(13, 7 / (m.isoRoom.a || 1)) : 8, blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && hyp(n.x - x, (n.y - 1) - y) < nr);
       const ox = p.x, oy = p.y; if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
       // 발자취는 거리마다 남긴다. 경공으로 달려도 뒤따르는 동료와의 거리가 같다
       p.walk += dt * (run ? 13 : 8); this.dashing = run && (p.x !== ox || p.y !== oy); this._acc = (this._acc || 0) + hyp(p.x - ox, p.y - oy);
@@ -133,11 +134,14 @@ export class Field {
     }
     this.arrows = this.arrows.filter(r => r.t > 0);
   }
-  face(n) { let dx = this.p.x - n.x, dy = this.p.y - n.y; if (this.m.isoRoom) [dx, dy] = toScreen(dx, dy); n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); }
+  face(n) { let dx = this.p.x - n.x, dy = this.p.y - n.y; if (this.m.isoRoom) [dx, dy] = toScreen(this.m, dx, dy); n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); }
   target() {
-    const p = this.p; let [fx, fy] = DIRV[p.dir]; if (this.m.isoRoom) { const [a, b] = toGrid(fx, fy), l = Math.hypot(a, b) || 1; fx = a / l; fy = b / l; } const x = p.x + fx * 10, y = p.y - 3 + fy * 10;
+    const p = this.p, m = this.m, r = m.isoRoom, out = r && (r.out || r.a < .99); let [fx, fy] = DIRV[p.dir];
+    if (out && p.diag !== undefined) { const v = 1 / (r.a * Math.hypot(1, r.t)); [fx, fy] = [[v, 0], [0, -v], [0, v], [-v, 0]][p.diag]; }  // 비스듬히 서 있으면 길이 뻗는 쪽을 본다
+    else if (r) { const [a, b] = toGrid(m, fx, fy), l = out ? 1 : Math.hypot(a, b) || 1; fx = a / l; fy = b / l; }
+    const x = p.x + fx * 10, y = p.y - 3 + fy * 10, far = out ? (dx, dy) => hyp(...toScreen(m, dx, dy)) * 1.25 : hyp;  // 바깥 쿼터뷰는 화면에 보이는 거리로 잰다
     let best = null, bd = 19;
-    for (const n of this.npcs) { if (n.hide > 0) continue; const d = hyp(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
+    for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
     for (const s of this.spots) { if (s.when && !s.when()) continue; if (x > s.x * TS - 6 && x < (s.x + s.w) * TS + 6 && y > s.y * TS - 6 && y < (s.y + s.h) * TS + 6) return s; }
     return null;
@@ -274,7 +278,7 @@ export class Field {
   draw(c) {
     const m = this.m; if (!m.isoRoom) return this.drawScene(c);
     const seen = new Set(), saved = [], sw = o => { if (!o || seen.has(o) || o.x === undefined) return; seen.add(o); saved.push([o, o.x, o.y, o.dir, o.diag]); [o.x, o.y] = proj(m, o.x, o.y);
-      if (o !== this.p && o.walk && o.dir !== undefined && !this.trail.includes(o)) { const [sx, sy] = toScreen(...DIRV[o.dir]); o.dir = Math.abs(sx) >= Math.abs(sy) * .55 ? (sx < 0 ? 2 : 3) : (sy < 0 ? 1 : 0); o.diag = (sy > 0 ? 0 : 1) + (sx < 0 ? 2 : 0); } };  // 걷는 사람은 칸 방향을 화면 방향으로
+      if (o !== this.p && o.walk && o.dir !== undefined && !this.trail.includes(o)) { const [sx, sy] = toScreen(m, ...DIRV[o.dir]); o.dir = Math.abs(sx) >= Math.abs(sy) * .55 ? (sx < 0 ? 2 : 3) : (sy < 0 ? 1 : 0); o.diag = (sy > 0 ? 0 : 1) + (sx < 0 ? 2 : 0); } };  // 걷는 사람은 칸 방향을 화면 방향으로
     this._gp = { x: this.p.x, y: this.p.y }; [this.p, ...this.npcs, ...this.trail, ...this.roam, ...this.animals, ...this.arrows].forEach(sw); const objs = m.objs; m.objs = m.isoObjs;
     try { this.drawScene(c); } finally { for (const [o, x, y, d, g] of saved) { o.x = x; o.y = y; o.dir = d; o.diag = g; } m.objs = objs; }
   }
@@ -296,7 +300,7 @@ export class Field {
     list.sort((a, b) => a.y - b.y);
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
-      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); if (o.s.iso) { const burnt = o.s.name === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
+      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
@@ -324,7 +328,7 @@ export class Field {
     if (G.fxOverlay) G.fxOverlay(c);
     if (m.labels) {
       c.setTransform(1, 0, 0, 1, 0, 0); c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
-      for (const l of m.labels) { const x = (l.x * TS + ox) * SCALE, y = (l.y * TS + oy) * SCALE; if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); }
+      for (const l of m.labels) { const [lx, ly] = m.isoRoom?.out ? l.iso || proj(m, l.x * TS, l.y * TS) : [l.x * TS, l.y * TS], x = (lx + ox) * SCALE, y = (ly + oy) * SCALE; if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); }
     }
     this.drawExits(c, ox, oy);
     this.drawBubbles(c, ox, oy);
@@ -341,7 +345,7 @@ export class Field {
       const cx = q.x + q.w / 2, cy = q.y + q.h / 2, d = Math.hypot(p.x - cx, p.y - cy) / TS; if (d > (dir ? 10 : 3.5)) continue;
       let ax = cx, ay = cy; if (dir === 'd') ay = q.y + q.h - 12; if (dir === 'u') ay = q.y + 12; if (dir === 'l') ax = q.x + 12; if (dir === 'r') ax = q.x + q.w - 12; if (door) { dir = 'u'; ay = q.y + q.h + 10; }
       let [vx, vy] = { d: [0, 1], u: [0, -1], l: [-1, 0], r: [1, 0] }[dir]; const b = Math.sin(t * 5) * 3, a = Math.max(.25, Math.min(1, (10 - d) / 4));
-      if (m.isoRoom) { [ax, ay] = proj(m, ax, ay); const [sx, sy] = toScreen(vx, vy), l = Math.hypot(sx, sy); vx = sx / l; vy = sy / l; }  // 쿼터뷰 방: 문은 왼쪽 아래 가장자리에 난다
+      if (m.isoRoom) { [ax, ay] = proj(m, ax, ay); const [sx, sy] = toScreen(m, vx, vy), l = Math.hypot(sx, sy); vx = sx / l; vy = sy / l; }  // 쿼터뷰 방: 문은 왼쪽 아래 가장자리에 난다
       const X = (ax + ox) * SCALE + vx * b * 2, Y = (ay + oy) * SCALE + vy * b * 2, k = door ? 9 : 13, px = -vy, py = vx;
       c.globalAlpha = a; c.lineJoin = 'round';
       for (const [col, lw] of [['#2a1608', 9], ['#ffe08a', 4]]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); for (const o of [0, -k * .9]) { c.moveTo(X + px * k - vx * k * .6 + vx * o, Y + py * k - vy * k * .6 + vy * o); c.lineTo(X + vx * k * .4 + vx * o, Y + vy * k * .4 + vy * o); c.lineTo(X - px * k - vx * k * .6 + vx * o, Y - py * k - vy * k * .6 + vy * o); } c.stroke(); }

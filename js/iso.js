@@ -13,7 +13,7 @@ export const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 export const ISO_SC = .62;
 const ROOMY = new Set(['bed', 'table', 'counter', 'bookshelf', 'wineshelf', 'medchest', 'weaponrack', 'screen', 'throne', 'stove', 'watertank', 'ricechest', 'censer', 'pillar', 'standlamp', 'flowerpot', 'scroll', 'crates']);
 // 본전과 큰 관청은 조금 덜 줄여 위엄을 남기고, 담 한 칸은 사람 어깨 높이가 되게 줄이지 않는다
-const SC_OF = k => ROOMY.has(k) || /^(wall_tile|wall_stone|hedge|fence_bamboo)$/.test(k) ? 1 : /^hall_/.test(k) ? .8 : /^(yamen|city_gate)$/.test(k) ? .7 : ISO_SC;
+const SC_OF = k => ROOMY.has(k) || /^(wall_tile|wall_stone|hedge|fence_bamboo)$/.test(k) ? 1 : /^(fence|palisade)$/.test(k) ? .85 : /^hall_/.test(k) ? .8 : /^(yamen|city_gate)$/.test(k) ? .7 : ISO_SC;
 export const ISO = Object.fromEntries(Object.entries(ISOMETA).map(([k, v]) => { const sc = SC_OF(k); return [k, sc === 1 ? v : { ...v, w: v.w * sc, h: v.h * sc, ax: v.ax * sc, ay: v.ay * sc, fw: v.fw * sc, fh: v.fh * sc }]; }));
 // 좌우를 뒤집으면 왼쪽 앞면과 오른쪽 앞면이 바뀐다
 export function meta(name, flip) { const q = ISO[name]; if (!q) return null; return flip ? { ...q, ax: q.w - q.ax, fw: q.fh, fh: q.fw, ls: q.rs, rs: q.ls } : q; }
@@ -48,6 +48,20 @@ export function drawIso(ctx, s) {
   }
   if (!s.flip) { ctx.drawImage(im, s.x, s.y, q.w, q.h); return; }
   ctx.save(); ctx.translate(s.x + q.w, s.y); ctx.scale(-1, 1); ctx.drawImage(im, 0, 0, q.w, q.h); ctx.restore();
+}
+// 그림 바닥선을 지도 기울기 t에 맞춘 사본을 만든다. 받은 그림은 바닥선 기울기가 0.2에서 0.5까지 제각각이라, 그대로 놓으면 담과 길과 집이 서로 나란하지 않다
+// 가로는 그대로 두고 세로만 밀고 늘린다(기둥은 곧게 선 채로). mode 'w'는 담 조각: 높이는 그대로 두고 뻗는 방향만 맞춘다
+export function normIso(name, t, mode = '') {
+  const q = ISO[name]; if (!q) return null; const ls = q.ls ?? .5, rs = q.rs ?? .5;
+  if (Math.abs(ls - t) < .012 && (mode === 'w' || Math.abs(rs - t) < .012)) return name;
+  const key = `${name}@${Math.round(t * 100)}${mode}`; if (ISO[key]) return key;
+  const im = IMG['iso/' + name]; if (!im) return null;
+  const d = mode === 'w' ? 1 : 2 * t / (ls + rs), c = mode === 'w' ? t - ls : t * (rs - ls) / (ls + rs);
+  const y0 = q.ay - d * q.ay + Math.min(-c * q.ax, c * (q.w - q.ax)), y1 = q.ay + d * (q.h - q.ay) + Math.max(-c * q.ax, c * (q.w - q.ax)), h = y1 - y0, ay = q.ay - y0;
+  const sx = im.width / q.w, sy = im.height / q.h, cv = document.createElement('canvas'); cv.width = im.width; cv.height = Math.ceil(h * sx);
+  const x = cv.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.setTransform(1, c, 0, d * sx / sy, 0, sx * (ay - c * q.ax - d * q.ay)); x.drawImage(im, 0, 0);
+  IMG['iso/' + key] = cv; ISO[key] = { ...q, h, ay, ls: t, rs: mode === 'w' ? rs : t, src: name };
+  return key;
 }
 // 그릴 순서: 소품은 앞 모서리 높이로, 사람은 발 높이로 줄을 세우되, 겹친 소품과는 앞뒤를 따져 끼워 넣는다
 export function orderKeys(list) {

@@ -1,6 +1,6 @@
 // 강호 전도: 중원과 변방을 한 장으로 걸어 다니는 큰 지도. 좌표는 804×658 참고 지도 기준
 import { G, IMG, TS, VW, VH, rnd, pick, toast, el, esc, Sound } from './core.js';
-import { MAPS, makeMap, isoMode, isoRetrofit, paintPave } from './maps.js';
+import { MAPS, makeMap } from './maps.js';
 import { hitsBox } from './iso.js';
 import { BIOME, AUTO, STAMPS, hasTex, texTile, drawStamp, flagOf, curbs, mottle } from './tiles.js';
 import { DB } from './items.js';
@@ -84,7 +84,6 @@ export function buildWorld() {
   for (const t of STOPS) { reserve(t.x - 5, t.y - 6, t.x + 5, t.y + 3); m.put('hut_o', t.x - 2, t.y - 4, { isoAs: 'tavern' }); m.put('banner4', t.x + 2, t.y - 2); m.put('jar', t.x - 3.2, t.y - 1.6); m.put('log', t.x + 3.3, t.y - .6); m.label(t.x, t.y - 5, '주막'); }
   for (const l of LOCS) compound(l);
   nature();
-  if (isoMode()) { const C = LOCS.map(l => [Math.round(l.px[0] * K) * TS, Math.round(l.px[1] * K) * TS]); isoRetrofit(m, { live: true, leftOf: x => { let b = C[0]; for (const c of C) if (Math.abs(c[0] - x) < Math.abs(b[0] - x)) b = c; return x < b[0]; } }); }
   m.objs = m.stamps; m.canvas = null;
   // 칸 묶음별 충돌과 소품
   m.sg = new Map(); m.og = new Map();
@@ -128,11 +127,9 @@ function compound(l) {
   m.label(tx, ty + 4.6, l.name); (m.sites = m.sites || []).push({ map: l.map, x0: x0 - 2, y0: y0 - 3, x1: x1 + 2, y1: y1 + 4 });  // 전쟁 흔적(js/warfx.js)이 이 터 안의 건물을 찾는다
   // 밑동 가운데 자리로 놓기
   const at = (name, cx, by, o) => { const s = STAMPS[name]; if (s) m.put(name, cx - s[3] / 32, by - s[4] / TS, o); };
-  const stone = (ax, ay, bx, by) => { if (isoMode() && bx - ax > 2) { m.paveDiamond((ax + bx + 1) / 2, (ay + by + 1) / 2, (bx - ax + 1) / 2 + 1); return; } for (let y = ay; y <= by; y++) for (let x = ax; x <= bx; x++) if (g[y]?.[x] !== undefined) g[y][x] = 3; };
+  const stone = (ax, ay, bx, by) => { for (let y = ay; y <= by; y++) for (let x = ax; x <= bx; x++) if (g[y]?.[x] !== undefined) g[y][x] = 3; };
   // 담: 가로는 양끝 마구리와 이음매 없는 가운데, 세로는 용마루. 정문 자리만 비운다
-  const ISO = isoMode();
   const wall = (X0, Y0, X1, Y1, kind, gap) => {
-    if (ISO) { const k = kind === 'wood' ? 'palisade' : kind === 'fence' ? 'fence' : 'wall_tile', n = Math.max(2, Math.round((X1 - X0) / 4)); m.isoWall(k, tx - 2.2, Y1 + .8, n, 'l').isoWall(k, tx + 2.2, Y1 + .8, n, 'r'); return; }
     const [he, hm, v] = kind === 'wood' ? ['wood_h', 'wood_h', 'wood_v'] : kind === 'fence' ? ['fence_h', 'fence_h', 'wood_v'] : ['wall_h', 'wall_m', 'wall_v'];
     const row = (y, a, b) => { for (let x = a; x <= b; x++) m.put(x === a || x === b ? he : hm, x, y); };
     row(Y0, X0, X1); if (gap) { row(Y1, X0, gap[0] - 1); row(Y1, gap[1] + 1, X1); } else row(Y1, X0, X1);
@@ -289,7 +286,6 @@ function chunk(cx, cy) {
   const c = document.createElement('canvas'); c.width = c.height = CH * TS; const x = c.getContext('2d', { willReadFrequently: true }), g = m.g;
   const at = (a, b) => { if (b < 0 || b >= WH || a < 0 || a >= WW) return -1; const v = g[b][a]; return v === 6 ? 0 : v; };
   const calm = paintArea(x, cx * CH, cy * CH, Math.min(CH, WW - cx * CH), Math.min(CH, WH - cy * CH), g, B, WW, WH);
-  if (m.pave) { const X = cx * CH * TS, Y = cy * CH * TS, N = CH * TS; x.save(); x.translate(-X, -Y); for (const p of m.pave) { const xs = p.poly.map(q => q[0]), ys = p.poly.map(q => q[1]); if (Math.max(...xs) < X || Math.min(...xs) > X + N || Math.max(...ys) < Y || Math.min(...ys) > Y + N) continue; paintPave(x, p); } x.restore(); }
   for (let ty = cy * CH; ty < Math.min(WH, (cy + 1) * CH); ty++) for (let tx = cx * CH; tx < Math.min(WW, (cx + 1) * CH); tx++) {
     const v = at(tx, ty), X = (tx - cx * CH) * TS, Y = (ty - cy * CH) * TS, bn = BN[B[ty][tx]]; if (v !== 0 || calm.has(tx + ty * WW)) continue;
     // 풀포기와 꽃. 꽃은 무리 지어 핀다

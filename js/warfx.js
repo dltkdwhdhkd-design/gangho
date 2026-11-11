@@ -78,7 +78,7 @@ export function under(c, m, cam, t) {
   if (m.live) for (const w of worldSites(m)) { for (const s of w.list) ground(c, w.st, s, cam); for (const s of w.fls) fallenFlag(c, s, cam); }
   const flags = st?.flags; if (flags && !m.room) {
     const k = m.k || 1, spots = [[20.5, 15.4], [38.5, 15.4], [20.5, 31.4], [38.5, 31.4], [27, 39.6], [33, 39.6]];
-    spots.forEach(([x, y], i) => { const id = flags[i % flags.length], nm = STAMPS['flag_' + id] ? 'flag_' + id : 'banner4'; drawStamp(c, nm, Math.round(x * k * TS - 2.5), Math.round(y * k * TS - 44)); });
+    const r = m.isoRoom?.out && m.isoRoom, sc = r ? .8 : 1; spots.forEach(([x, y], i) => { const id = flags[i % flags.length], nm = STAMPS['flag_' + id] ? 'flag_' + id : 'banner4'; let X = x * k * TS, Y = y * k * TS; if (r) [X, Y] = [(X - Y) * r.a + r.ox, (X + Y) * r.a * r.t + r.oy]; drawStamp(c, nm, Math.round(X - 2.5 * sc), Math.round(Y - 44 * sc), sc); });
   }
   if (m.live) {
     const f = G.saga?.fx?.('world'); if (!f) return;
