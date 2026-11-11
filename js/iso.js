@@ -63,6 +63,11 @@ export function normIso(name, t, mode = '') {
   IMG['iso/' + key] = cv; ISO[key] = { ...q, h, ay, ls: t, rs: mode === 'w' ? rs : t, src: name };
   return key;
 }
+// 같은 그림을 f배로 줄인 사본(그림은 같은 것을 쓰고 크기 정보만 줄인다). 방을 한 화면에 들어오게 줄일 때 쿼터뷰 가구도 같이 줄인다
+export function scaledIso(name, f) {
+  const q = ISO[name]; if (!q || Math.abs(f - 1) < .01) return name; const key = `${name}*${Math.round(f * 100)}`; if (ISO[key]) return key;
+  IMG['iso/' + key] = IMG['iso/' + name]; ISO[key] = { ...q, w: q.w * f, h: q.h * f, ax: q.ax * f, ay: q.ay * f, fw: q.fw * f, fh: q.fh * f }; return key;
+}
 // 그릴 순서: 소품은 앞 모서리 높이로, 사람은 발 높이로 줄을 세우되, 겹친 소품과는 앞뒤를 따져 끼워 넣는다
 export function orderKeys(list) {
   const isos = list.filter(o => o.s && o.s.iso);

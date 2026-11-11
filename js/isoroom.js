@@ -2,7 +2,7 @@
 // 그릴 때만 마름모로 눕힌다: 칸 좌표 (x, y)는 화면 (x - y, (x + y) / 2)로 간다. 위쪽 벽(y=0)은 오른쪽 뒷벽, 왼쪽 벽(x=0)은 왼쪽 뒷벽이 된다
 import { TS, IMG } from './core.js';
 import { STAMPS, drawStamp } from './tiles.js';
-import { meta, corners, normIso } from './iso.js';
+import { meta, corners, normIso, scaledIso } from './iso.js';
 
 const WH = 46, M = 6, LIP = 7;  // 벽 높이, 둘레 여백, 바닥 두께
 // 방 가구를 쿼터뷰 소품으로 바꿔 그릴 이름. 그림이 오기 전엔 정면 그림을 그대로 세운다
@@ -88,7 +88,7 @@ export function buildIsoRoom(m, floor, flatTex) {  // flatTex: 이미 비스듬�
   const fsc = a < .99 ? Math.min(1, Math.max(.62, a * 1.3)) : 1;  // 방을 줄인 만큼 세워 그리는 가구도 줄인다
   m.isoObjs = m.objs.map(s => {
     const st = STAMPS[s.name]; if (!st) return s; const w = st[3], h = st[4], box = st.length > 5 ? { x: s.x + st[5], y: s.y + st[6], w: st[7], h: st[8] } : null;
-    const iso = FURN_ISO[s.name], key = iso && meta(iso) && (normIso(iso, t) || iso), q = key && meta(key);
+    const iso = FURN_ISO[s.name], key = iso && meta(iso) && scaledIso(normIso(iso, t) || iso, a), q = key && meta(key);
     if (q && box) { const [fx, fy] = P(box.x + box.w, box.y + box.h), cn = corners(fx, fy, q.fw, q.fh, q.ls, q.rs); return { name: key, x: Math.round(fx - q.ax), y: Math.round(fy - q.ay), w: q.w, h: q.h, base: fy, iso: cn }; }
     const [ax, ay] = box ? P(box.x + box.w / 2, box.y + box.h / 2) : P(s.x + w / 2, s.base), bottom = ay + (box ? 3 : 0);
     return { name: s.name, x: Math.round(ax - w * fsc / 2), y: Math.round(bottom - h * fsc), base: bottom, w: w * fsc, ...(fsc !== 1 ? { sc: fsc } : {}) };
