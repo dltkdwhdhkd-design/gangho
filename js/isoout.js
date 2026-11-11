@@ -8,7 +8,7 @@ import { LOCS } from './worlddata.js';
 
 const A = ISO_SC, clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 // 정면 집 → 쿼터뷰 집. 아직 임시 상자인 그림(TEMP)은 쓰지 않고 받은 그림 가운데 비슷한 것으로 세운다
-const TEMP = new Set(['adobe', 'cabin', 'pagoda', 'platform', 'ruin', 'shack', 'ship', 'stairs', 'stilt', 'tent', 'watchtower', 'yurt']);
+const TEMP = new Set(['pagoda', 'platform', 'ruin', 'ship', 'stairs', 'stilt']);
 const real = n => n && meta(n) && !TEMP.has(n) ? n : null;
 const ISO_OF = { hall: ['hall_dao'], lodge: ['lodge', 'rich'], house_red: ['rich'], inn: ['inn'], hut_o: ['tile_house'], hut_b: ['tile_house'], hut_o2: ['thatch'], shop_blue: ['store'], shop_green: ['clinic'], clay: ['adobe', 'barn'], wood_o: ['barn'], wood_b: ['thatch_long'], mud: ['shack', 'thatch'], straw: ['thatch'] };
 const HALL = { temple: 'hall_temple', dao: 'hall_dao', manor: 'hall_manor', dark: 'hall_dark', ice: 'hall_ice', west: 'hall_west', fort: 'hall_dark' };
