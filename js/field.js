@@ -22,9 +22,9 @@ export class Field {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
     if (id === 'mysect') G.sect.build();
     G.world.ensure(id);
-    const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir; if (m.k < 1) [this.p.x, this.p.y] = m.freeNear(this.p.x, this.p.y);  // 좁힌 지도: 막힌 자리에 서면 가까운 빈 곳으로
+    const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir; if (m.k < 1) { [this.p.x, this.p.y] = m.freeNear(this.p.x, this.p.y); this.offPortal(m); }  // 좁힌 지도: 막힌 자리에 서면 가까운 빈 곳으로
     // 넓힌 지도로 방에서 나오면 그 방 문 바로 앞에 선다
-    if ((m.k > 1 || m.hasIso) && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
+    if (((m.k || 1) !== 1 || m.hasIso) && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];
@@ -341,6 +341,12 @@ export class Field {
     this.drawExits(c, P);
     this.drawBubbles(c, P);
     tickMini(this);
+  }
+  // 좁힌 지도: 원래 좌표로 적힌 '나오는 자리'가 문이나 출구 안에 떨어지면 나오자마자 다시 들어간다. 문은 아래로, 나머지는 지도 가운데 쪽으로 비켜 세운다
+  offPortal(m) {
+    const p = this.p, inside = () => m.portals.find(q => p.x > q.x - 4 && p.x < q.x + q.w + 4 && p.y > q.y - 4 && p.y < q.y + q.h + 6);
+    for (let i = 0, q; i < 40 && (q = inside()); i++) { if (q.door) p.y = q.y + q.h + 10; else { const cx = m.w * TS / 2 - p.x, cy = m.h * TS / 2 - p.y, l = Math.hypot(cx, cy) || 1; p.x += cx / l * 6; p.y += cy / l * 6; } }
+    [p.x, p.y] = m.freeNear(p.x, p.y);
   }
   // 새 화면(hd2d.js): 땅과 소품과 사람은 뒤의 WebGL 캔버스가 그리고, 이 캔버스에는 꽃잎, 말풍선, 이름표, 출구 표시, 할 일 표시만 얹는다
   drawGL(c) {
