@@ -1,5 +1,5 @@
 // 방침 2 점검: 바깥 지도마다 집이 카메라(남쪽)에 맞게 서 있는지 센다.
-// 앞길 없음: 문 아래 4칸 안에 길이 없다. 등이 길: 집 바로 위 2칸에 길이 있다(길에서 보면 집 등을 보게 된다). 뒤 틈: 집 바로 위 칸이 걸을 수 있는 땅이다.
+// 앞길 없음: 문 아래 4칸 안에 길(1)이나 마당 포장(3)이 없다. 등이 길: 집 바로 위 2칸에 길이 있다(길에서 보면 집 등을 보게 된다). 뒤 틈: 집 바로 위 칸이 걸을 수 있는 땅이다.
 const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const p = await b.newPage(); await p.goto(process.env.GAME_URL); await p.waitForFunction(() => window.__G && __G.dbg, null, { timeout: 30000 }); await p.waitForTimeout(1500);
   const r = await p.evaluate(async () => { const { MAPS } = await import('/gangho/js/maps.js'), T = await import('/gangho/js/tiles.js'), TS = 16;
@@ -7,8 +7,9 @@ const { chromium } = require('playwright');
     for (const id in MAPS) { const m = MAPS[id]; if (m.room || id === 'world' || id === 'mysect' || id.startsWith('b_') || id.startsWith('c_') || id.startsWith('r_') || id.startsWith('h_')) continue;
       const hs = m.stamps.filter(s => D.includes(s.name) && !s.iso); if (!hs.length) continue; let nf = 0, back = 0, gap = 0;
       for (const s of hs) { const S = T.STAMPS[s.name], x0 = Math.floor(s.x / TS), x1 = Math.floor((s.x + S[3] - 1) / TS), ty = Math.floor(s.y / TS), by = Math.floor((s.y + S[4]) / TS), cx = Math.floor((s.x + S[3] / 2) / TS);
-        let f = false; for (let y = by; y < by + 4; y++) for (let x = cx - 1; x <= cx + 1; x++) if (m.g[y]?.[x] === 1) f = true; if (!f) nf++;
-        let bk = false; for (let y = ty - 2; y < ty; y++) for (let x = x0; x <= x1; x++) if (m.g[y]?.[x] === 1) bk = true; if (bk) back++;
+        let f = false; for (let y = by; y < by + 4; y++) for (let x = cx - 1; x <= cx + 1; x++) if (m.g[y]?.[x] === 1 || m.g[y]?.[x] === 3) f = true; if (!f) nf++;
+        const Wk = v => v === 1 || v === 3, plaza = Wk(m.g[by]?.[cx]) && Wk(m.g[by - 1]?.[x0 - 1]) && Wk(m.g[by - 1]?.[x1 + 1]);  // 마당 한가운데 선 집은 빼고 센다
+        let bk = false; for (let y = ty - 2; y < ty; y++) for (let x = x0; x <= x1; x++) if (Wk(m.g[y]?.[x])) bk = true; if (bk && !plaza) back++;
         if (s.y > 8 && !m.blocked(s.x + S[3] / 2, s.y - 4)) gap++; }
       out.push([id, m.name, hs.length, nf, back, gap]); }
     return out; });

@@ -128,10 +128,17 @@ class MapDef {
   }
   // 좁힌 지도: 길(1, 3) 칸에 걸린 작은 소품(집이 아닌 것)을 가장 가까운 쪽으로 밀어 길을 비운다. 문 앞(포탈)도 비킨다
   // 집 뒤(북쪽) 좁은 틈 막기: 카메라가 남쪽에서 보므로 집 뒤는 보이지도 않고 걸어 들어가면 가려진다. 집 폭만큼 담을 친다(길 칸과 다른 막힘은 비운다)
-  backFence(names = DOORED, name = 'fence_h') { const F = STAMPS[name];
+  // 문 앞 길 잇기: 문 바로 아래에 길이나 마당이 없으면 문에서 남쪽으로 곧게 길을 내 가장 가까운 길(마당)에 잇는다. max칸 안에 없으면 손대지 않는다
+  frontPaths(max = 6) {
+    for (const st of this.stamps.filter(q => DOORED.includes(q.name) && !q.iso)) { const S = STAMPS[st.name], cx = Math.floor((st.x + S[3] / 2) / TS), by = Math.ceil((st.y + S[4]) / TS), W = v => v === 1 || v === 3;
+      if (W(this.g[by]?.[cx]) || W(this.g[by + 1]?.[cx])) continue; let end = -1; for (let y = by; y < by + max && y < this.h; y++) if (W(this.g[y]?.[cx]) || W(this.g[y]?.[cx - 1])) { end = y; break; }
+      if (end < 0) continue; for (let y = by; y < end; y++) for (const x of [cx - 1, cx]) if (this.g[y]?.[x] === 0) this.g[y][x] = 1; }
+    return this;
+  }
+  backFence(names = DOORED, name = 'fence_h', o = {}) { const F = STAMPS[name];
     for (const st of this.stamps.filter(q => names.includes(q.name) && !q.iso)) { const S = STAMPS[st.name], y = st.y - F[4] + 2;
       for (let x = st.x; x + F[3] <= st.x + S[3] + 1; x += F[3]) { const r = { x: x + F[5], y: y + F[6], w: F[7], h: F[8] }, t = this.g[Math.floor((r.y + r.h - 1) / TS)]?.[Math.floor((r.x + r.w / 2) / TS)];
-        if (t === undefined || t === 1 || t === 2 || this.solids.some(o => o.x < r.x + r.w && o.x + o.w > r.x && o.y < r.y + r.h && o.y + o.h > r.y)) continue; this.put(name, 0, 0, { dx: x, dy: y }); } }
+        if (t === undefined || (t === 1 && !o.yard) || t === 2 || this.solids.some(o => o.x < r.x + r.w && o.x + o.w > r.x && o.y < r.y + r.h && o.y + o.h > r.y)) continue; this.put(name, 0, 0, { dx: x, dy: y }); } }
     return this;
   }
   clearRoads() {
@@ -290,6 +297,7 @@ export function buildMaps() {
   m.fill(1, 2, 34, 22, 1).fill(0, 11, 2, 4, 1).fill(16, 23, 4, 3, 1);  // 목책 안 마당, 서쪽 샛문 길, 남쪽 정문 길. 목책 밖은 맨땅
   m.row('wood_h', 2, 2, 33).col('wood_h', 1, 3, 8).col('wood_h', 34, 3, 20).row('wood_h', 2, 23, 14).row('wood_h', 20, 23, 15).col('wood_h', 1, 15, 9);  // 아래 목책 가운데는 강호로 나가는 문
   m.put('wood_b', 8, 4).put('wood_o', 16, 4).put('hut_b', 26, 4).put('lodge', 15, 14).put('straw', 6, 15).put('mud', 26, 16);
+  m.backFence(['wood_b', 'wood_o', 'hut_b'], 'fence_h', { yard: true }); m.fenced = true;  // 북쪽 목책과 집 사이 한 칸 틈(마당 바닥이 길이라 규칙이 비켜 가서 따로)
   for (const [x, y] of [[13, 9], [22, 9], [5, 12], [30, 12], [10, 20], [24, 21]]) m.put('jar', x, y);
   m.flag('heukpung', 14.6, 14.75, true).flag('heukpung', 20.4, 14.75).flag('heukpung', 15.2, 23.9, true).flag('heukpung', 20.2, 23.9);  // 아래 문 양옆에도 산채 깃발
   m.exit(0, 12, 1, 3, 'pass', 37.5, 5.5, 2);
@@ -422,6 +430,7 @@ export function buildMaps() {
   m.exit(0, 11, 1, 4, 'oasis', 41, 15.5, 2);
   m = M('oasis', 44, 30, { name: '사주성', bgm: 'good', biome: 'sand', arena: 'sand' });
   m.road(0, 15, 43, 15, 2).road(21, 0, 21, 15, 2).road(21, 15, 21, 20, 2); m.water(17, 21, 10, 5);
+  m.road(10, 17, 10, 24, 2).road(2, 24, 17, 24, 2).road(36, 17, 36, 24, 2).road(29, 24, 38, 24, 2);  // 큰길 남쪽 집들 앞을 지나는 골목(정면이 남쪽 길을 보게)
   m.put('shop_green', 8, 8).put('mud', 14, 10).put('mud', 28, 9).put('straw', 33, 10).put('straw', 7, 20).put('mud', 31, 20).put('hut_b', 12, 21);
   m.put('tree_round', 15, 20).put('tree_round', 28, 20).put('tree_round', 15, 26).put('tree_round', 28, 26).put('jar', 19, 13).put('pot', 24, 13).put('rocks', 3, 9).put('boulder', 1, 12);
   m.border(['rocks', 'tree_dead'], [[20, 0, 4, 2], [42, 14, 3, 4]], 4);
