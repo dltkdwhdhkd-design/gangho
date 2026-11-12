@@ -9,7 +9,7 @@ export const SPEC = {
   hut_o: { walls: 'w1', roof: 'r_orange', eave: 'e_orange', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
   hut_b: { walls: 'w2', roof: 'r_dark', eave: 'e_dark', pitch: 27, wall: 30 },
   hut_o2: { walls: 'w3', roof: 'r_thatch', eave: 'e_thatch', pitch: 34, wall: 28, thatch: true },
-  inn: { walls: 'w1', roof: 'r_dark', eave: 'e_dark', pitch: 28, wall: 30, floors: 2, upper: 21, signText: '客棧', lanterns: 2, sign: true, balcony: true },
+  inn: { walls: 'w1', roof: 'r_dark', tint: '#d8d0c4', eave: 'e_dark', pitch: 28, wall: 30, floors: 2, upper: 21, signText: '客棧', lanterns: 2, sign: true, balcony: true },
 };
 
 // 벽 그림(HW1 앞벽 95×55, 옆벽 72×85 도트)에서 떠 낼 자리 [x0, y0, x1, y1](위가 0)
@@ -26,10 +26,10 @@ export function makeBuilder(C) {
   const crop = (set, part) => {
     const key = set + '/' + part; if (TEX.has(key)) return TEX.get(key); const [f, x0, y0, x1, y1] = CROP[part], im = PV[set + '_' + f]; if (!im) return null;
     const c = document.createElement('canvas'); c.width = x1 - x0; c.height = y1 - y0; c.getContext('2d').drawImage(im, x0, y0, c.width, c.height, 0, 0, c.width, c.height);
-    const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; t.userData.w = c.width; t.userData.h = c.height; TEX.set(key, t); return t;
+    const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = C.aniso || 1; t.needsUpdate = true; t.userData.w = c.width; t.userData.h = c.height; TEX.set(key, t); return t;
   };
   const pv = n => { const key = 'pv/' + n; if (TEX.has(key)) return TEX.get(key); const im = PV[n]; if (!im) return null; const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0);
-    const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; t.userData.w = im.width; t.userData.h = im.height; TEX.set(key, t); return t; };
+    const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = C.aniso || 1; t.needsUpdate = true; t.userData.w = im.width; t.userData.h = im.height; TEX.set(key, t); return t; };
   // 칠만 한 재질(그림 없는 부품). 검정은 쓰지 않는다
   const col = (hex) => { if (COL.has(hex)) return COL.get(hex); const m = new T.MeshLambertMaterial({ color: hex }), r = { m, f: holed(new T.MeshLambertMaterial({ color: hex })), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }) }; COL.set(hex, r); return r; };
   // 그림 재질에 색을 곱한 것(지붕 색 바꾸기, 그늘진 안쪽 면)
@@ -39,7 +39,7 @@ export function makeBuilder(C) {
   const MOT = new Map(), mottle = (t, hex) => { const k = t.uuid + (hex || ''); if (MOT.has(k)) return MOT.get(k); const b = matOf(t), mk = (bm) => { const m = bm.clone(); if (hex) m.color.set(hex);
       m.onBeforeCompile = sh => { bm.onBeforeCompile(sh); sh.vertexShader = 'varying vec3 vMw;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vMw = (modelMatrix * vec4(transformed, 1.)).xyz;');
         sh.fragmentShader = 'varying vec3 vMw;\nfloat h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }\nfloat vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f); return mix(mix(h21(i), h21(i + vec2(1, 0)), f.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1)), f.x), f.y); }\n' +
-          sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n { vec2 q = floor(vMw.xz / 1.2) * 1.2; float n = vn(q / 9.) * .65 + vn(q / 3.5) * .35; diffuseColor.rgb *= .72 + n * .42; diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(.85, 1.02, .8), smoothstep(.62, .8, vn(q / 6. + 7.))); }'); };
+          sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n { diffuseColor.rgb = pow(diffuseColor.rgb, vec3(1.45)) * 1.55;  // 기와 골을 또렷하게: 무늬 안의 밝고 어두운 차이를 키운다\n vec2 q = floor(vMw.xz / 1.2) * 1.2; float n = vn(q / 9.) * .65 + vn(q / 3.5) * .35; diffuseColor.rgb *= .66 + n * .5; diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(.85, 1.02, .8), smoothstep(.62, .8, vn(q / 6. + 7.))); }'); };
       m.customProgramCacheKey = () => (bm.customProgramCacheKey ? bm.customProgramCacheKey() : '') + '-mot'; return m; };
     const r = { m: mk(b.m), f: mk(b.f), d: b.d }; MOT.set(k, r); return r; };
   // 현판 글씨: 도트 굵기(U)대로 작은 그림에 쓰고 키운다. 짙은 나무 바탕에 금빛 글자
@@ -49,6 +49,10 @@ export function makeBuilder(C) {
     chars.forEach((ch, i) => x.fillText(ch, c.width / 2, vert ? (i + .5) * (c.height / chars.length) + .5 : c.height / 2 + .5));
     const d = x.getImageData(0, 0, c.width, c.height); for (let i = 0; i < d.data.length; i += 4) if (d.data[i] > 150) { d.data[i] = 236; d.data[i + 1] = 190; d.data[i + 2] = 88; } else if (d.data[i] > 95) { d.data[i] = 122; d.data[i + 1] = 82; d.data[i + 2] = 38; } x.putImageData(d, 0, 0);  // 글자 둘레를 두 색으로 끊어 도트처럼
     const t = texFrom(c, { mips: false }); t.magFilter = T.NearestFilter; TEX.set(k, t); return t; };
+  // 처마 그늘과 벽 밑 접촉 그늘: 벽 바로 앞에 세로로 옅어지는 어두운 띠를 붙인다(그림자 지도가 못 만드는 북쪽 벽에도)
+  let AOB = null; const aoBand = () => { if (AOB) return AOB; const c = document.createElement('canvas'); c.width = 4; c.height = 64; const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 64);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,1)'); x.fillStyle = g; x.fillRect(0, 0, 4, 64); const t = new T.CanvasTexture(c);
+    const mk = () => new T.MeshBasicMaterial({ color: '#160d08', alphaMap: t, transparent: true, depthWrite: false, opacity: .72 }); AOB = { m: mk(), f: mk(), d: null, noCast: true }; return AOB; };
   let LANT = null; const lanternMat = () => { if (LANT) return LANT; const mk = () => new T.MeshLambertMaterial({ color: '#c8372a', emissive: '#ff5a2a', emissiveIntensity: 0 }); LANT = { m: mk(), f: holed(mk()), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }) }; C.glow.push(LANT.m, LANT.f); return LANT; };
   const winMat = t => { if (WIN.has(t)) return WIN.get(t); const mk = () => { const m = new T.MeshLambertMaterial({ map: t, emissive: '#ffb45a', emissiveMap: t, emissiveIntensity: 0 }); return m; };
     const r = { m: mk(), f: holed(mk()), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }) }; WIN.set(t, r); C.glow.push(r.m, r.f); return r; };
@@ -107,6 +111,11 @@ export function makeBuilder(C) {
         for (const [a, b] of [[X0 + postW, doorX - dW / 2 - postW], [doorX + dW / 2 + postW, X1 - postW]]) { const sp = b - a; if (sp >= wW * 2 + 10) { mkWin(a + sp * .27); mkWin(a + sp * .73); } else if (sp >= wW + 3) mkWin((a + b) / 2); } }
       else { const n = Math.max(1, Math.floor((L - 6) / (wW + 7))); for (let i = 0; i < n; i++) mkWin(X0 + L * (i + .5) / n); }
       wallPanel([X0, yBase, zF], [1, 0, 0], [0, 0, 1], L, hh, holes, MP, P.plaster);
+      // 네 벽 모두 위쪽에 처마 그늘, 아래쪽에 접촉 그늘
+      for (const [O, a, n, Lw] of [[[X0, yBase, zF], [1, 0, 0], [0, 0, 1], L], [[X0, yBase, zB], [0, 0, 1], [-1, 0, 0], zF - zB], [[X1, yBase, zF], [0, 0, -1], [1, 0, 0], zF - zB], [[X1, yBase, zB], [-1, 0, 0], [0, 0, -1], L]]) {
+        const pt = (u, v) => [O[0] + a[0] * u + n[0] * .12, O[1] + v, O[2] + a[2] * u + n[2] * .12], th = H(up ? 7 : 10), bh = H(2.6);
+        put(aoBand(), [pt(0, hh - th), pt(Lw, hh - th), pt(Lw, hh), pt(0, hh)], [[0, 1], [1, 1], [1, 0], [0, 0]]);  // 그림 v=0이 가장 짙다
+        put(aoBand(), [pt(0, 0), pt(Lw, 0), pt(Lw, bh), pt(0, bh)], [[0, .4], [1, .4], [1, 1], [0, 1]]); }
       // 옆벽: 가운데 창 하나(깊이가 넉넉하면), 뒷벽: 창 없음
       const D = zF - zB, wy = H(up ? 4 : 7), sh = D >= wW + 5 ? [[D / 2 - wW / 2, D / 2 + wW / 2, wy, wy + H(wH), MWin]] : [];
       wallPanel([X0, yBase, zB], [0, 0, 1], [-1, 0, 0], D, hh, sh, MP, P.plaster);
@@ -116,7 +125,11 @@ export function makeBuilder(C) {
       // 기둥: 네 귀퉁이와 문 양옆. 벽 밖으로 조금 나온다
       const yt = yBase + hh, posts = [[X0, zF], [X1, zF], [X0, zB], [X1, zB]]; if (!up) posts.push([doorX - dW / 2 - postW / 2, zF], [doorX + dW / 2 + postW / 2, zF]);
       else { const ws = holes.map(q => q[0] + X0).sort((a, b) => a - b); for (let i = 1; i < ws.length; i++) posts.push([(ws[i - 1] + wW + ws[i]) / 2, zF]); }  // 위층: 창 사이마다 기둥
+      { const n = Math.round(L / 18); for (let i = 1; i < n; i++) posts.push([X0 + L * i / n, zB]); }  // 뒷벽: 18점마다 기둥
       for (const [x, z] of posts) box(x - postW / 2, yBase, z - postD, x + postW / 2, yt, z + postD * (z === zF ? 1 : .4), MPost, P.post, { top: MWood });
+      if (zF - zB > 22) for (const x of [X0, X1]) box(x - postW / 2 - .5, yBase, (zF + zB) / 2 - postW / 2, x + postW / 2 + .5, yt, (zF + zB) / 2 + postW / 2, MPost, P.post, { top: MWood });  // 옆벽 가운데 기둥
+      // 옆벽과 뒷벽 위 도리
+      for (const x of [X0, X1]) box(x - (x === X0 ? 1.2 : -.2), yt - H(2.2), zB - .5, x + (x === X0 ? .2 : 1.2), yt, zF + .5, MBeam, P.beam, { side: MWood, top: MWood });
       // 도리: 벽 위를 두르는 가로 들보
       const bh = H(2.2), bd = 1.3 * ZS;
       box(X0 - 1.4, yt - bh, zF - .2, X1 + 1.4, yt, zF + bd, MBeam, P.beam, { side: MWood, top: MWood, noBack: true });
@@ -137,6 +150,7 @@ export function makeBuilder(C) {
       yBase = yt;
       if (fl < floors - 1) {  // 중간 처마와 위층(조금 들여 짓고 앞에 난간)
         const ov = 6, ovx = 4; roof(X0 - ovx, X1 + ovx, zF + ov, zF - 1, yt + 1.3 * ZS * Math.tan(22 * Math.PI / 180) + H(.6), 22, false, true);
+        box(X0 - .6, yt, zB - .6, X1 + .6, yt + H(1.6), zF + .6, MBeam, P.beam, { side: MBeam, top: MWood });  // 층 사이를 메우는 바닥 띠(옆과 뒤에서 비치지 않게)
         const inset = 4; zF -= inset; zB += .5 * ZS; X0 += 2; X1 -= 2; yBase = yt + H(1.5);
         if (spec.balcony) { const zr = zF + inset - 1.2, rh = H(6); box(X0 - 2, yBase - H(.6), zF, X1 + 2, yBase, zr + 1, MWoodL, null, {});  // 난간 바닥
           for (let x = X0 - 1; x <= X1 + 1.01; x += (X1 - X0 + 2) / Math.round((X1 - X0 + 2) / 6)) box(x - .6, yBase, zr - .6, x + .6, yBase + rh, zr + .6, MWood, null, {});
@@ -187,7 +201,7 @@ export function makeBuilder(C) {
       const n = list.reduce((a, q) => a + q.attributes.position.count, 0), pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), nor = new Float32Array(n * 3); let k = 0;
       for (const q of list) { pos.set(q.attributes.position.array, k * 3); uv.set(q.attributes.uv.array, k * 2); nor.set(q.attributes.normal.array, k * 3); k += q.attributes.position.count; q.dispose(); }
       const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3)); geo.setAttribute('uv', new T.BufferAttribute(uv, 2)); geo.setAttribute('normal', new T.BufferAttribute(nor, 3)); geo.computeBoundingSphere();
-      const o = new T.Mesh(geo, M.m); o.customDepthMaterial = M.d; o.castShadow = o.receiveShadow = true; o.userData = { M, t: null, owner: g }; g.add(o);
+      const o = new T.Mesh(geo, M.m); if (M.d) o.customDepthMaterial = M.d; o.castShadow = !M.noCast; o.receiveShadow = !M.noCast; if (M.noCast) o.renderOrder = 2; o.userData = { M, t: null, owner: g }; g.add(o);
     }
     return g;
   };
