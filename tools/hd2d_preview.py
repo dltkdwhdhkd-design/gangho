@@ -103,9 +103,39 @@ def walls():
         c.save(os.path.join(OUT, n + '.webp'), lossless=True); print(n, c.size, '네모 시작', round(full[0] / c.height, 3))
 
 
+def strips():
+    """HR2: 가로 띠 여섯 줄(처마 끝 주황, 검푸름, 초가, 판자, 용마루, 서까래와 두공). 줄마다 바탕을 지우고 도트 굵기(원본 5점이 한 점)로 줄인다"""
+    im = key_out(Image.open(os.path.join(SRC, 'HR2.png'))); a = np.asarray(im)[..., 3] > 127; rows = a.any(1)
+    runs, y = [], 0
+    while y < len(rows):
+        if rows[y]:
+            y0 = y
+            while y < len(rows) and rows[y]: y += 1
+            if y - y0 > 8: runs.append((y0, y))
+        y += 1
+    for n, (y0, y1) in zip(['e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket'], runs):
+        c = shrink(im.crop((0, y0, im.width, y1)), 1 / 5); c.save(os.path.join(OUT, n + '.webp'), lossless=True); print(n, c.size)
+
+
+def walls1():
+    """HW1: 3열 2행. 1행 앞벽 셋, 2행 옆벽 셋(같은 열이 같은 집)"""
+    im = key_out(Image.open(os.path.join(SRC, 'HW1.png')))
+    for (i, j, c) in cells(im, 3, 2):
+        c = c.crop(c.getbbox()); c = shrink(c, 1 / 5); n = ('w%d_front' if j == 0 else 'w%d_side') % (i + 1)
+        a = np.asarray(c)[..., 3] > 127; full = np.where(a.sum(1) > a.shape[1] * .97)[0]
+        c.save(os.path.join(OUT, n + '.webp'), lossless=True); print(n, c.size, '네모 시작', round(full[0] / c.height, 3))
+
+
+def walls_k():
+    """HK2: 담 여섯 토막(2열 3행): 기와 얹은 흙담, 돌담, 목책, 나무 울타리, 성가퀴 담, 막돌 담"""
+    im = key_out(Image.open(os.path.join(SRC, 'HK2.png')))
+    for (i, j, c), n in zip(sorted(cells(im, 2, 3), key=lambda t: (t[1], t[0])), ['k_tiled', 'k_stone', 'k_palisade', 'k_fence', 'k_battle', 'k_cobble']):
+        c = c.crop(c.getbbox()); c = shrink(c, 1 / 5); c.save(os.path.join(OUT, n + '.webp'), lossless=True); print(n, c.size)
+
+
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
     houses(); walker('HC1', 'me'); walker('HC2', 'yun')
     tiles('HG1', ['g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow'], 11)
     tiles('HR1', ['r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow'], 11)
-    walls()
+    walls(); strips(); walls1(); walls_k()
