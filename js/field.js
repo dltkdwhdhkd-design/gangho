@@ -249,11 +249,11 @@ export class Field {
     return out.filter((c, i) => i === 0 || i === out.length - 1 || !((out[i - 1][0] === c[0] && c[0] === out[i + 1][0]) || (out[i - 1][1] === c[1] && c[1] === out[i + 1][1])));
   }
   bubble(n, text) { if (!text) return; n.bub = text; n.bubT = Math.min(5, 2.2 + text.length * .07); if (n.lively) n.hopT = .4; }  // lively면 말할 때 들썩인다
-  drawBubbles(c, ox, oy) {
+  drawBubbles(c, P, lift = 27) {  // P(x, y, 높이): 평면도 자리 → 화면 자리. lift: 말풍선 꼬리를 발에서 얼마나 띄우나
     if (this.busy) return; const on = this.npcs.filter(n => n.bubT > 0 && n.bub); if (!on.length) return;
     c.setTransform(1, 0, 0, 1, 0, 0); c.font = '15px Galmuri11, Galmuri14, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
     for (const n of on) {
-      const x = (n.x + ox) * SCALE, y = (n.y - 27 + oy) * SCALE; if (x < -200 || x > 1480 || y < 0 || y > 760) continue;
+      const [x, y] = P(n.x, n.y, lift); if (x < -200 || x > 1480 || y < 0 || y > 760) continue;
       const w = Math.min(420, c.measureText(n.bub).width + 22), h = 30, a = Math.min(1, n.bubT / .35);
       c.globalAlpha = a; c.fillStyle = '#fbf3df'; c.strokeStyle = '#2a2018'; c.lineWidth = 3;
       c.beginPath(); c.roundRect(Math.round(x - w / 2), Math.round(y - h), Math.round(w), h, 8); c.fill(); c.stroke();
@@ -283,7 +283,8 @@ export class Field {
     this.cam.x += (x - this.cam.x) * k; this.cam.y += (y - this.cam.y) * k;
   }
   draw(c) {
-    const m = this.m; if (!m.isoRoom) return this.drawScene(c);
+    const m = this.m; if (G.hd?.active(m)) return this.drawGL(c); G.hd?.hide();
+    if (!m.isoRoom) return this.drawScene(c);
     const seen = new Set(), saved = [], sw = o => { if (!o || seen.has(o) || o.x === undefined) return; seen.add(o); saved.push([o, o.x, o.y, o.dir, o.diag]); [o.x, o.y] = proj(m, o.x, o.y);
       if (o !== this.p && o.walk && o.dir !== undefined && !this.trail.includes(o)) { const [sx, sy] = toScreen(m, ...DIRV[o.dir]); o.dir = Math.abs(sx) >= Math.abs(sy) * .55 ? (sx < 0 ? 2 : 3) : (sy < 0 ? 1 : 0); o.diag = (sy > 0 ? 0 : 1) + (sx < 0 ? 2 : 0); } };  // 걷는 사람은 칸 방향을 화면 방향으로
     this._gp = { x: this.p.x, y: this.p.y }; [this.p, ...this.npcs, ...this.trail, ...this.roam, ...this.animals, ...this.arrows].forEach(sw); const objs = m.objs; m.objs = m.isoObjs;
@@ -336,12 +337,26 @@ export class Field {
       c.setTransform(1, 0, 0, 1, 0, 0); c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const [lx, ly] = m.isoRoom?.out ? l.iso || proj(m, l.x * TS, l.y * TS) : [l.x * TS, l.y * TS], x = (lx + ox) * SCALE, y = (ly + oy) * SCALE; if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); }
     }
-    this.drawExits(c, ox, oy);
-    this.drawBubbles(c, ox, oy);
+    const P = (x, y, h = 0) => [(x + ox) * SCALE, (y - h + oy) * SCALE];
+    this.drawExits(c, P);
+    this.drawBubbles(c, P);
+    tickMini(this);
+  }
+  // 새 화면(hd2d.js): 땅과 소품과 사람은 뒤의 WebGL 캔버스가 그리고, 이 캔버스에는 꽃잎, 말풍선, 이름표, 출구 표시, 할 일 표시만 얹는다
+  drawGL(c) {
+    const H = G.hd, m = this.m; H.render(this);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720);
+    c.setTransform(SCALE, 0, 0, SCALE, 0, 0); this.ambient(c); if (G.fxOverlay) G.fxOverlay(c);
+    c.setTransform(1, 0, 0, 1, 0, 0); const P = (x, y, h = 0) => H.proj(x, y, h), k = Math.min(5, H.pxPerUnit());
+    if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, 25 - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
+    if (m.labels) { c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
+      for (const l of m.labels) { const [x, y] = P(l.x * TS, l.y * TS); if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); } }
+    this.drawExits(c, P);
+    this.drawBubbles(c, P, 21);  // 새 화면은 사람이 크게 보여서 말풍선을 머리에 더 붙인다
     tickMini(this);
   }
   // 나가는 곳 표시: 맵 가장자리 출구와 방문에 들썩이는 화살표, 가까이 가면 어디로 가는지 적는다
-  drawExits(c, ox, oy) {
+  drawExits(c, P) {
     const m = this.m, p = m.isoRoom ? this._gp : this.p, S = G.S; if (m.live || this.busy) return;
     const W = m.w * TS, H = m.h * TS, t = performance.now() / 1000; c.setTransform(1, 0, 0, 1, 0, 0);
     for (const q of m.portals) {
@@ -352,7 +367,7 @@ export class Field {
       let ax = cx, ay = cy; if (dir === 'd') ay = q.y + q.h - 12; if (dir === 'u') ay = q.y + 12; if (dir === 'l') ax = q.x + 12; if (dir === 'r') ax = q.x + q.w - 12; if (door) { dir = 'u'; ay = q.y + q.h + 10; }
       let [vx, vy] = { d: [0, 1], u: [0, -1], l: [-1, 0], r: [1, 0] }[dir]; const b = Math.sin(t * 5) * 3, a = Math.max(.25, Math.min(1, (10 - d) / 4));
       if (m.isoRoom) { [ax, ay] = proj(m, ax, ay); const [sx, sy] = toScreen(m, vx, vy), l = Math.hypot(sx, sy); vx = sx / l; vy = sy / l; }  // 쿼터뷰 방: 문은 왼쪽 아래 가장자리에 난다
-      const X = (ax + ox) * SCALE + vx * b * 2, Y = (ay + oy) * SCALE + vy * b * 2, k = door ? 9 : 13, px = -vy, py = vx;
+      const [X0, Y0] = P(ax, ay), X = X0 + vx * b * 2, Y = Y0 + vy * b * 2, k = door ? 9 : 13, px = -vy, py = vx;
       c.globalAlpha = a; c.lineJoin = 'round';
       for (const [col, lw] of [['#2a1608', 9], ['#ffe08a', 4]]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); for (const o of [0, -k * .9]) { c.moveTo(X + px * k - vx * k * .6 + vx * o, Y + py * k - vy * k * .6 + vy * o); c.lineTo(X + vx * k * .4 + vx * o, Y + vy * k * .4 + vy * o); c.lineTo(X - px * k - vx * k * .6 + vx * o, Y - py * k - vy * k * .6 + vy * o); } c.stroke(); }
       if (!door && d < 7) { const to = q.to === 'world' ? '강호' : MAPS[q.to]?.name || ''; if (to) { c.font = '18px Galmuri11Bold, Galmuri14, sans-serif'; c.textAlign = 'center'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8'; const tx = X - vx * 40 + (vx ? 0 : 0), ty = Y - vy * 34 - (vy ? 0 : 22); const lab = m.room ? '나가기' : josa(to, '으로/로'); c.strokeText(lab, tx, ty); c.fillText(lab, tx, ty); } }
