@@ -14,8 +14,9 @@ const CHAR = 15, AHEAD = .12;  // 인물 도트의 키(평면도 점). 화면 �
 const W = 1280, H = 720;
 let T = null;  // three.js
 
-const OPTK = 'gangho_hd2d_opt', OPT0 = { zoom: 7, time: 'auto', fx: 'mid', art: 0 }, ZOOMS = [9, 7, 6];
-const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } if (!ZOOMS.includes(o.zoom)) o.zoom = OPT0.zoom; return o; };
+// 인물 키는 화면 높이의 1/9로 정했다(사용자). 그림은 새 그림이 기본
+const OPTK = 'gangho_hd2d_opt2', OPT0 = { zoom: 9, time: 'auto', fx: 'mid', art: 1 };
+const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } o.zoom = 9; return o; };
 const want = (() => { try { return new URLSearchParams(location.search).get('hd2d') === '1'; } catch { return false; } })();
 
 // 시각별 빛. sun: 해 쪽을 가리키는 방향(x 오른쪽, y 위, z 화면 앞쪽). 낮과 저녁은 왼쪽에서 조금 앞으로 들어 왼벽이 밝고 오른벽이 그늘지며 그림자는 오른쪽으로 진다. 아침은 오른쪽에서
@@ -86,13 +87,15 @@ function texFrom(c, { mips = true } = {}) {
 }
 const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 // 새 그림 맛보기(tools/hd2d_preview.py가 만든 것): 받은 집 그림과 윤설 걷기. 0단계에서 크기와 결만 보려고 잠깐 씌운다
-const PV = {}, PVN = ['hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me'];
+const PV = {}, PVN = ['hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow'];
+const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 인물 그림 기준). 새 땅과 지붕과 벽도 이 굵기로 깐다
+const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
 function loadPreview() { return pvP || (pvP = Promise.all(PVN.map(n => new Promise(res => { const im = new Image(); im.onload = () => { PV[n] = im; res(); }; im.onerror = res; im.src = `assets/hd2d/preview/${n}.webp`; })))); }
 const art = () => !!HD.opt.art;
 function previewTex(name) {
   const im = art() && PV[name]; if (!im) return null; if (TEX.has('p/' + name)) return TEX.get('p/' + name);
-  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' }); TEX.set('p/' + name, t); return t;
+  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' }); if (/^[gr]_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
 }
 // 소품: 도트 그대로 올려 '또렷한 겹선형'으로 읽는다(배경도 인물과 같은 도트 결. 매끈해지는 것은 흐림과 빛뿐)
 function stampTex(name) {
@@ -188,6 +191,51 @@ function wallBox(s, t, W_, H_) {
   return g;
 }
 
+// ── 새 그림: 부품으로 짓는 집(HW0 벽 + HR1 지붕 무늬) ──
+const PARTS = { hut_o: 'r_orange', hut_b: 'r_dark', hut_o2: 'r_thatch', straw: 'r_thatch', mud: 'r_thatch', clay: 'r_mud' };
+function partsBox(s, rk) {
+  const st = STAMPS[s.name], sc = s.sc || 1, x0 = s.x + st[5] * sc, x1 = x0 + st[7] * sc, yb = s.y + st[6] * sc, yf = yb + st[8] * sc;
+  const zf = yf * ZS, zb = yb * ZS, zm = (zf + zb) / 2, D = zf - zb, cw = x1 - x0, F = previewTex('w_front'), Sd = previewTex('w_side'), Rt = previewTex(rk);
+  const Hw = cw * F.image.height / F.image.width * HS, ov = 2.5, ovx = 3, Hr = (D / 2 + ov * ZS) * ROOF, yr = Hw + Hr, ye = Hw - .6 * HS, zfe = zf + ov * ZS, zbe = zb - ov * ZS, rx0 = x0 - ovx, rx1 = x1 + ovx, vS = 1 - SIDE_RECT;
+  const g = new T.Group(); g.userData = { s, house: true };
+  const add = (geo, tx) => { const Mt = matOf(tx), o = new T.Mesh(geo, Mt.m); o.customDepthMaterial = Mt.d; o.castShadow = o.receiveShadow = true; o.userData = { M: Mt, t: tx, owner: g }; g.add(o); };
+  add(face([[x0, 0, zf], [x1, 0, zf], [x1, Hw, zf], [x0, Hw, zf]], [[0, 0], [1, 0], [1, 1], [0, 1]]), F);  // 앞벽
+  add(face([[x1, 0, zb], [x0, 0, zb], [x0, Hw, zb], [x1, Hw, zb]], [[0, 0], [1, 0], [1, vS], [0, vS]]), Sd);  // 뒷벽: 옆벽 네모 부분을 늘여
+  add(face([[x0, 0, zb], [x0, 0, zf], [x0, Hw, zf], [x0, Hw, zb]], [[0, 0], [1, 0], [1, vS], [0, vS]]), Sd);  // 왼벽
+  add(face([[x1, 0, zf], [x1, 0, zb], [x1, Hw, zb], [x1, Hw, zf]], [[0, 0], [1, 0], [1, vS], [0, vS]]), Sd);  // 오른벽
+  add(face([[x0, Hw, zb], [x0, Hw, zf], [x0, yr, zm]], [[0, vS], [1, vS], [.5, 1]]), Sd);  // 박공 왼쪽
+  add(face([[x1, Hw, zf], [x1, Hw, zb], [x1, yr, zm]], [[0, vS], [1, vS], [.5, 1]]), Sd);  // 박공 오른쪽
+  // 지붕: 무늬를 도트 굵기대로 되풀이한다. 기와 골이 처마에서 용마루로 올라간다
+  const tw = Rt.image.width / DOT, th = Rt.image.height / DOT, L = Math.hypot(zfe - zm, yr - ye), U = (rx1 - rx0) / tw, Vv = L / th;
+  add(face([[rx0, ye, zfe], [rx1, ye, zfe], [rx1, yr, zm], [rx0, yr, zm]], [[0, 0], [U, 0], [U, Vv], [0, Vv]]), Rt);  // 앞 지붕
+  add(face([[rx1, ye, zbe], [rx0, ye, zbe], [rx0, yr, zm], [rx1, yr, zm]], [[0, 0], [U, 0], [U, Vv], [0, Vv]]), Rt);  // 뒤 지붕
+  return g;
+}
+// 새 땅(HG1): 칸 종류마다 무늬를 도트 굵기대로 깐다. 칸 경계는 낮은 잡음으로 흔들어 네모 칸이 드러나지 않게. 무늬가 없는 칸(물, 마루)은 예전 땅을 쓴다
+const GROUND = { 0: 'g_grass', 1: 'g_road', 3: 'g_yard' };
+function groundArt(m, base) {
+  if (!art() || !PV.g_grass || m.room) return null;
+  const W2 = Math.round(m.w * TS * DOT), H2 = Math.round(m.h * TS * DOT), c = mk(W2, H2), x = c.getContext('2d'), out = x.createImageData(W2, H2), o = out.data;
+  const pats = {}; for (const k in GROUND) { const im = PV[GROUND[k]]; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); pats[k] = { w: im.width, h: im.height, d: q.getImageData(0, 0, im.width, im.height).data }; }
+  const bw = base.width, bd = base.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, bw, base.height).data;
+  const hs = (i, j) => { let h = (i * 374761393 + j * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const nz = (u, v, k) => { const i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j, a = fu * fu * (3 - 2 * fu), b = fv * fv * (3 - 2 * fv), A = hs(i + k, j), B = hs(i + 1 + k, j), C = hs(i + k, j + 1), E = hs(i + 1 + k, j + 1); return A + (B - A) * a + (C - A) * b + (A - B - C + E) * a * b; };
+  const cell = TS * DOT, S = 1 / 18;  // 잡음 크기: 도트 18점마다 한 마디
+  // 가로로 난 길은 무늬를 눕혀 깐다(수레 자국이 길을 따라 나게)
+  const G1 = (x, y) => m.g[y]?.[x] === 1, LIE = m.g.map((r, y) => r.map((v, x) => v === 1 && (G1(x - 1, y) || G1(x + 1, y)) && !(G1(x, y - 1) && G1(x, y + 1)) && !(G1(x, y - 1) && !G1(x - 1, y) && !G1(x + 1, y)))), lie = (x, y) => LIE[y][x];
+  // 흔들림은 도트 두 점마다 한 번만 잰다(경계가 도트 크기로 각지고, 세우는 시간이 4분의 1)
+  const bw2 = (W2 >> 1) + 1, bh2 = (H2 >> 1) + 1, JX = new Float32Array(bw2 * bh2), JY = new Float32Array(bw2 * bh2);
+  for (let b = 0; b < bh2; b++) for (let a = 0; a < bw2; a++) { const X = a * 2, Y = b * 2, k = b * bw2 + a; JX[k] = (nz(X * S, Y * S, 0) - .5) * .55 + (nz(X * S * 3, Y * S * 3, 7) - .5) * .2; JY[k] = (nz(X * S, Y * S, 91) - .5) * .55 + (nz(X * S * 3, Y * S * 3, 53) - .5) * .2; }
+  for (let Y = 0; Y < H2; Y++) for (let X = 0; X < W2; X++) {
+    const k = (Y >> 1) * bw2 + (X >> 1), jx = JX[k], jy = JY[k];
+    const tx = Math.min(m.w - 1, Math.max(0, Math.floor(X / cell + jx))), ty = Math.min(m.h - 1, Math.max(0, Math.floor(Y / cell + jy))), p = pats[m.g[ty][tx]], i = (Y * W2 + X) * 4;
+    if (p) { const j = (lie(tx, ty) ? (X % p.h) * p.w + Y % p.w : (Y % p.h) * p.w + X % p.w) * 4; o[i] = p.d[j]; o[i + 1] = p.d[j + 1]; o[i + 2] = p.d[j + 2]; }
+    else { const j = (Math.floor(Y / DOT) * bw + Math.floor(X / DOT)) * 4; o[i] = bd[j]; o[i + 1] = bd[j + 1]; o[i + 2] = bd[j + 2]; }
+    o[i + 3] = 255;
+  }
+  x.putImageData(out, 0, 0); return c;
+}
+
 // ── 지도 ──
 let buildMs = 0;
 function setMap(m) {
@@ -197,7 +245,7 @@ function setMap(m) {
   const Wm = m.w * TS, Dm = m.h * TS * ZS;
   // 땅: 지금 땅 그림을 그대로 눕힌다(땅 무늬 HB14가 오기 전 임시). 땅도 도트 결로 읽는다
   const gc = mk(m.w * TS, m.h * TS), gx = gc.getContext('2d', { willReadFrequently: true }); m.paintBase(gx);
-  const gt = new T.CanvasTexture(gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter;
+  const gt = new T.CanvasTexture(groundArt(m, gc) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter;
   ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(Wm / 2, 0, Dm / 2); ground.receiveShadow = true; scene.add(ground);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
@@ -208,6 +256,7 @@ function setMap(m) {
   list.forEach(({ s, z }, k) => {
     const st = STAMPS[s.name], t = st && stampTex(s.name); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(s.name), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
+    if (!s.flat && PARTS[s.name] && previewTex('w_front')) { propG.add(partsBox(s, PARTS[s.name])); return; }  // 새 그림: 벽 부품(HW0)과 지붕 무늬(HR1)로
     if (ef) { propG.add(houseBox(s, t, w, h, ef)); return; }
     if (!s.flat && WALLS.has(s.name)) { propG.add(wallBox(s, t, w, h)); return; }
     if (!GEO.has(gk)) GEO.set(gk, standGeo(w, h));
@@ -247,7 +296,7 @@ function frameOf(key, dirCol, row, diag) {
 function syncActors(F) {
   used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, o.size || 16, o.lift || 0); blob(x, y, o.size ? o.size / 16 : 1); };
   for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16); continue; }
-    const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
+    const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, yt = key === 'chars/Princess' && previewTex('yun'); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
   for (const r of F.roam) if (!r.gone) { const key = r.spr.includes('/') ? r.spr : 'chars/' + r.spr; put(key, r.dir, Math.floor(r.walk || 0) % 4, r.x, r.y, { size: r.size }); }
   if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id), key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });
   for (const a of F.animals || []) { if (a.gone) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
@@ -378,7 +427,7 @@ function panel() {
   d.style.cssText = 'position:absolute;right:14px;bottom:12px;z-index:5;background:rgba(14,11,8,.82);border:2px solid #8a6a3a;color:#f3e6c8;font:14px Galmuri11,Galmuri14,sans-serif;padding:8px 10px;display:flex;flex-direction:column;gap:5px;pointer-events:auto';
   const row = (lab, key, items) => `<div class="hdr" data-k="${key}"><span style="display:inline-block;width:62px">${lab}</span>${items.map(([v, t]) => `<button data-v="${v}">${t}</button>`).join('')}</div>`;
   d.innerHTML = `<div style="display:flex;justify-content:space-between;gap:10px;cursor:pointer" id="hdt" title="눌러서 접기"><b style="color:#ffd88a;font-weight:400">새 화면 시제품 ▾</b><span id="hdfps" style="opacity:.7"></span></div>
-    ${row('인물 키', 'zoom', ZOOMS.map(z => [z, '1/' + z]))}${row('시각', 'time', [['auto', '게임대로'], ['morning', '아침'], ['day', '낮'], ['evening', '저녁'], ['night', '밤']])}${row('효과', 'fx', [['mid', '보통'], ['high', '높음']])}${row('그림', 'art', [[0, '지금 그림'], [1, '새 그림 맛보기']])}
+    ${row('시각', 'time', [['auto', '게임대로'], ['morning', '아침'], ['day', '낮'], ['evening', '저녁'], ['night', '밤']])}${row('효과', 'fx', [['mid', '보통'], ['high', '높음']])}${row('그림', 'art', [[0, '지금 그림'], [1, '새 그림 맛보기']])}
     <div style="display:flex;gap:6px"><button id="hdgo" title="새 낭인으로 청하진에 선다. 이 판은 저장하지 않는다">청하진 둘러보기</button><button id="hd2d">2D로 보기</button></div>`;
   $('#stage').appendChild(d);
   const st = document.createElement('style'); st.textContent = '#hdp button{font:inherit;font-size:13px;background:#2a2016;color:#f3e6c8;border:1px solid #6a5232;padding:2px 7px;margin-right:3px;cursor:pointer}#hdp button.on{background:#c89a4a;color:#1a120a;border-color:#ffd88a}'; document.head.appendChild(st);
