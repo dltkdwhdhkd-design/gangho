@@ -11,6 +11,7 @@ import { MAPS } from './maps.js';
 import * as state from './state.js';
 import { newState, stats } from './state.js';
 import * as dialog from './dialog.js';
+import { HD } from './hd2d.js';
 
 const cv = $('#cv'), ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; G.ctx = ctx;
 function fit() {
@@ -35,6 +36,7 @@ function render() {
   if (G.scene === 'battle' && G.battle) G.battle.draw(ctx);
   else if (G.scene === 'field' && G.field) G.field.draw(ctx);
   else if (G.bgDraw) G.bgDraw(ctx);
+  if (G.scene !== 'field') HD.hide();  // 새 화면은 필드에서만 보인다
 }
 let last = performance.now(), acc = 0;
 function frame(now) {
@@ -57,6 +59,7 @@ G.fast = (n) => { for (let i = 0; i < n; i++) tick(STEP); render(); };
   await document.fonts.load('20px Galmuri14', '강호').catch(() => { });
   await document.fonts.load('20px Galmuri11Bold', '강호').catch(() => { });
   buildMaps(); G.base.init();
+  if (HD.want) await HD.init();  // 새 화면(?hd2d=1). 못 켜면 2D 그대로
   G.field = new Field();
   showTitle();
   requestAnimationFrame(frame);

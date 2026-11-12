@@ -58,6 +58,7 @@ export const canEquip = (id, S = G.S) => { const k = SKILLS[id]; return k.w === 
 // 저장은 두 가지다. 자동 저장(이어 하기)은 이 브라우저에 계속 덮어쓰고, 저장 칸은 고른 순간을 그대로 남긴다.
 // 파일 내보내기는 누른 그 순간을 파일 한 장으로 받는다. 받은 파일은 다시 바뀌지 않는다
 export function save(slient = true) {
+  if (G.noSave) return;  // 새 화면 시제품의 둘러보기 판은 자동 저장하지 않는다
   try { localStorage.setItem(KEY, JSON.stringify(G.S)); if (!slient) toast('저장했습니다'); } catch (e) { if (!slient) toast('저장하지 못했습니다'); }
 }
 const fileName = S => `강호행_${S.name}_${S.day}일째_${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}.json`;
