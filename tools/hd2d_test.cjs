@@ -15,12 +15,12 @@ const { chromium } = require('playwright');
   const out = await p.evaluate(async () => {
     const G = __G, f = G.field, H = G.hd, sleep = ms => new Promise(r => setTimeout(r, ms)); G.manual = true;
     const m = f.m, pick = [], bad = []; for (let y = 1; y < m.h - 1; y += 2) for (let x = 1; x < m.w - 1; x += 3) if (!m.blocked(x * 16 + 8, y * 16 + 12)) pick.push([x, y]);  // 걸을 수 있는 칸을 고루
-    for (const z of [10, 8, 6]) { H.setOpt('zoom', z);
+    for (const z of [9, 7, 6]) { H.setOpt('zoom', z);
       for (const [x, y] of pick) { f.p.x = x * 16 + 8; f.p.y = y * 16 + 12; H.aim(f);
         const [fx, fy] = H.proj(f.p.x, f.p.y, 0), [hx, hy] = H.proj(f.p.x, f.p.y, 15); if (fx < 20 || fx > 1260 || hy < 20 || fy > 700) bad.push(`${z}:${x},${y} 발(${fx | 0},${fy | 0}) 머리y ${hy | 0}`); }
       await sleep(0); }
     // 2) 건물 뒤: 객잔 지붕 뒤에 서면 객잔이 옅어진다
-    H.setOpt('zoom', 8); f.p.x = 21 * 16; f.p.y = 9.2 * 16; H.aim(f); const behind = H.stats().faded;
+    H.setOpt('zoom', 7); f.p.x = 21 * 16; f.p.y = 9.2 * 16; H.aim(f); const behind = H.stats().faded;
     f.p.x = 21 * 16; f.p.y = 13 * 16; H.aim(f); const front = H.stats().faded;
     // 3) 지도 다시 세우기
     f.load('cheongha', 22.5, 16, 0); H.render(f); const build = H.stats().buildMs;
@@ -32,14 +32,14 @@ const { chromium } = require('playwright');
   // 4) 찍기
   const shot = async n => { await p.waitForTimeout(400); await p.screenshot({ path: `/tmp/claude-0/shots/hd2d_${n}.png` }); };
   const go = (x, y, o) => p.evaluate(([x, y, o]) => { const G = __G, f = G.field, H = G.hd; for (const k in o) H.setOpt(k, o[k]); f.p.x = x * 16; f.p.y = y * 16; H.aim(f); H.render(f); }, [x, y, o]);
-  for (const z of [10, 8, 6]) { await go(21, 22.6, { zoom: z, time: 'day' }); await shot('z' + z); }
-  for (const t of ['morning', 'day', 'evening', 'night']) { await go(21, 13, { zoom: 8, time: t }); await shot('t_' + t); }
-  await go(21, 9.2, { zoom: 8, time: 'day' }); await shot('behind');
+  for (const z of [9, 7, 6]) { await go(21, 22.6, { zoom: z, time: 'day' }); await shot('z' + z); }
+  for (const t of ['morning', 'day', 'evening', 'night']) { await go(21, 13, { zoom: 7, time: t }); await shot('t_' + t); }
+  await go(21, 9.2, { zoom: 7, time: 'day' }); await shot('behind');
   await p.evaluate(() => { const f = __G.field; f.p.x = 4 * 16; f.p.y = 15.5 * 16; const n = f.npcs.slice().sort((a, b) => Math.hypot(a.x - f.p.x, a.y - f.p.y) - Math.hypot(b.x - f.p.x, b.y - f.p.y))[0]; if (n) f.bubble(n, '말풍선이 머리 위에 뜨는지 본다'); });
-  await go(4, 15.5, { zoom: 10, time: 'day' }); await shot('exit');
+  await go(4, 15.5, { zoom: 9, time: 'day' }); await shot('exit');
   await p.evaluate(() => __G.hd.setOpt('art', 1)); await p.waitForTimeout(1500);
-  for (const z of [10, 8, 6]) { await go(21, 22.6, { zoom: z, time: 'day' }); await shot('art_z' + z); }
-  await go(21, 22.6, { zoom: 8, time: 'night' }); await shot('art_night');
-  await p.evaluate(() => { __G.hd.setOpt('art', 0); __G.hd.setOpt('time', 'auto'); __G.hd.setOpt('zoom', 8); });
+  for (const z of [9, 7, 6]) { await go(21, 22.6, { zoom: z, time: 'day' }); await shot('art_z' + z); }
+  await go(21, 22.6, { zoom: 7, time: 'night' }); await shot('art_night');
+  await p.evaluate(() => { __G.hd.setOpt('art', 0); __G.hd.setOpt('time', 'auto'); __G.hd.setOpt('zoom', 7); });
   console.log(errs.length ? '오류\n' + errs.slice(0, 10).join('\n') : '오류 없음'); await b.close();
 })().catch(e => { console.log(String(e).slice(0, 800)); process.exit(1); });
