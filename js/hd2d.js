@@ -33,7 +33,7 @@ const TIMES = {
 export const HD = {
   want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0,  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
   maps: new Set(['cheongha']),  // 시제품은 청하진만. 나머지 지도는 예전 2D로 그린다
-  active(m) { return this.want && this.ready && !this.failed && !!m && this.maps.has(m.id) && !m.isoRoom && !m.live; },
+  active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso)) && !m.isoRoom && !m.live; },  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
   init, render, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
@@ -256,11 +256,17 @@ function partsBox(s, rk) {
 }
 // 새 땅(HG1): 칸 종류마다 무늬를 도트 굵기대로 깐다. 칸 경계는 낮은 잡음으로 흔들어 네모 칸이 드러나지 않게. 무늬가 없는 칸(물, 마루)은 예전 땅을 쓴다
 const GROUND = { 0: 'g_grass', 1: 'g_road', 3: 'g_yard' };
+// 땅 종류마다 풀 그림 색 바꾸기(새 땅 그림이 오기 전까지). 풀은 짙은 올리브(기준 화면의 풀은 누런 올리브와 갈색)
+const BIOME_T = { grass: (r, g, b) => [r + 6, g * .9 + 2, b * .55], plain: (r, g, b) => [r + 6, g * .9 + 2, b * .55], rose: (r, g, b) => [r + 6, g * .9 + 2, b * .55],
+  deep: (r, g, b) => [r * .78, g * .86, b * .5], sand: (r, g, b, l) => [l * 1.05 + 78, l * .86 + 56, l * .5 + 28], snow: (r, g, b, l) => [l * .45 + 168, l * .45 + 172, l * .4 + 184], dusk: (r, g, b, l) => [l * .62 + 36, l * .5 + 26, l * .48 + 24] };
+const DECO = { grass: 1, plain: 1, rose: 1, deep: 1 };
+// 땅 얼룩 세기: 흙 드러난 자리, 짙은 자리, 이끼. 눈에는 흙과 이끼가 없고 엷은 그늘만
+const MOTTLE = { grass: { dirt: 1, dark: 1, moss: 1 }, plain: { dirt: 1, dark: 1, moss: 1 }, rose: { dirt: 1, dark: 1, moss: 1 }, deep: { dirt: .7, dark: 1, moss: 1 }, sand: { dirt: .6, dark: .6, moss: 0, dc: [120, 84, 48] }, dusk: { dirt: .6, dark: .8, moss: 0, dc: [70, 52, 40] }, snow: { dirt: 0, dark: .3, moss: 0 } };  // 풀 포기를 흩뿌리는 땅
 function groundArt(m, base) {
   if (!art() || !PV.g_grass || m.room) return null;
   const W2 = Math.round(m.w * TS * DOT), H2 = Math.round(m.h * TS * DOT), c = mk(W2, H2), x = c.getContext('2d'), out = x.createImageData(W2, H2), o = out.data;
   const pats = {}; for (const k in GROUND) { const im = PV[GROUND[k]]; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
-    if (GROUND[k] === 'g_grass') for (let i = 0; i < d.length; i += 4) { d[i] = Math.min(255, d[i] * 1.0 + 6); d[i + 1] = Math.min(255, d[i + 1] * .9 + 2); d[i + 2] = Math.min(255, d[i + 2] * .55); }  // 풀빛: 짙은 올리브 쪽으로(기준 화면의 풀은 누런 올리브와 갈색)
+    if (GROUND[k] === 'g_grass') { const bt = BIOME_T[m.biome] || BIOME_T.grass; for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; [d[i], d[i + 1], d[i + 2]] = bt(d[i], d[i + 1], d[i + 2], l).map(v => Math.max(0, Math.min(255, v))); } }  // 풀 그림을 땅 종류(모래, 눈, 짙은 숲, 어스름)에 맞게 다시 칠한다
     pats[k] = { w: im.width, h: im.height, d }; }
   const bw = base.width, bd = base.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, bw, base.height).data;
   const hs = (i, j) => { let h = (i * 374761393 + j * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -279,10 +285,10 @@ function groundArt(m, base) {
     const k = (Y >> 1) * bw2 + (X >> 1), jx = JX[k], jy = JY[k];
     const tx = Math.min(m.w - 1, Math.max(0, Math.floor(X / cell + jx))), ty = Math.min(m.h - 1, Math.max(0, Math.floor(Y / cell + jy))), p = pats[m.g[ty][tx]], i = (Y * W2 + X) * 4;
     if (p) { const j = (lie(tx, ty) ? (X % p.h) * p.w + Y % p.w : (Y % p.h) * p.w + X % p.w) * 4; o[i] = p.d[j]; o[i + 1] = p.d[j + 1]; o[i + 2] = p.d[j + 2];
-      if (m.g[ty][tx] === 0) { const r = hs(X >> 1, Y >> 1) * .12;  // 도트 두 점마다 떨림을 줘 경계를 도트로 끊는다
-        if (NA[k] > .66 + r) { const t = Math.min(1, (NA[k] - .66) * 5); for (let c = 0; c < 3; c++) o[i + c] = o[i + c] * (1 - t * .8) + DIRT[c] * t * .8 * (.8 + (p.d[j] / 255) * .5); }
-        else if (NB[k] < .34 - r) for (let c = 0; c < 3; c++) o[i + c] *= DARK[c];
-        else if (NC[k] > .7 + r) for (let c = 0; c < 3; c++) o[i + c] = o[i + c] * .55 + MOSS[c] * .45 * (o[i + 1] / 120); } }
+      if (m.g[ty][tx] === 0 && MOTTLE[m.biome || 'grass']) { const r = hs(X >> 1, Y >> 1) * .12, mo = MOTTLE[m.biome || 'grass'];  // 도트 두 점마다 떨림을 줘 경계를 도트로 끊는다
+        if (NA[k] > .66 + r) { const t = Math.min(1, (NA[k] - .66) * 5) * mo.dirt; for (let c = 0; c < 3; c++) o[i + c] = o[i + c] * (1 - t * .8) + (mo.dc || DIRT)[c] * t * .8 * (.8 + (p.d[j] / 255) * .5); }
+        else if (NB[k] < .34 - r) for (let c = 0; c < 3; c++) o[i + c] *= 1 - (1 - DARK[c]) * mo.dark;
+        else if (NC[k] > .7 + r && mo.moss) for (let c = 0; c < 3; c++) o[i + c] = o[i + c] * .55 + MOSS[c] * .45 * (o[i + 1] / 120); } }
     else { const j = (Math.floor(Y / DOT) * bw + Math.floor(X / DOT)) * 4; o[i] = bd[j]; o[i + 1] = bd[j + 1]; o[i + 2] = bd[j + 2]; }
     o[i + 3] = 255;
   }
@@ -382,7 +388,7 @@ function setMap(m) {
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
-  if (art()) { const DK = ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  if (art() && DECO[m.biome || 'grass']) { const DK = ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
     const near = (px, py) => m.stamps.some(q => { const S = STAMPS[q.name]; return S && px > q.x - 6 && px < q.x + S[3] * (q.sc || 1) + 6 && py > q.y + S[4] * .4 - 4 && py < q.base + 8; }) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
     const B = new Map();
     for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > .7) continue;
