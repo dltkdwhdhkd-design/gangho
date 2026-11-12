@@ -10,7 +10,7 @@ import { STAMPS } from './tiles.js';
 import { newState } from './state.js';
 import { makeBuilder, SPEC } from './hd2d/build.js';
 
-const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = 1 / Math.sin(PITCH), HS = 1 / Math.cos(PITCH);
+const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = .857 / Math.sin(PITCH) /* 원근 때문에 주인공 발밑에서 세로 걸음이 가로보다 1.17배 빨라 보이던 것을 맞춘다(평면도 1점이 화면에서 가로와 세로 같은 길이) */, HS = 1 / Math.cos(PITCH);
 const CHAR = 15, AHEAD = .04;  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
 const W = 1280, H = 720;
 let T = null;  // three.js
