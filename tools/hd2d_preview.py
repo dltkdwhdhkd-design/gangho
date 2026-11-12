@@ -1,0 +1,82 @@
+# 새 화면 시제품의 "새 그림 맛보기"에 쓸 그림을 만든다(0단계 임시, 4단계에서 정식 도구로 바꾼다).
+# art-src/chatgpt의 HB1(살림집 여섯 채)을 한 채씩 잘라 소품 이름으로, HC2a·HC2b(윤설 걷기)를 게임 시트 꼴로 줄여 넣는다.
+# 집도 사람과 같은 도트 굵기로 줄인다(면적 평균, 투명도는 반에서 잘라 가장자리를 또렷하게). 게임은 도트를 또렷하게 그린다.
+# 쓰는 법: python3 tools/hd2d_preview.py   → assets/hd2d/preview/*.webp
+import os, sys
+from PIL import Image, ImageFilter
+import numpy as np
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC = os.path.join(ROOT, 'art-src', 'chatgpt')
+OUT = os.path.join(ROOT, 'assets', 'hd2d', 'preview')
+
+
+def key_out(im):
+    """분홍(#FF00FF) 바탕을 지우고 가장자리에 남는 분홍 테를 깎는다"""
+    a = np.asarray(im.convert('RGB')).astype(np.int16)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    pink = np.minimum(r, b) - g  # 분홍일수록 크다. 빨간 등롱(파랑 적음)과 보라(빨강 적음)는 작다
+    alpha = np.clip(1 - (pink - 60) / 90, 0, 1)
+    alpha[(r > 200) & (b > 200) & (g < 90)] = 0
+    m = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3))  # 한 점 깎기
+    out = im.convert('RGBA'); out.putalpha(m)
+    return out
+
+
+def cells(im, cols, rows):
+    w, h = im.size
+    for j in range(rows):
+        for i in range(cols):
+            yield i, j, im.crop((i * w // cols, j * h // rows, (i + 1) * w // cols, (j + 1) * h // rows))
+
+
+def shrink(im, scale):
+    """면적 평균으로 줄이고(색은 투명도를 곱한 채로), 투명도는 반에서 잘라 가장자리를 또렷하게"""
+    a = np.asarray(im).astype(np.float32) / 255
+    pm = a.copy(); pm[..., :3] *= pm[..., 3:4]
+    w, h = im.size; W, H = max(1, round(w * scale)), max(1, round(h * scale))
+    chans = [Image.fromarray(pm[..., k]).resize((W, H), Image.BOX) for k in range(4)]
+    q = np.stack([np.asarray(c) for c in chans], -1)
+    al = q[..., 3:4]; rgb = np.where(al > 1e-4, q[..., :3] / np.maximum(al, 1e-4), 0)
+    out = np.concatenate([np.clip(rgb, 0, 1), (al > .5).astype(np.float32)], -1)
+    return Image.fromarray((out * 255).astype(np.uint8), 'RGBA')
+
+
+DOT = 48 / 15  # 인물 도트 밀도: 사람 키 15점(평면도)에 도트 48점. 배경도 이 굵기로 줄여 도트 결을 맞춘다
+WIDE = {'hut_o': 64, 'hut_b': 64, 'hut_o2': 64, 'straw': 47, 'mud': 42, 'clay': 48}  # 소품 바닥 폭(js/tiles.js STAMPS)
+
+
+def houses():
+    im = key_out(Image.open(os.path.join(SRC, 'HB1.png')))
+    for (i, j, c), n in zip(cells(im, 3, 2), WIDE):
+        c = c.crop(c.getbbox()); c = shrink(c, WIDE[n] * DOT / c.width)
+        c.save(os.path.join(OUT, n + '.webp'), lossless=True)
+        print(n, c.size)
+
+
+def walker():
+    """윤설 걷기 → 게임 시트 꼴: 열은 방향(아래, 위, 왼쪽, 오른쪽), 행은 차렷, 왼발, 차렷, 오른발. 칸 FR×FR, 발끝을 칸 아래에 맞춘다"""
+    FR, TALL = 56, 48  # 사람 키 48점(원본 380점쯤을 8분의 1로)
+    A = key_out(Image.open(os.path.join(SRC, 'HC2a.png'))); B = key_out(Image.open(os.path.join(SRC, 'HC2b.png')))
+    a = {(i, j): c for i, j, c in cells(A, 2, 3)}; b = {(i, j): c for i, j, c in cells(B, 2, 3)}
+    tall = max(c.getbbox()[3] - c.getbbox()[1] for c in list(a.values()) + list(b.values()))
+    sc = TALL / tall
+    def fit(c, flip=False):
+        bb = c.getbbox(); c = c.crop(bb); s = shrink(c, sc)
+        if flip: s = s.transpose(Image.FLIP_LEFT_RIGHT)
+        f = Image.new('RGBA', (FR, FR)); f.paste(s, ((FR - s.width) // 2, FR - s.height - 1), s); return f
+    cols = [
+        [a[0, 0], a[0, 1], a[0, 0], a[0, 2]],  # 정면
+        [a[1, 0], a[1, 1], a[1, 0], a[1, 2]],  # 뒷모습
+        [b[0, 0], b[0, 1], b[1, 1], b[0, 2]],  # 왼쪽(원본이 왼쪽을 본다)
+    ]
+    sheet = Image.new('RGBA', (FR * 4, FR * 4))
+    for d, col in enumerate(cols + [cols[2]]):
+        for r, c in enumerate(col): sheet.paste(fit(c, d == 3), (d * FR, r * FR))
+    sheet.save(os.path.join(OUT, 'me.webp'), lossless=True)
+    print('me', sheet.size, 'scale', round(sc, 4))
+
+
+if __name__ == '__main__':
+    os.makedirs(OUT, exist_ok=True)
+    houses(); walker()
