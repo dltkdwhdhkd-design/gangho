@@ -85,8 +85,8 @@ class MapDef {
     for (let y = 1; y < H - 1; y += st) { if (free(0, y)) this.put(nm(), -1 / this.k, y); if (free(W - 1, y)) this.put(nm(), W - 1 / this.k, y); }
     return this;
   }
-  render() {
-    const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
+  // 땅만 칠한다(납작 소품은 빼고). 새 화면(hd2d.js)은 이 그림을 바닥에 눕히고 납작 소품은 따로 세운다
+  paintBase(x) {
     if (this.room) { const doors = this.portals.filter(q => q.y + q.h >= this.h * TS - 2).map(q => [Math.round(q.x / TS), Math.round((q.x + q.w) / TS)]); paintRoom(x, this.w, this.h, this.roomStyle || 0, { doors, carpet: this.carpet }); }
     else if (G.world?.paintArea) { // 강호 전도와 같은 땅 칠하기: 길섶과 물가가 둥글고, 바닥 얼룩과 돌바닥 턱이 또렷하다
       const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.bm || this.g.map(r => r.map(() => bi));  // 쿼터뷰 마을은 칸마다 바닥(bm)과 칠할 때만 쓰는 흙 얼룩(gPaint)을 따로 둔다
@@ -94,6 +94,10 @@ class MapDef {
     } else paintGround(x, this.g, this.biome);
     if (this.pave) for (const p of this.pave) paintPave(x, p);
     for (const s of this.ground || []) drawIso(x, s);
+  }
+  render() {
+    const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
+    this.paintBase(x);
     for (const s of this.stamps) if (s.flat) drawStamp(x, s.name, s.x, s.y, s.sc);
     this.canvas = c; this.objs = this.stamps.filter(s => !s.flat);
     if (!this.room && !this.live && !FLATMAP.has(this.id) && isoMode()) { this.top = c; buildIsoOut(this); }  // 바깥 지도 쿼터뷰: 평면도는 그대로 두고 그림만 눕힌다
