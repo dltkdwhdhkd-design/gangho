@@ -21,6 +21,19 @@ class MapDef {
   fill(x0, y0, w, h, v) { const k = this.k; if (k !== 1) { const a = Math.round(x0 * k), b = Math.round(y0 * k); w = Math.round((x0 + w) * k) - a; h = Math.round((y0 + h) * k) - b; x0 = a; y0 = b; } return this.fillRaw(x0, y0, w, h, v); }
   fillRaw(x0, y0, w, h, v) { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (this.g[y] && this.g[y][x] !== undefined) this.g[y][x] = v; return this; }
   water(x, y, w, h) { return this.fill(x, y, w, h, 2); }
+  // 땅 높낮이(새 화면이 그린다). 칸마다 높이 단(0이 보통 땅, 한 단은 사람 키의 6할쯤). 계단 칸(stair: 높은 쪽 방향)은 비탈로 잇는다.
+  // 걷기는 따로 바꾸지 않는다: 높이가 다른 걸을 수 있는 칸 사이(계단이 아닌 곳)에 얇은 막힘을 넣는 것(heightEdges)으로 끝낸다
+  terrace(x, y, w, h, lv) { this.hgt ||= this.g.map(r => r.map(() => 0)); for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (this.hgt[j] && this.hgt[j][i] !== undefined) this.hgt[j][i] = lv; return this; }
+  stairs(x, y, w, h, up = 'n') { this.stair ||= {}; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) this.stair[i + ',' + j] = up; return this; }
+  heightEdges() {
+    const H = this.hgt, st = this.stair || {}, walk = (x, y) => this.g[y]?.[x] !== undefined && this.g[y][x] !== 2;
+    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) for (const [dx, dy] of [[1, 0], [0, 1]]) {
+      const X = x + dx, Y = y + dy; if (!walk(x, y) || !walk(X, Y)) continue;  // 계단은 위아래로만 오르내리고 옆으로는 못 들어간다
+      const a = !!st[x + ',' + y], b = !!st[X + ',' + Y], diff = H[y][x] !== H[Y][X];
+      if (dx ? (diff || a !== b) : (diff && !a && !b)) this.solids.push(dx ? { x: X * TS - 2, y: y * TS, w: 4, h: TS } : { x: x * TS, y: Y * TS - 2, w: TS, h: 4 });
+    }
+    return this;
+  }
   put(name, tx, ty, o = {}) {
     const s = STAMPS[name], px = tx * this.k * TS + (o.dx || 0), py = ty * this.k * TS + (o.dy || 0);
     if (!s) { console.warn('소품 없음', name); return this; }
@@ -94,6 +107,7 @@ class MapDef {
     } else paintGround(x, this.g, this.biome);
     if (this.pave) for (const p of this.pave) paintPave(x, p);
     for (const s of this.ground || []) drawIso(x, s);
+    if (this.hgt) { x.fillStyle = 'rgba(20,16,10,.35)'; for (let j = 0; j < this.h - 1; j++) for (let i = 0; i < this.w; i++) if (this.hgt[j][i] > this.hgt[j + 1][i] && !this.stair?.[i + ',' + j] && !this.stair?.[i + ',' + (j + 1)]) x.fillRect(i * TS, (j + 1) * TS, TS, 3); }  // 2D: 높은 칸 아래 가장자리에 그늘 띠
   }
   render() {
     const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
@@ -172,9 +186,19 @@ export function buildMaps() {
     m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2], [0, 13, 3, 5]], 3);
     m.put('plum', 8, 25).put('plum_o', 34, 24).put('tree_round', 38, 25).put('stump', 13, 25).put('boulder', 29, 26).put('jar', 19, 25).put('pot', 26, 25).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 40, 21);
     m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
+    // 길가 살림 소품(새 화면 시제품에서 청하진만 채움). 막힘 있는 것은 길과 문 앞을 비켜 놓는다
+    m.put('v_lamppost', 5, 13.05).put('v_lamppost', 17.5, 13.05).put('v_lamppost', 29.6, 13.05).put('v_lamppost', 7.3, 17.1).put('v_lamppost', 25, 17.1);  // 큰길 등롱 기둥
+    m.put('v_wood', 12.2, 11.6).put('v_crates', 12.8, 13.65).put('v_dummy', 6, 11.2);  // 대장간 옆 장작, 상자, 목인
+    m.put('v_stall', 14.5, 12.45).put('v_jars', 27.8, 13.7).put('v_well', 37.5, 13.4).put('v_hay', 41.5, 13.7);  // 큰길 북쪽: 노점, 독, 우물, 짚더미
+    m.put('v_cart', 11.3, 17.2).put('v_stonelamp', 34.5, 17.1).put('v_jars', 41.5, 17.3).put('v_crates', 29.5, 22.3).put('v_hay', 3.5, 19);  // 큰길 남쪽: 수레, 석등, 독, 상자, 짚더미
+    m.put('v_laundry', 11.5, 22.6, { nosolid: true }).put('v_signboard', 25.3, 25.4);  // 빨래 줄, 나루 안내판
+    m.row('fence_h', 3, 27.4, 17).row('fence_h', 26, 27.4, 17);  // 강둑 울타리(나루 길은 비움)
+    for (const [n, x, y] of [['bush2', 13.2, 20.3], ['flower4', 19.1, 20.4], ['bush4', 25.4, 20.2], ['flower2', 30.8, 20.3], ['bush2', 35.2, 20.6], ['flower1', 8.2, 14.2], ['fern2', 35.6, 14.3], ['bush4', 18.4, 14.4], ['flower3', 24.6, 11.6], ['fern2', 3.4, 14.2]]) m.put(n, x, y, { nosolid: true });  // 집 앞 화단과 풀 포기
+    m.scatter(['fern1', 'fern2', 'bush4', 'flower4', 'bush2'], 45, 11);
   }
   m.fill(21, 28, 4, 4, 4);
   { const K = m.k * TS; m.solids.push({ x: 21 * K - 4, y: 29 * K, w: 4, h: 3 * K }, { x: 25 * K, y: 29 * K, w: 4, h: 3 * K }, { x: 21 * K, y: 32 * K, w: 4 * K, h: 8 }); }
+  m.terrace(0, 29, 46, 5, -2).terrace(21, 29, 4, 3, -1).stairs(21, 28, 4, 1).heightEdges();  // 나루터 높낮이: 강물은 두 단, 나루 판은 한 단 아래, 둑에서 계단으로 내려간다
   m.exit(0, 14, 1, 4, 'valley', 37.5, 15.5, 2, { when: 'burned', lock: '서쪽 청풍골은 나중에 가 보자.' });
   m.label(3.5, 13.2, '← 청풍골');
   m.place(23, 13.8, '광장').place(23, 27, '나루터').place(13, 24.2, '복덕방');
