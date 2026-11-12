@@ -127,6 +127,13 @@ class MapDef {
     return this;
   }
   // 좁힌 지도: 길(1, 3) 칸에 걸린 작은 소품(집이 아닌 것)을 가장 가까운 쪽으로 밀어 길을 비운다. 문 앞(포탈)도 비킨다
+  // 집 뒤(북쪽) 좁은 틈 막기: 카메라가 남쪽에서 보므로 집 뒤는 보이지도 않고 걸어 들어가면 가려진다. 집 폭만큼 담을 친다(길 칸과 다른 막힘은 비운다)
+  backFence(names = DOORED, name = 'fence_h') { const F = STAMPS[name];
+    for (const st of this.stamps.filter(q => names.includes(q.name) && !q.iso)) { const S = STAMPS[st.name], y = st.y - F[4] + 2;
+      for (let x = st.x; x + F[3] <= st.x + S[3] + 1; x += F[3]) { const r = { x: x + F[5], y: y + F[6], w: F[7], h: F[8] }, t = this.g[Math.floor((r.y + r.h - 1) / TS)]?.[Math.floor((r.x + r.w / 2) / TS)];
+        if (t === undefined || t === 1 || t === 2 || this.solids.some(o => o.x < r.x + r.w && o.x + o.w > r.x && o.y < r.y + r.h && o.y + o.h > r.y)) continue; this.put(name, 0, 0, { dx: x, dy: y }); } }
+    return this;
+  }
   clearRoads() {
     let onRoad = r => { for (let ty = Math.floor(r.y / TS); ty <= Math.floor((r.y + r.h - .01) / TS); ty++) for (let tx = Math.floor(r.x / TS); tx <= Math.floor((r.x + r.w - .01) / TS); tx++) { const v = this.g[ty]?.[tx]; if (v === 1 || v === 3) return true; } return this.portals.some(q => q.x < r.x + r.w + 6 && q.x + q.w + 6 > r.x && q.y < r.y + r.h + 8 && q.y + q.h + 8 > r.y); };
     // 집 문 앞(나중에 autoDoors가 문을 다는 자리)도 길처럼 비워 둔다
@@ -200,7 +207,8 @@ export function buildMaps() {
   let m = M('cheongha', 46, 34, { name: '청하진', bgm: 'village', biome: 'grass', arena: 'village', k: .75 });
   m.water(0, 29, 46, 5);
   {
-    m.road(3, 15, 42, 15, 2).road(22, 3, 22, 27, 2).road(9, 16, 9, 20, 2).road(32, 16, 32, 21, 2).road(21, 26, 24, 27, 2);
+    // 큰길(가로)과 그 남쪽 집들 앞을 지나는 뒷길(가로). 새 화면 카메라는 남쪽에서 보므로 집 정면은 모두 남쪽 길을 본다
+    m.road(3, 15, 42, 15, 2).road(22, 3, 22, 27, 2).road(9, 16, 9, 23, 2).road(32, 16, 32, 23, 2).road(21, 26, 24, 27, 2).road(2, 22.7, 44, 22.7, 2);
     m.fill(20, 12, 6, 3, 1);
     m.road(22, 0, 22, 4, 2).road(43, 15, 45, 15, 2).road(0, 15, 3, 15, 2);
     m.house('inn', 19, 8, 'inn', 8, 10, 1, { doorDx: 0 });
@@ -210,24 +218,24 @@ export function buildMaps() {
     m.house('shop_blue', 36, 18, 'shop', 6, 7, 1);
     m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).house('hut_o2', 26, 18, 'bokun', 7, 8, 1, { when: 'bokun_open', lock: '낮에는 문이 잠겨 있다. 밤에만 불이 켜진다는 집이다.' }).put('wood_o', 4, 18).put('wood_b', 12, 8);
     m.put('banner4', 17.6, 9.3, { nosolid: true }).put('banner4', 23.4, 9.3, { nosolid: true });  // 객잔 간판 기: 밥그릇
-    m.put('plum', 2, 22).put('plum', 40, 8).put('plum_g', 18, 22).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
+    m.put('plum', 43, 6).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
     m.put('jar', 18, 12).put('pot', 26, 12).put('pot', 27, 12).put('signpost', 24, 16).put('signpost', 41, 13);
     m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2], [0, 13, 3, 5]], 3);
-    m.put('plum', 8, 25).put('plum_o', 34, 24).put('tree_round', 38, 25).put('stump', 13, 25).put('boulder', 29, 26).put('jar', 19, 25).put('pot', 26, 25).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 40, 21);
+    m.put('tree_round', 8, 25.4).put('tree_round', 38, 25.4).put('stump', 13, 25.5).put('boulder', 29, 26).put('jar', 19, 25.5).put('pot', 26, 25.5).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 37.5, 9.3);  // 동쪽 살림집은 큰길 북쪽으로 옮김(뒷길에 걸려서)
     m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
     // 길가 살림 소품(새 화면 시제품에서 청하진만 채움). 막힘 있는 것은 길과 문 앞을 비켜 놓는다
     m.put('v_lamppost', 5, 13.05).put('v_lamppost', 17.5, 13.05).put('v_lamppost', 29.6, 13.05).put('v_lamppost', 7.3, 17.1).put('v_lamppost', 25, 17.1);  // 큰길 등롱 기둥
     m.put('v_wood', 12.2, 11.6).put('v_dummy', 6, 11.2);  // 대장간 옆 장작, 상자, 목인
     m.put('v_stall', 17.5, 12.45).put('v_jars', 27.8, 13.7).put('v_well', 37.5, 13.4).put('v_hay', 41.5, 13.7);  // 큰길 북쪽: 노점, 독, 우물, 짚더미
-    m.put('v_cart', 7, 17.2).put('v_stonelamp', 34.5, 17.1).put('v_jars', 41.5, 17.3).put('v_crates', 29.5, 22.3).put('v_hay', 3.5, 19);  // 큰길 남쪽: 수레, 석등, 독, 상자, 짚더미
-    m.put('v_laundry', 11.5, 22.6, { nosolid: true }).put('v_signboard', 25.3, 25.4);  // 빨래 줄, 나루 안내판
+    m.put('v_cart', 16.5, 25.7).put('v_stonelamp', 34.5, 17.1).put('v_jars', 41.5, 17.3).put('v_crates', 29.5, 25.8).put('v_hay', 3.5, 19);  // 큰길 남쪽: 수레, 석등, 독, 상자, 짚더미
+    m.put('v_laundry', 11.5, 25.6, { nosolid: true }).put('v_signboard', 25.3, 25.4);  // 빨래 줄, 나루 안내판
     m.row('fence_h', 3, 27.4, 17).row('fence_h', 26, 27.4, 17);  // 강둑 울타리(나루 길은 비움)
-    for (const [n, x, y] of [['bush2', 13.2, 20.3], ['flower4', 19.1, 20.4], ['bush4', 25.4, 20.2], ['flower2', 30.8, 20.3], ['bush2', 35.2, 20.6], ['flower1', 8.2, 14.2], ['fern2', 35.6, 14.3], ['bush4', 18.4, 14.4], ['flower3', 24.6, 11.6], ['fern2', 3.4, 14.2]]) m.put(n, x, y, { nosolid: true });  // 집 앞 화단과 풀 포기
+    for (const [n, x, y] of [['bush2', 13.2, 25.9], ['flower4', 19.6, 25.9], ['bush4', 27.2, 26], ['flower2', 31, 25.9], ['bush2', 35.2, 26], ['flower1', 8.2, 14.2], ['fern2', 35.6, 14.3], ['bush4', 18.4, 14.4], ['flower3', 24.6, 11.6], ['fern2', 3.4, 14.2]]) m.put(n, x, y, { nosolid: true });  // 집 앞 화단과 풀 포기
     m.scatter(['fern1', 'fern2', 'bush4', 'flower4', 'bush2'], 45, 11);
   }
   m.fill(21, 28, 4, 4, 4);
   { const K = m.k * TS; m.solids.push({ x: 21 * K - 4, y: 29 * K, w: 4, h: 3 * K }, { x: 25 * K, y: 29 * K, w: 4, h: 3 * K }, { x: 21 * K, y: 32 * K, w: 4 * K, h: 8 }); }
-  m.terrace(0, 29, 46, 5, -2).terrace(21, 29, 4, 3, -1).stairs(21, 28, 4, 1).heightEdges().clearRoads().dress();  // 나루터 높낮이: 강물은 두 단, 나루 판은 한 단 아래, 둑에서 계단으로 내려간다
+  m.terrace(0, 29, 46, 5, -2).terrace(21, 29, 4, 3, -1).stairs(21, 28, 4, 1).heightEdges().clearRoads().backFence().dress();  // 나루터 높낮이: 강물은 두 단, 나루 판은 한 단 아래, 둑에서 계단으로 내려간다
   m.exit(0, 14, 1, 4, 'valley', 37.5, 15.5, 2, { when: 'burned', lock: '서쪽 청풍골은 나중에 가 보자.' });
   m.label(3.5, 13.2, '← 청풍골');
   m.place(23, 13.8, '광장').place(23, 27, '나루터').place(13, 24.2, '복덕방');
