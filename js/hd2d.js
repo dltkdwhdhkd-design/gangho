@@ -26,7 +26,7 @@ const TIMES = {
   morning: { sun: [.82, .38, .3], sunC: '#ffe0b4', sunI: 4, sky: '#8ea8d8', gnd: '#3a3628', hemI: .4, con: 1.15, fog: '#d4dae2', skyT: '#8fb4e6', mtn: '#7d8fa8', tint: [.99, 1, 1.03], expo: 1.02, sat: 1, lamp: 0 },
   day: { sun: [-.74, .5, .3], sunC: '#fff0d4', sunI: 4.6, sky: '#98b4e4', gnd: '#3a3024', hemI: .34, con: 1.22, fog: '#cdd6da', skyT: '#7fa6dc', mtn: '#7c8c9a', tint: [1.01, 1, .98], expo: 1, sat: 1.06, lamp: 0 },
   evening: { sun: [-.94, .12, .2], sunC: '#ff8a3a', sunI: 4.6, sky: '#5068a8', gnd: '#1c1a24', hemI: .75, fog: '#a58ca4', skyT: '#4c5c9c', mtn: '#4e4a6c', tint: [.98, .97, 1.04], expo: 1, sat: 1.08, lamp: .55 },
-  night: { sun: [-.4, .75, -.15], sunC: '#8aa4ff', sunI: .85, sky: '#2c4080', gnd: '#0c0e18', hemI: .5, fog: '#141c3c', skyT: '#0a1028', mtn: '#1a2240', tint: [.82, .92, 1.15], expo: 1, sat: .9, lamp: 1.2 },
+  night: { sun: [-.4, .75, -.15], sunC: '#7f9cff', sunI: 1.3, sky: '#3a54a8', gnd: '#10142a', hemI: .62, fog: '#141c3c', skyT: '#0a1028', mtn: '#1a2240', tint: [.74, .88, 1.3], expo: 1.05, sat: .8, lamp: 1.2 },
 };
 
 export const HD = {
@@ -306,6 +306,31 @@ function terrain(m, gt) {
 }
 
 // ── 지도 ──
+// 물(HG2 그림이 오기 전 코드로): 물 칸(2)마다 판을 깔고, 잔물결이 움직이며 하늘빛이 비치게 색을 섞는다. 빛과 그림자는 Lambert 그대로 받는다
+let waterM = null; const WU = { uT: { value: 0 }, uSky: { value: null }, uDeep: { value: null } };
+function waterMat() {
+  if (waterM) return waterM; WU.uSky.value = new T.Color('#9cc0e8'); WU.uDeep.value = new T.Color('#1f4a52');
+  waterM = new T.MeshLambertMaterial({ color: '#ffffff', transparent: true, opacity: .93 });
+  waterM.onBeforeCompile = s => { Object.assign(s.uniforms, WU);
+    s.vertexShader = 'varying vec3 vWp;\n' + s.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vWp = (modelMatrix * vec4(transformed, 1.)).xyz;');
+    s.fragmentShader = 'varying vec3 vWp; uniform float uT; uniform vec3 uSky, uDeep;\n' + s.fragmentShader.replace('#include <map_fragment>', `
+      vec2 q = floor(vWp.xz / vec2(1.2, 1.2 * 4.4)) * vec2(.09, .09 * 4.4 * 1.6);  // 도트 굵기로 끊어 잰다. 물결은 옆으로 긴 줄
+      float w1 = sin(q.x * .9 + q.y * 2.6 + uT * 1.6) + sin(q.x * 1.9 - q.y * 3.3 - uT * 1.2) * .8 + sin(q.x * 3.7 + q.y * 5.1 + uT * 2.1) * .5;
+      float rip = smoothstep(1.7, 2.1, w1), dark = smoothstep(-.8, -2.2, w1);
+      float far = smoothstep(0., 600., length(vWp.xz - cameraPosition.xz));
+      vec3 c = mix(uDeep, uSky, .38 + far * .3); c = mix(c, uSky * 1.25, rip * .75); c *= 1. - dark * .25;
+      diffuseColor.rgb *= c;`); };
+  return waterM;
+}
+function waterMesh(m) {
+  const P = [], N = [], z = y => y * TS * ZS;
+  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) { if (m.g[y][x] !== 2) continue;
+    const h = m.hgt ? Math.min(...corners4(m, x, y)) + .4 : .25, x0 = x * TS, x1 = x0 + TS + .02, z0 = z(y), z1 = z(y + 1) + .02;
+    for (const v of [[x0, z1], [x1, z1], [x1, z0], [x0, z1], [x1, z0], [x0, z0]]) { P.push(v[0], h, v[1]); N.push(0, 1, 0); } }
+  if (!P.length) return null; const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new T.Float32BufferAttribute(N, 3));
+  const o = new T.Mesh(g, waterMat()); o.receiveShadow = true; o.renderOrder = 1; return o;
+}
+let water = null;
 let buildMs = 0;
 function setMap(m) {
   if (curMap === m) return; curMap = m; const t0 = performance.now();
@@ -319,6 +344,7 @@ function setMap(m) {
   if (m.hgt) ground = terrain(m, gt);  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(Wm / 2, 0, Dm / 2); }
   ground.receiveShadow = true; scene.add(ground);
+  if (water) { scene.remove(water); water.geometry.dispose(); } water = art() ? waterMesh(m) : null; if (water) scene.add(water);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
@@ -335,6 +361,17 @@ function setMap(m) {
     const M = matOf(t), o = new T.Mesh(GEO.get(gk), M.m); o.customDepthMaterial = M.d; o.position.set(s.x + w / 2, hAt(m, s.x + w / 2, z - 1), z * ZS + k * .003);
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
+  // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
+  if (art()) { const DK = ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+    const near = (px, py) => m.stamps.some(q => { const S = STAMPS[q.name]; return S && px > q.x - 6 && px < q.x + S[3] * (q.sc || 1) + 6 && py > q.y + S[4] * .4 - 4 && py < q.base + 8; }) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
+    const B = new Map();
+    for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > .7) continue;
+      const px = (x + hs(x, y * 3 + j)) * TS, py = (y + hs(x * 5 + j, y)) * TS; if (near(px, py) || m.g[Math.floor(py / TS)]?.[Math.floor(px / TS)] !== 0) continue;
+      const k = DK[Math.floor(hs(x * 3, y * 11 + j) * DK.length)], t = stampTex(k), st = STAMPS[k]; if (!t || !st) continue; const sc = .45 + hs(y, x + j) * .3, w = st[3] * sc, h = st[4] * sc * HS, y0 = hAt(m, px, py), z = (py + .5) * ZS;
+      if (!B.has(t)) B.set(t, { P: [], U: [], I: [] }); const b = B.get(t), n = b.P.length / 3;
+      b.P.push(px - w / 2, y0, z, px + w / 2, y0, z, px + w / 2, y0 + h, z, px - w / 2, y0 + h, z); b.U.push(0, 0, 1, 0, 1, 1, 0, 1); b.I.push(n, n + 1, n + 2, n, n + 2, n + 3); }
+    for (const [t, b] of B) { const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(b.P, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(b.U, 2)); g.setAttribute('normal', new T.Float32BufferAttribute(b.P.map((_, i) => i % 3 === 1 ? 1 : 0), 3)); g.setIndex(b.I);
+      const o = new T.Mesh(g, matOf(t).m); o.receiveShadow = true; o.userData = { deco: true }; propG.add(o); } }
   // 등불 자리: 문 위, 등롱, 객잔 기
   m._lamps = [...LAMPX, ...m.portals.filter(q => q.door && !LAMPX.some(l => Math.abs(l[0] - q.x - q.w / 2) < 30 && Math.abs(l[1] - q.y) < 12)).map(q => [q.x + q.w / 2, q.y - 2, 26]), ...m.stamps.filter(s => /lantern|banner|censer|v_lamp|v_stonelamp/.test(s.name)).map(s => { const st = STAMPS[s.name]; return [s.x + st[3] * (s.name === 'v_lamppost' ? .7 : .5), s.base + 1, st[4] * (s.name === 'v_lamppost' ? .6 : s.name === 'v_stonelamp' ? .6 : .7)]; })]; LAMPX.length = 0;
   camT.set(-1, 0, 0);  // 다음 장면에서 카메라를 바로 주인공에게
@@ -343,15 +380,17 @@ function setMap(m) {
 
 // ── 인물 ──
 const pool = []; let used = 0;
-function actor(t, sx, sy, sw, sh, flip, x, y, size, lift = 0) {
+function actor(t, sx, sy, sw, sh, flip, x, y, size, lift = 0, wx = 1) {
   let o = pool[used];
   if (!o) { const g = new T.PlaneGeometry(1, 1); g.translate(0, .5, 0); const n = g.attributes.normal; for (let i = 0; i < 4; i++) n.setXYZ(i, 0, 1, 0); o = new T.Mesh(g); o.castShadow = true; o.receiveShadow = true; pool.push(o); actG.add(o); }
   used++; const M = matOf(t); o.material = M.m; o.customDepthMaterial = M.d; o.visible = true;
   const iw = t.image.width, ih = t.image.height, u0 = sx / iw, u1 = (sx + sw) / iw, v1 = 1 - sy / ih, v0 = 1 - (sy + sh) / ih, uv = o.geometry.attributes.uv;
   const a = flip ? u1 : u0, b = flip ? u0 : u1; uv.setXY(0, a, v1); uv.setXY(1, b, v1); uv.setXY(2, a, v0); uv.setXY(3, b, v0); uv.needsUpdate = true;
-  o.scale.set(size, size * HS, 1); o.position.set(x, lift * HS + hAt(curMap, x, y), (y + 1) * ZS + .5);  // 2D는 발끝을 y+1에 그렸다. 같은 줄의 소품보다 반 점 앞
+  o.scale.set(size * wx, size * HS, 1); o.position.set(x, lift * HS + hAt(curMap, x, y), (y + 1) * ZS + .5);  // 2D는 발끝을 y+1에 그렸다. 같은 줄의 소품보다 반 점 앞
   return o;
 }
+// 예전 2.5등신 인물(16점 칸): 새 인물 그림이 오기 전까지 키는 주인공과 같게(칸 16점 중 사람 15점), 폭만 조금 줄여 덜 튀게
+const OLDK = CHAR / 15;
 let blobT = null; const blobs = []; let usedB = 0;
 function blob(x, y, s) {
   if (!blobT) { const im = IMG['chars/_Shadow']; if (!im) return; blobT = new T.Texture(im); blobT.colorSpace = T.SRGBColorSpace; blobT.needsUpdate = true; }
@@ -366,7 +405,7 @@ function frameOf(key, dirCol, row, diag) {
   const f = 16 * (img.hd || 1), r = Math.min(row, Math.floor(img.height / f) - 1); return { t: sheetTex(key), sx: dirCol * f, sy: r * f, s: f, flip: false };
 }
 function syncActors(F) {
-  used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, o.size || 16, o.lift || 0); blob(x, y, o.size ? o.size / 16 : 1); };
+  used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, (o.size || 16) * OLDK, o.lift || 0, .84); blob(x, y, o.size ? o.size / 16 : 1); };
   for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16); continue; }
     const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, yt = key === 'chars/Princess' && previewTex('yun'); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
   for (const r of F.roam) if (!r.gone) { const key = r.spr.includes('/') ? r.spr : 'chars/' + r.spr; put(key, r.dir, Math.floor(r.walk || 0) % 4, r.x, r.y, { size: r.size }); }
@@ -455,6 +494,7 @@ function foreground() {
 const timeOf = () => HD.opt.time === 'auto' ? (G.S?.flags?.night ? 'night' : 'day') : HD.opt.time;
 function light() {
   const L = TIMES[timeOf()];
+  if (waterM) { WU.uT.value = performance.now() / 1000; WU.uSky.value.set(L.skyT); WU.uDeep.value.set(L.lamp ? '#0e2430' : '#1f4a52'); }
   sun.color.set(L.sunC); sun.intensity = L.sunI; hemi.color.set(L.sky); hemi.groundColor.set(L.gnd); hemi.intensity = L.hemI;
   scene.fog.color.set(L.fog); scene.fog.near = dist * 3; scene.fog.far = dist * 13; backdrop(L);
   const sz = HD.opt.fx === 'high' ? 4096 : HD.low ? 1024 : 2048; if (sun.shadow.mapSize.x !== sz) { sun.shadow.mapSize.set(sz, sz); sun.shadow.map?.dispose(); sun.shadow.map = null; }

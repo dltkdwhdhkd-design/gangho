@@ -138,6 +138,17 @@ class MapDef {
       out: for (let d = 2; d <= 48; d += 2) for (const [dx, dy] of [[0, -d], [0, d], [-d, 0], [d, 0]]) { const t = { x: r.x + dx, y: r.y + dy, w: r.w, h: r.h }; if (!onRoad(t) && !hits(t) && t.x >= 0 && t.y >= 0) { r.x += dx; r.y += dy; st.x += dx; st.y += dy; st.base += dy; break out; } } }
     return this;
   }
+  // 집마다 문 옆에 살림 소품 하나(독, 장작, 상자 따위). 문 앞(28점 폭)과 길, 다른 막힘은 피하고, 둘 데가 없으면 놓지 않는다
+  dress(list = ['v_jars', 'v_wood', 'jar', 'v_crates', 'pot', 'box']) {
+    const busy = (r, own) => this.solids.some(o => o !== own && o.x < r.x + r.w + 2 && o.x + o.w + 2 > r.x && o.y < r.y + r.h + 2 && o.y + o.h + 2 > r.y)
+      || this.portals.some(q => q.x < r.x + r.w + 2 && q.x + q.w + 2 > r.x && q.y < r.y + r.h + 10 && q.y + q.h + 10 > r.y)
+      || [[r.x, r.y], [r.x + r.w, r.y], [r.x, r.y + r.h], [r.x + r.w, r.y + r.h]].some(([x, y]) => { const v = this.g[Math.floor(y / TS)]?.[Math.floor(x / TS)]; return v === undefined || v === 1 || v === 2; });
+    this.stamps.filter(st => DOORED.includes(st.name) && !st.iso).forEach((st, i) => { const H = STAMPS[st.name], cx = st.x + H[3] / 2, by = st.y + H[4];
+      for (const side of i % 2 ? [1, -1] : [-1, 1]) { const name = list[i % list.length], S = STAMPS[name], px = Math.round(cx + side * (H[3] / 2 - S[3] / 2 + 4) - S[3] / 2), py = by + 3 - S[4];
+        if (Math.abs(px + S[3] / 2 - cx) - S[3] / 2 < 11) continue; const sol = { x: px + S[5], y: py + S[6], w: S[7], h: S[8] }; if (busy(sol, st.sol)) continue;
+        this.put(name, 0, 0, { dx: px, dy: py }); break; } });
+    return this;
+  }
   // (px, py)가 막혔으면 가장 가까운 빈 자리(점 단위)를 돌려준다. 좁힌 지도에서 사람과 들어오는 자리를 비켜 세울 때 쓴다
   freeNear(px, py) { if (!this.blocked(px, py)) return [px, py]; for (let r = 4; r <= 64; r += 4) for (let a = 0; a < 16; a++) { const x = px + Math.cos(a / 8 * Math.PI) * r, y = py + Math.sin(a / 8 * Math.PI) * r; if (!this.blocked(x, y)) return [x, y]; } return [px, py]; }
   blocked(px, py, w = 9, h = 5) {
@@ -216,7 +227,7 @@ export function buildMaps() {
   }
   m.fill(21, 28, 4, 4, 4);
   { const K = m.k * TS; m.solids.push({ x: 21 * K - 4, y: 29 * K, w: 4, h: 3 * K }, { x: 25 * K, y: 29 * K, w: 4, h: 3 * K }, { x: 21 * K, y: 32 * K, w: 4 * K, h: 8 }); }
-  m.terrace(0, 29, 46, 5, -2).terrace(21, 29, 4, 3, -1).stairs(21, 28, 4, 1).heightEdges().clearRoads();  // 나루터 높낮이: 강물은 두 단, 나루 판은 한 단 아래, 둑에서 계단으로 내려간다
+  m.terrace(0, 29, 46, 5, -2).terrace(21, 29, 4, 3, -1).stairs(21, 28, 4, 1).heightEdges().clearRoads().dress();  // 나루터 높낮이: 강물은 두 단, 나루 판은 한 단 아래, 둑에서 계단으로 내려간다
   m.exit(0, 14, 1, 4, 'valley', 37.5, 15.5, 2, { when: 'burned', lock: '서쪽 청풍골은 나중에 가 보자.' });
   m.label(3.5, 13.2, '← 청풍골');
   m.place(23, 13.8, '광장').place(23, 27, '나루터').place(13, 24.2, '복덕방');
