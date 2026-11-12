@@ -20,8 +20,9 @@ const { chromium } = require('playwright');
         const [fx, fy] = H.proj(f.p.x, f.p.y, 0), [hx, hy] = H.proj(f.p.x, f.p.y, 15); if (fx < 20 || fx > 1260 || hy < 20 || fy > 700) bad.push(`${z}:${x},${y} 발(${fx | 0},${fy | 0}) 머리y ${hy | 0}`); }
       await sleep(0); }
     // 2) 건물 뒤: 객잔 지붕 뒤에 서면 객잔이 옅어진다
-    H.setOpt('zoom', 7); f.p.x = 21 * 16; f.p.y = 9.2 * 16; H.aim(f); const behind = H.stats().faded;
-    f.p.x = 21 * 16; f.p.y = 13 * 16; H.aim(f); const front = H.stats().faded;
+    const inn = f.m.stamps.find(s => s.name === 'inn');  // 좁힌 지도에서도 객잔 자리를 따라간다
+    H.setOpt('zoom', 7); f.p.x = inn.x + 32; f.p.y = inn.y + 1.2 * 16; H.aim(f); const behind = H.stats().faded;
+    f.p.x = inn.x + 32; f.p.y = inn.y + 5 * 16; H.aim(f); const front = H.stats().faded;
     // 3) 지도 다시 세우기
     f.load('cheongha', 22.5, 16, 0); H.render(f); const build = H.stats().buildMs;
     G.manual = false; return { tiles: pick.length, bad, behind, front, build, stats: H.stats() };
@@ -34,7 +35,7 @@ const { chromium } = require('playwright');
   const go = (x, y, o) => p.evaluate(([x, y, o]) => { const G = __G, f = G.field, H = G.hd; for (const k in o) H.setOpt(k, o[k]); f.p.x = x * 16; f.p.y = y * 16; H.aim(f); H.render(f); }, [x, y, o]);
   for (const z of [9, 7, 6]) { await go(21, 22.6, { zoom: z, time: 'day' }); await shot('z' + z); }
   for (const t of ['morning', 'day', 'evening', 'night']) { await go(21, 13, { zoom: 7, time: t }); await shot('t_' + t); }
-  await go(21, 9.2, { zoom: 7, time: 'day' }); await shot('behind');
+  const inn = await p.evaluate(() => { const s = __G.field.m.stamps.find(s => s.name === 'inn'); return [s.x / 16 + 2, s.y / 16 + 1.2]; }); await go(inn[0], inn[1], { zoom: 7, time: 'day' }); await shot('behind');
   await p.evaluate(() => { const f = __G.field; f.p.x = 4 * 16; f.p.y = 15.5 * 16; const n = f.npcs.slice().sort((a, b) => Math.hypot(a.x - f.p.x, a.y - f.p.y) - Math.hypot(b.x - f.p.x, b.y - f.p.y))[0]; if (n) f.bubble(n, '말풍선이 머리 위에 뜨는지 본다'); });
   await go(4, 15.5, { zoom: 9, time: 'day' }); await shot('exit');
   await p.evaluate(() => __G.hd.setOpt('art', 1)); await p.waitForTimeout(1500);

@@ -22,7 +22,7 @@ export class Field {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
     if (id === 'mysect') G.sect.build();
     G.world.ensure(id);
-    const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir;
+    const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir; if (m.k < 1) [this.p.x, this.p.y] = m.freeNear(this.p.x, this.p.y);  // 좁힌 지도: 막힌 자리에 서면 가까운 빈 곳으로
     // 넓힌 지도로 방에서 나오면 그 방 문 바로 앞에 선다
     if ((m.k > 1 || m.hasIso) && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
     this.refresh(true); this.camera(1); this.showHud();
@@ -319,7 +319,7 @@ export class Field {
       else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined); drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
         mark(n); }
     }
-    if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha' && !m.hasIso) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(19 * TS, 8 * TS, 4 * TS, 3 * TS - 2); }
+    if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha' && !m.hasIso) { const st = m.stamps.find(s => s.name === 'inn'); if (st) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(st.x, st.y, 4 * TS, 3 * TS - 2); } }  // 좁힌 지도에서도 객잔 자리를 따라간다
     G.warfx?.over(c, m, cam, this.t);  // 불길, 연기, 비계, 교전 칼빛
     const ar = IMG['fx/p_arrow']; for (const r of this.arrows) { c.save(); c.translate(r.x, r.y); c.rotate(r.an); if (ar) c.drawImage(ar, -6, -2, ar.width / (ar.hd || 1), ar.height / (ar.hd || 1)); c.restore(); }
     if (G.decor) {

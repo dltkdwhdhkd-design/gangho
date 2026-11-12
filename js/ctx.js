@@ -52,8 +52,9 @@ export const Story = {
     const k = G.mapK?.(id) || 1; // 쿼터뷰 미리보기로 넓힌 지도면 이야기 쪽 칸 좌표를 그만큼 늘린다
     if (k !== 1) {
       const P = o => Object.assign(o, { x: o.x * k, y: o.y * k }), R = o => Object.assign(o, { x: o.x * k, y: o.y * k, w: (o.w ?? 1) * k, h: (o.h ?? 1) * k });
-      npcs.forEach(n => { if (n._k) return; n._k = 1; P(n); if (n.route) n.route = n.route.map(([a, b]) => [a * k, b * k]); });
+      npcs.forEach(n => { if (n._k) return; n._k = 1; P(n); if (n.route) n.route = n.route.map(([a, b]) => [a * k, b * k]); if (n.look) n.look = n.look.map(v => v * k); });
       spots = spots.map(o => R({ ...o })); trigs = trigs.map(o => R({ ...o })); roam = roam.map(o => P({ ...o })); hunt = hunt.map(o => P({ ...o }));
+      if (k < 1) { const m = G.field?.m?.id === id ? G.field.m : null; if (m) for (const n of npcs) { const [x, y] = m.freeNear(n.x * TS, n.y * TS); n.x = x / TS; n.y = y / TS; } }  // 좁힌 지도: 집 크기는 그대로라 집 속에 들어간 사람은 가까운 빈 곳으로
     }
     return { npcs, spots, trigs, roam, hunt };
   },
