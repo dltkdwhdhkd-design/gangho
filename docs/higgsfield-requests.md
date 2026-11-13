@@ -19,3 +19,21 @@ HC1a/b와 같은 칸 배치: a는 앞·뒤 2열 3행(차렷, 왼발, 오른발),
 
 ## HW2 큰 건물 벽(다음)
 HW1과 같은 배치로 절 법당(붉은 기둥, 살창 문 여섯), 문파 회관(검은 나무틀, 흰 벽, 큰 살창), 부잣집(회색 벽돌, 붉은 대문).
+
+## 무료 줄 차례(Higgsfield는 한 번에 한 장만 그린다)
+
+`tools/hf_queue.json`의 순서대로 받는다. 사람마다 a(앞·뒤, 참고 HC1a와 HN1a) 다음 b(옆모습, 참고 그 사람의 a와 HC1b). 받으면 `art-src/higgsfield/`에 넣고 `tools/hd2d_preview.py`의 walker로 게임 시트(`assets/hd2d/preview/n_*.webp`)를 만들고, `js/hd2d.js`의 NEWNPC에 이어 붙인다.
+
+| 번호 | 사람 | 쓰는 옛 그림 |
+|---|---|---|
+| HN5 | a Shaolin Buddhist monk of ancient China in his thirties | chars/Monk |
+| HN6 | a young martial-arts sect disciple in his twenties | chars/GreenNinja |
+| HN7 | a wealthy merchant of ancient China in his fifties | chars/Noble |
+| HN8 | a town patrol soldier of ancient China | chars/Knight |
+| HN9 | a burly bearded man of ancient China in his forties (blacksmith or mountain bandit) | chars/Caveman2 |
+| HN10 | an inn waiter of ancient China in his twenties | chars/Villager4 |
+| HN11 | a county yamen clerk of ancient China in his forties | chars/Inspector |
+| HN12 | a Beggars' Sect member of ancient China | chars/Gaebang |
+| HN13 | a village child of ancient China about eight years old | chars/Child |
+
+이것이 끝나면: 물 무늬(HG2: 강, 연못, 얕은 여울 이음 무늬), 나루와 배(선착장 판자, 나룻배, 돛단배), 저잣거리 좌판 더(포목, 약재, 그릇), 바위 절벽 토막.
