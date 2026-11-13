@@ -179,10 +179,10 @@ function townLayout(m, l) {
 }
 // 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다
 // 거리 채움 소품(지도마다 성격에 맞게). 길 북쪽 가장자리에 띄엄띄엄
-const STREET = { town: ['p_lanterns', 'p_barrels', 'p_sacks', 'p_flowerbed', 'p_trough', 'v_jars', 'v_crates', 'v_hay', 'v_wood', 'p_banner'], wild: ['v_hay', 'v_wood', 'p_sacks', 'p_barrels', 'v_cart'],
+const STREET = { town: ['p_lanterns', 'p_barrels', 'p_sacks', 'p_flowerbed', 'p_trough', 'v_jars', 'v_crates', 'v_hay', 'v_wood', 'p_banner', 'p_bench', 'p_teatable', 'p_vat', 'p_woodshed', 'p_laundry', 'p_pots', 'p_chili', 'p_garlic', 'p_ladder', 'p_coop'], wild: ['v_hay', 'v_wood', 'p_sacks', 'p_barrels', 'v_cart', 'p_woodshed', 'p_ladder', 'p_bamboofence'],
   fort: ['p_weapons', 'p_target', 'p_barrels', 'p_sacks', 'v_wood', 'p_banner', 'v_crates'], guhwa: ['p_lanterns', 'p_flowerbed', 'p_barrels', 'p_foodstall', 'p_sacks', 'p_banner', 'v_jars'],
   cloudmt: ['p_lanterns', 'p_flowerbed', 'p_weapons', 'p_target', 'p_lion', 'p_banner'], shaolin: ['p_lanterns', 'p_flowerbed', 'p_lion', 'p_weapons'], ninehall: ['p_lanterns', 'p_flowerbed', 'p_banner', 'p_weapons', 'p_lion'],
-  fiveclans: ['p_lanterns', 'p_flowerbed', 'p_banner', 'p_rail', 'p_lion'], oasis: ['p_barrels', 'p_sacks', 'p_trough', 'v_jars', 'p_foodstall', 'p_banner'] };
+  fiveclans: ['p_lanterns', 'p_flowerbed', 'p_banner', 'p_rail', 'p_lion'], oasis: ['p_barrels', 'p_sacks', 'p_trough', 'v_jars', 'p_foodstall', 'p_banner', 'p_vat', 'p_chili'] };
 function autoDoors(m, owner) {
   [...m.stamps].forEach((st, i) => { if (st.iso || !HOUSES.includes(st.name)) return; const w = STAMPS[st.name][3], h = STAMPS[st.name][4], cx = st.x + w / 2, by = st.y + h; if (m.portals.some(q => q.x + q.w > st.x && q.x < st.x + w && Math.abs(q.y - by) < 28)) return;  // 쿼터뷰 집(이름이 같은 inn 등)은 건너뛴다
     const bx = cx / TS / m.k, byT = (by / TS + 1) / m.k; if (m.blocked(cx, by + 16) || m.blocked(cx, by + 8)) return; const big = st.name === 'hall' || st.name === 'lodge', kind = big ? 'temple' : 'home', id = `h_${m.id}_${i}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: m.id, bx, by: byT, kind, name: big ? '전각' : '집', owner };

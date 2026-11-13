@@ -133,7 +133,7 @@ class MapDef {
     const apron = this.stamps.filter(st => DOORED.includes(st.name)).map(st => { const S = STAMPS[st.name]; return { x: st.x + S[3] / 2 - 20, y: st.y + S[4] - 4, w: 40, h: 40 }; });
     const hit = (r, pad) => this.solids.some(o => o.x < r.x + r.w + pad && o.x + o.w + pad > r.x && o.y < r.y + r.h + pad && o.y + o.h + pad > r.y) || this.portals.some(q => q.x < r.x + r.w + 16 && q.x + q.w + 16 > r.x && q.y < r.y + r.h + 24 && q.y + q.h + 24 > r.y) || apron.some(a => a.x < r.x + r.w && a.x + a.w > r.x && a.y < r.y + r.h && a.y + a.h > r.y);
     let last = -99;
-    for (let ty = 2; ty < this.h - 1; ty++) for (let tx = 1; tx < this.w - 1; tx++) { if (this.g[ty][tx] !== 1 || this.g[ty - 1][tx] !== 0 || this.g[ty - 2]?.[tx] !== 0) continue;
+    for (let ty = 2; ty < this.h - 1; ty++) for (let tx = 1; tx < this.w - 1; tx++) { if ((this.g[ty][tx] !== 1 && this.g[ty][tx] !== 3) || this.g[ty - 1][tx] !== 0 || this.g[ty - 2]?.[tx] !== 0) continue;  // 길(1)과 마당(3) 북쪽 가장자리
       if (hs(tx, ty) > 1 / every || tx - last < 3) continue; const name = list[Math.floor(hs(ty, tx * 3) * list.length)], S = STAMPS[name]; if (!S) continue;
       const px = tx * TS + TS / 2 - S[3] / 2, py = ty * TS - S[4] - 1, r = S.length > 5 ? { x: px + S[5], y: py + S[6], w: S[7], h: S[8] } : { x: px, y: py + S[4] - 6, w: S[3], h: 6 };
       let ok = !hit(r, 6); for (let x = r.x; ok && x < r.x + r.w; x += 4) for (let y = r.y; y < r.y + r.h; y += 4) { const v = this.g[Math.floor(y / TS)]?.[Math.floor(x / TS)]; if (v !== 0) { ok = false; break; } }
