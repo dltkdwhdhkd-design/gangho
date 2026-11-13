@@ -99,12 +99,19 @@ const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 �
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
 // 블렌더로 지은 모형(tools/blender/hall.py → assets/hd2d/models/*.glb). 길이는 평면도 점이라 세울 때 (1, HS, ZS)로 늘린다
-const MODELS = {}, MODELN = ['daewoong'], MODELM = new Map();  // MODELM: 그물(geometry) → 재질 셋. clone은 userData를 JSON으로 베껴 재질이 깨지므로 따로 둔다
-async function loadModels() { try { const { GLTFLoader } = await import('./lib/three/addons/GLTFLoader.js'), L = new GLTFLoader();
-  await Promise.all(MODELN.map(async n => { try { const g = await L.loadAsync(`assets/hd2d/models/${n}.glb`); g.scene.traverse(o => { if (!o.isMesh) return; const sm = o.material, t = sm.map;
+const MODELS = {}, MODELN = ['daewoong'], MODELM = new Map(), MODELP = {};  // MODELM: 그물(geometry) → 재질 셋. clone은 userData를 JSON으로 베껴 재질이 깨지므로 따로 둔다
+let GLL = null;
+async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('./lib/three/addons/GLTFLoader.js'), import('./lib/three/addons/meshopt_decoder.module.js')]); GLL = new GLTFLoader(); GLL.setMeshoptDecoder(MeshoptDecoder); } const g = await GLL.loadAsync(`assets/hd2d/models/${n}.glb`);
+  g.scene.traverse(o => { if (!o.isMesh) return; const sm = o.material, t = sm.map, nm = sm.name || o.name;
     if (t) { t.magFilter = T.LinearFilter; t.minFilter = T.LinearMipmapLinearFilter; t.generateMipmaps = true; t.anisotropy = R.capabilities.getMaxAnisotropy(); t.needsUpdate = true; }
-    const mkm = () => { const m = new T.MeshLambertMaterial({ map: t || null, color: t ? 0xffffff : sm.color }); return t ? sharpen(m) : m; };
-    const M = { m: mkm(), f: holed(mkm()), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }) }; MODELM.set(o.geometry, M); o.material = M.m; o.userData = {}; o.castShadow = o.receiveShadow = true; }); MODELS[n] = g.scene; } catch (e) { console.warn('모형 못 읽음', n, e); } })); } catch (e) { console.warn('GLTFLoader', e); } }
+    const glow = /^(win|lantern)/.test(nm);
+    const mkm = () => { const m = new T.MeshLambertMaterial({ map: t || null, color: t ? 0xffffff : sm.color }); if (glow) { m.emissive = new T.Color(nm === 'win' ? 0xffb050 : 0xff6a30); if (t) m.emissiveMap = t; m.emissiveIntensity = 0; GLOW.push(m); } return t ? sharpen(m) : m; };
+    const M = { m: mkm(), f: holed(mkm()), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }) }; MODELM.set(o.geometry, M); o.material = M.m; o.userData = {}; o.castShadow = o.receiveShadow = true; });
+  const lp = g.scene.getObjectByName('lamps'); g.scene.userData.lamps = lp?.userData?.pts ? JSON.parse(lp.userData.pts) : []; MODELS[n] = g.scene; } catch (e) { MODELS[n] = null; console.warn('모형 못 읽음', n, e); } }
+async function loadModels() { await Promise.all(MODELN.map(loadModel)); }
+// 지도에 필요한 모형을 그때그때 읽는다. 다 읽으면 지도를 다시 세운다(그동안은 조립 건물로 보인다)
+function needModel(n) { if (n in MODELS) return MODELS[n]; if (!MODELP[n]) { HD.modelsPending = (HD.modelsPending || 0) + 1; MODELP[n] = loadModel(n).then(() => { HD.modelsPending--; curMap = null; }); } return null; }
+function modelKey(s) { const gs = s.grand && GRAND[s.grand]; return gs?.model || (s.grand ? `g_${s.grand}_${s.name}` : SPEC[s.name] ? `b_${s.name}` : null); }
 function loadPreview() { if (!loadModels.p) loadModels.p = loadModels(); return pvP || (pvP = Promise.all([loadModels.p, ...PVN.map(n => new Promise(res => { const im = new Image(); im.onload = () => { PV[n] = im; res(); }; im.onerror = res; im.src = `assets/hd2d/preview/${n}.webp`; }))])); }
 const art = () => !!HD.opt.art;
 function previewTex(name) {
@@ -392,9 +399,10 @@ function setMap(m) {
   list.forEach(({ s, z }, k) => {
     const st = STAMPS[s.name], t = st && stampTex(s.name); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(s.name), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
-    const gm = !s.flat && art() && s.grand && GRAND[s.grand]?.model && MODELS[GRAND[s.grand].model];
+    const mk_ = !s.flat && art() && modelKey(s), gm = mk_ && needModel(mk_);
     if (gm) { const g = new T.Group(), o = gm.clone(true); o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; } }); g.add(o);
-      const xc = s.x + st[5] + st[7] / 2, yf = s.y + st[6] + st[8], pb = GRAND[s.grand].modelFront || 7; g.scale.set(1, HS, ZS); g.position.set(xc, hAt(m, xc, yf - 1), (yf - pb) * ZS); g.userData = { s, house: true }; propG.add(g); return; }  // 블렌더 모형
+      const xc = s.x + st[5] + st[7] / 2, yf = s.y + st[6] + st[8], pb = s.grand && GRAND[s.grand]?.model ? GRAND[s.grand].modelFront || 7 : 0; g.scale.set(1, HS, ZS); g.position.set(xc, hAt(m, xc, yf - 1), (yf - pb) * ZS); g.userData = { s, house: true }; propG.add(g);
+      for (const [x, y, z] of gm.userData.lamps || []) LAMPX.push([xc + x, yf - pb - y, z]); return; }  // 블렌더 모형(tools/blender/hall.py, houses.py)
     if (!s.flat && SPEC[s.name] && art() && PV.w1_front) { build ||= makeBuilder({ T, HS, ZS, DOT, PV, aniso: R.capabilities.getMaxAnisotropy(), texFrom, matOf, holed, LAMPX, face, glow: GLOW, get AO() { return aoTex(); } }); const b = build(s, st, SPEC[s.name]); if (b) { propG.add(b); return; } }  // 조립한 건물(js/hd2d/build.js)
     if (!s.flat && PARTS[s.name] && previewTex('w_front')) { propG.add(partsBox(s, PARTS[s.name])); return; }  // 새 그림: 벽 부품(HW0)과 지붕 무늬(HR1)로
     if (ef) { propG.add(houseBox(s, t, w, h, ef)); return; }
