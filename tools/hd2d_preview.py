@@ -174,7 +174,8 @@ if __name__ == '__main__':
     HF = os.path.join(ROOT, 'art-src', 'higgsfield')  # Higgsfield로 받은 마을 사람
     Q = [(c, o, t) for c, o, _, t, _ in json.load(open(os.path.join(ROOT, 'tools', 'hf_queue.json')))]  # 줄에 선 사람들(키는 줄에 적힌 대로)
     for code, out, tl in [('HN1', 'n_villager', 48), ('HN2', 'n_woman', 45), ('HN3', 'n_oldman', 44), ('HN4', 'n_oldwoman', 41)] + Q:
-        if os.path.exists(os.path.join(HF, code + 'a.png')) and os.path.exists(os.path.join(HF, code + 'b.png')): walker(code, out, HF, tl)
+        for D in (HF, os.path.join(ROOT, 'art-src', 'chatgpt'), os.path.join(ROOT, 'art-src', 'gemini')):  # Higgsfield, ChatGPT, Gemini 어디서 받았든
+            if os.path.exists(os.path.join(D, code + 'a.png')) and os.path.exists(os.path.join(D, code + 'b.png')): walker(code, out, D, tl); break
     tiles('HG1', ['g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow'], 11)
     tiles('HR1', ['r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow'], 11)
     walls(); strips(); walls1(); walls_k(); walls2()
