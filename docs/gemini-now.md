@@ -1,233 +1,2529 @@
-# Gemini 요청문 (한 칸씩 복사해서 붙인다)
+# Gemini 요청문: 사람 (대화 일러스트와 걷는 도트를 한 사람씩)
 
-Gemini는 주소를 열지 못하니, 아래 칸을 **하나씩** 복사해 붙이고 적힌 그림을 같이 올린다. 칸마다 규칙이 다 들어 있어서 앞뒤 칸을 몰라도 된다. 같은 대화에서 이어 가면 그림체가 맞춰진다.
+같은 사람의 대화 일러스트와 도트가 서로 달라 보이면 안 되니, **사람마다 일러스트를 기준으로 도트를 그린다.** 이 문서는 Claude가 계속 고친다(다 받은 사람은 빠지고, 새 사람이 붙는다). 벽·지붕·소품 같은 사람 아닌 그림은 ChatGPT 몫(`docs/chatgpt-now.md`)이다.
 
-올릴 그림(저장소에서 내려받기)
-- 사람 도트용: `art-src/ref-people.png` (https://github.com/dltkdwhdhkd-design/gangho/blob/main/art-src/ref-people.png)
-- 벽·지붕·소품용: `art-src/ref-walls.png` (https://github.com/dltkdwhdhkd-design/gangho/blob/main/art-src/ref-walls.png)
+## 쓰는 법
 
-받은 그림은 칸 제목의 파일 이름 그대로 저장소 `art-src/gemini/`에 올리거나 Claude 대화에 붙인다. 오른쪽 아래 Gemini 표시는 Claude가 지운다. 바탕이 마젠타·파랑이 아니고 검정이거나, 칸 수가 틀리면 "바탕은 단색 마젠타로, 칸은 2열 3행으로 다시"라고 한다.
+Gemini는 주소를 못 여니 칸을 **하나씩 복사해 붙이고**, 칸에 적힌 그림을 같이 올린다. 한 사람은 한 대화에서 끝까지(일러스트 → a → b) 이어 가면 같은 사람으로 맞춰진다.
 
-## 사람 걷기 도트 (사람마다 a 다음 b. 첫 a에 ref-people.png를 올린다)
+1. 일러스트가 이미 있는 사람: 그 사람의 일러스트(`assets/art/<키>_n.webp`)와 `art-src/ref-people.png`를 올리고 **a** 칸, 이어서 **b** 칸.
+2. 새로 그릴 사람: `art-src/ref-art.png`를 올리고 **일러스트** 칸 → 받은 일러스트와 `ref-people.png`를 올리고 **a** 칸 → **b** 칸.
+3. 받은 그림은 칸 제목의 파일 이름 그대로(`<키>_n.png`, `<키>-a.png`, `<키>-b.png`) 저장소 `art-src/gemini/`에 올리거나 Claude 대화에 붙인다. 오른쪽 아래 Gemini 표시는 Claude가 지운다.
+4. 바탕이 검정이거나 칸 수가 틀리면 "바탕은 단색 마젠타로, 칸은 2열 3행으로 다시"라고 한다. 도트가 일러스트와 다르면 "일러스트와 머리·옷 색을 똑같이 다시"라고 한다.
 
-### HN6a · 문파 제자 앞·뒤
+참고 그림 내려받기
+- 일러스트 그림체: https://github.com/dltkdwhdhkd-design/gangho/blob/main/art-src/ref-art.png
+- 도트 급과 칸 배치: https://github.com/dltkdwhdhkd-design/gangho/blob/main/art-src/ref-people.png
+- 사람마다의 일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art (파일 이름은 <키>_n.webp)
+
+## 1순위: 동료와 히로인 (일러스트는 있다. 그 일러스트대로 도트만)
+
+### 소연하 (히로인, 벽수궁 검객) — 키 `so`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/so_n.webp
+
+**도트 `so-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 이십 대 남자 문파 제자. 상투에 초록 댕기, 몸에 맞는 짙은 초록 교령 수련복에 검은 띠와 팔토시, 등에 검은 칼집의 검, 검은 장화
+인물: 스물세 살 여성 검객. 허리까지 오는 은빛 머리에 넓은 삿갓, 어깨가 드러나고 허리를 바짝 조인 붉은 무복, 옆이 깊게 트인 치맛자락, 탄탄하고 볼륨 있는 몸매, 허리에 가는 장검. 입꼬리만 살짝 올린 도전적인 표정.
 ```
 
-### HN6b · 문파 제자 옆
+**도트 `so-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HN7a · 부호 앞·뒤
+### 철우 (파계승, 주인공의 의형) — 키 `cheol`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/cheol_n.webp
+
+**도트 `cheol-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 오십 대 부유한 상인. 약간 통통하고 가는 콧수염, 검은 네모 유건, 금빛 둥근 무늬가 있는 짙은 붉은 비단옷, 허리에 옥 패물, 수놓은 신
+인물: 서른다섯 살 남자 승려. 거구의 근육질 빡빡머리에 정수리 계인, 붉은 가사를 아무렇게나 걸쳤고 한 손에 고기 꼬치. 입을 크게 벌리고 호탕하게 웃는 표정.
 ```
 
-### HN7b · 부호 옆
+**도트 `cheol-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HN8a · 순라군 앞·뒤
+### 백랑 (히로인, 하오문 도박장 주인) — 키 `baekrang`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/baekrang_n.webp
+
+**도트 `baekrang-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 고을 순라군. 붉은 술이 달린 둥근 쇠투구, 가벼운 미늘 갑옷 위에 붉은 솜옷, 짙은 바지와 장화, 오른손에 긴 창을 곧게 세워 듦
+인물: 서른 살 여성, 뒷골목 도박장 주인이자 하오문 간부. 초록빛이 도는 틀어 올린 머리, 앞섶이 깊게 파이고 옆이 트인 짙은 녹색 장포, 풍만한 몸매, 한 손에 주사위 통. 속을 알 수 없는 여유로운 웃음.
 ```
 
-### HN8b · 순라군 옆
+**도트 `baekrang-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HN9a · 덩치(대장장이·산적) 앞·뒤
+### 혁련하 (히로인, 천마신교 성녀) — 키 `hyeok`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/hyeok_n.webp
+
+**도트 `hyeok-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 사십 대 수염 난 덩치 큰 남자. 굵은 맨팔, 맨가슴 위에 짙은 갈색 가죽 조끼, 붉은 머리띠, 넓은 허리끈, 발목을 묶은 헐렁한 회색 바지, 짚신
+인물: 스물여섯 살 여성, 서역 마교의 성녀. 긴 흑발에 붉은 눈, 어깨와 등이 드러나고 옆이 깊게 트인 검은 제의복에 금실과 붉은 초승달 무늬, 풍만한 몸매. 차분하고 슬픈 듯한 위엄 있는 표정.
 ```
 
-### HN9b · 덩치(대장장이·산적) 옆
+**도트 `hyeok-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HN10a · 점소이 앞·뒤
+### 당소연 (히로인, 사천당가) — 키 `clan_dang`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_dang_n.webp
+
+**도트 `clan_dang-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 이십 대 객잔 점소이. 작은 검은 천 모자, 왼어깨에 흰 수건, 소매를 걷은 짧은 청회색 저고리, 긴 흰 앞치마, 검은 바지, 친근한 얼굴
+인물: 스물세 살 여성, 독과 암기의 가문 사천당가의 딸. 보랏빛 짧은 머리에 작은 뼈 모양 머리꽂이, 몸에 딱 붙는 진보라 옷으로 쇄골과 허리선이 드러나고, 볼륨 있는 몸매, 얇은 가죽 장갑. 한 손에 찻잔을 들고 삐딱하게 웃는 표정.
 ```
 
-### HN10b · 점소이 옆
+**도트 `clan_dang-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HN11a · 아전 앞·뒤
+### 모용설 (히로인, 모용세가) — 키 `clan_moyong`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_moyong_n.webp
+
+**도트 `clan_moyong-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 사십 대 고을 관아 아전. 검은 사모, 띠를 두른 짙은 남색 관복, 손에 말린 문서, 검은 장화, 엄한 얼굴
+인물: 스물네 살 여성, 명문 모용세가의 딸. 긴 흑발을 높이 틀어 올리고 푸른 꽃 장식, 어깨가 드러나고 깃이 깊게 파인 푸른 비단 장포, 볼륨 있는 몸매, 손에 작은 청동 손거울. 상대를 재어 보는 새침한 표정.
 ```
 
-### HN11b · 아전 옆
+**도트 `clan_moyong-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HN12a · 개방 거지 앞·뒤
+### 남궁진 (히로인, 남궁세가 후계자) — 키 `clan_namgung`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_namgung_n.webp
+
+**도트 `clan_namgung-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 개방 사람. 헝겊으로 묶은 헝클어진 머리, 기운 자국 많은 누더기 갈색·회색 옷, 허리에 술 호리병, 대나무 지팡이, 짚신, 넉살 좋은 웃음
+인물: 스물다섯 살 여성, 천하제일 검가 남궁세가의 후계자. 은빛 머리를 높이 묶었고 몸에 붙는 하늘색 무복과 짧은 흰 겉옷, 허벅지가 보이는 트임, 늘씬하고 볼륨 있는 몸매, 양손으로 짚은 장검. 턱을 살짝 치켜든 자존심 강한 표정.
 ```
 
-### HN12b · 개방 거지 옆
+**도트 `clan_namgung-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HN13a · 마을 아이 앞·뒤
+### 하후민 (몰락한 세가 도련님) — 키 `c_haho`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_haho_n.webp
+
+**도트 `c_haho-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-명나라를 배경으로 한 무협 RPG, 일검풍운결(Wandering Sword) 같은 HD-2D 게임의 인물 도트야. 첨부한 그림(ref-people.png)의 왼쪽 두 칸 배치와 오른쪽 그림의 세밀함으로: 3.5등신, 한 인물의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게 찍히고, 머리카락은 3~4단, 옷은 주름과 겹침이 보이게 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 게임에서 8분의 1로 줄여 쓰니 얼굴은 옷보다 밝게, 앞머리가 눈을 가리지 않게, 검은 옷은 짙은 남회색으로. 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자, 빛번짐 없이.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
 
-정사각형 한 장(1:1)을 2열 3행으로 나눠 같은 인물을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고, 칸끼리 넉넉히 떼.
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
 
-인물: 여덟 살쯤 마을 아이. 양쪽에 작은 상투 두 개, 빛바랜 붉은 짧은 저고리와 파란 바지, 천신, 장난스러운 얼굴. 키는 어른의 3분의 2쯤
+인물: 스물아홉 살 남자. 낡았지만 비단인 푸른 도포, 단정하게 빗은 머리, 허리에 찬 칼, 허세가 섞인 웃음, 주머니는 비어 보이는 인상.
 ```
 
-### HN13b · 마을 아이 옆
+**도트 `c_haho-b.png`**
 
 ```text
-방금 그린 그 인물을 정사각형 한 장(1:1)에 2열 3행으로 6번 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키와 색은 앞서 그린 그림과 같게. 배경은 앞 그림과 같은 단색 마젠타(#FF00FF), 빛번짐과 바닥 그림자 없이, 각진 도트로.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-## 문파·세가 전각 벽과 지붕 (ref-walls.png를 올린다)
+### 문창 (서생) — 키 `c_mun`
 
-### HS1 · 소림사, 무당파, 화산파
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_mun_n.webp
+
+**도트 `c_mun-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Shaolin Temple main hall: ochre-yellow walls, thick red lacquered round columns, golden-brown carved lattice doors with swastika (manji) and lotus patterns, a deep red and gold beam band, bronze door studs, grey granite plinth with carved lotus base. Column 2, Wudang Taoist hall: plain white-washed walls with dark wood frame, black and white yin-yang taiji roundel above the door, jade-green painted beams with cloud scroll patterns, dark green lattice windows, grey stone base. Column 3, Mount Hua sword sect hall: pale granite stone walls with crimson wooden frame, plum blossom carvings on the beams and door panels, deep red double door with brass rings, cliff-stone plinth.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살 남자. 먹물 묻은 소매의 회색 유생복, 책 꾸러미를 끼고 있음, 야윈 몸, 안색이 창백하고 눈빛은 초롱초롱함.
 ```
 
-### HS2 · 종남파, 아미파, 곤륜파
+**도트 `c_mun-b.png`**
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Zhongnan Taoist sect hall: stern dark blue-grey wooden frame, grey stone walls, star-constellation (Big Dipper) carved panel above the door, iron-studded black double door, plain heavy beams. Column 2, Emei nunnery hall: pale cream walls, soft violet and gold painted beams with lotus and cloud motifs, round moon-gate shaped door frame with wooden doors, delicate white lattice windows. Column 3, Kunlun mountain sect hall: white marble-like stone walls, icy sky-blue beams, silver-grey frame, snow-capped mountain carving above a heavy white-grey double door, thick stone plinth.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HS3 · 공동파, 점창파, 청성파
+### 오월 (범 잡는 사냥꾼) — 키 `c_owol`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_owol_n.webp
+
+**도트 `c_owol-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Kongtong sect hall: rugged brown rock-block walls, ochre timber, carved fierce beast-head brackets, heavy bronze door, rough stone base. Column 2, Diancang sect hall (southern Yunnan): dark polished wood and woven bamboo panels, green and terracotta painted beams, slatted bamboo lattice windows, wooden double door. Column 3, Qingcheng sect hall: mossy grey stone base, deep green-lacquered columns, green beams with mountain-mist cloud patterns, carved pine motifs, dark wooden doors.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물여덟 살 여성. 호피를 덧댄 가죽 사냥복, 몸선이 드러나는 옷, 볼륨 있는 몸매, 그을린 피부, 긴 창, 거칠게 묶은 머리, 시원하게 웃는 표정.
 ```
 
-### HS4 · 개방, 남궁세가, 모용세가
+**도트 `c_owol-b.png`**
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Beggars' Sect headquarters: large but humble patched hall of weathered planks, woven bamboo mats and straw, mismatched patches, a big gourd hung beside a plain plank double door, rope-bound posts, rough stone base. Column 2, Namgung family manor (richest sword clan): imposing deep navy-blue lacquered frame with gold trim, white walls, a gold sword emblem above a massive gate-like double door with rows of brass studs, carved granite plinth with steps. Column 3, Murong family manor (elegant Jiangnan style): white-washed walls with black tile edging, a round moon window on each side, black lacquered double door, graceful slender dark wood columns, plum-blossom lattice.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HS5 · 제갈세가, 사천당가, 하북팽가
+### 혜공 (취승) — 키 `c_hyegong`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_hyegong_n.webp
+
+**도트 `c_hyegong-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Zhuge family manor (strategists): dark green lacquered frame, eight-trigram bagua roundel above the door, intricate geometric interlocking lattice like puzzle mechanisms, scholarly wooden double door, grey stone base. Column 2, Sichuan Tang family manor (poison and hidden weapons): dark purple-black lacquered wood, iron studs and iron bands, narrow barred windows, carved centipede and snake motifs on the beams, black double door with iron rings. Column 3, Hebei Peng family manor (saber clan): massive northern-style red-brown timber and grey brick, heavy black iron fittings, crossed broadsword emblem above a thick red double door, coarse stone plinth.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자 승려. 풀어헤친 낡은 승복, 까칠한 수염, 허리에 찬 호리병, 붉어진 코, 반쯤 감긴 눈, 그래도 눈빛은 맑음.
 ```
 
-### HS6 · 황보세가, 산동악가, 신창양가
+**도트 `c_hyegong-b.png`**
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Hwangbo clan hall (Hebei fist masters): grey brick walls with gold-painted beams, heavy studded red double door, carved tiger heads on the beam ends, granite plinth. Column 2, Ak clan hall (loyal spear clan of Shandong): sturdy dark red timber frame, white walls, a carved spear-and-banner motif above the door, black iron-bound door. Column 3, Yang clan hall (spear clan): warm ochre walls, red-brown beams with pear-blossom carvings, wide double door with brass rings, racks of spears painted on the side panels.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HS7 · 진주언가, 광동진가, 해남파
+### 사이라 (서역 여검객) — 키 `c_saira`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_saira_n.webp
+
+**도트 `c_saira-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Eon clan hall (iron-body fist clan): rough dark grey stone walls, iron bands across the beams, massive iron door with big rivets, plain heavy plinth. Column 2, Jin clan hall of Guangdong: southern style, light grey brick with green glazed window grilles, red and green painted beams, carved wooden screen above a wide door. Column 3, Hainan sword sect hall (island by the sea): whitewashed coral-stone walls, sea-blue beams with wave patterns, wooden door with shell inlays, weathered stone base.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살 여성. 서역풍 붉은 비단옷과 금장식, 얇은 베일을 어깨에 두름, 몸선이 드러나는 옷, 볼륨 있는 몸매, 짙은 눈매, 곧은 세검, 말없이 노려보는 표정.
 ```
 
-### HS8 · 천산파, 전진교, 모산파
+**도트 `c_saira-b.png`**
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Tianshan sect hall (snow mountains of the far west): white stone walls, icy pale-blue beams, silver-grey frame, snow lotus carving above a heavy white door. Column 2, Quanzhen Taoist hall: white walls, dark wooden frame, black-and-white Big Dipper star carving over the door, plain green-grey beams. Column 3, Maoshan Taoist exorcist hall: yellow ochre walls with painted red talisman-like patterns (abstract, no readable letters), dark wood frame, bronze mirror above the door, black door.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HS9 · 장백파, 보타문, 기루
+### 갈 선생 (돌팔이 의원) — 키 `c_gal`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_gal_n.webp
+
+**도트 `c_gal-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Changbai mountain sect hall (northeast): heavy log and stone walls, dark brown beams with tiger motifs, thick wooden door, snow on the plinth edge. Column 2, Putuo island nunnery hall: pale cream walls, soft blue and gold beams with lotus and wave motifs, round moon-gate door. Column 3, a two-storey city pleasure house (gilou) front: lacquered red pillars, carved latticework painted gold, rows of red paper lanterns along the beam, open entrance with a red curtain, very ornate and colourful.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 남자. 약 냄새 밴 누런 도포, 약상자, 듬성한 수염, 자신만만하지만 어딘가 믿음이 안 가는 표정.
 ```
 
-### HR3 · 문파 지붕 무늬 여섯
+**도트 `c_gal-b.png`**
 
 ```text
-Roof tile texture sheet in exactly the same layout, pixel size and pixel-art style as the reference image: 3 columns x 2 rows of square seamless roof-tile swatches separated by blue lines, solid pure blue #0000FF gaps. Each swatch is a tileable pattern of curved Chinese roof tiles seen from above at a slight angle, with clear tile ridges and dark grooves, crisp chunky pixels, light from the upper left, no text. Swatches: 1) imperial yellow-gold glazed tiles (Shaolin); 2) jade-green glazed tiles (Wudang, Qingcheng); 3) deep blue glazed tiles (Namgung, Kunlun); 4) black glazed tiles with a slight purple sheen (Tang clan); 5) grey unglazed clay tiles with moss patches (Zhongnan, Kongtong); 6) red-brown glazed tiles (Hua, Peng). All six must tile seamlessly left-right and top-bottom.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HE1 · 지붕 장식과 현판
+### 양춘 (좀도둑) — 키 `c_yang`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_yang_n.webp
+
+**도트 `c_yang-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Sprite sheet of Chinese roof ornaments and hall decorations for a pixel-art wuxia RPG, 4 columns x 3 rows grid, in exactly the pixel size, outline and palette of the reference images, solid pure blue #0000FF background, wide gaps, nothing touching. Items: 1) dragon-head ridge-end ornament (chiwen), dark grey glazed, facing right; 2) the same in gold-yellow; 3) row of five small roof-ridge guardian beasts on a short ridge piece; 4) upturned flying eave corner piece with a hanging bronze wind bell; 5) long horizontal ridge band with a carved cloud pattern, tileable left-right; 6) small tower-like ridge-centre pearl/flame ornament; 7) blank dark lacquered horizontal plaque with a gold border (no text); 8) blank vertical plaque, red with gold border (no text); 9) pair of red lacquered round columns with gilded capitals; 10) row of painted dougong bracket sets under an eave, tileable left-right; 11) large bronze incense cauldron (ding) on three legs; 12) pair of tall stone lanterns with carved roofs. Same pixel scale for all: plaques about one person wide, columns about two people tall. No text or letters anywhere.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른두 살 남자. 작고 마른 몸, 해진 갈색 옷, 눈치 빠른 쥐눈, 소매에서 살짝 보이는 남의 돈주머니, 비굴한 웃음.
 ```
 
-## 물가와 저잣거리 (ref-walls.png를 올린다)
-
-### HG2 · 물 무늬 셋(3열 1행, 이어 붙는 정사각형): 강물(잔물결), 연못(연잎 몇 장), 얕은 여울(돌이 비치는 물). 참고 그림: https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HG1.png
+**도트 `c_yang-b.png`**
 
 ```text
-Seamless water texture sheet in exactly the same layout, pixel size and pixel-art style as the reference image: 3 square swatches in one row separated by solid pure blue #0000FF gaps. 1) river water with small ripples and light glints, 2) still pond water with a few lotus leaves, 3) clear shallow stream showing pebbles under the water. Each swatch must tile seamlessly left-right and top-bottom. Crisp chunky pixels, light from the upper left, no text.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HP5 · 나루와 배(3열 2행): 선착장 판자 토막, 말뚝과 밧줄, 나룻배, 돛단배, 고깃배와 그물, 물가 갈대 무더기. 참고 그림: 벽 그림 묶음의 HP2
+### 구 노창 (은퇴한 창수) — 키 `c_gu`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/c_gu_n.webp
+
+**도트 `c_gu-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid pure blue #0000FF background, wide gaps, nothing touching. Items seen from a high three-quarter top-down view: 1) a wooden pier section with plank deck, 2) wooden mooring posts with coiled rope, 3) a small river ferry boat with a pole, 4) a sailing junk with a tan batten sail, 5) a small fishing boat with a net draped over the side, 6) a clump of riverside reeds. No text.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순다섯 살 남자. 낡은 군복을 고쳐 입은 무복, 흰 수염, 굽은 허리를 세운 채 긴 창을 짚고 있음, 흉터 많은 얼굴, 온화한 눈.
 ```
 
-### HP6 · 저잣거리 좌판(3열 2행): 포목 좌판, 약재 좌판, 그릇 좌판, 만두 찜통 좌판, 장신구 좌판, 짐수레
+**도트 `c_gu-b.png`**
 
 ```text
-Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid pure blue #0000FF background, wide gaps, nothing touching. Market stalls of a Ming-dynasty town seen from a high three-quarter top-down view, each with a cloth awning: 1) cloth and silk bolts stall, 2) herbal medicine stall with drawers and dried roots, 3) pottery and bowls stall, 4) steamed bun stall with stacked bamboo steamers and steam, 5) hairpin and trinket stall, 6) a wooden hand cart loaded with sacks. No text.
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### HK3 · 바위 절벽 토막(3열 2행): 절벽 앞면 둘, 절벽 모서리 둘, 바위 계단, 이끼 낀 큰 바위
+## 2순위: 청하진과 자주 만나는 사람 (일러스트는 있다)
+
+### 곽 아주머니 (객잔 주인, 숨은 호법) — 키 `gwak`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/gwak_n.webp
+
+**도트 `gwak-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
 
 ```text
-Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid pure blue #0000FF background, wide gaps. Cliff pieces seen from a high three-quarter top-down view that can be placed side by side: 1) and 2) two straight cliff face sections of layered grey-brown rock with grass on top, 3) and 4) left and right cliff corner pieces, 5) rough stone steps cut into the cliff, 6) a large mossy boulder. No text.
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 여성, 객잔 주인. 보랏빛 도는 회색 머리를 단단히 틀어 올렸고 낡은 푸른 앞치마, 한 손에 큰 국자. 호통치기 직전의 매서운 눈.
+```
+
+**도트 `gwak-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 백 노인 (구석방 술꾼, 정체 불명의 고수) — 키 `baek`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/baek_n.webp
+
+**도트 `baek-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 일흔 넘은 깡마른 노인. 흰 수염, 낡은 짚 삿갓, 회색 도포, 허리에 술 호리병. 취한 듯 웃지만 눈만은 맑은 표정.
+```
+
+**도트 `baek-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 촌장 어른 — 키 `elder`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/elder_n.webp
+
+**도트 `elder-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 일흔 살 남자 마을 촌장. 작은 체구, 흰 도포와 유건, 책 한 권.
+```
+
+**도트 `elder-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 대장장이 강씨 — 키 `smith`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/smith_n.webp
+
+**도트 `smith-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자 대장장이. 거구에 붉은 수염, 가죽 앞치마, 쇠망치.
+```
+
+**도트 `smith-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 윤 의원 — 키 `doc`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/doc_n.webp
+
+**도트 `doc-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 남자 의원, 윤설의 아버지. 인자한 얼굴, 흰 수염, 회색 도포, 약 상자.
+```
+
+**도트 `doc-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 뱃사공 노씨 — 키 `boat`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/boat_n.webp
+
+**도트 `boat-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 남자 뱃사공. 햇볕에 그을린 얼굴, 흰 수염, 삿갓과 낡은 삼베옷, 삿대.
+```
+
+**도트 `boat-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 사냥꾼 호씨 — 키 `hunter`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/hunter_n.webp
+
+**도트 `hunter-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔다섯 살 남자 사냥꾼. 털가죽 조끼, 활과 화살통, 볕에 탄 얼굴.
+```
+
+**도트 `hunter-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 복덕방 영감 — 키 `realtor`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/realtor_n.webp
+
+**도트 `realtor-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순다섯 살 남자. 작은 갓, 집문서 두루마리, 깐깐한 표정.
+```
+
+**도트 `realtor-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 만물상 주인 — 키 `shopk`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/shopk_n.webp
+
+**도트 `shopk-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자 상인. 둥근 비단 모자, 주판, 장사꾼의 미소.
+```
+
+**도트 `shopk-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 객잔 주인 — 키 `host`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/host_n.webp
+
+**도트 `host-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자. 통통한 체격, 앞치마, 장부, 곤란한 표정.
+```
+
+**도트 `host-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 마을 사람 — 키 `town`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/town_n.webp
+
+**도트 `town-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자 농부. 낡은 무명옷, 괭이, 사람 좋은 웃음.
+```
+
+**도트 `town-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 마을 아낙 — 키 `town2`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/town2_n.webp
+
+**도트 `town2-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔다섯 살 여성. 머릿수건, 수수한 무명옷에 앞치마, 빨래 바구니, 평범한 체형, 수다스러운 표정.
+```
+
+**도트 `town2-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 동네 꼬마 — 키 `kid`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/kid_n.webp
+
+**도트 `kid-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 일곱 살쯤 된 시골 남자아이. 기운 삼베옷과 긴 바지, 짧은 머리, 앞니 하나가 빠진 밝은 웃음, 나무 막대기.
+```
+
+**도트 `kid-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 개방 거지 — 키 `beggar`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/beggar_n.webp
+
+**도트 `beggar-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른다섯 살 남자 거지. 기운 누더기, 매듭 허리끈, 깨진 밥그릇, 능글맞은 표정.
+```
+
+**도트 `beggar-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 창운문 제자 — 키 `disc`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/disc_n.webp
+
+**도트 `disc-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스무 살 남자. 흰 바탕에 푸른 띠의 문파 무복, 목검, 성실한 표정.
+```
+
+**도트 `disc-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 꽃 파는 노파 — 키 `flower`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/flower_n.webp
+
+**도트 `flower-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순다섯 살 서역 여성. 낡은 머릿수건, 주름진 얼굴, 말린 달맞이꽃 바구니, 슬프지만 온화한 눈.
+```
+
+**도트 `flower-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 떠돌이 비무객 — 키 `wander`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/wander_n.webp
+
+**도트 `wander-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른다섯 살 남자 낭인. 삿갓, 낡은 갈색 무복, 긴 칼, 여유로운 미소.
+```
+
+**도트 `wander-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 순이네 — 키 `wife`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/wife_n.webp
+
+**도트 `wife-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른다섯 살 여성. 머릿수건, 수수한 삼베옷, 평범한 체형, 근심 어린 표정.
+```
+
+**도트 `wife-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 순이 아버지 — 키 `husband`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/husband_n.webp
+
+**도트 `husband-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살 남자 어부. 야윈 얼굴, 낡은 삼베옷, 손목의 밧줄 자국, 지친 표정.
+```
+
+**도트 `husband-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+## 3순위: 새로 그릴 사람 (일러스트부터)
+
+### 왕충 (창운문 내문 사형) — 키 `wangchung`
+
+**일러스트 `wangchung_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물대여섯 살 남자 검객. 부잣집 아들 티가 나는 깔끔한 녹색 비단 무복과 옥 장식 허리띠, 단정히 묶은 머리. 턱을 살짝 든 거만한 얼굴이지만 눈빛은 곧다. 허리에 장검.
+```
+
+**도트 `wangchung-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물대여섯 살 남자 검객. 부잣집 아들 티가 나는 깔끔한 녹색 비단 무복과 옥 장식 허리띠, 단정히 묶은 머리. 턱을 살짝 든 거만한 얼굴이지만 눈빛은 곧다. 허리에 장검.
+```
+
+**도트 `wangchung-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 석두 (창운문 외문 막내) — 키 `seokdu`
+
+**일러스트 `seokdu_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스무 살 남짓한 덩치 작은 외문 제자. 얼굴이 순해서 어려 보인다. 기운 자국이 많은 낡은 회색 무복, 짧게 깎은 머리, 순하고 겁 많은 표정. 물동이를 두 손으로 들고 있다.
+```
+
+**도트 `seokdu-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스무 살 남짓한 덩치 작은 외문 제자. 얼굴이 순해서 어려 보인다. 기운 자국이 많은 낡은 회색 무복, 짧게 깎은 머리, 순하고 겁 많은 표정. 물동이를 두 손으로 들고 있다.
+```
+
+**도트 `seokdu-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 운청 (청성파의 마지막 제자) — 키 `uncheong`
+
+**일러스트 `uncheong_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스무 살 남짓한 젊은 도사. 흙먼지가 묻은 푸른 도포, 풀어진 상투, 지친 얼굴에 굳은 눈빛. 천으로 싼 장검 한 자루를 품에 꼭 안고 있다.
+```
+
+**도트 `uncheong-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스무 살 남짓한 젊은 도사. 흙먼지가 묻은 푸른 도포, 풀어진 상투, 지친 얼굴에 굳은 눈빛. 천으로 싼 장검 한 자루를 품에 꼭 안고 있다.
+```
+
+**도트 `uncheong-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 화산 검수 — 키 `yuhyeon`
+
+**일러스트 `yuhyeon_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물대여섯 살 화산파 검수. 붉은 매화 무늬가 수놓인 흰 무복과 붉은 허리띠, 높이 묶은 머리에 매화 비녀, 허리에 가는 검. 자신만만한 웃음.
+```
+
+**도트 `yuhyeon-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물대여섯 살 화산파 검수. 붉은 매화 무늬가 수놓인 흰 무복과 붉은 허리띠, 높이 묶은 머리에 매화 비녀, 허리에 가는 검. 자신만만한 웃음.
+```
+
+**도트 `yuhyeon-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 노예상 — 키 `slaver`
+
+**일러스트 `slaver_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 남자. 금실 무늬 짙은 갈색 비단옷에 가죽 조끼, 허리에 열쇠 꾸러미와 채찍, 손가락에 굵은 반지. 장사꾼의 웃음 뒤에 차가운 눈.
+```
+
+**도트 `slaver-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 남자. 금실 무늬 짙은 갈색 비단옷에 가죽 조끼, 허리에 열쇠 꾸러미와 채찍, 손가락에 굵은 반지. 장사꾼의 웃음 뒤에 차가운 눈.
+```
+
+**도트 `slaver-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 노예상 부하 — 키 `slaverguard`
+
+**일러스트 `slaverguard_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른 살쯤 우락부락한 남자. 짧은 머리에 사자 갈기 같은 수염, 소매 없는 짙은 조끼, 굵은 팔, 손에 몽둥이. 무표정.
+```
+
+**도트 `slaverguard-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살쯤 우락부락한 남자. 짧은 머리에 사자 갈기 같은 수염, 소매 없는 짙은 조끼, 굵은 팔, 손에 몽둥이. 무표정.
+```
+
+**도트 `slaverguard-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 물주 (노름판) — 키 `dealer`
+
+**일러스트 `dealer_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른 살쯤 마른 남자. 검은 두건과 검은 저고리, 소매를 걷어 올린 손에 주사위 그릇, 입꼬리만 웃는 얼굴.
+```
+
+**도트 `dealer-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살쯤 마른 남자. 검은 두건과 검은 저고리, 소매를 걷어 올린 손에 주사위 그릇, 입꼬리만 웃는 얼굴.
+```
+
+**도트 `dealer-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 도박장 주인 — 키 `gboss`
+
+**일러스트 `gboss_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 쉰 살쯤 남자. 검은 사모에 짙은 남색 비단 장포, 손에 주판, 가는 콧수염. 셈이 빠른 눈.
+```
+
+**도트 `gboss-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살쯤 남자. 검은 사모에 짙은 남색 비단 장포, 손에 주판, 가는 콧수염. 셈이 빠른 눈.
+```
+
+**도트 `gboss-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 도박장 덩치 — 키 `bouncer`
+
+**일러스트 `bouncer_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른 살쯤 덩치 큰 남자. 맨팔에 갈색 가죽 조끼, 붉은 머리띠, 팔짱을 끼고 문을 막고 선 자세.
+```
+
+**도트 `bouncer-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살쯤 덩치 큰 남자. 맨팔에 갈색 가죽 조끼, 붉은 머리띠, 팔짱을 끼고 문을 막고 선 자세.
+```
+
+**도트 `bouncer-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 호객꾼 — 키 `tout`
+
+**일러스트 `tout_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물대여섯 살 남자. 초록 저고리에 작은 모자, 한 손을 흔들며 손님을 부르는 너스레 웃음.
+```
+
+**도트 `tout-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물대여섯 살 남자. 초록 저고리에 작은 모자, 한 손을 흔들며 손님을 부르는 너스레 웃음.
+```
+
+**도트 `tout-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 취객 — 키 `drunk`
+
+**일러스트 `drunk_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 남자. 풀어진 상투, 술 얼룩 묻은 헐렁한 회색 옷, 한 손에 술병, 붉어진 얼굴로 헤벌쭉 웃음.
+```
+
+**도트 `drunk-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 남자. 풀어진 상투, 술 얼룩 묻은 헐렁한 회색 옷, 한 손에 술병, 붉어진 얼굴로 헤벌쭉 웃음.
+```
+
+**도트 `drunk-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 노름꾼·골목 건달 — 키 `gambler`
+
+**일러스트 `gambler_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물대여섯 살 남자. 비스듬히 쓴 두건, 앞섶을 풀어헤친 저고리, 귀에 꽂은 이쑤시개, 건들거리는 웃음.
+```
+
+**도트 `gambler-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물대여섯 살 남자. 비스듬히 쓴 두건, 앞섶을 풀어헤친 저고리, 귀에 꽂은 이쑤시개, 건들거리는 웃음.
+```
+
+**도트 `gambler-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 아전 — 키 `yamen`
+
+**일러스트 `yamen_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 고을 관아 아전. 검은 사모, 띠를 두른 짙은 남색 관복, 손에 말린 문서. 엄한 얼굴.
+```
+
+**도트 `yamen-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 고을 관아 아전. 검은 사모, 띠를 두른 짙은 남색 관복, 손에 말린 문서. 엄한 얼굴.
+```
+
+**도트 `yamen-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 순라군 — 키 `guard`
+
+**일러스트 `guard_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른 살쯤 순라군. 붉은 술 달린 둥근 쇠투구, 가벼운 미늘 갑옷 위에 붉은 솜옷, 긴 창을 곧게 세워 듦. 성실한 얼굴.
+```
+
+**도트 `guard-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살쯤 순라군. 붉은 술 달린 둥근 쇠투구, 가벼운 미늘 갑옷 위에 붉은 솜옷, 긴 창을 곧게 세워 듦. 성실한 얼굴.
+```
+
+**도트 `guard-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 숙수 (주루 요리사) — 키 `cook`
+
+**일러스트 `cook_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 통통한 남자. 흰 두건과 흰 앞치마, 걷어 올린 소매, 한 손에 큰 식칼, 땀 맺힌 웃음.
+```
+
+**도트 `cook-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 통통한 남자. 흰 두건과 흰 앞치마, 걷어 올린 소매, 한 손에 큰 식칼, 땀 맺힌 웃음.
+```
+
+**도트 `cook-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 점소이 — 키 `waiter`
+
+**일러스트 `waiter_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스무 살 남짓 남자. 작은 검은 천 모자, 왼어깨에 흰 수건, 짧은 청회색 저고리와 긴 흰 앞치마, 쟁반을 든 친근한 얼굴.
+```
+
+**도트 `waiter-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스무 살 남짓 남자. 작은 검은 천 모자, 왼어깨에 흰 수건, 짧은 청회색 저고리와 긴 흰 앞치마, 쟁반을 든 친근한 얼굴.
+```
+
+**도트 `waiter-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 전각지기·사당지기 — 키 `keeper`
+
+**일러스트 `keeper_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 예순 살쯤 남자. 회색 도포에 향 꾸러미를 든 손, 하얀 눈썹, 조용한 얼굴.
+```
+
+**도트 `keeper-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살쯤 남자. 회색 도포에 향 꾸러미를 든 손, 하얀 눈썹, 조용한 얼굴.
+```
+
+**도트 `keeper-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 이야기꾼 — 키 `teller`
+
+**일러스트 `teller_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 쉰 살쯤 남자. 접은 부채로 탁자를 치려는 몸짓, 낡은 푸른 장포, 신이 난 얼굴.
+```
+
+**도트 `teller-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살쯤 남자. 접은 부채로 탁자를 치려는 몸짓, 낡은 푸른 장포, 신이 난 얼굴.
+```
+
+**도트 `teller-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 재주꾼 — 키 `acrobat`
+
+**일러스트 `acrobat_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스무 살 남짓 남자 곡예사. 몸에 붙는 회색 옷과 붉은 띠, 손끝에 접시를 돌리는 중, 장난스러운 웃음.
+```
+
+**도트 `acrobat-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스무 살 남짓 남자 곡예사. 몸에 붙는 회색 옷과 붉은 띠, 손끝에 접시를 돌리는 중, 장난스러운 웃음.
+```
+
+**도트 `acrobat-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 떡장수 — 키 `ricecake`
+
+**일러스트 `ricecake_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 여자. 머릿수건, 소박한 갈색 저고리와 앞치마, 떡 함지를 옆구리에 낀 넉넉한 웃음.
+```
+
+**도트 `ricecake-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 여자. 머릿수건, 소박한 갈색 저고리와 앞치마, 떡 함지를 옆구리에 낀 넉넉한 웃음.
+```
+
+**도트 `ricecake-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 구경꾼 — 키 `onlooker`
+
+**일러스트 `onlooker_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른 살쯤 여자. 수수한 분홍 저고리, 입을 가린 손, 호기심 많은 눈.
+```
+
+**도트 `onlooker-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살쯤 여자. 수수한 분홍 저고리, 입을 가린 손, 호기심 많은 눈.
+```
+
+**도트 `onlooker-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 할멈·나물 파는 할머니 — 키 `granny`
+
+**일러스트 `granny_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 일흔 살쯤 할머니. 쪽진 흰머리, 소박한 갈색 옷, 나물 바구니, 주름진 다정한 웃음.
+```
+
+**도트 `granny-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 일흔 살쯤 할머니. 쪽진 흰머리, 소박한 갈색 옷, 나물 바구니, 주름진 다정한 웃음.
+```
+
+**도트 `granny-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 포목전·잡화 상인 — 키 `shop`
+
+**일러스트 `shop_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 남자 상인. 작은 모자에 단정한 갈색 장포, 손에 장부와 붓, 손님을 맞는 웃음.
+```
+
+**도트 `shop-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 남자 상인. 작은 모자에 단정한 갈색 장포, 손에 장부와 붓, 손님을 맞는 웃음.
+```
+
+**도트 `shop-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 비단 장수·포목점 안주인 — 키 `silk`
+
+**일러스트 `silk_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른대여섯 살 여자. 곱게 쪽진 머리에 은비녀, 단정한 푸른 비단옷, 팔에 걸친 비단 한 필, 깐깐한 눈.
+```
+
+**도트 `silk-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른대여섯 살 여자. 곱게 쪽진 머리에 은비녀, 단정한 푸른 비단옷, 팔에 걸친 비단 한 필, 깐깐한 눈.
+```
+
+**도트 `silk-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 찻집 주인 — 키 `tea`
+
+**일러스트 `tea_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물대여섯 살 여자. 단정한 연두 저고리와 앞치마, 찻주전자를 든 손, 소식에 밝은 영리한 얼굴.
+```
+
+**도트 `tea-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물대여섯 살 여자. 단정한 연두 저고리와 앞치마, 찻주전자를 든 손, 소식에 밝은 영리한 얼굴.
+```
+
+**도트 `tea-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 무관 문하생 — 키 `student`
+
+**일러스트 `student_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스무 살 남짓 남자. 땀에 젖은 흰 수련복, 어깨에 멘 목검, 의욕 넘치는 얼굴.
+```
+
+**도트 `student-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스무 살 남짓 남자. 땀에 젖은 흰 수련복, 어깨에 멘 목검, 의욕 넘치는 얼굴.
+```
+
+**도트 `student-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 늙은 표사 — 키 `escort`
+
+**일러스트 `escort_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 예순 살쯤 남자. 낡은 표국 옷에 표국 깃발 무늬 어깨띠, 허리에 낡은 칼, 흰 수염, 노련한 눈.
+```
+
+**도트 `escort-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살쯤 남자. 낡은 표국 옷에 표국 깃발 무늬 어깨띠, 허리에 낡은 칼, 흰 수염, 노련한 눈.
+```
+
+**도트 `escort-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 과거 준비생·책방 서생 — 키 `scholar`
+
+**일러스트 `scholar_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스무 살 남짓 남자. 유건과 흰 도포, 품에 책 두어 권, 수줍은 얼굴.
+```
+
+**도트 `scholar-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스무 살 남짓 남자. 유건과 흰 도포, 품에 책 두어 권, 수줍은 얼굴.
+```
+
+**도트 `scholar-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 짐꾼·부두 일꾼 — 키 `porter`
+
+**일러스트 `porter_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른 살쯤 남자. 어깨에 짐을 멘 멜대, 걷어 올린 바지, 그을린 피부, 털털한 웃음.
+```
+
+**도트 `porter-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살쯤 남자. 어깨에 짐을 멘 멜대, 걷어 올린 바지, 그을린 피부, 털털한 웃음.
+```
+
+**도트 `porter-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 탁발승 — 키 `alms`
+
+**일러스트 `alms_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 서른 살쯤 승려. 낡은 회색 승복과 삿갓을 뒤로 넘김, 손에 목탁과 바리때, 담담한 얼굴.
+```
+
+**도트 `alms-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살쯤 승려. 낡은 회색 승복과 삿갓을 뒤로 넘김, 손에 목탁과 바리때, 담담한 얼굴.
+```
+
+**도트 `alms-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 떠돌이 약장수 — 키 `quack`
+
+**일러스트 `quack_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 남자. 등에 약상자, 손에 약병을 높이 들고 떠드는 모습, 수상한 콧수염.
+```
+
+**도트 `quack-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 남자. 등에 약상자, 손에 약병을 높이 들고 떠드는 모습, 수상한 콧수염.
+```
+
+**도트 `quack-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 어부 — 키 `fisher`
+
+**일러스트 `fisher_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 마흔 살쯤 남자. 도롱이와 삿갓, 어깨에 그물, 햇볕에 그을린 얼굴.
+```
+
+**도트 `fisher-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살쯤 남자. 도롱이와 삿갓, 어깨에 그물, 햇볕에 그을린 얼굴.
+```
+
+**도트 `fisher-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 어부의 아들 — 키 `cap_fisher`
+
+**일러스트 `cap_fisher_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물세 살 남자. 소금기에 바랜 짧은 저고리, 햇볕에 탄 얼굴, 체념한 눈.
+```
+
+**도트 `cap_fisher-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물세 살 남자. 소금기에 바랜 짧은 저고리, 햇볕에 탄 얼굴, 체념한 눈.
+```
+
+**도트 `cap_fisher-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 서생 — 키 `cap_scholar`
+
+**일러스트 `cap_scholar_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물한 살 남자. 찢어진 흰 도포, 흐트러진 유건, 겁먹었지만 따지고 싶은 얼굴.
+```
+
+**도트 `cap_scholar-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물한 살 남자. 찢어진 흰 도포, 흐트러진 유건, 겁먹었지만 따지고 싶은 얼굴.
+```
+
+**도트 `cap_scholar-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 약초꾼 — 키 `cap_herbal`
+
+**일러스트 `cap_herbal_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물두 살 여자. 풀물 든 갈색 일옷과 머릿수건, 흙 묻은 손, 겁먹은 눈.
+```
+
+**도트 `cap_herbal-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물두 살 여자. 풀물 든 갈색 일옷과 머릿수건, 흙 묻은 손, 겁먹은 눈.
+```
+
+**도트 `cap_herbal-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 무관 낙제생 — 키 `cap_dropout`
+
+**일러스트 `cap_dropout_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물대여섯 살 남자. 해진 무복, 멍든 뺨, 분한 듯 입을 다문 얼굴.
+```
+
+**도트 `cap_dropout-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물대여섯 살 남자. 해진 무복, 멍든 뺨, 분한 듯 입을 다문 얼굴.
+```
+
+**도트 `cap_dropout-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 악사 — 키 `cap_musician`
+
+**일러스트 `cap_musician_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물네 살 여자. 수수한 회청색 옷, 끈 떨어진 피리를 쥔 손, 체념한 웃음.
+```
+
+**도트 `cap_musician-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물네 살 여자. 수수한 회청색 옷, 끈 떨어진 피리를 쥔 손, 체념한 웃음.
+```
+
+**도트 `cap_musician-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 대장간 도제 — 키 `cap_smith`
+
+**일러스트 `cap_smith_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물다섯 살 남자. 굵은 팔, 그을음 묻은 앞치마, 이를 악문 얼굴.
+```
+
+**도트 `cap_smith-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물다섯 살 남자. 굵은 팔, 그을음 묻은 앞치마, 이를 악문 얼굴.
+```
+
+**도트 `cap_smith-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 사냥꾼 — 키 `cap_hunter`
+
+**일러스트 `cap_hunter_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물여덟 살 남자. 북방풍 털옷, 낯선 땅을 경계하는 눈.
+```
+
+**도트 `cap_hunter-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물여덟 살 남자. 북방풍 털옷, 낯선 땅을 경계하는 눈.
+```
+
+**도트 `cap_hunter-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 농사꾼 — 키 `cap_farmer`
+
+**일러스트 `cap_farmer_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 서른 살 남자. 흙 묻은 무명옷, 거친 손, 억울한 얼굴.
+```
+
+**도트 `cap_farmer-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 서른 살 남자. 흙 묻은 무명옷, 거친 손, 억울한 얼굴.
+```
+
+**도트 `cap_farmer-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 춤꾼 — 키 `cap_dancer`
+
+**일러스트 `cap_dancer_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물두 살 여자. 빛바랜 연분홍 옷(긴 소매와 긴 치마), 흐트러진 머리, 그래도 곧은 자세.
+```
+
+**도트 `cap_dancer-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물두 살 여자. 빛바랜 연분홍 옷(긴 소매와 긴 치마), 흐트러진 머리, 그래도 곧은 자세.
+```
+
+**도트 `cap_dancer-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 떠돌이 무사 — 키 `cap_ronin`
+
+**일러스트 `cap_ronin_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 서른 살 남자. 해진 짙은 무복, 빈 칼집, 비웃는 듯 쓴웃음.
+```
+
+**도트 `cap_ronin-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 서른 살 남자. 해진 짙은 무복, 빈 칼집, 비웃는 듯 쓴웃음.
+```
+
+**도트 `cap_ronin-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 역참 마부 — 키 `cap_groom`
+
+**일러스트 `cap_groom_n.png`** (ref-art.png 올리기)
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물여섯 살 남자. 역참 마부의 짧은 초록 옷과 두건, 말채찍 자국이 남은 손, 순한 얼굴.
+```
+
+**도트 `cap_groom-a.png`** (방금 받은 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 손목에 굵은 밧줄, 해진 옷이지만 몸을 다 덮는 단정한 옷, 지치고 불안한 얼굴. 스물여섯 살 남자. 역참 마부의 짧은 초록 옷과 두건, 말채찍 자국이 남은 손, 순한 얼굴.
+```
+
+**도트 `cap_groom-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+## 4순위: 문파 장문인과 세가 가주 (일러스트는 있다)
+
+### 악정산 (산동악가) — 키 `clan_ak`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_ak_n.webp
+
+**도트 `clan_ak-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰다섯 살 남자. 금빛 가죽 갑옷을 덧댄 무복, 세워 쥔 긴 창, 곧은 자세, 근엄한 눈.
+```
+
+**도트 `clan_ak-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 설한연 (북해빙궁주) — 키 `clan_bukhae`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_bukhae_n.webp
+
+**도트 `clan_bukhae-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살 여성. 허리까지 오는 은백색 머리, 흰 털을 두른 얼음빛 비단옷, 몸선이 드러나는 옷, 볼륨 있는 몸매, 가는 검, 차갑게 내려다보는 눈.
+```
+
+**도트 `clan_bukhae-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 진다명 (청성파) — 키 `clan_cheongseong`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_cheongseong_n.webp
+
+**도트 `clan_cheongseong-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살 남자 도가 검객. 초록 도포, 찻주전자와 검.
+```
+
+**도트 `clan_cheongseong-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 고산옥 (천산파 장문인) — 키 `clan_cheonsan`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_cheonsan_n.webp
+
+**도트 `clan_cheonsan-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른여덟 살 여성. 짧게 묶은 검은 머리, 흰 털을 덧댄 푸른 겨울 무복, 몸선이 드러나는 옷, 볼륨 있는 몸매, 허리에 찬 가는 검, 무뚝뚝하고 피곤한 눈.
+```
+
+**도트 `clan_cheonsan-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 정혜 사태 (아미파) — 키 `clan_emei`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_emei_n.webp
+
+**도트 `clan_emei-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 여승. 회색 승복, 불진, 자비롭지만 입이 매서워 보이는 표정.
+```
+
+**도트 `clan_emei-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 언창호 (진주언가) — 키 `clan_eon`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_eon_n.webp
+
+**도트 `clan_eon-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살 거한. 사자 갈기처럼 뻗친 머리, 가슴이 드러난 무복, 붕대 감은 주먹, 단순해 보이는 표정.
+```
+
+**도트 `clan_eon-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 홍두 장로 (개방) — 키 `clan_gaebang`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_gaebang_n.webp
+
+**도트 `clan_gaebang-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 남자 거지 고수. 붉은 코, 누더기, 타구봉, 호리병.
+```
+
+**도트 `clan_gaebang-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 막철심 (공동파) — 키 `clan_gongdong`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_gongdong_n.webp
+
+**도트 `clan_gongdong-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살 남자 권사. 맨 팔뚝의 쇠 같은 근육, 갈색 무복.
+```
+
+**도트 `clan_gongdong-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 설봉자 (곤륜파) — 키 `clan_gonryun`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_gonryun_n.webp
+
+**도트 `clan_gonryun-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자 검객. 흰 털 장포, 설산 사람의 그을린 얼굴.
+```
+
+**도트 `clan_gonryun-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 임해조 (해남파 장문인) — 키 `clan_haenam`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_haenam_n.webp
+
+**도트 `clan_haenam-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자. 햇볕에 그을린 얼굴, 소금기 밴 남색 무복, 걷어 올린 소매와 굵은 팔, 허리에 찬 칼, 뱃사람처럼 웃음기 있는 눈.
+```
+
+**도트 `clan_haenam-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 황보웅 (황보세가) — 키 `clan_hwangbo`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_hwangbo_n.webp
+
+**도트 `clan_hwangbo-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 거한. 붉은 무복, 드러난 굵은 팔뚝, 쇠로 된 권갑, 한 손에 든 술잔, 호탕한 웃음.
+```
+
+**도트 `clan_hwangbo-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 매향 (화산파) — 키 `clan_hwasan`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_hwasan_n.webp
+
+**도트 `clan_hwasan-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살 여성 검수. 몸선이 드러나는 매화 무늬 분홍빛 무복, 화려한 검, 도도한 표정.
+```
+
+**도트 `clan_hwasan-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 박무산 (장백파) — 키 `clan_jangbaek`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_jangbaek_n.webp
+
+**도트 `clan_jangbaek-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔다섯 살 남자. 호랑이 가죽을 덧댄 겨울옷, 짧은 수염, 굵은 몸, 긴 창, 말수 적어 보이는 표정.
+```
+
+**도트 `clan_jangbaek-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 제갈현 (제갈세가) — 키 `clan_jegal`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_jegal_n.webp
+
+**도트 `clan_jegal-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살 남자 책사. 흰 학창의, 깃털 부채, 모든 것을 계산한 표정.
+```
+
+**도트 `clan_jegal-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 섭일 (점창파) — 키 `clan_jeomchang`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_jeomchang_n.webp
+
+**도트 `clan_jeomchang-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른 살 남자 쾌검객. 말없는 눈, 검은 삿갓, 짧은 검.
+```
+
+**도트 `clan_jeomchang-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 장양 진인 (전진교) — 키 `clan_jeonjin`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_jeonjin_n.webp
+
+**도트 `clan_jeonjin-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 남자 도사. 회색 도포, 단정히 묶은 희끗한 상투, 곧은 자세, 손에 든 불진, 깐깐한 눈.
+```
+
+**도트 `clan_jeonjin-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 진태석 (광동진가) — 키 `clan_jin`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_jin_n.webp
+
+**도트 `clan_jin-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔다섯 살 남자. 소매 없는 남쪽풍 무복 위에 약방 앞치마, 권갑, 장사꾼처럼 눈치 빠른 표정.
+```
+
+**도트 `clan_jin-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 서문각 (종남파) — 키 `clan_jongnam`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_jongnam_n.webp
+
+**도트 `clan_jongnam-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 서른다섯 살 남자 검객. 푸른 무복, 곧은 눈썹, 고집스러운 표정.
+```
+
+**도트 `clan_jongnam-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 허정자 (모산파) — 키 `clan_mosan`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_mosan_n.webp
+
+**도트 `clan_mosan-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰다섯 살 남자 도사. 누런 도포, 소매에 꽂은 부적 여러 장, 복숭아나무 칼, 장난기 있는 눈.
+```
+
+**도트 `clan_mosan-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 무량 법사 (뇌음사) — 키 `clan_noeum`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_noeum_n.webp
+
+**도트 `clan_noeum-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 일흔 살 남자 승려. 서역풍 붉은 가사, 긴 흰 눈썹, 여윈 몸, 긴 석장, 속을 알 수 없는 여유로운 미소.
+```
+
+**도트 `clan_noeum-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 팽대악 (하북팽가) — 키 `clan_paeng`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_paeng_n.webp
+
+**도트 `clan_paeng-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 마흔 살 남자 도객. 거구, 짧은 수염, 큰 박도, 호탕한 표정.
+```
+
+**도트 `clan_paeng-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 금강 법왕 (포달랍궁) — 키 `clan_podalra`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_podalra_n.webp
+
+**도트 `clan_podalra-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 거구의 승려. 금색과 자주색 가사, 높은 법관, 손에 든 금강저, 두꺼운 목, 온화한데 압도적인 표정.
+```
+
+**도트 `clan_podalra-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 자운 사태 (보타문) — 키 `clan_pota`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_pota_n.webp
+
+**도트 `clan_pota-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 비구니. 회색 승복, 긴 염주, 허리에 찬 가는 칼, 잔잔한 미소, 그래도 눈빛은 매서움.
+```
+
+**도트 `clan_pota-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 혜각 대사 (소림사) — 키 `clan_shaolin`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_shaolin_n.webp
+
+**도트 `clan_shaolin-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 일흔 살 남자 고승. 금빛 가사, 염주, 깊이 후회하는 눈.
+```
+
+**도트 `clan_shaolin-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 청허 도장 (무당파) — 키 `clan_wudang`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_wudang_n.webp
+
+**도트 `clan_wudang-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 예순 살 남자 도사. 회색 도포, 불진, 느긋한 미소.
+```
+
+**도트 `clan_wudang-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 양 태군 (신창양가) — 키 `clan_yang`
+
+일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_yang_n.webp
+
+**도트 `clan_yang-a.png`** (이 사람 일러스트와 ref-people.png 올리기)
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 일흔 살 여성 집안 어른. 단정히 올린 은빛 머리, 짙은 남색 갑옷 무복, 붉은 술이 달린 창, 꼿꼿한 허리, 매서운 눈, 평범한 체형.
+```
+
+**도트 `clan_yang-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+## 보류: 기루 사람들 (기루를 게임에 넣기로 하면 그때)
+
+기녀는 모두 스물 넘은 성인 예인이고, 몸을 다 덮는 단정한 비단옷으로 노출 없이 그린다.
+
+### 홍매 (가야금 타는 기녀, 스물넷) — 키 `giru_hongmae`
+
+**일러스트 `giru_hongmae_n.png`**
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물넷 여자. 높이 틀어 올린 쪽머리에 붉은 옥비녀와 작은 떨잠, 장밋빛과 짙은 진홍의 겹 비단옷, 흰 수놓은 깃, 오른손에 접은 부채. 다섯 해째 기루에 있어 표정은 차분하지만 눈에 피곤이 조금 비친다.
+```
+
+**도트 `giru_hongmae-a.png`**
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물넷 여자. 높이 틀어 올린 쪽머리에 붉은 옥비녀와 작은 떨잠, 장밋빛과 짙은 진홍의 겹 비단옷, 흰 수놓은 깃, 오른손에 접은 부채. 다섯 해째 기루에 있어 표정은 차분하지만 눈에 피곤이 조금 비친다.
+```
+
+**도트 `giru_hongmae-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 월향 (춤추는 기녀, 스물둘) — 키 `giru_wolhyang`
+
+**일러스트 `giru_wolhyang_n.png`**
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물두 살 여자. 양쪽으로 둥글게 감아 올린 머리에 연보라 댕기, 연보라와 옅은 금빛 비단옷, 긴 소매 끝을 살짝 들어 춤사위를 시작하려는 손. 어머니에게 춤을 배운 사람답게 몸가짐이 반듯하고, 입가에 장난스러운 웃음.
+```
+
+**도트 `giru_wolhyang-a.png`**
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물두 살 여자. 양쪽으로 둥글게 감아 올린 머리에 연보라 댕기, 연보라와 옅은 금빛 비단옷, 긴 소매 끝을 살짝 들어 춤사위를 시작하려는 손. 어머니에게 춤을 배운 사람답게 몸가짐이 반듯하고, 입가에 장난스러운 웃음.
+```
+
+**도트 `giru_wolhyang-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 소옥 (강남에서 온 가객, 스물셋) — 키 `giru_soak`
+
+**일러스트 `giru_soak_n.png`**
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물세 살 여자. 강남풍으로 낮게 묶은 쪽머리에 은비녀, 청록과 상아빛 비단옷, 길게 늘어진 물소매, 옅은 띠. 노래하는 사람이라 목선이 곧고, 순한 얼굴에 사투리 섞인 웃음이 어울리는 인상.
+```
+
+**도트 `giru_soak-a.png`**
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물세 살 여자. 강남풍으로 낮게 묶은 쪽머리에 은비녀, 청록과 상아빛 비단옷, 길게 늘어진 물소매, 옅은 띠. 노래하는 사람이라 목선이 곧고, 순한 얼굴에 사투리 섞인 웃음이 어울리는 인상.
+```
+
+**도트 `giru_soak-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 연화 (노예 시장에서 온 기녀, 스물하나) — 키 `giru_yeonhwa`
+
+**일러스트 `giru_yeonhwa_n.png`**
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물한 살 여자. 수수하게 틀어 올린 머리에 나무비녀 하나, 다른 기녀보다 소박한 분홍 비단옷(소매 끝이 조금 해짐), 두 손을 앞으로 모아 쥠. 겁먹었지만 꺾이지 않은 눈, 글을 배우고 싶어 하는 사람다운 또렷한 눈빛.
+```
+
+**도트 `giru_yeonhwa-a.png`**
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물한 살 여자. 수수하게 틀어 올린 머리에 나무비녀 하나, 다른 기녀보다 소박한 분홍 비단옷(소매 끝이 조금 해짐), 두 손을 앞으로 모아 쥠. 겁먹었지만 꺾이지 않은 눈, 글을 배우고 싶어 하는 사람다운 또렷한 눈빛.
+```
+
+**도트 `giru_yeonhwa-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 채운 (비파 타는 기녀, 스물다섯) — 키 `giru_chaeun`
+
+**일러스트 `giru_chaeun_n.png`**
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물다섯 살 여자. 한쪽으로 넘겨 묶은 긴 머리에 구름무늬 머리 장식, 하늘색과 흰빛 겹 비단옷, 비파를 가슴에 안음. 일할 때만 웃는 사람이라 지금은 담담한 얼굴, 손가락이 길고 단정함.
+```
+
+**도트 `giru_chaeun-a.png`**
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물다섯 살 여자. 한쪽으로 넘겨 묶은 긴 머리에 구름무늬 머리 장식, 하늘색과 흰빛 겹 비단옷, 비파를 가슴에 안음. 일할 때만 웃는 사람이라 지금은 담담한 얼굴, 손가락이 길고 단정함.
+```
+
+**도트 `giru_chaeun-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 난주 (관기 출신 기녀, 스물일곱) — 키 `giru_nanju`
+
+**일러스트 `giru_nanju_n.png`**
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 스물일곱 살 여자. 크고 화려하게 올린 머리에 금비녀와 비취 장식, 짙은 남색과 금실 비단옷, 관아 의례복을 닮은 단정한 깃. 이 기루에서 가장 이름난 사람답게 당당하고 영리한 눈, 입꼬리에 냉소가 조금.
+```
+
+**도트 `giru_nanju-a.png`**
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 스물일곱 살 여자. 크고 화려하게 올린 머리에 금비녀와 비취 장식, 짙은 남색과 금실 비단옷, 관아 의례복을 닮은 단정한 깃. 이 기루에서 가장 이름난 사람답게 당당하고 영리한 눈, 입꼬리에 냉소가 조금.
+```
+
+**도트 `giru_nanju-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
+```
+
+### 포주 (기루 주인) — 키 `giru_pimp`
+
+**일러스트 `giru_pimp_n.png`**
+
+```text
+지금부터 내 게임 '강호행'(한국 무협 도트 게임)의 대화 일러스트를 그려 줘. 첨부한 ref-art.png의 그림체와 똑같이: 한국 웹소설 표지풍의 깔끔한 2D 일러스트, 또렷한 선, 셀화 채색에 가벼운 명암(사진풍·3D풍 금지). 복장은 명나라풍과 한복풍을 섞은 가상의 고대 무협(기모노·사무라이 금지). 허벅지 위까지 보이는 한 사람, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면, 머리와 손이 잘리지 않게. 세로 1024×1536, 배경은 투명하거나 무늬 없는 단색 회색. 글자·서명·테두리 없이. 이 일러스트는 같은 사람의 걷는 도트 그림의 기준이 되니, 머리 모양과 색, 옷의 모양과 색, 장식, 들고 있는 물건을 분명하게 그려.
+
+인물: 쉰 살 남자. 살집 있는 몸, 가늘게 늘어진 콧수염, 작은 검은 사모, 금빛 엽전 무늬가 들어간 진홍 비단옷에 털 깃, 허리에 불룩한 돈주머니와 주판, 손가락마다 반지. 웃고 있지만 계산이 끝난 눈.
+```
+
+**도트 `giru_pimp-a.png`**
+
+```text
+첨부한 일러스트 속 사람을 HD-2D 무협 RPG(일검풍운결 같은)의 걷는 도트로 그려 줘. 일러스트와 같은 사람이어야 해: 머리 모양과 색, 옷의 모양과 색, 허리띠·장식, 들고 있는 물건까지 일러스트와 똑같이. 도트는 첨부한 ref-people.png와 같은 급: 3.5등신, 한 사람의 키가 그림에서 300픽셀쯤, 얼굴에 눈·눈썹·입이 작게, 머리카락 3~4단·옷 4~5단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게. 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 배경은 완전한 단색 마젠타(#FF00FF), 그림 안에는 마젠타를 쓰지 마. 바닥 그림자·빛번짐·글자 없이.
+
+정사각형 한 장(1:1)을 2열 3행으로 나눠 이 사람을 6번 그려. 1열은 정면, 2열은 뒷모습. 1행 차렷, 2행 왼발 내딛기, 3행 오른발 내딛기. 팔은 다리와 반대로 흔들리고, 손에 든 물건은 여섯 칸 모두 같게. 여섯 칸 모두 키·머리 크기·옷·색이 같고 칸끼리 넉넉히 떼.
+
+인물: 쉰 살 남자. 살집 있는 몸, 가늘게 늘어진 콧수염, 작은 검은 사모, 금빛 엽전 무늬가 들어간 진홍 비단옷에 털 깃, 허리에 불룩한 돈주머니와 주판, 손가락마다 반지. 웃고 있지만 계산이 끝난 눈.
+```
+
+**도트 `giru_pimp-b.png`**
+
+```text
+방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
