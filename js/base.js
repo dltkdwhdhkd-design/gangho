@@ -14,6 +14,7 @@ import { TALK, CITYTALK, HOME, REG, CTX, STALLS, CITYHAWK, TALES, LISTEN, PERFOR
 import { WEAPONS } from './data.js';
 import { CLANS } from './clandata.js';
 import { sellTo, bought } from './slave.js';
+import { GIRU, giruRoom, giruNpcs, runawayNpc, mookNpc } from './giru.js';
 
 const NEW = EXTRA.filter(f => f.hi); NEW.forEach(f => { WHO[f.key] = { name: f.who, face: f.spr }; });
 const ST = {
@@ -60,6 +61,7 @@ function room(m, l, stamp, x, y, kind, name, o) {
 }
 // 고을 가게 안: 찻집, 주루, 비단 가게, 사당
 function shopRoom(m, as) {
+  if (as === 'giru') return giruRoom(m);
   if (as === 'tea') m.put('counter', 1, 2).put('shelf', 4, 1).put('f_scroll', 8, 1).put('f_scroll', 11, 1).put('longtable', 2, 6).put('teapot', 3.5, 6).put('longtable', 8, 6).put('teapot', 9.5, 6).row('stool', 2, 5, 3, 1).row('stool', 8, 5, 3, 1).put('f_bonsai', 12, 3).put('plant', 1, 8);
   if (as === 'rest') m.put('f_stove', 1, 1).put('f_stove', 3, 1).put('jar', 5.5, 1).put('pot', 7, 1).put('counter', 9, 2).put('longtable', 2, 6).put('longtable', 8, 6).row('stool', 2, 5, 3, 1).row('stool', 8, 5, 3, 1).put('lantern', 1, 8).put('lantern', 12.5, 8);
   if (as === 'silk') m.put('shelf', 1, 1).put('shelf2', 4, 1).put('shelf', 8, 1).put('counter', 4, 4).put('box', 1, 7).put('box', 11, 7).put('jar', 11.5, 2);
@@ -70,6 +72,7 @@ const FORTUNE = ['대길이오. 오늘은 무얼 해도 되오. 노름만 빼고
   '흉이오. 물가를 조심하시오. 아니, 사람을 조심하시오. 둘 다 조심하시오.', '길이오. 잃어버린 것이 돌아오오. 돌려받고 싶지 않은 것일 수도 있소.', '대흉… 이라고 나왔는데, 향이 비뚤게 꽂혀서 그렇소. 마음에 두지 마시오.', '중길이오. 오래 기다린 소식이 오오. 너무 기대하지는 마시오.', '길이오. 오늘 만나는 사람 가운데 하나가 나중에 목숨을 구해 주오. 누군지는 안 나왔소.'];
 const PAY = async n => { if (G.S.silver >= n) { G.S.silver -= n; return true; } await say(null, '주머니가 모자란다.'); return false; };
 function shopNpcs(r, id, out) {
+  if (r.as === 'giru') return giruNpcs(r.owner, id, out);
   const l = r.owner, V = G.voices, P = V.PERSONAS[{ tea: 'tea', rest: 'host', silk: 'silk', shrine: 'keeper' }[r.as]], who = r.as === 'tea' ? '찻집 주인' : P.who[0], spr = P.spr || 'Woman', opt = { map: l.map, place: l.name };
   const own = () => npcSay(who, spr, V.line(id + 'own', P, opt));
   const guests = (sprs, at) => V.assign(id, sprs).forEach((q, i) => out.npcs.push({ id: 'gu' + i, spr: q.spr, x: at[i][0], y: at[i][1], dir: 0, life: 'still', lively: 1, hint: q.who, barks: q.p.bark, talk: () => npcSay(q.who, q.spr, V.line(id + 'gu' + i, q.p, opt)) }));
@@ -163,7 +166,7 @@ function sectLayout(m, l, st, ft) {
   m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
 }
 const SLAVE = ['guangzhou', 'changan', 'suzhou'];  // 노예 시장이 서는 고을
-const SHOPS = { 0: ['rest', '주루', 'restaurant'], 1: ['tea', '찻집', 'teahouse'], 2: ['silk', '비단 가게', 'silk'], 6: ['shrine', '사당', 'temple_town'] };  // 고을 민가 자리 가운데 가게가 되는 곳
+const SHOPS = { 0: ['rest', '주루', 'restaurant'], 1: ['tea', '찻집', 'teahouse'], 2: ['silk', '비단 가게', 'silk'], 3: ['giru', '기루', 'restaurant'], 6: ['shrine', '사당', 'temple_town'] };  // 기루는 js/giru.js  // 고을 민가 자리 가운데 가게가 되는 곳
 function townLayout(m, l) {
   const W = 60, H = 48, cx = 28; m.walkOn = [1, 3];
   m.border(['tree_round', 'grove_green'], [[cx - 1, H - 3, 6, 3]], 3);
@@ -171,7 +174,7 @@ function townLayout(m, l) {
   m.row('wall_h', 3, 43, cx - 3); m.row('wall_h', cx + 4, 43, W - cx - 7); m.put('gate_arch', cx, 41, { nosolid: true }); m.place(cx + 2, 40, l.name);
   if (isoMode()) m.col('wall_h', 3, 0, 20).col('wall_h', 3, 26, 17).col('wall_h', 56, 0, 20).col('wall_h', 56, 26, 17).row('wall_h', 4, 0, 52);  // 쿼터뷰에서는 성벽을 사방으로 두른다. 동서 큰길 끝만 터 둔다
   room(m, l, 'inn', 6, 13, 'inn', '객잔'); room(m, l, 'shop_green', 14, 14, 'shop', '저잣거리'); room(m, l, 'shop_blue', 42, 14, 'book', '고서점'); room(m, l, 'hall', 26, 2, 'gov', '관아'); room(m, l, 'house_red', 49, 13, 'gamble', '도박장');
-  [['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => { const sp = SHOPS[i]; room(m, l, st, x, y, 'home', sp ? sp[1] : '민가', { n: i + 1, quiet: !sp, as: sp?.[0], iso: sp?.[2] }); });  // 민가 몇 채는 가게다(방 이름표는 예전 저장과 같게 home 그대로)
+  [['hut_o', 34, 8], ['hut_o2', 18, 7], ['clay', 40, 6], ['wood_b', 6, 30], ['hut_o', 13, 30], ['clay', 40, 30], ['wood_o', 47, 30], ['hut_b', 6, 36], ['hut_o2', 13, 36], ['hut_b', 40, 36], ['hut_o', 47, 36]].forEach(([st, x, y], i) => { const sp = SHOPS[i]; room(m, l, st, x, y, 'home', sp ? (sp[0] === 'giru' ? GIRU[l.id]?.[0] || sp[1] : sp[1]) : '민가', { n: i + 1, quiet: !sp, as: sp?.[0], iso: sp?.[2] }); });  // 민가 몇 채는 가게다(방 이름표는 예전 저장과 같게 home 그대로)
   m.pen('gwan', 20.3, 14.75); m.pen('gwan', 39.3, 14.75); m.flag('gwan', 25.5, 9.6, true); m.flag('gwan', 30.5, 9.6); m.put('banner4', 10.1, 14.3, { nosolid: true }); m.put('statue', 29.5, 19, { nosolid: true });  // 관아 앞 관기, 객잔 옆 밥그릇 기
   // 광장 네 귀퉁이의 좌판. 차양 밑에 매대를 놓고 장사꾼은 그 뒤에 선다
   for (const [x, y] of [[21, 16], [34, 16], [21, 26], [34, 26]]) { m.put('awning', x, y, { nosolid: true }); m.put('counter', x + 1.5, y + 2); }
@@ -321,7 +324,8 @@ function townNpcs(l, id, out, folk) {
   out.npcs.push({ id: 'gatebeg', spr: 'Caveman', x: 26.4, y: 39.6, dir: 3, life: 'still', hint: '거지', hawk: BEGGAR.hawk, gap: [12, 22], talk: () => beggarTalk(l) });
   // 도박장 앞 호객꾼
   out.npcs.push({ id: 'tout', spr: 'Greenman', x: 53, y: 17.3, dir: 2, life: 'still', hint: '호객꾼', hawk: ['한 판 하고 가시오!', '오늘 운수 좋아 보이시오!', '홀이냐 짝이냐!'], talk: async () => { await npcSay('호객꾼', 'Greenman', nextLine(id + 'tout', ['들어가 보시오. 따면 손님 돈이고, 잃어도 손님 돈이오. 하하.', '하오문이 보는 판이라 속임수는 없소. 속임수가 필요 없거든.', '칼 찬 양반들은 판을 크게 걸더군. 크게 따는 사람도 있소. 가끔.'])); } });
-  if (SLAVE.includes(l.id)) slaveNpcs(l, id, out, night);
+  if (SLAVE.includes(l.id)) { slaveNpcs(l, id, out, night); if (!night) mookNpc(l, out); }
+  runawayNpc(l, out);
   if (night) {  // 밤에는 좌판이 걷히고 취객이 나온다
     out.npcs.push({ id: 'drunk', spr: 'Villager2', x: 10, y: 18.8, dir: 0, life: 'wander', r: 2.5, speed: 11, hint: '취객', barks: DRUNK, talk: async () => { await npcSay('취객', 'Villager2', nextLine(id + 'dr', ['어이, 친구! 한 잔 받으시오! …잔이 어디 갔지?', '내가 왕년에 화산파 장문인이랑 술을 마셨소. 진짜요. 장문인은 기억 못 하겠지만.', '집에 가면 마누라가 기다리오. 그러니 한 잔만 더.'])); } });
     return;
