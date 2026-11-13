@@ -12,7 +12,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-now.md
 문서의 "규칙"을 지키고, "받을 차례"의 맨 위 항목부터 한 장씩 그려 줘. 한 메시지에 한 장만. 내가 "다음"이라고 하면 다음 항목을 그려. 각 항목에 적힌 참고 그림을 열어서 그 그림과 도트 굵기·색·칸 배치를 맞춰. 주소를 못 열면 나한테 그 그림을 올려 달라고 말해. 다 그리면 항목의 파일 이름을 알려 줘.
 ```
 
-**방법 2 (주소를 못 열 때)**: 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙인 뒤, 참고 그림 두 장 `art-src/ref-people.png`(사람 도트), `art-src/ref-walls.png`(벽·지붕·소품)을 내려받아 함께 올린다. 그리고 "이 문서대로 받을 차례 맨 위부터 한 장씩 그려 줘"라고 한다. 일러스트(기루)를 받을 때는 `assets/art/yun_n.webp`도 올린다.
+**방법 2 (주소를 못 열 때)**: Gemini라면 `docs/gemini-now.md`(한 칸씩 복사해 붙이는 판)를 쓴다. ChatGPT라면 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙인 뒤, 참고 그림 두 장 `art-src/ref-people.png`(사람 도트), `art-src/ref-walls.png`(벽·지붕·소품)을 내려받아 함께 올린다. 그리고 "이 문서대로 받을 차례 맨 위부터 한 장씩 그려 줘"라고 한다. 일러스트(기루)를 받을 때는 `assets/art/yun_n.webp`도 올린다.
 
 받은 그림은 파일 이름 그대로 저장소 `art-src/chatgpt/`(Gemini면 `art-src/gemini/`)에 올리거나 Claude 대화에 붙인다. 넣는 일은 Claude가 한다.
 
@@ -47,7 +47,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-now.md
 
 ### 1. 인물 도트 걷기 시트 (a, b 한 쌍씩)
 
-위의 '인물 도트 공통 문장'과 a 또는 b 문장을 붙이고, 아래 인물 설명을 넣는다. 파일 이름은 `번호a.png`, `번호b.png`(예: HN15a.png).
+위의 '인물 도트 공통 문장'과 a 또는 b 문장을 붙이고, 아래 인물 설명을 넣는다. 파일 이름은 `번호a.png`, `번호b.png`(예: HN6a.png).
 
 - **HN6a, HN6b** · 문파 제자
 
