@@ -4,13 +4,15 @@
 
 ## ChatGPT에게 처음 하는 말
 
-새 대화에서 아래를 그대로 붙인다. 다음부터는 "다음"이라고만 하면 된다.
+**방법 1 (주소)**: 새 대화에 아래를 붙인다. 다음부터는 "다음"이라고만 하면 된다.
 
 ```text
 아래 주소의 문서를 읽어 줘. 내 게임 '강호행'에 들어갈 그림 요청문이야.
-https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/docs/chatgpt-now.md
-문서의 "규칙"을 지키고, "받을 차례"의 맨 위 항목부터 한 장씩 그려 줘. 한 메시지에 한 장만. 내가 "다음"이라고 하면 다음 항목을 그려. 각 항목에 적힌 참고 그림 주소를 열어서 그 그림과 도트 굵기·색·칸 배치를 맞춰. 주소를 못 열면 나한테 그 그림을 올려 달라고 말해. 다 그리면 항목의 파일 이름을 알려 줘.
+https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-now.md
+문서의 "규칙"을 지키고, "받을 차례"의 맨 위 항목부터 한 장씩 그려 줘. 한 메시지에 한 장만. 내가 "다음"이라고 하면 다음 항목을 그려. 각 항목에 적힌 참고 그림을 열어서 그 그림과 도트 굵기·색·칸 배치를 맞춰. 주소를 못 열면 나한테 그 그림을 올려 달라고 말해. 다 그리면 항목의 파일 이름을 알려 줘.
 ```
+
+**방법 2 (주소를 못 열 때)**: 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙인 뒤, 참고 그림 두 장 `art-src/ref-people.png`(사람 도트), `art-src/ref-walls.png`(벽·지붕·소품)을 내려받아 함께 올린다. 그리고 "이 문서대로 받을 차례 맨 위부터 한 장씩 그려 줘"라고 한다. 일러스트(기루)를 받을 때는 `assets/art/yun_n.webp`도 올린다.
 
 받은 그림은 파일 이름 그대로 저장소 `art-src/chatgpt/`(Gemini면 `art-src/gemini/`)에 올리거나 Claude 대화에 붙인다. 넣는 일은 Claude가 한다.
 
@@ -25,10 +27,12 @@ https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/docs/chatgpt-no
 
 ## 참고 그림
 
-1. 인물 도트(걷기 시트 기준): https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/chatgpt/HC1a.png (앞·뒤), https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/chatgpt/HC1b.png (옆)
-2. 벽 그림 묶음: https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/chatgpt/HW1.png , https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/higgsfield/HW2.png , https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/chatgpt/HR1.png , https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/chatgpt/HR2.png , https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/chatgpt/HP2.png
-3. 도트 질의 기준(Gemini 시험 그림. 이 정도 세밀함으로): https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/gemini/G1.png
-4. 인물 일러스트 그림체: https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/assets/art/yun_n.webp , https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/assets/art/so_n.webp , https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/assets/art/c_gu_n.webp
+(방법 2라면 1·3은 ref-people.png, 2는 ref-walls.png 한 장에 다 들어 있다)
+
+1. 인물 도트(걷기 시트 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HC1a.png (앞·뒤), https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HC1b.png (옆)
+2. 벽 그림 묶음: https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HW1.png , https://dltkdwhdhkd-design.github.io/gangho/art-src/higgsfield/HW2.png , https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HR1.png , https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HR2.png , https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HP2.png
+3. 도트 질의 기준(Gemini 시험 그림. 이 정도 세밀함으로): https://dltkdwhdhkd-design.github.io/gangho/art-src/gemini/G1.png
+4. 인물 일러스트 그림체: https://dltkdwhdhkd-design.github.io/gangho/assets/art/yun_n.webp , https://dltkdwhdhkd-design.github.io/gangho/assets/art/so_n.webp , https://dltkdwhdhkd-design.github.io/gangho/assets/art/c_gu_n.webp
 
 ## 인물 도트 공통 문장 (도트 걷기 시트마다 앞에 붙는다)
 
@@ -41,77 +45,9 @@ https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/docs/chatgpt-no
 
 ## 받을 차례
 
-### 1. 기루 일러스트 7장 (투명 배경 1024×1536)
-
-참고 그림 4의 그림체로. 허벅지 위까지, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면. 첫 장 앞에 이 문장을 한 번 붙인다.
-
-```text
-이번 일곱 장은 명나라풍 큰 고을의 기루(술과 가무를 파는 곳) 사람들이야. 기녀는 모두 스물 넘은 성인 여성이고, 가야금·비파·춤·시로 손님을 맞는 예인으로 그려 줘. 옷은 몸을 다 덮는 단정한 비단옷(긴 소매, 바닥까지 닿는 치마, 여민 깃)으로, 노출과 몸선 강조 없이 품위 있게. 같은 그림체, 같은 구도(허벅지 위, 얼굴은 거의 정면), 1024×1536 투명 배경 규칙은 그대로야.
-```
-
-- **giru_hongmae_n.png** · 홍매 (가야금 타는 기녀, 스물넷)
-
-```text
-스물넷 여자. 높이 틀어 올린 쪽머리에 붉은 옥비녀와 작은 떨잠, 장밋빛과 짙은 진홍의 겹 비단옷, 흰 수놓은 깃, 오른손에 접은 부채. 다섯 해째 기루에 있어 표정은 차분하지만 눈에 피곤이 조금 비친다.
-```
-
-- **giru_wolhyang_n.png** · 월향 (춤추는 기녀, 스물둘)
-
-```text
-스물두 살 여자. 양쪽으로 둥글게 감아 올린 머리에 연보라 댕기, 연보라와 옅은 금빛 비단옷, 긴 소매 끝을 살짝 들어 춤사위를 시작하려는 손. 어머니에게 춤을 배운 사람답게 몸가짐이 반듯하고, 입가에 장난스러운 웃음.
-```
-
-- **giru_soak_n.png** · 소옥 (강남에서 온 가객, 스물셋)
-
-```text
-스물세 살 여자. 강남풍으로 낮게 묶은 쪽머리에 은비녀, 청록과 상아빛 비단옷, 길게 늘어진 물소매, 옅은 띠. 노래하는 사람이라 목선이 곧고, 순한 얼굴에 사투리 섞인 웃음이 어울리는 인상.
-```
-
-- **giru_yeonhwa_n.png** · 연화 (노예 시장에서 온 기녀, 스물하나)
-
-```text
-스물한 살 여자. 수수하게 틀어 올린 머리에 나무비녀 하나, 다른 기녀보다 소박한 분홍 비단옷(소매 끝이 조금 해짐), 두 손을 앞으로 모아 쥠. 겁먹었지만 꺾이지 않은 눈, 글을 배우고 싶어 하는 사람다운 또렷한 눈빛.
-```
-
-- **giru_chaeun_n.png** · 채운 (비파 타는 기녀, 스물다섯)
-
-```text
-스물다섯 살 여자. 한쪽으로 넘겨 묶은 긴 머리에 구름무늬 머리 장식, 하늘색과 흰빛 겹 비단옷, 비파를 가슴에 안음. 일할 때만 웃는 사람이라 지금은 담담한 얼굴, 손가락이 길고 단정함.
-```
-
-- **giru_nanju_n.png** · 난주 (관기 출신 기녀, 스물일곱)
-
-```text
-스물일곱 살 여자. 크고 화려하게 올린 머리에 금비녀와 비취 장식, 짙은 남색과 금실 비단옷, 관아 의례복을 닮은 단정한 깃. 이 기루에서 가장 이름난 사람답게 당당하고 영리한 눈, 입꼬리에 냉소가 조금.
-```
-
-- **giru_pimp_n.png** · 포주 (기루 주인)
-
-```text
-쉰 살 남자. 살집 있는 몸, 가늘게 늘어진 콧수염, 작은 검은 사모, 금빛 엽전 무늬가 들어간 진홍 비단옷에 털 깃, 허리에 불룩한 돈주머니와 주판, 손가락마다 반지. 웃고 있지만 계산이 끝난 눈.
-```
-
-### 2. 인물 도트 걷기 시트 (a, b 한 쌍씩)
+### 1. 인물 도트 걷기 시트 (a, b 한 쌍씩)
 
 위의 '인물 도트 공통 문장'과 a 또는 b 문장을 붙이고, 아래 인물 설명을 넣는다. 파일 이름은 `번호a.png`, `번호b.png`(예: HN15a.png).
-
-- **HN15a, HN15b** · 월향·채운 같은 비파 타는 기녀
-
-```text
-인물: 스물 넘은 성인 여자 기녀(예인). 양쪽으로 둥글게 감아 올린 머리에 연보라 댕기, 몸을 다 덮는 연보라와 옅은 금빛 겹 비단옷(긴 소매, 바닥까지 닿는 치마), 작은 비파를 두 손으로 가슴 앞에 안음, 부드러운 웃음. 노출 없이 단정하게
-```
-
-- **HN16a, HN16b** · 춤추는 기녀
-
-```text
-인물: 스물 넘은 성인 여자 기녀(무희). 높게 올린 외쪽 머리에 은비녀, 몸을 다 덮는 청록과 상아빛 비단옷, 아주 긴 물소매, 바닥까지 닿는 치마, 길고 옅은 띠, 반듯한 얼굴. 노출 없이 단정하게
-```
-
-- **HN17a, HN17b** · 기루 포주
-
-```text
-인물: 쉰 살쯤 살집 있는 남자. 가늘게 늘어진 콧수염, 작은 검은 사모, 금빛 엽전 무늬의 진홍 비단옷에 털 깃, 허리에 불룩한 돈주머니와 주판, 손가락마다 반지, 웃지만 계산이 끝난 눈
-```
 
 - **HN6a, HN6b** · 문파 제자
 
@@ -161,7 +97,7 @@ https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/docs/chatgpt-no
 인물: 여덟 살쯤 마을 아이. 양쪽에 작은 상투 두 개, 빛바랜 붉은 짧은 저고리와 파란 바지, 천신, 장난스러운 얼굴. 키는 어른의 3분의 2쯤
 ```
 
-### 3. 문파·세가 전각 벽 (파랑 배경, 3열 2행)
+### 2. 문파·세가 전각 벽 (파랑 배경, 3열 2행)
 
 파일 이름은 번호 그대로(HS1.png 따위). 1행은 앞벽 셋, 2행은 같은 건물의 옆벽(박공) 셋.
 
@@ -253,9 +189,9 @@ Roof tile texture sheet in exactly the same layout, pixel size and pixel-art sty
 Sprite sheet of Chinese roof ornaments and hall decorations for a pixel-art wuxia RPG, 4 columns x 3 rows grid, in exactly the pixel size, outline and palette of the reference images, solid pure blue #0000FF background, wide gaps, nothing touching. Items: 1) dragon-head ridge-end ornament (chiwen), dark grey glazed, facing right; 2) the same in gold-yellow; 3) row of five small roof-ridge guardian beasts on a short ridge piece; 4) upturned flying eave corner piece with a hanging bronze wind bell; 5) long horizontal ridge band with a carved cloud pattern, tileable left-right; 6) small tower-like ridge-centre pearl/flame ornament; 7) blank dark lacquered horizontal plaque with a gold border (no text); 8) blank vertical plaque, red with gold border (no text); 9) pair of red lacquered round columns with gilded capitals; 10) row of painted dougong bracket sets under an eave, tileable left-right; 11) large bronze incense cauldron (ding) on three legs; 12) pair of tall stone lanterns with carved roofs. Same pixel scale for all: plaques about one person wide, columns about two people tall. No text or letters anywhere.
 ```
 
-### 4. 물가와 저잣거리 (파랑 배경)
+### 3. 물가와 저잣거리 (파랑 배경)
 
-- **HG2** · 물 무늬 셋(3열 1행, 이어 붙는 정사각형): 강물(잔물결), 연못(연잎 몇 장), 얕은 여울(돌이 비치는 물). 참고 그림: https://raw.githubusercontent.com/dltkdwhdhkd-design/gangho/main/art-src/chatgpt/HG1.png
+- **HG2** · 물 무늬 셋(3열 1행, 이어 붙는 정사각형): 강물(잔물결), 연못(연잎 몇 장), 얕은 여울(돌이 비치는 물). 참고 그림: https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/HG1.png
 
 ```
 Seamless water texture sheet in exactly the same layout, pixel size and pixel-art style as the reference image: 3 square swatches in one row separated by solid pure blue #0000FF gaps. 1) river water with small ripples and light glints, 2) still pond water with a few lotus leaves, 3) clear shallow stream showing pebbles under the water. Each swatch must tile seamlessly left-right and top-bottom. Crisp chunky pixels, light from the upper left, no text.
@@ -278,3 +214,77 @@ Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel si
 ```
 Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid pure blue #0000FF background, wide gaps. Cliff pieces seen from a high three-quarter top-down view that can be placed side by side: 1) and 2) two straight cliff face sections of layered grey-brown rock with grass on top, 3) and 4) left and right cliff corner pieces, 5) rough stone steps cut into the cliff, 6) a large mossy boulder. No text.
 ```
+
+## 보류: 기루 (아직 게임에 넣지 않음. 위 차례를 다 받은 뒤에, 또는 기루를 넣기로 하면 그때)
+
+### 기루 일러스트 7장 (투명 배경 1024×1536)
+
+참고 그림 4의 그림체로. 허벅지 위까지, 몸은 오른쪽으로 살짝, 얼굴과 시선은 거의 정면. 첫 장 앞에 이 문장을 한 번 붙인다.
+
+```text
+이번 일곱 장은 명나라풍 큰 고을의 기루(술과 가무를 파는 곳) 사람들이야. 기녀는 모두 스물 넘은 성인 여성이고, 가야금·비파·춤·시로 손님을 맞는 예인으로 그려 줘. 옷은 몸을 다 덮는 단정한 비단옷(긴 소매, 바닥까지 닿는 치마, 여민 깃)으로, 노출과 몸선 강조 없이 품위 있게. 같은 그림체, 같은 구도(허벅지 위, 얼굴은 거의 정면), 1024×1536 투명 배경 규칙은 그대로야.
+```
+
+- **giru_hongmae_n.png** · 홍매 (가야금 타는 기녀, 스물넷)
+
+```text
+스물넷 여자. 높이 틀어 올린 쪽머리에 붉은 옥비녀와 작은 떨잠, 장밋빛과 짙은 진홍의 겹 비단옷, 흰 수놓은 깃, 오른손에 접은 부채. 다섯 해째 기루에 있어 표정은 차분하지만 눈에 피곤이 조금 비친다.
+```
+
+- **giru_wolhyang_n.png** · 월향 (춤추는 기녀, 스물둘)
+
+```text
+스물두 살 여자. 양쪽으로 둥글게 감아 올린 머리에 연보라 댕기, 연보라와 옅은 금빛 비단옷, 긴 소매 끝을 살짝 들어 춤사위를 시작하려는 손. 어머니에게 춤을 배운 사람답게 몸가짐이 반듯하고, 입가에 장난스러운 웃음.
+```
+
+- **giru_soak_n.png** · 소옥 (강남에서 온 가객, 스물셋)
+
+```text
+스물세 살 여자. 강남풍으로 낮게 묶은 쪽머리에 은비녀, 청록과 상아빛 비단옷, 길게 늘어진 물소매, 옅은 띠. 노래하는 사람이라 목선이 곧고, 순한 얼굴에 사투리 섞인 웃음이 어울리는 인상.
+```
+
+- **giru_yeonhwa_n.png** · 연화 (노예 시장에서 온 기녀, 스물하나)
+
+```text
+스물한 살 여자. 수수하게 틀어 올린 머리에 나무비녀 하나, 다른 기녀보다 소박한 분홍 비단옷(소매 끝이 조금 해짐), 두 손을 앞으로 모아 쥠. 겁먹었지만 꺾이지 않은 눈, 글을 배우고 싶어 하는 사람다운 또렷한 눈빛.
+```
+
+- **giru_chaeun_n.png** · 채운 (비파 타는 기녀, 스물다섯)
+
+```text
+스물다섯 살 여자. 한쪽으로 넘겨 묶은 긴 머리에 구름무늬 머리 장식, 하늘색과 흰빛 겹 비단옷, 비파를 가슴에 안음. 일할 때만 웃는 사람이라 지금은 담담한 얼굴, 손가락이 길고 단정함.
+```
+
+- **giru_nanju_n.png** · 난주 (관기 출신 기녀, 스물일곱)
+
+```text
+스물일곱 살 여자. 크고 화려하게 올린 머리에 금비녀와 비취 장식, 짙은 남색과 금실 비단옷, 관아 의례복을 닮은 단정한 깃. 이 기루에서 가장 이름난 사람답게 당당하고 영리한 눈, 입꼬리에 냉소가 조금.
+```
+
+- **giru_pimp_n.png** · 포주 (기루 주인)
+
+```text
+쉰 살 남자. 살집 있는 몸, 가늘게 늘어진 콧수염, 작은 검은 사모, 금빛 엽전 무늬가 들어간 진홍 비단옷에 털 깃, 허리에 불룩한 돈주머니와 주판, 손가락마다 반지. 웃고 있지만 계산이 끝난 눈.
+```
+
+
+### 기루 사람 걷기 도트 (a, b 한 쌍씩, 위 '인물 도트 공통 문장'으로)
+
+- **HN15a, HN15b** · 월향·채운 같은 비파 타는 기녀
+
+```text
+인물: 스물 넘은 성인 여자 기녀(예인). 양쪽으로 둥글게 감아 올린 머리에 연보라 댕기, 몸을 다 덮는 연보라와 옅은 금빛 겹 비단옷(긴 소매, 바닥까지 닿는 치마), 작은 비파를 두 손으로 가슴 앞에 안음, 부드러운 웃음. 노출 없이 단정하게
+```
+
+- **HN16a, HN16b** · 춤추는 기녀
+
+```text
+인물: 스물 넘은 성인 여자 기녀(무희). 높게 올린 외쪽 머리에 은비녀, 몸을 다 덮는 청록과 상아빛 비단옷, 아주 긴 물소매, 바닥까지 닿는 치마, 길고 옅은 띠, 반듯한 얼굴. 노출 없이 단정하게
+```
+
+- **HN17a, HN17b** · 기루 포주
+
+```text
+인물: 쉰 살쯤 살집 있는 남자. 가늘게 늘어진 콧수염, 작은 검은 사모, 금빛 엽전 무늬의 진홍 비단옷에 털 깃, 허리에 불룩한 돈주머니와 주판, 손가락마다 반지, 웃지만 계산이 끝난 눈
+```
+
