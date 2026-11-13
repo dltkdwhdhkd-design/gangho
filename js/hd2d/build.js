@@ -10,7 +10,7 @@
 // 문파마다 HS 벽 그림을 받으면 walls를 그 그림으로 바꾼다(docs/chatgpt-sects.md)
 const G0 = { sign: false, pitch: 30, wall: 34, floors: 2, upper: 20, balcony: true, porch: 6, widen: 1.18, plat: [4, 5], lanterns: 2, depth: 30 };
 export const GRAND = {
-  shaolin_main: { ...G0, walls: ['hs_shaolin', 'w4'], roof: 'r_orange', tint: '#ffd870', col: '#a8281e', plaque: '大雄寶殿', gold: 1, widen: 1.05, wall: 40, upper: 22 },
+  shaolin_main: { ...G0, model: 'daewoong', walls: ['hs_shaolin', 'w4'], roof: 'r_orange', tint: '#ffd870', col: '#a8281e', plaque: '大雄寶殿', gold: 1, widen: 1.05, wall: 40, upper: 22 },
   shaolin: { ...G0, walls: ['hs_shaolin', 'w4'], roof: 'r_orange', tint: '#ffd870', col: '#a8281e', plaque: '羅漢堂', gold: 1 },
   wudang: { ...G0, walls: ['hs_wudang', 'w5'], roof: 'r_dark', tint: '#9ad0a0', col: '#2e4a36', plaque: '武當' },
   hwasan: { ...G0, walls: ['hs_hwasan', 'w4'], roof: 'r_orange', tint: '#e07060', col: '#8a2a22', plaque: '華山' },

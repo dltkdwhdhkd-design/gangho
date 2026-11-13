@@ -8,7 +8,7 @@
 import { G, IMG, TS, $ } from './core.js';
 import { STAMPS } from './tiles.js';
 import { newState } from './state.js';
-import { makeBuilder, SPEC } from './hd2d/build.js';
+import { makeBuilder, SPEC, GRAND } from './hd2d/build.js';
 
 const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = .857 / Math.sin(PITCH) /* 원근 때문에 주인공 발밑에서 세로 걸음이 가로보다 1.17배 빨라 보이던 것을 맞춘다(평면도 1점이 화면에서 가로와 세로 같은 길이) */, HS = 1 / Math.cos(PITCH);
 const CHAR = 15, AHEAD = .04;  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
@@ -98,7 +98,14 @@ const PV = {}, PVN = ['n_villager', 'n_woman', 'n_oldman', 'n_oldwoman', 'hut_o'
 const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 인물 그림 기준). 새 땅과 지붕과 벽도 이 굵기로 깐다
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
-function loadPreview() { return pvP || (pvP = Promise.all(PVN.map(n => new Promise(res => { const im = new Image(); im.onload = () => { PV[n] = im; res(); }; im.onerror = res; im.src = `assets/hd2d/preview/${n}.webp`; })))); }
+// 블렌더로 지은 모형(tools/blender/hall.py → assets/hd2d/models/*.glb). 길이는 평면도 점이라 세울 때 (1, HS, ZS)로 늘린다
+const MODELS = {}, MODELN = ['daewoong'], MODELM = new Map();  // MODELM: 그물(geometry) → 재질 셋. clone은 userData를 JSON으로 베껴 재질이 깨지므로 따로 둔다
+async function loadModels() { try { const { GLTFLoader } = await import('./lib/three/addons/GLTFLoader.js'), L = new GLTFLoader();
+  await Promise.all(MODELN.map(async n => { try { const g = await L.loadAsync(`assets/hd2d/models/${n}.glb`); g.scene.traverse(o => { if (!o.isMesh) return; const sm = o.material, t = sm.map;
+    if (t) { t.magFilter = T.LinearFilter; t.minFilter = T.LinearMipmapLinearFilter; t.generateMipmaps = true; t.anisotropy = R.capabilities.getMaxAnisotropy(); t.needsUpdate = true; }
+    const mkm = () => { const m = new T.MeshLambertMaterial({ map: t || null, color: t ? 0xffffff : sm.color }); return t ? sharpen(m) : m; };
+    const M = { m: mkm(), f: holed(mkm()), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }) }; MODELM.set(o.geometry, M); o.material = M.m; o.userData = {}; o.castShadow = o.receiveShadow = true; }); MODELS[n] = g.scene; } catch (e) { console.warn('모형 못 읽음', n, e); } })); } catch (e) { console.warn('GLTFLoader', e); } }
+function loadPreview() { if (!loadModels.p) loadModels.p = loadModels(); return pvP || (pvP = Promise.all([loadModels.p, ...PVN.map(n => new Promise(res => { const im = new Image(); im.onload = () => { PV[n] = im; res(); }; im.onerror = res; im.src = `assets/hd2d/preview/${n}.webp`; }))])); }
 const art = () => !!HD.opt.art;
 function previewTex(name) {
   const im = art() && PV[name]; if (!im) return null; if (TEX.has('p/' + name)) return TEX.get('p/' + name);
@@ -385,6 +392,9 @@ function setMap(m) {
   list.forEach(({ s, z }, k) => {
     const st = STAMPS[s.name], t = st && stampTex(s.name); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(s.name), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
+    const gm = !s.flat && art() && s.grand && GRAND[s.grand]?.model && MODELS[GRAND[s.grand].model];
+    if (gm) { const g = new T.Group(), o = gm.clone(true); o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; } }); g.add(o);
+      const xc = s.x + st[5] + st[7] / 2, yf = s.y + st[6] + st[8], pb = GRAND[s.grand].modelFront || 7; g.scale.set(1, HS, ZS); g.position.set(xc, hAt(m, xc, yf - 1), (yf - pb) * ZS); g.userData = { s, house: true }; propG.add(g); return; }  // 블렌더 모형
     if (!s.flat && SPEC[s.name] && art() && PV.w1_front) { build ||= makeBuilder({ T, HS, ZS, DOT, PV, aniso: R.capabilities.getMaxAnisotropy(), texFrom, matOf, holed, LAMPX, face, glow: GLOW, get AO() { return aoTex(); } }); const b = build(s, st, SPEC[s.name]); if (b) { propG.add(b); return; } }  // 조립한 건물(js/hd2d/build.js)
     if (!s.flat && PARTS[s.name] && previewTex('w_front')) { propG.add(partsBox(s, PARTS[s.name])); return; }  // 새 그림: 벽 부품(HW0)과 지붕 무늬(HR1)로
     if (ef) { propG.add(houseBox(s, t, w, h, ef)); return; }
@@ -498,7 +508,8 @@ function cutHouse(g, on, dt) {
   const want = u.cutV > 0; if (!u.cutU) { if (!want) return; const bb = new T.Box3().setFromObject(g); u.top = bb.max.y + 2; u.cutU = { value: u.top }; u.cutM = new Map(); }
   u.cutU.value = u.top + (KNEE * HS - u.top) * u.cutV;
   if (!!u.cutOn === want) return; u.cutOn = want;
-  for (const c of g.children) { if (!c.isMesh || c.userData.flat) continue; if (!c.userData.base) c.userData.base = c.material;
+  const ms = []; g.traverse(c => { if (c.isMesh) ms.push(c); });  // 블렌더 모형은 물체가 한 겹 더 안에 있다
+  for (const c of ms) { if (c.userData.flat) continue; if (!c.userData.base) c.userData.base = c.material;
     if (!want) { c.material = c.userData.base; continue; }
     let m = u.cutM.get(c.userData.base); if (!m) { const b = c.userData.base; m = b.clone(); m.side = T.DoubleSide; const cu = u.cutU;
       m.onBeforeCompile = sh => { b.onBeforeCompile(sh); sh.uniforms.uCut = cu; sh.vertexShader = 'varying float vCutY;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vCutY = (modelMatrix * vec4(transformed, 1.)).y;');
