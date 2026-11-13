@@ -47,12 +47,12 @@ export const SPEC = {
 };
 
 // 벽 그림(HW1 앞벽 95×55, 옆벽 72×85 도트)에서 떠 낼 자리 [x0, y0, x1, y1](위가 0)
-const CROP = {
+export const CROP = {
   beam: ['front', 10, 0, 85, 4], plaster: ['side', 8, 32, 22, 68], stone: ['side', 6, 71, 66, 85], post: ['side', 0, 32, 6, 70],
   door: ['front', 34, 12, 60, 55], win: ['front', 7, 12, 27, 37],
 };
 // HW2(법당 w4, 문파 회관 w5, 부잣집 w6)는 그림마다 문과 창 자리가 달라 따로 적는다(도트, 위가 0)
-const CROPS = {
+export const CROPS = {
   w4: { beam: ['front', 10, 6, 85, 15], plaster: ['side', 50, 36, 60, 70], stone: ['side', 0, 75, 72, 86], post: ['side', 2, 40, 10, 70], door: ['front', 14, 17, 81, 57], win: ['front', 15, 18, 26, 40] },
   w5: { beam: ['front', 2, 5, 92, 14], plaster: ['side', 10, 36, 24, 70], stone: ['side', 0, 74, 73, 86], post: ['side', 1, 30, 6, 74], door: ['front', 31, 17, 58, 60], win: ['front', 8, 21, 28, 47] },
   w6: { beam: ['front', 0, 1, 94, 5], plaster: ['side', 2, 34, 24, 72], stone: ['side', 0, 74, 73, 86], post: ['side', 0, 34, 6, 72], door: ['front', 35, 20, 60, 60], win: ['front', 4, 20, 24, 46] },
