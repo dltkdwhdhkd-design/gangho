@@ -255,7 +255,7 @@ function partsBox(s, rk) {
   return g;
 }
 // 새 땅(HG1): 칸 종류마다 무늬를 도트 굵기대로 깐다. 칸 경계는 낮은 잡음으로 흔들어 네모 칸이 드러나지 않게. 무늬가 없는 칸(물, 마루)은 예전 땅을 쓴다
-const GROUND = { 0: 'g_grass', 1: 'g_road', 3: 'g_yard' };
+const GROUND = { 0: 'g_grass', 1: 'g_road', 3: 'g_yard', 5: 'g_cobble' };  // 5: 비무대·광장 바닥(막돌)
 // 땅 종류마다 풀 그림 색 바꾸기(새 땅 그림이 오기 전까지). 풀은 짙은 올리브(기준 화면의 풀은 누런 올리브와 갈색)
 const BIOME_T = { grass: (r, g, b) => [r + 6, g * .9 + 2, b * .55], plain: (r, g, b) => [r + 6, g * .9 + 2, b * .55], rose: (r, g, b) => [r + 6, g * .9 + 2, b * .55],
   deep: (r, g, b) => [r * .78, g * .86, b * .5], sand: (r, g, b, l) => [l * 1.05 + 78, l * .86 + 56, l * .5 + 28], snow: (r, g, b, l) => [l * .45 + 168, l * .45 + 172, l * .4 + 184],  // 모래와 눈은 받은 땅 그림(g_sand, g_snow)이 있으면 그걸 쓴다
@@ -267,6 +267,7 @@ function groundArt(m, base) {
   if (!art() || !PV.g_grass || m.room) return null;
   const W2 = Math.round(m.w * TS * DOT), H2 = Math.round(m.h * TS * DOT), c = mk(W2, H2), x = c.getContext('2d'), out = x.createImageData(W2, H2), o = out.data;
   const GB = { sand: 'g_sand', snow: 'g_snow' }[m.biome], pats = {}; for (const k in GROUND) { const nm = k === '0' && GB && PV[GB] ? GB : GROUND[k], im = PV[nm]; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
+    if (nm === 'g_road' && m.biome === 'snow') for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; d[i] = l * .5 + 120; d[i + 1] = l * .5 + 124; d[i + 2] = l * .45 + 136; }  // 눈 위 길: 밟아 다진 회색 눈
     if (nm === 'g_grass') { const bt = BIOME_T[m.biome] || BIOME_T.grass; for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; [d[i], d[i + 1], d[i + 2]] = bt(d[i], d[i + 1], d[i + 2], l).map(v => Math.max(0, Math.min(255, v))); } }  // 풀 그림을 땅 종류(모래, 눈, 짙은 숲, 어스름)에 맞게 다시 칠한다
     pats[k] = { w: im.width, h: im.height, d }; }
   const bw = base.width, bd = base.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, bw, base.height).data;
@@ -609,7 +610,8 @@ function postFx(F) {
   const fp = (HD.peek ? V().set(camT.x, 20 * HS, camT.z) : V().set(F.p.x, 8 * HS, (F.p.y + 1) * ZS)).applyMatrix4(cam.matrixWorldInverse);
   Object.assign(u.tS, { value: P.scene.texture }); u.tD.value = P.scene.depthTexture; u.tB1.value = P.a1.texture; u.tB2.value = P.a2.texture;
   u.cn.value = cam.near; u.cf.value = cam.far; u.focus.value = -fp.z; u.f0.value = dist * 1.6; u.f1.value = dist * 4; u.n0.value = dist * .5; u.n1.value = dist * .64;  // 가까운 흐림은 화면 앞 덤불에만(높은 지붕은 초점보다 가깝지만 흐리지 않게)
-  u.tint.value.set(...L.tint); u.expo.value = L.expo; u.sat.value = L.sat; u.bk.value = HD.opt.fx === 'high' ? .75 : .55; u.bt.value = timeOf() === 'night' ? .55 : .82; u.vig.value = L.vig ?? .62; u.con.value = L.con || 1.08; u.warm.value = L.warm || 0;
+  const cool = curMap?.biome === 'snow' && !L.lamp;  // 눈 덮인 낮은 따뜻한 물들이기를 빼고 차갑게
+  u.tint.value.set(...(cool ? [.94, 1, 1.1] : L.tint)); u.expo.value = L.expo; u.sat.value = L.sat; u.bk.value = HD.opt.fx === 'high' ? .75 : .55; u.bt.value = timeOf() === 'night' ? .55 : .82; u.vig.value = L.vig ?? .62; u.con.value = L.con || 1.08; u.warm.value = curMap?.biome === 'snow' ? 0 : L.warm || 0;
   P.pass(P.fin, null);
 }
 
