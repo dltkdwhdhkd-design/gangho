@@ -41,7 +41,7 @@ class MapDef {
     const s = STAMPS[name], px = tx * this.k * TS + (o.dx || 0), py = ty * this.k * TS + (o.dy || 0);
     if (!s) { console.warn('소품 없음', name); return this; }
     const sc = o.sc || 1;  // sc: 줄여 그리기(쿼터뷰 마을의 정면 소품). 막힘 상자도 같이 줄인다
-    this.stamps.push({ name, x: px, y: py, base: py + s[4] * sc - (o.lift || 0), flat: o.flat, ...(sc !== 1 ? { sc, w: s[3] * sc } : {}), ...(o.isoAs ? { isoAs: o.isoAs } : {}) });
+    this.stamps.push({ name, x: px, y: py, base: py + s[4] * sc - (o.lift || 0), flat: o.flat, ...(sc !== 1 ? { sc, w: s[3] * sc } : {}), ...(o.isoAs ? { isoAs: o.isoAs } : {}), ...(o.grand ? { grand: o.grand } : {}) });  // grand: 문파·세가 전각(새 화면에서 크고 문파답게 짓는다)
     if (s.length > 5 && !o.nosolid) { const sol = { x: px + s[5] * sc, y: py + s[6] * sc, w: s[7] * sc, h: s[8] * sc }; this.solids.push(sol); Object.defineProperty(this.stamps.at(-1), 'sol', { value: sol }); }
     return this;
   }
@@ -393,8 +393,8 @@ export function buildMaps() {
   // 소림사: 숭산의 절
   m = M('shaolin', 40, 30, { name: '소림사', bgm: 'temple', biome: 'grass', arena: 'court', ambient: 'leaf' });
   m.fill(14, 8, 12, 14, 3).road(19, 22, 19, 29, 2).road(5, 15, 14, 15, 2).road(26, 15, 34, 15, 2);
-  m.put('hall', 17, 0).label(19, -.2 + 1, '대웅전').put('statue', 15, 9).put('statue', 23, 9).put('gate', 18.3, 21, { nosolid: true });
-  m.house('wood_b', 3, 12, 'sutra', 7, 9, 1).label(5, 11.6, '장경각').put('lodge', 32, 9).label(34, 8.6, '나한당');
+  m.put('hall', 17, 0, { grand: 'shaolin_main' }).label(19, -.2 + 1, '대웅전').put('statue', 15, 9).put('statue', 23, 9).put('gate', 18.3, 21, { nosolid: true });
+  m.house('wood_b', 3, 12, 'sutra', 7, 9, 1).label(5, 11.6, '장경각').put('lodge', 32, 9, { grand: 'shaolin' }).label(34, 8.6, '나한당');
   m.put('tree_big', 10, 6).put('tree_pine', 28, 5).put('tree_round', 6, 22).put('tree_big', 31, 23).put('tree_pine', 12, 25).put('plum_g', 26, 25);
   m.border(['grove_pine', 'tree_big', 'grove_green'], [[18, 28, 4, 3]], 3);
   m.scatter(['fern1', 'bush1', 'flower3', 'bush3'], 26, 51);
@@ -416,7 +416,7 @@ export function buildMaps() {
   m.fill(0, 9, 44, 3, 3).fill(0, 19, 44, 3, 3).fill(1, 9, 2, 13, 3).fill(41, 9, 2, 13, 3).fill(21, 12, 2, 7, 3);
   const nine = [['house_red', 4, 5, '소림사', 'tree_big', 'shaolin'], ['hut_b', 12, 5, '무당파', 'tree_pine', 'wudang'], ['hut_o', 20, 5, '화산파', 'plum', 'hwasan'], ['hut_o2', 28, 5, '종남파', 'tree_pine', 'jongnam'], ['shop_green', 36, 5, '아미파', 'plum_w', 'emei'],
     ['wood_b', 4, 15, '곤륜파', 'tree_snow', 'gonryun'], ['clay', 12.5, 15, '공동파', 'boulder', 'gongdong'], ['wood_o', 20.5, 15, '점창파', 'tree_round', 'jeomchang'], ['hut_b', 28, 15, '청성파', 'bamboo', 'cheongseong'], ['straw', 36.5, 15.8, '개방', 'stump', 'gaebang']];
-  for (const [st, x, y, nm, tr, fid] of nine) { m.put(st, x, y, { nosolid: false }).flag(fid, x + STAMPS[st][3] / TS + .3, y + STAMPS[st][4] / TS + .15).label(x + 2, y - .5, nm); m.put(tr, x - 2.4, y - .4 + (tr === 'plum' || tr === 'plum_w' ? -1 : 0)); }
+  for (const [st, x, y, nm, tr, fid] of nine) { m.put(st, x, y, { nosolid: false, grand: fid }).flag(fid, x + STAMPS[st][3] / TS + .3, y + STAMPS[st][4] / TS + .15).label(x + 2, y - .5, nm); m.put(tr, x - 2.4, y - .4 + (tr === 'plum' || tr === 'plum_w' ? -1 : 0)); }
   m.solids.push({ x: 0, y: 0, w: 44 * m.k * TS, h: 3 * m.k * TS }, { x: 0, y: 23 * m.k * TS, w: 44 * m.k * TS, h: 2 * m.k * TS });
   m.border(['grove_green', 'tree_big', 'grove_pine'], [[0, 8, 2, 5]], 3);
   m.scatter(['flower1', 'flower3', 'fern1', 'bush2'], 22, 21);
@@ -424,11 +424,11 @@ export function buildMaps() {
   // 세가 거리: 오대세가의 별채
   m = M('fiveclans', 42, 25, { name: '세가 거리', bgm: 'story', biome: 'deep', arena: 'ring' });
   m.fill(1, 10, 41, 3, 3).fill(1, 19, 36, 3, 3).fill(36, 13, 3, 9, 3);
-  m.house('hall', 3, 1, 'fiveclans', 5, 10.5, 0, { when: 'never', lock: '남궁세가의 본채다. 함부로 들어갈 곳이 아니다.' }).label(5, .6, '남궁세가').flag('namgung', 2.6, 8.6, true).flag('namgung', 7.4, 8.6);
-  m.put('lodge', 14, 3).label(16, 2.6, '모용세가').flag('moyong', 13.6, 8.6, true).flag('moyong', 18.4, 8.6).put('plum_w', 10, 4);
-  m.put('house_red', 26, 6).label(28, 5.5, '제갈세가').flag('jegal', 25.6, 9.6, true).flag('jegal', 30.4, 9.6).put('tree_pine', 22, 5).put('bamboo', 33, 5).put('bamboo', 34, 5.4).put('bamboo', 35, 5);
-  m.put('shop_green', 8, 15).label(10, 14.5, '사천당가').flag('dang', 7.6, 18.6, true).flag('dang', 12.4, 18.6).put('tree_dead', 4, 15).row('jar', 3, 18, 2, 1);
-  m.put('clay', 22, 15).label(24, 14.5, '하북팽가').flag('paeng', 21.6, 18.6, true).flag('paeng', 25.4, 18.6).put('stump', 17, 16).put('stump_o', 27, 16).put('pot', 19, 18);
+  m.house('hall', 3, 1, 'fiveclans', 5, 10.5, 0, { when: 'never', lock: '남궁세가의 본채다. 함부로 들어갈 곳이 아니다.', grand: 'namgung' }).label(5, .6, '남궁세가').flag('namgung', 2.6, 8.6, true).flag('namgung', 7.4, 8.6);
+  m.put('lodge', 14, 3, { grand: 'moyong' }).label(16, 2.6, '모용세가').flag('moyong', 13.6, 8.6, true).flag('moyong', 18.4, 8.6).put('plum_w', 10, 4);
+  m.put('house_red', 26, 6, { grand: 'jegal' }).label(28, 5.5, '제갈세가').flag('jegal', 25.6, 9.6, true).flag('jegal', 30.4, 9.6).put('tree_pine', 22, 5).put('bamboo', 33, 5).put('bamboo', 34, 5.4).put('bamboo', 35, 5);
+  m.put('shop_green', 8, 15, { grand: 'dang' }).label(10, 14.5, '사천당가').flag('dang', 7.6, 18.6, true).flag('dang', 12.4, 18.6).put('tree_dead', 4, 15).row('jar', 3, 18, 2, 1);
+  m.put('clay', 22, 15, { grand: 'paeng' }).label(24, 14.5, '하북팽가').flag('paeng', 21.6, 18.6, true).flag('paeng', 25.4, 18.6).put('stump', 17, 16).put('stump_o', 27, 16).put('pot', 19, 18);
   m.solids.push({ x: 0, y: 23 * m.k * TS, w: 42 * m.k * TS, h: 2 * m.k * TS });
   m.border(['grove_pine', 'tree_big', 'grove_green'], [[40, 9, 3, 5]], 3);
   m.scatter(['fern1', 'fern2', 'bush2', 'bush4'], 20, 31);

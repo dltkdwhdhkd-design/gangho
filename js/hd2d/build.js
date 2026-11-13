@@ -5,6 +5,28 @@
 // 좌표: 세상 X = 평면도 x, Y = 높이, Z = 평면도 y × ZS. 선 것의 키는 HS만큼 늘린다(hd2d.js 머리말).
 
 // 종류마다 조립 설명서. 길이는 평면도 점(사람 키 15점). 높이는 땅에서부터
+
+// 구파일방·오대세가 전각: 종류 설명서 위에 덮어쓴다. 벽(w4 법당, w5 회관, w6 부잣집), 지붕 빛, 기둥 빛, 현판 글씨, 앞 기둥줄(porch), 넓게(widen)
+// 문파마다 HS 벽 그림을 받으면 walls를 그 그림으로 바꾼다(docs/chatgpt-sects.md)
+const G0 = { sign: false, pitch: 30, wall: 34, floors: 2, upper: 20, balcony: true, porch: 6, widen: 1.18, plat: [4, 5], lanterns: 2, depth: 30 };
+export const GRAND = {
+  shaolin_main: { ...G0, walls: ['hs_shaolin', 'w4'], roof: 'r_orange', tint: '#ffd870', col: '#a8281e', plaque: '大雄寶殿', gold: 1, widen: 1.05, wall: 40, upper: 22 },
+  shaolin: { ...G0, walls: ['hs_shaolin', 'w4'], roof: 'r_orange', tint: '#ffd870', col: '#a8281e', plaque: '羅漢堂', gold: 1 },
+  wudang: { ...G0, walls: ['hs_wudang', 'w5'], roof: 'r_dark', tint: '#9ad0a0', col: '#2e4a36', plaque: '武當' },
+  hwasan: { ...G0, walls: ['hs_hwasan', 'w4'], roof: 'r_orange', tint: '#e07060', col: '#8a2a22', plaque: '華山' },
+  jongnam: { ...G0, walls: ['hs_jongnam', 'w5'], roof: 'r_dark', tint: '#98a8c0', col: '#2e3a4a', plaque: '終南' },
+  emei: { ...G0, walls: ['hs_emei', 'w4'], roof: 'r_dark', tint: '#c0b0d8', col: '#6a4a70', plaque: '峨嵋' },
+  gonryun: { ...G0, walls: ['hs_gonryun', 'w5'], roof: 'r_dark', tint: '#c8dcf0', col: '#5a6a80', plaque: '崑崙' },
+  gongdong: { ...G0, walls: ['hs_gongdong', 'w6'], roof: 'r_dark', tint: '#b8a078', col: '#6a4a2a', plaque: '崆峒' },
+  jeomchang: { ...G0, walls: ['hs_jeomchang', 'w5'], roof: 'r_dark', tint: '#98c098', col: '#4a3020', plaque: '點蒼' },
+  cheongseong: { ...G0, walls: ['hs_cheongseong', 'w5'], roof: 'r_dark', tint: '#88c090', col: '#2a5a3a', plaque: '靑城' },
+  gaebang: { ...G0, walls: ['hs_gaebang', 'w3'], plank: '#7a5a3a', roof: 'r_thatch', eave: 'e_thatch', thatch: true, pitch: 34, floors: 1, wall: 30, porch: 5, col: '#5a4030', plaque: '丐幇', widen: 1.12 },
+  namgung: { ...G0, walls: ['hs_namgung', 'w5'], roof: 'r_dark', tint: '#8098d8', col: '#1e2a5a', plaque: '南宮世家', gold: 1, widen: 1.08 },
+  moyong: { ...G0, walls: ['hs_moyong', 'w6'], roof: 'r_dark', tint: '#808890', col: '#202020', plaque: '慕容世家', widen: 1.05 },
+  jegal: { ...G0, walls: ['hs_jegal', 'w5'], roof: 'r_dark', tint: '#88b898', col: '#2a4a30', plaque: '諸葛世家' },
+  dang: { ...G0, walls: ['hs_dang', 'w6'], roof: 'r_dark', tint: '#a080a8', col: '#2a1a2a', plaque: '唐門' },
+  paeng: { ...G0, walls: ['hs_paeng', 'w6'], roof: 'r_orange', tint: '#c87050', col: '#5a2018', plaque: '彭家' },
+};
 // 새 벽 그림 이름(그림이 없으면 대신 쓸 것). 실제로 고르는 것은 짓는 때(build 안)
 const PVW = (a, b) => [a, b];
 export const SPEC = {
@@ -84,11 +106,12 @@ export function makeBuilder(C) {
     x.fillStyle = rgb(.6); x.fillRect(0, 17, 24, 1);
     const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = C.aniso || 1; t.needsUpdate = true; t.userData.w = 24; t.userData.h = 36; TEX.set(k, t); return t; };
   return function build(s, st, spec) {
+    if (s.grand && GRAND[s.grand]) spec = { ...spec, ...GRAND[s.grand] };
     const set = Array.isArray(spec.walls) ? (C.PV[spec.walls[0] + '_front'] ? spec.walls[0] : spec.walls[1]) : spec.walls, P = { plaster: spec.plank ? plank(spec.plank) : crop(set, 'plaster'), stone: crop(set, 'stone'), post: crop(set, 'post'), beam: crop(set, 'beam'), door: crop(set, 'door'), win: crop(set, 'win') };
     if (!P.plaster) return null;
     const roofT = pv(spec.roof), eaveT = pv(spec.eave), ridgeT = pv(spec.thatch ? 'e_thatch' : 'e_ridge');
     // 바닥: 막힘 상자의 앞쪽 끝과 좌우를 그대로, 깊이는 막힘 상자(뒤는 못 가는 곳이라 조금 얕아도 된다)
-    const sc = s.sc || 1, x0 = s.x + st[5] * sc, x1 = x0 + st[7] * sc, yb = s.y + st[6] * sc, yf = yb + st[8] * sc;
+    const sc = s.sc || 1, yb = s.y + st[6] * sc, yf = yb + st[8] * sc, wd = spec.widen || 1, xc = s.x + (st[5] + st[7] / 2) * sc, x0 = xc - st[7] * sc / 2 * wd, x1 = xc + st[7] * sc / 2 * wd;  // 전각은 좌우로 조금 넓게 보인다(막힘은 그대로)
     const zf = yf * ZS, zb = Math.max(yb * ZS, zf - (spec.depth || 26)), zm = (zf + zb) / 2, cw = x1 - x0;  // 보이는 깊이는 줄인다(깊은 상자는 지붕만 넓어진다). 뒤쪽 남는 땅은 원래 못 가는 곳
     const g = new T.Group(); g.userData = { s, house: true };
     const B = new Map();  // 재질마다 면을 모아 한 덩어리로 합친다
@@ -123,12 +146,12 @@ export function makeBuilder(C) {
     const MP = matOf(P.plaster), MS = matOf(P.stone), MPost = matOf(P.post), MBeam = matOf(P.beam), MDoor = matOf(P.door), MWin = winMat(P.win);
     const MStoneTop = tint(P.stone, '#b8ae9c'), MWood = col('#4a3122'), MWoodL = col('#6b4a30'), MSoff = col('#3b2a1f');
     // 1) 돌 기단: 벽보다 사방 2점 넓고 3점 높다
-    const pb = 2, ph = 3, yP = H(ph);
+    const [pb, ph] = spec.plat || [2, 3], yP = H(ph), porch = spec.porch || 0;  // porch: 앞 기둥줄. 벽을 그만큼 뒤로 들이고 기둥은 원래 벽 자리에
     box(x0 - pb, 0, zb - pb * ZS, x1 + pb, yP, zf + pb * ZS, MS, P.stone, { top: MStoneTop });
     // 2) 층마다 벽
     const floors = spec.floors || 1, dW = P.door.userData.w * U, dH = P.door.userData.h * U, wW = P.win.userData.w * U, wH = P.win.userData.h * U;
     const doorX = s.x + st[3] * sc / 2 + (s.doorDx || 0), postW = 2.2, postD = 1.1 * ZS;
-    let yBase = yP, zF = zf, zB = zb, X0 = x0, X1 = x1;
+    let yBase = yP, zF = zf - porch, zB = zb, X0 = x0, X1 = x1;
     for (let fl = 0; fl < floors; fl++) {
       const hh = H(fl === 0 ? spec.wall - ph : spec.upper), up = fl > 0;
       // 앞벽: 아래층은 가운데 문, 문 양쪽 칸에 창. 위층은 창만 고르게
@@ -153,6 +176,16 @@ export function makeBuilder(C) {
       else { const ws = holes.map(q => q[0] + X0).sort((a, b) => a - b); for (let i = 1; i < ws.length; i++) posts.push([(ws[i - 1] + wW + ws[i]) / 2, zF]); }  // 위층: 창 사이마다 기둥
       { const n = Math.round(L / 18); for (let i = 1; i < n; i++) posts.push([X0 + L * i / n, zB]); }  // 뒷벽: 18점마다 기둥
       for (const [x, z] of posts) box(x - postW / 2, yBase, z - postD, x + postW / 2, yt, z + postD * (z === zF ? 1 : .4), MPost, P.post, { top: MWood });
+      if (!up && porch && spec.col) {  // 앞 기둥줄: 둥근 맛이 나게 모서리를 깎은 붉은(문파 빛) 기둥, 금빛 머리, 돌 받침. 위에 들보
+        const zc = zF + porch - 1.4, n = Math.max(2, Math.round((X1 - X0) / 13)), CM = col(spec.col), CK = col(spec.gold ? '#c89a30' : '#7a6a50');
+        for (let i = 0; i <= n; i++) { const x = X0 + (X1 - X0) * i / n; if (Math.abs(x - doorX) < dW / 2 + 1) continue;
+          box(x - 1.9, yBase, zc - 1.9, x + 1.9, yBase + H(1.2), zc + 1.9, MS, P.stone, { top: MStoneTop }); box(x - 1.4, yBase + H(1.2), zc - 1.4, x + 1.4, yt - H(1.6), zc + 1.4, CM, null, {});
+          box(x - .9, yBase + H(1.2), zc + 1.4, x + .9, yt - H(1.6), zc + 1.9, CM, null, {}); box(x - 1.7, yt - H(1.6), zc - 1.7, x + 1.7, yt, zc + 1.7, CK, null, {}); }
+        box(X0 - 2, yt - H(3), zc - 1.6, X1 + 2, yt, zc + 1.6, MBeam, P.beam, { side: MWood, top: MWood }); }
+      if (spec.plaque && (fl === floors - 1)) {  // 가로 현판: 맨 위층 앞벽 가운데(한 층이면 문 위)
+        const w = Math.min(L * .5, 6 + spec.plaque.length * 5), h = 6.5, y0 = up ? yBase + hh * .42 : yBase + H(dH + 1.2), zz = zF + (up ? 1.9 : porch + .2);
+        box(doorX - w / 2 - .8, y0 - H(.8), zz - 1.2, doorX + w / 2 + .8, y0 + H(h + .8), zz, col('#2a1a10'), null, {});
+        const ST = signTex(spec.plaque, w, h, false); if (ST) put(matOf(ST), [[doorX - w / 2, y0, zz + .05], [doorX + w / 2, y0, zz + .05], [doorX + w / 2, y0 + H(h), zz + .05], [doorX - w / 2, y0 + H(h), zz + .05]], [[0, 0], [1, 0], [1, 1], [0, 1]]); }
       if (zF - zB > 22) for (const x of [X0, X1]) box(x - postW / 2 - .5, yBase, (zF + zB) / 2 - postW / 2, x + postW / 2 + .5, yt, (zF + zB) / 2 + postW / 2, MPost, P.post, { top: MWood });  // 옆벽 가운데 기둥
       // 옆벽과 뒷벽 위 도리
       for (const x of [X0, X1]) box(x - (x === X0 ? 1.2 : -.2), yt - H(2.2), zB - .5, x + (x === X0 ? .2 : 1.2), yt, zF + .5, MBeam, P.beam, { side: MWood, top: MWood });
@@ -161,7 +194,8 @@ export function makeBuilder(C) {
       box(X0 - 1.4, yt - bh, zF - .2, X1 + 1.4, yt, zF + bd, MBeam, P.beam, { side: MWood, top: MWood, noBack: true });
       box(X0 - 1.4, yt - bh, zB - bd, X1 + 1.4, yt, zB + .2, MWood, null, { noFront: true });
       // 돌계단(아래층 문 앞)
-      if (!up) { box(doorX - dW / 2 - 2, 0, zf + pb * ZS, doorX + dW / 2 + 2, H(ph * .5), zf + (pb + 2.2) * ZS, MS, P.stone, { top: MStoneTop }); }
+      if (!up) { const sw = spec.plat ? dW / 2 + 7 : dW / 2 + 2, n = spec.plat ? 3 : 1;  // 돌계단: 전각은 넓은 세 단
+        for (let i = 0; i < n; i++) box(doorX - sw, 0, zf + pb * ZS, doorX + sw, H(ph * (n - i) / (n + 1)), zf + (pb + 2.2 * (i + 1)) * ZS, MS, P.stone, { top: MStoneTop }); }
       // 등롱: 문 양옆 기둥에. 밤에 불빛 자리
       if (!up && spec.lanterns) for (const sgn of spec.sign ? [-1] : [-1, 1]) { const lx = doorX + sgn * (dW / 2 + postW + 2.4), ly = yBase + H(dH * .78);
         const LR = lanternMat(); box(lx - .5, ly, zF + .6, lx + .5, ly + H(1.2), zF + 1.4, MWood, null, {});  // 고리
@@ -175,7 +209,7 @@ export function makeBuilder(C) {
         const ST = signTex(spec.signText || '', w, h, true); if (ST) put(matOf(ST), [[sx - w / 2, y0, zF + 1.75], [sx + w / 2, y0, zF + 1.75], [sx + w / 2, y0 + H(h), zF + 1.75], [sx - w / 2, y0 + H(h), zF + 1.75]], [[0, 0], [1, 0], [1, 1], [0, 1]]); }
       yBase = yt;
       if (fl < floors - 1) {  // 중간 처마와 위층(조금 들여 짓고 앞에 난간)
-        const ov = 6, ovx = 4; roof(X0 - ovx, X1 + ovx, zF + ov, zF - 1, yt + 1.3 * ZS * Math.tan(22 * Math.PI / 180) + H(.6), 22, false, true);
+        const ov = 6 + porch, ovx = 4 + (spec.plat ? 2 : 0); roof(X0 - ovx, X1 + ovx, zF + ov, zF - 1, yt + 1.3 * ZS * Math.tan(22 * Math.PI / 180) + H(.6), 22, false, true);
         box(X0 - .6, yt, zB - .6, X1 + .6, yt + H(1.6), zF + .6, MBeam, P.beam, { side: MBeam, top: MWood });  // 층 사이를 메우는 바닥 띠(옆과 뒤에서 비치지 않게)
         const inset = 4; zF -= inset; zB += .5 * ZS; X0 += 2; X1 -= 2; yBase = yt + H(1.5);
         if (spec.balcony) { const zr = zF + inset - 1.2, rh = H(6); box(X0 - 2, yBase - H(.6), zF, X1 + 2, yBase, zr + 1, MWoodL, null, {});  // 난간 바닥
@@ -214,11 +248,11 @@ export function makeBuilder(C) {
       const rh = ridgeT ? ridgeT.userData.h * U * HS * ES : H(4), U3 = (rx1 - rx0 + 2) / (ridgeT ? ridgeT.userData.w * U : 10), RG = ridgeT ? matOf(ridgeT) : MWood;
       box(rx0 - 1, yr - rh * .5, zm - 1.7, rx1 + 1, yr + rh * .5, zm + 1.7, RG, ridgeT, { ts: ES, side: spec.thatch ? tint(roofT, '#8a7048') : col('#3d3a36'), top: spec.thatch ? tint(roofT, '#8a7048') : col('#4a4640') });
       if (!spec.thatch) for (const [x, sg] of [[rx0 - 1, 1], [rx1 + 1, -1]]) {  // 용마루 끝을 조금 들어 올린다(치미)
-        box(x - (sg > 0 ? 0 : 2.2), yr - rh * .5, zm - 1.6, x + (sg > 0 ? 2.2 : 0), yr + rh * .7, zm + 1.6, col('#55555a'), null, { top: col('#66666a') });
-        box(x - (sg > 0 ? .8 : 1.4), yr + rh * .7, zm - 1.1, x + (sg > 0 ? 1.4 : .8), yr + rh * 1.0, zm + 1.1, col('#55555a'), null, { top: col('#66666a') }); }
+        box(x - (sg > 0 ? 0 : 2.2), yr - rh * .5, zm - 1.6, x + (sg > 0 ? 2.2 : 0), yr + rh * .7, zm + 1.6, col(spec.gold ? '#c09030' : '#55555a'), null, { top: col(spec.gold ? '#e0b850' : '#66666a') });
+        box(x - (sg > 0 ? .8 : 1.4), yr + rh * .7, zm - 1.1, x + (sg > 0 ? 1.4 : .8), yr + rh * 1.0, zm + 1.1, col(spec.gold ? '#c09030' : '#55555a'), null, { top: col(spec.gold ? '#e0b850' : '#66666a') }); }
       return yr;
     }
-    const ov = 7.5, ovx = 5, yW = yBase + 1.3 * ZS * Math.tan(spec.pitch * Math.PI / 180) + H(.6);  // 지붕은 도리 위에 얹는다(도리와 기둥 머리가 지붕을 뚫지 않게)  // 처마는 사람 반 키(세상 길이)
+    const ov = 7.5 + (floors > 1 ? 0 : porch), ovx = 5 + (spec.plat ? 2 : 0), yW = yBase + 1.3 * ZS * Math.tan(spec.pitch * Math.PI / 180) + H(.6);  // 지붕은 도리 위에 얹는다(도리와 기둥 머리가 지붕을 뚫지 않게)  // 처마는 사람 반 키(세상 길이)
     roof(X0 - ovx, X1 + ovx, zF + ov, zm, yW, spec.pitch, true, false);
     // 땅과 닿는 곳의 그늘(접촉 그늘): 기단 둘레에 어두운 띠
     if (C.AO) { const o = new T.Mesh(new T.PlaneGeometry(cw + 14, (zf - zb) + 7 * ZS + 6), new T.MeshBasicMaterial({ map: C.AO, transparent: true, depthWrite: false, fog: false, opacity: .8 })); o.rotation.x = -Math.PI / 2; o.position.set((x0 + x1) / 2, .2, zm); o.renderOrder = 1; o.userData = { owner: g, flat: true }; g.add(o); }
