@@ -1,4 +1,4 @@
-// 기루: 고을마다 기루가 서고, 포주·기녀·손님이 있다. 술상, 몸값 치르기(풀어 줌), 도망친 기녀(현상금), 노예 시장의 포주 수하
+// 기루(보류 중이면 고을에 아무것도 안 나오는지만 본다): 고을마다 기루가 서고, 포주·기녀·손님이 있다. 술상, 몸값 치르기(풀어 줌), 도망친 기녀(현상금), 노예 시장의 포주 수하
 const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } }); const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(process.env.GAME_URL); await p.waitForFunction(() => window.__G && __G.dbg, null, { timeout: 60000 }); await p.waitForTimeout(1500);
@@ -8,6 +8,8 @@ const { chromium } = require('playwright');
   const talk = async id => { await p.evaluate(id => { const f = __G.field; f.busy = false; f.run(f.npcs.find(n => n.id === id).talk); }, id); await p.waitForTimeout(500); if (await p.locator('.choices button', { hasText: '말을 건다' }).count()) await click('말을 건다'); await skip(); };
   const go = (map, x, y) => p.evaluate(async ([map, x, y]) => { const G = __G; G.world.ensure('c_guangzhou'); G.field.busy = false; G.field.load(map, x, y, 1); await new Promise(r => setTimeout(r, 600)); }, [map, x, y]);
   await go('c_guangzhou', 30, 30);
+  const on = await p.evaluate(async () => (await import('/gangho/js/giru.js')).GIRU_ON);
+  if (!on) { const t = await p.evaluate(() => ({ label: (__G.field.m.labels || []).some(l => l.text === '해월루'), mook: !!__G.field.npcs.find(n => n.id === 'giru_mook'), run: !!__G.field.npcs.find(n => n.id === 'runaway') })); const ok = !t.label && !t.mook && !t.run && !errs.length; console.log('기루 보류 중: 고을에 기루·포주 수하·도망친 기녀 없음', JSON.stringify(t)); console.log(ok ? '통과' : '실패'); await b.close(); process.exit(ok ? 0 : 1); }
   const town = await p.evaluate(() => ({ label: (__G.field.m.labels || []).some(l => l.text === '해월루'), door: __G.field.m.portals.some(q => q.to === 'r_guangzhou_home4'), mook: !!__G.field.npcs.find(n => n.id === 'giru_mook') }));
   console.log('고을', JSON.stringify(town));
   await go('r_guangzhou_home4', 7, 8);

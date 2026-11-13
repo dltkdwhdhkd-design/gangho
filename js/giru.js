@@ -6,6 +6,8 @@ import { say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { ART } from './core.js';
 
+// 보류: 만들어 두었지만 아직 게임에 넣지 않는다. 넣으라고 하면 true로 바꾼다(고을 민가 한 채가 기루가 되고, 노예 시장에 포주 수하, 고을에 도망친 기녀가 나온다)
+export const GIRU_ON = false;
 const S = () => G.S, PA = 'giru_pimp';  // 포주 그림 이름(assets/art/giru_pimp_n.webp가 들어오면 그 그림으로 나온다)
 // 고을마다 기루 이름과 포주
 export const GIRU = {
@@ -60,7 +62,7 @@ export function giruNpcs(l, id, out) {
 }
 // 도망친 기녀: 고을 동쪽 골목에 숨어 있다(js/base.js의 고을 사람들 사이에 끼운다)
 export function runawayNpc(l, out) {
-  const r = S()?.flags.giru_run; if (!r || r.city !== l.id) return; const [n, spr, art] = GIRLS[r.k];
+  if (!GIRU_ON) return; const r = S()?.flags.giru_run; if (!r || r.city !== l.id) return; const [n, spr, art] = GIRLS[r.k];
   out.npcs.push({ id: 'runaway', spr, x: 53.5, y: 34.6, dir: 1, life: 'still', hint: '숨어 있는 여자', talk: () => runTalk(l, r) });
 }
 async function bossTalk(l, house, boss) {
@@ -105,4 +107,4 @@ async function runTalk(l, r) {
   G.field.refresh();
 }
 // 노예 시장의 포주 수하
-export function mookNpc(l, out) { if (!GIRU[l.id]) return; out.npcs.push({ id: 'giru_mook', spr: 'DarkNinja', x: 55.2, y: 10.2, dir: 2, life: 'still', hint: `${GIRU[l.id][0]} 사람`, barks: MOOK.barks, gap: [9, 15], talk: () => npcSay(`${GIRU[l.id][0]} 사람`, 'DarkNinja', pick(MOOK.talk)) }); }
+export function mookNpc(l, out) { if (!GIRU_ON || !GIRU[l.id]) return; out.npcs.push({ id: 'giru_mook', spr: 'DarkNinja', x: 55.2, y: 10.2, dir: 2, life: 'still', hint: `${GIRU[l.id][0]} 사람`, barks: MOOK.barks, gap: [9, 15], talk: () => npcSay(`${GIRU[l.id][0]} 사람`, 'DarkNinja', pick(MOOK.talk)) }); }

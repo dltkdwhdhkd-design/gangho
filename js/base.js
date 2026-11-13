@@ -14,7 +14,7 @@ import { TALK, CITYTALK, HOME, REG, CTX, STALLS, CITYHAWK, TALES, LISTEN, PERFOR
 import { WEAPONS } from './data.js';
 import { CLANS } from './clandata.js';
 import { sellTo, bought } from './slave.js';
-import { GIRU, giruRoom, giruNpcs, runawayNpc, mookNpc } from './giru.js';
+import { GIRU, GIRU_ON, giruRoom, giruNpcs, runawayNpc, mookNpc } from './giru.js';
 
 const NEW = EXTRA.filter(f => f.hi); NEW.forEach(f => { WHO[f.key] = { name: f.who, face: f.spr }; });
 const ST = {
@@ -166,7 +166,7 @@ function sectLayout(m, l, st, ft) {
   m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
 }
 const SLAVE = ['guangzhou', 'changan', 'suzhou'];  // 노예 시장이 서는 고을
-const SHOPS = { 0: ['rest', '주루', 'restaurant'], 1: ['tea', '찻집', 'teahouse'], 2: ['silk', '비단 가게', 'silk'], 3: ['giru', '기루', 'restaurant'], 6: ['shrine', '사당', 'temple_town'] };  // 기루는 js/giru.js  // 고을 민가 자리 가운데 가게가 되는 곳
+const SHOPS = { 0: ['rest', '주루', 'restaurant'], 1: ['tea', '찻집', 'teahouse'], 2: ['silk', '비단 가게', 'silk'], ...(GIRU_ON ? { 3: ['giru', '기루', 'restaurant'] } : {}), 6: ['shrine', '사당', 'temple_town'] };  // 기루는 js/giru.js(보류 중이면 그 자리는 민가)  // 고을 민가 자리 가운데 가게가 되는 곳
 function townLayout(m, l) {
   const W = 60, H = 48, cx = 28; m.walkOn = [1, 3];
   m.border(['tree_round', 'grove_green'], [[cx - 1, H - 3, 6, 3]], 3);
