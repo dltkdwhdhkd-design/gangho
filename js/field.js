@@ -149,6 +149,8 @@ export class Field {
     let best = null, bd = 19;
     for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
+    if (G.party && !m.isoRoom) G.party.members().forEach((id, i) => { const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q || this.npcs.some(n => n.id === id)) return; const d = far(q.x - x, q.y - 4 - y); if (d < bd) { bd = d; best = { id: 'pty_' + id, x: q.x, y: q.y, hint: `${G.party.name(id)} · 말 걸기`, talk: () => G.party.talkTo(id) }; } });  // 따라다니는 동료에게도 말을 건다
+    if (best) return best;
     for (const s of this.spots) { if (s.when && !s.when()) continue; if (x > s.x * TS - 6 && x < (s.x + s.w) * TS + 6 && y > s.y * TS - 6 && y < (s.y + s.h) * TS + 6) return s; }
     return null;
   }

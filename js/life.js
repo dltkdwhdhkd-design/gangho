@@ -244,7 +244,7 @@ export function lootPick(name, ids) {
     B.appendChild(w);
   }, 860);
 }
-G.life = { pick, craft, fishing, houseScore, cand: CAND, stageOf, animals: ANIMALS, openDecor, lootPick, openCraft, openSell, sleepNow: async () => { await fadeTo(1); nextDay(); await fadeTo(0); toast(`${S().day}일째 아침`, 2.4); }, lootAfter: async cfg => { const id = cfg.foes[0], t = FOE_LOOT[id]; if (t) await lootPick(FOES[id].name, t); }, placeAt, closeDecor, enterHouse, canPlace, size };
+G.life = { gift: giveGift, pick, craft, fishing, houseScore, cand: CAND, stageOf, animals: ANIMALS, openDecor, lootPick, openCraft, openSell, sleepNow: async () => { await fadeTo(1); nextDay(); await fadeTo(0); toast(`${S().day}일째 아침`, 2.4); }, lootAfter: async cfg => { const id = cfg.foes[0], t = FOE_LOOT[id]; if (t) await lootPick(FOES[id].name, t); }, placeAt, closeDecor, enterHouse, canPlace, size };
 // 떠돌이 비무객: 하루 한 번, 경지에 맞는 상대
 FOES.wanderer = { name: '떠돌이 비무객', spr: 'chars/Samurai', hp: 100, atk: 10, def: 3, spd: 66, exp: 0, silver: 0, pause: 1.05, moves: ['double', 'lunge', 'quick', 'dart3'], wpn: 'Katana', guard: .5, poise: 40, elite: 1 };
 async function wanderer() {
