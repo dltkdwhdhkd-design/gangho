@@ -1,11 +1,93 @@
 [
- ["HN5","n_monk","chars/Monk",47,"a Shaolin Buddhist monk of ancient China in his thirties, shaved head with six small ordination dots, ochre-yellow monk robe with a brown kasaya draped over the left shoulder, long wooden prayer beads around the neck, grey leggings wrapped at the shin, cloth shoes, calm face"],
- ["HN6","n_disciple","chars/GreenNinja",48,"a young martial-arts sect disciple in his twenties, black hair in a topknot with a green ribbon, fitted forest-green cross-collar training uniform with a black sash and arm guards, a sword in a dark scabbard on his back, black boots"],
- ["HN7","n_rich","chars/Noble",46,"a wealthy merchant of ancient China in his fifties, slightly plump, thin moustache, black square scholar's hat, rich dark-red silk robe with gold round medallion patterns, jade pendant at the belt, embroidered shoes"],
- ["HN8","n_guard","chars/Knight",49,"a town patrol soldier of ancient China, round iron helmet with red tassel, red padded tunic over light lamellar armour, dark trousers, boots, holding a tall spear upright in his right hand"],
- ["HN9","n_brawny","chars/Caveman2",50,"a burly bearded man of ancient China in his forties (blacksmith or mountain bandit), thick arms bare, dark brown sleeveless leather vest over a bare chest, red cloth headband, wide sash, baggy grey trousers tied at the ankle, straw sandals"],
- ["HN10","n_waiter","chars/Villager4",47,"an inn waiter of ancient China in his twenties, small black cloth cap, white towel over his left shoulder, short blue-grey jacket with rolled sleeves, a long white apron, black trousers, cloth shoes, friendly face"],
- ["HN11","n_clerk","chars/Inspector",47,"a county yamen clerk of ancient China in his forties, black official winged gauze cap, dark navy official robe with a belt, holding a rolled document, black boots, stern face"],
- ["HN12","n_beggar","chars/Gaebang",46,"a Beggars' Sect member of ancient China, messy hair tied with a rag, many-patched ragged brown and grey clothes, a wine gourd at the waist, holding a bamboo staff, barefoot with straw sandals, cheerful grin"],
- ["HN13","n_child","chars/Child",34,"a village child of ancient China about eight years old, hair in two small buns, short faded red jacket and blue trousers, cloth shoes, playful face; the child is noticeably shorter than an adult (about two thirds of the reference height) but drawn at the same pixel size"]
+ [
+  "HN5",
+  "n_monk",
+  "chars/Monk",
+  47,
+  "a Shaolin Buddhist monk of ancient China in his thirties, shaved head with six small ordination dots, ochre-yellow monk robe with a brown kasaya draped over the left shoulder, long wooden prayer beads around the neck, grey leggings wrapped at the shin, cloth shoes, calm face"
+ ],
+ [
+  "HN14",
+  "n_gisaeng1",
+  "chars/Gisaeng",
+  46,
+  "an elegant courtesan-entertainer (gisaeng) of a Ming-era pleasure house, an adult woman in her mid-twenties, hair in a tall coiled bun with a red jade hairpin and small dangling ornaments, fully covering layered silk robe in rose-pink and deep crimson with wide sleeves and a long skirt to the floor, embroidered white collar, a folded fan in her right hand, calm composed face; modest and dignified, no exposed skin besides face and hands"
+ ],
+ [
+  "HN15",
+  "n_gisaeng2",
+  "chars/Gisaeng2",
+  46,
+  "a pipa-playing courtesan-musician of a Ming-era pleasure house, an adult woman in her twenties, hair in two looped side buns with lilac ribbons, fully covering layered silk robe in lilac and pale gold with long sleeves and a floor-length skirt, carrying a small pipa lute against her chest with both hands, gentle smile; modest and dignified, no exposed skin besides face and hands"
+ ],
+ [
+  "HN16",
+  "n_gisaeng3",
+  "chars/Gisaeng3",
+  46,
+  "a dancer of a Ming-era pleasure house, an adult woman in her twenties, hair in a high single bun with a silver hairpin, fully covering silk robe in teal and ivory with very long flowing water-sleeves and a floor-length skirt, a long pale ribbon sash, poised composed face; modest and dignified, no exposed skin besides face and hands"
+ ],
+ [
+  "HN17",
+  "n_pimp",
+  "chars/Pimp",
+  48,
+  "the plump middle-aged owner of a Ming-era pleasure house, thin drooping moustache, small black square cap, rich wine-red silk robe with gold coin patterns and a fur-trimmed collar, a fat money pouch and an abacus hanging at the belt, rings on his fingers, sly smiling eyes"
+ ],
+ [
+  "HN6",
+  "n_disciple",
+  "chars/GreenNinja",
+  48,
+  "a young martial-arts sect disciple in his twenties, black hair in a topknot with a green ribbon, fitted forest-green cross-collar training uniform with a black sash and arm guards, a sword in a dark scabbard on his back, black boots"
+ ],
+ [
+  "HN7",
+  "n_rich",
+  "chars/Noble",
+  46,
+  "a wealthy merchant of ancient China in his fifties, slightly plump, thin moustache, black square scholar's hat, rich dark-red silk robe with gold round medallion patterns, jade pendant at the belt, embroidered shoes"
+ ],
+ [
+  "HN8",
+  "n_guard",
+  "chars/Knight",
+  49,
+  "a town patrol soldier of ancient China, round iron helmet with red tassel, red padded tunic over light lamellar armour, dark trousers, boots, holding a tall spear upright in his right hand"
+ ],
+ [
+  "HN9",
+  "n_brawny",
+  "chars/Caveman2",
+  50,
+  "a burly bearded man of ancient China in his forties (blacksmith or mountain bandit), thick arms bare, dark brown sleeveless leather vest over a bare chest, red cloth headband, wide sash, baggy grey trousers tied at the ankle, straw sandals"
+ ],
+ [
+  "HN10",
+  "n_waiter",
+  "chars/Villager4",
+  47,
+  "an inn waiter of ancient China in his twenties, small black cloth cap, white towel over his left shoulder, short blue-grey jacket with rolled sleeves, a long white apron, black trousers, cloth shoes, friendly face"
+ ],
+ [
+  "HN11",
+  "n_clerk",
+  "chars/Inspector",
+  47,
+  "a county yamen clerk of ancient China in his forties, black official winged gauze cap, dark navy official robe with a belt, holding a rolled document, black boots, stern face"
+ ],
+ [
+  "HN12",
+  "n_beggar",
+  "chars/Gaebang",
+  46,
+  "a Beggars' Sect member of ancient China, messy hair tied with a rag, many-patched ragged brown and grey clothes, a wine gourd at the waist, holding a bamboo staff, barefoot with straw sandals, cheerful grin"
+ ],
+ [
+  "HN13",
+  "n_child",
+  "chars/Child",
+  34,
+  "a village child of ancient China about eight years old, hair in two small buns, short faded red jacket and blue trousers, cloth shoes, playful face; the child is noticeably shorter than an adult (about two thirds of the reference height) but drawn at the same pixel size"
+ ]
 ]
