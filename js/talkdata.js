@@ -374,3 +374,10 @@ export const SLAVER = { hawk: ['튼튼한 일꾼 있소!', '빚 대신 받은 �
   sold: '잘 부리시오. 도망가면 그건 손님 사정이오.',
   shut: '노예상이 자리를 비웠다. 단상 위에 끊어진 밧줄만 남아 있다.',
   guard: ['구경 끝났으면 가시오.', '손님 아니면 물러서시오.'] };
+// 이름 붙은 역할 → 사람 키. 대화 그림은 assets/art/<키>_n.webp, 새 화면 도트는 assets/hd2d/preview/n_<키>.webp. 없으면 예전 그림. 요청문은 docs/gemini-now.md
+export const ROLE = { '노예상': 'slaver', '노예상 부하': 'slaverguard', '물주': 'dealer', '도박장 주인': 'gboss', '덩치': 'bouncer', '아전': 'yamen', '순라군': 'guard', '숙수': 'cook', '주루 숙수': 'cook', '점소이': 'waiter',
+  '전각지기': 'keeper', '사당지기': 'keeper', '이야기꾼': 'teller', '재주꾼': 'acrobat', '호객꾼': 'tout', '취객': 'drunk', '떡장수': 'ricecake', '구경꾼': 'onlooker', '할멈': 'granny', '거지': 'beggar',
+  '포목전 주인': 'shop', '잡화 상인': 'shop', '쌀가게 주인': 'shop', '나물 파는 할머니': 'granny', '동네 할머니': 'granny', '무관 문하생': 'student', '목검 든 청년': 'student', '늙은 표사': 'escort', '은퇴한 표국 무사': 'escort',
+  '과거 준비생': 'scholar', '책방 서생': 'scholar', '짐꾼': 'porter', '부두 일꾼': 'porter', '노름꾼': 'gambler', '골목 건달': 'gambler', '탁발승': 'alms', '떠돌이 약장수': 'quack', '찻집 주인': 'tea', '소식 빠른 찻집 아가씨': 'tea',
+  '늙은 뱃사공': 'boat', '어부': 'fisher', '주루 주인': 'host', '비단 장수': 'silk', '포목점 안주인': 'silk',
+  '어부의 아들': 'cap_fisher', '서생': 'cap_scholar', '약초꾼': 'cap_herbal', '무관 낙제생': 'cap_dropout', '악사': 'cap_musician', '대장간 도제': 'cap_smith', '사냥꾼': 'cap_hunter', '농사꾼': 'cap_farmer', '춤꾼': 'cap_dancer', '떠돌이 무사': 'cap_ronin', '역참 마부': 'cap_groom' };

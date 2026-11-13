@@ -1,5 +1,5 @@
 // 문파 본거지와 도시. 처음 들어갈 때 만든다
-import { G, Sound, toast, josa, pick } from './core.js';
+import { G, Sound, toast, josa, pick, ART } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { MAPS, makeMap, isoMode } from './maps.js';
@@ -10,7 +10,7 @@ import { LOOT } from './items.js';
 import { learn } from './state.js';
 import { LOCS } from './worlddata.js';
 import { EXTRA, SURNAME } from './freedata.js';
-import { TALK, CITYTALK, HOME, REG, CTX, STALLS, CITYHAWK, TALES, LISTEN, PERFORM, BEGGAR, PATROL, KIDS, ELDERS, DRUNK, GAMBLE, CAPTIVES, SLAVER } from './talkdata.js';
+import { TALK, CITYTALK, HOME, REG, CTX, STALLS, CITYHAWK, TALES, LISTEN, PERFORM, BEGGAR, PATROL, KIDS, ELDERS, DRUNK, GAMBLE, CAPTIVES, SLAVER, ROLE } from './talkdata.js';
 import { WEAPONS } from './data.js';
 import { CLANS } from './clandata.js';
 import { sellTo, bought } from './slave.js';
@@ -221,7 +221,7 @@ const AWAY = { 구파일방: '장문인께서는 구화성 구파 회관에 가 
 // 말할 때 이름과 얼굴을 띄운다. 같은 사람에게 다시 걸면 다음 말을 한다
 const ARTOF = { Villager: 'town', Villager2: 'town', Villager3: 'town', Villager4: 'town2', Woman: 'town2', Boy: 'kid' };
 const SAID = new Map();
-function npcSay(name, spr, text, art) { WHO._npc = { name, face: spr, art: art === undefined ? ARTOF[spr] : art || undefined }; return say('_npc', text); }
+function npcSay(name, spr, text, art) { WHO._npc = { name, face: spr, art: art === undefined ? (ART.get(ROLE[name] + '_n') ? ROLE[name] : ARTOF[spr]) : art || undefined }; return say('_npc', text); }
 function nextLine(key, list) { const i = SAID.get(key) || 0; SAID.set(key, i + 1); return list[i % list.length]; }
 // 강호 소식을 그 사람 말투로 옮긴다. "~붙었다." → "~붙었답니다."
 function hearsay(reg) {
