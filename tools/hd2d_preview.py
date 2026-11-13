@@ -60,10 +60,11 @@ def houses():
         print(n, c.size)
 
 
-def walker(code, out):
+def walker(code, out, src=None, tall_=48):
     """걷기 그림(a, b) → 게임 시트 꼴: 열은 방향(아래, 위, 왼쪽, 오른쪽), 행은 차렷, 왼발, 차렷, 오른발. 칸 FR×FR, 발끝을 칸 아래에 맞춘다"""
-    FR, TALL = 56, 48  # 사람 키 48점(원본 380점쯤을 8분의 1로)
-    A = key_out(Image.open(os.path.join(SRC, code + 'a.png'))); B = key_out(Image.open(os.path.join(SRC, code + 'b.png')))
+    FR, TALL = 56, tall_  # 사람 키 48점(원본 380점쯤을 8분의 1로). 노인은 조금 작게
+    S = src or SRC; ld = lambda f: (lambda im: im if im.mode == 'RGBA' and np.asarray(im)[..., 3].min() < 10 else key_out(im))(Image.open(os.path.join(S, f)).convert('RGBA') if Image.open(os.path.join(S, f)).mode == 'RGBA' else Image.open(os.path.join(S, f)))
+    A = ld(code + 'a.png'); B = ld(code + 'b.png')  # 투명 바탕(Higgsfield)이면 그대로, 분홍·파랑 바탕이면 지운다
     a = {(i, j): c for i, j, c in cells(A, 2, 3)}; b = {(i, j): c for i, j, c in cells(B, 2, 3)}
     tall = max(c.getbbox()[3] - c.getbbox()[1] for c in list(a.values()) + list(b.values()))
     sc = TALL / tall
@@ -157,6 +158,9 @@ def props_p():
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
     houses(); walker('HC1', 'me'); walker('HC2', 'yun')
+    HF = os.path.join(ROOT, 'art-src', 'higgsfield')  # Higgsfield로 받은 마을 사람
+    for code, out, tl in [('HN1', 'n_villager', 48), ('HN2', 'n_woman', 45), ('HN3', 'n_oldman', 44), ('HN4', 'n_oldwoman', 41)]:
+        if os.path.exists(os.path.join(HF, code + 'a.png')) and os.path.exists(os.path.join(HF, code + 'b.png')): walker(code, out, HF, tl)
     tiles('HG1', ['g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow'], 11)
     tiles('HR1', ['r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow'], 11)
     walls(); strips(); walls1(); walls_k()

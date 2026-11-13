@@ -92,7 +92,9 @@ function texFrom(c, { mips = true } = {}) {
 }
 const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 // 새 그림 맛보기(tools/hd2d_preview.py가 만든 것): 받은 집 그림과 윤설 걷기. 0단계에서 크기와 결만 보려고 잠깐 씌운다
-const PV = {}, PVN = ['hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'k_fence', 'k_palisade', 'k_stone'];
+// 새 인물 그림(Higgsfield HN*, 게임 시트 꼴 56점 칸)이 있는 사람 종류
+const NEWNPC = { 'chars/Villager': 'n_villager', 'chars/Woman': 'n_woman', 'chars/OldMan': 'n_oldman', 'chars/OldWoman': 'n_oldwoman' };
+const PV = {}, PVN = ['n_villager', 'n_woman', 'n_oldman', 'n_oldwoman', 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'k_fence', 'k_palisade', 'k_stone'];
 const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 인물 그림 기준). 새 땅과 지붕과 벽도 이 굵기로 깐다
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
@@ -100,7 +102,7 @@ function loadPreview() { return pvP || (pvP = Promise.all(PVN.map(n => new Promi
 const art = () => !!HD.opt.art;
 function previewTex(name) {
   const im = art() && PV[name]; if (!im) return null; if (TEX.has('p/' + name)) return TEX.get('p/' + name);
-  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' }); if (/^[gre]_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
+  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') }); if (/^[gre]_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
 }
 // 소품: 도트 그대로 올려 '또렷한 겹선형'으로 읽는다(배경도 인물과 같은 도트 결. 매끈해지는 것은 흐림과 빛뿐)
 // 옛 그림(16점 칸, 도트 2배) 소품은 새 그림보다 크고 쨍하다. 새 나무 그림(HT1)이 오기 전까지 새 화면에서만 줄이고 색을 맞춘다(막힘과 2D는 그대로)
@@ -444,7 +446,7 @@ function frameOf(key, dirCol, row, diag) {
 function syncActors(F) {
   used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, (o.size || 16) * OLDK, o.lift || 0, .84); blob(x, y, o.size ? o.size / 16 : 1); };
   for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16); continue; }
-    const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, yt = key === 'chars/Princess' && previewTex('yun'); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
+    const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, yt = (key === 'chars/Princess' && previewTex('yun')) || (NEWNPC[key] && previewTex(NEWNPC[key])); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
   for (const r of F.roam) if (!r.gone) { const key = r.spr.includes('/') ? r.spr : 'chars/' + r.spr; put(key, r.dir, Math.floor(r.walk || 0) % 4, r.x, r.y, { size: r.size }); }
   if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id), key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });
   for (const a of F.animals || []) { if (a.gone) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
