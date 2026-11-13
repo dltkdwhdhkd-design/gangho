@@ -238,7 +238,7 @@ export class Battle {
       let x = a.x, y = a.y;
       if (z.at === 'ring') { const an = i / n * 6.283; x = clamp(a.x + Math.cos(an) * z.dist, 10, this.W - 10); y = clamp(a.y + Math.sin(an) * z.dist * .85, 20, this.H - 10); }
       if (z.at === 'target' && T) { x = clamp(T.x + (i ? rnd(-z.spread, z.spread) : 0), 10, this.W - 10); y = clamp(T.y + (i ? rnd(-z.spread, z.spread) : 0), 20, this.H - 10); }
-      this.zones.push({ x, y, r: z.r, left: z.delay + (z.at === 'ring' ? 0 : i * .08), tot: z.delay + (z.at === 'ring' ? 0 : i * .08), h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub }, owner: a, team: a.team, sk, fx: z.fx, fxS: z.at === 'ring' ? 1 : 0, sfx: z.sfx, player: z.player && a.team === 0 });
+      this.zones.push({ x, y, r: z.r, left: z.delay + (z.at === 'ring' ? 0 : i * .08), tot: z.delay + (z.at === 'ring' ? 0 : i * .08), h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub, dot: z.dot, slow: z.slow, drain: z.drain }, owner: a, team: a.team, sk, fx: z.fx, fxS: z.at === 'ring' ? 1 : 0, sfx: z.sfx, player: z.player && a.team === 0 });
     }
   }
   // 피해 처리
@@ -275,6 +275,8 @@ export class Battle {
       if (this.b.venom && sk && sk.basic) o.dots.push({ dps: src.atk * .12, t: 2, n: 0 });
     }
     if (h.dot) o.dots.push({ dps: src.atk * h.dot.dps, t: h.dot.t, n: 0 });
+    if (h.slow) { o.slowT = Math.max(o.slowT || 0, h.slow.dur); o.slowF = h.slow.f; }  // 한기·물살: 느려진다
+    if (h.drain) src.hp = Math.min(src.maxHp, src.hp + dmg * h.drain);  // 흡기: 준 피해만큼 조금 돌아온다
     // 경직과 밀림
     let stagger = true;
     if (o.armor > 0 || o.buffs.diamond > 0) stagger = false;
@@ -368,7 +370,7 @@ export class Battle {
         if (o.team === p.team || o.dead || o.iframe > 0 || p.seen.has(o)) continue;
         if (hyp(o.x - p.x, o.y - 5 - p.y) < o.r + p.r) {
           p.seen.add(o);
-          this.applyHit(p.owner, o, { mul: p.mul, kb: p.kb ?? 22, stun: p.stun, ub: p.ub, dot: p.dot }, p.sk, p);
+          this.applyHit(p.owner, o, { mul: p.mul, kb: p.kb ?? 22, stun: p.stun, ub: p.ub, dot: p.dot, slow: p.slow, drain: p.drain }, p.sk, p);
           if (!p.pierce) p.age = 99;
           break;
         }

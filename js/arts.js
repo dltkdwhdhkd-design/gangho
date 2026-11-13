@@ -5,7 +5,7 @@ import { SKILLS, HEARTS } from './data.js';
 import { MOVES } from './foes.js';
 import { learn } from './state.js';
 import { FACS } from './free.js';
-import { ARTS, ART_HEARTS, RELICS, RELIC_HEARTS } from './artdata.js';
+import { ARTS, ART_HEARTS, RELICS, RELIC_HEARTS, ART_FX, ART_NAMES } from './artdata.js';
 
 const S = () => G.S, pw = t => [1, 1.22, 1.5][t - 1];
 const arcH = (r, a, mul, o = {}) => ({ shape: 'arc', r, a, mul, kb: 44, stun: .38, ...o }), lineH = (len, wd, mul, o = {}) => ({ shape: 'line', len, w: wd, mul, kb: 40, stun: .36, ...o }), ring = (r, mul, o = {}) => ({ shape: 'circle', r, mul, kb: 50, stun: .4, ...o });
@@ -26,6 +26,7 @@ const ARCH = {
   stomp: t => ({ mp: 11 + t * 3, cd: 6 + t * 1.3, dur: .5, steps: [{ t: .18, sfx: 'boom2', hit: ring(38 + t * 4, 1.4 * pw(t), { kb: 16, stun: 1 }), fx: { n: 'ring', s: 1.9, at: 'self' }, shake: 3 }] }),
   blink: t => ({ mp: 9 + t * 3, cd: 4 + t * 1.3, dur: .44, steps: [{ t: .03, sfx: 'magic2', blink: { behind: 16 }, fx: { n: 'smoke', s: 1, at: 'self' } }, { t: .18, sfx: 'sword2', hit: arcH(28, 100, 2 * pw(t)), fx: { n: 'double', s: 1.3 } }] }),
   mine: t => ({ mp: 14 + t * 4, cd: 8 + t * 1.4, dur: .42, steps: [{ t: .1, sfx: 'magic3', zone: { at: 'ring', n: 5 + t, dist: 44, r: 16, delay: .55, mul: 1.3 * pw(t), stun: 1, kb: 0, player: true, fx: 'ringw', sfx: 'magic2' } }] }),
+  mend: t => ({ mp: 10 + t * 3, cd: 14 - t, dur: .6, o: { self: true }, steps: [{ t: .05, sfx: 'power1', fx: { n: 'aura', s: 1.3, at: 'self' } }, { t: .45, heal: { hp: .1 + t * .04, mp: .04 } }] }),
   counter: t => ({ mp: 8 + t * 3, cd: 7 + t, dur: .7, o: { self: true }, steps: [{ t: 0, sfx: 'select', counter: { dur: .62, mul: 2.5 * pw(t), all: t === 3 }, fx: { n: 'shieldb', s: 1.2, at: 'self' } }] }),
   ult_line: () => ({ mp: 45, cd: 28, dur: .9, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .34, sfx: 'boom', hit: lineH(130, 40, 5.6, { kb: 120, stun: .8, ub: true }), fx: { n: 'cut', s: 3.4, along: 1 }, shake: 6 }] }),
   ult_arc: () => ({ mp: 45, cd: 28, dur: .9, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .36, sfx: 'boom', hit: arcH(76, 60, 5.8, { kb: 130, stun: .9, ub: true }), fx: { n: 'spark', s: 4, at: 'front', off: 34 }, shake: 6 }] }),
@@ -33,8 +34,18 @@ const ARCH = {
   ult_fan: () => ({ mp: 45, cd: 28, dur: .8, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .3, sfx: 'boom2', proj: { img: 'p_kunai', speed: 260, mul: 1.5, life: .8, n: 9, spread: 11, r: 5, stun: .3 }, shake: 4 }] }),
   ult_pull: () => ({ mp: 45, cd: 28, dur: .95, o: { ult: true }, steps: [{ t: .02, ...ULT, sfx: 'magic2', pull: { r: 110, f: 170 } }, { t: .42, sfx: 'boom', hit: ring(58, 5, { kb: 70, stun: .9, ub: true }), heal: { hp: .12, mp: .2 }, fx: { n: 'aurap', s: 2.6, at: 'self' }, shake: 5 }] }),
 };
-const make = (id, name, han, w, school, arch, t, desc, fac) => { const a = ARCH[arch](t); SKILLS[id] = { id, name, han, w, school, mp: Math.round(a.mp), cd: +a.cd.toFixed(1), desc, dur: a.dur, steps: a.steps, tier: t, fac, ...(a.o || {}) }; };
-const nameOf = fid => fid === 'jabhak' ? '강호 잡학' : (FACS.find(f => f.id === fid) || {}).name || fid;
+// 세력의 특색(ART_FX)을 초식에 입힌다: 독(dot), 한기·물살(slow), 흡기(drain), 금강(armor), 패도(kb), 점혈·진법(stun), 쾌검(fast)
+const FXK = {
+  dot: o => { o.dot = { dps: .28, t: 3 } }, slow: o => { o.slow = { f: .55, dur: 1.6 } }, drain: o => { o.drain = .12 },
+  kb: o => { if (o.kb !== undefined) o.kb = Math.round(o.kb * 1.6); o.stun = (o.stun || .2) + .08 }, stun: o => { o.stun = (o.stun || .2) + .25 },
+};
+function flavor(a, kind) {
+  const steps = a.steps.map(q => { const r = { ...q }; for (const k of ['hit', 'proj', 'zone']) if (q[k]) { r[k] = { ...q[k] }; FXK[kind]?.(r[k]); } return r; });
+  if (kind === 'armor' && !steps.some(q => q.armor)) steps.unshift({ t: .02, armor: .45 });
+  return { ...a, steps, cd: kind === 'fast' ? a.cd * .82 : a.cd };
+}
+const make = (id, name, han, w, school, arch, t, desc, fac) => { let a = ARCH[arch](t); const fx = fac && ART_FX[fac]; if (fx) { a = flavor(a, fx[1]); desc = `${desc} · ${fx[0]}`; } SKILLS[id] = { id, name, han, w, school, mp: Math.round(a.mp), cd: +a.cd.toFixed(1), desc, dur: a.dur, steps: a.steps, tier: t, fac, ...(a.o || {}) }; };
+const nameOf = fid => fid === 'jabhak' ? '강호 잡학' : ART_NAMES[fid] || (FACS.find(f => f.id === fid) || {}).name || fid;
 export const ID = {}; // 세력 id → 초식 id 목록
 for (const fid in ARTS) { ID[fid] = ARTS[fid].map((a, i) => { const id = `x_${fid}${i + 1}`; make(id, a[0], a[1], a[2], nameOf(fid), a[3], a[4], a[5], fid); return id; }); }
 for (const r of RELICS) make(r.id, r.name, r.han, r.w, '기연', r.arch, 3, r.desc, null);
@@ -119,7 +130,7 @@ function codex(B) {
     return `<details ${fid === B._open ? 'open' : ''} data-f="${fid}" style="margin-bottom:4px"><summary style="cursor:pointer">${esc(title)} <small class="hint">${L.filter(k => s.skills.includes(k)).length}/${L.length}${fid !== 'relic' && fid !== 'jabhak' ? ` · 우호 ${jh.rep(fid)}` : ''}</small></summary><div class="list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">${L.map(k => { const q = SKILLS[k], got = s.skills.includes(k), sc = (s.scrap || {})[k] || 0, ins = (s.insight || {})[k] || 0, need = needScrap(k), can = sc >= need && !got; return `<button class="item ${got ? 'eq' : ''}" ${can ? `data-dec="${k}"` : 'disabled'}>${got || sc || ins ? q.name : '？？？'}${q.ult ? '<span class="tag ult">절초</span>' : ''}<span class="tag">${q.w}</span><small>${got ? q.desc : fid === 'relic' ? '강호 어딘가에 있다.' : `잔권 ${sc}/${need}${seeable(k) ? ` · 견식 ${ins}/${needSee()}` : ''}${(s.decode || {})[k] ? ` · 해독 ${Math.round(s.decode[k])}%` : ''}${can ? ' · 눌러서 해독' : ''}`}</small></button>`; }).join('')}</div></details>`;
   };
   const hs = s.hearts.filter(h => h !== 'none').map(h => HEARTS[h].name).join(', ') || '없음';
-  B.innerHTML = `<p class="hint">익힌 초식 ${have}/${all.length} · 익힌 심법 ${s.hearts.length - 1}/${Object.keys(HEARTS).length - 1} (${esc(hs)})</p><p class="hint">사범에게 배우거나, 대련에서 막아 내며 익히거나, 잔권을 모아 해독하거나, 강호 곳곳의 기연을 찾으면 된다.</p>` + sec('jabhak', '강호 잡학') + FACS.map(f => sec(f.id, f.name)).join('') + sec('relic', '기연');
+  B.innerHTML = `<p class="hint">익힌 초식 ${have}/${all.length} · 익힌 심법 ${s.hearts.length - 1}/${Object.keys(HEARTS).length - 1} (${esc(hs)})</p><p class="hint">사범에게 배우거나, 대련에서 막아 내며 익히거나, 잔권을 모아 해독하거나, 강호 곳곳의 기연을 찾으면 된다.</p>` + sec('jabhak', '강호 잡학') + FACS.map(f => sec(f.id, f.name)).join('') + Object.keys(ART_NAMES).map(k => sec(k, ART_NAMES[k])).join('') + sec('relic', '기연');
   B.querySelectorAll('details').forEach(d => d.ontoggle = () => { if (d.open) B._open = d.dataset.f; });
   B.querySelectorAll('[data-dec]').forEach(b => b.onclick = () => { const k = b.dataset.dec; G.closeMenu && G.closeMenu(); G.field.run(() => decode(k)); });
 }
