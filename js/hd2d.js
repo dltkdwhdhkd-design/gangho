@@ -106,6 +106,11 @@ function previewTex(name) {
 // 옛 그림(16점 칸, 도트 2배) 소품은 새 그림보다 크고 쨍하다. 새 나무 그림(HT1)이 오기 전까지 새 화면에서만 줄이고 색을 맞춘다(막힘과 2D는 그대로)
 const OLDSC = { tree_round: .8, tree_big: .8, tree_pine: .82, plum: .76, plum_g: .76, plum_o: .76, grove_green: .86, pot: .66, jar: .66, box: .74, stump: .85, boulder: .85,
   flower1: .58, flower2: .58, flower3: .58, flower4: .58, fern1: .7, fern2: .7, bush1: .72, bush2: .72, bush3: .72, bush4: .72 };
+// 옛 그림 → 새 그림(새 화면에서만, 그림이 받아져 있을 때만). 크기는 새 그림의 평면도 폭과 키
+const SWAP = { tree_round: 't_camphor', tree_big: 't_camphor', tree_pine: 't_pine', tree_dead: 't_dead', plum: 't_plum', plum_w: 't_plum', plum_g: 't_willow', plum_o: 't_maple', grove_green: 't_shrubs', bamboo: 't_bamboo',
+  bush1: 'g_bush', bush2: 'g_bush', bush3: 'g_bush', bush4: 'g_fern', fern1: 'g_fern', fern2: 'g_tallgrass', flower1: 'g_yflowers', flower2: 'g_wflowers', flower3: 'g_yflowers', flower4: 'g_wflowers', stump: 'g_stump', boulder: 'g_mossrock', rocks: 'g_rocks' };
+const SWAP_SZ = { t_pine: [40, 47], t_camphor: [48, 48], t_plum: [40, 38], t_willow: [40, 43], t_bamboo: [26, 32], t_maple: [44, 42], t_shrubs: [30, 18], t_dead: [36, 36],
+  g_tallgrass: [14, 10], g_fern: [18, 11], g_yflowers: [18, 9], g_wflowers: [18, 8], g_mossrock: [16, 10], g_rocks: [18, 11], g_log: [24, 11], g_stump: [18, 10], g_reeds: [14, 12], g_lily: [18, 11], g_bush: [16, 12], g_ivy: [18, 8] };
 function stampTex(name) {
   const pv = previewTex(name); if (pv) return pv;
   if (TEX.has('s/' + name)) return TEX.get('s/' + name);
@@ -382,6 +387,10 @@ function setMap(m) {
     if (!s.flat && PARTS[s.name] && previewTex('w_front')) { propG.add(partsBox(s, PARTS[s.name])); return; }  // 새 그림: 벽 부품(HW0)과 지붕 무늬(HR1)로
     if (ef) { propG.add(houseBox(s, t, w, h, ef)); return; }
     if (!s.flat && WALLS.has(s.name)) { propG.add(wallBox(s, t, w, h)); return; }
+    const sw = art() && !s.flat && SWAP[s.name] && IMG['stamp/' + SWAP[s.name]] && SWAP_SZ[SWAP[s.name]];
+    if (sw) { const nm = SWAP[s.name], [w2, h2] = SWAP_SZ[nm].map(v => v * (s.sc || 1) * (.9 + ((s.x * 7 + s.y * 3) % 5) * .05)), t2 = stampTex(nm), gk2 = w2.toFixed(1) + 'x' + h2.toFixed(1); if (!GEO.has(gk2)) GEO.set(gk2, standGeo(w2, h2));
+      const M = matOf(t2), o = new T.Mesh(GEO.get(gk2), M.m); o.customDepthMaterial = M.d; o.position.set(s.x + w / 2, hAt(m, s.x + w / 2, z - 1), z * ZS + k * .003);
+      o.castShadow = true; o.receiveShadow = true; o.userData = { s, w: w2, h: h2, M, t: t2, owner: o, shared: true }; propG.add(o); return; }  // 새 그림(Higgsfield HT1, HP4)으로 바꿔 그린다. 막힘은 그대로
     if (art() && OLDSC[s.name] && !s.flat) { const k = OLDSC[s.name], w2 = w * k, h2 = h * k, gk2 = w2 + 'x' + h2; if (!GEO.has(gk2)) GEO.set(gk2, standGeo(w2, h2));
       const M = matOf(t), o = new T.Mesh(GEO.get(gk2), M.m); o.customDepthMaterial = M.d; o.position.set(s.x + w / 2, hAt(m, s.x + w / 2, z - 1), z * ZS + k * .003);
       o.castShadow = true; o.receiveShadow = true; o.userData = { s, w: w2, h: h2, M, t, owner: o, shared: true }; propG.add(o); return; }
@@ -390,12 +399,12 @@ function setMap(m) {
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
-  if (art() && DECO[m.biome || 'grass']) { const DK = ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  if (art() && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
     const near = (px, py) => m.stamps.some(q => { const S = STAMPS[q.name]; return S && px > q.x - 6 && px < q.x + S[3] * (q.sc || 1) + 6 && py > q.y + S[4] * .4 - 4 && py < q.base + 8; }) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
     const B = new Map();
     for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > .7) continue;
       const px = (x + hs(x, y * 3 + j)) * TS, py = (y + hs(x * 5 + j, y)) * TS; if (near(px, py) || m.g[Math.floor(py / TS)]?.[Math.floor(px / TS)] !== 0) continue;
-      const k = DK[Math.floor(hs(x * 3, y * 11 + j) * DK.length)], t = stampTex(k), st = STAMPS[k]; if (!t || !st) continue; const sc = .45 + hs(y, x + j) * .3, w = st[3] * sc, h = st[4] * sc * HS, y0 = hAt(m, px, py), z = (py + .5) * ZS;
+      const k = DK[Math.floor(hs(x * 3, y * 11 + j) * DK.length)], t = stampTex(k), st = STAMPS[k]; if (!t || !st) continue; const sc = (k.startsWith('g_') ? .75 : .45) + hs(y, x + j) * .3, w = st[3] * sc, h = st[4] * sc * HS, y0 = hAt(m, px, py), z = (py + .5) * ZS;
       if (!B.has(t)) B.set(t, { P: [], U: [], I: [] }); const b = B.get(t), n = b.P.length / 3;
       b.P.push(px - w / 2, y0, z, px + w / 2, y0, z, px + w / 2, y0 + h, z, px - w / 2, y0 + h, z); b.U.push(0, 0, 1, 0, 1, 1, 0, 1); b.I.push(n, n + 1, n + 2, n, n + 2, n + 3); }
     for (const [t, b] of B) { const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(b.P, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(b.U, 2)); g.setAttribute('normal', new T.Float32BufferAttribute(b.P.map((_, i) => i % 3 === 1 ? 1 : 0), 3)); g.setIndex(b.I);
