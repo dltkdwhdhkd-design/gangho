@@ -140,7 +140,7 @@ function heard(t) { const s = S(); if (!s || s.mode === 'free' || !t) return; le
 function storyTime() {
   const s = S(), step = s?.flags?.step; if (!step || s.mode === 'free') return; const ch = s.chapter || '', lc = s.lastChap ?? ch; s.lastChap = ch;
   const part = c => (c.match(/^제\d+부/) || [''])[0], days = s.storyPass || (part(ch) !== part(lc) ? 10 : ch !== lc ? 4 : 0); s.storyPass = 0; if (!days) return; quiet = [];
-  for (let i = 0; i < days; i++) { s.day++; s.daily = {}; daily(); G.party?.daily(); }
+  for (let i = 0; i < days; i++) { s.day++; s.daily = {}; daily(); G.party?.daily(); G.slave?.daily(); }
   const L = quiet; quiet = null; if (L.length) toast(`강호 소식: ${L[L.length - 1]}`, 3.2); G.field.showHud?.();
 }
 function daily() {

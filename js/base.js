@@ -13,6 +13,7 @@ import { EXTRA, SURNAME } from './freedata.js';
 import { TALK, CITYTALK, HOME, REG, CTX, STALLS, CITYHAWK, TALES, LISTEN, PERFORM, BEGGAR, PATROL, KIDS, ELDERS, DRUNK, GAMBLE, CAPTIVES, SLAVER } from './talkdata.js';
 import { WEAPONS } from './data.js';
 import { CLANS } from './clandata.js';
+import { sellTo, bought } from './slave.js';
 
 const NEW = EXTRA.filter(f => f.hi); NEW.forEach(f => { WHO[f.key] = { name: f.who, face: f.spr }; });
 const ST = {
@@ -382,26 +383,29 @@ async function gambleTalk(l) {
     if ((S.daily[k] || 0) >= cap) { await npcSay('물주', 'DarkNinja', '허허, 오늘은 손님 날이군요. 판은 여기까지입니다.'); return; }
   }
 }
-// ── 노예 시장: 사고팔 수는 없다. 값을 치러 풀어 주거나, 노예상을 쳐서 일주일 동안 문을 닫게 한다 ──
+// ── 노예 시장: 사람을 사서 풀어 주거나 집 하인으로 데려가고, 강호에서 묶어 온 포로를 넘기고(js/slave.js), 노예상을 쳐서 일주일 동안 문을 닫게 한다 ──
 function captivesOf(l) { const R = fold(l.id + (G.S.day || 1)), a = [...CAPTIVES], out = []; while (out.length < 4) out.push(a.splice(Math.floor(R() * a.length), 1)[0]); return out; }
 function slaveNpcs(l, id, out, night) {
   const S = G.S, shut = (S.flags['slave_shut_' + l.id] || 0) > (S.day || 1);
   if (shut || night) { out.spots.push({ x: 47, y: 6, w: 9, h: 3, hint: '빈 단상', act: async () => { await narr(shut ? SLAVER.shut : '밤이라 단상이 비어 있다. 끌려온 사람들은 어딘가에 갇혀 있을 것이다.'); } }); return; }
   const freed = S.daily['freed_' + l.id] || [];
-  captivesOf(l).forEach(([who, spr, line], i) => { if (!freed.includes(i)) out.npcs.push({ id: 'cap' + i, spr, x: 48.5 + i * 2, y: 7.7, dir: 0, life: 'still', hint: who, talk: async () => { await npcSay(who, spr, line); const c = await choice('어떻게 할까?', ['풀어 주겠다고 한다', '그만둔다']); if (!c) await ransom(l, i); } }); });
+  captivesOf(l).forEach(([who, spr, line], i) => { if (!freed.includes(i)) out.npcs.push({ id: 'cap' + i, spr, x: 48.5 + i * 2, y: 7.7, dir: 0, life: 'still', hint: who, talk: async () => { await npcSay(who, spr, line); const c = await choice('어떻게 할까?', ['노예상에게 값을 치른다', '그만둔다']); if (!c) await ransom(l, i); } }); });
   out.npcs.push({ id: 'slaver', spr: 'GoldKnight', x: 51.5, y: 10.5, dir: 0, life: 'still', hint: '노예상', hawk: SLAVER.hawk, gap: [7, 13], talk: () => slaverTalk(l) },
     { id: 'sguard', spr: 'Lion', x: 46, y: 8.6, dir: 3, life: 'still', hint: '노예상 부하', barks: SLAVER.guard, talk: async () => { await npcSay('노예상 부하', 'Lion', '물건에 손대지 마시오. 사람이라고? 값 매겨지면 물건이오.'); } });
 }
 async function slaverTalk(l) {
   await npcSay('노예상', 'GoldKnight', SLAVER.talk);
-  const c = await choice('노예상이다.', ['값을 치르고 사람을 풀어 준다', '노예상을 친다', '그만둔다']);
-  if (c === 0) { const caps = captivesOf(l), freed = G.S.daily['freed_' + l.id] || [], left = caps.map((q, i) => i).filter(i => !freed.includes(i)); if (!left.length) return; const k = await choice('누구를 풀어 줄까?', [...left.map(i => caps[i][0]), '그만둔다']); if (k < left.length) await ransom(l, left[k]); }
-  if (c === 1) await raid(l);
+  const n = G.slave?.count() || 0, o = ['사람을 산다', ...(n ? [`묶어 온 포로를 넘긴다 (${n}명)`] : []), '노예상을 친다', '그만둔다'], c = await choice('노예상이다.', o);
+  if (o[c] === '사람을 산다') { const caps = captivesOf(l), freed = G.S.daily['freed_' + l.id] || [], left = caps.map((q, i) => i).filter(i => !freed.includes(i)); if (!left.length) return; const k = await choice('누구를 살까?', [...left.map(i => caps[i][0]), '그만둔다']); if (k < left.length) await ransom(l, left[k]); }
+  if (o[c]?.startsWith('묶어 온')) await sellTo(l);
+  if (o[c] === '노예상을 친다') await raid(l);
 }
 async function ransom(l, i) {
   const S = G.S, price = 80 + S.lv * 10, c = await choice(`노예상에게 은자 ${price}냥을 치를까?`, ['치른다', '그만둔다']); if (c) return;
   if (S.silver < price) { await say(null, '은자가 모자란다.'); return; }
-  S.silver -= price; Sound.sfx('coin'); await npcSay('노예상', 'GoldKnight', SLAVER.free); await freeMen(l, [i]);
+  S.silver -= price; Sound.sfx('coin'); const cap = captivesOf(l)[i];
+  if (await bought(cap) === 'kept') { await npcSay('노예상', 'GoldKnight', SLAVER.sold); S.daily['freed_' + l.id] = [...(S.daily['freed_' + l.id] || []), i]; G.field.refresh(); return; }
+  await npcSay('노예상', 'GoldKnight', SLAVER.free); await freeMen(l, [i]);
 }
 async function raid(l) {
   const S = G.S, lv = S.lv, F = G.free.foes; await narr('칼자루에 손을 얹자 노예상 뒤에서 덩치들이 몽둥이를 집어 들었다.');
