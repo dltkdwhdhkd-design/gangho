@@ -133,9 +133,31 @@ def walls_k():
         c = c.crop(c.getbbox()); c = shrink(c, 1 / 5); c.save(os.path.join(OUT, n + '.webp'), lossless=True); print(n, c.size)
 
 
+# HP2(거리 채움 열두 가지): 4×3 칸을 하나씩 잘라 바탕을 지우고 도트 굵기(DOT)로 줄여 소품 그림으로(assets/hd/stamp/p_*.webp).
+# 이름과 바닥 폭(평면도 점). 막힘 상자는 js/tiles.js STAMPS에 적는다
+HP2 = [('p_lanterns', 18), ('p_banner', 16), ('p_barrels', 24), ('p_sacks', 28), ('p_flowerbed', 30), ('p_steps', 26),
+       ('p_rail', 30), ('p_weapons', 30), ('p_foodstall', 28), ('p_target', 18), ('p_trough', 30), ('p_lion', 18)]
+
+
+def props_p():
+    """칸 경계가 그림을 자르므로 칸으로 나누지 않고, 바탕을 지운 뒤 붙어 있는 덩어리마다 테두리를 잡는다(큰 것 열두 개, 줄 순서대로)"""
+    from scipy import ndimage
+    im = Image.open(os.path.join(SRC, 'HP2.png')); k = key_out(im); A = np.asarray(k.getchannel('A')) > 128
+    lab, n = ndimage.label(ndimage.binary_dilation(A, iterations=6)); objs = ndimage.find_objects(lab)
+    boxes = sorted([o for o in objs if (o[0].stop - o[0].start) * (o[1].stop - o[1].start) > 4000], key=lambda o: (o[0].start + o[0].stop) / 2)
+    rows = [sorted(boxes[r * 4:(r + 1) * 4], key=lambda o: o[1].start) for r in range(3)]
+    out = os.path.join(ROOT, 'assets', 'hd', 'stamp'); sizes = {}
+    for o, (name, w) in zip([b for r in rows for b in r], HP2):
+        c = k.crop((o[1].start, o[0].start, o[1].stop, o[0].stop)); Ac = np.asarray(c.getchannel('A')) > 128; ys = np.where(Ac.any(1))[0]; xs = np.where(Ac.any(0))[0]
+        c = c.crop((xs[0], ys[0], xs[-1] + 1, ys[-1] + 1)); s = shrink(c, w * DOT / c.width); s.save(os.path.join(out, name + '.webp'), lossless=True); sizes[name] = (w, round(s.height / DOT))
+    return sizes
+
+
+
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
     houses(); walker('HC1', 'me'); walker('HC2', 'yun')
     tiles('HG1', ['g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow'], 11)
     tiles('HR1', ['r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow'], 11)
     walls(); strips(); walls1(); walls_k()
+    if 'hp2' in sys.argv: [print(n, w, h) for n, (w, h) in props_p().items()]

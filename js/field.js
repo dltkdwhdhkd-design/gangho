@@ -352,7 +352,7 @@ export class Field {
   drawGL(c) {
     const H = G.hd, m = this.m; H.render(this);
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720);
-    c.setTransform(SCALE, 0, 0, SCALE, 0, 0); this.ambient(c); if (G.fxOverlay) G.fxOverlay(c);
+    c.setTransform(1.4, 0, 0, 1.4, 0, 0); this.ambient(c, 1280 / 1.4, 720 / 1.4); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); if (G.fxOverlay) G.fxOverlay(c);  // 꽃잎은 사람 머리보다 작게
     c.setTransform(1, 0, 0, 1, 0, 0); const P = (x, y, h = 0) => H.proj(x, y, h), k = Math.min(5, H.pxPerUnit());
     if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, 25 - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
     if (m.labels) { c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
@@ -380,12 +380,12 @@ export class Field {
       c.globalAlpha = 1;
     }
   }
-  ambient(c) {
+  ambient(c, VW_ = VW, VH_ = VH) {  // 새 화면은 꽃잎을 작게 그리려고 더 넓은 판에 그린다
     const kind = this.m.ambient || ({ cheongha: 'leafpink', bamboo: 'leaf', cloudmt: 'leafpink', guhwa: 'leafpink', wolha: 'snow' })[this.m.id];
     if (!kind) return; const im = IMG['fx/' + kind]; if (!im) return;
-    if (this.parts.length < 22 && Math.random() < .06) this.parts.push({ x: rnd(0, VW + 40), y: -8, vx: rnd(-16, -5), vy: rnd(9, 22), f: Math.floor(rnd(6)), t: rnd(100) });
+    if (this.parts.length < 22 && Math.random() < .06) this.parts.push({ x: rnd(0, VW_ + 40), y: -8, vx: rnd(-16, -5), vy: rnd(9, 22), f: Math.floor(rnd(6)), t: rnd(100) });
     const k = im.hd || 1, fw = kind === 'snow' ? 8 : 12, fh = kind === 'snow' ? 8 : 7, frames = Math.floor(im.width / k / fw);
     for (const q of this.parts) { q.x += q.vx / 60; q.y += q.vy / 60; q.t += 1 / 60; const fr = Math.floor(q.t * 6) % frames; c.drawImage(im, fr * fw * k, 0, fw * k, fh * k, snap(q.x), snap(q.y), fw, fh); }
-    this.parts = this.parts.filter(q => q.y < VH + 10 && q.x > -14);
+    this.parts = this.parts.filter(q => q.y < VH_ + 10 && q.x > -14);
   }
 }

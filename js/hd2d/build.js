@@ -9,6 +9,16 @@ export const SPEC = {
   hut_o: { walls: 'w1', roof: 'r_orange', eave: 'e_orange', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
   hut_b: { walls: 'w2', roof: 'r_dark', eave: 'e_dark', pitch: 27, wall: 30 },
   hut_o2: { walls: 'w3', roof: 'r_thatch', eave: 'e_thatch', pitch: 34, wall: 28, thatch: true },
+  shop_blue: { walls: 'w2', roof: 'r_dark', tint: '#9fb4d8', eave: 'e_dark', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
+  shop_green: { walls: 'w1', roof: 'r_dark', tint: '#a8c4a0', eave: 'e_dark', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
+  house_red: { walls: 'w1', roof: 'r_orange', tint: '#e0a090', eave: 'e_orange', pitch: 28, wall: 32, depth: 22 },
+  clay: { walls: 'w3', roof: 'r_mud', eave: 'e_plank', pitch: 24, wall: 28, depth: 22 },
+  wood_o: { walls: 'w2', plank: '#7a4e2c', roof: 'r_plank', eave: 'e_plank', pitch: 26, wall: 30, depth: 22 },
+  wood_b: { walls: 'w2', plank: '#5a4436', roof: 'r_dark', eave: 'e_dark', pitch: 26, wall: 30, depth: 22 },
+  mud: { walls: 'w3', roof: 'r_thatch', eave: 'e_thatch', pitch: 34, wall: 24, thatch: true, depth: 18 },
+  straw: { walls: 'w3', plank: '#8a6a44', roof: 'r_thatch', eave: 'e_thatch', pitch: 34, wall: 22, thatch: true, depth: 16 },
+  lodge: { walls: 'w1', roof: 'r_dark', tint: '#d0c8c0', eave: 'e_dark', pitch: 30, wall: 30, floors: 2, upper: 20, lanterns: 2, depth: 34 },
+  hall: { walls: 'w1', roof: 'r_dark', tint: '#c8c0b8', eave: 'e_dark', pitch: 32, wall: 42, lanterns: 2, sign: true, signText: '正殿', depth: 36 },
   inn: { walls: 'w1', roof: 'r_dark', tint: '#d8d0c4', eave: 'e_dark', pitch: 28, wall: 30, floors: 2, upper: 21, signText: '客棧', lanterns: 2, sign: true, balcony: true },
 };
 
@@ -57,8 +67,16 @@ export function makeBuilder(C) {
   const winMat = t => { if (WIN.has(t)) return WIN.get(t); const mk = () => { const m = new T.MeshLambertMaterial({ map: t, emissive: '#ffb45a', emissiveMap: t, emissiveIntensity: 0 }); return m; };
     const r = { m: mk(), f: holed(mk()), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }) }; WIN.set(t, r); C.glow.push(r.m, r.f); return r; };
 
+  // 판자벽: 받은 벽 그림에 없어서 도트로 그린다(세로 판자, 판자마다 밝기 차, 틈, 옹이)
+  const plank = hex => { const k = 'plank/' + hex; if (TEX.has(k)) return TEX.get(k); const c = document.createElement('canvas'); c.width = 24; c.height = 36; const x = c.getContext('2d'), b = new T.Color(hex);
+    const rgb = (f) => `rgb(${b.r * 255 * f | 0},${b.g * 255 * f | 0},${b.b * 255 * f | 0})`; let sd = 7; const R = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+    for (let i = 0; i < 4; i++) { x.fillStyle = rgb(.82 + R() * .3); x.fillRect(i * 6, 0, 6, 36); x.fillStyle = rgb(.5); x.fillRect(i * 6, 0, 1, 36); x.fillStyle = rgb(1.12); x.fillRect(i * 6 + 1, 0, 1, 36);
+      for (let j = 0; j < 5; j++) { x.fillStyle = rgb(.7 + R() * .2); x.fillRect(i * 6 + 2 + (R() * 3 | 0), R() * 36 | 0, 1, 3 + (R() * 5 | 0)); }
+      if (R() < .6) { x.fillStyle = rgb(.45); x.fillRect(i * 6 + 2, R() * 30 | 0, 2, 2); } }
+    x.fillStyle = rgb(.6); x.fillRect(0, 17, 24, 1);
+    const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = C.aniso || 1; t.needsUpdate = true; t.userData.w = 24; t.userData.h = 36; TEX.set(k, t); return t; };
   return function build(s, st, spec) {
-    const set = spec.walls, P = { plaster: crop(set, 'plaster'), stone: crop(set, 'stone'), post: crop(set, 'post'), beam: crop(set, 'beam'), door: crop(set, 'door'), win: crop(set, 'win') };
+    const set = spec.walls, P = { plaster: spec.plank ? plank(spec.plank) : crop(set, 'plaster'), stone: crop(set, 'stone'), post: crop(set, 'post'), beam: crop(set, 'beam'), door: crop(set, 'door'), win: crop(set, 'win') };
     if (!P.plaster) return null;
     const roofT = pv(spec.roof), eaveT = pv(spec.eave), ridgeT = pv(spec.thatch ? 'e_thatch' : 'e_ridge');
     // 바닥: 막힘 상자의 앞쪽 끝과 좌우를 그대로, 깊이는 막힘 상자(뒤는 못 가는 곳이라 조금 얕아도 된다)

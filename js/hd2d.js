@@ -258,15 +258,16 @@ function partsBox(s, rk) {
 const GROUND = { 0: 'g_grass', 1: 'g_road', 3: 'g_yard' };
 // 땅 종류마다 풀 그림 색 바꾸기(새 땅 그림이 오기 전까지). 풀은 짙은 올리브(기준 화면의 풀은 누런 올리브와 갈색)
 const BIOME_T = { grass: (r, g, b) => [r + 6, g * .9 + 2, b * .55], plain: (r, g, b) => [r + 6, g * .9 + 2, b * .55], rose: (r, g, b) => [r + 6, g * .9 + 2, b * .55],
-  deep: (r, g, b) => [r * .78, g * .86, b * .5], sand: (r, g, b, l) => [l * 1.05 + 78, l * .86 + 56, l * .5 + 28], snow: (r, g, b, l) => [l * .45 + 168, l * .45 + 172, l * .4 + 184], dusk: (r, g, b, l) => [l * .62 + 36, l * .5 + 26, l * .48 + 24] };
+  deep: (r, g, b) => [r * .78, g * .86, b * .5], sand: (r, g, b, l) => [l * 1.05 + 78, l * .86 + 56, l * .5 + 28], snow: (r, g, b, l) => [l * .45 + 168, l * .45 + 172, l * .4 + 184],  // 모래와 눈은 받은 땅 그림(g_sand, g_snow)이 있으면 그걸 쓴다
+  dusk: (r, g, b, l) => [l * .62 + 36, l * .5 + 26, l * .48 + 24] };
 const DECO = { grass: 1, plain: 1, rose: 1, deep: 1 };
 // 땅 얼룩 세기: 흙 드러난 자리, 짙은 자리, 이끼. 눈에는 흙과 이끼가 없고 엷은 그늘만
 const MOTTLE = { grass: { dirt: 1, dark: 1, moss: 1 }, plain: { dirt: 1, dark: 1, moss: 1 }, rose: { dirt: 1, dark: 1, moss: 1 }, deep: { dirt: .7, dark: 1, moss: 1 }, sand: { dirt: .6, dark: .6, moss: 0, dc: [120, 84, 48] }, dusk: { dirt: .6, dark: .8, moss: 0, dc: [70, 52, 40] }, snow: { dirt: 0, dark: .3, moss: 0 } };  // 풀 포기를 흩뿌리는 땅
 function groundArt(m, base) {
   if (!art() || !PV.g_grass || m.room) return null;
   const W2 = Math.round(m.w * TS * DOT), H2 = Math.round(m.h * TS * DOT), c = mk(W2, H2), x = c.getContext('2d'), out = x.createImageData(W2, H2), o = out.data;
-  const pats = {}; for (const k in GROUND) { const im = PV[GROUND[k]]; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
-    if (GROUND[k] === 'g_grass') { const bt = BIOME_T[m.biome] || BIOME_T.grass; for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; [d[i], d[i + 1], d[i + 2]] = bt(d[i], d[i + 1], d[i + 2], l).map(v => Math.max(0, Math.min(255, v))); } }  // 풀 그림을 땅 종류(모래, 눈, 짙은 숲, 어스름)에 맞게 다시 칠한다
+  const GB = { sand: 'g_sand', snow: 'g_snow' }[m.biome], pats = {}; for (const k in GROUND) { const nm = k === '0' && GB && PV[GB] ? GB : GROUND[k], im = PV[nm]; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
+    if (nm === 'g_grass') { const bt = BIOME_T[m.biome] || BIOME_T.grass; for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; [d[i], d[i + 1], d[i + 2]] = bt(d[i], d[i + 1], d[i + 2], l).map(v => Math.max(0, Math.min(255, v))); } }  // 풀 그림을 땅 종류(모래, 눈, 짙은 숲, 어스름)에 맞게 다시 칠한다
     pats[k] = { w: im.width, h: im.height, d }; }
   const bw = base.width, bd = base.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, bw, base.height).data;
   const hs = (i, j) => { let h = (i * 374761393 + j * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -523,7 +524,7 @@ const FG = [], FGM = new Map(); const FGK = ['bush2', 'bush4', 'fern1', 'bush1',
 // 앞가림: 그림 모양 그대로 짙은 남갈색 실루엣(빛을 받지 않는다). 흐림은 화면 흐림(가까운 쪽)이 맡는다
 const fgMat = t => { let m = FGM.get(t); if (!m) { m = new T.MeshBasicMaterial({ map: t, color: '#20160e', alphaTest: .35, fog: false }); FGM.set(t, m); } return m; };
 function foreground() {
-  if (HD.orbit || HD.peek) { for (const o of FG) o.visible = false; return; }  // 시험 화면(건물 겨냥)에서는 앞가림을 빼고 찍는다
+  if (true || HD.orbit || HD.peek) { for (const o of FG) o.visible = false; return; }  // 앞가림 덤불은 끈다: 흐리게 그릴 방법을 찾기 전까지 검은 덩어리가 따라다니는 것처럼 보였다  // 시험 화면(건물 겨냥)에서는 앞가림을 빼고 찍는다
   const step = 21, d = dist * .32, z = cam.position.z - d * Math.cos(0), base = Math.floor((camT.x - dist * .9) / step);
   for (let i = 0; i < 18; i++) {
     const n = base + i, k = FGK[((n % 8) + 8) % 8], t = k.startsWith('k_') ? previewTex(k) : stampTex(k); let o = FG[i];

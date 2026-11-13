@@ -127,6 +127,19 @@ class MapDef {
     return this;
   }
   // 좁힌 지도: 길(1, 3) 칸에 걸린 작은 소품(집이 아닌 것)을 가장 가까운 쪽으로 밀어 길을 비운다. 문 앞(포탈)도 비킨다
+  // 거리 채우기: 길 북쪽 가장자리 풀밭에 길가 소품을 띄엄띄엄 세운다(카메라가 남쪽에서 보므로 길 위 사람을 가리지 않는다).
+  // 문, 출구, 다른 막힘 둘레와 집 문 앞은 비우고, every칸에 하나꼴로 seed에 따라 고른다
+  streetDress(list, every = 4, seed = 1) { const hs = (a, b) => { let h = (a * 374761393 + b * 668265263 + seed * 1013) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+    const apron = this.stamps.filter(st => DOORED.includes(st.name)).map(st => { const S = STAMPS[st.name]; return { x: st.x + S[3] / 2 - 20, y: st.y + S[4] - 4, w: 40, h: 40 }; });
+    const hit = (r, pad) => this.solids.some(o => o.x < r.x + r.w + pad && o.x + o.w + pad > r.x && o.y < r.y + r.h + pad && o.y + o.h + pad > r.y) || this.portals.some(q => q.x < r.x + r.w + 16 && q.x + q.w + 16 > r.x && q.y < r.y + r.h + 24 && q.y + q.h + 24 > r.y) || apron.some(a => a.x < r.x + r.w && a.x + a.w > r.x && a.y < r.y + r.h && a.y + a.h > r.y);
+    let last = -99;
+    for (let ty = 2; ty < this.h - 1; ty++) for (let tx = 1; tx < this.w - 1; tx++) { if (this.g[ty][tx] !== 1 || this.g[ty - 1][tx] !== 0 || this.g[ty - 2]?.[tx] !== 0) continue;
+      if (hs(tx, ty) > 1 / every || tx - last < 3) continue; const name = list[Math.floor(hs(ty, tx * 3) * list.length)], S = STAMPS[name]; if (!S) continue;
+      const px = tx * TS + TS / 2 - S[3] / 2, py = ty * TS - S[4] - 1, r = S.length > 5 ? { x: px + S[5], y: py + S[6], w: S[7], h: S[8] } : { x: px, y: py + S[4] - 6, w: S[3], h: 6 };
+      let ok = !hit(r, 6); for (let x = r.x; ok && x < r.x + r.w; x += 4) for (let y = r.y; y < r.y + r.h; y += 4) { const v = this.g[Math.floor(y / TS)]?.[Math.floor(x / TS)]; if (v !== 0) { ok = false; break; } }
+      if (!ok) continue; this.put(name, 0, 0, { dx: px, dy: py }); last = tx; }
+    return this;
+  }
   // 집 뒤(북쪽) 좁은 틈 막기: 카메라가 남쪽에서 보므로 집 뒤는 보이지도 않고 걸어 들어가면 가려진다. 집 폭만큼 담을 친다(길 칸과 다른 막힘은 비운다)
   // 문 앞 길 잇기: 문 바로 아래에 길이나 마당이 없으면 문에서 남쪽으로 곧게 길을 내 가장 가까운 길(마당)에 잇는다. max칸 안에 없으면 손대지 않는다
   frontPaths(max = 6) {
