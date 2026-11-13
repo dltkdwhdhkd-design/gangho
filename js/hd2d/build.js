@@ -26,6 +26,18 @@ export const GRAND = {
   jegal: { ...G0, walls: ['hs_jegal', 'w5'], roof: 'r_dark', tint: '#88b898', col: '#2a4a30', plaque: '諸葛世家' },
   dang: { ...G0, walls: ['hs_dang', 'w6'], roof: 'r_dark', tint: '#a080a8', col: '#2a1a2a', plaque: '唐門' },
   paeng: { ...G0, walls: ['hs_paeng', 'w6'], roof: 'r_orange', tint: '#c87050', col: '#5a2018', plaque: '彭家' },
+  // 강호 전도에 있는 그 밖의 세가와 정파 문파(세가 거리·구파 회관 셋째 줄)
+  hwangbo: { ...G0, walls: ['hs_hwangbo', 'w6'], roof: 'r_dark', tint: '#d8b878', col: '#5a3a18', plaque: '皇甫世家', gold: 1 },
+  ak: { ...G0, walls: ['hs_ak', 'w5'], roof: 'r_dark', tint: '#c87868', col: '#6a1e18', plaque: '岳家' },
+  yang: { ...G0, walls: ['hs_yang', 'w4'], roof: 'r_orange', tint: '#e0a868', col: '#5a2a18', plaque: '楊家' },
+  eon: { ...G0, walls: ['hs_eon', 'w6'], roof: 'r_dark', tint: '#a8a8b0', col: '#303038', plaque: '彦家' },
+  jin: { ...G0, walls: ['hs_jin', 'w4'], roof: 'r_orange', tint: '#e8a070', col: '#4a2a18', plaque: '陳家' },
+  haenam: { ...G0, walls: ['hs_haenam', 'w5'], roof: 'r_dark', tint: '#80b8c8', col: '#1e4a5a', plaque: '海南' },
+  cheonsan: { ...G0, walls: ['hs_cheonsan', 'w5'], roof: 'r_dark', tint: '#d0e0f0', col: '#4a5a78', plaque: '天山' },
+  jeonjin: { ...G0, walls: ['hs_jeonjin', 'w5'], roof: 'r_dark', tint: '#a0b8a8', col: '#2a3a30', plaque: '全眞' },
+  mosan: { ...G0, walls: ['hs_mosan', 'w4'], roof: 'r_dark', tint: '#c8b878', col: '#4a3a1a', plaque: '茅山' },
+  jangbaek: { ...G0, walls: ['hs_jangbaek', 'w6'], roof: 'r_dark', tint: '#c0d0d8', col: '#3a4a50', plaque: '長白' },
+  pota: { ...G0, walls: ['hs_pota', 'w4'], roof: 'r_dark', tint: '#b8c8e0', col: '#4a5a80', plaque: '普陀' },
 };
 // 새 벽 그림 이름(그림이 없으면 대신 쓸 것). 실제로 고르는 것은 짓는 때(build 안)
 const PVW = (a, b) => [a, b];

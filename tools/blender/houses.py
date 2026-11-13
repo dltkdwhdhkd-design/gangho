@@ -20,7 +20,8 @@ SPEC, GRAND, CROP, CROPS, ST = D['SPEC'], D['GRAND'], D['CROP'], D['CROPS'], D['
 # 지붕 꼴: 종류마다
 ROOF = {'hut_o': 'gable', 'hut_b': 'gable', 'hut_o2': 'thatch', 'shop_blue': 'gable', 'shop_green': 'gable', 'house_red': 'xieshan', 'clay': 'gable', 'wood_o': 'gable',
         'wood_b': 'gable', 'mud': 'thatch', 'straw': 'thatch', 'lodge': 'xieshan', 'hall': 'hip', 'inn': 'xieshan'}
-GROOF = {'shaolin': 'hip', 'namgung': 'hip', 'gaebang': 'thatch', 'jongnam': 'hip', 'emei': 'hip', 'gongdong': 'gable', 'dang': 'gable', 'paeng': 'hip'}  # 나머지 문파·세가는 팔작
+GROOF = {'shaolin': 'hip', 'namgung': 'hip', 'gaebang': 'thatch', 'jongnam': 'hip', 'emei': 'hip', 'gongdong': 'gable', 'dang': 'gable', 'paeng': 'hip',
+         'ak': 'hip', 'eon': 'gable', 'cheonsan': 'hip', 'mosan': 'gable', 'jangbaek': 'hip', 'pota': 'hip'}  # 나머지 문파·세가는 팔작
 # 문파·세가마다 꼴을 달리한다(같은 설명서에 덮어쓴다): 층수, 물매, 기둥줄 깊이, 너비
 SHAPE = {
     'wudang': dict(pitch=36, upper=24, gold=1),                 # 도가 산문: 높고 가파른 이층 누각
@@ -36,6 +37,17 @@ SHAPE = {
     'jegal': dict(balcony=False, pitch=28),                     # 학자 집안: 난간 없이 단정하게
     'dang': dict(porch=0, widen=1.05, pitch=32, lanterns=1),    # 독문: 기둥줄 없이 닫힌 이층 맞배
     'paeng': dict(floors=1, wall=40, widen=1.25, porch=7),      # 도객 집안: 낮고 넓고 묵직한 단층
+    'hwangbo': dict(upper=22),                                  # 하북의 권법 세가: 이층 팔작, 금빛 마루
+    'ak': dict(upper=22, balcony=False),                        # 충의 창가: 무전 이층, 단단하게
+    'yang': dict(floors=1, wall=38, porch=7),                   # 창술 세가: 넓은 단층 팔작
+    'eon': dict(floors=1, wall=36, widen=1.2, porch=0),         # 철골공: 투박한 단층 맞배
+    'jin': dict(pitch=26),                                      # 광동: 완만한 이층 팔작
+    'haenam': dict(floors=1, wall=36, porch=8, pitch=24),       # 바닷가 문파: 낮은 물매, 트인 기둥줄
+    'cheonsan': dict(pitch=36, balcony=False),                  # 천산 설산: 가파른 무전
+    'jeonjin': dict(pitch=34, upper=24),                        # 전진 도관: 높은 이층 팔작
+    'mosan': dict(porch=0, lanterns=1),                         # 부적 도관: 닫힌 이층 맞배
+    'jangbaek': dict(floors=1, wall=38, pitch=36),              # 장백산: 가파른 단층 무전
+    'pota': dict(floors=1, wall=38, porch=7, pitch=32),         # 섬의 비구니 암자: 단층 무전
 }
 
 def hexc(h): h = h.lstrip('#'); return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
@@ -326,7 +338,8 @@ def jobs():
     for k, sp in SPEC.items(): yield 'b_' + k, sp, ST[k], ROOF[k]
     # 문파·세가 전각: (문파, 지도에 놓인 소품). js/maps.js의 nine(구파 회관), 오대세가 거리, 소림사 나한당
     PAIRS = [('shaolin', 'house_red'), ('wudang', 'hut_b'), ('hwasan', 'hut_o'), ('jongnam', 'hut_o2'), ('emei', 'shop_green'), ('gonryun', 'wood_b'), ('gongdong', 'clay'), ('jeomchang', 'wood_o'),
-             ('cheongseong', 'hut_b'), ('gaebang', 'straw'), ('namgung', 'hall'), ('moyong', 'lodge'), ('jegal', 'house_red'), ('dang', 'shop_green'), ('paeng', 'clay'), ('shaolin', 'lodge')]
+             ('cheongseong', 'hut_b'), ('gaebang', 'straw'), ('namgung', 'hall'), ('moyong', 'lodge'), ('jegal', 'house_red'), ('dang', 'shop_green'), ('paeng', 'clay'), ('shaolin', 'lodge'),
+             ('hwangbo', 'house_red'), ('ak', 'lodge'), ('yang', 'wood_b'), ('eon', 'clay'), ('jin', 'shop_blue'), ('haenam', 'wood_o'), ('cheonsan', 'wood_b'), ('jeonjin', 'hut_b'), ('mosan', 'hut_o2'), ('jangbaek', 'clay'), ('pota', 'shop_green')]
     for k, base in PAIRS:
         gs = GRAND[k]; sp = {**SPEC[base], **gs, **SHAPE.get(k, {})}; yield 'g_' + k + '_' + base, sp, ST[base], GROOF.get(k, 'xieshan')
 
