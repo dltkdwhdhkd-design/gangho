@@ -23,5 +23,9 @@ const { chromium } = require('playwright');
   await p.evaluate(() => { __G.field.busy = false; __G.field.run(() => __G.party.talkTo('yun')); }); await p.waitForTimeout(300); await click('선물을 준다'); await p.waitForTimeout(300); await p.locator('.list button', { hasText: '산삼' }).first().click(); await p.waitForTimeout(400); for (let i = 0; i < 4; i++) { await p.keyboard.press('Enter'); await p.waitForTimeout(150); }
   const after = await p.evaluate(() => ({ gu: __G.S.love.c_gu, yun: __G.S.love.yun, wine: __G.S.inv.plum_wine, gin: __G.S.inv.ginseng }));
   console.log('호감', JSON.stringify(before), '→', JSON.stringify(after));
-  const ok = tg && tg.includes('구 노창') || tg && tg.includes('윤설'); const giftOk = after.gu >= before.gu + 15 && after.yun >= before.yun + 15;
+  // 4) 전수: 윤설(호감 85)에게 윤가 침술을 배운다
+  await p.evaluate(() => { __G.S.love.yun = 85; __G.S.daily = {}; });
+  await p.evaluate(() => { __G.field.busy = false; __G.field.run(() => __G.party.talkTo('yun')); }); await p.waitForTimeout(300); await click('전수'); await p.waitForTimeout(300); await p.locator('.choices button').first().click(); await p.waitForTimeout(400); for (let i = 0; i < 8; i++) { await p.keyboard.press('Enter'); await p.waitForTimeout(150); }
+  const learned = await p.evaluate(() => __G.S.skills.filter(k => k.startsWith('x_yunui'))); console.log('전수받은 무공', learned.join(','));
+  const ok = learned.length > 0 && tg && tg.includes('구 노창') || tg && tg.includes('윤설'); const giftOk = after.gu >= before.gu + 15 && after.yun >= before.yun + 15;
   console.log(ok && giftOk && !errs.length ? '통과' : '실패'); console.log(errs.join('\n') || '오류 없음'); await b.close(); process.exit(ok && giftOk && !errs.length ? 0 : 1); })();

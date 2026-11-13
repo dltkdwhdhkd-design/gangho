@@ -62,7 +62,7 @@ export const FOES = {
   // 2장
   disciple: F('창운문 제자', 'chars/GreenNinja', 180, 18, 5, 60, 34, 14, 1.2, ['slash', 'swallow_qi', 'cloud_flash'], { wpn: 'Sword', guard: .5 }),
   senior_go: F('사형 고진', 'chars/Inspector', 900, 22, 7, 62, 110, 60, 1, ['double', 'cloud_flash', 'swallow_qi', 'wind_turn'], { wpn: 'Sword', guard: .7, boss: 1, poise: 150 }),
-  so_rival: F('소연하', 'chars/RedSamurai', 1300, 24, 7, 76, 180, 0, .9, ['flurry', 'cloud_flash', 'blink', 'fan5'], { wpn: 'Katana', guard: 1, boss: 1, poise: 170, title: '벽수궁 객원' }),
+  so_rival: F('소연하', 'chars/RedSamurai', 1300, 24, 7, 76, 180, 0, .9, ['x_byeoksu4', 'x_byeoksu2', 'x_byeoksu3', 'fan5'], { wpn: 'Katana', guard: 1, boss: 1, poise: 170, title: '벽수궁 객원' }),
   shadow: F('무면회 살수', 'chars/GrayNinja', 250, 24, 6, 72, 50, 16, 1.05, ['quick', 'blink', 'dart3'], { wpn: 'Ninjaku', guard: .3 }),
   puppet: F('독강시', 'chars/Skeleton', 320, 26, 12, 40, 60, 10, 1.3, ['venom', 'heavy'], { poise: 30 }),
   elder_wi: F('검각주 위문상', 'chars/Noble', 1900, 30, 10, 66, 420, 300, .85, ['double', 'cloud_flash', 'swallow_qi', 'fan5', 'heavy'], { wpn: 'Rapier', guard: .8, boss: 1, poise: 260, phases: [{ hp: .55, say: '제법이구나. 그럼 이건 어떠냐.', add: ['flurry', 'rain', 'summon2'], pause: .7 }], minion: 'shadow', scale: 1.3 }),

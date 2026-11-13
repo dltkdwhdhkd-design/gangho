@@ -4,31 +4,31 @@ import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { FOES, MOVES } from './foes.js';
 import { DB } from './items.js';
-import { SKILLS } from './data.js';
-import { have, take, give } from './state.js';
+import { SKILLS, HEARTS } from './data.js';
+import { have, take, give, learn } from './state.js';
 import { TALK, GIFT } from './comptalk.js';
 
 const S = () => G.S, MAX = 2;
 const st = () => (S().pt = S().pt || { in: [], home: {}, met: {}, up: {}, moves: {} });
 // 인연이 있는 인물
-export const COMP = {
-  yun: { spr: 'Princess', wpn: 'Ninjaku', hp: .85, atk: .8, moves: ['quick', 'dart3'], fx: { potion: 20 }, good: 1, boon: '금창약 효과 +20%', bark: ['{p}요? 약초가 다르겠네요. 잠깐만요, 이것 좀 뜯고요.', '오늘은 왼쪽 안 맞았죠?', '밥은 제때 먹어야 해요. 강호고 뭐고.'] },
-  so: { spr: 'RedSamurai', wpn: 'Sword', hp: 1, atk: 1.1, moves: ['swallow_qi', 'cloud_flash', 'double'], fx: { atk: 3 }, good: 1, boon: '공격 +3%', bark: ['{p}까지 왔네. 사부가 들으면 웃겠다.', '왼발 늦었어. 방금 그 돌부리.', '여기서 지는 사람이 술 사기다.'] },
-  cheol: { spr: 'Monk2', wpn: 'Club', hp: 1.35, atk: .95, moves: ['luohan', 'iron_fist', 'earth_stomp'], fx: { hp: 5 }, good: 1, fac: 'shaolin', boon: '체력 +5%', bark: ['시주, {p}에는 뭐가 맛있소?', '부처님도 여기까지는 안 와 보셨을 것이오.', '배가 고프오. 말이 아니라 사실이오.'] },
-  baekrang: { spr: 'Cavegirl', wpn: 'Ninjaku', hp: .9, atk: 1.05, moves: ['quick', 'dart3', 'blink'], fx: { crit: 3 }, boon: '치명타 +3%', bark: ['{p} 장사꾼들은 셈이 빨라요. 조심해요.', '여기 소문은 값이 얼마나 하려나.', '돈 냄새가 나요. 아, 아닌가.'] },
-  hyeok: { spr: 'Hyeok', wpn: 'Ninjaku', hp: .95, atk: 1.15, moves: ['blink', 'flurry', 'venom'], fx: { skill: 4 }, boon: '초식 위력 +4%', bark: ['{p}. 교리서에는 없던 곳입니다.', '사람들이 저를 쳐다봅니다. 제가 무엇을 잘못했습니까.', '이 길은 어디로 갑니까. 아니, 묻는 것이 아니라 궁금한 것입니다.'] },
-  clan_dang: { spr: 'Dang', wpn: 'Ninjaku', hp: .9, atk: 1, moves: ['dart3', 'venom', 'quick'], fx: { atk: 2, regen: 8 }, good: 1, fac: 'dang', boon: '공격 +2%, 내력 회복 +8%', bark: ['{p}의 약재는 독으로 쓰면 좋아요.', '그 물 마시지 마요. 아니, 마셔도 되는데 재미없어서요.', '오늘도 안 죽었네요. 다행이에요. 아마도요.'] },
-  clan_moyong: { spr: 'Moyong', wpn: 'Rapier', hp: .95, atk: 1.05, moves: ['flurry', 'swallow_qi', 'blink'], fx: { parry: .02, skill: 2 }, good: 1, fac: 'moyong', boon: '튕겨내기 쉬움, 초식 위력 +2%', bark: ['{p}이라. 시 한 수 나올 만하오. 나는 아니지만.', '그대는 걸을 때 왼발이 늦소.', '받은 것은 돌려주겠소. 어제 그 국수 말이오.'] },
-  clan_namgung: { spr: 'Namgung', wpn: 'Rapier', hp: 1.1, atk: 1.2, moves: ['cloud_flash', 'flurry', 'wind_turn'], fx: { atk: 4 }, good: 1, fac: 'namgung', boon: '공격 +4%', bark: ['{p}에도 국수는 있겠지.', '다음에는 내가 이긴다. 오늘 말고.', '남궁세가 사람은 길을 묻지 않는다. 그러니 네가 물어라.'] },
+export const COMP = {  // art: 그 사람이 속한 무공 갈래(js/artdata.js). 호감이 쌓이면 그 무공을 전수해 준다
+  yun: { spr: 'Princess', wpn: 'Ninjaku', hp: .85, atk: .8, moves: ['x_yunui1', 'x_yunui2', 'dart3'], art: 'yunui', fx: { potion: 20 }, good: 1, boon: '금창약 효과 +20%', bark: ['{p}요? 약초가 다르겠네요. 잠깐만요, 이것 좀 뜯고요.', '오늘은 왼쪽 안 맞았죠?', '밥은 제때 먹어야 해요. 강호고 뭐고.'] },
+  so: { spr: 'RedSamurai', wpn: 'Sword', hp: 1, atk: 1.1, moves: ['x_byeoksu1', 'x_byeoksu2', 'x_byeoksu4'], art: 'byeoksu', fx: { atk: 3 }, good: 1, boon: '공격 +3%', bark: ['{p}까지 왔네. 사부가 들으면 웃겠다.', '왼발 늦었어. 방금 그 돌부리.', '여기서 지는 사람이 술 사기다.'] },
+  cheol: { spr: 'Monk2', wpn: 'Club', hp: 1.35, atk: .95, moves: ['x_shaolin1', 'x_shaolin3', 'x_shaolin4'], art: 'shaolin', fx: { hp: 5 }, good: 1, fac: 'shaolin', boon: '체력 +5%', bark: ['시주, {p}에는 뭐가 맛있소?', '부처님도 여기까지는 안 와 보셨을 것이오.', '배가 고프오. 말이 아니라 사실이오.'] },
+  baekrang: { spr: 'Cavegirl', wpn: 'Ninjaku', hp: .9, atk: 1.05, moves: ['x_haomun1', 'x_haomun3', 'x_haomun4'], art: 'haomun', fx: { crit: 3 }, boon: '치명타 +3%', bark: ['{p} 장사꾼들은 셈이 빨라요. 조심해요.', '여기 소문은 값이 얼마나 하려나.', '돈 냄새가 나요. 아, 아닌가.'] },
+  hyeok: { spr: 'Hyeok', wpn: 'Ninjaku', hp: .95, atk: 1.15, moves: ['x_cheonma1', 'x_cheonma2', 'x_cheonma4'], art: 'cheonma', fx: { skill: 4 }, boon: '초식 위력 +4%', bark: ['{p}. 교리서에는 없던 곳입니다.', '사람들이 저를 쳐다봅니다. 제가 무엇을 잘못했습니까.', '이 길은 어디로 갑니까. 아니, 묻는 것이 아니라 궁금한 것입니다.'] },
+  clan_dang: { spr: 'Dang', wpn: 'Ninjaku', hp: .9, atk: 1, moves: ['x_dang1', 'x_dang2', 'x_dang4'], art: 'dang', fx: { atk: 2, regen: 8 }, good: 1, fac: 'dang', boon: '공격 +2%, 내력 회복 +8%', bark: ['{p}의 약재는 독으로 쓰면 좋아요.', '그 물 마시지 마요. 아니, 마셔도 되는데 재미없어서요.', '오늘도 안 죽었네요. 다행이에요. 아마도요.'] },
+  clan_moyong: { spr: 'Moyong', wpn: 'Rapier', hp: .95, atk: 1.05, moves: ['x_moyong1', 'x_moyong2', 'x_moyong4'], art: 'moyong', fx: { parry: .02, skill: 2 }, good: 1, fac: 'moyong', boon: '튕겨내기 쉬움, 초식 위력 +2%', bark: ['{p}이라. 시 한 수 나올 만하오. 나는 아니지만.', '그대는 걸을 때 왼발이 늦소.', '받은 것은 돌려주겠소. 어제 그 국수 말이오.'] },
+  clan_namgung: { spr: 'Namgung', wpn: 'Rapier', hp: 1.1, atk: 1.2, moves: ['x_namgung1', 'x_namgung2', 'x_namgung4'], art: 'namgung', fx: { atk: 4 }, good: 1, fac: 'namgung', boon: '공격 +4%', bark: ['{p}에도 국수는 있겠지.', '다음에는 내가 이긴다. 오늘 말고.', '남궁세가 사람은 길을 묻지 않는다. 그러니 네가 물어라.'] },
   // 강호에서 만나는 사람들
-  c_haho: { name: '하후민', spr: 'Noble', wpn: 'Sword', hp: .9, atk: .9, moves: ['double', 'lunge', 'x_jabhak1'], fx: { hp: 3, atk: 2 }, good: 1, boon: '체력 +3%, 공격 +2%', at: 'c_nakyang', x: 9, y: 12, hint: '외상값에 시달리는 도련님', bark: ['{p}에 우리 집안 별장이 있었지. 있었어. 지금은 없고.', '칼은 내가 뽑을 테니 값은 네가 내.', '명문 세가 사람이 왜 걸어 다니느냐고 묻지 마.'] },
+  c_haho: { name: '하후민', spr: 'Noble', wpn: 'Sword', hp: .9, atk: .9, moves: ['x_jabhak1', 'x_jabhak13', 'x_jabhak14'], art: 'jabhak', fx: { hp: 3, atk: 2 }, good: 1, boon: '체력 +3%, 공격 +2%', at: 'c_nakyang', x: 9, y: 12, hint: '외상값에 시달리는 도련님', bark: ['{p}에 우리 집안 별장이 있었지. 있었어. 지금은 없고.', '칼은 내가 뽑을 테니 값은 네가 내.', '명문 세가 사람이 왜 걸어 다니느냐고 묻지 마.'] },
   c_mun: { name: '문창', spr: 'Villager', wpn: 'Stick', hp: .75, atk: .75, moves: ['quick', 'x_jabhak4'], fx: { decode: 20 }, good: 1, boon: '잔권 해독이 빨라진다', at: 'c_changan', x: 30, y: 12, hint: '책만 보는 서생', bark: ['{p}이 옛 지리지에는 이렇게 안 나오는데요.', '잠깐만요, 이 비석 좀 읽고요.', '칼 쓰는 책도 읽었습니다. 읽기만 했습니다.'] },
-  c_owol: { name: '오월', spr: 'Cavegirl2', wpn: 'Lance', hp: 1.05, atk: 1.05, moves: ['one_point', 'sweep_army', 'lunge'], fx: { crit: 2, gather: 1 }, boon: '치명타 +2%, 채집이 두 배', at: 'c_yeongyeong', x: 30, y: 17, hint: '범 잡는 여자', bark: ['{p} 숲은 짐승 길이 넓네.', '바람이 바뀌었어. 뒤에 뭐가 있나 봐.', '사람 사냥은 재미없어. 말이 많아서.'] },
-  c_hyegong: { name: '혜공', spr: 'Sodi', wpn: 'Club', hp: 1.25, atk: 1, moves: ['luohan', 'earth_stomp', 'x_gaebang2'], fx: { hp: 4, def: 2 }, boon: '체력 +4%, 방어 +2', at: 'c_seongdo', x: 9, y: 17, hint: '술 취한 스님', bark: ['{p} 술은 물을 탔다. 부처님이 보신다.', '계율은 깨라고 있는 게 아니고 잊으라고 있는 거야.', '자네 어깨에 힘 빼. 술 한잔 하면 빠지네.'] },
-  c_saira: { name: '사이라', spr: 'Woman', wpn: 'Rapier', hp: .95, atk: 1.15, moves: ['flurry', 'blink', 'quick'], fx: { crit: 4 }, boon: '치명타 +4%', at: 'oasis', x: 26, y: 18, hint: '서역 여검객', bark: ['{p}은 물이 많아서 싫어.', '너희 말은 어렵다. 칼은 쉽다.', '내 고향에서는 이런 날 낙타를 잡는다.'] },
-  c_gal: { name: '갈 선생', spr: 'OldMan3', wpn: 'Stick', hp: .85, atk: .7, moves: ['quick', 'dart3'], fx: { potion: 30 }, boon: '금창약 효과 +30%', at: 'c_suzhou', x: 31, y: 12, hint: '돌팔이 의원', bark: ['{p} 사람들은 위장이 약해. 내가 봤어.', '죽을 병은 아니야. 아마. 나도 몰라.', '약값은 나중에 받겠네. 살아 있으면.'] },
-  c_yang: { name: '양춘', spr: 'EggBoy', wpn: 'Ninjaku', hp: .8, atk: .85, moves: ['quick', 'dart3', 'blink'], fx: { silver: 20 }, boon: '싸움에서 얻는 은자 +20%', at: 'c_guangzhou', x: 31, y: 17, hint: '수상한 좀도둑', bark: ['{p} 사람들은 주머니가 왼쪽이야.', '내가 훔친 게 아니라 떨어져 있던 거야.', '형님, 저 사람 비단 신을 신었어. 아, 그냥 그렇다고.'] },
-  c_gu: { name: '구 노창', spr: 'OldMan2', wpn: 'Lance', hp: 1.15, atk: 1.05, moves: ['one_point', 'dragon_pass', 'sweep_army'], fx: { def: 4 }, good: 1, boon: '방어 +4', at: 'c_yeongyeong', x: 9, y: 12, hint: '은퇴한 창수', bark: ['{p}에서 싸운 적이 있지. 그때도 비가 왔어.', '요즘 젊은것들은 창을 너무 빨리 뺀다.', '허리가 아프면 비가 온다네. 지금 아파.'] },
+  c_owol: { name: '오월', spr: 'Cavegirl2', wpn: 'Lance', hp: 1.05, atk: 1.05, moves: ['x_jangbaek1', 'x_jangbaek2', 'x_jangbaek4'], art: 'jangbaek', fx: { crit: 2, gather: 1 }, boon: '치명타 +2%, 채집이 두 배', at: 'c_yeongyeong', x: 30, y: 17, hint: '범 잡는 여자', bark: ['{p} 숲은 짐승 길이 넓네.', '바람이 바뀌었어. 뒤에 뭐가 있나 봐.', '사람 사냥은 재미없어. 말이 많아서.'] },
+  c_hyegong: { name: '혜공', spr: 'Sodi', wpn: 'Club', hp: 1.25, atk: 1, moves: ['x_shaolin1', 'x_gaebang2', 'x_gaebang4'], art: 'gaebang', fx: { hp: 4, def: 2 }, boon: '체력 +4%, 방어 +2', at: 'c_seongdo', x: 9, y: 17, hint: '술 취한 스님', bark: ['{p} 술은 물을 탔다. 부처님이 보신다.', '계율은 깨라고 있는 게 아니고 잊으라고 있는 거야.', '자네 어깨에 힘 빼. 술 한잔 하면 빠지네.'] },
+  c_saira: { name: '사이라', spr: 'Woman', wpn: 'Rapier', hp: .95, atk: 1.15, moves: ['x_cheonsan3', 'x_cheonsan1', 'blink'], art: 'cheonsan', fx: { crit: 4 }, boon: '치명타 +4%', at: 'oasis', x: 26, y: 18, hint: '서역 여검객', bark: ['{p}은 물이 많아서 싫어.', '너희 말은 어렵다. 칼은 쉽다.', '내 고향에서는 이런 날 낙타를 잡는다.'] },
+  c_gal: { name: '갈 선생', spr: 'OldMan3', wpn: 'Stick', hp: .85, atk: .7, moves: ['x_odok1', 'x_yunui1', 'dart3'], art: 'odok', fx: { potion: 30 }, boon: '금창약 효과 +30%', at: 'c_suzhou', x: 31, y: 12, hint: '돌팔이 의원', bark: ['{p} 사람들은 위장이 약해. 내가 봤어.', '죽을 병은 아니야. 아마. 나도 몰라.', '약값은 나중에 받겠네. 살아 있으면.'] },
+  c_yang: { name: '양춘', spr: 'EggBoy', wpn: 'Ninjaku', hp: .8, atk: .85, moves: ['x_haomun1', 'x_haomun3', 'quick'], art: 'haomun', fx: { silver: 20 }, boon: '싸움에서 얻는 은자 +20%', at: 'c_guangzhou', x: 31, y: 17, hint: '수상한 좀도둑', bark: ['{p} 사람들은 주머니가 왼쪽이야.', '내가 훔친 게 아니라 떨어져 있던 거야.', '형님, 저 사람 비단 신을 신었어. 아, 그냥 그렇다고.'] },
+  c_gu: { name: '구 노창', spr: 'OldMan2', wpn: 'Lance', hp: 1.15, atk: 1.05, moves: ['x_ak1', 'x_ak2', 'x_ak4'], art: 'ak', fx: { def: 4 }, good: 1, boon: '방어 +4', at: 'c_yeongyeong', x: 9, y: 12, hint: '은퇴한 창수', bark: ['{p}에서 싸운 적이 있지. 그때도 비가 왔어.', '요즘 젊은것들은 창을 너무 빨리 뺀다.', '허리가 아프면 비가 온다네. 지금 아파.'] },
 };
 for (const k in COMP) if (COMP[k].name && !WHO[k]) WHO[k] = { name: COMP[k].name, face: COMP[k].spr };
 const nameOf = id => COMP[id].name || WHO[id]?.name || id;
@@ -74,13 +74,25 @@ async function gift(id) {
   const it = ids[k]; take(it); s.daily['gift_' + id] = 1; const v = g.loves.includes(it) ? 15 : g.likes.includes(it) ? 8 : g.hates.includes(it) ? -5 : 3;
   s.love[id] = Math.max(0, Math.min(100, love(id) + v)); Sound.sfx(v > 0 ? 'secret' : 'cancel'); await say(id, g.thanks[v >= 15 ? 0 : v >= 8 ? 1 : v > 0 ? 2 : 3]);
 }
+// 전수: 호감이 쌓이면 그 사람이 속한 갈래의 무공을 가르쳐 준다. 호감 30이면 1단계, 55면 2단계, 80이면 3단계, 90이면 절초, 70이면 심법. 하루 한 번
+async function inherit(id) {
+  const c = COMP[id], s = S(), L = love(id), cap = L >= 80 ? 3 : L >= 55 ? 2 : L >= 30 ? 1 : 0;
+  if (!c.art || !G.arts?.ID?.[c.art]) return; if (s.daily['inherit_' + id]) { await say(id, '오늘은 여기까지. 몸에 익을 시간을 줘야지.'); return; }
+  const ks = G.arts.ID[c.art].filter(k => !s.skills.includes(k) && SKILLS[k] && (SKILLS[k].ult ? L >= 90 : (SKILLS[k].tier || 1) <= cap)), h = 'h_' + c.art;
+  const o = [...ks.map(k => `${SKILLS[k].name} (${SKILLS[k].school})`), ...(L >= 70 && HEARTS[h] && !s.hearts.includes(h) ? [`심법: ${HEARTS[h].name}`] : []), '그만둔다'];
+  if (o.length === 1) { await say(id, cap ? '지금 가르쳐 줄 수 있는 건 다 가르쳤어. 더는 나랑 더 친해지면.' : '아직은 좀. 우리 사이가 그 정도는 아니잖아.'); return; }
+  const k = await choice(`${nameOf(id)}에게 무엇을 배울까? (호감 ${love(id)})`, o); if (k === o.length - 1) return;
+  s.daily['inherit_' + id] = 1; await narr(`${josa(nameOf(id), '이/가')} 자세부터 잡아 주었다. 해가 질 때까지 같은 동작을 되풀이했다.`); await G.life.sleepNow();
+  if (k < ks.length) learn(ks[k]); else { s.hearts.push(h); Sound.sfx('bonus'); toast(`심법을 익혔다: ${HEARTS[h].name}`, 3); }
+  addLove(id, 2);
+}
 // 따라다니는 동료에게 말을 걸었을 때
 async function talkTo(id) {
-  const o = [['이야기한다', () => chat(id)], ['선물을 준다', () => gift(id)], ['초식을 가르친다', () => teach(id)], ['잠시 헤어진다', async () => { leave(id); await say(id, pickLine(id, ['알았어. 또 보자.', '몸조심해요.', '부르면 올게.']) || '또 보자.'); G.field.refresh(); }], ['그만둔다', async () => { }]];
+  const o = [['이야기한다', () => chat(id)], ['선물을 준다', () => gift(id)], ['무공을 전수받는다', () => inherit(id)], ['초식을 가르친다', () => teach(id)], ['잠시 헤어진다', async () => { leave(id); await say(id, pickLine(id, ['알았어. 또 보자.', '몸조심해요.', '부르면 올게.']) || '또 보자.'); G.field.refresh(); }], ['그만둔다', async () => { }]];
   const k = await choice(`${nameOf(id)} · 호감 ${love(id)}`, o.map(q => q[0])); await o[k][1]();
 }
 async function compTalk(id) {
-  const p = st(), opts = [['이야기한다', () => chat(id)]]; if (p.met[id]) opts.push(['선물을 준다', () => gift(id)]);
+  const p = st(), opts = [['이야기한다', () => chat(id)]]; if (p.met[id]) opts.push(['선물을 준다', () => gift(id)]); if (p.met[id] && COMP[id].art) opts.push(['무공을 전수받는다', () => inherit(id)]);
   if (p.met[id]) { if (isIn(id)) opts.push(['잠시 헤어진다', async () => { leave(id); await say(id, '알았어. 또 보자.'); }]); else opts.push(['같이 가자고 한다', () => join(id)]); }
   else opts.push(['같이 다니자고 한다', async () => { if (await JOIN[id](id)) await join(id); }]);
   opts.push(['그만둔다', async () => { }]); const c = await choice(`${nameOf(id)} · ${COMP[id].hint || ''}`, opts.map(o => o[0])); await opts[c][1]();
