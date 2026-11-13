@@ -256,7 +256,7 @@ async function gateAsk(f, l, name, spr, art) {
 }
 async function shopTalk(l) {
   const c = await choice(`${l.name} 저잣거리다. 없는 게 없다.`, ['물건 사기', '물건 팔기', '그만둔다']);
-  if (c === 0) await ctx.shop(`${l.name} 저잣거리`, [ctx.item.potion(), ctx.item.stuff('rice', 4), ctx.item.stuff('noodlep', 4), ctx.item.stuff('tea', 44), ctx.item.stuff('sweets', 24), ctx.item.weapon('iron_sword'), ctx.item.weapon('iron_blade'), ctx.item.weapon('iron_spear'), ctx.item.weapon('fist_wrap')]);
+  if (c === 0) await ctx.shop(`${l.name} 저잣거리`, [ctx.item.potion(), ctx.item.stuff('rice', 4), ctx.item.stuff('noodlep', 4), ctx.item.stuff('tea', 44), ctx.item.stuff('sweets', 24), ctx.item.weapon('iron_sword'), ctx.item.weapon('iron_blade'), ctx.item.weapon('iron_spear'), ctx.item.weapon('fist_wrap'), ctx.item.weapon('ring_blade'), ctx.item.weapon('tiger_spear'), ctx.item.weapon('tiger_claw')]);
   if (c === 1) await G.life.openSell();
 }
 async function innTalk(l) {

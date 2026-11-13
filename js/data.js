@@ -10,8 +10,15 @@ export const WEAPONS = {
   ghost_blade: { name: '귀면도', type: '도', atk: 22, spr: 'Axe', price: 480, desc: '칼등에 귀신 얼굴이 새겨진 대도.' },
   iron_spear: { name: '철창', type: '창', atk: 10, spr: 'Lance', price: 100, desc: '길어서 먼저 닿는다.' },
   dragon_spear: { name: '유룡창', type: '창', atk: 19, spr: 'Lance2', price: 450, desc: '창대가 낭창낭창한 명창.' },
+  ring_blade: { name: '환두대도', type: '도', atk: 16, spr: 'BigSword', price: 260, desc: '자루 끝에 쇠고리가 달린 큰 칼. 휘두를 때 고리가 운다.' },
+  moon_glaive: { name: '청룡언월도', type: '도', atk: 28, spr: 'Axe', price: 900, desc: '달 모양 날이 달린 긴 칼. 들기만 해도 팔이 저리다.' },
+  tiger_spear: { name: '호두창', type: '창', atk: 14, spr: 'Lance', price: 240, desc: '창날 밑에 범 머리를 새긴 창.' },
+  plum_spear: { name: '이화창', type: '창', atk: 27, spr: 'Lance2', price: 880, desc: '창끝이 배꽃처럼 흩어져 보인다는 명창.' },
+  pine_sword: { name: '송문고검', type: '검', atk: 23, spr: 'Rapier', price: 860, desc: '솔무늬가 들어간 옛 검. 가볍고 질기다.' },
   fist_wrap: { name: '무명 권대', type: '권', atk: 6, spr: 'Sai', price: 60, desc: '손에 감는 무명천. 맨손으로 싸우는 사람의 무기.' },
   iron_gauntlet: { name: '철권갑', type: '권', atk: 15, spr: 'Club', price: 400, desc: '쇠로 만든 권갑.' },
+  tiger_claw: { name: '호조수투', type: '권', atk: 11, spr: 'Sai', price: 220, desc: '손끝에 쇠발톱이 달린 장갑.' },
+  diamond_fist: { name: '금강권갑', type: '권', atk: 25, spr: 'Club', price: 820, desc: '금강석 가루를 섞어 벼린 권갑. 바위를 쳐도 손이 멀쩡하다.' },
 };
 
 // 평타: 무기 종류마다 다르다
