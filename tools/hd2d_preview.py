@@ -127,6 +127,19 @@ def walls1():
         c.save(os.path.join(OUT, n + '.webp'), lossless=True); print(n, c.size, '네모 시작', round(full[0] / c.height, 3))
 
 
+def walls2():
+    """HW2(Higgsfield): HW1과 같은 배치. 1행 앞벽(법당, 문파 회관, 부잣집), 2행 옆벽. 원본이 2048점이라 HW1과 같은 도트 굵기가 되게 0.15배"""
+    from scipy import ndimage
+    p = os.path.join(ROOT, 'art-src', 'higgsfield', 'HW2.png')
+    if not os.path.exists(p): return
+    im = key_out(Image.open(p)); A = np.asarray(im)[..., 3] > 127
+    lab, n = ndimage.label(A); objs = [o for o in ndimage.find_objects(lab) if (o[0].stop - o[0].start) * (o[1].stop - o[1].start) > 20000]
+    objs.sort(key=lambda o: (o[0].start // 300, o[1].start))
+    for k, o in enumerate(objs[:6]):
+        c = im.crop((o[1].start, o[0].start, o[1].stop, o[0].stop)); c = shrink(c, .15); n = ('w%d_front' if k < 3 else 'w%d_side') % (k % 3 + 4)
+        c.save(os.path.join(OUT, n + '.webp'), lossless=True); print(n, c.size)
+
+
 def walls_k():
     """HK2: 담 여섯 토막(2열 3행): 기와 얹은 흙담, 돌담, 목책, 나무 울타리, 성가퀴 담, 막돌 담"""
     im = key_out(Image.open(os.path.join(SRC, 'HK2.png')))
@@ -163,5 +176,5 @@ if __name__ == '__main__':
         if os.path.exists(os.path.join(HF, code + 'a.png')) and os.path.exists(os.path.join(HF, code + 'b.png')): walker(code, out, HF, tl)
     tiles('HG1', ['g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow'], 11)
     tiles('HR1', ['r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow'], 11)
-    walls(); strips(); walls1(); walls_k()
+    walls(); strips(); walls1(); walls_k(); walls2()
     if 'hp2' in sys.argv: [print(n, w, h) for n, (w, h) in props_p().items()]

@@ -5,20 +5,22 @@
 // 좌표: 세상 X = 평면도 x, Y = 높이, Z = 평면도 y × ZS. 선 것의 키는 HS만큼 늘린다(hd2d.js 머리말).
 
 // 종류마다 조립 설명서. 길이는 평면도 점(사람 키 15점). 높이는 땅에서부터
+// 새 벽 그림 이름(그림이 없으면 대신 쓸 것). 실제로 고르는 것은 짓는 때(build 안)
+const PVW = (a, b) => [a, b];
 export const SPEC = {
   hut_o: { walls: 'w1', roof: 'r_orange', eave: 'e_orange', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
   hut_b: { walls: 'w2', roof: 'r_dark', eave: 'e_dark', pitch: 27, wall: 30 },
   hut_o2: { walls: 'w3', roof: 'r_thatch', eave: 'e_thatch', pitch: 34, wall: 28, thatch: true },
-  shop_blue: { walls: 'w2', roof: 'r_dark', tint: '#9fb4d8', eave: 'e_dark', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
+  shop_blue: { walls: PVW('w6', 'w2'), roof: 'r_dark', tint: '#9fb4d8', eave: 'e_dark', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
   shop_green: { walls: 'w1', roof: 'r_dark', tint: '#a8c4a0', eave: 'e_dark', pitch: 27, wall: 30, lanterns: 2, depth: 22 },
-  house_red: { walls: 'w1', roof: 'r_orange', tint: '#e0a090', eave: 'e_orange', pitch: 28, wall: 32, depth: 22 },
+  house_red: { walls: PVW('w4', 'w1'), roof: 'r_orange', tint: '#e0a090', eave: 'e_orange', pitch: 28, wall: 32, depth: 22 },
   clay: { walls: 'w3', roof: 'r_mud', eave: 'e_plank', pitch: 24, wall: 28, depth: 22 },
   wood_o: { walls: 'w2', plank: '#7a4e2c', roof: 'r_plank', eave: 'e_plank', pitch: 26, wall: 30, depth: 22 },
   wood_b: { walls: 'w2', plank: '#5a4436', roof: 'r_dark', eave: 'e_dark', pitch: 26, wall: 30, depth: 22 },
   mud: { walls: 'w3', roof: 'r_thatch', eave: 'e_thatch', pitch: 34, wall: 24, thatch: true, depth: 18 },
   straw: { walls: 'w3', plank: '#8a6a44', roof: 'r_thatch', eave: 'e_thatch', pitch: 34, wall: 22, thatch: true, depth: 16 },
-  lodge: { walls: 'w1', roof: 'r_dark', tint: '#d0c8c0', eave: 'e_dark', pitch: 30, wall: 30, floors: 2, upper: 20, lanterns: 2, depth: 34 },
-  hall: { walls: 'w1', roof: 'r_dark', tint: '#c8c0b8', eave: 'e_dark', pitch: 32, wall: 42, lanterns: 2, sign: true, signText: '正殿', depth: 36 },
+  lodge: { walls: PVW('w5', 'w1'), roof: 'r_dark', tint: '#d0c8c0', eave: 'e_dark', pitch: 30, wall: 30, floors: 2, upper: 20, lanterns: 2, depth: 34 },
+  hall: { walls: PVW('w4', 'w1'), roof: 'r_dark', tint: '#c8c0b8', eave: 'e_dark', pitch: 32, wall: 42, lanterns: 2, sign: true, signText: '正殿', depth: 36 },
   inn: { walls: 'w1', roof: 'r_dark', tint: '#d8d0c4', eave: 'e_dark', pitch: 28, wall: 30, floors: 2, upper: 21, signText: '客棧', lanterns: 2, sign: true, balcony: true },
 };
 
@@ -27,6 +29,12 @@ const CROP = {
   beam: ['front', 10, 0, 85, 4], plaster: ['side', 8, 32, 22, 68], stone: ['side', 6, 71, 66, 85], post: ['side', 0, 32, 6, 70],
   door: ['front', 34, 12, 60, 55], win: ['front', 7, 12, 27, 37],
 };
+// HW2(법당 w4, 문파 회관 w5, 부잣집 w6)는 그림마다 문과 창 자리가 달라 따로 적는다(도트, 위가 0)
+const CROPS = {
+  w4: { beam: ['front', 10, 6, 85, 15], plaster: ['side', 50, 36, 60, 70], stone: ['side', 0, 75, 72, 86], post: ['side', 2, 40, 10, 70], door: ['front', 14, 17, 81, 57], win: ['front', 15, 18, 26, 40] },
+  w5: { beam: ['front', 2, 5, 92, 14], plaster: ['side', 10, 36, 24, 70], stone: ['side', 0, 74, 73, 86], post: ['side', 1, 30, 6, 74], door: ['front', 31, 17, 58, 60], win: ['front', 8, 21, 28, 47] },
+  w6: { beam: ['front', 0, 1, 94, 5], plaster: ['side', 2, 34, 24, 72], stone: ['side', 0, 74, 73, 86], post: ['side', 0, 34, 6, 72], door: ['front', 35, 20, 60, 60], win: ['front', 4, 20, 24, 46] },
+};
 const PART = 1.2, ES = .55, RS = .62;  // ES: 처마 띠(HR2)는 받은 그림의 도트가 굵어 줄인다. RS: 지붕 무늬(HR1)도 기와 한 장이 크게 보여 줄인다  // 벽 부품의 도트 확대: 문이 사람보다 조금 높게(문 43도트 × 1.2 ≈ 사람 48도트 × 1.08)
 
 export function makeBuilder(C) {
@@ -34,7 +42,7 @@ export function makeBuilder(C) {
   const TEX = new Map(), COL = new Map(), WIN = new Map();
   // 그림 조각 → 되풀이 텍스처
   const crop = (set, part) => {
-    const key = set + '/' + part; if (TEX.has(key)) return TEX.get(key); const [f, x0, y0, x1, y1] = CROP[part], im = PV[set + '_' + f]; if (!im) return null;
+    const key = set + '/' + part; if (TEX.has(key)) return TEX.get(key); const [f, x0, y0, x1, y1] = (CROPS[set] || CROP)[part], im = PV[set + '_' + f]; if (!im) return null;
     const c = document.createElement('canvas'); c.width = x1 - x0; c.height = y1 - y0; c.getContext('2d').drawImage(im, x0, y0, c.width, c.height, 0, 0, c.width, c.height);
     const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = C.aniso || 1; t.needsUpdate = true; t.userData.w = c.width; t.userData.h = c.height; TEX.set(key, t); return t;
   };
@@ -76,7 +84,7 @@ export function makeBuilder(C) {
     x.fillStyle = rgb(.6); x.fillRect(0, 17, 24, 1);
     const t = texFrom(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = C.aniso || 1; t.needsUpdate = true; t.userData.w = 24; t.userData.h = 36; TEX.set(k, t); return t; };
   return function build(s, st, spec) {
-    const set = spec.walls, P = { plaster: spec.plank ? plank(spec.plank) : crop(set, 'plaster'), stone: crop(set, 'stone'), post: crop(set, 'post'), beam: crop(set, 'beam'), door: crop(set, 'door'), win: crop(set, 'win') };
+    const set = Array.isArray(spec.walls) ? (C.PV[spec.walls[0] + '_front'] ? spec.walls[0] : spec.walls[1]) : spec.walls, P = { plaster: spec.plank ? plank(spec.plank) : crop(set, 'plaster'), stone: crop(set, 'stone'), post: crop(set, 'post'), beam: crop(set, 'beam'), door: crop(set, 'door'), win: crop(set, 'win') };
     if (!P.plaster) return null;
     const roofT = pv(spec.roof), eaveT = pv(spec.eave), ridgeT = pv(spec.thatch ? 'e_thatch' : 'e_ridge');
     // 바닥: 막힘 상자의 앞쪽 끝과 좌우를 그대로, 깊이는 막힘 상자(뒤는 못 가는 곳이라 조금 얕아도 된다)

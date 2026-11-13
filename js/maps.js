@@ -140,6 +140,24 @@ class MapDef {
       if (!ok) continue; this.put(name, 0, 0, { dx: px, dy: py }); last = tx; }
     return this;
   }
+  // 넓은 마당 채우기: 마당(3)이나 광장(5) 칸이 minArea 넘게 이어진 곳마다, 안쪽 가장자리를 따라 석등과 화단, 등롱을 세우고
+  // 들어오는 길(남쪽 가운데) 양옆에 돌사자 한 쌍을 둔다. 가운데 세로 줄(폭 6칸)과 문, 출구, 다른 막힘 둘레는 비운다
+  plazaDress(o = {}) { const edge = o.edge || ['v_stonelamp', 'p_flowerbed', 'p_lanterns', 'p_flowerbed'], minArea = o.minArea || 80, seen = new Set(), W = this.w, H = this.h;
+    const apron = this.stamps.filter(st => DOORED.includes(st.name)).map(st => { const S = STAMPS[st.name]; return { x: st.x + S[3] / 2 - 22, y: st.y + S[4] - 4, w: 44, h: 48 }; });
+    const busy = r => this.solids.some(q => q.x < r.x + r.w + 6 && q.x + q.w + 6 > r.x && q.y < r.y + r.h + 6 && q.y + q.h + 6 > r.y) || this.portals.some(q => q.x < r.x + r.w + 20 && q.x + q.w + 20 > r.x && q.y < r.y + r.h + 28 && q.y + q.h + 28 > r.y) || apron.some(a => a.x < r.x + r.w && a.x + a.w > r.x && a.y < r.y + r.h && a.y + a.h > r.y);
+    const yard = (x, y) => { const v = this.g[y]?.[x]; return v === 3 || v === 5; };
+    const tryPut = (name, cx, by) => { const S = STAMPS[name]; if (!S) return false; const px = Math.round(cx - S[3] / 2), py = Math.round(by - S[4]); const r = S.length > 5 ? { x: px + S[5], y: py + S[6], w: S[7], h: S[8] } : { x: px, y: py + S[4] - 6, w: S[3], h: 6 };
+      for (let x = r.x; x < r.x + r.w; x += 4) for (let y = r.y; y < r.y + r.h; y += 4) if (!yard(Math.floor(x / TS), Math.floor(y / TS))) return false;
+      if (busy(r)) return false; this.put(name, 0, 0, { dx: px, dy: py }); return true; };
+    for (let y0 = 0; y0 < H; y0++) for (let x0 = 0; x0 < W; x0++) { if (!yard(x0, y0) || seen.has(y0 * W + x0)) continue;
+      const cells = [], st = [[x0, y0]]; seen.add(y0 * W + x0); while (st.length) { const [x, y] = st.pop(); cells.push([x, y]); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + a, Y = y + b; if (X >= 0 && Y >= 0 && X < W && Y < H && yard(X, Y) && !seen.has(Y * W + X)) { seen.add(Y * W + X); st.push([X, Y]); } } }
+      if (cells.length < minArea) continue; const xs = cells.map(c => c[0]), ys = cells.map(c => c[1]), L = Math.min(...xs), R = Math.max(...xs), T = Math.min(...ys), B = Math.max(...ys), mid = (L + R + 1) / 2;
+      let i = 0; for (let x = L + 1.5; x < R - .5; x += 4.5) { if (Math.abs(x - mid) < 3.5) continue; if (tryPut(edge[i % edge.length], x * TS, (T + 1.6) * TS)) i++; }  // 북쪽 가장자리
+      for (let y = T + 4; y < B - 1; y += 4) { tryPut('v_stonelamp', (L + 1) * TS, (y + .8) * TS); tryPut('v_stonelamp', (R) * TS, (y + .8) * TS); }  // 서쪽, 동쪽 가장자리
+      if (R - L > 10) { tryPut('p_lion', (mid - 4) * TS, (B + .2) * TS); tryPut('p_lion', (mid + 4) * TS, (B + .2) * TS); }  // 남쪽 들머리 돌사자
+    }
+    return this;
+  }
   // 집 뒤(북쪽) 좁은 틈 막기: 카메라가 남쪽에서 보므로 집 뒤는 보이지도 않고 걸어 들어가면 가려진다. 집 폭만큼 담을 친다(길 칸과 다른 막힘은 비운다)
   // 문 앞 길 잇기: 문 바로 아래에 길이나 마당이 없으면 문에서 남쪽으로 곧게 길을 내 가장 가까운 길(마당)에 잇는다. max칸 안에 없으면 손대지 않는다
   frontPaths(max = 6) {

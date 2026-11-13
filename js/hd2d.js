@@ -94,7 +94,7 @@ const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; 
 // 새 그림 맛보기(tools/hd2d_preview.py가 만든 것): 받은 집 그림과 윤설 걷기. 0단계에서 크기와 결만 보려고 잠깐 씌운다
 // 새 인물 그림(Higgsfield HN*, 게임 시트 꼴 56점 칸)이 있는 사람 종류
 const NEWNPC = { 'chars/Villager': 'n_villager', 'chars/Woman': 'n_woman', 'chars/OldMan': 'n_oldman', 'chars/OldWoman': 'n_oldwoman' };
-const PV = {}, PVN = ['n_villager', 'n_woman', 'n_oldman', 'n_oldwoman', 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'k_fence', 'k_palisade', 'k_stone'];
+const PV = {}, PVN = ['n_villager', 'n_woman', 'n_oldman', 'n_oldwoman', 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'w4_front', 'w5_front', 'w6_front', 'w4_side', 'w5_side', 'w6_side', 'k_fence', 'k_palisade', 'k_stone'];
 const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 인물 그림 기준). 새 땅과 지붕과 벽도 이 굵기로 깐다
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;

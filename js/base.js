@@ -472,7 +472,7 @@ function provider(id) {
 }
 function init() {
   Story.providers.push(provider, ambient);
-  for (const id in MAPS) { const m = MAPS[id]; if (!m.room && id !== 'world' && id !== 'mysect' && !id.startsWith('b_') && !id.startsWith('c_')) { if (id !== 'cheongha') { m.frontPaths?.(); if (!m.fenced) m.backFence?.(); m.dress?.(); m.streetDress?.(STREET[id] || (m.stamps.some(q => ['hut_o', 'hut_b', 'clay', 'mud', 'straw', 'shop_blue', 'wood_o'].includes(q.name)) ? STREET.town : STREET.wild), id === 'fort' ? 3 : 4, id.length); } autoDoors(m, { id, name: m.name, style: 'town', map: id }); } }  // 방침 2 규칙: 집 뒤 좁은 틈을 담으로 막는다(청하진은 지도에서 직접)
+  for (const id in MAPS) { const m = MAPS[id]; if (!m.room && id !== 'world' && id !== 'mysect' && !id.startsWith('b_') && !id.startsWith('c_')) { if (id !== 'cheongha') { m.frontPaths?.(); if (!m.fenced) m.backFence?.(); m.dress?.(); m.plazaDress?.(); m.streetDress?.(STREET[id] || (m.stamps.some(q => ['hut_o', 'hut_b', 'clay', 'mud', 'straw', 'shop_blue', 'wood_o'].includes(q.name)) ? STREET.town : STREET.wild), id === 'fort' ? 3 : 4, id.length); } autoDoors(m, { id, name: m.name, style: 'town', map: id }); } }  // 방침 2 규칙: 집 뒤 좁은 틈을 담으로 막는다(청하진은 지도에서 직접)
   MAPS.hwasan?.exit(29, 9, 1, 5, 'b_hwasan', 1.5, 32, 3);
   for (const l of LOCS) if (l.kind === 'old' && MAPS[l.map]) { const m = MAPS[l.map], n = m.stamps.length; m.put('signpost', Math.floor(l.at[0] - 1.5), Math.floor(l.at[1] - 1.5), { nosolid: true }); if (m.objs) m.objs.push(m.stamps[n]); }
 }
