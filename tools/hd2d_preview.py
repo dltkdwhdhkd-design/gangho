@@ -3,7 +3,7 @@
 # HG1(땅 무늬), HR1(지붕 무늬)은 도트 한 점이 텍스처 한 점이 되게 줄이고, HW0(시험 집 앞벽, 옆벽)은 바탕을 지워 줄인다.
 # 집도 사람과 같은 도트 굵기로 줄인다(면적 평균, 투명도는 반에서 잘라 가장자리를 또렷하게). 게임은 도트를 또렷하게 그린다.
 # 쓰는 법: python3 tools/hd2d_preview.py   → assets/hd2d/preview/*.webp
-import os, sys
+import json, os, sys
 from PIL import Image, ImageFilter
 import numpy as np
 
@@ -172,7 +172,8 @@ if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
     houses(); walker('HC1', 'me'); walker('HC2', 'yun')
     HF = os.path.join(ROOT, 'art-src', 'higgsfield')  # Higgsfield로 받은 마을 사람
-    for code, out, tl in [('HN1', 'n_villager', 48), ('HN2', 'n_woman', 45), ('HN3', 'n_oldman', 44), ('HN4', 'n_oldwoman', 41)]:
+    Q = [(c, o, t) for c, o, _, t, _ in json.load(open(os.path.join(ROOT, 'tools', 'hf_queue.json')))]  # 줄에 선 사람들(키는 줄에 적힌 대로)
+    for code, out, tl in [('HN1', 'n_villager', 48), ('HN2', 'n_woman', 45), ('HN3', 'n_oldman', 44), ('HN4', 'n_oldwoman', 41)] + Q:
         if os.path.exists(os.path.join(HF, code + 'a.png')) and os.path.exists(os.path.join(HF, code + 'b.png')): walker(code, out, HF, tl)
     tiles('HG1', ['g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow'], 11)
     tiles('HR1', ['r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow'], 11)
