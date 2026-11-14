@@ -76,6 +76,7 @@ async function granary() {
 
 // ── 정파 길 ──
 import { crossFire } from './part45.js';
+import { warOpens, samaungEcho } from './part4b.js';
 async function jeong4() {
   F().night = false;
   await ctx.part(4, '쫓기는 몸', '움막');
@@ -177,9 +178,11 @@ async function council() {
   await say('me', '그럼 전쟁부터 말려야죠. 패천도를 만나 볼게요.');
   await say('cheol', '혼자서 말이오?');
   await say('me', '칼 든 사람이 여럿 가면 말을 못 하잖아요.');
+  await narr('회관을 나서는데 마당 구석에서 남궁 장로와 제갈 군량관이 낮은 소리로 다투고 있었다. 맹주를 어떻게 할지가 아니라, 전쟁이 끝나면 장강 나루를 누가 갖느냐를 두고.');
+  await say('so', '저거 들려? 고발이 끝나자마자 전리품 계산이야.', 'a');
   F().night = false; F().jg_council = true; ctx.rep('jeong', 2); set('jg3');
-  ctx.goal('동쪽 산길 너머 흑풍채에서 패천도 사마웅 만나기');
-  ctx.note('장문인 회의에서 맹주를 고발했다. 맹주가 전쟁을 내세워 넘어갔지만 혜각 대사는 내 편에 섰다.');
+  ctx.note('장문인 회의에서 맹주를 고발했다. 맹주가 전쟁을 내세워 넘어갔지만 혜각 대사는 내 편에 섰다. 회관 마당에서는 벌써 전리품을 두고 세가들이 다퉜다.');
+  await warOpens();
 }
 async function samaungTalk() {
   await ctx.chap(5, '구파 회관의 밤', '패천도');
@@ -189,6 +192,7 @@ async function samaungTalk() {
     await say('lion', '말리고 싶은데 내 말을 들을 분이 아니다. 몸조심해라.');
   }
   await say('samaung', '네놈이 {호} {나}구나. 정파 심부름을 왔냐, 역적 심부름을 왔냐.');
+  await samaungEcho();
   await say('me', '전쟁을 멈추러 왔습니다. 맹주는 이 전쟁으로 제 죄를 덮으려고 합니다.');
   await say('samaung', '이십 년 전에 내 형제 열둘이 그놈이 따른 술을 마시고 죽었다. 이제 와서 멈추라고? 말은 칼로 해라.');
   await ctx.duel({ foes: ['samaung_foe'], arena: 'fort', bgm: 'boss', title: '패천도 사마웅', survive: 30, tip: '이길 수 없는 상대입니다. 30초를 버티세요.' });
@@ -378,7 +382,7 @@ Story.providers.push(function part4(id) {
     if (go) n.push(job({ id: 'job_store', spr: 'Knight', x: 41, y: 18, hint: '창고 뒷담 넘기', talk: granary }));
     if (at('sa3') && F().sa_rice2) n.push(job({ id: 'job_nam', spr: 'Namgung', x: 24.5, y: 26, hint: '남궁진과 맞서기', talk: saNamgung }));
   }
-  if (id === 'fort' && at('jg3')) n.push(job({ id: 'samaung', spr: 'Samaung', x: 18, y: 20, hint: '패천도 만나기', talk: samaungTalk }));
+  if (id === 'fort' && at('jg3') && G.ch5.done()) n.push(job({ id: 'samaung', spr: 'Samaung', x: 18, y: 20, hint: '패천도 만나기', talk: samaungTalk }));  // 흑도맹 거두 셋을 먼저 막는다(js/part4b.js)
   if (id === 'cheongha' && at('fr2')) n.push(job({ id: 'elder', spr: 'Monk', x: 23.5, y: 18.4, dir: 2, talk: frElder }));
   return { npcs: n, spots: [], trigs: [], roam: [] };
 });

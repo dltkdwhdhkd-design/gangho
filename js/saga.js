@@ -37,6 +37,7 @@ export function st() {
   if (g.dm === undefined) g.dm = 0; g.ruin = g.ruin || {};  // 정마 대세: +3이면 마교가, -3이면 무림맹이 완전히 무너진다
   if (!g.v) { g.v = 2; g.t.js = Math.min(g.t.js, 30); g.t.jm = Math.min(g.t.jm, 10); g.cool.jsw = Math.max(g.cool.jsw, 30); g.cool.demon = Math.max(g.cool.demon, 150); }  // 첫 판 저장: 큰 싸움이 너무 잦던 때의 수치를 낮춘다
   if (g.v < 3) { g.v = 3; g.cool.demon = Math.max(g.cool.demon, 200); }  // 정마대전을 한 해 한 번으로 늦춘 판
+  if (g.cool.rift === undefined) g.cool.rift = 20;  // 정파 내분(나중에 생긴 판)
   return g;
 }
 const arc = k => st()?.arcs.find(a => a.kind === k);
@@ -56,6 +57,7 @@ const K = {
   tourney: { name: '무림대회', order: ['notice', 'main'], ph: { notice: ['공고', 3], main: ['본선', 2] } },
   jsw: { name: '정사대전', order: ['omen', 'war', 'battle'], ph: { omen: ['전운', 3], war: ['개전', 6], battle: ['격전', 3] } },
   demon: { name: '정마대전', order: ['omen', 'league', 'invade', 'final'], ph: { omen: ['징조', 3], league: ['무림맹 결성', 2], invade: ['마교 침공', 8], final: ['결전', 5] } },
+  rift: { name: '정파 내분', order: ['omen', 'clash'], ph: { omen: ['반목', 3], clash: ['이권 다툼', 5] } },
 };
 const INIT = {}, ENTER = {}, TICK = {}, END = {};
 function start(kind) { const g = st(), a = { id: g.id++, kind, day: S().day }; if (INIT[kind](a) === false) return; g.arcs.push(a); enter(a, K[kind].order[0]); }
@@ -81,6 +83,7 @@ function daily() {
   if (!arc('tourney') && g.cool.tourney <= 0 && arc('demon')?.phase !== 'invade') start('tourney');
   if (!arc('jsw') && !arc('demon') && g.cool.jsw <= 0 && g.t.js >= 100) start('jsw');
   else if (!arc('demon') && !arc('jsw') && g.cool.demon <= 0 && g.t.jm >= 100) start('demon');
+  else if (!arc('rift') && !arc('demon') && g.cool.rift <= 0 && side('jeong').length >= 4) start('rift');  // 정파끼리 이권 다툼. 정사대전 중에도 터진다
   refresh();
 }
 
@@ -146,6 +149,48 @@ async function tourTalk(a) {
   news(`${josa(s.name, '이/가')} ${a.place} 무림대회에서 우승했다. 단상 아래가 함성으로 들끓었다.`); hist(`${a.place} 무림대회 — ${s.name} 우승`);
   await narr(`끝까지 서 있었다. 상금 은자 ${v}냥과 비급 두 권을 받았다.`); for (let i = 0; i < 2; i++) G.arts.drop(null, 1);
 }
+
+// ── 정파 내분: 같은 정파 두 세력이 고을 하나의 이권을 두고 갈라선다 ──
+// 원수 사이(js/jianghu.js FOE)를 먼저 고르고, 없으면 세력이 비슷한 둘. 다툼 동안 두 세력 무리는 강호 길에서 마주치면 칼을 뽑는다(js/wander.js)
+const PRIZE = ['장강 나루 뱃삯', '소금 전매', '표국 길목', '약재 도매', '비무대 주관', '성문 세금', '비단 길드'];
+const RIVAL = [['hwasan', 'jongnam'], ['hwangbo', 'eon'], ['jeonjin', 'jongnam'], ['namgung', 'jegal'], ['paeng', 'hwangbo'], ['dang', 'emei'], ['gongdong', 'gonryun'], ['moyong', 'namgung'], ['ak', 'yang']];
+INIT.rift = a => {
+  const J = side('jeong'), P = RIVAL.filter(([x, y]) => J.some(f => f.id === x) && J.some(f => f.id === y)), [x, y] = P.length ? pick(P) : J.sort(() => Math.random() - .5).slice(0, 2).map(f => f.id);
+  if (!x || !y) return false; const c = pick(openCity()); Object.assign(a, { A: x, B: y, map: c.map, place: c.name, prize: pick(PRIZE), score: 0, helped: null });
+};
+const fn = id => fac(id)?.name || id;
+ENTER.rift = {
+  omen: a => { news(`${josa(fn(a.A), '와/과')} ${josa(fn(a.B), '이/가')} ${a.place} ${josa(a.prize, '을/를')} 두고 맞섰다. 양쪽 장로가 서로 얼굴도 안 본다고 한다.`); },
+  clash: a => { news(`${a.place}에서 ${josa(fn(a.A), '와/과')} ${fn(a.B)} 제자들이 칼을 뽑았다. 같은 정파끼리 피를 본다.`); toast(`강호 소식: ${a.place}에서 정파끼리 칼부림`, 3.4); },
+};
+TICK.rift = a => { if (a.phase === 'clash') a.score += (pow(a.A) - pow(a.B)) / 120 + rnd(-.6, .6); };
+END.rift = a => {
+  const g = st(); g.cool.rift = 45 + Math.floor(rnd(0, 30));
+  if (a.peace) { news(`${josa(a.place, '이/가')} 조용해졌다. ${josa(fn(a.A), '와/과')} ${fn(a.B)} 장로가 한 상에 앉아 ${josa(a.prize, '을/를')} 반씩 나누기로 했다.`); hist(`${a.place} 정파 내분 — 화해`); return; }
+  const [w, l] = a.score + (a.helped === a.A ? 3 : a.helped === a.B ? -3 : 0) >= 0 ? [a.A, a.B] : [a.B, a.A];
+  G.jh.gain(w, 5); G.jh.gain(l, -6); news(`${josa(fn(w), '이/가')} ${a.place} ${josa(a.prize, '을/를')} 차지했다. ${josa(fn(l), '은/는')} 이를 갈며 물러났다. 정천맹 회의에서 두 세력 자리가 멀어졌다.`); hist(`${a.place} 정파 내분 — ${fn(w)} 이김`);
+};
+async function riftTalk(a, me) {
+  const s = S(), you = me === a.A ? a.B : a.A, f = fac(me), o = fac(you);
+  await say(null, `${f.name} 장로: ${pick([`${a.place} ${a.prize}는 원래 우리 몫이었소. ${o.name}이 전쟁 통에 끼어든 거요.`, `${o.name} 놈들이 우리 제자를 먼저 쳤소. 정파 체면에 참고 있을 수만은 없지.`, `${a.prize}에서 나오는 돈으로 제자 이백을 먹이오. 뺏기면 그 애들이 굶소.`])}`);
+  if (a.helped) { await say(null, a.helped === me ? `${f.name} 장로: 그때 도와준 은혜는 잊지 않소.` : `${f.name} 장로: 저쪽 편을 든 사람과는 할 말이 없소.`); return; }
+  const O = [`${f.name} 편을 든다`, ...(Fr().fame >= 40 ? ['두 장로를 한자리에 앉힌다 (명성 40 이상)'] : []), '그만둔다'], c = await choice(`${a.place} ${a.prize}. ${josa(f.name, '와/과')} ${josa(o.name, '이/가')} 다툰다.`, O);
+  if (O[c] === '그만둔다') return;
+  if (O[c].startsWith('두 장로')) {
+    const ok = Math.random() < Math.min(.85, .35 + Fr().fame / 400);
+    if (ok) { a.peace = 1; a.left = 0; Fr().fame += 4; G.jh.addRep(a.A, 3); G.jh.addRep(a.B, 3); await narr('찻잔 두 개를 놓고 반나절을 버텼다. 마지막엔 두 장로가 같은 잔을 들었다. 무엇을 마셨는지는 둘 다 기억하지 못할 것이다.'); }
+    else { G.jh.addRep(a.A, -3); G.jh.addRep(a.B, -3); await narr('말을 꺼내자마자 두 장로가 동시에 일어섰다. "정파 일에 낭인이 끼어드는 거 아니오." 둘이 한목소리를 낸 건 그게 처음이었다.'); }
+    return;
+  }
+  const won = await ctx.duel({ foes: G.jh.crew(o, s.lv, s.lv < 10 ? 2 : 3), arena: G.field.m.arena, bgm: 'fight', title: `${a.place} ${a.prize}`, optional: true, noIntro: true });
+  if (!won) { await narr('밀려났다. 같은 정파끼리 칼을 섞는 게 이렇게 지저분할 줄은 몰랐다.'); return; }
+  a.helped = me; G.jh.addRep(me, 8); G.jh.addRep(you, -12); s.silver += 60 + s.lv * 6; Sound.sfx('coin');
+  news(`${josa(s.name, '이/가')} ${a.place}에서 ${f.name} 편을 들어 ${o.name} 제자들을 물리쳤다.`);
+  await say(null, `${f.name} 장로: 이걸로 ${a.prize}는 우리 것이오. 사례는 받아 두시오. 정파 일은 원래 이렇게 돌아가오.`);
+}
+// 강호 길의 무리(js/wander.js)가 서로 칼을 뽑는 사이인가: 다툼 중인 두 정파
+const feuding = (x, y) => { const a = arc('rift'); return !!a && a.phase === 'clash' && ((a.A === x && a.B === y) || (a.A === y && a.B === x)); };
+const riftFacs = () => { const a = arc('rift'); return a && a.phase === 'clash' ? [a.A, a.B] : null; };
 
 // ── 정사대전 ──
 INIT.jsw = a => {
@@ -408,6 +453,7 @@ function npcs(id, out) {
     if (j.phase !== 'battle' || id !== j.front[0]) { out.push({ id: 'sg_rj', spr: 'Knight', x: 25.5, y: 26.75, dir: 0, hint: '정파 모병관', mark: () => !mySide(), talk: () => recruit(j, 'jeong') }); out.push({ id: 'sg_rs', spr: 'DarkNinja', x: 34.5, y: 26.75, dir: 0, hint: '흑도맹 모병관', mark: () => !mySide(), talk: () => recruit(j, 'sa') }); }
     else out.push({ id: 'sg_bt', spr: 'Knight', x: 29.5, y: 27.75, dir: 0, hint: `${CAMP[mySide()] || '양쪽'} 진영`, mark: () => !!mySide() && !j.fought, talk: () => battle(j) });
   }
+  const rf = arc('rift'); if (rf && rf.phase === 'clash' && rf.map === id) [rf.A, rf.B].forEach((k, i) => out.push({ id: 'sg_rift' + i, spr: fac(k)?.spr || 'Knight', x: 27.5 + i * 5, y: 31, dir: 0, hint: `${fac(k)?.name || ''} 장로`, mark: () => !rf.helped && !rf.peace, talk: () => riftTalk(rf, k) }));
   const d = arc('demon');
   if (d && id === d.hq && d.phase !== 'omen') out.push({ id: 'sg_league', spr: 'Noble', x: 33.5, y: 19.75, dir: 0, hint: '무림맹 집사', mark: () => d.phase === 'league' && !d.asked && Fr().fame >= 80, talk: () => leagueTalk(d) });
   if (d && d.phase === 'final' && id === 'b_cheonma') out.push({ id: 'sg_van', spr: 'Knight', x: sp[0], y: sp[1] + 2, dir: 1, hint: '무림맹 선봉장', mark: () => !d.finalWon && !cultMember(), talk: () => finalBattle(d) });
@@ -458,6 +504,7 @@ function marks() {
   const g = st(); if (!g || !isFree()) return []; const out = [];
   const t = arc('tourney'); if (t) out.push({ map: t.map, color: '#ffd23c' });
   const j = arc('jsw'); if (j && j.phase === 'battle') out.push({ map: j.front[0], color: '#ff6a3c' });
+  const rf = arc('rift'); if (rf && rf.phase === 'clash') out.push({ map: rf.map, color: '#7ed36a' });
   const d = arc('demon'); if (d) { if (d.phase !== 'omen') out.push({ map: d.hq, color: '#7ec8ff' }); for (const m in g.occ) out.push({ map: m, color: '#c43cff' }); if (d.phase === 'final') out.push({ map: 'b_cheonma', color: '#ff3b2c' }); }
   return out;
 }
@@ -465,7 +512,7 @@ function marks() {
 function html() {
   const g = st(); if (!g || !isFree()) return '';
   const bar = (n, c) => `<span style="display:inline-block;width:120px;height:8px;background:#2a2018;border-radius:4px;vertical-align:middle;overflow:hidden"><span style="display:block;height:100%;width:${clamp(n, 0, 100)}%;background:${c}"></span></span>`;
-  const rows = g.arcs.map(a => { const [pn] = K[a.kind].ph[a.phase], where = a.kind === 'tourney' ? a.place : a.kind === 'jsw' ? pname(a.front[0]) : pname(a.hq); const extra = a.kind === 'jsw' && a.phase !== 'omen' ? ` · 형세 ${a.score >= 0 ? '정파' : '흑도맹'} 우세` : a.kind === 'demon' && a.lord ? ` · 맹주 ${a.lord === 'me' ? esc(S().name) : esc(fac(a.lord)?.who || '')}` : '';
+  const rows = g.arcs.map(a => { const [pn] = K[a.kind].ph[a.phase], where = a.kind === 'tourney' || a.kind === 'rift' ? a.place : a.kind === 'jsw' ? pname(a.front[0]) : pname(a.hq); const extra = a.kind === 'jsw' && a.phase !== 'omen' ? ` · 형세 ${a.score >= 0 ? '정파' : '흑도맹'} 우세` : a.kind === 'demon' && a.lord ? ` · 맹주 ${a.lord === 'me' ? esc(S().name) : esc(fac(a.lord)?.who || '')}` : '';
     return `<div class="note" style="margin-bottom:6px;padding:7px 10px"><b style="font-weight:400">${K[a.kind].name}</b> <small class="hint">${esc(where)} · ${pn} · ${a.left}일 남음${extra}</small></div>`; }).join('') || '<p class="hint">큰 판은 아직 없다.</p>';
   const occ = Object.keys(g.occ).length ? `<div class="hint">마교가 차지한 곳: ${Object.keys(g.occ).map(m => pname(m) + (g.occ[m].until ? ` (${Math.max(0, g.occ[m].until - S().day)}일 뒤 물러감)` : '')).join(', ')}. 고을 광장의 향주를 쓰러뜨리면 되찾는다.</div>` : '';
   const me = mySide(), T = arc('tourney') || g.lastT;
@@ -508,4 +555,4 @@ function fx(id) {
 }
 // 시험용: 판을 바로 띄운다
 const debug = { start, next: k => { const a = arc(k); if (a) { a.left = 0; next(a); } }, tick: a => TICK[a.kind]?.(a), tension: (k, v) => { st().t[k] = v; } };
-G.saga = { fx, guard, ruined, talkCtx, st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug };
+G.saga = { fx, guard, ruined, talkCtx, st, daily, jobsFor, runJob, spawn, npcs, shut, marks, html, arc, mySide, debug, feuding, riftFacs };

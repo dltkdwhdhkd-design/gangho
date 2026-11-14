@@ -10,7 +10,7 @@ import { FOES } from './foes.js';
 import { FACS } from './free.js';
 
 const S = () => G.S, Fr = () => G.S.fr, MAXB = 2;
-const ENEMY = (a, b) => a.side !== b.side && (a.side === 'ma' || b.side === 'ma' || (a.side === 'jeong') !== (b.side === 'jeong'));
+const ENEMY = (a, b) => (a.side !== b.side && (a.side === 'ma' || b.side === 'ma' || (a.side === 'jeong') !== (b.side === 'jeong'))) || (a.side === 'jeong' && b.side === 'jeong' && !!G.saga?.feuding?.(a.fac, b.fac));  // 같은 정파라도 이권 다툼 중이면(js/saga.js 정파 내분) 칼을 뽑는다
 const alive = f => !Fr()?.fallen?.[f.id] && !Fr()?.dead?.[f.id];
 const myFac = () => Fr()?.fac, bounty = () => (Fr()?.infamy || 0) * 12;
 const VILL = ['흑풍 마삼', '독사 염구', '피바람 곽자', '쌍도 노칠', '야차 진오', '귀수 엽팔'];
@@ -27,7 +27,7 @@ function spawn(x, y) {
   const s = S(); if (!s?.fr || bands().length >= MAXB || Math.random() < .45) return null;
   const roll = Math.random(), want = roll < .5 ? 'jeong' : roll < .85 ? 'sa' : 'ma';
   const F = FACS.filter(f => f.align === want && alive(f)); if (!F.length) return null;
-  const f = pick(F), lv = Math.max(1, s.lv + (Math.random() < .3 ? 1 : 0)), n = lv < 6 ? 2 : 3, foes = G.jh.crew(f, lv, n);
+  const R = want === 'jeong' && G.saga?.riftFacs?.(), f = R && Math.random() < .6 ? FACS.find(x => x.id === pick(R)) || pick(F) : pick(F), lv = Math.max(1, s.lv + (Math.random() < .3 ? 1 : 0)), n = lv < 6 ? 2 : 3, foes = G.jh.crew(f, lv, n);
   const villain = want !== 'jeong' && Math.random() < .35, b = { band: 1, fac: f.id, side: want, lv, foes, x, y, hx: x, hy: y, dir: 0, walk: 0, t: 1, vx: 0, vy: 0, peace: true, ai, spr: FOES[foes[0]].spr };
   b.tag = villain ? `현상범 ${pick(VILL)}` : `${f.name} ${pick(want === 'jeong' ? ['제자들', '무사들', '일행'] : want === 'sa' ? ['패거리', '무리', '일당'] : ['교도들'])}`;
   if (villain) b.prize = 80 + lv * 25;

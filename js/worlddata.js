@@ -12,7 +12,7 @@ export const LOCS = [
   // 구파일방
   B('wudang', '무당파', [543, 390], 'dao', 4), B('jongnam', '종남파', [486, 369], 'dao', 3), B('emei', '아미파', [402, 458], 'temple', 3), B('gonryun', '곤륜파', [242, 356], 'peak', 4), B('gongdong', '공동파', [425, 345], 'dao', 3), B('jeomchang', '점창파', [358, 517], 'dao', 3), B('cheongseong', '청성파', [410, 415], 'dao', 3), B('gaebang', '개방 총타', [613, 265], 'slum', 3),
   // 오대세가
-  B('namgung', '남궁세가', [638, 411], 'manor', 4), B('moyong', '모용세가', [662, 236], 'manor', 4), B('jegal', '제갈세가', [551, 401], 'manor', 4), B('dang', '사천당가', [424, 432], 'manor', 3), B('paeng', '하북팽가', [584, 252], 'manor', 3),
+  B('namgung', '남궁세가', [607, 365], 'manor', 4, { road: 1 })  /* 안휘 합비: 장강 북쪽, 남경 강 건너 서쪽. 예전엔 장강 남쪽 소주 옆이었다 */, B('moyong', '모용세가', [662, 236], 'manor', 4), B('jegal', '제갈세가', [551, 401], 'manor', 4), B('dang', '사천당가', [424, 432], 'manor', 3), B('paeng', '하북팽가', [584, 252], 'manor', 3),
   // 사파와 마교
   B('janggang', '장강수로채', [524, 429], 'water', 3, { color: 'evil' }), B('haomun', '하오문', [654, 416], 'slum', 3, { color: 'evil' }), B('odok', '오독문', [400, 540], 'fort', 4, { color: 'evil' }), B('hyeoleui', '혈의방', [470, 509], 'fort', 4, { color: 'evil' }), B('cheonma', '천마신교', [180, 262], 'dark', 6, { color: 'evil' }),
   // 그 밖의 문파
