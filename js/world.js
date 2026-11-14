@@ -24,6 +24,29 @@ function readTerrain() {
   const c = document.createElement('canvas'); c.width = WW; c.height = WH; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, WW, WH).data;
   for (let i = 0, y = 0; y < WH; y++) for (let xx = 0; xx < WW; xx++, i++) { T[i] = Math.round(d[i * 4] / 16); B[y][xx] = Math.min(5, Math.round(d[i * 4 + 1] / 32)); }
 }
+// 땅 그림에 없던 새 고을(road 표시): 터를 평평하게 고르고, 성문에서 가장 가까운 큰길까지 길을 낸다.
+// 산은 크게 돌아가고, 강은 다리로 건너고, 다른 문파 터는 피해 간다
+const STEP = { [PLAIN]: 1, [GLADE]: 1, [STEPPE]: 1, [FOOT]: 2, [FOREST]: 1.4, [DESERT]: 1.6, [SNOWF]: 2, [MOUNT]: 40, [SNOWM]: 50, [RIVER]: 9, [SEA]: 400 };
+function carve() {
+  const box = l => { const tx = Math.round(l.px[0] * K), ty = Math.round(l.px[1] * K), [rx, ry] = SIZE[shape(l)]; return [tx, ty, tx - rx - 4, ty - ry - 5, tx + rx + 4, ty + 6]; };
+  const BX = LOCS.map(box), inBox = (x, y, skip) => BX.some((b, i) => i !== skip && x >= b[2] && x <= b[4] && y >= b[3] && y <= b[5]);
+  const N = WW * WH, D = new Float64Array(N), P = new Int32Array(N);
+  LOCS.forEach((l, li) => {
+    if (!l.road) return; const [tx, ty, X0, Y0, X1, Y1] = BX[li];
+    for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const i = y * WW + x, c = T[i]; if (c === MOUNT || c === SNOWM || c === SEA || c === RIVER || c === FOREST || c === FOOT) T[i] = c === SNOWM ? SNOWF : PLAIN; }
+    // 성문 앞에서 다익스트라
+    D.fill(Infinity); P.fill(-1); const H = [], push = (d, i) => { H.push([d, i]); let k = H.length - 1; while (k) { const p = (k - 1) >> 1; if (H[p][0] <= H[k][0]) break; [H[p], H[k]] = [H[k], H[p]]; k = p; } };
+    const pop = () => { const top = H[0], last = H.pop(); if (H.length) { H[0] = last; let k = 0; for (;;) { const a = 2 * k + 1, b = a + 1; let s = k; if (a < H.length && H[a][0] < H[s][0]) s = a; if (b < H.length && H[b][0] < H[s][0]) s = b; if (s === k) break; [H[s], H[k]] = [H[k], H[s]]; k = s; } } return top; };
+    const s0 = (ty + 4) * WW + tx; D[s0] = 0; push(0, s0); let goal = -1;
+    while (H.length) {
+      const [d, i] = pop(); if (d > D[i]) continue; const x = i % WW, y = (i - x) / WW, c = T[i];
+      if ((c === ROAD || c === BRIDGE || c === INN) && !(x >= X0 && x <= X1 && y >= Y0 && y <= Y1)) { goal = i; break; }
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < 1 || Y < 1 || X >= WW - 1 || Y >= WH - 1 || (Y < ty + 2 && X >= X0 && X <= X1 && Y >= Y0)) continue; const j = Y * WW + X, k = T[j], w = (k === ROAD || k === BRIDGE || k === INN ? .5 : STEP[k] || 1) + (inBox(X, Y, li) ? 60 : 0); if (d + w < D[j]) { D[j] = d + w; P[j] = i; push(d + w, j); } }
+    }
+    if (goal < 0) return console.warn('길을 못 냈다', l.id);
+    for (let i = goal; i >= 0; i = P[i]) { const x = i % WW, y = (i - x) / WW; for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) { const j = (y + dy) * WW + x + dx, k = T[j]; if (k === ROAD || k === BRIDGE || k === INN) continue; T[j] = k === RIVER || k === SEA ? BRIDGE : ROAD; } }
+  });
+}
 // 나무, 바위, 산을 심을 자리. 길과 문파 터 둘레는 비워 둔다
 let RES = null;
 const reserve = (x0, y0, x1, y1) => { for (let y = Math.max(0, y0); y <= Math.min(WH - 1, y1); y++) for (let x = Math.max(0, x0); x <= Math.min(WW - 1, x1); x++) RES[y * WW + x] = 1; };
@@ -77,7 +100,7 @@ function nature() {
 export function buildWorld() {
   if (ready) return; ready = true;
   m = makeMap('world', WW, WH, { name: '강호', bgm: 'road', biome: 'grass', arena: 'village', live: true });
-  readTerrain(); const g = m.g; RES = new Uint8Array(WW * WH); STOPS = [];
+  readTerrain(); carve(); const g = m.g; RES = new Uint8Array(WW * WH); STOPS = [];
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const c = T[y * WW + x]; g[y][x] = c === SEA || c === RIVER ? 2 : c === ROAD ? 1 : c === BRIDGE ? 4 : 0; if (c === INN) STOPS.push({ x, y }); }
   // 길가 두 칸은 비워 둔다
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const c = T[y * WW + x]; if (c === ROAD || c === BRIDGE) reserve(x - 2, y - 2, x + 2, y + 2); }
@@ -387,9 +410,12 @@ function tick(dt) {
   if (spawnT > 0) return; spawnT = 4 + Math.random() * 6;
   const a = Math.random() * 6.28, x = p.x + Math.cos(a) * 210, y = p.y + Math.sin(a) * 150; if (f.m.blocked(x, y, 14, 12)) return;
   if (S.flags.bow && f.animals.length < 3 && Math.random() < .5) { const k = pick(b === 'snow' ? ['rabbit', 'deer'] : ['rabbit', 'pheasant', 'deer']); f.animals.push({ kind: k, ...G.life.animals[k], x, y, vx: 0, vy: 0, t: 1, walk: 0 }); return; }
-  if (f.roam.filter(r => !r.band).length >= 3 && (G.wander?.bands().length ?? 2) >= 2 || !S.flags.world_open && S.mode !== 'free') return;
+  if (!S.flags.world_open && S.mode !== 'free') return;
+  const tv = G.travel?.spawn(x, y); if (tv) { f.roam.push(tv); return; }  // 볼일 보러 큰길을 오가는 길손(js/travel.js)
+  const hostile = f.roam.filter(r => !r.band && !r.trav).length;
+  if (hostile >= 3 && (G.wander?.bands().length ?? 2) >= 2) return;
   const wb = G.wander?.spawn(x, y); if (wb) { f.roam.push(wb); return; }  // 떠도는 문파·세가·사파·마교 무리(js/wander.js)
-  if (f.roam.filter(r => !r.band).length >= 3) return;
+  if (hostile >= 3) return;
   const sg = G.saga?.spawn(x, y); if (sg) { f.roam.push(sg); return; }  // 정사대전 순찰대, 마교도
   const hunted = G.jh.spawn(x, y); if (hunted) { f.roam.push(hunted); return; }
   const lv = Math.max(1, S.lv + (Math.random() < .3 ? 1 : 0)), onRoad = f.m.g[ty]?.[tx] === 1 || f.m.g[ty]?.[tx] === 4, kind = pick(wet ? ['pirate', 'pirate', 'bandit'] : onRoad ? ['bandit', 'rogue', 'bandit'] : ['bandit', 'rogue']), n = lv < 5 ? 1 : lv < 14 ? 2 : 3, foes = G.free.group(kind, lv, n), FO = G.free.foes;
