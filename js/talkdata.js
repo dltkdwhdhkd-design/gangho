@@ -409,7 +409,7 @@ export const SLAVER = { hawk: ['튼튼한 일꾼 있소!', '빚 대신 받은 �
   sold: '잘 부리시오. 도망가면 그건 손님 사정이오.',
   shut: '노예상이 자리를 비웠다. 단상 위에 끊어진 밧줄만 남아 있다.',
   guard: ['구경 끝났으면 가시오.', '손님 아니면 물러서시오.'] };
-// 이름 붙은 역할 → 사람 키. 대화 그림은 assets/art/<키>_n.webp, 새 화면 도트는 assets/hd2d/preview/n_<키>.webp. 없으면 예전 그림. 요청문은 docs/gemini-now.md
+// 이름 붙은 역할 → 사람 키. 대화 그림은 assets/art/<키>_n.webp, 새 화면 도트는 assets/hd2d/preview/n_<키>.webp. 없으면 예전 그림. 요청문은 docs/chatgpt-people.md
 export const ROLE = { '노예상': 'slaver', '노예상 부하': 'slaverguard', '물주': 'dealer', '도박장 주인': 'gboss', '덩치': 'bouncer', '아전': 'yamen', '순라군': 'guard', '숙수': 'cook', '주루 숙수': 'cook', '점소이': 'waiter',
   '전각지기': 'keeper', '사당지기': 'keeper', '이야기꾼': 'teller', '재주꾼': 'acrobat', '호객꾼': 'tout', '취객': 'drunk', '떡장수': 'ricecake', '구경꾼': 'onlooker', '할멈': 'granny', '거지': 'beggar',
   '포목전 주인': 'shop', '잡화 상인': 'shop', '쌀가게 주인': 'shop', '나물 파는 할머니': 'granny', '동네 할머니': 'granny', '무관 문하생': 'student', '목검 든 청년': 'student', '늙은 표사': 'escort', '은퇴한 표국 무사': 'escort',

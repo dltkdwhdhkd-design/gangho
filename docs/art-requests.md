@@ -1,6 +1,6 @@
 # 강호행 이미지 요청문
 
-> 지금 받을 그림은 사람(일러스트·도트)은 `docs/gemini-now.md`, 건물·땅·소품은 `docs/chatgpt-now.md`에 모아 둔다. 이 문서는 예전 기록이다.
+> 지금 받을 그림은 사람(일러스트·도트)은 `docs/chatgpt-people.md`, 건물·땅·소품은 `docs/chatgpt-now.md`에 모아 둔다. 이 문서는 예전 기록이다.
 
 ChatGPT에 붙여 넣는 요청문입니다. 코드 칸 오른쪽 위의 복사 단추를 쓰면 됩니다.
 

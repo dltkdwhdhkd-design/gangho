@@ -1,6 +1,6 @@
 # 강호행 그림 요청서: 인물
 
-> 지금 받을 그림은 사람(일러스트·도트)은 `docs/gemini-now.md`, 건물·땅·소품은 `docs/chatgpt-now.md`에 모아 둔다. 이 문서는 예전 기록이다.
+> 지금 받을 그림은 사람(일러스트·도트)은 `docs/chatgpt-people.md`, 건물·땅·소품은 `docs/chatgpt-now.md`에 모아 둔다. 이 문서는 예전 기록이다.
 
 이 문서를 통째로 ChatGPT에 주면 돼. 아래는 ChatGPT에게 하는 말이야.
 
