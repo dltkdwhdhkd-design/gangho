@@ -16,13 +16,13 @@ export const LOCS = [
   // 사파와 마교
   B('janggang', '장강수로채', [524, 429], 'water', 3, { color: 'evil' }), B('haomun', '하오문', [654, 416], 'slum', 3, { color: 'evil' }), B('odok', '오독문', [400, 540], 'fort', 4, { color: 'evil' }), B('hyeoleui', '혈의방', [470, 509], 'fort', 4, { color: 'evil' }), B('cheonma', '천마신교', [180, 262], 'dark', 6, { color: 'evil' }),
   // 그 밖의 문파
-  B('haenam', '해남파', [388, 634], 'water', 3, { boat: 'c_guangzhou' }), B('cheonsan', '천산파', [178, 190], 'peak', 5), B('jeonjin', '전진교', [478, 408], 'dao', 3), B('mosan', '모산파', [650, 385], 'dao', 2), B('jangbaek', '장백파', [711, 171], 'peak', 3), B('pota', '보타문', [714, 414], 'water', 3, { boat: 'c_suzhou' }),
+  B('haenam', '해남파', [388, 634], 'water', 3, { boat: 'c_guangzhou' }), B('cheonsan', '천산파', [178, 190], 'peak', 5), B('jeonjin', '전진교', [450, 362], 'dao', 3, { road: 1 })  /* 전진교는 종남산 북쪽 기슭(장안 서남). 예전엔 강 건너 남쪽에 있었다 */, B('mosan', '모산파', [650, 385], 'dao', 2), B('jangbaek', '장백파', [711, 171], 'peak', 3), B('pota', '보타문', [714, 414], 'water', 3, { boat: 'c_suzhou' }),
   B('hwangbo', '황보세가', [624, 291], 'manor', 3), B('ak', '산동악가', [612, 326], 'manor', 3), B('yang', '신창양가', [546, 313], 'manor', 3), B('eon', '진주언가', [578, 310], 'manor', 2), B('jin', '광동진가', [576, 535], 'manor', 3),
   B('bukhae', '북해빙궁', [400, 40], 'ice', 6, { color: 'out' }), B('noeum', '뇌음사', [32, 368], 'west', 6, { color: 'out' }), B('podalra', '포달랍궁', [207, 426], 'west', 5, { color: 'out' }),
   // 도시
   C('yeongyeong', '연경', [598, 232], 3), C('nakyang', '낙양', [526, 332], 3), C('changan', '장안', [480, 352], 3), C('seongdo', '성도', [402, 432], 3), C('guangzhou', '광주', [548, 556], 4, { boat: 'b_haenam' }), C('suzhou', '소주', [672, 402], 3, { boat: 'b_pota' }),
-  // 새로 낸 큰 고을. 땅 그림엔 없어서 world.js carve()가 터를 고르고 큰길까지 길을 낸다
-  C('hangzhou', '항주', [686, 424], 3, { road: 1 }), C('nanjing', '남경', [628, 352], 3, { road: 1 }), C('kaifeng', '개봉', [562, 338], 3, { road: 1 }), C('wuchang', '무창', [556, 446], 3, { road: 1 }),
+  // 새로 낸 큰 고을. 땅 그림엔 없어서 world.js carve()가 터를 고르고 큰길까지 길을 낸다(road 표시). 실제 지리에 맞춰: 남경은 장강 남쪽 기슭, 무창은 장강과 한수가 만나는 다리 남쪽
+  C('hangzhou', '항주', [686, 424], 3, { road: 1 }), C('nanjing', '남경', [629, 377], 3, { road: 1 }), C('kaifeng', '개봉', [562, 338], 3, { road: 1 }), C('wuchang', '무창', [549, 433], 3, { road: 1 }),
   C('taiyuan', '태원', [546, 272], 4, { road: 1 }), C('fuzhou', '복주', [620, 500], 4, { road: 1 }), C('dali', '대리', [330, 540], 5, { road: 1 }),
 ];
 export const ROADS = [

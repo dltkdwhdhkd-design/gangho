@@ -33,7 +33,8 @@ function carve() {
   const N = WW * WH, D = new Float64Array(N), P = new Int32Array(N);
   LOCS.forEach((l, li) => {
     if (!l.road) return; const [tx, ty, X0, Y0, X1, Y1] = BX[li];
-    for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const i = y * WW + x, c = T[i]; if (c === MOUNT || c === SNOWM || c === SEA || c === RIVER || c === FOREST || c === FOOT) T[i] = c === SNOWM ? SNOWF : PLAIN; }
+    const [rx, ry] = SIZE[shape(l)], inner = (x, y) => x >= tx - rx - 1 && x <= tx + rx + 1 && y >= ty - ry - 1 && y <= ty + 3;  // 물은 담장 안만 메운다(강가 고을 둘레의 강은 그대로)
+    for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const i = y * WW + x, c = T[i]; if (c === MOUNT || c === SNOWM || c === FOREST || c === FOOT || ((c === SEA || c === RIVER) && inner(x, y))) T[i] = c === SNOWM ? SNOWF : PLAIN; }
     // 성문 앞에서 다익스트라
     D.fill(Infinity); P.fill(-1); const H = [], push = (d, i) => { H.push([d, i]); let k = H.length - 1; while (k) { const p = (k - 1) >> 1; if (H[p][0] <= H[k][0]) break; [H[p], H[k]] = [H[k], H[p]]; k = p; } };
     const pop = () => { const top = H[0], last = H.pop(); if (H.length) { H[0] = last; let k = 0; for (;;) { const a = 2 * k + 1, b = a + 1; let s = k; if (a < H.length && H[a][0] < H[s][0]) s = a; if (b < H.length && H[b][0] < H[s][0]) s = b; if (s === k) break; [H[s], H[k]] = [H[k], H[s]]; k = s; } } return top; };
@@ -44,7 +45,7 @@ function carve() {
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < 1 || Y < 1 || X >= WW - 1 || Y >= WH - 1 || (Y < ty + 2 && X >= X0 && X <= X1 && Y >= Y0)) continue; const j = Y * WW + X, k = T[j], w = (k === ROAD || k === BRIDGE || k === INN ? .5 : STEP[k] || 1) + (inBox(X, Y, li) ? 60 : 0); if (d + w < D[j]) { D[j] = d + w; P[j] = i; push(d + w, j); } }
     }
     if (goal < 0) return console.warn('길을 못 냈다', l.id);
-    for (let i = goal; i >= 0; i = P[i]) { const x = i % WW, y = (i - x) / WW; for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) { const j = (y + dy) * WW + x + dx, k = T[j]; if (k === ROAD || k === BRIDGE || k === INN) continue; T[j] = k === RIVER || k === SEA ? BRIDGE : ROAD; } }
+    for (let i = goal; i >= 0; i = P[i]) { const x = i % WW, y = (i - x) / WW, wet = T[i] === RIVER || T[i] === SEA; for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) { const j = (y + dy) * WW + x + dx, k = T[j], kw = k === RIVER || k === SEA; if (k === ROAD || k === BRIDGE || k === INN || (kw && !wet)) continue; T[j] = kw ? BRIDGE : ROAD; } }  // 강물 위를 지날 때만 다리를 놓는다
   });
 }
 // 나무, 바위, 산을 심을 자리. 길과 문파 터 둘레는 비워 둔다
