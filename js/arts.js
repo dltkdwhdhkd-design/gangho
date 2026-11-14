@@ -34,10 +34,10 @@ const ARCH = {
   ult_fan: () => ({ mp: 45, cd: 28, dur: .8, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .3, sfx: 'boom2', proj: { img: 'p_kunai', speed: 260, mul: 1.5, life: .8, n: 9, spread: 11, r: 5, stun: .3 }, shake: 4 }] }),
   ult_pull: () => ({ mp: 45, cd: 28, dur: .95, o: { ult: true }, steps: [{ t: .02, ...ULT, sfx: 'magic2', pull: { r: 110, f: 170 } }, { t: .42, sfx: 'boom', hit: ring(58, 5, { kb: 70, stun: .9, ub: true }), heal: { hp: .12, mp: .2 }, fx: { n: 'aurap', s: 2.6, at: 'self' }, shake: 5 }] }),
 };
-// 세력의 특색(ART_FX)을 초식에 입힌다: 독(dot), 한기·물살(slow), 흡기(drain), 금강(armor), 패도(kb), 점혈·진법(stun), 쾌검(fast)
+// 세력의 특색(ART_FX)을 초식에 입힌다: 뇌전(shock: 벼락이 가까운 적 하나로 튐), 독(dot), 한기·물살(slow), 흡기(drain), 금강(armor), 패도(kb), 점혈·진법(stun), 쾌검(fast)
 const FXK = {
   dot: o => { o.dot = { dps: .28, t: 3 } }, slow: o => { o.slow = { f: .55, dur: 1.6 } }, drain: o => { o.drain = .12 },
-  kb: o => { if (o.kb !== undefined) o.kb = Math.round(o.kb * 1.6); o.stun = (o.stun || .2) + .08 }, stun: o => { o.stun = (o.stun || .2) + .25 },
+  kb: o => { if (o.kb !== undefined) o.kb = Math.round(o.kb * 1.6); o.stun = (o.stun || .2) + .08 }, stun: o => { o.stun = (o.stun || .2) + .25 }, shock: o => { o.shock = 1; o.stun = (o.stun || .2) + .15 },
 };
 function flavor(a, kind) {
   const steps = a.steps.map(q => { const r = { ...q }; for (const k of ['hit', 'proj', 'zone']) if (q[k]) { r[k] = { ...q[k] }; FXK[kind]?.(r[k]); } return r; });

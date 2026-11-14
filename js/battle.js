@@ -238,7 +238,7 @@ export class Battle {
       let x = a.x, y = a.y;
       if (z.at === 'ring') { const an = i / n * 6.283; x = clamp(a.x + Math.cos(an) * z.dist, 10, this.W - 10); y = clamp(a.y + Math.sin(an) * z.dist * .85, 20, this.H - 10); }
       if (z.at === 'target' && T) { x = clamp(T.x + (i ? rnd(-z.spread, z.spread) : 0), 10, this.W - 10); y = clamp(T.y + (i ? rnd(-z.spread, z.spread) : 0), 20, this.H - 10); }
-      this.zones.push({ x, y, r: z.r, left: z.delay + (z.at === 'ring' ? 0 : i * .08), tot: z.delay + (z.at === 'ring' ? 0 : i * .08), h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub, dot: z.dot, slow: z.slow, drain: z.drain }, owner: a, team: a.team, sk, fx: z.fx, fxS: z.at === 'ring' ? 1 : 0, sfx: z.sfx, player: z.player && a.team === 0 });
+      this.zones.push({ x, y, r: z.r, left: z.delay + (z.at === 'ring' ? 0 : i * .08), tot: z.delay + (z.at === 'ring' ? 0 : i * .08), h: { mul: z.mul, kb: z.kb ?? 40, stun: z.stun ?? .4, ub: z.ub, dot: z.dot, slow: z.slow, drain: z.drain, shock: z.shock }, owner: a, team: a.team, sk, fx: z.fx, fxS: z.at === 'ring' ? 1 : 0, sfx: z.sfx, player: z.player && a.team === 0 });
     }
   }
   // 피해 처리
@@ -277,6 +277,7 @@ export class Battle {
     if (h.dot) o.dots.push({ dps: src.atk * h.dot.dps, t: h.dot.t, n: 0 });
     if (h.slow) { o.slowT = Math.max(o.slowT || 0, h.slow.dur); o.slowF = h.slow.f; }  // 한기·물살: 느려진다
     if (h.drain) src.hp = Math.min(src.maxHp, src.hp + dmg * h.drain);  // 흡기: 준 피해만큼 조금 돌아온다
+    if (h.shock && !h.chain) { this.addFx('thunder', o.x, o.y - 12, 1.2); const n2 = this.foes(src).filter(q => q !== o && hyp(q.x - o.x, q.y - o.y) < 80).sort((a, b) => hyp(a.x - o.x, a.y - o.y) - hyp(b.x - o.x, b.y - o.y))[0]; if (n2) { this.addFx('thunder', n2.x, n2.y - 12, 1); this.applyHit(src, n2, { mul: (h.mul || 1) * .4, kb: 20, stun: .35, ub: true, chain: 1 }, sk); } }  // 뇌전: 벼락이 떨어지고 가까운 적 하나로 튄다
     // 경직과 밀림
     let stagger = true;
     if (o.armor > 0 || o.buffs.diamond > 0) stagger = false;
@@ -370,7 +371,7 @@ export class Battle {
         if (o.team === p.team || o.dead || o.iframe > 0 || p.seen.has(o)) continue;
         if (hyp(o.x - p.x, o.y - 5 - p.y) < o.r + p.r) {
           p.seen.add(o);
-          this.applyHit(p.owner, o, { mul: p.mul, kb: p.kb ?? 22, stun: p.stun, ub: p.ub, dot: p.dot, slow: p.slow, drain: p.drain }, p.sk, p);
+          this.applyHit(p.owner, o, { mul: p.mul, kb: p.kb ?? 22, stun: p.stun, ub: p.ub, dot: p.dot, slow: p.slow, drain: p.drain, shock: p.shock }, p.sk, p);
           if (!p.pierce) p.age = 99;
           break;
         }
