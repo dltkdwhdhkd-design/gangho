@@ -82,6 +82,26 @@ Building wall parts sheet in exactly the same layout, scale, pixel size and pixe
 Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Changbai mountain sect hall (northeast): heavy log and stone walls, dark brown beams with tiger motifs, thick wooden door, snow on the plinth edge. Column 2, Putuo island nunnery hall: pale cream walls, soft blue and gold beams with lotus and wave motifs, round moon-gate door. Column 3, a two-storey city pleasure house (gilou) front: lacquered red pillars, carved latticework painted gold, rows of red paper lanterns along the beam, open entrance with a red curtain, very ornate and colourful.
 ```
 
+### HD1: 담장 셋 (회벽 기와담, 돌담, 고을 성벽)
+
+지금 문파 담장과 성벽은 옛 16점 타일을 늘려 그려서 새 전각 벽 옆에서 뭉개져 보인다. 이걸 바꿀 그림. 받은 문파 벽(HS1~HS9)과 같은 도트 굵기.
+
+```
+Wall segment sheet in exactly the same pixel size and pixel-art style as the temple wall sheets we made before (Ming dynasty wuxia, front orthographic view, no perspective): 3 columns x 2 rows on a solid flat pure blue #0000FF background, nothing else. Column 1: whitewashed courtyard wall with a small grey tiled coping roof on top and a grey stone base. Column 2: rough fieldstone wall with a flat stone cap. Column 3: tall grey brick town rampart with crenellated battlements on top and a stone base. Top row: one straight wall segment each, about 3 times wider than tall, left and right edges cut straight so many copies can be placed side by side seamlessly with no visible joint. Bottom row: the end/corner post of the same wall (a short square pillar a little taller than the wall, with the same cap). No doors, no text, no shadow on the background, crisp pixels, no anti-aliasing.
+```
+
+### HD2: 울타리 셋 (나무 울짱, 대나무 울타리, 싸리 바자)
+
+```
+Fence segment sheet in the same pixel size and pixel-art style as the wall sheets: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Column 1: wooden stake palisade, pointed log tops tied with rope. Column 2: green bamboo fence, vertical poles lashed to two horizontal rails. Column 3: low woven brushwood (wattle) village fence. Top row: one straight segment each, about 3 times wider than tall, left and right edges cut straight so copies tile side by side seamlessly. Bottom row: the end post of the same fence. Front orthographic view, no ground, no text, crisp pixels, no anti-aliasing.
+```
+
+### HD3: 대문 셋 (문파 산문 패방, 고을 성문, 세가 대문)
+
+```
+Gate sheet in the same pixel size and pixel-art style as the wall sheets: 3 columns x 1 row on a solid flat pure blue #0000FF background. Column 1: a sect mountain gate paifang archway, three bays, red pillars, green-and-gold bracket sets, dark tiled roofs, an empty plaque board (no writing). Column 2: a town gate: thick grey brick gatehouse with an arched tunnel, iron-studded wooden doors open, a small tiled tower on top. Column 3: a noble clan front gate: roofed gatehouse with red lacquered double doors, brass lion knockers, stone drum blocks on both sides. Front orthographic view, each gate standing on its own stone base, no text on plaques, crisp pixels, no anti-aliasing.
+```
+
 ### HR3: 문파 지붕 무늬 여섯
 
 참고 그림: ref-walls.png
