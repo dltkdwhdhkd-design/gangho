@@ -149,7 +149,7 @@ export class Field {
     let best = null, bd = 19;
     for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
-    for (const r of this.roam) { if (r.gone || !r.peace) continue; const d = far(r.x - x, r.y - 4 - y); if (d < bd) { bd = d; best = { id: 'band', x: r.x, y: r.y, hint: `${r.tag} · 다가간다`, talk: () => G.wander.talk(r) }; } }
+    for (const r of this.roam) { if (r.gone || !r.peace) continue; const d = far(r.x - x, r.y - 4 - y); if (d < bd) { bd = d; best = { id: 'band', x: r.x, y: r.y, hint: `${r.tag} · ${r.trav ? '말 걸기' : '다가간다'}`, talk: () => r.trav ? G.travel.talk(r) : G.wander.talk(r) }; } }
     if (best) return best;
     if (G.party && !m.isoRoom) G.party.members().forEach((id, i) => { const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q || this.npcs.some(n => n.id === id)) return; const d = far(q.x - x, q.y - 4 - y); if (d < bd) { bd = d; best = { id: 'pty_' + id, x: q.x, y: q.y, hint: `${G.party.name(id)} · 말 걸기`, talk: () => G.party.talkTo(id) }; } });  // 따라다니는 동료에게도 말을 건다
     if (best) return best;
@@ -365,6 +365,7 @@ export class Field {
     if (m.labels) { c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const [x, y] = P(l.x * TS, l.y * TS); if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); } }
     this.drawExits(c, P);
+    if (m.live) G.wander?.over(c, this.roam, this.t, P);  // 무리와 길손 이름표
     this.drawBubbles(c, P, 21);  // 새 화면은 사람이 크게 보여서 말풍선을 머리에 더 붙인다
     tickMini(this);
   }

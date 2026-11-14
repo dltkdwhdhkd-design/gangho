@@ -58,10 +58,10 @@ function ai(b, dt, f, d) {
     if (b.peace) { b.peace = false; b.intro = b.side === 'jeong' ? `${b.tag}: ${Fr().infamy >= 25 ? `현상금 은자 ${bounty()}냥짜리가 여기 있었군! 잡아라!` : '원수를 만났다! 놓치지 마라!'}` : b.side === 'ma' ? `${b.tag}: 천마께서 강림하신다! 무릎 꿇어라!` : `${b.tag}: 저놈이다! 형님들 원수를 갚자!`; Sound.sfx('cancel'); b.win = () => { if (b.prize) { S().silver += b.prize; S().fr.fame += 3; toast(`현상범을 잡았다. 상금 은자 ${b.prize}냥`, 3); } }; }
     const s = 48; b.vx = (f.p.x - b.x) / d * s; b.vy = (f.p.y - b.y) / d * s; return;
   }
-  // 원수 무리를 보면 붙는다
-  for (const o of bands()) {
-    if (o === b || o.fight || !ENEMY(b, o)) continue; const e = Math.hypot(o.x - b.x, o.y - b.y);
-    if (e < 26) { const t = 7 + Math.random() * 4; b.fight = { with: o, t, lead: true }; o.fight = { with: b, t, lead: false }; if (d < 260) toast(`${josa(b.tag, '와/과')} ${josa(o.tag, '이/가')} 맞붙었다`, 2.6); return; }
+  // 원수 무리를 보면 붙는다. 현상범과 마교는 지나가는 길손(js/travel.js)도 덮친다
+  for (const o of [...bands(), ...(b.side === 'ma' || b.prize ? G.travel?.list() || [] : [])]) {
+    if (o === b || o.fight || (!o.trav && !ENEMY(b, o))) continue; const e = Math.hypot(o.x - b.x, o.y - b.y);
+    if (e < 26) { const t = 7 + Math.random() * 4; b.fight = { with: o, t, lead: true }; o.fight = { with: b, t, lead: false }; if (d < 260) toast(o.trav ? `${josa(b.tag, '이/가')} ${josa(o.tag.split(' · ')[0], '을/를')} 덮쳤다!` : `${josa(b.tag, '와/과')} ${josa(o.tag, '이/가')} 맞붙었다`, 2.6); return; }
     if (e < 170) { b.vx = (o.x - b.x) / e * 34; b.vy = (o.y - b.y) / e * 34; return; }
   }
   // 그냥 지나간다
@@ -78,7 +78,9 @@ function follow(b, dt) {
 // 싸움이 끝나면 한쪽이 쓰러진다(사람 수와 단계로 기운다)
 function settle(a, b) {
   const pa = a.foes.length * (a.side === 'ma' ? 1.3 : 1) + Math.random() * 2, pb = b.foes.length * (b.side === 'ma' ? 1.3 : 1) + Math.random() * 2, [w, l] = pa >= pb ? [a, b] : [b, a];
-  l.gone = true; w.fight = null; a.fight = b.fight = null; w.foes = w.foes.slice(0, Math.max(1, w.foes.length - 1)); w.crew = w.crew.slice(0, w.foes.length - 1);
+  l.gone = true; w.fight = null; a.fight = b.fight = null; w.foes = w.foes.slice(0, Math.max(1, w.foes.length - 1)); if (w.crew) w.crew = w.crew.slice(0, w.foes.length - 1);
+  if (l.trav) { G.travel.robbed(l, w.tag); if (Math.hypot(G.field.p.x - l.x, G.field.p.y - l.y) < 260) toast(`${josa(l.tag.split(' · ')[0], '이/가')} 털렸다`, 2.4); return; }
+  if (w.trav) { G.jh.news(`${josa(w.tag.split(' · ')[0], '이/가')} ${josa(l.tag, '을/를')} 물리쳤다.`); return; }
   G.jh.news(`${josa(w.tag, '이/가')} 강호 길에서 ${josa(l.tag, '을/를')} 쓰러뜨렸다.`);
   if (Math.hypot(G.field.p.x - l.x, G.field.p.y - l.y) < 260) toast(`${josa(w.tag, '이/가')} 이겼다`, 2.4);
 }
@@ -111,21 +113,26 @@ async function finish(b, f) {
 }
 // 싸움판에 끼어든다: 한쪽 편을 든다
 async function join(a, b) {
-  const c = await choice(`${josa(a.tag, '와/과')} ${josa(b.tag, '이/가')} 칼을 맞대고 있다.`, [`${a.tag} 편을 든다`, `${b.tag} 편을 든다`, '구경만 한다']); if (c === 2) return;
+  const N = q => q.trav ? q.tag.split(' · ')[0] : q.tag;
+  const c = await choice(b.trav ? `${josa(a.tag, '이/가')} ${josa(N(b), '을/를')} 덮쳤다.` : `${josa(a.tag, '와/과')} ${josa(b.tag, '이/가')} 칼을 맞대고 있다.`, b.trav ? [`${josa(N(b), '을/를')} 구한다`, `${a.tag} 편에 붙어 같이 턴다`, '구경만 한다'] : [`${a.tag} 편을 든다`, `${b.tag} 편을 든다`, '구경만 한다']); if (c === 2) return;
+  if (b.trav) { const [me, foe] = c === 0 ? [b, a] : [a, b]; a.fight = b.fight = null; const won = await ctx.duel({ foes: foe.foes, allies: me.foes, arena: G.field.m.arena, bgm: 'fight', noIntro: true, optional: true }); if (!won) { await narr('밀려나고 말았다.'); foe.cool = 4; return; }
+    if (me.trav) { await G.travel.saved(me); await finish(foe, FACS.find(x => x.id === foe.fac)); } else { foe.gone = true; G.travel.robbed(foe); await narr(`${josa(N(foe), '이/가')} 가진 것을 다 털렸다. 은자 ${foe.purse}냥이 손에 들어왔다.`); } return; }
   const [me, foe] = c === 0 ? [a, b] : [b, a]; a.fight = b.fight = null;
   const won = await ctx.duel({ foes: foe.foes, allies: me.foes, arena: G.field.m.arena, bgm: 'fight', noIntro: true, optional: true });
   if (!won) { await narr('둘 다 쓰러뜨리지 못하고 물러났다.'); foe.cool = 4; return; }
-  G.jh.addRep(me.fac, 8); G.jh.addRep(foe.fac, -10); await say(null, `${me.tag}: 고맙소! 이 은혜는 사문에 알리겠소.`);
+  G.jh.addRep(me.fac, 8); G.jh.addRep(foe.fac, -10);
+  await say(null, `${me.tag}: 고맙소! 이 은혜는 사문에 알리겠소.`);
   await finish(foe, FACS.find(x => x.id === foe.fac));
 }
-// ── 그리기: 이름표와 싸움 칼빛 ──
-function over(c, roam, t) {
-  c.save(); c.font = '7px sans-serif'; c.textAlign = 'center';
+// ── 그리기: 이름표와 싸움 칼빛. 무리와 길손(js/travel.js) 모두. P를 주면 새 화면(HD-2D) 위 화면 좌표로 그린다 ──
+function over(c, roam, t, P) {
+  const k = P ? 2 : 1; c.save(); c.font = `${7 * k}px sans-serif`; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  const at = (x, y, h) => P ? P(x, y, h * .7) : [x, y - h * .62];
   for (const b of roam) {
-    if (!b.band || b.gone) continue; const col = b.side === 'jeong' ? '#bfe3ff' : b.side === 'sa' ? '#ffcf9a' : '#ff8a8a';
-    const label = b.prize ? `${b.tag} · 상금 ${b.prize}냥` : b.tag; c.fillStyle = 'rgba(0,0,0,.55)'; const w = c.measureText(label).width + 6; c.fillRect(Math.round(b.x - w / 2), Math.round(b.y - 34), w, 9); c.fillStyle = b.peace ? col : '#ff6a5a'; c.fillText(label, Math.round(b.x), Math.round(b.y - 27));
-    if (b.fight && b.fight.lead && b.fight.with) { const o = b.fight.with, mx = (b.x + o.x) / 2, my = (b.y + o.y) / 2 - 8; if (Math.sin(t * 13) > .3) { c.strokeStyle = '#fff6c8'; c.lineWidth = 1; c.beginPath(); const a = t * 9; c.moveTo(mx - Math.cos(a) * 6, my - Math.sin(a) * 6); c.lineTo(mx + Math.cos(a) * 6, my + Math.sin(a) * 6); c.stroke(); } }
+    if ((!b.band && !b.trav) || b.gone) continue; const col = b.trav ? (b.escort ? '#b8ffb0' : '#f2ead2') : b.side === 'jeong' ? '#bfe3ff' : b.side === 'sa' ? '#ffcf9a' : '#ff8a8a';
+    const label = b.prize ? `${b.tag} · 상금 ${b.prize}냥` : b.escort ? `${b.tag} · 호위 중` : b.tag, [x, y] = at(b.x, b.y, 30); c.fillStyle = 'rgba(0,0,0,.55)'; const w = c.measureText(label).width + 6 * k; c.fillRect(Math.round(x - w / 2), Math.round(y - 7 * k), w, 9 * k); c.fillStyle = b.peace ? col : '#ff6a5a'; c.fillText(label, Math.round(x), Math.round(y));
+    if (b.fight && b.fight.lead && b.fight.with) { const o = b.fight.with, [mx, my] = at((b.x + o.x) / 2, (b.y + o.y) / 2, 8); if (Math.sin(t * 13) > .3) { c.strokeStyle = '#fff6c8'; c.lineWidth = k; c.beginPath(); const a = t * 9; c.moveTo(mx - Math.cos(a) * 6 * k, my - Math.sin(a) * 6 * k); c.lineTo(mx + Math.cos(a) * 6 * k, my + Math.sin(a) * 6 * k); c.stroke(); } }
   }
   c.restore();
 }
-G.wander = { spawn, talk, follow, over, bands, hunts };
+G.wander = { spawn, talk, follow, over, bands, hunts, join };
