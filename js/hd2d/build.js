@@ -66,21 +66,27 @@ export const CROP = {
 // HW2(법당 w4, 문파 회관 w5, 부잣집 w6)는 그림마다 문과 창 자리가 달라 따로 적는다(도트, 위가 0)
 export const CROPS = {
   // hs 시작
+  hs_ak: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 61], win: ['front', 11, 25, 28, 50], plaster: ['side', 11, 50, 21, 69], stone: ['side', 2, 75, 74, 86], post: ['side', 2, 38, 9, 71]},
   hs_cheongseong: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
   hs_dang: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 61], win: ['front', 11, 25, 28, 50], plaster: ['side', 11, 50, 21, 69], stone: ['side', 2, 75, 74, 86], post: ['side', 2, 38, 9, 71]},
   hs_emei: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 60], win: ['front', 11, 24, 28, 50], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
+  hs_eon: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 62], win: ['front', 11, 25, 28, 51], plaster: ['side', 10, 49, 20, 68], stone: ['side', 1, 74, 71, 85], post: ['side', 1, 37, 9, 70]},
   hs_gaebang: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
   hs_gongdong: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
   hs_gonryun: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
+  hs_haenam: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 62], win: ['front', 11, 25, 28, 51], plaster: ['side', 11, 50, 21, 69], stone: ['side', 2, 75, 74, 86], post: ['side', 2, 38, 9, 71]},
+  hs_hwangbo: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 61], win: ['front', 11, 25, 28, 50], plaster: ['side', 10, 49, 21, 68], stone: ['side', 1, 74, 73, 85], post: ['side', 1, 37, 9, 70]},
   hs_hwasan: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
   hs_jegal: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 61], win: ['front', 11, 25, 28, 50], plaster: ['side', 10, 49, 21, 68], stone: ['side', 1, 74, 73, 85], post: ['side', 1, 37, 9, 70]},
   hs_jeomchang: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 59], win: ['front', 11, 24, 28, 49], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
+  hs_jin: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 62], win: ['front', 11, 25, 28, 51], plaster: ['side', 11, 50, 21, 69], stone: ['side', 2, 75, 74, 86], post: ['side', 2, 38, 9, 71]},
   hs_jongnam: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
   hs_moyong: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 59], win: ['front', 11, 24, 28, 49], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
   hs_namgung: {beam: ['front', 8, 1, 87, 11], door: ['front', 34, 17, 61, 58], win: ['front', 11, 23, 28, 48], plaster: ['side', 11, 50, 21, 69], stone: ['side', 2, 75, 74, 86], post: ['side', 2, 38, 9, 71]},
   hs_paeng: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 61], win: ['front', 11, 25, 28, 50], plaster: ['side', 11, 50, 21, 69], stone: ['side', 2, 75, 74, 86], post: ['side', 2, 38, 9, 71]},
   hs_shaolin: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
   hs_wudang: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 60], win: ['front', 11, 24, 28, 50], plaster: ['side', 11, 52, 22, 71], stone: ['side', 2, 77, 75, 89], post: ['side', 2, 39, 9, 73]},
+  hs_yang: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 61], win: ['front', 11, 25, 28, 50], plaster: ['side', 11, 50, 21, 69], stone: ['side', 2, 75, 74, 86], post: ['side', 2, 38, 9, 71]},
   // hs 끝
   w4: { beam: ['front', 10, 6, 85, 15], plaster: ['side', 50, 36, 60, 70], stone: ['side', 0, 75, 72, 86], post: ['side', 2, 40, 10, 70], door: ['front', 14, 17, 81, 57], win: ['front', 15, 18, 26, 40] },
   w5: { beam: ['front', 2, 5, 92, 14], plaster: ['side', 10, 36, 24, 70], stone: ['side', 0, 74, 73, 86], post: ['side', 1, 30, 6, 74], door: ['front', 31, 17, 58, 60], win: ['front', 8, 21, 28, 47] },
