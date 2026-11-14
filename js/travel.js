@@ -3,7 +3,8 @@
 // - 목적지(고을·문파)를 하나 정해 큰길을 따라 걷는다. 다 오면 성문으로 들어가 사라진다
 // - 말을 걸면 어디 가는지, 길에서 들은 소문을 말하고, 갈래마다 할 수 있는 일이 다르다(물건, 호위, 시주, 치료…)
 // - 털 수도 있다. 악명이 붙는다. 현상범·마교 무리는 지나가는 길손을 덮친다(js/wander.js). 끼어들어 구할 수 있다
-import { G, TS, Sound, toast, josa, pick } from './core.js';
+import { G, TS, Sound, toast, josa, pick, ART } from './core.js';
+import { WHO } from './dialog.js';
 import { say, narr, choice, ctx } from './ctx.js';
 import { LOCS } from './worlddata.js';
 import { give } from './state.js';
@@ -27,7 +28,7 @@ const KINDS = {
   scholar: { tag: '서생', spr: ['Villager'], role: 'scholar', sp: 16, to: l => ['c_nanjing', 'c_yeongyeong', 'c_kaifeng', 'c_hangzhou', 'c_nakyang'].includes(l.map),
     why: d => `과거 보러 ${d}에 가는 길입니다. 세 번째입니다. 이번엔 붙어야지요.`,
     lines: ['길에서도 책을 놓으면 안 됩니다. 아, 돌부리!', '무공 하시는 분들은 시험이 없어서 좋겠습니다.', '붓 한 자루로 천하를 다스린다지요. 칼 한 자루로도 그렇습니까?'] },
-  hopeful: { tag: '입문 지망생', spr: ['Boy', 'Child'], role: 'kid', sp: 20, to: l => l.kind === 'sect' && l.color !== 'evil' && l.color !== 'out',
+  hopeful: { tag: '입문 지망생', spr: ['Boy', 'Child'], role: 'hopeful', sp: 20, to: l => l.kind === 'sect' && l.color !== 'evil' && l.color !== 'out',
     why: d => `${d}에 제자로 들어가러 가요! 받아 줄지는 모르지만요.`,
     lines: ['저도 크면 대협이 될 거예요!', '산문 앞에서 사흘 꿇어앉으면 받아 준대요. 진짜예요?', '아저씨(언니)도 문파 사람이에요? 우와.'] },
   doctor: { tag: '떠돌이 의원', spr: ['OldMan3'], role: 'doctor', sp: 16, to: l => l.kind === 'city' || l.kind === 'old',
@@ -40,6 +41,8 @@ const KINDS = {
 const WEIGHT = [['peddler', 3], ['caravan', 2], ['pilgrim', 2], ['messenger', 1.5], ['scholar', 1], ['hopeful', 1], ['doctor', 1], ['farmer', 2]];
 const roll = () => { let r = Math.random() * WEIGHT.reduce((a, w) => a + w[1], 0); for (const [k, w] of WEIGHT) if ((r -= w) < 0) return k; return 'peddler'; };
 const list = () => G.field.roam.filter(r => r.trav && !r.gone);
+// 길손의 말: 대화 그림이 들어오면(assets/art/<역할>_n) 그 그림으로, 없으면 도트 얼굴로
+const line = (t, text, who = t.kind === 'caravan' ? '상단 행수' : t.tag.split(' · ')[0]) => { WHO._npc = { name: who, face: t.spr, art: ART.get(t.role + '_n') ? t.role : undefined }; return say('_npc', text); };
 
 // ── 큰길 따라 길 찾기: 지금 칸에서 목적지 성문까지 길(1)과 다리(4)만 밟는다 ──
 function route(sx, sy, map) {
@@ -90,7 +93,7 @@ function ai(t, dt, f, d) {
 async function arrive(t, d) {
   t.gone = true; if (!t.escort) return; const s = S(), pay = 50 + s.lv * 12;
   if (d > 320) return; s.silver += pay; Sound.sfx('coin'); if (fr()) fr().fame += 2;
-  G.field.run(async () => { await say(null, `${t.tag.split(' · ')[0]} 행수: ${t.dest.name}에 무사히 닿았소! 약조한 은자 ${pay}냥이오. 다음에도 부탁하오.`); });
+  G.field.run(async () => { await line(t, `${t.dest.name}에 무사히 닿았소! 약조한 은자 ${pay}냥이오. 다음에도 부탁하오.`); });
   G.jh?.news?.(`${s.name}, ${t.dest.name}까지 상단을 지켜 주다.`);
 }
 // 호위 길에 산적이 덮친다
@@ -98,23 +101,23 @@ async function ambush(t) {
   const s = S(), lv = s.lv, n = lv < 6 ? 2 : lv < 16 ? 3 : 4;
   await narr(pick(['수풀이 흔들리더니 복면 쓴 자들이 수레를 둘러쌌다!', '"짐 놓고 가라!" 고갯마루에서 산적들이 내려왔다.', '앞길에 통나무가 걸쳐 있다. 매복이다!']));
   const won = await ctx.duel({ foes: G.free.group('bandit', lv, n), allies: t.foes, arena: G.field.m.arena, bgm: 'fight', noIntro: true, optional: true });
-  if (won) { await say(null, `${t.tag.split(' · ')[0]} 행수: 휴, 살았소! 조금만 더 가면 되오.`); return; }
+  if (won) { await line(t, `휴, 살았소! 조금만 더 가면 되오.`); return; }
   t.gone = true; t.escort = false; await narr('산적들이 수레를 끌고 사라졌다. 행수는 땅을 치며 울었다.'); G.jh?.news?.(`${t.dest.name}로 가던 상단이 산적에게 털렸다.`);
 }
 // ── 말 걸기 ──
 async function talk(t) {
   const s = S(), K = KINDS[t.kind], who = t.tag.split(' · ')[0];
   if (t.fight && t.fight.with && !t.fight.with.gone) return G.wander.join(t.fight.with, t);
-  await say(null, `${who}: ${pick(K.lines)}`);
-  const O = [['어디 가시오?', async () => { await say(null, `${who}: ${K.why(t.dest.name)}`); }],
-    ['길에서 들은 소문을 묻는다', async () => { const N = fr()?.news || []; await say(null, N.length && Math.random() < .75 ? `${who}: 오는 길에 들었소. "${pick(N.slice(0, 6)).replace(/^\d+일: /, '')}"` : `${who}: ${pick(['요 앞 주막 국밥이 괜찮소.', '고개 너머엔 산적이 나온다니 조심하시오.', '강 건너 마을에 무림 고수가 묵고 있다던데, 누군지는 모르겠소.', '요즘은 별일 없소. 별일 없는 게 제일이오.'])}`); }]];
+  await line(t, `${pick(K.lines)}`);
+  const O = [['어디 가시오?', async () => { await line(t, `${K.why(t.dest.name)}`); }],
+    ['길에서 들은 소문을 묻는다', async () => { const N = fr()?.news || []; await line(t, N.length && Math.random() < .75 ? `오는 길에 들었소. "${pick(N.slice(0, 6)).replace(/^\d+일: /, '')}"` : `${pick(['요 앞 주막 국밥이 괜찮소.', '고개 너머엔 산적이 나온다니 조심하시오.', '강 건너 마을에 무림 고수가 묵고 있다던데, 누군지는 모르겠소.', '요즘은 별일 없소. 별일 없는 게 제일이오.'])}`); }]];
   if (t.kind === 'peddler') O.push(['물건을 본다', () => wares(t)]);
   if (t.kind === 'farmer') O.push(['곡식을 산다', () => ctx.shop(`${who}의 지게`, [['rice_ball', 18], ['herb', 7], ['honey', 34]].map(([k, v]) => ctx.item.stuff(k, v)))]);
-  if (t.kind === 'caravan' && !t.escort && !t.ambushed) O.push([`호위를 맡는다 (${t.dest.name}까지)`, async () => { t.escort = true; t.ambushT = rnd(18, 40); await say(null, `${who} 행수: 고맙소! ${t.dest.name}에 닿으면 은자 ${50 + s.lv * 12}냥을 드리리다.`); toast('상단을 따라 걷는다. 멀리 떨어지면 호위는 없던 일이 된다', 3); }]);
-  if (t.kind === 'pilgrim' && !s.daily.alms) O.push(['시주한다 (은자 10냥)', async () => { if (s.silver < 10) return narr('전대가 비었다.'); s.silver -= 10; s.daily.alms = 1; if (fr()) fr().fame += 1; Sound.sfx('coin'); await say(null, `${who}: 복 받으실 거요. 부처님께 시주님 이름도 같이 올리리다.`); }]);
-  if (t.kind === 'scholar' && !s.daily.poem) O.push(['시 한 수 청한다 (은자 20냥)', async () => { if (s.silver < 20) return narr('전대가 비었다.'); s.silver -= 20; s.daily.poem = 1; give('poem'); toast('시 한 수를 얻었다', 2.4); await say(null, `${who}: 길 위에서 쓴 것이라 거칩니다만… 정인께 드리면 좋아하실 겁니다.`); }]);
+  if (t.kind === 'caravan' && !t.escort && !t.ambushed) O.push([`호위를 맡는다 (${t.dest.name}까지)`, async () => { t.escort = true; t.ambushT = rnd(18, 40); await line(t, `고맙소! ${t.dest.name}에 닿으면 은자 ${50 + s.lv * 12}냥을 드리리다.`); toast('상단을 따라 걷는다. 멀리 떨어지면 호위는 없던 일이 된다', 3); }]);
+  if (t.kind === 'pilgrim' && !s.daily.alms) O.push(['시주한다 (은자 10냥)', async () => { if (s.silver < 10) return narr('전대가 비었다.'); s.silver -= 10; s.daily.alms = 1; if (fr()) fr().fame += 1; Sound.sfx('coin'); await line(t, `복 받으실 거요. 부처님께 시주님 이름도 같이 올리리다.`); }]);
+  if (t.kind === 'scholar' && !s.daily.poem) O.push(['시 한 수 청한다 (은자 20냥)', async () => { if (s.silver < 20) return narr('전대가 비었다.'); s.silver -= 20; s.daily.poem = 1; give('poem'); toast('시 한 수를 얻었다', 2.4); await line(t, `길 위에서 쓴 것이라 거칩니다만… 정인께 드리면 좋아하실 겁니다.`); }]);
   if (t.kind === 'doctor') O.push([`약을 지어 달란다 (은자 ${30 + s.lv * 2}냥)`, async () => { const v = 30 + s.lv * 2; if (s.silver < v) return narr('전대가 모자란다.'); s.silver -= v; s.potion = s.potionMax; Sound.sfx('coin'); toast('금창약을 가득 채웠다', 2.4); }]);
-  if (t.kind === 'hopeful') O.push(['격려한다', async () => { await say(null, `${who}: ${pick(['네! 꼭 대협이 될게요! 그때 저랑 비무해 주세요!', '산문 앞에서 안 울게요. 진짜로요.', '이름 알려 주세요! 나중에 사부님한테 자랑할래요.'])}`); if (fr()) fr().fame += .5; }]);
+  if (t.kind === 'hopeful') O.push(['격려한다', async () => { await line(t, `${pick(['네! 꼭 대협이 될게요! 그때 저랑 비무해 주세요!', '산문 앞에서 안 울게요. 진짜로요.', '이름 알려 주세요! 나중에 사부님한테 자랑할래요.'])}`); if (fr()) fr().fame += .5; }]);
   if (t.kind === 'messenger' && t.dest.fac) O.push(['서찰을 빼앗는다', () => rob(t)]);
   if (t.kind !== 'messenger' && t.kind !== 'hopeful') O.push(['턴다', () => rob(t)]);
   O.push(['그냥 간다', async () => { }]);
@@ -146,6 +149,6 @@ function robbed(t, by) {
 // 무리에게 붙들린 길손을 구해 주었다
 async function saved(t) {
   const s = S(), who = t.tag.split(' · ')[0], v = Math.round(t.purse * .6); s.silver += v; Sound.sfx('coin'); if (fr()) fr().fame += 2;
-  await say(null, `${who}: 은인이오! 가진 게 이것뿐이지만 받아 주시오. (은자 ${v}냥)`); G.jh?.news?.(`${s.name}, 강도 떼에게서 ${josa(who, '을/를')} 구하다.`);
+  await line(t, `은인이오! 가진 게 이것뿐이지만 받아 주시오. (은자 ${v}냥)`); G.jh?.news?.(`${s.name}, 강도 떼에게서 ${josa(who, '을/를')} 구하다.`);
 }
 G.travel = { spawn, talk, list, robbed, saved, route, KINDS };
