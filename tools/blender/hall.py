@@ -2,7 +2,7 @@
 # 길이는 평면도 점(사람 키 15점). 게임(js/hd2d.js)에서 (1, HS, ZS)로 늘려 세운다. 앞면은 y=0, 뒤로 +y(glTF로 나가면 z=0에서 -z로).
 # 그림은 받은 도트 그림(assets/hd2d/preview)을 잘라 쓰고 '가장 가까운 점'으로 읽게 둔다(도트가 뭉개지지 않게).
 # 쓰는 법: python3 tools/blender/hall.py [이름]   → assets/hd2d/models/<이름>.glb   (이름: daewoong)
-import bpy, bmesh, math, os, sys
+import bpy, bmesh, math, os, sys, json
 from mathutils import Vector
 from PIL import Image, ImageDraw, ImageFont
 
@@ -14,7 +14,7 @@ TX = 2.67  # 벽 도트: 평면도 1점에 그림 2.67점(사람 도트 48/15를
 # 종류마다 설명서
 HALLS = {
     'daewoong': dict(W=84, D=46, plat=(7, 6), colH=30, cols=6, skirtOut=9, upW=64, upD=34, upH=16, roofH=24, ridgeLen=.42,
-                     roof=('r_orange', (1.15, .86, .32)), wall='w4', colC=(.62, .12, .09), plaque='大雄寶殿', gold=True),
+                     roof=('r_orange', (1.15, .86, .32)), wall='hs_shaolin', colC=(.62, .12, .09), plaque='大雄寶殿', gold=True),
 }
 
 def crop(name, box, tint=None, key=None):
@@ -127,9 +127,12 @@ def build(name):
     global ROOFTW, ROOFTL, FASW
     rp, rs = crop(S['roof'][0], None, S['roof'][1], 'roof'); ROOFTW, ROOFTL = rs[0] / TX * .7, rs[1] / TX * .7
     ep, es = crop('e_orange' if S['roof'][0] == 'r_orange' else 'e_dark', None, S['roof'][1], 'eave'); FASW = es[0] / TX * .6
-    w = S['wall']
-    pl = crop(w + '_side', (50, 36, 60, 70), (1.15, .95, .7), 'plaster'); st = crop(w + '_side', (0, 75, 72, 86), None, 'stone'); bm = crop(w + '_front', (10, 6, 85, 15), None, 'beam')
-    dr = crop(w + '_front', (14, 17, 81, 57), None, 'door'); rg = crop('e_ridge', None, S['roof'][1], 'ridge')
+    # 벽 부품 자리: 문파 벽(hs_*)이 있으면 js/hd2d/build.js CROPS(tools/blender/dump_spec.mjs가 /tmp/spec.json에 뽑아 둔 것)에서, 없으면 예전 법당 벽(w4)
+    w = S['wall']; CRS = json.load(open('/tmp/spec.json'))['CROPS'] if os.path.exists('/tmp/spec.json') else {}
+    if w not in CRS or not os.path.exists(os.path.join(PV, w + '_front.webp')): w = 'w4'
+    R = {k: tuple(v[1:]) for k, v in CRS[w].items()} if w in CRS and w != 'w4' else {'plaster': (50, 36, 60, 70), 'stone': (0, 75, 72, 86), 'beam': (10, 6, 85, 15), 'door': (14, 17, 81, 57)}
+    pl = crop(w + '_side', R['plaster'], (1.15, .95, .7) if w == 'w4' else None, 'plaster'); st = crop(w + '_side', R['stone'], None, 'stone'); bm = crop(w + '_front', R['beam'], None, 'beam')
+    dr = crop(w + '_front', R['door'], None, 'door'); rg = crop('e_ridge', None, S['roof'][1], 'ridge')
     mat('roof', rp)
     mat('eave', ep); mat('under', None, (.16, .1, .07)); mat('plaster', pl[0]); mat('stone', st[0]); mat('stonetop', None, (.62, .58, .52)); mat('beam', bm[0])
     mat('door', dr[0]); mat('col', None, S['colC']); mat('gold', None, (.78, .58, .2)); mat('wood', None, (.27, .17, .11)); mat('ridge', rg[0]); mat('ridgeend', None, (.76, .56, .2) if S['gold'] else (.3, .3, .32))

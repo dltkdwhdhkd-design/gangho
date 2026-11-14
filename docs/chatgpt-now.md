@@ -32,23 +32,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-now.md
 
 ### 1. 문파·세가 전각 벽 (파랑 배경, 3열 2행)
 
-파일 이름은 번호 그대로(HS1.png 따위). 1행은 앞벽 셋, 2행은 같은 건물의 옆벽(박공) 셋.
-
-### HS1: 소림사, 무당파, 화산파
-
-참고 그림: ref-walls.png
-
-```
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Shaolin Temple main hall: ochre-yellow walls, thick red lacquered round columns, golden-brown carved lattice doors with swastika (manji) and lotus patterns, a deep red and gold beam band, bronze door studs, grey granite plinth with carved lotus base. Column 2, Wudang Taoist hall: plain white-washed walls with dark wood frame, black and white yin-yang taiji roundel above the door, jade-green painted beams with cloud scroll patterns, dark green lattice windows, grey stone base. Column 3, Mount Hua sword sect hall: pale granite stone walls with crimson wooden frame, plum blossom carvings on the beams and door panels, deep red double door with brass rings, cliff-stone plinth.
-```
-
-### HS2: 종남파, 아미파, 곤륜파
-
-참고 그림: ref-walls.png
-
-```
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Zhongnan Taoist sect hall: stern dark blue-grey wooden frame, grey stone walls, star-constellation (Big Dipper) carved panel above the door, iron-studded black double door, plain heavy beams. Column 2, Emei nunnery hall: pale cream walls, soft violet and gold painted beams with lotus and cloud motifs, round moon-gate shaped door frame with wooden doors, delicate white lattice windows. Column 3, Kunlun mountain sect hall: white marble-like stone walls, icy sky-blue beams, silver-grey frame, snow-capped mountain carving above a heavy white-grey double door, thick stone plinth.
-```
+파일 이름은 번호 그대로(HS3.png 따위). 1행은 앞벽 셋, 2행은 같은 건물의 옆벽(박공) 셋. HS1(소림·무당·화산), HS2(종남·아미·곤륜)는 받아서 넣었다(받은 그림을 참고로 같은 틀을 이어 가면 된다).
 
 ### HS3: 공동파, 점창파, 청성파
 
