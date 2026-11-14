@@ -32,15 +32,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-now.md
 
 ### 1. 문파·세가 전각 벽 (파랑 배경, 3열 2행)
 
-파일 이름은 번호 그대로(HS3.png 따위). 1행은 앞벽 셋, 2행은 같은 건물의 옆벽(박공) 셋. HS1(소림·무당·화산), HS2(종남·아미·곤륜)는 받아서 넣었다(받은 그림을 참고로 같은 틀을 이어 가면 된다).
-
-### HS3: 공동파, 점창파, 청성파
-
-참고 그림: ref-walls.png
-
-```
-Building wall parts sheet in exactly the same layout, scale, pixel size and pixel-art style as the reference image: 3 columns x 2 rows on a solid flat pure blue #0000FF background. Top row: three FRONT walls (flat orthographic elevation, walls only, no roof, top edge cut flat, the main door exactly in the horizontal centre, raised stone plinth at the bottom). Bottom row: the matching SIDE wall of each building with a triangular gable top and one window. Crisp chunky hand-placed pixels, dark 1-pixel outlines, warm muted palette with light from the upper left, no text, no letters, no shadows on the background, wide blue gaps between pieces. These are the grand main halls of famous martial-arts sects in a wuxia world, so they must look rich, imposing and distinctive, far grander than a village house: tall walls, heavy carved beams, ornate lattice, painted bracket bands, big double doors. Column 1, Kongtong sect hall: rugged brown rock-block walls, ochre timber, carved fierce beast-head brackets, heavy bronze door, rough stone base. Column 2, Diancang sect hall (southern Yunnan): dark polished wood and woven bamboo panels, green and terracotta painted beams, slatted bamboo lattice windows, wooden double door. Column 3, Qingcheng sect hall: mossy grey stone base, deep green-lacquered columns, green beams with mountain-mist cloud patterns, carved pine motifs, dark wooden doors.
-```
+파일 이름은 번호 그대로(HS4.png 따위). 1행은 앞벽 셋, 2행은 같은 건물의 옆벽(박공) 셋. HS1(소림·무당·화산), HS2(종남·아미·곤륜), HS3(공동·점창·청성)은 받아서 넣었다(받은 그림을 참고로 같은 틀을 이어 가면 된다).
 
 ### HS4: 개방, 남궁세가, 모용세가
 

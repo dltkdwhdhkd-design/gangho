@@ -66,9 +66,12 @@ export const CROP = {
 // HW2(법당 w4, 문파 회관 w5, 부잣집 w6)는 그림마다 문과 창 자리가 달라 따로 적는다(도트, 위가 0)
 export const CROPS = {
   // hs 시작
+  hs_cheongseong: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
   hs_emei: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 60], win: ['front', 11, 24, 28, 50], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
+  hs_gongdong: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
   hs_gonryun: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
   hs_hwasan: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
+  hs_jeomchang: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 59], win: ['front', 11, 24, 28, 49], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
   hs_jongnam: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 50, 21, 70], stone: ['side', 2, 76, 74, 87], post: ['side', 2, 38, 9, 71]},
   hs_shaolin: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 17, 61, 58], win: ['front', 11, 24, 28, 48], plaster: ['side', 11, 51, 21, 70], stone: ['side', 2, 77, 74, 88], post: ['side', 2, 39, 9, 72]},
   hs_wudang: {beam: ['front', 8, 1, 87, 12], door: ['front', 34, 18, 61, 60], win: ['front', 11, 24, 28, 50], plaster: ['side', 11, 52, 22, 71], stone: ['side', 2, 77, 75, 89], post: ['side', 2, 39, 9, 73]},
