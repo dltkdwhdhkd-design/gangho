@@ -221,6 +221,13 @@ const AWAY = { 구파일방: '장문인께서는 구화성 구파 회관에 가 
 // 말할 때 이름과 얼굴을 띄운다. 같은 사람에게 다시 걸면 다음 말을 한다
 const ARTOF = { Villager: 'town', Villager2: 'town', Villager3: 'town', Villager4: 'town2', Woman: 'town2', Boy: 'kid' };
 const SAID = new Map();
+// 관아의 현상금 창구: 내 목에 걸린 현상금(악명 × 12)을 돈으로 덮는다. 낸 만큼 악명이 깎이고, 정파 무리가 덜 쫓는다
+async function bountyDesk() {
+  const S = G.S, fr = S.fr; if (!fr || fr.infamy < 10) return; const b = fr.infamy * 12, cost = Math.round(b * 1.5);
+  const c = await choice(`내 얼굴이 그려진 방이 붙어 있다. 현상금 은자 ${b}냥.`, [`아전에게 은자 ${cost}냥을 찔러 주고 방을 떼게 한다`, '모른 척한다']); if (c) return;
+  if (S.silver < cost) { await say(null, '주머니가 모자란다.'); return; } S.silver -= cost; fr.infamy = Math.max(0, Math.round(fr.infamy / 2) - 5); Sound.sfx('coin');
+  await npcSay('아전', 'Inspector', '방은 비 맞아서 떨어졌다고 해 두겠소. 다시는 내 앞에서 칼 뽑지 마시오.'); G.jh?.news?.(`${S.name}의 현상수배 방이 슬그머니 사라졌다.`);
+}
 function npcSay(name, spr, text, art) { WHO._npc = { name, face: spr, art: art === undefined ? (ART.get(ROLE[name] + '_n') ? ROLE[name] : ARTOF[spr]) : art || undefined }; return say('_npc', text); }
 function nextLine(key, list) { const i = SAID.get(key) || 0; SAID.set(key, i + 1); return list[i % list.length]; }
 // 강호 소식을 그 사람 말투로 옮긴다. "~붙었다." → "~붙었답니다."
@@ -274,7 +281,7 @@ function roomNpcs(id, out) {
   if (kind === 'home' && r.as) return shopNpcs(r, id, out);
   if (kind === 'home') { const [who, spr, t] = HOME[hash % HOME.length]; out.npcs.push({ id: 'res', spr, x: 7, y: 4 + hash % 2, dir: 0, hint: who, talk: async () => { await npcSay(who, spr, nextLine(id + 'res', t).replace(/\{p\}/g, l.name)); } }); return; }
   if (kind === 'temple') { out.npcs.push({ id: 'res', spr: 'Monk', x: 8, y: 7.4, dir: 0, life: 'work', hint: '전각지기', talk: async () => { await npcSay('전각지기', 'Monk', nextLine(id + 'res', ['향만 피우고 가시면 됩니다. 소리는 내지 마십시오.', '바닥을 막 닦았습니다. 밟으신 데는 제가 다시 닦겠습니다.', '오늘은 손님이 없었습니다. 이런 날은 부처님도 쉬십니다.'])); } }); return; }
-  if (kind === 'gov') { out.npcs.push({ id: 'res', spr: 'Inspector', x: 10, y: 6.4, dir: 0, life: 'work', hint: '아전', talk: async () => { await npcSay('아전', 'Inspector', nextLine(id + 'res', [`${l.name} 관아요. 칼 찬 사람끼리 싸운 일은 우리 소관이 아니오. 위에서 그렇게 말하라고 했소.`, '세금 내러 왔소? 아니면 나가시오. 오늘 장부가 산더미요.', '방은 저쪽 벽에 붙어 있소. 현상금 걸린 놈 얼굴도 거기 있고.'])); } }); return; }
+  if (kind === 'gov') { out.npcs.push({ id: 'res', spr: 'Inspector', x: 10, y: 6.4, dir: 0, life: 'work', hint: '아전', talk: async () => { await npcSay('아전', 'Inspector', nextLine(id + 'res', [`${l.name} 관아요. 칼 찬 사람끼리 싸운 일은 우리 소관이 아니오. 위에서 그렇게 말하라고 했소.`, '세금 내러 왔소? 아니면 나가시오. 오늘 장부가 산더미요.', '방은 저쪽 벽에 붙어 있소. 현상금 걸린 놈 얼굴도 거기 있고.'])); await bountyDesk(); } }); return; }
   if (kind === 'gamble') {
     out.npcs.push({ id: 'dealer', spr: 'DarkNinja', x: 9.5, y: 4.3, dir: 0, life: 'still', hint: '물주', hawk: ['홀이냐 짝이냐, 거시오!', '자, 엎습니다!', '판돈 거시오, 판돈!'], gap: [5, 9], talk: () => gambleTalk(l) },
       { id: 'gboss', spr: 'Inspector', x: 17.2, y: 4.2, dir: 2, life: 'still', hint: '도박장 주인', talk: async () => { await npcSay('도박장 주인', 'Inspector', nextLine(id + 'b', GAMBLE.boss)); } },

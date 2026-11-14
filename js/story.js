@@ -19,6 +19,7 @@ import './part9.js';
 import './side.js';
 import './free.js';
 import './arts.js';
+import './wander.js';
 import './jianghu.js';
 import './saga.js';
 import './voices.js';

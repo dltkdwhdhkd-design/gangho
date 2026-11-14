@@ -149,6 +149,8 @@ export class Field {
     let best = null, bd = 19;
     for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
+    for (const r of this.roam) { if (r.gone || !r.peace) continue; const d = far(r.x - x, r.y - 4 - y); if (d < bd) { bd = d; best = { id: 'band', x: r.x, y: r.y, hint: `${r.tag} · 다가간다`, talk: () => G.wander.talk(r) }; } }
+    if (best) return best;
     if (G.party && !m.isoRoom) G.party.members().forEach((id, i) => { const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q || this.npcs.some(n => n.id === id)) return; const d = far(q.x - x, q.y - 4 - y); if (d < bd) { bd = d; best = { id: 'pty_' + id, x: q.x, y: q.y, hint: `${G.party.name(id)} · 말 걸기`, talk: () => G.party.talkTo(id) }; } });  // 따라다니는 동료에게도 말을 건다
     if (best) return best;
     for (const s of this.spots) { if (s.when && !s.when()) continue; if (x > s.x * TS - 6 && x < (s.x + s.w) * TS + 6 && y > s.y * TS - 6 && y < (s.y + s.h) * TS + 6) return s; }
@@ -271,12 +273,14 @@ export class Field {
       if (r.gone) continue;
       const d = hyp(p.x - r.x, p.y - r.y);
       if (r.cool > 0) { r.cool -= dt; continue; }
-      if (d < 78) { const s = 44; r.vx = (p.x - r.x) / d * s; r.vy = (p.y - r.y) / d * s; }
+      if (r.ai) { if (r.ai(r, dt, this, d) === 'skip') continue; }  // 강호를 떠도는 무리(js/wander.js)는 저마다 움직인다
+      else if (d < 78) { const s = 44; r.vx = (p.x - r.x) / d * s; r.vy = (p.y - r.y) / d * s; }
       else { r.t -= dt; if (r.t <= 0) { r.t = rnd(1, 2.6); const a = rnd(6.28), on = Math.random() < .6; r.vx = on ? Math.cos(a) * 22 : 0; r.vy = on ? Math.sin(a) * 22 : 0; if (hyp(r.hx - r.x, r.hy - r.y) > 50) { const q = hyp(r.hx - r.x, r.hy - r.y); r.vx = (r.hx - r.x) / q * 22; r.vy = (r.hy - r.y) / q * 22; } } }
       const nx = r.x + r.vx * dt * this.vk, ny = r.y + r.vy * dt * this.vk;
       if (!m.blocked(nx, r.y)) r.x = nx; if (!m.blocked(r.x, ny)) r.y = ny;
       if (r.vx || r.vy) { r.walk += dt * 7; r.dir = Math.abs(r.vx) > Math.abs(r.vy) ? (r.vx < 0 ? 2 : 3) : (r.vy < 0 ? 1 : 0); }
-      if (d < 11) { this.run(async () => { const won = await Story.encounter(r); if (won) r.gone = true; else { r.cool = 3; } }); return; }
+      if (r.crew) G.wander?.follow(r, dt);
+      if (d < 11 && !r.peace) { this.run(async () => { const won = await Story.encounter(r); if (won) r.gone = true; else { r.cool = 3; } }); return; }
     }
   }
   camera(k) {
@@ -302,7 +306,7 @@ export class Field {
     const list = [];
     for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x + (s.w || STAMPS[s.name]?.[3] || 120) > cam.x - 8 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
     for (const n of this.npcs) if (!(n.hide > 0)) list.push({ y: n.y, n });
-    for (const r of this.roam) if (!r.gone) list.push({ y: r.y, n: r, mon: true });
+    for (const r of this.roam) if (!r.gone) { list.push({ y: r.y, n: r, mon: true }); for (const q of r.crew || []) list.push({ y: q.y, n: q }); }
     if (G.party && this.m.id !== 'world0') G.party.members().forEach((id, i) => { if (this.npcs.some(n => n.id === id)) return; const q = this.trail[Math.min(this.trail.length - 1, 16 + i * 16)]; if (!q) return; list.push({ y: q.y, n: { id, spr: G.party.spr(id), x: q.x, y: q.y, dir: q.dir, diag: q.diag, walk: p.walk } }); });
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });
     if (!this.hideMe) list.push({ y: p.y, me: true });
@@ -323,6 +327,7 @@ export class Field {
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha' && !m.hasIso) { const st = m.stamps.find(s => s.name === 'inn'); if (st) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(st.x, st.y, 4 * TS, 3 * TS - 2); } }  // 좁힌 지도에서도 객잔 자리를 따라간다
     G.warfx?.over(c, m, cam, this.t);  // 불길, 연기, 비계, 교전 칼빛
+    if (m.live) G.wander?.over(c, this.roam, this.t);  // 떠도는 무리의 이름표, 무리끼리 싸우는 칼빛
     const ar = IMG['fx/p_arrow']; for (const r of this.arrows) { c.save(); c.translate(r.x, r.y); c.rotate(r.an); if (ar) c.drawImage(ar, -6, -2, ar.width / (ar.hd || 1), ar.height / (ar.hd || 1)); c.restore(); }
     if (G.decor) {
       const d = G.decor; c.strokeStyle = '#ffe36a'; c.lineWidth = .75;

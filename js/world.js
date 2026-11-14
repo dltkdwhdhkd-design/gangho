@@ -387,7 +387,9 @@ function tick(dt) {
   if (spawnT > 0) return; spawnT = 4 + Math.random() * 6;
   const a = Math.random() * 6.28, x = p.x + Math.cos(a) * 210, y = p.y + Math.sin(a) * 150; if (f.m.blocked(x, y, 14, 12)) return;
   if (S.flags.bow && f.animals.length < 3 && Math.random() < .5) { const k = pick(b === 'snow' ? ['rabbit', 'deer'] : ['rabbit', 'pheasant', 'deer']); f.animals.push({ kind: k, ...G.life.animals[k], x, y, vx: 0, vy: 0, t: 1, walk: 0 }); return; }
-  if (f.roam.length >= 3 || !S.flags.world_open && S.mode !== 'free') return;
+  if (f.roam.filter(r => !r.band).length >= 3 && (G.wander?.bands().length ?? 2) >= 2 || !S.flags.world_open && S.mode !== 'free') return;
+  const wb = G.wander?.spawn(x, y); if (wb) { f.roam.push(wb); return; }  // 떠도는 문파·세가·사파·마교 무리(js/wander.js)
+  if (f.roam.filter(r => !r.band).length >= 3) return;
   const sg = G.saga?.spawn(x, y); if (sg) { f.roam.push(sg); return; }  // 정사대전 순찰대, 마교도
   const hunted = G.jh.spawn(x, y); if (hunted) { f.roam.push(hunted); return; }
   const lv = Math.max(1, S.lv + (Math.random() < .3 ? 1 : 0)), onRoad = f.m.g[ty]?.[tx] === 1 || f.m.g[ty]?.[tx] === 4, kind = pick(wet ? ['pirate', 'pirate', 'bandit'] : onRoad ? ['bandit', 'rogue', 'bandit'] : ['bandit', 'rogue']), n = lv < 5 ? 1 : lv < 14 ? 2 : 3, foes = G.free.group(kind, lv, n), FO = G.free.foes;
