@@ -21,6 +21,7 @@ import './free.js';
 import './arts.js';
 import './wander.js';
 import './travel.js';
+import './fanchars.js';
 import './jianghu.js';
 import './saga.js';
 import './voices.js';
