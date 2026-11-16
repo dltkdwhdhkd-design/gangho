@@ -12,7 +12,7 @@ import * as BF from './battlefx.js';
 import { stageOf } from './hd2d/stages.js';
 
 // 전투 화면은 아래 기술 칸 띠(BAND) 위에만 그린다. 기술 칸이 싸움을 가리지 않게
-export const BAND = 76; const ZB = 3.3, VWB = 1280 / ZB, VHB = (720 - BAND) / ZB;  // 2D 전투는 마을(4배)보다 조금 멀리(3.3배): 싸움터 가로가 한눈에 들어온다
+export const BAND = 0; const ZB = 3.6, VWB = 1280 / ZB, VHB = (720 - BAND) / ZB;  // 2D 전투는 마을(4배)보다 조금 멀리(3.3배): 싸움터 가로가 한눈에 들어온다
 const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
 const MOB = { bandit: 'mob_bandit', rowdy: 'mob_bandit', mask_low: 'mob_bandit', rowdy2: 'mob_brute', bruiser: 'mob_brute', pirate: 'mob_pirate', pirate_bow: 'mob_pirate', pirate_hook: 'mob_pirate', archer: 'mob_archer', wanted2: 'mob_archer',
@@ -489,7 +489,7 @@ export class Battle {
     c.restore(); this.drawBand(c);
   }
   // 기술 칸 띠: 전투 화면과 겹치지 않게 아래에 따로 깐다
-  drawBand(c) { c.setTransform(1, 0, 0, 1, 0, 0); const y = 720 - BAND, g = c.createLinearGradient(0, y, 0, 720); g.addColorStop(0, '#1c140e'); g.addColorStop(1, '#0c0907'); c.fillStyle = g; c.fillRect(0, y, 1280, BAND); c.fillStyle = '#8a6a3a'; c.fillRect(0, y, 1280, 2); c.fillStyle = '#000'; c.fillRect(0, y + 2, 1280, 2); }
+  drawBand(c) { if (!BAND) return; c.setTransform(1, 0, 0, 1, 0, 0); const y = 720 - BAND, g = c.createLinearGradient(0, y, 0, 720); g.addColorStop(0, '#1c140e'); g.addColorStop(1, '#0c0907'); c.fillStyle = g; c.fillRect(0, y, 1280, BAND); c.fillStyle = '#8a6a3a'; c.fillRect(0, y, 1280, 2); c.fillStyle = '#000'; c.fillRect(0, y + 2, 1280, 2); }
   draw2d(c) {
     const cam = this.cam; let sx = 0, sy = 0;
     if (this.shakeT > 0) { sx = rnd(-this.shakeA, this.shakeA); sy = rnd(-this.shakeA, this.shakeA); } else this.shakeA = 0;

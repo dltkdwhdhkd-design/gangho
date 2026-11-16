@@ -176,7 +176,23 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .slotc .sb{grid-column:1 / -1;display:flex;gap:6px;flex-wrap:wrap}
 .card.wide{width:min(1120px,94vw);max-height:90vh;overflow:auto}
 
-#stage.inbattle #hdp{bottom:88px!important}
+#stage.inbattle #hdp{bottom:auto!important;top:80px}
+/* 전투 HUD: 액션 게임처럼 싸움 화면 위에 겹쳐 얹는다. 기술은 오른쪽 아래 작은 반투명 묶음(위 줄 초식 넷, 아래 줄 평타·경공·막기·약), 체력은 왼쪽 위 얇게 */
+.skills{left:auto;right:16px;bottom:14px;transform:none;display:grid;grid-template-columns:repeat(4,54px);gap:6px;align-items:end}
+.sk{width:54px;height:54px;font-size:11px;background:rgba(16,12,9,.55);border:2px solid rgba(232,214,170,.7);box-shadow:0 0 0 1px rgba(0,0,0,.6)}
+.sk.small{width:54px;height:34px;font-size:11px}
+.sk.small .nm{top:13px}
+.sk .nm{top:15px;line-height:1.1;text-shadow:0 1px 0 #000}
+.sk .ky{font-size:10px;padding:0 4px;background:rgba(232,214,170,.85)}
+.sk .mp{font-size:10px}
+.sk .ct{font-size:14px;bottom:2px}
+.sk.ready{border-color:var(--gold);box-shadow:0 0 6px rgba(255,210,90,.6)}
+.bars{width:300px;top:12px;left:14px}
+.bars .bar{height:15px;margin-bottom:4px}.bars .bar.mp{height:9px}.bars .bar b{font-size:12px;line-height:11px}
+.bars .bname{font-size:15px;margin-bottom:3px}
+.boss{left:360px;right:360px;top:12px}.boss .bname{font-size:17px;margin-bottom:3px}.boss .bar{height:13px}.boss .bar.pos{height:6px}
+.foe{width:240px;top:12px;right:14px}
+#stage.inbattle #hdp{bottom:auto!important;top:80px}
 /* 전투 기술 칸: 아래 띠(76) 안에 들어가게 작게 */
 .skills{bottom:8px;gap:6px}
 .sk{width:60px;height:60px;font-size:11px}

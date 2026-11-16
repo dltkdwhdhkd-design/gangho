@@ -743,7 +743,7 @@ function placeCamBattle(B, dt) {
   const m = B.stage, Wm = m.w * TS, Hm = m.h * TS; let sx = 0, sy = 0, n = 0;
   for (const a of B.actors) { if (a.dead) continue; const k = a.isPlayer ? 3 : 1; sx += a.x * k; sy += a.y * k; n += k; }
   const ax = n ? sx / n : Wm / 2, ay = n ? sy / n : Hm / 2, f = FOV / 2 * DEG;
-  let d = CHAR * HD.opt.zoom * 1.18 / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
+  let d = CHAR * HD.opt.zoom * 1.08 / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
   let tx = Math.min(Wm - hw + 20, Math.max(hw - 20, ax)), tyP = Math.min(Hm - 50, Math.max(50, ay - 16));  // 사람보다 조금 북쪽을 겨눠 무대 뒤 담과 건물이 화면에 들어온다
   if (B.zoomT > 0) { const u = Math.sin(Math.min(1, B.zoomT / .75) * Math.PI); d *= 1 - .16 * u; tx += ((B.zoomX ?? tx) - tx) * .5 * u; tyP += ((B.zoomY ?? tyP) - tyP) * .5 * u; }
   if (B.shakeT > 0) { tx += (Math.random() - .5) * 2 * B.shakeA; tyP += (Math.random() - .5) * 2 * B.shakeA; }
