@@ -10,7 +10,7 @@ import { DB } from './items.js';
 import { openMenu } from './ui.js';
 import * as BF from './battlefx.js';
 
-const PARRY = .17, D2R = Math.PI / 180;
+const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
 const MOB = { bandit: 'mob_bandit', rowdy: 'mob_bandit', mask_low: 'mob_bandit', rowdy2: 'mob_brute', bruiser: 'mob_brute', pirate: 'mob_pirate', pirate_bow: 'mob_pirate', pirate_hook: 'mob_pirate', archer: 'mob_archer', wanted2: 'mob_archer',
   shadow0: 'mob_assassin', shadow: 'mob_assassin', shadow2: 'mob_assassin', fox: 'mob_assassin', fox0: 'mob_assassin', sand_cut: 'mob_assassin', puppet: 'mob_jiangshi', skull: 'mob_jiangshi', disciple: 'mob_jeong',
@@ -465,14 +465,14 @@ export class Battle {
     c.translate(ox, oy);
     c.fillStyle = '#000'; c.fillRect(-20, -20, this.W + 40, this.H + 40); c.drawImage(this.bg, 0, 0);
     if (this.dimT > 0) { c.fillStyle = `rgba(6,4,14,${Math.min(.6, this.dimT)})`; c.fillRect(-20, -20, this.W + 40, this.H + 40); }
-    BF.draw(c, this, true);
+    BF.draw(c, this, true, ox, oy);
     for (const t of this.teles) this.drawTele(c, t);
     for (const z of this.zones) { const u = 1 - z.left / z.tot; c.fillStyle = z.player ? 'rgba(170,200,255,.2)' : 'rgba(230,50,30,.2)'; c.beginPath(); c.ellipse(z.x, z.y, z.r, z.r * .8, 0, 0, 7); c.fill(); c.fillStyle = z.player ? 'rgba(190,220,255,.4)' : 'rgba(255,70,40,.42)'; c.beginPath(); c.ellipse(z.x, z.y, z.r * u, z.r * .8 * u, 0, 0, 7); c.fill(); }
     const list = [...this.actors].sort((a, b) => a.y - b.y);
     for (const a of list) this.drawActor(c, a);
     for (const p of this.proj) this.drawProj(c, p);
     for (const f of this.fx) this.drawFx(c, f);
-    BF.draw(c, this, false);
+    BF.draw(c, this, false, ox, oy, this.proj.filter(p => VEC.has(p.img) || p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy')), (x, p) => this.drawProj(x, p, true));
     c.restore();
     if (this.flashT > 0) { c.globalAlpha = this.flashT / .16 * .4; c.fillStyle = this.flashC || '#fff'; c.fillRect(0, 0, 1280, 720); c.globalAlpha = 1; }
     // 숫자는 고해상도로
@@ -583,8 +583,8 @@ export class Battle {
     const push = sw.thrust ? Math.sin(u * Math.PI) * 8 : 2;
     const iw = im.width / (im.hd || 1), ih = im.height / (im.hd || 1); c.drawImage(im, -iw / 2, -ih - push, iw, ih); c.restore();
   }
-  drawProj(c, p) {
-    if (p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy')) return BF.drawProj(c, p, p.st, this.t);
+  drawProj(c, p, raw) {
+    if (!raw && (VEC.has(p.img) || p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy'))) return;  // 선으로 그리는 기운은 BF.draw가 도트 판에 그린다
     c.save(); c.translate(p.x, p.y);
     if (p.img === 'tray') { c.rotate(p.age * 18); c.fillStyle = '#7a4a22'; c.beginPath(); c.ellipse(0, 0, 6, 3.4, 0, 0, 7); c.fill(); c.fillStyle = '#b57a3e'; c.beginPath(); c.ellipse(0, 0, 4.4, 2.2, 0, 0, 7); c.fill(); }
     else if (p.img === 'plum') { c.rotate(p.age * 9); c.fillStyle = '#ffb7c8'; for (let i = 0; i < 5; i++) { const q = i * 1.2566; c.beginPath(); c.arc(Math.cos(q) * 2.4, Math.sin(q) * 2.4, 1.8, 0, 7); c.fill(); } c.fillStyle = '#ffe36a'; c.fillRect(-1, -1, 2, 2); }

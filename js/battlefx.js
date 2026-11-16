@@ -1,6 +1,6 @@
 // 초식 연출: 문파·무공마다 다른 빛깔과 조각(꽃잎, 벼락, 태극, 서리 따위)을 그린다
 // 그림 파일 없이 캔버스로만 그린다. 싸움 판정은 건드리지 않는다
-import { rnd, lerp, clamp } from './core.js';
+import { rnd, lerp, clamp, VW, VH } from './core.js';
 
 // 무공 갈래(school) → 연출 꼴
 const SCHOOL = {
@@ -147,14 +147,31 @@ export function tick(B, dt) {
   for (const k of ['flashT', 'dimT', 'zoomT']) if (B[k] > 0) B[k] -= dt;
 }
 
-export function draw(c, B, under) {
+// 도트 결 맞추기: 조각은 평면도 한 점 = 한 칸인 작은 판(320×180)에 그리고, 반투명 가장자리를 세 단계로 끊은 뒤 4배로 키워 붙인다.
+// 그래서 꽃잎·검기도 옛 효과 그림처럼 각진 도트로 보인다
+let LN, LA;
+const mkL = () => { const c = document.createElement('canvas'); c.width = VW; c.height = VH; const x = c.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = false; return x; };
+function crisp(x) {
+  const im = x.getImageData(0, 0, VW, VH), d = im.data;
+  for (let i = 3; i < d.length; i += 4) { const a = d[i]; if (!a) continue; const q = a < 48 ? 0 : a < 150 ? 128 : 255; if (q && q !== a) { const k = q / a; d[i - 3] = Math.min(255, d[i - 3] * k); d[i - 2] = Math.min(255, d[i - 2] * k); d[i - 1] = Math.min(255, d[i - 1] * k); } d[i] = q; }
+  x.putImageData(im, 0, 0);
+}
+// c: 판 좌표(SCALE 곱한 상태)로 옮겨 둔 본 캔버스. ox, oy: 화면 왼쪽 위의 평면도 자리(음수)
+export function draw(c, B, under, ox, oy, projs = [], raw) {
+  LN = LN || mkL(); LA = LA || mkL();
+  for (const x of [LN, LA]) { x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, VW, VH); x.translate(ox, oy); }
+  let n = 0;
   for (const p of B.parts) {
     if (p.delay > 0 || !!p.flat !== !!under) continue;
     const u = p.t / p.life, al = (p.a0 ?? 1) * (u < .15 ? u / .15 : 1 - Math.max(0, u - .4) / .6);
-    if (al <= 0) continue;
-    c.save(); c.globalAlpha = clamp(al, 0, 1); if (p.add) c.globalCompositeOperation = 'lighter';
-    shape(c, p, u); c.restore();
+    if (al <= 0) continue; const x = p.add ? LA : LN;
+    x.save(); x.globalAlpha = clamp(al, 0, 1); if (p.add) x.globalCompositeOperation = 'lighter';
+    shape(x, p, u); x.restore(); n++;
   }
+  for (const p of projs) { if (p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy')) drawProj(LN, p, p.st); else raw(LN, p); n++; }
+  if (!n) return;
+  crisp(LN); crisp(LA);
+  c.save(); c.imageSmoothingEnabled = false; c.drawImage(LN.canvas, -ox, -oy); c.globalCompositeOperation = 'lighter'; c.drawImage(LA.canvas, -ox, -oy); c.restore();
 }
 function shape(c, p, u) {
   const x = p.x, y = p.y;
@@ -197,7 +214,7 @@ function shape(c, p, u) {
 }
 
 // 날아가는 기운: 세력마다 다른 꼴로 그린다(옛 그림 p_energy 자리를 바꾼다)
-export function drawProj(c, p, st, t) {
+function drawProj(c, p, st) {
   const [c0, c1, c2] = C(st), big = p.img === 'p_bigenergy', s = big ? 1.5 : 1;
   c.save(); c.translate(p.x, p.y); c.globalCompositeOperation = 'lighter';
   const g = c.createRadialGradient(0, 0, 0, 0, 0, 9 * s); g.addColorStop(0, c0 + 'cc'); g.addColorStop(1, c0 + '00'); c.fillStyle = g; c.beginPath(); c.arc(0, 0, 9 * s, 0, 6.29); c.fill();
