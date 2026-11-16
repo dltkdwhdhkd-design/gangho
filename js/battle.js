@@ -11,6 +11,10 @@ import { openMenu } from './ui.js';
 import * as BF from './battlefx.js';
 
 const PARRY = .17, D2R = Math.PI / 180;
+// 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
+const MOB = { bandit: 'mob_bandit', rowdy: 'mob_bandit', mask_low: 'mob_bandit', rowdy2: 'mob_brute', bruiser: 'mob_brute', pirate: 'mob_pirate', pirate_bow: 'mob_pirate', pirate_hook: 'mob_pirate', archer: 'mob_archer', wanted2: 'mob_archer',
+  shadow0: 'mob_assassin', shadow: 'mob_assassin', shadow2: 'mob_assassin', fox: 'mob_assassin', fox0: 'mob_assassin', sand_cut: 'mob_assassin', puppet: 'mob_jiangshi', skull: 'mob_jiangshi', disciple: 'mob_jeong',
+  soldier: 'mob_soldier', jeong: 'mob_jeong', sa: 'mob_sa', ma: 'mob_cult', hyeolgyo: 'mob_cult', 'chars/Skeleton': 'mob_jiangshi' };
 const FX = { slash: [32, 32, 4], curve: [32, 32, 4], double: [32, 32, 4], double2: [32, 32, 4], circle: [32, 32, 4], cut: [32, 32, 5], claw: [32, 32, 4], smoke: [32, 32, 6], flam: [32, 32, 5], thunder: [40, 28, 4], rock: [30, 30, 14], spark: [32, 32, 5], spirit: [32, 32, 5], spiritb: [32, 32, 5], aura: [32, 32, 4], aurap: [32, 32, 4], ring: [32, 32, 4], ringw: [32, 32, 4], shieldy: [24, 26, 6], shieldb: [24, 26, 6] };
 const PJ = { p_arrow: [13, 5, 1], p_kunai: [14, 5, 1], p_shuriken: [16, 16, 2], p_energy: [16, 16, 4], p_fire: [16, 16, 4], p_bigenergy: [24, 24, 4] };
 
@@ -523,8 +527,8 @@ export class Battle {
     if (a.hdIm !== undefined && (a.hdIm || this.t > 1)) return a.hdIm;
     if (!G.hd?.sheet || a.big || a.mon || a.def_?.stamp) return (a.hdIm = null);
     if (a.isPlayer) return (a.hdIm = G.hd.sheet({ me: 1 }));
-    const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, '');
-    return (a.hdIm = G.hd.sheet({ id, keys: [a.def_?.pk, b], spr: a.spr }));
+    const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, ''), fm = /^(?:fd|sga|sgn)_([a-z]+)/.exec(id), al = fm && G.free?.fac?.(fm[1])?.align;
+    return (a.hdIm = G.hd.sheet({ id, keys: [a.def_?.pk, b, MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
   }
   pose(c, a, x, y) {
     let sx = 1, sy = 1, rot = 0, ox = 0;
