@@ -321,10 +321,13 @@ const rot = (a, i) => a.slice(i % a.length).concat(a.slice(0, i % a.length));
 function townNpcs(l, id, out, folk) {
   const CT = CITYTALK[l.id] || { talk: CHAT.town, bark: [] }, night = G.S.flags.night, kid = G.S.gender === 'f' ? '누나' : '형';
   // 길 가는 사람마다 직업과 말투가 다르다(js/voices.js). 이야기 모드의 그날 소문은 앞의 두 사람이 먼저 꺼낸다
-  const VO = G.voices.assign(id, [0, 1, 2, 3, 4, 5, 6].map(i => folk[i % folk.length]));
+  const VO = G.voices.assign(id, Array.from({ length: 23 }, (_, i) => folk[i % folk.length]));
   const talkOf = (i, spr) => async () => { const t = i < 2 && G.jh.talkOfDay(), P = VO[i]; await npcSay(P.who, P.spr, t || G.voices.line(id + ':folk' + i, P.p, { map: id, place: l.name, local: rot(CT.talk, i) })); };
   // 길을 오가는 사람들. 짝수 번째는 가끔 집이나 가게에 들어갔다 나온다
   [[29, 12], [24, 22], [36, 23], [29, 30], [12, 22], [46, 22], [29, 36]].slice(0, night ? 2 : 7).forEach(([x, y], i) => { const P = VO[i], spr = P.spr; out.npcs.push({ id: `folk${i}`, spr, x: x + .5, y: y + .75, dir: i % 4, life: 'stroll', enters: i % 2 === 0, speed: 17 + (i * 7) % 11, hint: P.who, barks: () => night ? SLEEPY : [...CT.bark, ...P.p.bark], talk: talkOf(i, spr) }); });
+  // 거리에 오가는 사람을 더 둔다. 넓은 광장에 일곱 명뿐이라 도시가 텅 비어 보였다(문 앞 길, 광장, 큰길 양쪽)
+  const MORE = [[29, 39], [31, 37], [27, 34], [22, 24], [38, 20], [33, 13], [26, 15], [8, 23], [18, 23], [42, 23], [52, 23], [30, 6], [44, 31], [16, 33], [48, 14], [12, 12]];
+  MORE.slice(0, night ? 3 : MORE.length).forEach(([x, y], k) => { const i = 7 + k, P = VO[i] || VO[k % 7], spr = P.spr; out.npcs.push({ id: `folk${i}`, spr, x: x + .5, y: y + .75, dir: k % 4, life: 'stroll', far: 18 + (k * 5) % 12, enters: k % 3 === 0, speed: 15 + (k * 7) % 13, hint: P.who, barks: () => night ? SLEEPY : [...CT.bark, ...P.p.bark], talk: talkOf(i, spr) }); });
   // 순라군 둘. 하나는 광장을 돌고 하나는 큰길을 오간다
   [[[20, 15], [39, 15], [39, 31], [20, 31]], [[30, 10], [30, 38], [30, 23], [55, 23], [4, 23], [30, 23]]].forEach((route, i) => out.npcs.push({ id: 'guard' + i, spr: 'Knight', x: route[0][0] + .5, y: route[0][1] + .75, dir: 0, life: 'patrol', route, speed: 19, hint: '순라군', barks: () => night ? PATROL.night : PATROL.day, talk: async () => { await npcSay('순라군', 'Knight', nextLine(id + 'pt', PATROL.talk)); } }));
   // 문 앞 거지는 밤낮없이 앉아 있다
@@ -338,6 +341,8 @@ function townNpcs(l, id, out, folk) {
     return;
   }
   STALLS.forEach((st, i) => { const [x, y] = [[24, 18.3], [37, 18.3], [24, 28.3], [37, 28.3]][i]; out.npcs.push({ id: 'stall_' + st.k, spr: st.spr, x, y, dir: 0, life: 'still', hint: st.who, hawk: [...st.hawk, ...(CITYHAWK[l.id]?.[st.k] || [])], gap: [6, 12], talk: () => stallTalk(l, st) }); });
+  // 좌판마다 손님 하나씩 서서 물건을 본다
+  [[24, 20], [37, 20], [24, 30], [37, 30]].forEach(([x, y], i) => out.npcs.push({ id: 'buyer' + i, spr: folk[(i + 3) % folk.length], x: x + .3, y: y + .2, dir: 3, life: 'watch', lively: 1, look: [x, y - 1.7], hint: '손님', barks: ['이거 얼마요?', '좀 깎아 주시오.', '어제보다 비싸졌네.', '하나만 더 얹어 주시오.'], talk: async () => { await npcSay('손님', folk[(i + 3) % folk.length], nextLine(id + 'buyer' + i, ['값을 묻고 있는 중이오. 방해 마시오.', '여기 물건이 제일 싸오. 맛은 장담 못 하오만.', '저 주인이 오늘 기분이 좋아서 덤을 준다오.', '구경만 하는 거요. 돈은 집에 두고 왔소.'])); } }));
   // 이야기꾼과 듣는 사람들
   out.npcs.push({ id: 'teller', spr: 'Monk', x: 15, y: 26.4, dir: 0, life: 'still', hint: '이야기꾼', hawk: ['자, 들어들 보시오!', '이건 진짜 있었던 일이오.', '오늘은 무슨 얘기를 할까…'], talk: () => tellerTalk(l) });
   [[13.4, 28.2, 'Villager'], [15.1, 28.7, 'Woman'], [16.8, 28.1, 'Villager4']].forEach(([x, y, spr], i) => out.npcs.push({ id: 'listen' + i, spr, x, y, dir: 1, life: 'watch', lively: 1, look: [15, 26.4], hint: '말 걸기', barks: LISTEN, talk: async () => { await npcSay('듣는 사람', spr, rot(['쉿. 지금 제일 재밌는 대목이오.', '저 영감 얘기는 반이 거짓말이오. 그래도 재밌소.', '어제 들은 얘기랑 끝이 다르오. 그래서 또 듣는 거요.'], i)[0]); } }));
