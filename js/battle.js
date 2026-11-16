@@ -477,7 +477,7 @@ export class Battle {
     if (this.dimT > 0) { c.fillStyle = `rgba(6,4,14,${Math.min(.6, this.dimT)})`; c.fillRect(0, 0, 1280, 720); }
     const M = (x, y, flat) => H.affine(x, y, flat), put = (x, y, flat) => { const m = M(x, y, flat); c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]); };
     BF.draw(c, this, true, 0, 0, [], null, M);
-    for (const t of this.teles) { put(t.x, t.y, true); this.drawTele(c, t); }
+    for (const t of this.teles) { put(t.x, t.y, true); this.drawTele(c, t, true); }
     for (const z of this.zones) { put(z.x, z.y, true); const u = 1 - z.left / z.tot; c.fillStyle = z.player ? 'rgba(170,200,255,.2)' : 'rgba(230,50,30,.2)'; c.beginPath(); c.ellipse(z.x, z.y, z.r, z.r * .8, 0, 0, 7); c.fill(); c.fillStyle = z.player ? 'rgba(190,220,255,.35)' : 'rgba(255,90,50,.35)'; c.beginPath(); c.ellipse(z.x, z.y, z.r * u, z.r * .8 * u, 0, 0, 7); c.fill(); }
     for (const p of this.proj) { put(p.x, p.y); this.drawProj(c, p); }
     for (const f of this.fx) { put(f.x, f.y); this.drawFx(c, f); }
@@ -530,7 +530,7 @@ export class Battle {
     c.restore();
     if (this.p.hp / this.p.maxHp < .25 && !this.ended) { const g = c.createRadialGradient(640, 360, 300, 640, 360, 760); g.addColorStop(0, 'rgba(120,0,0,0)'); g.addColorStop(1, `rgba(130,0,0,${.32 + Math.sin(this.t * 6) * .1})`); c.fillStyle = g; c.fillRect(0, 0, 1280, 720); }
   }
-  drawTele(c, t) {
+  drawTele(c, t, thin) {  // thin: 새 화면에서는 이 판이 사람 위에 겹쳐지므로 옅게 칠하고 테두리로 보인다(붉은 판에 주인공이 묻혀 안 보이던 것)
     const u = 1 - t.left / t.tot, col = t.ub ? '230,50,30' : '240,190,60';
     c.save(); c.translate(t.x, t.y); const an = Math.atan2(t.ay, t.ax);
     const shape = (k) => {
@@ -540,7 +540,8 @@ export class Battle {
       else { c.rotate(an); c.rect(0, -t.w / 2, t.len * k, t.w); }
       c.fill();
     };
-    c.fillStyle = `rgba(${col},.17)`; c.save(); shape(1); c.restore(); c.fillStyle = `rgba(${col},.38)`; c.save(); shape(u); c.restore();
+    if (thin) { c.fillStyle = `rgba(${col},.07)`; c.strokeStyle = `rgba(${col},.8)`; c.lineWidth = .7; c.save(); shape(1); c.stroke(); c.restore(); c.fillStyle = `rgba(${col},.2)`; c.save(); shape(u); c.restore(); }
+    else { c.fillStyle = `rgba(${col},.17)`; c.save(); shape(1); c.restore(); c.fillStyle = `rgba(${col},.38)`; c.save(); shape(u); c.restore(); }
     c.restore();
   }
   drawActor(c, a, noShadow) {

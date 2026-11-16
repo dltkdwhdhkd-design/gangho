@@ -24,7 +24,8 @@ const BYID = {
   lion: 2, wei: 2, senior_go: 2, so_rival: 3, elder_wi: 3, fighter_a: 2, fighter_b: 3, fighter_c: 3, cheolu_spar: 3, so_final: 4, fox: 4, chief: 5, chief2: 6, demon_eye: 3,
   ogang_foe: 3, guyang_foe: 3, paeng_cap: 3, samaung_foe: 4, samaung_last: 4, makgo: 3, hyeolma: 4, hyeolma2: 4, hyeol_elite: 3, bingma: 5, cheon2: 5, gwima: 5, moon_envoy: 5,
   tianmo: 6, tianmo0: 7, majang: 3, gate_guard: 3, wanted3: 3,
-  so_ally: 4, cheol_ally: 3, hyegak_ally: 5, namgung_ally: 5, baek_ally2: 5, gwak_ally: 4, samaung_ally: 4, hyeok_ally: 4, lion_ally: 3, wei_ally: 3, ogang_ally: 3, guyang_ally: 3, go_ally9: 3,
+  so_ally: 4, cheol_ally: 3, hyegak_ally: 5, namgung_ally: 4, clan_namgung: 4,  // 남궁진은 가주가 아니라 후계자라 초절정
+  baek_ally2: 5, gwak_ally: 4, samaung_ally: 4, hyeok_ally: 4, lion_ally: 3, wei_ally: 3, ogang_ally: 3, guyang_ally: 3, go_ally9: 3,
 };
 // 구파일방·오대세가 대표: 셋째 줄(가주·장문인급)은 화경, 둘째 줄은 초절정, 첫째 줄은 절정
 const TIER = { 1: 3, 2: 4, 3: 5 };
