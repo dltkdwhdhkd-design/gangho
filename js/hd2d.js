@@ -37,7 +37,7 @@ export const HD = {
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso)) && !m.isoRoom && !m.live; },  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
-  init, render, renderBattle, affine, resetCam: () => camT.set(-1, 0, 0), battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  init, render, renderBattle, affine, resetCam: () => camT.set(-1, 0, 0), bbLeft: () => bboard.filter(o => o.mesh.visible).length, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
   dbg: () => ({ fg: FG.map(o => [o.visible, o.position.toArray().map(Math.round), o.scale.toArray().map(Math.round), o.material.type, o.material.map?.image?.width, (() => { const c = o.material.map?.image; if (!c?.getContext) return -1; const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let a = 0; for (let i = 3; i < d.length; i += 4) a += d[i]; return Math.round(a / (d.length / 4)); })()]), cam: cam.position.toArray().map(Math.round), far: cam.far, m: mtns?.children.map(o => [o.position.toArray().map(Math.round), o.visible, o.material.color.getHexString()]) }),
   stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: !!HD.low, size: R ? [R.domElement.width, R.domElement.height] : null }),
@@ -520,6 +520,7 @@ function syncActors(F) {
   if (F.hideMe) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48); blob(p.x, p.y, 1); }
   else put('chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false;
+  for (const o of bboard) o.mesh.visible = false;  // 전투 때 쓴 인물 판(주인공·적)을 마을에서 숨긴다. 안 숨겨서 전투가 끝난 자리에 주인공 닮은 사람이 덩그러니 서 있었다
 }
 
 // ── 카메라 ──

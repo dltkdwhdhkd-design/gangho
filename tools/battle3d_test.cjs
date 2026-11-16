@@ -17,10 +17,11 @@ const { chromium } = require('playwright');
         let i = 0; while (!done && i++ < 3000) { G.fast(30); await new Promise(r => setTimeout(r, 0)); }
         res[ar].out = done?.outcome || '멈춤';
       }
-      G.fast(2); const gl = document.querySelector('#gl'); return { res, gl: gl ? gl.style.display : '없음', scene: G.scene };
+      G.fast(2); await new Promise(r => setTimeout(r, 400)); G.fast(2); const gl = document.querySelector('#gl'); return { res, gl: gl ? gl.style.display : '없음', scene: G.scene, bb: G.hd.bbLeft?.() ?? 0 };
     });
     out.push(q + ' ' + JSON.stringify(r));
     for (const [k, v] of Object.entries(r.res)) { if (v.out !== 'win') fail.push(`${q} ${k}: ${v.out}`); if (v.stage !== (q === '?hd2d=1')) fail.push(`${q} ${k}: 3D 무대 ${v.stage}`); }
+    if (r.bb) fail.push(`전투 뒤 마을에 전투 인물 ${r.bb}명이 남음`);
     if (q && r.gl !== 'block') fail.push('전투 뒤 새 화면이 안 보임: ' + r.gl);
     await p.close();
   }
