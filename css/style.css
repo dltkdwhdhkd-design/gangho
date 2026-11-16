@@ -202,3 +202,4 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .sk .mp{font-size:10px}
 .sk .ct{font-size:14px;bottom:2px}
 #stage.inbattle #hdp>*:not(:first-child){display:none!important}
+.bname .realm{font-size:.7em;color:#ffcf8a;border:1px solid rgba(255,207,138,.55);padding:0 5px;margin-left:6px;vertical-align:middle;border-radius:3px;background:rgba(0,0,0,.35)}

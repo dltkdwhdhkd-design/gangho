@@ -19,7 +19,7 @@ FACS.forEach(f => { const l = LOCS.find(q => q.fac === f.id); if (HOME[f.id]) f.
 export const fac = id => FACS.find(f => f.id === id);
 export const rankName = (f, r) => (f.id === 'gaebang' ? RANKS.개방 : RANKS[f.group])[r];
 const T = { 1: [1000, 28, 8, 66, 130, 60, 1.05, 130], 2: [1500, 34, 10, 72, 220, 100, .95, 170], 3: [2200, 40, 12, 76, 340, 160, .85, 220] };
-for (const c of EXTRA) { const t = T[c.tier]; FOES['clan_' + c.id] = { name: c.who, spr: 'chars/' + c.spr, hp: t[0], atk: t[1], def: t[2], spd: t[3], exp: t[4], silver: t[5], pause: t[6], poise: t[7], moves: c.moves, boss: 1, title: c.name, wpn: c.wpn, guard: c.tier * .4, phases: [{ hp: .5, pause: t[6] * .8 }] }; }
+for (const c of EXTRA) { const t = T[c.tier]; FOES['clan_' + c.id] = { name: c.who, spr: 'chars/' + c.spr, hp: t[0], atk: t[1], def: t[2], spd: t[3], exp: t[4], silver: t[5], pause: t[6], poise: t[7], moves: c.moves, boss: 1, tier: c.tier, title: c.name, wpn: c.wpn, guard: c.tier * .4, phases: [{ hp: .5, pause: t[6] * .8 }] }; }
 Object.assign(WHO, { steward: { name: '집사', face: 'OldMan' } });
 
 // ── 적 ──

@@ -9,6 +9,7 @@ import { stats, bonus, masteryLv, canEquip, DIFF, gainExp, save, give } from './
 import { DB } from './items.js';
 import { openMenu } from './ui.js';
 import * as BF from './battlefx.js';
+import * as RL from './realm.js';
 import { stageOf } from './hd2d/stages.js';
 
 // 전투 화면은 아래 기술 칸 띠(BAND) 위에만 그린다. 기술 칸이 싸움을 가리지 않게
@@ -50,6 +51,7 @@ export class Battle {
     const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) : 1)), atk = f.atk * (enemy ? d.foeAtk : 1);
     const a = new Actor({ id, def_: f, team, name: f.name, spr: f.spr, x, y, maxHp: hp, hp, atk, def: f.def, spd: f.spd, crit: .02, boss: f.boss, elite: f.elite, mon: f.mon, big: f.big, r: f.r || 6, scale: f.scale || 1, wpn: f.wpn, moves: f.moves.slice(), pause: f.pause, poise: f.poise || 0, maxPoise: f.poise || 0, phase: 0, ax: 0, ay: 1, face: 0, dummy: f.dummy, atkCd: rnd(.6, 1.3) });
     if (team === 0) { a.hp = a.maxHp = hp * 1.4; a.atk = atk * .7; }
+    RL.apply(a, id, f, this.cfg, enemy);  // 경지: 능력치와 막기·연계 버릇(js/realm.js)
     this.actors.push(a); return a;
   }
   foes(a) { return this.actors.filter(o => o.team !== a.team && !o.dead); }
@@ -265,6 +267,7 @@ export class Battle {
     if (o.st === 'guard' && front && !h.ub) {
       const moon = o.buffs.moonlight > 0;
       if (o.guardT < PARRY + (isP ? (this.b.parry || 0) : 0) || moon) return this.parry(o, src, proj);
+      if (!isP && o.realm >= 3) { o.guardAI = Math.min(o.guardAI, .15); o.counterNext = 1; }  // 막고 곧바로 되받아친다
       const bd = this.calc(src, o, h, sk) * .22; o.hp -= bd; o.mp = Math.max(0, o.mp - bd * .4); this.num(o.x, o.y - 16, Math.round(bd), '#bbb', .8); Sound.sfx('mini', .8); this.addFx('spark', o.x + nx * -6, o.y - 6, .5);
       o.kx = nx * 40; o.ky = ny * 40; o.kT = .1;
       if (isP && o.mp <= 0) { o.st = 'stun'; o.stT = .7; this.say(o, '자세 무너짐', '#ff8f7a'); }
@@ -276,6 +279,7 @@ export class Battle {
     if (isP && G.S.heart === 'iron_shirt') dmg *= .9;
     if (src.isPlayer && G.S.heart === 'fury' && src.hp < src.maxHp * .5) dmg *= 1.25;
     if (o.stagger > 0) dmg *= 1.4;
+    if (o.dmgIn) dmg *= o.dmgIn;  // 경지 차이(호신강기)
     dmg = Math.max(1, Math.round(dmg)); o.hp -= dmg; o.flash = .1;
     this.num(o.x + rnd(-4, 4), o.y - 16, dmg, crit ? '#ffd23c' : isP ? '#ff7a6a' : '#fff', crit ? 1.35 : 1);
     this.addFx('spark', o.x - nx * 2, o.y - 7, .55); if (!src.mon || sk) BF.impact(this, (proj && proj.st) || src.fxSt || 'steel', o, nx, ny, (h.mul || 1) >= 2.5 || crit);
@@ -297,7 +301,7 @@ export class Battle {
       if (o.poise > 0) stagger = false;
       else if (o.maxPoise < 9000) { o.poise = o.maxPoise; o.st = 'stun'; o.stT = 1.5; o.stagger = 1.5; o.sk = null; stagger = false; this.say(o, '자세 무너짐!', '#ffd23c'); this.shake(3); Sound.sfx('boom2'); this.teles = this.teles.filter(t => t.owner !== o); }
     }
-    if (stagger) { o.st = 'stun'; o.stT = (h.stun || .25); o.sk = null; o.mv = null; o.rush = null; o.vx = o.vy = 0; o.kx = nx * (h.kb || 20) * 2.4; o.ky = ny * (h.kb || 20) * 2.4; o.kT = .16; this.teles = this.teles.filter(t => t.owner !== o); }
+    if (stagger) { const rs = o.rStun || 1, rk = o.rKb || 1; o.st = 'stun'; o.stT = (h.stun || .25) * rs; o.sk = null; o.mv = null; o.rush = null; o.vx = o.vy = 0; o.kx = nx * (h.kb || 20) * 2.4 * rk; o.ky = ny * (h.kb || 20) * 2.4 * rk; o.kT = .16; this.teles = this.teles.filter(t => t.owner !== o); }
     this.stop = Math.max(this.stop, (h.mul || 1) > 2 ? .09 : .045);
     if (isP) { this.shake(2); o.iframe = Math.max(o.iframe, .3); }
     if ((h.mul || 1) >= 3) this.shake(3);
@@ -316,6 +320,7 @@ export class Battle {
   parry(o, src, proj) {
     this.addFx('ringw', o.x, o.y - 7, 1.2); Sound.sfx('sword2'); Sound.sfx('power1', .5); this.stop = .12; this.shake(2);
     this.say(o, '튕겨내기!', '#ffe9a8'); o.iframe = .25;
+    if (!o.isPlayer && o.realm >= 3) { o.guardAI = Math.min(o.guardAI || 0, .08); o.counterNext = 1; }
     if (o.isPlayer) {
       if (G.arts && src?.skKey && src.st === 'skill') G.arts.parried(src.skKey);
       o.mp = Math.min(o.maxMp, o.mp + 8);
@@ -429,18 +434,23 @@ export class Battle {
     if (a.busy) return;
     const T = this.near(a); if (!T) { a.vx = a.vy = 0; return; }
     const dx = T.x - a.x, dy = T.y - a.y, d = hyp(dx, dy) || 1, nx = dx / d, ny = dy / d;
-    if (a.st === 'guard') { a.guardT += dt; a.guardAI -= dt; a.vx = a.vy = 0; if (a.guardAI <= 0) { a.st = 'idle'; a.atkCd = Math.min(a.atkCd, .2); } return; }
+    if (a.st === 'guard') { a.guardT += dt; a.guardAI -= dt; a.vx = a.vy = 0; if (a.guardAI <= 0) { a.st = 'idle'; a.atkCd = Math.min(a.atkCd, a.counterNext ? 0 : .2); } return; }
     a.ax = lerp(a.ax, nx, .25); a.ay = lerp(a.ay, ny, .25); const l = hyp(a.ax, a.ay) || 1; a.ax /= l; a.ay /= l; a.face = faceOf(a.ax, a.ay);
     const f = a.def_;
     // 막기: 플레이어가 코앞에서 공격하면 일정 확률로 막는다
-    if (f.guard && T.st === 'skill' && d < 44 && T.skT < .08 && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < f.guard * .4) { a.st = 'guard'; a.guardT = f.guard >= 1 && Math.random() < .3 ? .1 : .3; a.guardAI = rnd(.35, .7); return; } }
+    // 막기: 상대가 코앞에서 초식을 시작하면 경지만큼 미리 읽고 막는다. 높은 경지는 아예 튕겨 낼 때가 많다
+    if (a.rGuard && T.st === 'skill' && d < 44 + a.realm * 3 && T.skT < .08 + a.rRead && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < a.rGuard * .4) { a.st = 'guard'; a.guardT = Math.random() < a.rPerfect ? -1 : .3; a.guardAI = rnd(.35, .7) + a.rRead; return; } }
     const attackers = this.actors.filter(o => o.team === 1 && !o.dead && o.st === 'skill').length;
     if (a.atkCd <= 0 && (a.boss || attackers < 2 || a.team === 0)) {
       const opts = a.moves.map(m => MOVES[m]).filter(m => m && d <= m.range + 8 && (a.cd[m.id] || 0) <= 0);
       if (opts.length) {
-        const m = pick(opts); a.ax = nx; a.ay = ny; a.face = faceOf(nx, ny);
+        const m = a.counterNext ? opts.reduce((p, q) => q.dur < p.dur ? q : p) : pick(opts); a.ax = nx; a.ay = ny; a.face = faceOf(nx, ny);
         this.start(a, m, m.id); a.cd[m.id] = m.once || (m.ult ? 16 : 0) || (m.fromSkill ? Math.min(m.cd, 8) : 0) || (m.range > 90 ? 3 : .5);
-        a.atkCd = a.pause * rnd(.75, 1.3) + m.dur * .35; return;
+        a.atkCd = a.pause * rnd(.75, 1.3) + m.dur * .35;
+        // 연계: 경지가 높으면 초식이 끝나자마자 다음 초식을 잇는다. 막은 뒤 되받아친 초식도 한 번 더 이을 수 있다
+        if (a.chainN < a.rChain && Math.random() < a.rCombo + (a.counterNext ? .2 : 0)) { a.atkCd = m.dur * .9; a.chainN++; } else a.chainN = 0;
+        if (a.counterNext) { a.counterNext = 0; if (a.realm >= 4) this.say(a, '되받아치기', '#ffcf8a'); }
+        return;
       }
     }
     const keep = f.keep || 0; const close = Math.min(...a.moves.map(m => MOVES[m] ? MOVES[m].range : 40), 40) * .8;
@@ -646,7 +656,7 @@ export class Battle {
     const p = this.p, S = G.S;
     h.innerHTML = `<div class="bars"><div class="bname">${esc(S.title)} ${esc(p.name)}</div><div class="bar"><i class="lag" id="hLag"></i><i class="val" id="hVal"></i><b id="hTxt"></b></div><div class="bar mp"><i class="val" id="mVal"></i><b id="mTxt"></b></div></div>`;
     const bosses = this.actors.filter(a => (a.boss || a.elite) && a.team === 1).sort((a, b) => !!b.boss - !!a.boss);
-    if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.nameplate || b.name)}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
+    if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.nameplate || b.name)}${b.realm >= 2 && !b.def_.nameplate ? ` <small class="realm">${RL.NAME[b.realm]}${b.gap ? ' ▲' : ''}</small>` : ''}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
     const key = (i) => Keys.label('s' + i);
     let sk = '';
     S.slots.forEach((id, i) => { const k = id && SKILLS[id]; sk += `<div class="sk ${k && k.ult ? 'ult' : ''}" id="sk${i}"><span class="ky">${key(i)}</span>${k ? `<span class="mp">${k.mp}</span><span class="nm">${k.name}</span>` : '<span class="nm">-</span>'}<div class="cd"></div><span class="ct"></span></div>`; });

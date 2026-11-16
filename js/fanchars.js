@@ -1,6 +1,7 @@
 // 팬 게임 인물(『화산귀환』): 사용자가 ChatGPT로 그린 걷는 도트(assets/hd2d/preview/n_<키>.webp)를 쓰는 사람들
 // 저마다 소속 문파·세가 터(b_<문파>)나 고을에 서 있다. 말을 걸면 한두 마디 하고, 자유 모드에서는 비무를 청할 수 있다
 // 대사는 원작 문장을 옮기지 않고 새로 썼다. 대화 그림(assets/art/<키>_n)이 들어오면 그 그림으로 말한다
+import { fanRealm, LV as RLV } from './realm.js';
 import { G, TS, ART, pick, josa } from './core.js';
 import { Story, ctx, say, choice, narr } from './ctx.js';
 import { WHO } from './dialog.js';
@@ -143,8 +144,9 @@ async function talk(k) {
   if (!fac || !G.jh?.disciple || !G.free?.fac) return;
   const c = await choice(`${name} · ${title}`, ['비무를 청한다', '그냥 간다']); if (c) return;
   if (T.no) return say(who, pick(T.no));
-  const f = G.free.fac(fac); if (!f) return; const base = G.jh.disciple(f, G.S.lv + 1, true), id = 'fan_' + k;
-  FOES[id] = { ...FOES[base], name: `${title} ${name}`, boss: 1 };
+  // 경지대로 센 상대가 나온다(js/realm.js). 청명·가주급은 화경이라 낮은 경지에서 덤비면 크게 진다
+  const f = G.free.fac(fac); if (!f) return; const rl = fanRealm(k, title), base = G.jh.disciple(f, Math.max(G.S.lv + 1, RLV[rl] + 3), true), id = 'fan_' + k;
+  FOES[id] = { ...FOES[base], name: `${title} ${name}`, boss: 1, realm: rl };
   await say(who, pick(T.ok || ['비무라. 사양하지 않겠습니다.', '한 수 부탁드립니다.']));
   const won = await ctx.duel({ foes: [id], arena: G.field.m.arena, bgm: 'fight', title: `${josa(name, '와/과')} 비무`, optional: true, noIntro: true, noLoot: true });
   await say(who, won ? pick(T.d || ['…졌습니다. 다시 겨뤄 주십시오.']) : pick(T.w || ['수련을 더 하고 오십시오.']));

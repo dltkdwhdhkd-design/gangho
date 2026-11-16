@@ -39,7 +39,7 @@ export const CLANS = [
 ];
 for (const c of CLANS) {
   const t = T[c.tier];
-  FOES['clan_' + c.id] = { name: c.who, spr: 'chars/' + c.spr, ...t, moves: c.moves, boss: 1, title: c.name, wpn: c.wpn, guard: c.tier * .4, keep: c.keep, phases: [{ hp: .5, pause: t.pause * .8 }] };
+  FOES['clan_' + c.id] = { name: c.who, spr: 'chars/' + c.spr, ...t, moves: c.moves, boss: 1, tier: c.tier, title: c.name, wpn: c.wpn, guard: c.tier * .4, keep: c.keep, phases: [{ hp: .5, pause: t.pause * .8 }] };
   WHO['clan_' + c.id] = { name: c.who, face: c.spr };
 }
 Object.assign(FOES, {
