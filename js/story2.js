@@ -313,9 +313,11 @@ async function foxBoss() {
   ctx.cg('mask');
   await narr('가면이 갈라져 떨어졌다. 나와 어딘가 닮은 얼굴이었다.');
   ctx.cgOff();
+  { const c = await choice('발치에 갈라진 가면 조각이 떨어져 있다.', ['조각을 주워 품에 넣는다', '밟고 지나간다']); if (c === 0) { F().mask_shard = true; G.fate?.mark(); await say(null, '여우 가면 조각을 얻었다. 안쪽에 월하문 글자가 새겨져 있다.'); } }
   await say('cheon', '너도 개처럼 컸다더구나. 나는 여덟 살에 연경추 손에 끌려가 사람 죽이는 법을 배웠다.');
   await say('me', '그럼 당신이 그 큰아이…', 'b');
   await say('cheon', '형이라고 부르지 마라. 그 말을 들으면 칼을 못 든다.');
+  { const c = await choice('그 사람이 칼끝을 내린다.', ['“…형.”', '말을 삼킨다']); if (c === 0) { F().wol_named = true; G.fate?.mark(); await say('me', '…형.', 's'); await narr('그 사람의 칼끝이 한 번 떨렸다. 대답은 없었다.'); } }
   await say('cheon', '하나만 알아 둬라. 북쪽 변경 마을을 태운 건 전쟁이 아니다. 너를 찾던 무면회다. 견대도 연경추가 고아를 모으려고 만든 곳이고.');
   await say('me', '제 마지막 임무도요?', 's');
   await say('cheon', '그래. 네가 살아 돌아온 것만 그자의 계산에 없었다.');

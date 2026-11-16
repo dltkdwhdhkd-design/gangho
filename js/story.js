@@ -22,6 +22,8 @@ import './arts.js';
 import './wander.js';
 import './travel.js';
 import './fanchars.js';
+import './fate.js';
+import './endings.js';
 import './jianghu.js';
 import './saga.js';
 import './voices.js';

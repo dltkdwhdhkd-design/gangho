@@ -111,6 +111,12 @@ async function mossRain() {
     await say('jangpal', '형씨. 쟤들 저랑 같이 물 긷던 애들이어유. 묻어 주고 싶은디 손이 떨려서 삽을 못 잡겠어유.');
     await narr('셋이서 매화나무 아래에 구덩이를 팠다. 고진은 사제들 칼을 하나씩 닦아서 같이 묻었다.');
   } else await say('lord', '고진이 있었으면 저 아이들을 자기 손으로 보냈을 것이오. 이끼는 가져가시오. 산문을 나가시오.');
+  { const c = await choice('바위틈에 이끼가 아직 남아 있다. 밤까지 남으면 더 캘 수 있다. 그런데 소림 쪽에서 혈교가 움직인다는 소식이 왔다.', ['밤까지 남아 넉넉히 캔다', '필요한 만큼만 캐서 내려간다']);
+    if (c === 0) {
+      await narr('해가 지자 바위틈이 더 밝게 빛났다. 이끼를 긁는 소리를 듣고 붉은 눈들이 또 올라왔다.');
+      await ctx.duel({ foes: ['rainman', 'rainman', 'rainman', 'rainman'], arena: 'forest', bgm: 'fight', title: '달빛이끼 (밤)' });
+      F().moss_extra = true; G.fate?.mark(); await say(null, '달빛이끼를 넉넉히 캤다. 사흘이 더 걸렸다.');
+    } }
   F().r_moss = true; ctx.note('창운산에서 달빛이끼를 구했다.'); checkRain();
 }
 async function dangRain() {
@@ -125,10 +131,28 @@ async function dangRain() {
   F().r_dang = true; ctx.love('clan_dang'); ctx.note('당소연이 벽독단 처방과 자기 피를 내주기로 했다.'); checkRain();
 }
 function checkRain() { if (F().r_moss && F().r_dang) ctx.goal('윤씨 약방으로 돌아가기'); }
+// 이끼를 넉넉히 캐 온 길: 묽은 약으로 먼저 시험할 수 있어서 윤 의원이 산다
+async function rainCureSafe() {
+  await say('yun', '먹어 볼 사람이 있어야 해요. 제가 먹을게요.');
+  await say('doc', '아니다. 이리 다오.');
+  await say('yun', '아버지, 이끼가 넉넉해요. 열 배로 묽혀서 한 모금씩 먼저 봐요. 한꺼번에 들이켜지 말고요.', 'a');
+  await narr('윤 의원은 약사발을 들었다가 내려놓았다. 소매에 피가 묻어 있었다. 사흘 전부터 기침을 숨기고 있었다는 걸 그제야 알았다. 윤설은 그 소매를 보고도 아무 말 없이 약을 묽혔다.');
+  await say('doc', '…네 어미도 이렇게 고집이 셌다.', 'h');
+  await narr('그날 밤 붉은 눈들이 약방으로 몰려왔다. 피 냄새를 맡은 것 같았다.');
+  await ctx.duel({ foes: ['rainman', 'rainman', 'rainman', 'rainman'], allies: ['smith_ally', 'dang_ally'], arena: 'village', bgm: 'boss', title: '약방을 지켜라', survive: 40, tip: '40초를 버티면 날이 밝습니다.' });
+  await narr('날이 밝자 비가 그쳤다. 열 배로 묽힌 약은 사흘에 걸쳐 들었다. 윤 의원의 기침이 멎었다. 나흘째 아침, 노인은 왕진 가방을 챙기고 있었다.');
+  await say('doc', '순이네 둘째가 열이 난단다. 다녀오마.', 'h');
+  await say('yun', '아버지는 누워 계세요!', 'a');
+  await say('yun', '…{나} 씨. 이끼 고마워요. 사흘 늦게 온 거, 아버지는 몰라요.', 's');
+  G.fate?.set('doc', 'alive', '넉넉히 캔 달빛이끼로 약을 묽게 먼저 시험했다');
+  set('r3'); ctx.goal('달맞이 객잔의 곽 아주머니에게 가기');
+  ctx.note('혈우를 고쳤다. 윤 의원이 살았다. 대신 사흘을 늦었다.');
+}
 async function rainCure() {
   await say('yun', '이끼 왔어요? 당 소저는 앉아요. 소매 걷고요.');
   await say('clan_dang', '피를 뽑히는 건 처음이네요. 살살 해요.', 'b');
   await narr('꼬박 하루가 걸렸다. 윤설은 약사발 하나를 들고 한참 들여다봤다.');
+  if (F().moss_extra) return rainCureSafe();
   await say('yun', '먹어 볼 사람이 있어야 해요. 제가 먹을게요.');
   await say('doc', '아니다. 이리 다오.');
   await narr('말릴 틈도 없었다. 윤 의원은 약사발을 비우고 나서야 소매로 입을 닦았다. 소매에 피가 묻어 있었다. 사흘 전부터 기침을 숨기고 있었다는 걸 그제야 알았다.');
@@ -215,6 +239,24 @@ async function tableScene() {
 }
 
 // ── 제4장 소림의 문 ──
+// 의형제를 맺었지만 이끼를 캐느라 사흘 늦은 길
+async function gateLate() {
+  await narr('창운산에서 사흘을 더 있었다. 그 사흘 동안 소림 산문 앞에서는 싸움이 계속됐다고 했다.');
+  await say('me', '형님, 뒷길에도 놈들이 올라온대요. 제가 막을게요.');
+  await say('cheol', '아우가 늦었구려. 괜찮소. 뒷길은 아우가 막으시오. 여기는 소승이 사흘째 보고 있소.', 'h');
+  await ctx.duel({ foes: ['hyeol_elite', 'hyeolgyo', 'hyeolgyo'], arena: 'forest', bgm: 'boss', title: '소림 뒷길' });
+  ctx.cg('gate');
+  await narr('뒷길을 막고 돌아왔을 때 싸움은 끝나 있었다. 철우는 돌계단 맨 위에 앉아 있었다. 사흘 동안 한 번도 일어나지 않았다고 했다.');
+  await say('me', '형님. 밥값 내러 왔어요.', 's');
+  await narr('대답이 없었다. 손에 먹다 남은 주먹밥이 쥐여 있었다. 의형제를 맺던 날 내가 사 준 것과 같은 것이었다.');
+  ctx.cgOff();
+  await say('jigaek', '…스님께서 마지막에 그러셨습니다. 아우가 늦는 건 사람을 살리느라 그런 거니 탓하지 말라고.');
+  await narr('십 년 넘게 닫혀 있던 쪽 문이 열렸다. 승려들이 철우를 메고 그 문으로 들어갔다. 윤 의원이 그 뒤를 따라가며 염불 대신 맥을 짚었다. 이미 늦은 손목이었다.');
+  F().cheol_dead = true; G.fate?.set('cheol', 'dead', '달빛이끼를 넉넉히 캐느라 소림에 사흘 늦었다');
+  ctx.note('철우가 소림 산문 앞에서 세상을 떠났다. 나는 사흘 늦었다.');
+  await ctx.warp('cheongha', 22.5, 26, 1);
+  set('r5'); ctx.goal('구화성 남문으로 가기 (나루의 뱃사공)');
+}
 async function gateScene() {
   const sworn = S().sworn === 'cheol';
   await ctx.chap(7, PART, '제4장 소림의 문');
@@ -231,6 +273,7 @@ async function gateScene() {
   await say('cheol', '안 들어가오. 밖에 서겠소.');
   await narr('철우는 닫힌 문을 등지고 돌계단 맨 위에 앉았다. 그러고는 품에서 주먹밥을 꺼내 먹기 시작했다.');
   await ctx.duel({ foes: ['hyeolgyo', 'hyeolgyo', 'hyeolgyo'], allies: ['cheol_ally'], arena: 'court', bgm: 'fight', title: '산문 앞 첫 물결' });
+  if (sworn && F().moss_extra) return gateLate();
   if (sworn) {
     await say('me', '형님, 뒷길에도 놈들이 올라온대요.');
     await say('cheol', '아우가 가시오. 여기는 소승이 보겠소.');
@@ -320,3 +363,4 @@ Story.providers.push(function part7(id) {
   return { npcs: n, spots: sp, trigs: tr, roam: [] };
 });
 G.act3 = { begin, hook7 };
+G.act3t = Object.assign(G.act3t || {}, { rainCure, gateScene, mossRain });  // 시험용

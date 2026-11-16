@@ -1,5 +1,5 @@
 // 제9부 낙월: 천마에게 지고, 무공을 잃고, 객잔으로 돌아가 걸레를 든다. 그리고 끝
-import { G, Sound, fadeTo, toast, $ } from './core.js';
+import { G, Sound, fadeTo, toast, $, josa } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { FOES } from './foes.js';
@@ -21,6 +21,10 @@ Object.assign(FOES, {
   moon_envoy: foe('붉은 달 사자', 'chars/RedArmor', 6000, 68, 16, 84, 1400, 600, .78, ['flurry', 'cloud_flash', 'fan5', 'rain', 'blink'], { wpn: 'Katana', guard: .7, boss: 1, poise: 480 }),
   gwak_ally: foe('곽 아주머니', 'chars/OldWoman', 2400, 72, 16, 70, 0, 0, 1, ['flurry', 'cloud_flash', 'quick'], { wpn: 'Stick' }),
   town_ally: foe('청하진 사람들', 'chars/Villager', 900, 34, 8, 52, 0, 0, 1.3, ['slash', 'lunge'], { wpn: 'Club' }),
+  ogang_ally: foe('오강', 'chars/Villager3', 2200, 46, 13, 70, 0, 0, 1, ['double', 'lunge', 'spin'], { wpn: 'Lance' }),
+  guyang_ally: foe('구양철', 'chars/Caveman2', 2600, 50, 15, 60, 0, 0, 1.1, ['heavy', 'quake', 'spin'], { wpn: 'Axe' }),
+  go_ally9: foe('고진', 'chars/Inspector', 1800, 46, 13, 72, 0, 0, 1, ['double', 'lunge', 'cloud_flash'], { wpn: 'Sword' }),
+  jang_ally: foe('장팔', 'chars/GreenNinja', 1200, 34, 12, 60, 0, 0, 1.2, ['heavy', 'slash'], { wpn: 'Club' }),
   samaung_last: foe('사마웅', 'chars/Samaung', 3000, 60, 18, 62, 0, 0, 1, ['heavy', 'quake', 'spin'], { wpn: 'BigSword' }),
 });
 
@@ -118,16 +122,18 @@ async function siege() {
   if (F().wei_spared) await say('wei', '점소이, 국수 외상 갚으러 왔다. 배는 다 뒤집어 놨으니 강으로는 못 물러난다.');
   if (F().lion_debt) await say('lion', '산에서 내려왔다. 녹림 놈들은 빚지고는 못 산다고 했잖냐.');
   if (F().kids_saved) await narr('나무패를 벗은 아이들 서른한 명이 쟁반을 하나씩 들고 줄을 섰다. 말리는 사람이 없었다. 꼬마가 맨 앞에서 던지는 법을 가르치고 있었다.');
+  const post = await deploy();
   await say('gwak', '다들 밥은 먹었어? 안 먹은 놈은 나중에 먹어. 살아서 먹어.');
   await narr('곽 아주머니가 국자를 들고 맨 앞으로 걸어 나갔다. 나는 쟁반을 집어 들었다.');
   ctx.cgOff();
-  await ctx.duel({ foes: ['majang', 'majang', 'majang'], allies: ['gwak_ally', 'town_ally'], arena: 'dock', bgm: 'fight', title: '나루' });
+  await ctx.duel({ foes: ['majang', 'majang', 'majang'], allies: ['gwak_ally', 'town_ally', ...post[0].map(k => DEF[k].ally)].slice(0, 4), arena: 'dock', bgm: 'fight', title: '나루 문' });
   await say('me', '아주머니, 물러나세요!', 'b');
   await say('gwak', '네가 물러나, 이놈아. 나는 여기서 십칠 년을 살았다.', 'a');
-  await ctx.duel({ foes: ['majang', 'majang', 'hyeol_elite', 'hyeol_elite'], allies: ['gwak_ally', 'town_ally', 'smith_ally'], arena: 'village', bgm: 'fight', title: '광장' });
+  await ctx.duel({ foes: ['majang', 'majang', 'hyeol_elite', 'hyeol_elite'], allies: ['gwak_ally', 'town_ally', ...[...post[1], ...post[2]].map(k => DEF[k].ally)].slice(0, 4), arena: 'forest', bgm: 'fight', title: '대숲 문과 우물' });
   await narr('광장이 뚫렸다. 객잔 마당까지 밀렸을 때 붉은 갑옷을 입은 자가 지붕 위로 뛰어올랐다. 객잔이 불타던 그믐밤처럼 기왓장 밟는 소리가 났다.');
   await say('me', '남의 집 지붕에서 뭐 하는 짓이야!', 'a');
   await ctx.duel({ foes: ['moon_envoy'], allies: ['gwak_ally'], arena: 'yard', bgm: 'boss', title: '붉은 달 사자' });
+  await siegeToll(post);
   await narr('날이 밝았다. 군세가 강 건너로 물러났다. 객잔은 지붕이 반쯤 날아갔는데 서 있었고, 곽 아주머니는 오른쪽 어깨를 누르고 부뚜막 앞에 앉아 있었다. 옛날 칼자국 위로 새 칼자국이 나 있었다.');
   await say('yun', '팔 줘 봐요. 아니, 아주머니 어깨부터요.');
   await say('gwak', '약 너무 쓰게 달이지 말고 감초 많이 넣어.', 'h');
@@ -136,8 +142,41 @@ async function siege() {
   await say('me', '다녀올게요.', 's');
   await say('gwak', '…밥은 먹고 가.', 's');
   await narr('마지막 국수는 내가 끓였다. 곽 아주머니는 한 숟갈 뜨고 나서 소금이 모자란다고 했다. 그릇은 다 비웠다.');
+  { const c = await choice('곽 아주머니가 빈 그릇을 들고 묻는다. “하나 더 싸 주랴?”', ['형 몫으로 하나 더 싸 달라고 한다', '괜찮다고 한다']);
+    if (c === 0) { F().gwak_soup = true; G.fate?.mark(); await say('gwak', '…천이 놈 몫이냐. 식기 전에 먹이라고는 안 한다. 식어도 먹여.', 's'); await say(null, '국 한 그릇을 받았다. 보자기에 싸서 등에 멨다.'); } }
   ctx.note('달맞이 객잔을 지켰다. 천마를 치러 다시 천산으로 간다.');
   set('x4'); await palaceStart();
+}
+
+// 객잔 방어전 배치: 온 사람을 세 문에 나눠 세운다. 한 문에 하나뿐이면 그 사람이 쓰러지고, 아무도 없으면 마을이 사람을 잃는다. 여섯이 넘게 오면 아무도 안 죽는다
+const GATES = ['나루 문', '대숲 문', '우물'];
+const DEF = {
+  cheol: { name: '철우', ally: 'cheol_ally', ok: () => !!F().cheol_arm && G.fate?.of('cheol') !== 'dead', die: '철우는 우물가에서 남은 오른팔 하나로 문짝을 받치고 서 있었다. 날이 밝을 때까지 그 자세였다.' },
+  wei: { name: '위충', ally: 'wei_ally', ok: () => !!F().wei_spared && G.fate?.of('wei') !== 'lost', die: '위충은 나루 문 앞 물속에 엎어져 있었다. 뒤집어 놓은 배 밑으로 마장 셋이 같이 가라앉아 있었다.' },
+  lion: { name: '맹호', ally: 'lion_ally', ok: () => !!F().lion_debt, die: '맹호는 문 앞에 앉은 채였다. 도끼는 오른손에 있었다. 빚은 갚았다고 했다더라고, 아이들이 전했다.' },
+  go: { name: '고진', ally: 'go_ally9', ok: () => !!F().go_bond && !F().go_dead, die: '고진은 무너진 문 자리에 혼자 서 있다가 쓰러졌다. 칼끝은 끝까지 바닥을 보지 않았다.' },
+  jang: { name: '장팔', ally: 'jang_ally', ok: () => !!F().jang_bond && G.fate?.of('jang') !== 'lost', die: '장팔은 쟁반 든 아이들을 객잔 안으로 밀어 넣고 문을 막았다. 문은 버텼다. 장팔은 못 버텼다.' },
+  guyang: { name: '구양철', ally: 'guyang_ally', ok: () => (F().jg_guyang === 'saved' || G.S.side === 'sa'), die: '구양철은 산길 쪽 문을 끝까지 비키지 않았다. 녹림 놈들이 사흘 동안 그 문 앞에서 울었다.' },
+  smith: { name: '대장장이 강씨', ally: 'smith_ally', ok: () => true, safe: 1 },
+};
+async function deploy() {
+  const L = Object.keys(DEF).filter(k => DEF[k].ok()), post = [[], [], []];
+  await narr(`객잔으로 들어오는 길은 셋이었다. 나루 쪽 문, 대숲 쪽 문, 그리고 뒷마당 우물. 내 곁에 선 사람은 ${L.length}명이었다.`);
+  if (L.length < 6) await say('gwak', '셋을 다 막을 사람이 없다. 문 하나에 둘은 서야 안 무너진다. 알아서 세워.', 'a');
+  for (const [i, k] of L.entries()) {
+    const c = G.auto ? i % 3 : await choice(`${josa(DEF[k].name, "을/를")} 어디에 세울까? (나루 ${post[0].length} · 대숲 ${post[1].length} · 우물 ${post[2].length})`, GATES);
+    post[c].push(k);
+  }
+  F().siege_post = post; G.fate?.mark();
+  return post;
+}
+async function siegeToll(post) {
+  const n = post.flat().length; if (n >= 6) { await narr('세 문 모두 버텼다. 아침에 이름을 불러 보니 한 사람도 빠지지 않았다.'); return; }
+  let lost = false;
+  for (const [i, g] of post.entries()) {
+    if (g.length === 0 && !lost) { lost = true; await narr(`${GATES[i]}에는 아무도 서 있지 않았다. 마장들이 그리로 들이쳤고, 촌장 어른이 지팡이를 들고 막아섰다.`); G.fate?.set('town', 'dead', `${GATES[i]}에 아무도 세우지 않았다`); }
+    else if (g.length === 1 && !DEF[g[0]].safe) { const k = g[0]; await narr(DEF[k].die); G.fate?.set(k, 'dead', `객잔 방어전에서 ${GATES[i]}을 혼자 지켰다`); if (k === 'go') F().go_dead = true; }
+  }
 }
 
 // ── 제4장 흑운궁 ──
@@ -146,7 +185,7 @@ async function palaceStart() {
   await narr('이번에는 군대를 데려가지 않았다. 강호에 군대가 남아 있지도 않았다. 혁련하가 아는 길로 석 달을 걸어 천산 뒤쪽 벼랑에 닿았다. 구름 위에 검은 궁이 얹혀 있었다.');
   await ctx.warp('blackpalace', 22, 34, 1);
   await say('hyeok', '이 다리를 건너면 흑운궁입니다. 저는 여기서 자랐습니다. 다리는 하나뿐입니다.');
-  if (S().sworn === 'cheol' ) await say('cheol', '아우, 소승은 오른손이 남았소. 문짝 하나는 더 부술 수 있소.');
+  if (S().sworn === 'cheol' && G.fate?.of('cheol') !== 'dead') await say('cheol', '아우, 소승은 오른손이 남았소. 문짝 하나는 더 부술 수 있소.');
   ctx.goal('다리를 건너 흑운궁 제단으로 가기');
   ctx.note('흑운궁에 닿았다.');
 }
@@ -155,6 +194,8 @@ async function bridge() {
   await say('samaung', '이 다리, 폭이 딱 칼 하나 휘두를 만하네.');
   await say('me', '패천도. 왜 여기 계세요. 분명 강호에 남으신다고…', 'b');
   await say('samaung', '네놈 메고 나올 때 등에 뭘 흘렸는지 아냐. 그 빚은 받아야지.');
+  const og = F().jg_ogang === 'spared' || (side() === 'sa' && F().sa_t2), gy = (F().jg_guyang === 'saved' || (side() === 'sa' && F().sa_t1)) && G.fate?.of('guyang') !== 'dead', tb = (F().table_good || 0) >= 2;
+  if (og && gy && tb) return bridgeTogether();
   await ctx.duel({ foes: ['majang', 'majang', 'majang', 'hyeol_elite'], allies: ['samaung_last'], arena: 'moon', bgm: 'boss', title: '흑운궁 다리' });
   await say('samaung', '가라.');
   await say('me', '같이 가요.');
@@ -163,6 +204,18 @@ async function bridge() {
   await narr('사마웅은 다리 한가운데서 큰 칼을 땅에 꽂고 돌아섰다. 뒤를 돌아보지 말라고 했는데 나는 돌아봤다. 맨 앞 놈의 목이 날아갔고, 그 사람은 웃고 있었다. 칼 부딪는 소리는 궁 문이 닫힐 때까지 들렸다.');
   ctx.cgOff();
   F().samaung_dead = true; await hall();
+}
+// 살려 보낸 두 채주가 따라와 다리 양 끝을 나눠 막는다. 합석에서 한 상에 앉았던 일이 여기서 돌아온다
+async function bridgeTogether() {
+  await say('ogang', '형님 혼자 폭 좋은 다리 차지하는 건 반칙이오. 물귀신도 다리 위에서는 싸울 줄 아오.');
+  await say('guyang', '산길은 애들한테 맡기고 왔다. 무창에서, 산길에서 이놈한테 빚진 놈들이 둘이나 서 있는데 형님 혼자 죽겠다고?');
+  await say('samaung', '…이놈들이. 내 몫을 나눠 먹겠다고?');
+  await say('me', '합석에서 한 상에 앉았잖아요. 국수도 셋이 나눠 드셨으면서.', 'h');
+  await ctx.duel({ foes: ['majang', 'majang', 'majang', 'majang', 'hyeol_elite'], allies: ['samaung_last', 'ogang_ally', 'guyang_ally'], arena: 'moon', bgm: 'boss', title: '흑운궁 다리' });
+  await narr('셋이 다리 한가운데에 등을 맞대고 섰다. 오강이 앞을, 구양철이 뒤를, 사마웅이 가운데를 맡았다. 나는 돌아보지 않고 달렸다. 이번에는 돌아볼 필요가 없었다.');
+  await narr('궁 문이 닫히기 직전에 사마웅의 목소리가 들렸다. 형제 열둘한테 혼날 날을 미뤄야겠다고, 욕 섞인 웃음소리였다.');
+  G.fate?.set('samaung', 'alive', '살려 보낸 오강과 구양철이 다리 위에 같이 섰다');
+  await hall();
 }
 async function hall() {
   await narr('제단으로 가는 복도는 길었다. 복도 끝에 사람이 서 있었다. 가면도 없이, 눈 쌓인 머리 그대로였다.');
@@ -174,6 +227,7 @@ async function hall() {
   await say('cheon', '…{나}.');
   await say('me', '형.', 's');
   await say('cheon', '그 말… 하지 말랬지.');
+  if (F().wol_named && F().wol_mop && F().gwak_soup) return hallSaved();
   await narr('그 순간 복도 끝에서 붉은 빛이 날아왔다. 내가 고개를 돌리기도 전에 형이 나를 등 뒤로 밀쳤다. 빛은 형의 가슴에서 멈췄다.');
   await say('cheon', '아주머니한테… 밥은 먹고 다녔다고 해라.');
   await say('me', '형!', 's');
@@ -181,6 +235,21 @@ async function hall() {
   ctx.cgOff();
   await narr('이번에는 내가 직접 눈을 감겨 주었다.');
   F().cheon_end = true;
+  set('x5'); await finale();
+}
+
+// 숨은 길: 월하곡에서 형이라고 불렀고, 고개에서 칼 대신 걸레질로 끝냈고, 곽 아주머니의 국을 들고 왔다
+async function hallSaved() {
+  await narr('그 순간 복도 끝에서 붉은 빛이 날아왔다. 형이 나를 등 뒤로 밀치려 했다. 나는 그보다 먼저 등에 멘 보자기를 풀어 앞으로 내밀었다.');
+  await narr('빛은 국그릇에 맞았다. 그릇이 깨지고 식은 국물이 형 얼굴에 튀었다. 민물새우 한 줌에 무 한 토막. 붉은 빛은 국물에 젖은 데부터 꺼졌다.');
+  await say('cheon', '…이게 뭐냐.', 'b');
+  await say('me', '아주머니가 형 몫이래. 식어도 먹이랬어.', 'h');
+  await say('cheon', '다 쏟았잖아.', 'b');
+  await say('me', '내려가면 또 끓여 주실 거야. 소금 모자라다고 하면서.', 'h');
+  await narr('형이 웃었다. 처음 보는 얼굴이었다. 열일곱 해 동안 눈 밑에 쌓여 있던 것이 한꺼번에 녹는 얼굴이었다.');
+  await say('cheon', '…가라. 제단은 너 혼자 가야 한다. 나는 문 앞에 서 있겠다. 이번에는 안 죽고.', 'h');
+  ctx.cgOff();
+  F().cheon_end = true; G.fate?.set('wolcheon', 'alive', '이름을 불렀고, 걸레질로 끝냈고, 국 한 그릇을 들고 갔다');
   set('x5'); await finale();
 }
 
@@ -193,6 +262,18 @@ async function finale() {
   await say('cheonma', '…걸레질.');
   await say('me', '당신 먼지 닦으러 왔어요.', 'a');
   await say('cheonma', '삼백 년 전에 그 말을 한 계집이 있었지. 배가 고프구나. 너는 어떤 맛이냐.');
+  if (side() === 'ma') {  // 마교 길: 마지막으로 한 번 더 고른다. 빈 그릇을 채워 바치면 붉은 달 결말
+    await say('cheonma', '너는 내 교단에서 컸다. 그릇을 채워라. 그러면 아무도 배고프지 않게 해 주마.');
+    const c = await choice('천마가 빈 그릇을 내민다.', ['그릇을 받지 않고, 허리를 세운다', '그릇을 채워 바친다']);
+    if (c === 1) {
+      F().ma_side_end = true; G.fate?.mark();
+      ctx.cg('fall');
+      await narr('나는 그릇을 받았다. 품에서 일곱 장을 꺼내 그릇에 넣었다. 그 사람이 그릇을 들어 마셨다. 달이 더 붉어졌다. 배가 부른 얼굴이었다.');
+      await say('cheonma', '착하구나. 이제 아무도 배고프지 않다.');
+      ctx.cgOff(); F().tianmo_down = false;
+      return lastChoice();
+    }
+  }
   const allies = []; { const a = await G.bond.join(side(), allies); if (a) allies.push(a); }
   if (F().hyeok_join && !allies.includes('hyeok_ally')) { await say('hyeok', '제단의 불은 제가 끄겠습니다. 저는 소야입니다.'); allies.push('hyeok_ally'); }
   if (!allies.includes('so_ally')) { await say('so', '왼발 늦지 마라.', 'h'); allies.push('so_ally'); }
@@ -212,20 +293,13 @@ const LEAD = { jeong: ['정천맹을 다시 세운다', '맹주 자리는 내가
 async function lastChoice() {
   const s = side() || 'jeong', lead = LEAD[s];
   await narr('달이 지고 나서도 세상은 그대로 있었다. 무너진 산문을 고치고, 불탄 나루를 다시 놓고, 죽은 사람들 이름을 적는 데 한 해가 갔다.');
-  const c = await choice('그 뒤로 나는', ['달맞이 객잔으로 돌아간다', lead[0], '천산에 남아 봉인 자리를 지킨다', '다시 길을 떠난다']);
-  F().finale = ['inn', 'lead', 'seal', 'road'][c];
-  if (F().cheol_dead) await narr('철우는 소림 경내에 묻혔다. 파계승의 무덤으로는 처음이었다. 그 앞에는 언제나 만두가 놓여 있는데, 누가 놓는지는 아무도 말하지 않는다.');
-  if (F().baek_gone) await narr('백 노인의 마지막 봉투는 곽 아주머니에게 드렸다. 아주머니는 세어 보지도 않고 장부에 ‘갚음’이라고 적었다.');
-  if (c === 0) {
-    ctx.cg('end_table');
-    await narr('달맞이 객잔 지붕을 다시 올렸다. 나는 아침마다 바닥을 닦고 손님상에 국수를 나른다. 곽 아주머니는 내 국물에 아직도 소금이 모자란다고 한다.');
-    await say('gwak', '{나}야! 거기서 뭐 해! 해가 중천이다!', 'a');
-    await say('me', '바닥 닦았는데요.', 'h');
-    await say('gwak', '이게 닦은 거야? …됐다. 밥 먹어.', 'h');
+  if (!F().ma_side_end) {
+    const p = await choice('품 안에 월하칠식 일곱 장이 있다. 이제 무엇에 쓸까.', ['태운다', '곽 아주머니에게 맡긴다', '지니고 다닌다']);
+    F().pages_fate = ['burn', 'gwak', 'keep'][p]; if (p === 0) F().pages_burned = true;
   }
-  if (c === 1) { ctx.cg({ jeong: 'end_jeong', sa: 'end_sa', ma: 'end_ma', free: 'end_free' }[s]); await narr(lead[1]); await narr('일 년에 한 번은 달맞이 객잔에 들른다. 어느 자리에 앉아 있든 곽 아주머니는 걸레부터 던져 준다.'); }
-  if (c === 2) { ctx.cg('end_ma'); await narr('천산 돌문 앞에 움막을 지었다. 백 노인이 쓰던 술병을 옆에 두고, 아침마다 돌계단을 닦는다. 사흘만 안 닦아도 먼지가 앉는다.'); }
-  if (c === 3) { ctx.cg('end_free'); await narr('칼 한 자루를 메고 새벽에 나루를 나섰다. 이번에는 갈 데가 없어서 떠나는 게 아니었다. 강호 어디서든 그믐날 밤이면 나무패도 번호도 없는 낭인 하나가 묵었다 간다는 얘기가 돌았다.'); }
+  const c = F().ma_side_end ? 1 : await choice('그 뒤로 나는', ['달맞이 객잔으로 돌아간다', lead[0], '천산에 남아 봉인 자리를 지킨다', '다시 길을 떠난다']);
+  F().finale = ['inn', 'lead', 'seal', 'road'][c];
+  await G.endings.play(c);
   await G.side.ending();
   await G.bond.ending();
   ctx.cgOff();
@@ -247,3 +321,4 @@ Story.providers.push(function part9p(id) {
   return { npcs: n, spots: [], trigs: [], roam: [] };
 });
 Object.assign(G.act3, { part9, credits });
+G.act3t = Object.assign(G.act3t || {}, { lastChoice, deploy, siegeToll, bridge, hall, finale, siege });  // 시험용

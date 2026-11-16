@@ -29,6 +29,10 @@ export const COMP = {  // art: 그 사람이 속한 무공 갈래(js/artdata.js)
   c_gal: { name: '갈 선생', spr: 'OldMan3', wpn: 'Stick', hp: .85, atk: .7, moves: ['x_odok1', 'x_yunui1', 'dart3'], art: 'odok', fx: { potion: 30 }, boon: '금창약 효과 +30%', at: 'c_suzhou', x: 31, y: 12, hint: '돌팔이 의원', bark: ['{p} 사람들은 위장이 약해. 내가 봤어.', '죽을 병은 아니야. 아마. 나도 몰라.', '약값은 나중에 받겠네. 살아 있으면.'] },
   c_yang: { name: '양춘', spr: 'EggBoy', wpn: 'Ninjaku', hp: .8, atk: .85, moves: ['x_haomun1', 'x_haomun3', 'quick'], art: 'haomun', fx: { silver: 20 }, boon: '싸움에서 얻는 은자 +20%', at: 'c_guangzhou', x: 31, y: 17, hint: '수상한 좀도둑', bark: ['{p} 사람들은 주머니가 왼쪽이야.', '내가 훔친 게 아니라 떨어져 있던 거야.', '형님, 저 사람 비단 신을 신었어. 아, 그냥 그렇다고.'] },
   c_gu: { name: '구 노창', spr: 'OldMan2', wpn: 'Lance', hp: 1.15, atk: 1.05, moves: ['x_ak1', 'x_ak2', 'x_ak4'], art: 'ak', fx: { def: 4 }, good: 1, boon: '방어 +4', at: 'c_yeongyeong', x: 9, y: 12, hint: '은퇴한 창수', bark: ['{p}에서 싸운 적이 있지. 그때도 비가 왔어.', '요즘 젊은것들은 창을 너무 빨리 뺀다.', '허리가 아프면 비가 온다네. 지금 아파.'] },
+  // 이야기에서 살려 보낸 사람들: 운명(js/fate.js)이 살아 있고, 제7부부터 찾아가면 따라온다
+  wei: { name: '위충', spr: 'Paeng', wpn: 'Sword', hp: 1, atk: 1, moves: ['double', 'lunge', 'x_janggang1'], fx: { silver: 10 }, boon: '싸움에서 얻는 은자 +10%', at: 'cheongha', x: 24.5, y: 29, hint: '나룻배를 모는 전직 수적', cond: () => !!G.S.flags.act3 && G.fate?.of('wei') === 'alive', bark: ['{p} 물길은 내가 안다. 땅길은 네가 알아서 해라.', '빚은 반쯤 갚았나.', '점소이, 국수 외상 아직 남았다.'] },
+  lion: { name: '맹호', spr: 'Lion', wpn: 'Axe', hp: 1.3, atk: 1.05, moves: ['heavy', 'spin', 'x_nokrim1'], fx: { hp: 4 }, good: 1, boon: '체력 +4%', at: 'fort', x: 23, y: 20, hint: '빚을 갚으려는 산적 두목', cond: () => !!G.S.flags.act3 && G.fate?.of('lion') === 'alive', bark: ['{p}에 감자 심으면 잘 되겠다.', '녹림 놈들은 빚지고는 못 산다.', '도끼는 오른손으로 드니까 괜찮아.'] },
+  guyang: { name: '구양철', spr: 'Caveman2', wpn: 'Axe', hp: 1.4, atk: 1.1, moves: ['heavy', 'quake', 'x_nokrim2'], fx: { def: 3 }, boon: '방어 +3', at: 'pass', x: 19, y: 10, hint: '녹림 총채주', cond: () => !!G.S.flags.act3 && (G.S.flags.jg_guyang === 'saved' || G.S.side === 'sa') && G.fate?.of('guyang') !== 'dead', bark: ['{p}에도 사만 식구 먹일 밭이 있나.', '형님이 뭐라든 나는 네 편이다.', '솥 하나 안 엎어졌다. 그거면 됐다.'] },
 };
 for (const k in COMP) if (COMP[k].name && !WHO[k]) WHO[k] = { name: COMP[k].name, face: COMP[k].spr };
 const nameOf = id => COMP[id].name || WHO[id]?.name || id;
@@ -44,6 +48,9 @@ const JOIN = {
   c_saira: async id => { await say(id, '너 강해? 나는 여기서 할 일이 없어. 강한 사람 따라가면 일이 생긴다.'); return ctx.duel({ foes: [G.party.spar(id)], arena: 'sand', bgm: 'fight', title: '사이라와 비무', optional: true, noIntro: true, noFollow: true }); },
   c_gal: async id => { await say(id, '약초가 없어서 병을 못 고치고 있네. 사실 약초가 있어도 못 고치지만.'); if (have('herb') < 5) { await say(id, '약초 다섯 뿌리만 구해 오게. 그럼 내가 자네 주치의가 되어 주지.'); return false; } take('herb', 5); await say(id, '좋아. 오늘부터 자네는 내 환자야.'); return true; },
   c_yang: async id => { await say(id, '형님, 살려 주쇼. 관아에 벌금 은자 80냥이 밀렸는데 안 내면 손을 자른답니다.'); const c = await choice('벌금을 대신 낼까? (은자 80냥)', ['내 준다', '그만둔다']); if (c) return false; if (S().silver < 80) { await say(null, '주머니가 비었다.'); return false; } S().silver -= 80; await say(id, '평생 모시겠습니다. 평생이 언제까지인지는 모르겠지만.'); return true; },
+  wei: async id => { await say(id, '빚은 갚으라고 있는 거다. 배는 동생들한테 맡겼다. 가자.'); return true; },
+  lion: async id => { await say(id, '산에서 내려왔다. 녹림 놈들은 빚지고는 못 산다고 했잖냐. 따라간다.'); return true; },
+  guyang: async id => { await say(id, '사만 식구 밥은 애들이 짓는다. 나는 빚을 갚으러 간다.'); return true; },
   c_gu: async id => { await say(id, '젊은이, 창 든 늙은이는 시시한 사람은 안 따라가.'); if (S().lv < 14) { await say(id, '조금 더 커서 오게.'); return false; } await say(id, '눈빛은 쓸 만하군. 마지막으로 한 번 더 나가 볼까.'); return true; },
 };
 async function join(id) {
@@ -135,7 +142,7 @@ function tab(B) {
 // 강호 인물과 집터 사람을 지도에 놓는다
 Story.providers.push(id => {
   const out = { npcs: [], spots: [], trigs: [], roam: [] }; if (!G.S || !G.world?.open()) return out; const p = st();
-  for (const k in COMP) { const c = COMP[k]; if (c.at === id && !isIn(k) && p.home[k] === undefined && !p.gone?.[k]) out.npcs.push({ id: k, spr: c.spr, x: c.x, y: c.y, dir: 0, hint: c.hint, talk: () => compTalk(k) }); }
+  for (const k in COMP) { const c = COMP[k]; if (c.at === id && !isIn(k) && p.home[k] === undefined && !p.gone?.[k] && (!c.cond || c.cond())) out.npcs.push({ id: k, spr: c.spr, x: c.x, y: c.y, dir: 0, hint: c.hint, talk: () => compTalk(k) }); }
   if (id === 'myhouse') { let i = 0; for (const k in p.home) { if (S().married === k) continue; out.npcs.push({ id: 'home_' + k, spr: COMP[k].spr, x: 3 + i * 2, y: 4, dir: 0, hint: nameOf(k), talk: () => compTalk(k) }); i++; } }
   return out;
 });

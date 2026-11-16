@@ -51,9 +51,10 @@ async function part8() {
   await say('so', '거짓말하지 마.', 'h');
   if (!F().plague) {
     await narr('다들 잠든 뒤에도 윤설은 불 옆에서 아버지 장부를 넘기고 있었다.');
-    await say('yun', '아버지 마지막 장에 {나} 씨 이름이 있어요.', 's');
+    const docAlive = G.fate?.of('doc') === 'alive';
+    await say('yun', docAlive ? '떠나기 전에 아버지가 장부 한 장을 찢어 주셨어요. {나} 씨 이름이 있어요.' : '아버지 마지막 장에 {나} 씨 이름이 있어요.', 's');
     await say('me', '제 이름이요?');
-    await say('yun', '‘왼쪽 어깨 쓰는 버릇 못 고침. 딸이 볼 것.’ 그게 끝이에요. 앓아누워서까지 왕진 기록을 쓰고 있었어요.', 's');
+    await say('yun', docAlive ? '‘왼쪽 어깨 쓰는 버릇 못 고침. 딸이 볼 것.’ 이걸 적어 주시면서 웃으셨어요. 살아서 보니 별걸 다 적게 된다고요.' : '‘왼쪽 어깨 쓰는 버릇 못 고침. 딸이 볼 것.’ 그게 끝이에요. 앓아누워서까지 왕진 기록을 쓰고 있었어요.', 's');
     await say('me', '고칠게요.', 's');
     await say('yun', '아니요. 제가 볼게요. 그렇게 적혀 있잖아요.', 's');
   }
@@ -153,7 +154,10 @@ async function ghostPass() {
   await say('me', '내려와. 네 얼굴부터 보자.', 'a');
   await say('gwima', '먼저 네 형이랑 놀아라. 곽란이 키운 아이들이 서로 베는 걸 보고 싶구나.');
   await ctx.duel({ foes: ['cheon2'], arena: 'snow', bgm: 'boss', title: '월천', yieldAt: .3, noLoot: true });
-  await narr('칼을 맞대는 내내 형은 숨소리도 내지 않았다. 내가 왼발을 밀면 똑같이 왼발이 나왔다. 칼끝에 어깨가 베여도 얼굴은 그대로였다. 무릎이 꺾인 형을 두고 나는 칼을 돌렸다.');
+  await narr('칼을 맞대는 내내 형은 숨소리도 내지 않았다. 내가 왼발을 밀면 똑같이 왼발이 나왔다. 칼끝에 어깨가 베여도 얼굴은 그대로였다.');
+  { const c = await choice('형의 무릎이 꺾였다. 칼끝이 형의 목 앞에 있다.', ['칼을 돌려 귀마에게 간다', '칼을 내려놓고, 허리를 세우고, 왼발로 민다']);
+    if (c === 1) { F().wol_mop = true; G.fate?.mark(); await narr('칼을 눈 위에 내려놓았다. 허리를 세우고 왼발로 밀었다. 형 어깨에 쌓인 눈이 한 줌 쓸려 나갔다. 형이 처음으로 눈을 깜빡였다.'); }
+    else await narr('무릎이 꺾인 형을 두고 나는 칼을 돌렸다.'); }
   await say('me', '이제 네 차례야.', 'a');
   await ctx.duel({ foes: ['gwima'], foeHpMul: G.S.diff === 'hard' ? .85 : 1, allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '귀마' });
   await say('gwima', '죽은 것은… 다시 일어난다… 나도…');
@@ -174,7 +178,30 @@ async function fourthStart() {
   await narr('천산 입구는 산이 갈라진 틈이었다. 틈을 가로막은 돌문에 달 모양 구멍이 일곱 개 뚫려 있었다. 연합군 본대는 아직 오지 않았다.');
   ctx.goal('돌문 앞으로 가기');
 }
+// 백 노인이 살아 나오는 길: 6부에서 주운 여우 가면 조각(안쪽에 월하문 글자)이 돌문의 빠진 쐐기였다
+async function lastRentSealed() {
+  await narr('돌문 앞에 움막이 하나 있었다. 모닥불이 꺼져 가고 있었고, 그 옆에 낯익은 술병이 누워 있었다.');
+  await say('baek', '왔느냐.');
+  await say('me', '어르신! 여기서 뭐 하세요?', 'b');
+  await say('baek', '문지기를 하고 있다. 내가 연 문이니 내가 닫아야지. 그런데 쐐기가 하나 빠져서 닫히질 않는구나. 석 달째다.');
+  await narr('돌문 가운데 손바닥만 한 홈이 파여 있었다. 품에서 여우 가면 조각을 꺼냈다. 안쪽에 새겨진 월하문 글자가 홈의 무늬와 똑같았다.');
+  await say('baek', '…그걸 어디서 났느냐.', 'b');
+  await say('me', '월하곡에서요. 형이 쓰던 거예요.');
+  await say('baek', '천이 놈이 문 열 열쇠를 얼굴에 쓰고 다녔구나. 연경추 그놈은 끝까지 몰랐겠지.');
+  await say('baek', '저것들이 오는구나. 조각을 끼울 동안만 버텨라.');
+  await ctx.duel({ foes: ['gate_guard', 'gate_guard', 'gate_guard'], allies: ['baek_ally2'], arena: 'moon', bgm: 'boss', title: '돌문 앞', survive: 30, tip: '30초를 버티면 백 노인이 조각을 끼웁니다.' });
+  ctx.cg('last_rent');
+  await narr('조각이 홈에 들어가자 돌문이 낮게 울렸다. 틈으로 새어 나오던 붉은 빛이 한 줄씩 끊겼다. 문 틈이 닫혔다.');
+  await say('baek', '허허… 닫혔다. 내가 연 문을, 천이가 닫았구나.', 's');
+  await say('me', '방값 받아야죠. 이자까지요.', 'h');
+  await say('baek', '이놈이. …살아서 갚으라고 했지. 갚으마. 이번 달 몫은 곽란한테 내가 직접 가져다준다.', 'h');
+  ctx.cgOff();
+  G.fate?.set('baek', 'alive', '월천의 가면 조각으로 돌문을 닫았다');
+  ctx.note('천산 돌문을 여우 가면 조각으로 닫았다. 백 노인이 살아 나왔다.');
+  await afterRent();
+}
 async function lastRent() {
+  if (F().baek_live && F().mask_shard) return lastRentSealed();
   if (F().baek_live) {
     await narr('돌문 앞에 움막이 하나 있었다. 모닥불이 꺼져 가고 있었고, 그 옆에 낯익은 술병이 누워 있었다.');
     await say('baek', '왔느냐.');
@@ -207,12 +234,14 @@ async function lastRent() {
     await ctx.duel({ foes: ['gate_guard', 'gate_guard', 'gate_guard'], allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '돌문 앞' });
   }
   S().silver += 5; ctx.note('천산 입구의 돌문 앞에서 그믐 봉투를 받았다. 은자 다섯 냥.');
-  set('w5'); await fifthStart();
+  await afterRent();
 }
+async function afterRent() { set('w5'); await fifthStart(); }
 
 // ── 제5장 심마 ──
 async function fifthStart() {
   await ctx.chap(8, PART, '제5장 심마');
+  if (G.fate?.of('baek') === 'alive') await narr('틈은 닫혔지만 돌문 빗장은 안쪽에서 풀려 있었다. 누가 먼저 들어가 기다린다는 뜻이었다. 백 노인이 문 앞에 남았다.');
   await narr('돌문은 잠겨 있지 않았다. 안쪽으로 돌계단이 이어졌고, 그 끝에 탁자가 하나 놓여 있었다. 천산 뱃속 한가운데 찻잔 두 개가 김을 올리고 있었다.');
   await say('chief', '왔나. 앉게. 차가 식겠네.');
   await say('me', '살아 있었네.', 'a');
@@ -256,3 +285,4 @@ Story.providers.push(function part8p(id) {
 });
 Object.assign(FOES, { baek_ally2: foe('백 노인', 'chars/OldMan3', 2600, 66, 16, 86, 0, 0, .9, ['moon1', 'moon3', 'flurry'], { wpn: 'Stick' }) });
 G.act3.part8 = part8;
+G.act3t = Object.assign(G.act3t || {}, { lastRent, ghostPass });  // 시험용

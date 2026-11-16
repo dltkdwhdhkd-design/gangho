@@ -69,8 +69,8 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
           for (let i = 0; i < N; i++) { G.S = JSON.parse(sn.s); G.S.flags.step = 'end'; const p0 = G.S.potion; G.scene = 'field'; G.battle = null; let out = null; D.fight({ ...sn.cfg, noIntro: true }).then(r => out = r); const B = G.battle; let n = 0; while (!out && n++ < 900) { G.fast(60); await sleep(); } if (B.outcome === 'win' && B.p.hp > 0) win++; T.push(B.t); H.push(B.p.hp / B.p.maxHp); P.push(p0 - G.S.potion); }
           const c = sn.cfg; console.log(`LOG ${(c.title || '').padEnd(14)} lv${JSON.parse(sn.s).lv} 승${win}/${N} ${med(T).toFixed(0)}s 체력${Math.round(med(H) * 100)}% 약${med(P)}`); }
       } return { lv: 0 }; }
-    return { log, lv: S.lv, side: S.side, ending: S.flags.ending, rep: S.rep, titles: S.titles.length, step: S.flags.step, skills: S.skills, silver: S.silver, love: S.love, loses, time: S.time, flags: Object.keys(S.flags).length, pages: S.pages };
+    return { log, lv: S.lv, side: S.side, ending: S.flags.ending, end9: S.flags.ending9, rep: S.rep, titles: S.titles.length, step: S.flags.step, skills: S.skills, silver: S.silver, love: S.love, loses, time: S.time, flags: Object.keys(S.flags).length, pages: S.pages };
   }, { diff, skill, clans: process.argv[4] === 'clans', route: process.argv[5] || 'jeong', alt: +(process.argv[6] || 0), snapOn: !!process.env.SNAP });
-  delete res.log; console.log(JSON.stringify(res));
+  const stuck = /STUCK[^\n]*/.exec(String(res.log || ''))?.[0]; delete res.log; console.log(JSON.stringify(res)); if (stuck) { console.log(stuck); await b.close(); process.exit(2); }
   console.log('ERR', errs.slice(0, 10).join('\n')); await b.close();
 })().catch(e => { console.log(String(e).slice(0, 1200)); process.exit(1); });

@@ -36,12 +36,21 @@ export async function warOpens() {
   await say('cheol', '패천도는 맨 뒤에 앉아 있겠구려. 앞에 선 셋을 지나야 얼굴이라도 보겠소.');
   await say('yun', '무창 나루에 피난민이 몰려 있대요. 배가 없으면 강을 못 건너요.');
   await say('me', '하나씩 막아요. 셋을 막으면 패천도도 말을 들을 거예요.');
+  await say('jg_clerk', '군량 장부로 따져 보니 세 곳을 다 제때 막을 시간은 없소. 셋째로 가는 곳은 이미 무너져 있을 거요. 어디를 뒤로 미룰지 정하시오.');
   nextGoal(); ctx.note('흑도맹이 세 갈래로 남하한다. 장강수로채는 무창 나루로, 녹림은 동쪽 산길로, 혈의방은 구파 회관 지붕으로.');
 }
+
+// 몇 번째로 왔나. 셋째로 온 곳은 이미 무너져 있다(둘 다는 못 구한다)
+function arrive(k) { const o = (F().jg_order = F().jg_order || []); if (!o.includes(k)) o.push(k); if (o.length === 3 && o[2] === k) { F().jg_late = k; return true; } return false; }
 
 // ── 무창 나루: 오강 ──
 async function wuchang() {
   await ctx.chap(5, '세 갈래 길', '무창 나루');
+  if (arrive('wc')) {
+    await narr('무창에 닿았을 때는 이미 나루 절반이 타 있었다. 피난민을 실은 배 두 척이 강 한가운데서 뒤집혀 있었다.');
+    if (F().wei_spared) { await say('sailor', '수적 하나가 혼자 나루를 막고 있었소. 장강수로채 옷을 입고 장강수로채를 막더이다. 다리를 크게 다쳐 저쪽 창고에 누워 있소.'); await narr('창고 짚더미 위에 위충이 누워 있었다. 왼쪽 다리가 무릎 아래로 성하지 않았다.'); await say('wei', '…늦었다, 점소이. 빚은 반만 갚았다.', 's'); G.fate?.set('wei', 'lost', '무창 나루에 늦게 닿아, 혼자 나루를 막다 크게 다쳤다'); }
+    else G.fate?.mark();
+  }
   await narr('무창은 장강과 한수가 만나는 곳이다. 강 건너 한양 쪽 나루에서 연기가 올랐고, 이쪽 나루에는 짐 보따리를 진 사람들이 발 디딜 틈 없이 서 있었다.');
   await say('sailor', '배를 다 뺏겼소! 장강수로채가 한수 어귀에서 내려와 나루를 막았소. 강을 건너려면 뱃삯을 내라는데, 정천맹 세금보다 싸다니 웃기지도 않소.');
   await narr('물 위에 검은 돛배 여섯 척이 나란히 섰다. 가운데 배 이물에 창을 짚은 사내가 서 있었다.');
@@ -95,6 +104,11 @@ async function wuchang() {
 async function hallNight() {
   await ctx.chap(5, '세 갈래 길', '지붕 위의 손님');
   await fadeTo(1); F().night = true; G.field.load('ninehall', 20, 16, 1); await fadeTo(0);
+  if (arrive('mk')) {
+    await narr('구화성에 닿기 전날 밤, 화산 장문인이 처소에서 숨진 채 발견됐다고 했다. 목에 가는 붉은 실 자국이 있었다. 혈의방 솜씨였다.');
+    await say('clan_shaolin', '시주가 오기 전에 한 사람을 잃었소. 화산은 종남을 의심하고, 종남은 문을 걸어 잠갔소. 오늘 밤 남은 둘이라도 지켜 주시오.', 's');
+    G.fate?.set('hwasan_elder', 'dead', '구파 회관에 늦게 닿아 혈의방에 암살당했다');
+  } else
   await say('clan_shaolin', '시주, 오늘 밤은 노납 곁에 있어 주시오. 장문인 셋이 묵는 처소 지붕에서 기와 밟는 소리가 났소.');
   await narr('삼경이 지나자 종남파 처소 쪽에서 비명이 터졌다. 달려가 보니 종남 장문인 서문각이 어깨를 감싸 쥐고 있었고, 지붕 위에 붉은 그림자가 셋 서 있었다.');
   await say('clan_jongnam', '…화산이다. 우리 처소 위치를 아는 건 화산밖에 없었다!', 'a');
@@ -134,6 +148,11 @@ async function hallNight() {
 // ── 동쪽 산길: 구양철 ──
 async function guyang() {
   await ctx.chap(5, '세 갈래 길', '산길의 솥');
+  if (arrive('gy')) {
+    await narr('고개 아래 피난민 마을은 이미 반쯤 타 있었다. 하북팽가 토벌대가 먼저 다녀간 자리였다. 타다 만 외양간에 소 한 마리가 묶인 채 울고 있었다.');
+    if (F().jang_bond) { await narr('불탄 집들 사이에서 낯익은 등이 보였다. 장팔이었다. 창운산을 내려와 여기 터를 잡았다고 했다.'); await say('jangpal', '형씨… 집이 다 탔어유. 소 살 돈 모으던 항아리도유.', 's'); G.fate?.set('jang', 'lost', '동쪽 산길에 늦어 피난민 마을과 집이 탔다'); }
+    else G.fate?.mark();
+  }
   await narr('동쪽 산길 고갯마루에 통나무 목책이 섰다. 목책 너머로 연기가 여러 줄 올랐는데, 불이 아니라 밥 짓는 연기였다.');
   await say('guyang', '녹림 칠십이채 총채주 구양철이다. 이 고개 너머는 사만 식구가 사는 데다. 칼 찬 놈은 못 지나간다.');
   await say('me', '패천도를 만나러 가요. 싸우러 가는 게 아니에요.');
@@ -183,3 +202,4 @@ Story.providers.push(function part4b(id) {
   }
   return { npcs: n, spots: [], trigs: [], roam: [] };
 });
+G.act3t = Object.assign(G.act3t || {}, { wuchang, hallNight, guyang });  // 시험용

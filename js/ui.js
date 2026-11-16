@@ -27,6 +27,7 @@ export function showTitle() {
   $('#bFile').onclick = () => $('#fFile').click();
   $('#bSlot').onclick = () => { Sound.init(); Sound.resume(); showSlotScreen(); };
   $('#fFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { G.S = await loadFromFile(f); Sound.init(); Sound.resume(); s.innerHTML = ''; Story.resume(); } catch (err) { toast('저장 파일을 읽지 못했습니다', 3); } };
+  { const n = G.endings?.seen().length || 0; if (n) { const d = el('div', 'hint', `결말 기록 ${G.endings.seenText()}`); d.style.cssText = 'margin-top:10px;max-width:640px;text-align:center'; $('#title .col').after(d); } }
   const l = $('#bLoad'); if (!hasSave()) l.disabled = true; else l.classList.add('pri'); (hasSave() ? l : $('#bNew')).focus(); l.onclick = () => { Sound.init(); G.S = load(); s.innerHTML = ''; Story.resume(); };
 }
 function showCreate() {
@@ -56,12 +57,12 @@ export function closeMenu() { G.keyWait = false; G.menuOpen = false; $('#modal')
 function menuKey(e) { if (G.keyWait) return; if (e.repeat || (Keys.is('opt', e.code) && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || Keys.is('opt', e.code)) { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['note', '수첩'], ['save', '저장'], ['set', '설정']];
+  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['fate', '인연의 실'], ['note', '수첩'], ['save', '저장'], ['set', '설정']].filter(([k]) => k !== 'fate' || S.mode !== 'free');
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (${Keys.label('opt')})</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab, fate: G.fate.tab })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
