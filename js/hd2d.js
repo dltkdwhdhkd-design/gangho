@@ -673,7 +673,7 @@ function makePost() {
   return P;
 }
 function resize(force) {
-  const s = Math.min(innerWidth / W, innerHeight / H), dpr = window.devicePixelRatio || 1, cap = HD.opt.fx === 'high' ? 2560 : 1600;
+  const s = Math.min(innerWidth / W, innerHeight / H), dpr = window.devicePixelRatio || 1, cap = HD.opt.fx === 'high' ? 2560 : 1920;  // 보통도 1920×1080까지
   const bw = Math.round(Math.min(cap, Math.max(W, W * s * dpr)) * (HD.low ? .75 : 1)), bh = Math.round(bw * H / W);
   if (!force && R.domElement.width === bw) return; R.setSize(bw, bh, false); post.size(bw, bh);
 }
@@ -703,6 +703,7 @@ function govern() {
 function render(F) {
   const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
+  if (cam.view?.enabled) cam.clearViewOffset();
   resize(); setMap(F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
   { const [x, y] = proj(F.p.x, F.p.y, 8), k = post.h / H, v = V().set(F.p.x, 8 * HS, (F.p.y + 1) * ZS).applyMatrix4(cam.matrixWorldInverse);  // 구멍: 화면의 주인공 가슴 자리, 주인공 키의 0.9배 반지름
     if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(x * post.w / W, (H - y) * k, HD.pxPerUnit() * CHAR * .9 * k); HOLE.uHoleZ.value = -v.z - 2; }
@@ -749,6 +750,7 @@ function placeCamBattle(B, dt) {
   dist = d; const ty = 8 * HS, tz = tyP * ZS;
   if (camT.x < 0 || !B.camInit) { camT.set(tx, ty, tz); B.camInit = true; } else { const k = 1 - Math.exp(-dt * 6); camT.set(camT.x + (tx - camT.x) * k, ty, camT.z + (tz - camT.z) * k); }
   cam.position.set(camT.x, camT.y + dist * Math.sin(PITCH), camT.z + dist * Math.cos(PITCH)); cam.lookAt(camT.x, camT.y, camT.z); cam.updateMatrixWorld();
+  cam.setViewOffset(W, H, 0, (B.band || 0) / 2, W, H);  // 아래 기술 칸 띠만큼 그림을 위로 올린다(화면 행렬 proj도 같이 따라간다)
   const L = TIMES[timeOf()], dv = new T.Vector3(...L.sun).normalize(); sun.target.position.set(camT.x, 0, camT.z - dist * .3); sun.position.copy(sun.target.position).addScaledVector(dv, 1200);
   const sc = sun.shadow.camera, half = dist * 1.4; sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.near = 200; sc.far = 2600; sc.updateProjectionMatrix();
 }

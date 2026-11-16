@@ -13,7 +13,13 @@ import { newState, stats } from './state.js';
 import * as dialog from './dialog.js';
 import { HD } from './hd2d.js';
 
-const cv = $('#cv'), ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; G.ctx = ctx;
+const cv = $('#cv'), ctx = cv.getContext('2d'); G.ctx = ctx;
+// 해상도: 화면 배치는 1280×720 그대로 두고 캔버스만 1920×1080으로 그린다(1.5배). 그리는 코드는 모두 1280×720 좌표를 쓰므로 변환에 1.5를 곱해 준다
+const RK = 1.5; cv.width = 1280 * RK; cv.height = 720 * RK; ctx.imageSmoothingEnabled = false;
+{ const st = ctx.setTransform.bind(ctx); ctx.setTransform = (a, b, c, d, e, f) => typeof a === 'object' ? st(a) : st(a * RK, b * RK, c * RK, d * RK, e * RK, f * RK); ctx.resetTransform = () => st(RK, 0, 0, RK, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0); }
+// 전체 화면: 설정의 단추, 또는 Alt+Enter
+G.fullscreen = () => { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen({ navigationUI: 'hide' }); } catch { } };
+addEventListener('keydown', e => { if (e.altKey && e.code === 'Enter') { e.preventDefault(); G.fullscreen(); } });
 function fit() {
   const s = Math.min(innerWidth / 1280, innerHeight / 720);
   $('#stage').style.transform = `translate(-50%,-50%) scale(${s})`;

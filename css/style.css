@@ -175,3 +175,5 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .slotc .mi{font-size:15px;line-height:1.45;color:var(--ink)}
 .slotc .sb{grid-column:1 / -1;display:flex;gap:6px;flex-wrap:wrap}
 .card.wide{width:min(1120px,94vw);max-height:90vh;overflow:auto}
+
+#stage.inbattle #hdp{bottom:120px!important}

@@ -226,7 +226,7 @@ function shape(c, p, u) {
       if (sheetAt(c, big ? 'hs_bloom_big' : 'hs_bloom', Math.min(7, Math.floor(q * 5)), x, y)) break;
       // 코드 그림은 봉오리만: 꽃 모양을 코드로 그리면 장난감처럼 보여서, 만개 그림(hs_bloom)이 오기 전까지는 봉오리가 부풀다 번쩍이며 꽃잎으로 터지는 것으로 대신한다
       const X = Math.round(x), Y = Math.round(y), b = big ? 2 : 1;
-      if (q <= 1) { const g = q < .5 ? 1 : 2; c.fillStyle = HW.dark; c.fillRect(X - g * b, Y - g * b, g * 2 * b, g * 2 * b); c.fillStyle = HW.red; c.fillRect(X - g * b, Y - g * b, g * b, g * b); if (q > .75) { c.fillStyle = HW.white; c.fillRect(X - b, Y - b, b, b); } }
+      if (q <= 1) { const g = q < .5 ? 1 : 2; c.fillStyle = HW.dark; c.fillRect(X, Y, g * b, g * b); c.fillStyle = q > .75 ? HW.white : HW.red; c.fillRect(X, Y, b, b); }  // 작은 봉오리 한두 점
       else { const r = (q - 1) * 30 * b; c.strokeStyle = HW.white; c.lineWidth = 1; c.beginPath(); c.arc(x, y, r, 0, 6.29); c.stroke(); }
       break; }
     case 'branch': {  // 자라나는 가지: 앞 절반 동안 끝까지 뻗고, 뒤 절반 동안 옅어진다

@@ -11,6 +11,8 @@ import { openMenu } from './ui.js';
 import * as BF from './battlefx.js';
 import { stageOf } from './hd2d/stages.js';
 
+// 전투 화면은 아래 기술 칸 띠(BAND) 위에만 그린다. 기술 칸이 싸움을 가리지 않게
+export const BAND = 108; const VHB = (720 - BAND) / SCALE;
 const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
 const MOB = { bandit: 'mob_bandit', rowdy: 'mob_bandit', mask_low: 'mob_bandit', rowdy2: 'mob_brute', bruiser: 'mob_brute', pirate: 'mob_pirate', pirate_bow: 'mob_pirate', pirate_hook: 'mob_pirate', archer: 'mob_archer', wanted2: 'mob_archer',
@@ -34,7 +36,7 @@ export class Battle {
   constructor(cfg) {
     this.cfg = cfg; this.t = 0; this.actors = []; this.fx = []; this.proj = []; this.zones = []; this.nums = []; this.teles = []; this.parts = [];
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
-    this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.stage = G.hd?.battleOk?.() ? stageOf(cfg.arena || 'village') : null;  // 새 화면이면 3D 무대(js/hd2d/stages.js) this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;
+    this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.stage = G.hd?.battleOk?.() ? stageOf(cfg.arena || 'village') : null; this.band = BAND;  // 새 화면이면 3D 무대(js/hd2d/stages.js) this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;
     const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;
@@ -419,7 +421,7 @@ export class Battle {
     { const pic = ART.get('cut_' + st); if (pic) { c.style.backgroundImage = `linear-gradient(90deg,transparent,rgba(0,0,0,.55) 30%,rgba(0,0,0,.55) 70%,transparent),url(${pic.src})`; c.style.backgroundSize = 'cover'; c.style.backgroundPosition = 'center'; } }  // 절초 이름띠 그림(ChatGPT: assets/art/cut_<꼴>.webp, 화산은 cut_plum)
     $('#hud').appendChild(c); this.cut = { t: .7, el: c }; this.slowT = .45; BF.ult(this, st, a); Sound.sfx('power2');
   }
-  camera(k) { const c = this.cam, x = clamp(this.p.x - VW / 2, 0, this.W - VW), y = clamp(this.p.y - VH / 2 - 4, 0, this.H - VH); c.x = lerp(c.x, x, k); c.y = lerp(c.y, y, k); }
+  camera(k) { const c = this.cam, x = clamp(this.p.x - VW / 2, 0, this.W - VW), y = clamp(this.p.y - VHB / 2 - 4, 0, this.H - VHB); c.x = lerp(c.x, x, k); c.y = lerp(c.y, y, k); }
   // ── 적 AI ──
   ai(a, dt0) {
     const dt = dt0 * (a.slowT > 0 ? a.slowF : 1);
@@ -461,7 +463,7 @@ export class Battle {
   // 새 화면 전투: 무대와 사람은 WebGL 캔버스가, 효과·숫자·표시는 이 캔버스가 그린다(자리는 땅을 화면으로 옮기는 행렬로)
   draw3d(c) {
     const H = G.hd; H.renderBattle(this);
-    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720); c.imageSmoothingEnabled = false;
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720 - BAND); c.imageSmoothingEnabled = false;
     if (this.dimT > 0) { c.fillStyle = `rgba(6,4,14,${Math.min(.6, this.dimT)})`; c.fillRect(0, 0, 1280, 720); }
     const M = (x, y, flat) => H.affine(x, y, flat), put = (x, y, flat) => { const m = M(x, y, flat); c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]); };
     BF.draw(c, this, true, 0, 0, [], null, M);
@@ -482,7 +484,13 @@ export class Battle {
     if (this.p.hp / this.p.maxHp < .25 && !this.ended) { const g = c.createRadialGradient(640, 360, 300, 640, 360, 760); g.addColorStop(0, 'rgba(120,0,0,0)'); g.addColorStop(1, `rgba(130,0,0,${.32 + Math.sin(this.t * 6) * .1})`); c.fillStyle = g; c.fillRect(0, 0, 1280, 720); }
   }
   draw(c) {
-    if (this.stage) return this.draw3d(c);
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); if (this.stage) c.clearRect(0, 0, 1280, 720); else { c.fillStyle = '#000'; c.fillRect(0, 0, 1280, 720); } c.beginPath(); c.rect(0, 0, 1280, 720 - BAND); c.clip();
+    if (this.stage) this.draw3d(c); else this.draw2d(c);
+    c.restore(); this.drawBand(c);
+  }
+  // 기술 칸 띠: 전투 화면과 겹치지 않게 아래에 따로 깐다
+  drawBand(c) { c.setTransform(1, 0, 0, 1, 0, 0); const y = 720 - BAND, g = c.createLinearGradient(0, y, 0, 720); g.addColorStop(0, '#1c140e'); g.addColorStop(1, '#0c0907'); c.fillStyle = g; c.fillRect(0, y, 1280, BAND); c.fillStyle = '#8a6a3a'; c.fillRect(0, y, 1280, 2); c.fillStyle = '#000'; c.fillRect(0, y + 2, 1280, 2); }
+  draw2d(c) {
     const cam = this.cam; let sx = 0, sy = 0;
     if (this.shakeT > 0) { sx = rnd(-this.shakeA, this.shakeA); sy = rnd(-this.shakeA, this.shakeA); } else this.shakeA = 0;
     c.save(); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); c.imageSmoothingEnabled = false;
@@ -677,7 +685,7 @@ export function fight(cfg) {
     const prev = G.scene;
     const B = new Battle(cfg);
     Input.clear();
-    G.battle = B; G.scene = 'battle';
+    G.battle = B; G.scene = 'battle'; $('#stage').classList.add('inbattle');
     Sound.bgm(cfg.bgm || (cfg.foes.some(f => FOES[f].boss) ? 'boss' : 'fight'));
     B.onDone = async (o) => {
       G.lastOutcome = o;
@@ -690,7 +698,7 @@ export function fight(cfg) {
       }
       const meal = G.S.meal; if (meal && --meal.left <= 0) G.S.meal = null;
       $('#hud').innerHTML = '';
-      G.scene = prev === 'battle' ? 'field' : prev; G.battle = null; if (B.stage) G.hd?.resetCam?.();  // 3D 무대에서 돌아오면 마을 카메라를 주인공에게 바로 맞춘다
+      G.scene = prev === 'battle' ? 'field' : prev; G.battle = null; $('#stage').classList.remove('inbattle'); if (B.stage) G.hd?.resetCam?.();  // 3D 무대에서 돌아오면 마을 카메라를 주인공에게 바로 맞춘다
       res({ outcome: o, exp: ex, silver: si, levelUp: up, drops });
     };
   });
