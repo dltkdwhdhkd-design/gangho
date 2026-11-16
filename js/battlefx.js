@@ -167,21 +167,24 @@ function crisp(x) {
   x.putImageData(im, 0, 0);
 }
 // c: 판 좌표(SCALE 곱한 상태)로 옮겨 둔 본 캔버스. ox, oy: 화면 왼쪽 위의 평면도 자리(음수)
-export function draw(c, B, under, ox, oy, projs = [], raw) {
+// M: 새 화면(3D) 전투일 때 평면도 (x, y)를 화면(1280×720)으로 옮기는 행렬 함수. 그때 작은 판은 화면의 4분의 1이다
+export function draw(c, B, under, ox, oy, projs = [], raw, M) {
   LN = LN || mkL(); LA = LA || mkL();
-  for (const x of [LN, LA]) { x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, VW, VH); x.translate(ox, oy); }
+  for (const x of [LN, LA]) { x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, VW, VH); if (!M) x.translate(ox, oy); }
+  const at = (x, px, py, flat) => { if (M) { const m = M(px, py, flat); x.setTransform(m[0] / 4, m[1] / 4, m[2] / 4, m[3] / 4, m[4] / 4, m[5] / 4); } };
   let n = 0;
   for (const p of B.parts) {
     if (p.delay > 0 || !!p.flat !== !!under) continue;
     const u = p.t / p.life, al = (p.a0 ?? 1) * (u < .15 ? u / .15 : 1 - Math.max(0, u - .4) / .6);
     if (al <= 0) continue; const x = p.add ? LA : LN;
-    x.save(); x.globalAlpha = clamp(al, 0, 1); if (p.add) x.globalCompositeOperation = 'lighter';
+    x.save(); at(x, p.x, p.y, p.flat); x.globalAlpha = clamp(al, 0, 1); if (p.add) x.globalCompositeOperation = 'lighter';
     shape(x, p, u); x.restore(); n++;
   }
-  for (const p of projs) { if (p.img === 'plum' || p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy')) drawProj(LN, p, p.st || 'plum'); else raw(LN, p); n++; }
+  for (const p of projs) { LN.save(); at(LN, p.x, p.y); if (p.img === 'plum' || p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy')) drawProj(LN, p, p.st || 'plum'); else raw(LN, p); LN.restore(); n++; }
   if (!n) return;
   crisp(LN); crisp(LA);
-  c.save(); c.imageSmoothingEnabled = false; c.drawImage(LN.canvas, -ox, -oy); c.globalCompositeOperation = 'lighter'; c.drawImage(LA.canvas, -ox, -oy); c.restore();
+  c.save(); c.imageSmoothingEnabled = false; if (M) c.setTransform(4, 0, 0, 4, 0, 0);
+  const X = M ? 0 : -ox, Y = M ? 0 : -oy; c.drawImage(LN.canvas, X, Y); c.globalCompositeOperation = 'lighter'; c.drawImage(LA.canvas, X, Y); c.restore();
 }
 function shape(c, p, u) {
   const x = p.x, y = p.y;

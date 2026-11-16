@@ -9,6 +9,7 @@ import { stats, bonus, masteryLv, canEquip, DIFF, gainExp, save, give } from './
 import { DB } from './items.js';
 import { openMenu } from './ui.js';
 import * as BF from './battlefx.js';
+import { stageOf } from './hd2d/stages.js';
 
 const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
@@ -33,7 +34,7 @@ export class Battle {
   constructor(cfg) {
     this.cfg = cfg; this.t = 0; this.actors = []; this.fx = []; this.proj = []; this.zones = []; this.nums = []; this.teles = []; this.parts = [];
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
-    this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;
+    this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.stage = G.hd?.battleOk?.() ? stageOf(cfg.arena || 'village') : null;  // 새 화면이면 3D 무대(js/hd2d/stages.js) this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;
     const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;
@@ -456,7 +457,31 @@ export class Battle {
     this.shake(4); this.addFx('aurap', a.x, a.y - 7, 2); Sound.sfx('strange');
   }
   // ── 그리기 ──
+  // 새 화면 전투: 무대와 사람은 WebGL 캔버스가, 효과·숫자·표시는 이 캔버스가 그린다(자리는 땅을 화면으로 옮기는 행렬로)
+  draw3d(c) {
+    const H = G.hd; H.renderBattle(this);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720); c.imageSmoothingEnabled = false;
+    if (this.dimT > 0) { c.fillStyle = `rgba(6,4,14,${Math.min(.6, this.dimT)})`; c.fillRect(0, 0, 1280, 720); }
+    const M = (x, y, flat) => H.affine(x, y, flat), put = (x, y, flat) => { const m = M(x, y, flat); c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]); };
+    BF.draw(c, this, true, 0, 0, [], null, M);
+    for (const t of this.teles) { put(t.x, t.y, true); this.drawTele(c, t); }
+    for (const z of this.zones) { put(z.x, z.y, true); const u = 1 - z.left / z.tot; c.fillStyle = z.player ? 'rgba(170,200,255,.2)' : 'rgba(230,50,30,.2)'; c.beginPath(); c.ellipse(z.x, z.y, z.r, z.r * .8, 0, 0, 7); c.fill(); c.fillStyle = z.player ? 'rgba(190,220,255,.35)' : 'rgba(255,90,50,.35)'; c.beginPath(); c.ellipse(z.x, z.y, z.r * u, z.r * .8 * u, 0, 0, 7); c.fill(); }
+    for (const p of this.proj) { put(p.x, p.y); this.drawProj(c, p); }
+    for (const f of this.fx) { put(f.x, f.y); this.drawFx(c, f); }
+    BF.draw(c, this, false, 0, 0, this.proj.filter(p => VEC.has(p.img) || p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy')), (x, p) => this.drawProj(x, p, true), M);
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    if (this.flashT > 0) { c.globalAlpha = this.flashT / .16 * .4; c.fillStyle = this.flashC || '#fff'; c.fillRect(0, 0, 1280, 720); c.globalAlpha = 1; }
+    c.save(); c.textAlign = 'center';
+    for (const n of this.nums) {
+      const a = n.t < .1 ? n.t / .1 : (n.t > .6 ? (.85 - n.t) / .25 : 1), s = n.text ? 20 : 26 * n.s, [x, y] = H.proj(n.x, n.y + 1);
+      c.globalAlpha = clamp(a, 0, 1); c.font = `${Math.round(s)}px Galmuri11Bold, Galmuri14, sans-serif`;
+      c.lineWidth = 5; c.strokeStyle = '#000'; c.strokeText(n.v, x, y); c.fillStyle = n.c; c.fillText(n.v, x, y);
+    }
+    c.restore();
+    if (this.p.hp / this.p.maxHp < .25 && !this.ended) { const g = c.createRadialGradient(640, 360, 300, 640, 360, 760); g.addColorStop(0, 'rgba(120,0,0,0)'); g.addColorStop(1, `rgba(130,0,0,${.32 + Math.sin(this.t * 6) * .1})`); c.fillStyle = g; c.fillRect(0, 0, 1280, 720); }
+  }
   draw(c) {
+    if (this.stage) return this.draw3d(c);
     const cam = this.cam; let sx = 0, sy = 0;
     if (this.shakeT > 0) { sx = rnd(-this.shakeA, this.shakeA); sy = rnd(-this.shakeA, this.shakeA); } else this.shakeA = 0;
     c.save(); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); c.imageSmoothingEnabled = false;
@@ -499,12 +524,12 @@ export class Battle {
     c.fillStyle = `rgba(${col},.17)`; c.save(); shape(1); c.restore(); c.fillStyle = `rgba(${col},.38)`; c.save(); shape(u); c.restore();
     c.restore();
   }
-  drawActor(c, a) {
+  drawActor(c, a, noShadow) {
     const dead = a.dead, alpha = dead ? clamp(1 - a.deadT / .8, 0, 1) : (a.iframe > 0 && a.st !== 'skill' && Math.floor(this.t * 30) % 2 ? .55 : 1);
     if (dead && alpha <= 0) return;
     const s = a.scale || 1, y = a.y;
     if (a.st === 'guard') { c.fillStyle = 'rgba(160,210,255,.28)'; c.beginPath(); c.arc(a.x + a.ax * 4, y - 6 + a.ay * 4, 9, 0, 7); c.fill(); }
-    drawShadow(c, a.x, y, a.big ? 2 : s);
+    if (!noShadow) drawShadow(c, a.x, y, a.big ? 2 : s);
     const hd = this.hdOf(a), gc = a.fxSt && BF.PAL[a.fxSt] ? BF.PAL[a.fxSt][0] : null;
     for (const g of a.ghosts) { c.globalAlpha = g.t * 2.2; this.sprite(c, a, g.x, g.y, 0, g.face); if (gc && a.st === 'skill') { c.globalAlpha = g.t * 1.4; c.globalCompositeOperation = 'lighter'; this.sprite(c, a, g.x, g.y, 0, g.face); c.globalCompositeOperation = 'source-over'; } c.globalAlpha = 1; }  // 초식 잔상은 빛나게
     c.globalAlpha = alpha;
@@ -660,7 +685,7 @@ export function fight(cfg) {
       }
       const meal = G.S.meal; if (meal && --meal.left <= 0) G.S.meal = null;
       $('#hud').innerHTML = '';
-      G.scene = prev === 'battle' ? 'field' : prev; G.battle = null;
+      G.scene = prev === 'battle' ? 'field' : prev; G.battle = null; if (B.stage) G.hd?.resetCam?.();  // 3D 무대에서 돌아오면 마을 카메라를 주인공에게 바로 맞춘다
       res({ outcome: o, exp: ex, silver: si, levelUp: up, drops });
     };
   });

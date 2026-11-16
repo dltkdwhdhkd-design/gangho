@@ -36,7 +36,7 @@ function render() {
   if (G.scene === 'battle' && G.battle) G.battle.draw(ctx);
   else if (G.scene === 'field' && G.field) G.field.draw(ctx);
   else if (G.bgDraw) G.bgDraw(ctx);
-  if (G.scene !== 'field') HD.hide();  // 새 화면은 필드에서만 보인다
+  if (G.scene !== 'field' && !(G.scene === 'battle' && G.battle?.stage)) HD.hide();  // 새 화면은 필드와 3D 무대 전투에서만 보인다
 }
 let last = performance.now(), acc = 0;
 function frame(now) {
