@@ -191,9 +191,10 @@ export function tick(B, dt) {
 // 도트 결 맞추기: 조각은 평면도 한 점 = 한 칸인 작은 판(320×180)에 그리고, 반투명 가장자리를 세 단계로 끊은 뒤 4배로 키워 붙인다.
 // 그래서 꽃잎·검기도 옛 효과 그림처럼 각진 도트로 보인다
 let LN, LA;
-const mkL = () => { const c = document.createElement('canvas'); c.width = VW; c.height = VH; const x = c.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = false; return x; };
+const LW = 420, LH = 240;  // 2D 전투가 한 화면에 보이는 평면도 넓이보다 조금 크게
+const mkL = () => { const c = document.createElement('canvas'); c.width = LW; c.height = LH; const x = c.getContext('2d', { willReadFrequently: true }); x.imageSmoothingEnabled = false; return x; };
 function crisp(x) {
-  const im = x.getImageData(0, 0, VW, VH), d = im.data;
+  const im = x.getImageData(0, 0, LW, LH), d = im.data;
   for (let i = 3; i < d.length; i += 4) { const a = d[i]; if (!a) continue; const q = a < 48 ? 0 : a < 150 ? 128 : 255; if (q && q !== a) { const k = q / a; d[i - 3] = Math.min(255, d[i - 3] * k); d[i - 2] = Math.min(255, d[i - 2] * k); d[i - 1] = Math.min(255, d[i - 1] * k); } d[i] = q; }
   x.putImageData(im, 0, 0);
 }
@@ -201,7 +202,7 @@ function crisp(x) {
 // M: 새 화면(3D) 전투일 때 평면도 (x, y)를 화면(1280×720)으로 옮기는 행렬 함수. 그때 작은 판은 화면의 4분의 1이다
 export function draw(c, B, under, ox, oy, projs = [], raw, M) {
   LN = LN || mkL(); LA = LA || mkL();
-  for (const x of [LN, LA]) { x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, VW, VH); if (!M) x.translate(ox, oy); }
+  for (const x of [LN, LA]) { x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, LW, LH); if (!M) x.translate(ox, oy); }
   const at = (x, px, py, flat) => { if (M) { const m = M(px, py, flat); x.setTransform(m[0] / 4, m[1] / 4, m[2] / 4, m[3] / 4, m[4] / 4, m[5] / 4); } };
   let n = 0;
   for (const p of B.parts) {

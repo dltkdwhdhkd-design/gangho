@@ -176,4 +176,13 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .slotc .sb{grid-column:1 / -1;display:flex;gap:6px;flex-wrap:wrap}
 .card.wide{width:min(1120px,94vw);max-height:90vh;overflow:auto}
 
-#stage.inbattle #hdp{bottom:120px!important}
+#stage.inbattle #hdp{bottom:88px!important}
+/* 전투 기술 칸: 아래 띠(76) 안에 들어가게 작게 */
+.skills{bottom:8px;gap:6px}
+.sk{width:60px;height:60px;font-size:11px}
+.sk.small{width:48px;height:48px;font-size:11px}
+.sk .nm{top:16px;line-height:1.1}
+.sk .ky{font-size:11px;padding:0 4px}
+.sk .mp{font-size:10px}
+.sk .ct{font-size:14px;bottom:2px}
+#stage.inbattle #hdp>*:not(:first-child){display:none!important}

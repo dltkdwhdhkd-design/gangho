@@ -12,7 +12,7 @@ import * as BF from './battlefx.js';
 import { stageOf } from './hd2d/stages.js';
 
 // 전투 화면은 아래 기술 칸 띠(BAND) 위에만 그린다. 기술 칸이 싸움을 가리지 않게
-export const BAND = 108; const VHB = (720 - BAND) / SCALE;
+export const BAND = 76; const ZB = 3.3, VWB = 1280 / ZB, VHB = (720 - BAND) / ZB;  // 2D 전투는 마을(4배)보다 조금 멀리(3.3배): 싸움터 가로가 한눈에 들어온다
 const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
 const MOB = { bandit: 'mob_bandit', rowdy: 'mob_bandit', mask_low: 'mob_bandit', rowdy2: 'mob_brute', bruiser: 'mob_brute', pirate: 'mob_pirate', pirate_bow: 'mob_pirate', pirate_hook: 'mob_pirate', archer: 'mob_archer', wanted2: 'mob_archer',
@@ -421,7 +421,7 @@ export class Battle {
     { const pic = ART.get('cut_' + st); if (pic) { c.style.backgroundImage = `linear-gradient(90deg,transparent,rgba(0,0,0,.55) 30%,rgba(0,0,0,.55) 70%,transparent),url(${pic.src})`; c.style.backgroundSize = 'cover'; c.style.backgroundPosition = 'center'; } }  // 절초 이름띠 그림(ChatGPT: assets/art/cut_<꼴>.webp, 화산은 cut_plum)
     $('#hud').appendChild(c); this.cut = { t: .7, el: c }; this.slowT = .45; BF.ult(this, st, a); Sound.sfx('power2');
   }
-  camera(k) { const c = this.cam, x = clamp(this.p.x - VW / 2, 0, this.W - VW), y = clamp(this.p.y - VHB / 2 - 4, 0, this.H - VHB); c.x = lerp(c.x, x, k); c.y = lerp(c.y, y, k); }
+  camera(k) { const c = this.cam, x = this.W > VWB ? clamp(this.p.x - VWB / 2, 0, this.W - VWB) : (this.W - VWB) / 2, y = clamp(this.p.y - VHB / 2 - 4, 0, this.H - VHB); c.x = lerp(c.x, x, k); c.y = lerp(c.y, y, k); }
   // ── 적 AI ──
   ai(a, dt0) {
     const dt = dt0 * (a.slowT > 0 ? a.slowF : 1);
@@ -493,7 +493,7 @@ export class Battle {
   draw2d(c) {
     const cam = this.cam; let sx = 0, sy = 0;
     if (this.shakeT > 0) { sx = rnd(-this.shakeA, this.shakeA); sy = rnd(-this.shakeA, this.shakeA); } else this.shakeA = 0;
-    c.save(); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); c.imageSmoothingEnabled = false;
+    c.save(); c.setTransform(ZB, 0, 0, ZB, 0, 0); c.imageSmoothingEnabled = false;
     const ox = -snap(cam.x + sx), oy = -snap(cam.y + sy);
     if (this.zoomT > 0) { const u = Math.sin(Math.min(1, this.zoomT / .75) * Math.PI), k = 1 + .1 * u, fx = this.zoomX + ox, fy = this.zoomY + oy; c.translate(fx, fy); c.scale(k, k); c.translate(-fx, -fy); }  // 절초: 쓰는 사람 쪽으로 살짝 당긴다
     c.translate(ox, oy);
@@ -514,7 +514,7 @@ export class Battle {
     for (const n of this.nums) {
       const a = n.t < .1 ? n.t / .1 : (n.t > .6 ? (.85 - n.t) / .25 : 1), s = n.text ? 20 : 26 * n.s;
       c.globalAlpha = clamp(a, 0, 1); c.font = `${Math.round(s)}px Galmuri11Bold, Galmuri14, sans-serif`;
-      const x = (n.x + ox) * SCALE, y = (n.y + oy) * SCALE;
+      const x = (n.x + ox) * ZB, y = (n.y + oy) * ZB;
       c.lineWidth = 5; c.strokeStyle = '#000'; c.strokeText(n.v, x, y); c.fillStyle = n.c; c.fillText(n.v, x, y);
     }
     c.restore();

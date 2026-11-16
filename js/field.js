@@ -85,7 +85,7 @@ export class Field {
       let [gx, gy] = m.isoRoom ? walkDir(m, d.x, d.y) : [d.x, d.y];  // 쿼터뷰 방은 화면 방향을 칸 방향으로 돌린다
       if (m.isoRoom && !m.isoRoom.out && d.y > 0) { const H = m.h * TS, q = m.portals.find(q => q.y + q.h >= H - 2 && p.y > H - 4 * TS && Math.abs(q.x + q.w / 2 - p.x) < 4 * TS); if (q) gx = clamp((q.x + q.w / 2 - p.x) / 12, -1, 1) * Math.max(.6, gy); }  // 문 가까이서 아래로 가면 문으로 끌어 준다
       const nx = p.x + gx * sp * dt, ny = p.y + gy * sp * dt;
-      const nr = m.isoRoom ? Math.min(13, 7 / (m.isoRoom.a || 1)) : 8, blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && hyp(n.x - x, (n.y - 1) - y) < nr);
+      const nr = m.isoRoom ? Math.min(13, 7 / (m.isoRoom.a || 1)) : 8, blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && !n.ghost && hyp(n.x - x, (n.y - 1) - y) < nr);  // ghost: 대회 구경꾼처럼 길을 막지 않는 사람
       const ox = p.x, oy = p.y; if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
       // 발자취는 거리마다 남긴다. 경공으로 달려도 뒤따르는 동료와의 거리가 같다
       p.walk += dt * (run ? 13 : 8); this.dashing = run && (p.x !== ox || p.y !== oy); this._acc = (this._acc || 0) + hyp(p.x - ox, p.y - oy);
