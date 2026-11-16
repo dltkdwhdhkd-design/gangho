@@ -16,21 +16,23 @@ const FAC = {
   paeng: 'quake', hwangbo: 'quake', nokrim: 'quake', gongdong: 'quake', jeomchang: 'sun', cheongseong: 'wind', jin: 'wind', yang: 'spear',
   podalra: 'fire', hyeoleui: 'blood', cheonma: 'blood', changun: 'cloud',
 };
+const BYID = { x_hwasan3: 'jaha' };  // 초식 하나만 다른 꼴(자하검기는 보랏빛 노을)
 const RELIC = { r_dokgo: 'wind', r_six: 'sun', r_lingbo: 'water', r_geongon: 'taiji', r_yiyang: 'sun', r_tanji: 'star', r_ansu: 'cloud', r_taehyeon: 'glyph' };
 // 꼴마다 [주색, 밝은색, 어두운색]
 export const PAL = {
-  plum: ['#ff8fb4', '#ffe1ea', '#c2406e'], lightning: ['#ffe86a', '#ffffff', '#6a8cff'], taiji: ['#bcd8ff', '#ffffff', '#1d2233'], gold: ['#ffc94a', '#fff1b8', '#b8741c'],
+  plum: ['#ff8fb4', '#ffe1ea', '#c2406e'], jaha: ['#a77ae8', '#e2d0ff', '#4a2c7a'], lightning: ['#ffe86a', '#ffffff', '#6a8cff'], taiji: ['#bcd8ff', '#ffffff', '#1d2233'], gold: ['#ffc94a', '#fff1b8', '#b8741c'],
   lotus: ['#ffb0d0', '#fff4f8', '#e2a640'], poison: ['#8ee05a', '#d8ffb0', '#7a3fa8'], dust: ['#c9a26a', '#efe0b8', '#6f5230'], ice: ['#9fe6ff', '#ffffff', '#3d7fd0'],
   water: ['#5fb8ff', '#d8f2ff', '#1f5fa8'], star: ['#ffe27a', '#ffffff', '#5f6fd8'], mirror: ['#d8d0ff', '#ffffff', '#7a6ac8'], glyph: ['#ffd36a', '#fff3c8', '#c0602a'],
   quake: ['#e0a060', '#ffe0b0', '#6a4020'], blood: ['#ff3a3a', '#ffb0a0', '#3a0610'], wind: ['#9ff0c0', '#ffffff', '#3aa070'], fire: ['#ff9a3a', '#fff0a0', '#c02a10'],
   moon: ['#cfe0ff', '#ffffff', '#6a7ad8'], cloud: ['#bfe4ff', '#ffffff', '#5a90c8'], sun: ['#ffd84a', '#fffbe0', '#ff7a2a'], spear: ['#7fe6e0', '#e8ffff', '#2a8f9a'],
   blade: ['#ff9a5a', '#ffe0c0', '#a83a1a'], steel: ['#d8e4f0', '#ffffff', '#7a8aa0'], beast: ['#e8d8c0', '#ffffff', '#806040'],
 };
-export const NAME = { plum: '매화', lightning: '뇌전', taiji: '태극', gold: '금강', lotus: '불광', poison: '독', dust: '취타', ice: '한빙', water: '물살', star: '칠성', mirror: '이형', glyph: '진법', quake: '패도', blood: '혈마', wind: '바람', fire: '화염', moon: '월광', cloud: '청운', sun: '일양', spear: '용', blade: '도기', steel: '검기', beast: '' };
+export const NAME = { plum: '매화', jaha: '자하', lightning: '뇌전', taiji: '태극', gold: '금강', lotus: '불광', poison: '독', dust: '취타', ice: '한빙', water: '물살', star: '칠성', mirror: '이형', glyph: '진법', quake: '패도', blood: '혈마', wind: '바람', fire: '화염', moon: '월광', cloud: '청운', sun: '일양', spear: '용', blade: '도기', steel: '검기', beast: '' };
 
 export function styleOf(a, sk) {
   if (!sk) return a?.mon ? 'beast' : 'steel';
   if (sk.fxSt) return sk.fxSt;
+  if (BYID[sk.id]) return (sk.fxSt = BYID[sk.id]);
   const m = /^x_([a-z]+)\d+$/.exec(sk.id || ''), own = (sk.fac && FAC[sk.fac]) || (m && FAC[m[1]]) || SCHOOL[sk.school] || RELIC[sk.id];
   if (own) { try { sk.fxSt = own; } catch { } return own; }  // 초식에 딸린 꼴만 기억한다(평타 같은 공용 초식은 쓰는 사람을 따른다)
   const f = /^(?:fd|sga|sgn)_([a-z]+)/.exec(a?.id || '');
@@ -38,6 +40,29 @@ export function styleOf(a, sk) {
 }
 
 const MAX = 900;
+// ChatGPT 효과 시트(tools/fx_in.py → assets/fx2). 있으면 시트 칸을, 없으면 코드 그림을 쓴다. 자리 목록: docs/art-slots.md
+export const SHEET = {};
+try { fetch('assets/fx2/fx.json').then(r => r.ok ? r.json() : {}).then(j => { for (const [k, v] of Object.entries(j || {})) { const im = new Image(); im.onload = () => { SHEET[k] = { im, ...v }; }; im.src = `assets/fx2/${k}.webp`; } }).catch(() => { }); } catch { }
+function sheetAt(c, name, i, x, y, k = 1, rot = 0, flip = false) {
+  const S = SHEET[name]; if (!S) return false; const f = Math.max(0, Math.min(S.n - 1, i | 0));
+  c.save(); c.translate(x, y); if (rot) c.rotate(rot); if (flip) c.scale(-1, 1); c.drawImage(S.im, f * S.w, 0, S.w, S.h, -S.w / 2 * k, -S.h / 2 * k, S.w * k, S.h * k); c.restore(); return true;
+}
+// 화산: 검이 지나간 자리에 매화가 핀다(봉오리 → 만개 → 번쩍 → 흩날림). 늦게 피고 한꺼번에 터진다. 기획: docs/chatgpt-hwasan.md
+const HW = { red: '#c8284a', dark: '#8e1838', pink: '#ff9fbd', light: '#ffc4d6', white: '#fff0f5', gold: '#ffe36a' };
+function bloom(B, x, y, delay = 0, big = false, hit = false) { P(B, { k: 'bloom', x, y, life: big ? .9 : .62, delay, big, hit, s: big ? 13 : 5 }); }
+// 매화 가지: 곧은 칼빛이 아니라 마디마다 꺾이고 갈라지는 붉은 줄기. 마디에 봉오리가 차례로 맺힌다
+function branch(B, x, y, ang, len, delay = 0, nodes = 4) {
+  const pts = [[0, 0]], fork = []; let px = 0, py = 0, a = 0; const n = 6, step = len / n;
+  for (let i = 1; i <= n; i++) { a += rnd(-.35, .35); px += Math.cos(a) * step; py += Math.sin(a) * step; pts.push([px, py]); if (i > 1 && i < n && Math.random() < .55) { const fa = a + (Math.random() < .5 ? 1 : -1) * rnd(.5, .9), fl = step * rnd(.8, 1.6); fork.push([px, py, px + Math.cos(fa) * fl, py + Math.sin(fa) * fl]); } }
+  P(B, { k: 'branch', x, y, ang, pts, fork, life: .55, delay, w: Math.max(1, len / 80), len, add: 0 });
+  const ca = Math.cos(ang), sa = Math.sin(ang), at = ([u, v]) => [x + u * ca - v * sa, y + u * sa + v * ca];
+  for (let i = 0; i < nodes; i++) { const j = Math.min(n, 1 + Math.round(i * (n - 1) / Math.max(1, nodes - 1))), [bx, by] = at(pts[j]); bloom(B, bx, by, delay + .05 + j * .035); }
+  for (const f of fork) { const [bx, by] = at([f[2], f[3]]); bloom(B, bx, by, delay + .12); }
+}
+function plumUlt(B, a) {  // 매화만개: 허공에 가지가 그어지고 수십 송이가 맺힌 뒤 한꺼번에 핀다
+  for (let i = 0; i < 6; i++) branch(B, a.x, a.y - 8, i / 6 * 6.28 + rnd(-.2, .2), rnd(70, 110), .25 + i * .03, 3);
+  for (let i = 0; i < 18; i++) { const q = rnd(6.28), r = rnd(20, 120); bloom(B, a.x + Math.cos(q) * r, a.y - 8 + Math.sin(q) * r * .6, .45 + rnd(0, .08), i % 5 === 0, true); }
+}
 // 휘날리는 꽃잎: 좌우로 흔들리며 천천히 떨어지고, 뒤집히며 폭이 좁아졌다 넓어진다
 const PINK = ['#ffb3cb', '#ff97b8', '#f7a6c0', '#fff0f5', '#c94f7c'], LOT = ['#fff4f8', '#ffd0e2', '#ffc0d8', '#ffffff', '#e08aa8'];
 // 꽃잎 칸: [x, y, 색(0 바탕, 1 그늘, 2 빛)]
@@ -68,6 +93,7 @@ export function cast(B, st, a, big) {
     case 'mirror': for (let i = 0; i < 6; i++) { const an = i / 6 * 6.28; P(B, { k: 'orbit', x, y: y - 8, r: 14, ang: an, life: .6, s: 2.4, col: i % 2 ? c0 : c1, vr: 9, add: 1 }); } break;
     case 'glyph': P(B, { k: 'glyph', x, y, life: .75, s: 15 * k, col: c0, vr: 2, flat: 1, add: 1 }); break;
     case 'quake': P(B, { k: 'crack', x, y, life: .6, s: 16 * k, col: c2, seed: Math.random() * 99, flat: 1 }); for (let i = 0; i < 6; i++) P(B, { k: 'rock', x: x + rnd(-8, 8), y, vx: rnd(-30, 30), vy: -rnd(40, 80), g: 260, life: .5, s: 1.6, col: i % 2 ? c0 : c2, vr: 8 }); break;
+    case 'jaha': for (let i = 0; i < 12 * k; i++) P(B, { k: 'flame', x: x + rnd(-10, 10), y: y - rnd(0, 4), vy: -rnd(18, 40), life: rnd(.4, .7), s: rnd(1.6, 2.6), col: c0, col2: c2, add: 1 }); for (let i = 0; i < 5; i++) petal(B, x + rnd(-8, 8), y - rnd(4, 16), rnd(-20, 20), -rnd(5, 20), 'plum'); break;  // 자하신공: 발밑에서 보랏빛 노을이 피어오른다
     case 'blood': case 'fire': for (let i = 0; i < 10 * k; i++) P(B, { k: 'flame', x: x + rnd(-9, 9), y: y - rnd(0, 6), vy: -rnd(20, 45), life: rnd(.35, .6), s: rnd(1.6, 2.8), col: c0, col2: st === 'blood' ? c2 : c1, add: st === 'fire' ? 1 : 0 }); break;
     case 'wind': for (let i = 0; i < 6; i++) P(B, { k: 'streak', x: x + rnd(-14, 14), y: y - rnd(2, 18), vx: rnd(60, 110) * (Math.random() < .5 ? -1 : 1), life: .3, s: 8, col: i % 2 ? c0 : c1, add: 1 }); break;
     case 'moon': P(B, { k: 'crescentP', x, y: y - 26, life: .6, s: 7 * k, col: c1, col2: c0, add: 1 }); break;
@@ -93,6 +119,7 @@ export function swing(B, st, a, h, sk) {
     const d = rnd(.3, 1) * R * (h.shape === 'circle' ? 1 : .9), q = h.shape === 'circle' ? rnd(6.28) : an + rnd(-1, 1) * (h.shape === 'line' ? .12 : Math.min((h.a || 80) * Math.PI / 180, 1.3)), px = x + Math.cos(q) * d, py = y + Math.sin(q) * d * (h.shape === 'circle' ? .8 : 1);
     bit(B, st, px, py, Math.cos(q), Math.sin(q), c0, c1, c2, i);
   }
+  if (st === 'plum' && sk && !sk.basic) { const R2 = (h.shape === 'line' ? (h.len || 40) : (h.r || 30)) * .9; if (h.shape === 'circle') for (let i = 0; i < 5; i++) branch(B, x, y, i / 5 * 6.28, R2 * .8, .04, 2); else branch(B, x, y, an + (h.shape === 'line' ? 0 : rnd(-.3, .3)), R2, .03, h.shape === 'line' ? 7 : 4); }
   if (st === 'lightning') for (let i = 0; i < (ult ? 4 : 1); i++) { const d = R * rnd(.5, 1), q = an + rnd(-.6, .6); P(B, bolt(x, y, x + Math.cos(q) * d, y + Math.sin(q) * d, c0, c1, .14)); }
   if (st === 'taiji' && h.shape !== 'line') P(B, { k: 'taiji', x: x + a.ax * 14, y: y + a.ay * 10, life: .4, s: 9, col: c1, col2: c2, vr: -10 });
   if (st === 'quake' && (h.mul || 1) > 2.5) P(B, { k: 'crack', x: x + a.ax * 20, y: a.y + a.ay * 16, life: .5, s: 18, col: c2, seed: Math.random() * 99, flat: 1 });
@@ -101,6 +128,7 @@ export function swing(B, st, a, h, sk) {
 function bit(B, st, x, y, nx, ny, c0, c1, c2, i) {
   const sp = rnd(20, 60);
   switch (st) {
+    case 'jaha': if (i % 2) return petal(B, x, y, nx * sp, ny * sp - 15, 'plum'); return P(B, { k: 'mist', x, y, vx: nx * sp * .4, vy: ny * sp * .4 - 8, life: .6, s: 2, s2: 6, col: i % 4 ? c0 : c2, a0: .45 });
     case 'plum': case 'lotus': petal(B, x, y, nx * sp * 1.4 + rnd(-15, 15), ny * sp - 20, st); if (i % 2) petal(B, x + rnd(-4, 4), y + rnd(-3, 3), nx * sp * .6, -rnd(10, 30), st); return;
     case 'dust': return P(B, { k: 'leaf', x, y, vx: nx * sp, vy: ny * sp - 20, life: .5, s: 1.3, col: i % 2 ? c0 : c2, vr: 12, g: 40, drag: .94 });
     case 'ice': case 'mirror': return P(B, { k: 'shard', x, y, vx: nx * sp, vy: ny * sp, life: .35, s: rnd(1.6, 2.6), col: i % 2 ? c0 : c1, rot: Math.atan2(ny, nx), add: 1, drag: .9 });
@@ -119,6 +147,7 @@ export function impact(B, st, o, nx, ny, big) {
   const [c0, c1, c2] = C(st), x = o.x, y = o.y - 7, n = big ? 12 : 5;
   P(B, { k: 'burst', x, y, life: .14, s: big ? 11 : 7, col: c1, add: 1 });
   for (let i = 0; i < n; i++) { const q = Math.atan2(ny, nx) + rnd(-1.2, 1.2); bit(B, st, x, y, Math.cos(q), Math.sin(q), c0, c1, c2, i); }
+  if (st === 'plum') bloom(B, x + rnd(-3, 3), y + rnd(-3, 2), .08, big, true);  // 늦게 핀다
   if (st === 'lightning') P(B, bolt(x + rnd(-4, 4), y - 30, x, y, c0, c1, .14));
   if (st === 'poison') P(B, { k: 'mist', x, y, vy: -6, life: .8, s: 4, s2: 9, col: c0, a0: .35 });
   if (st === 'ice') P(B, { k: 'ring', x, y: o.y, life: .3, s: 3, s2: 10, col: c1, w: 1.5, add: 1, flat: 1 });
@@ -144,6 +173,7 @@ export function ult(B, st, a) {
   cast(B, st, a, true);
   const [c0, c1] = C(st); B.flashC = c0; B.flashT = .16; B.dimT = .9; B.zoomT = .75; B.zoomX = a.x; B.zoomY = a.y - 8;
   P(B, { k: 'ring', x: a.x, y: a.y, life: .55, s: 8, s2: 70, col: c1, w: 3, add: 1, flat: 1 });
+  if (st === 'plum') plumUlt(B, a);
   for (let i = 0; i < 16; i++) { const q = i / 16 * 6.28; P(B, { k: 'streak', x: a.x + Math.cos(q) * 70, y: a.y - 8 + Math.sin(q) * 50, vx: -Math.cos(q) * 200, vy: -Math.sin(q) * 140, life: .3, s: 10, col: i % 2 ? c0 : c1, add: 1 }); }  // 기가 몸으로 빨려 든다
 }
 
@@ -152,6 +182,7 @@ export function tick(B, dt) {
     if (p.delay > 0) { p.delay -= dt; continue; }
     p.t += dt; p.vy += p.g * dt; if (p.sw) p.vx += Math.sin(p.t * p.f + p.ph) * p.sw * dt; p.vx *= p.drag; p.vy *= p.drag; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
     if (p.k === 'orbit') p.ang += p.vr * dt;
+    if (p.k === 'bloom' && !p.popped && p.t / p.life >= .58) { p.popped = true; for (let i = 0; i < (p.big ? 14 : 5); i++) { const q = rnd(6.28), v = rnd(20, p.big ? 80 : 45); petal(B, p.x, p.y, Math.cos(q) * v, Math.sin(q) * v - 15, 'plum'); } if (p.hit) B.stop = Math.max(B.stop || 0, p.big ? .08 : .035); }
   }
   B.parts = B.parts.filter(p => p.t < p.life);
   for (const k of ['flashT', 'dimT', 'zoomT']) if (B[k] > 0) B[k] -= dt;
@@ -190,7 +221,26 @@ function shape(c, p, u) {
   const x = p.x, y = p.y;
   switch (p.k) {
     case 'ring': { const r = lerp(p.s, p.s2, 1 - (1 - u) * (1 - u)); c.strokeStyle = p.col; c.lineWidth = Math.max(.3, p.w * (1 - u)); c.beginPath(); c.ellipse(x, y, r, r * (p.flat ? .55 : 1), 0, 0, 6.29); c.stroke(); break; }
+    case 'bloom': {  // 봉오리 → 반쯤 → 만개 → 번쩍 → (터지면 꽃잎이 따로 흩날린다)
+      const q = u / .58; if (q > 1.25) break; const big = p.big;
+      if (sheetAt(c, big ? 'hs_bloom_big' : 'hs_bloom', Math.min(7, Math.floor(q * 5)), x, y)) break;
+      // 코드 그림은 봉오리만: 꽃 모양을 코드로 그리면 장난감처럼 보여서, 만개 그림(hs_bloom)이 오기 전까지는 봉오리가 부풀다 번쩍이며 꽃잎으로 터지는 것으로 대신한다
+      const X = Math.round(x), Y = Math.round(y), b = big ? 2 : 1;
+      if (q <= 1) { const g = q < .5 ? 1 : 2; c.fillStyle = HW.dark; c.fillRect(X - g * b, Y - g * b, g * 2 * b, g * 2 * b); c.fillStyle = HW.red; c.fillRect(X - g * b, Y - g * b, g * b, g * b); if (q > .75) { c.fillStyle = HW.white; c.fillRect(X - b, Y - b, b, b); } }
+      else { const r = (q - 1) * 30 * b; c.strokeStyle = HW.white; c.lineWidth = 1; c.beginPath(); c.arc(x, y, r, 0, 6.29); c.stroke(); }
+      break; }
+    case 'branch': {  // 자라나는 가지: 앞 절반 동안 끝까지 뻗고, 뒤 절반 동안 옅어진다
+      c.translate(x, y); c.rotate(p.ang); const grow = Math.min(1, u * 2.4), n = p.pts.length - 1, upto = grow * n;
+      if (SHEET.hs_branch) { sheetAt(c, 'hs_branch', Math.floor(u * 8), p.len / 2, 0, p.len / SHEET.hs_branch.w); break; }
+      c.lineCap = 'round'; c.lineJoin = 'round';
+      for (const [col, w] of [[HW.dark, p.w + 1.6], [HW.red, p.w], [HW.white, Math.max(.6, p.w * .35)]]) {
+        c.strokeStyle = col; c.lineWidth = w * (1 - Math.max(0, u - .55)); c.beginPath(); c.moveTo(0, 0);
+        for (let i = 1; i <= Math.ceil(upto); i++) { const [ax, ay] = p.pts[i - 1], [bx, by] = p.pts[i], f = Math.min(1, upto - (i - 1)); c.lineTo(ax + (bx - ax) * f, ay + (by - ay) * f); } c.stroke();
+        if (grow > .6) for (const f of p.fork) { c.beginPath(); c.moveTo(f[0], f[1]); c.lineTo(f[0] + (f[2] - f[0]) * (grow - .6) / .4, f[1] + (f[3] - f[1]) * (grow - .6) / .4); c.stroke(); }
+      }
+      break; }
     case 'petalF': {  // 점을 하나하나 찍은 꽃잎. 뒤집히는 폭에 따라 넓은 잎·반쪽·옆모습 세 칸을 고른다
+      if (SHEET.hs_petal) { const fr = Math.floor((p.t * p.fl / 1.6 + p.ph) % 4), row = PINK.indexOf(p.col) % 3; sheetAt(c, 'hs_petal', (row < 0 ? 1 : row) * 4 + (fr < 0 ? 0 : fr), x, y, p.big ? 1 : .75, p.rot); break; }
       const w = Math.abs(Math.cos(p.t * p.fl + p.ph)), F = (p.big ? PF2 : PF)[w > .66 ? 0 : w > .3 ? 1 : 2], fl = Math.sin(p.rot) > 0, X = Math.round(x), Y = Math.round(y), K = [p.col, p.dk, p.col2];
       for (const [dx, dy, ci] of F) { c.fillStyle = K[ci]; c.fillRect(X + (fl ? -dx : dx), Y + dy, 1, 1); } break; }
     case 'petal': c.translate(x, y); c.rotate(p.rot); c.fillStyle = p.col; c.beginPath(); c.ellipse(0, 0, p.s * 1.3, p.s * .7, 0, 0, 6.29); c.fill(); break;

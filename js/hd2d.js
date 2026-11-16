@@ -17,7 +17,7 @@ const W = 1280, H = 720;
 let T = null;  // three.js
 
 // 인물 키는 화면 높이의 1/9로 정했다(사용자). 그림은 새 그림이 기본
-const OPTK = 'gangho_hd2d_opt2', OPT0 = { zoom: 9, time: 'auto', fx: 'mid', art: 1 };
+const OPTK = 'gangho_hd2d_opt2', OPT0 = { zoom: 9, time: 'auto', fx: 'mid', art: 1, battle3d: 1 };
 const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } o.zoom = 9; return o; };
 const want = (() => { try { return new URLSearchParams(location.search).get('hd2d') === '1'; } catch { return false; } })();
 
@@ -37,14 +37,14 @@ export const HD = {
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso)) && !m.isoRoom && !m.live; },  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
-  init, render, renderBattle, affine, resetCam: () => camT.set(-1, 0, 0), battleOk: () => HD.want && HD.ready && !HD.failed && HD.opt.battle3d !== false, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  init, render, renderBattle, affine, resetCam: () => camT.set(-1, 0, 0), battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
   dbg: () => ({ fg: FG.map(o => [o.visible, o.position.toArray().map(Math.round), o.scale.toArray().map(Math.round), o.material.type, o.material.map?.image?.width, (() => { const c = o.material.map?.image; if (!c?.getContext) return -1; const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let a = 0; for (let i = 3; i < d.length; i += 4) a += d[i]; return Math.round(a / (d.length / 4)); })()]), cam: cam.position.toArray().map(Math.round), far: cam.far, m: mtns?.children.map(o => [o.position.toArray().map(Math.round), o.visible, o.material.color.getHexString()]) }),
   stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: !!HD.low, size: R ? [R.domElement.width, R.domElement.height] : null }),
 };
 G.hd = HD;
 // 옛 2D 화면(전투, 강호 큰 지도, 방)에서도 마을과 같은 사람 도트를 쓰게 시트를 내준다. 새 화면과 새 그림을 켰을 때만
-HD.sheet = o => {
+HD.sheetKey = o => {
   if (!want || !art() || !o) return null; const L = [];
   if (o.me) L.push('me');
   else {
@@ -52,7 +52,14 @@ HD.sheet = o => {
     const key = o.spr ? (o.spr.includes('/') ? o.spr : 'chars/' + o.spr) : null;
     if (key === 'chars/Princess') L.push('yun'); if (key && NEWNPC[key]) L.push(...NEWNPC[key]);
   }
-  for (const n of L) if (PV[n]) return PV[n]; return null;
+  for (const n of L) if (PV[n]) return n; return null;
+};
+HD.sheet = o => { const k = HD.sheetKey(o); return k ? PV[k] : null; };
+// 동작 시트(<키>_act: 왼쪽을 보는 옆모습 여섯 칸 — 준비, 내지름, 거둠, 맞음, 쓰러짐, 경공). tools/people_in.py가 <키>-c.png로 만든다
+HD.act = k => (k && PV[k + '_act']) || null;
+HD.draw2dAct = (c, im, fr, flip, x, y, h = CHAR, white) => {
+  const CW = 80, CH = 64, k = h / 48; c.save(); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; if (white) c.filter = 'brightness(0) invert(1)';
+  c.translate(x, y + 1); if (flip) c.scale(-1, 1); c.drawImage(im, fr * CW, 0, CW, CH, -CW / 2 * k, -CH * k, CW * k, CH * k); c.restore();
 };
 // 사람 시트 한 칸을 2D 캔버스에 그린다: 칸 56점, 사람 키 48점, 발이 칸 바닥. h는 사람 키(평면도 점)
 HD.draw2d = (c, im, dir, frame, x, y, h = CHAR, white) => {
@@ -767,11 +774,11 @@ function panel() {
   d.style.cssText = 'position:absolute;right:14px;bottom:12px;z-index:5;background:rgba(14,11,8,.82);border:2px solid #8a6a3a;color:#f3e6c8;font:14px Galmuri11,Galmuri14,sans-serif;padding:8px 10px;display:flex;flex-direction:column;gap:5px;pointer-events:auto';
   const row = (lab, key, items) => `<div class="hdr" data-k="${key}"><span style="display:inline-block;width:62px">${lab}</span>${items.map(([v, t]) => `<button data-v="${v}">${t}</button>`).join('')}</div>`;
   d.innerHTML = `<div style="display:flex;justify-content:space-between;gap:10px;cursor:pointer" id="hdt" title="눌러서 접기"><b style="color:#ffd88a;font-weight:400">새 화면 시제품 ▾</b><span id="hdfps" style="opacity:.7"></span></div>
-    ${row('시각', 'time', [['auto', '게임대로'], ['morning', '아침'], ['day', '낮'], ['evening', '저녁'], ['night', '밤']])}${row('효과', 'fx', [['mid', '보통'], ['high', '높음']])}${row('그림', 'art', [[0, '지금 그림'], [1, '새 그림 맛보기']])}
+    ${row('시각', 'time', [['auto', '게임대로'], ['morning', '아침'], ['day', '낮'], ['evening', '저녁'], ['night', '밤']])}${row('효과', 'fx', [['mid', '보통'], ['high', '높음']])}${row('그림', 'art', [[0, '지금 그림'], [1, '새 그림 맛보기']])}${row('전투', 'battle3d', [[1, '새 화면'], [0, '2D']])}
     <div style="display:flex;gap:6px"><button id="hdgo" title="새 낭인으로 청하진에 선다. 이 판은 저장하지 않는다">청하진 둘러보기</button><button id="hd2d">2D로 보기</button></div>`;
   $('#stage').appendChild(d);
   const st = document.createElement('style'); st.textContent = '#hdp button{font:inherit;font-size:13px;background:#2a2016;color:#f3e6c8;border:1px solid #6a5232;padding:2px 7px;margin-right:3px;cursor:pointer}#hdp button.on{background:#c89a4a;color:#1a120a;border-color:#ffd88a}'; document.head.appendChild(st);
-  d.querySelectorAll('.hdr button').forEach(b => b.onclick = e => { e.stopPropagation(); const k = b.parentElement.dataset.k, v = b.dataset.v; HD.setOpt(k, k === 'zoom' || k === 'art' ? +v : v); b.blur(); });
+  d.querySelectorAll('.hdr button').forEach(b => b.onclick = e => { e.stopPropagation(); const k = b.parentElement.dataset.k, v = b.dataset.v; HD.setOpt(k, k === 'zoom' || k === 'art' || k === 'battle3d' ? +v : v); b.blur(); });
   $('#hdt').onclick = e => { e.stopPropagation(); const fold = d.dataset.fold !== '1'; d.dataset.fold = fold ? '1' : ''; [...d.children].slice(1).forEach(c => c.style.display = fold ? 'none' : ''); $('#hdt b').textContent = '새 화면 시제품 ' + (fold ? '▸' : '▾'); };
   $('#hdgo').onclick = e => { e.stopPropagation(); e.currentTarget.blur(); tour(); };
   $('#hd2d').onclick = e => { e.stopPropagation(); e.currentTarget.blur(); HD.off = !HD.off; e.currentTarget.textContent = HD.off ? '새 화면으로' : '2D로 보기'; HD.ready = !HD.off; if (HD.off) HD.hide(); };

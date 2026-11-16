@@ -24,8 +24,9 @@ for D in DIRS:
                 im = Image.open(os.path.join(D, f'{key}-{s_}.png')).convert('RGB'); w, h = im.size; bg = im.getpixel((5, 5))
                 im.paste(bg, (int(w * .9), int(h * .9), w, h)); im.save(os.path.join(src, f'{key}-{s_}.png'))
         H.walker(key + '-', 'n_' + key, src, TALL.get(key, 46 if key in FEM else 48)); done.append(key)
+        if os.path.exists(os.path.join(D, key + '-c.png')): H.actor(key + '-', ('me' if key == 'me' else 'n_' + key) + '_act', D, TALL.get(key, 46 if key in FEM else 48))  # 동작 칸(있을 때만)
 for c, o, _, t, _ in json.load(open(os.path.join(ROOT, 'tools', 'hf_queue.json'))):
     for D in DIRS:
         if os.path.exists(os.path.join(D, c + 'a.png')) and os.path.exists(os.path.join(D, c + 'b.png')) and not os.path.exists(os.path.join(OUT, o + '.webp')): H.walker(c, o, D, t); break
-L = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(OUT, 'n_*.webp')))
+L = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(OUT, 'n_*.webp')) + glob.glob(os.path.join(OUT, 'me_act.webp')))
 json.dump(L, open(os.path.join(OUT, 'people.json'), 'w'), ensure_ascii=False); print('people.json', L)

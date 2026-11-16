@@ -84,6 +84,24 @@ def walker(code, out, src=None, tall_=48):
     print(out, sheet.size, 'scale', round(sc, 4))
 
 
+def actor(code, out, src=None, tall_=48):
+    """동작 그림(<키>-c.png: 2열 3행, 왼쪽을 보는 옆모습. 1열 위부터 준비·내지름·거둠, 2열 위부터 맞음·쓰러짐·경공)
+    → 게임 시트 한 줄 여섯 칸(칸 80×64, 발끝을 칸 아래에). 키는 같은 사람 걷기 그림(-a)의 차렷 키에 맞춘다"""
+    CW, CH = 80, 64
+    S = src or SRC; ld = lambda f: (lambda im: im if im.mode == 'RGBA' and np.asarray(im)[..., 3].min() < 10 else key_out(im))(Image.open(os.path.join(S, f)).convert('RGBA'))
+    A = ld(code + 'a.png'); C = ld(code + 'c.png')
+    stand = dict(((i, j), c) for i, j, c in cells(A, 2, 3))[0, 0]; bb = stand.getbbox(); sc = tall_ / (bb[3] - bb[1])
+    c6 = dict(((i, j), c) for i, j, c in cells(C, 2, 3)); order = [c6[0, 0], c6[0, 1], c6[0, 2], c6[1, 0], c6[1, 1], c6[1, 2]]
+    sheet = Image.new('RGBA', (CW * 6, CH))
+    for k, c in enumerate(order):
+        b = c.getbbox()
+        if not b: continue
+        s = shrink(c.crop(b), sc)
+        if s.width > CW or s.height > CH: s = s.resize((min(CW, s.width), min(CH, s.height)), Image.NEAREST)
+        sheet.paste(s, (k * CW + (CW - s.width) // 2, CH - s.height - 1), s)
+    sheet.save(os.path.join(OUT, out + '.webp'), lossless=True); print(out, sheet.size, 'scale', round(sc, 4))
+
+
 def tiles(code, names, dot):
     """이어 까는 무늬 여섯 칸(3열 2행, 칸 사이 파랑 선) → 칸마다 도트 한 점이 텍스처 한 점이 되게 줄인다. dot: 원본에서 도트 한 점의 크기"""
     im = Image.open(os.path.join(SRC, code + '.png')).convert('RGB'); w, h = im.size

@@ -1,6 +1,6 @@
 // 직접 조작 전투
 import { G, IMG, Input, Sound, $, $$, el, esc, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait, qSheet, QZ } from './core.js';
-import { Keys } from './core.js';
+import { Keys, ART } from './core.js';
 import { stageClear } from './dialog.js';
 import { SKILLS, BASIC, WEAPONS } from './data.js';
 import { MOVES, FOES } from './foes.js';
@@ -416,6 +416,7 @@ export class Battle {
     const st = a.fxSt || BF.styleOf(a, sk), [c0, c1, c2] = BF.PAL[st] || BF.PAL.steel, c = el('div', 'cutin');
     c.style.setProperty('--c0', c0); c.style.setProperty('--c2', c2); c.classList.add(a.team === 0 ? 'me' : 'foe');
     c.innerHTML = `<b>${esc(sk.name)}</b>${sk.han ? `<i>${esc(sk.han)}</i>` : ''}${BF.NAME[st] ? `<em>${BF.NAME[st]}</em>` : ''}`;
+    { const pic = ART.get('cut_' + st); if (pic) { c.style.backgroundImage = `linear-gradient(90deg,transparent,rgba(0,0,0,.55) 30%,rgba(0,0,0,.55) 70%,transparent),url(${pic.src})`; c.style.backgroundSize = 'cover'; c.style.backgroundPosition = 'center'; } }  // 절초 이름띠 그림(ChatGPT: assets/art/cut_<꼴>.webp, 화산은 cut_plum)
     $('#hud').appendChild(c); this.cut = { t: .7, el: c }; this.slowT = .45; BF.ult(this, st, a); Sound.sfx('power2');
   }
   camera(k) { const c = this.cam, x = clamp(this.p.x - VW / 2, 0, this.W - VW), y = clamp(this.p.y - VH / 2 - 4, 0, this.H - VH); c.x = lerp(c.x, x, k); c.y = lerp(c.y, y, k); }
@@ -551,11 +552,13 @@ export class Battle {
   hdOf(a) {
     if (a.hdIm !== undefined && (a.hdIm || this.t > 1)) return a.hdIm;
     if (!G.hd?.sheet || a.big || a.mon || a.def_?.stamp) return (a.hdIm = null);
-    if (a.isPlayer) return (a.hdIm = G.hd.sheet({ me: 1 }));
+    const key = o => { const k = G.hd.sheetKey(o); a.hdKey = k; a.hdAct = G.hd.act(k); return k ? G.hd.sheet(o) : null; };
+    if (a.isPlayer) return (a.hdIm = key({ me: 1 }));
     const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, ''), fm = /^(?:fd|sga|sgn)_([a-z]+)/.exec(id), al = fm && G.free?.fac?.(fm[1])?.align;
-    return (a.hdIm = G.hd.sheet({ id, keys: [a.def_?.pk, b, MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
+    return (a.hdIm = key({ id, keys: [a.def_?.pk, b, MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
   }
   pose(c, a, x, y) {
+    if (a.hdAct && (a.dead || a.st === 'skill' || a.st === 'stun' || a.st === 'dash')) return;  // 동작 칸이 몸놀림을 대신한다
     let sx = 1, sy = 1, rot = 0, ox = 0;
     if (a.dead) { const u = Math.min(1, a.deadT / .28); rot = u * 1.45 * (a.ax > 0 ? -1 : 1); }
     else if (a.st === 'skill' && a.sk && !a.sk.basic) { const lead = a.hitT || 0;
@@ -572,6 +575,8 @@ export class Battle {
   sprite(c, a, x, y, _, face, white) {
     const s = a.scale || 1;
     const hd = !a.def_?.stamp && !a.big && this.hdOf(a);
+    const act = hd && a.hdAct, af = !act ? -1 : a.dead ? 4 : a.st === 'stun' ? 3 : a.st === 'dash' || a.jumpT > 0 ? 5 : a.st === 'skill' ? (a.skT < (a.hitT || .08) ? 0 : a.skT < (a.hitT || .08) + .16 ? 1 : 2) : -1;
+    if (af >= 0) { G.hd.draw2dAct(c, act, af, face === 3 || (face < 2 && a.ax > 0), x, y, 15 * s * (qSheet(a.spr) ? QZ : 1), !!white); return; }  // 동작 칸이 있으면 기울이기 흉내 대신 그 칸
     if (hd) {  // 칸: 0 섬, 1~3 걸음. 초식과 돌진은 크게 내딛은 칸
       const fr = a.dead ? 0 : a.st === 'move' ? Math.floor(a.walk) % 4 : a.st === 'skill' || a.st === 'dash' ? 2 : a.st === 'stun' ? 1 : 0;
       G.hd.draw2d(c, hd, face, fr, x, y, 15 * s * (qSheet(a.spr) ? QZ : 1), !!white); return;  // 옛 쿼터뷰 인물과 같은 키

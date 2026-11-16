@@ -9,6 +9,7 @@ req = open(os.path.join(ROOT, 'docs', 'art-requests.md')).read()
 DESC = {m.group(1): (m.group(2).strip(), m.group(3).strip().replace('같은 규칙으로 그려 줘. ', '')) for m in re.finditer(r"### (\w+)_n\.png · ([^\n]*)\n\n```text\n(.*?)\n```", req, re.S)}
 TIERS = [
  ('1순위: 동료와 히로인 (일러스트는 있다. 그 일러스트대로 도트만)', ['so', 'cheol', 'baekrang', 'hyeok', 'clan_dang', 'clan_moyong', 'clan_namgung', 'c_haho', 'c_mun', 'c_owol', 'c_hyegong', 'c_saira', 'c_gal', 'c_yang', 'c_gu']),
+ ('1-2순위: 이야기에서 운명이 갈리는 사람 (일러스트는 있다)', ['wei', 'lion', 'samaung', 'ogang', 'guyang', 'makgo', 'go', 'cheon', 'chief', 'namhwa', 'manhwa']),
  ('2순위: 청하진과 자주 만나는 사람 (일러스트는 있다)', ['gwak', 'baek', 'elder', 'smith', 'doc', 'boat', 'hunter', 'realtor', 'shopk', 'host', 'town', 'town2', 'kid', 'beggar', 'disc', 'flower', 'wander', 'wife', 'husband']),
  ('3순위: 새로 그릴 사람 (일러스트부터)', [k for k, _, _ in NEW]),
  ('4순위: 문파 장문인과 세가 가주 (일러스트는 있다)', sorted(k[:-2] for k in art if k.startswith('clan_') and k.endswith('_n') and k[:-2] not in ('clan_dang', 'clan_moyong', 'clan_namgung'))),
@@ -51,7 +52,7 @@ n = 0
 for title, keys in TIERS:
     blocks = []
     for k in keys:
-        if 'n_' + k in have: continue
+        if 'n_' + k in have and '--drop' in sys.argv: continue  # 받은 사람은 주인이 빼라고 할 때만 뺀다(--drop)
         new = k in NEWD; t, d = NEWD[k] if new else DESC.get(k, (k, ''))
         if not new and k + '_n' not in art: continue
         n += 1; b = [f"### {t} — 키 `{k}`\n"]
@@ -66,4 +67,8 @@ if HOLD:
     for k, t, d in HOLD:
         hb.append(f"### {t} — 키 `{k}`\n\n**일러스트 `{k}_n.png`**\n\n```text\n{ILL}\n\n인물: {d}\n```\n\n**도트 `{k}-a.png`**\n\n```text\n{DOT}\n\n{A}\n\n인물: {d}\n```\n\n**도트 `{k}-b.png`**\n\n```text\n{B}\n```\n")
     out.append("## 보류: 기루 사람들 (기루를 게임에 넣기로 하면 그때)\n\n기녀는 모두 스물 넘은 성인 예인이고, 몸을 다 덮는 단정한 비단옷으로 노출 없이 그린다.\n\n" + '\n'.join(hb))
-open(os.path.join(ROOT, 'docs', 'chatgpt-people.md'), 'w').write('\n'.join(out)); print('사람', n)
+# 손으로 쓴 앞부분(동작 칸, 0순위 이름 없는 적)은 지금 문서에서 그대로 옮겨 온다
+P = os.path.join(ROOT, 'docs', 'chatgpt-people.md'); old = open(P).read() if os.path.exists(P) else ''
+m = re.search(r'(## 동작 칸.*?)(?=## 1순위)', old, re.S)
+if m: out.insert(1, m.group(1).rstrip() + '\n')
+open(P, 'w').write('\n'.join(out)); print('사람', n)

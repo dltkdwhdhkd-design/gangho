@@ -1,5 +1,5 @@
 // 결말 열둘: 마지막 보기(객잔/이끎/천산/떠남) 위에 누가 살았나와 편을 얹어 이름을 정한다. 본 결말은 세이브와 따로 적는다
-import { G } from './core.js';
+import { G, ART } from './core.js';
 import { ctx, say, narr } from './ctx.js';
 
 const F = () => G.S.flags, side = () => G.S.side || 'jeong', fate = () => G.fate;
@@ -79,7 +79,7 @@ const SCENE = {
 
 async function play(c) {
   const e = pick(c); F().ending9 = e.id; mark(e.id);
-  ctx.cg(CGOF[e.id] || 'end_free');
+  ctx.cg(ART.get('cg_end_' + e.id) ? 'end_' + e.id : CGOF[e.id] || 'end_free');  // 결말 그림이 오면 그 그림, 없으면 가까운 그림
   await SCENE[e.id]();
   if (F().pages_burned) { mark('ash'); await narr('월하칠식 일곱 장은 객잔 부뚜막에서 태웠다. 곽 아주머니가 국물을 올리는 불이었다. 재는 우물가에 묻었다.'); }
   for (const t of fate().lines()) await narr(t);
