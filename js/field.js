@@ -1,5 +1,5 @@
 // 마을과 산길을 걸어 다니는 화면
-import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast, qSheet } from './core.js';
+import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast, qSheet, QZ } from './core.js';
 import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
 import { drawIso, orderKeys, inside as isoInside } from './iso.js';
@@ -319,10 +319,13 @@ export class Field {
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
-        if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }
-        drawShadow(c, p.x, p.y); drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
+        const me = G.hd?.sheet?.({ me: 1 }), hh = 15 * (qSheet('chars/' + S.look) ? QZ : 1);  // 새 그림을 켜면 마을과 같은 주인공 도트
+        if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; if (me) G.hd.draw2d(c, me, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, hh); else drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }
+        drawShadow(c, p.x, p.y); if (me) G.hd.draw2d(c, me, p.dir, Math.floor(p.walk) % 4, p.x, p.y, hh); else drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
       }
-      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr; drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined); drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
+      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, hd = !n.size && G.hd?.sheet?.(n); drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined);
+        if (hd) { G.hd.draw2d(c, hd, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (qSheet(key) ? QZ : 1)); mark(n); continue; }
+        drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
         mark(n); }
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha' && !m.hasIso) { const st = m.stamps.find(s => s.name === 'inn'); if (st) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(st.x, st.y, 4 * TS, 3 * TS - 2); } }  // 좁힌 지도에서도 객잔 자리를 따라간다

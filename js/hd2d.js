@@ -43,6 +43,22 @@ export const HD = {
   stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: !!HD.low, size: R ? [R.domElement.width, R.domElement.height] : null }),
 };
 G.hd = HD;
+// 옛 2D 화면(전투, 강호 큰 지도, 방)에서도 마을과 같은 사람 도트를 쓰게 시트를 내준다. 새 화면과 새 그림을 켰을 때만
+HD.sheet = o => {
+  if (!want || !art() || !o) return null; const L = [];
+  if (o.me) L.push('me');
+  else {
+    for (const k of [o.id, o.role, o.hint && ROLE[o.hint], ...(o.keys || [])]) if (k) L.push('n_' + k);
+    const key = o.spr ? (o.spr.includes('/') ? o.spr : 'chars/' + o.spr) : null;
+    if (key === 'chars/Princess') L.push('yun'); if (key && NEWNPC[key]) L.push(...NEWNPC[key]);
+  }
+  for (const n of L) if (PV[n]) return PV[n]; return null;
+};
+// 사람 시트 한 칸을 2D 캔버스에 그린다: 칸 56점, 사람 키 48점, 발이 칸 바닥. h는 사람 키(평면도 점)
+HD.draw2d = (c, im, dir, frame, x, y, h = CHAR, white) => {
+  const D = h * 56 / 48; c.save(); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; if (white) c.filter = 'brightness(0) invert(1)';
+  c.drawImage(im, (dir & 3) * 56, (frame & 3) * 56, 56, 56, x - D / 2, y + 1 - D, D, D); c.restore();
+};
 
 let R, cv, scene, cam, sun, fill, hemi, ground, skirt, propG, actG, lamps = [], post, curMap = null;
 const TEX = new Map(), MATS = new Map(), DMATS = new Map();
