@@ -8,6 +8,7 @@ import { arena, ARENA_W, ARENA_H, drawStamp, STAMPS } from './tiles.js';
 import { stats, bonus, masteryLv, canEquip, DIFF, gainExp, save, give } from './state.js';
 import { DB } from './items.js';
 import { openMenu } from './ui.js';
+import * as BF from './battlefx.js';
 
 const PARRY = .17, D2R = Math.PI / 180;
 const FX = { slash: [32, 32, 4], curve: [32, 32, 4], double: [32, 32, 4], double2: [32, 32, 4], circle: [32, 32, 4], cut: [32, 32, 5], claw: [32, 32, 4], smoke: [32, 32, 6], flam: [32, 32, 5], thunder: [40, 28, 4], rock: [30, 30, 14], spark: [32, 32, 5], spirit: [32, 32, 5], spiritb: [32, 32, 5], aura: [32, 32, 4], aurap: [32, 32, 4], ring: [32, 32, 4], ringw: [32, 32, 4], shieldy: [24, 26, 6], shieldb: [24, 26, 6] };
@@ -63,9 +64,10 @@ export class Battle {
       if (!p.dead) { if (G.bot) this.bot(p, dt); else this.control(p, dt); }
       for (const a of this.actors) if (a !== p && !a.dead && !a.dummy) this.ai(a, dt);
     }
-    for (const a of this.actors) this.tickActor(a, dt);
+    const wd = this.slowT > 0 ? dt * .45 : dt;  // 절초 뒤 잠깐 느리게
+    for (const a of this.actors) this.tickActor(a, wd);
     this.separate();
-    this.tickProj(dt); this.tickZones(dt); this.tickFx(dt);
+    this.tickProj(wd); this.tickZones(wd); this.tickFx(dt);
     for (const s of this.spawnQ) { const ang = rnd(6.28), a = this.spawn(s, 1, clamp(this.p.x + Math.cos(ang) * 90, 30, this.W - 30), clamp(this.p.y + Math.sin(ang) * 70, 40, this.H - 30)); this.addFx('smoke', a.x, a.y - 6, 1); }
     this.spawnQ = [];
     this.camera(.12); this.checkEnd(dt); this.hud();
@@ -170,6 +172,8 @@ export class Battle {
   // ── 초식 실행 ──
   start(a, sk, key) {
     a.st = 'skill'; a.sk = sk; a.skKey = key; a.skT = 0; a.skI = 0; a.vx = a.vy = 0; a.counter = 0; a.skSeq = (a.skSeq || 0) + 1;
+    a.fxSt = sk.basic ? BF.styleOf(a, null) : BF.styleOf(a, sk); a.hitT = sk.steps.find(q => q.hit || q.proj || q.zone || q.rush)?.t ?? 0;  // 연출 꼴, 첫 타격 때(그 전까지는 기를 모으는 자세)
+    if (!sk.basic && !sk.ult && !(a.isPlayer && sk.steps.some(q => q.cut))) { BF.cast(this, a.fxSt, a); if (a.isPlayer && sk.name) this.say(a, sk.name, BF.PAL[a.fxSt][0]); }
     if (sk.steps && sk.teleToFoe) { const T = this.near(a); a.jumpTo = T ? { x: T.x, y: T.y } : null; }
     if (a.team === 1 && !sk.noTele) this.addTeles(a, sk);
   }
@@ -185,14 +189,14 @@ export class Battle {
     if (s.sfx) Sound.sfx(s.sfx, .9);
     if (s.armor) a.armor = Math.max(a.armor, s.armor);
     if (s.iframe) a.iframe = Math.max(a.iframe, s.iframe);
-    if (s.cut && a.isPlayer || s.cut && a.boss) this.cutin(sk.name);
+    if (s.cut && a.isPlayer || s.cut && a.boss) this.cutin(sk, a);
     if (s.jump) { a.jumpT = s.jump; a.jumpD = s.jump; }
     if (s.move) { const dd = s.move.d; a.mv = { vx: a.ax * dd / s.move.dur, vy: a.ay * dd / s.move.dur, t: s.move.dur, ghost: s.move.ghost }; if (s.move.iframe) a.iframe = Math.max(a.iframe, s.move.dur + .06); if (s.move.ghost) a.ghostT = s.move.dur; }
     if (s.rush) { a.mv = { vx: a.ax * s.rush.d / s.rush.dur, vy: a.ay * s.rush.d / s.rush.dur, t: s.rush.dur, ghost: true }; a.rush = { ...s.rush, seen: new Set() }; a.ghostT = s.rush.dur; }
     if (s.blink) { const T = this.near(a); if (T) { const tl = hyp(T.ax, T.ay) || 1, b = s.blink.behind; a.x = clamp(T.x - T.ax / tl * b, this.left, this.right); a.y = clamp(T.y - T.ay / tl * b, this.top, this.floorB); const dx = T.x - a.x, dy = T.y - a.y, l = hyp(dx, dy) || 1; a.ax = dx / l; a.ay = dy / l; a.face = faceOf(dx, dy); a.iframe = Math.max(a.iframe, .2); if (s.blink.enemy) this.teles.push({ owner: a, skRef: sk, x: a.x, y: a.y, ax: a.ax, ay: a.ay, left: .28, tot: .28, shape: 'arc', r: 26, a: 90 }); } }
     if (s.fx) { const key = 'sk_' + sk.id; if (IMG['fx/' + key] && s === sk.steps.find(q => q.fx)) { FX[key] = FX[key] || [48, 48, 6]; this.stepFx(a, { ...s.fx, n: key }); } else this.stepFx(a, s.fx); }
     if (s.shake) this.shake(s.shake);
-    if (s.hit) { this.swingFx(a, s.hit); this.melee(a, s.hit, sk); }
+    if (s.hit) { this.swingFx(a, s.hit); BF.swing(this, a.fxSt, a, s.hit, sk); this.melee(a, s.hit, sk); }
     if (s.proj) this.shoot(a, s.proj, sk);
     if (s.zone) this.zone(a, s.zone, sk);
     if (s.clearProj) this.proj = this.proj.filter(p => p.team === a.team);
@@ -229,7 +233,7 @@ export class Battle {
     const n = p.n || 1, base = Math.atan2(a.ay, a.ax);
     for (let i = 0; i < n; i++) {
       const an = base + (i - (n - 1) / 2) * (p.spread || 0) * D2R;
-      this.proj.push({ ...p, x: a.x + Math.cos(an) * 8, y: a.y - 5 + Math.sin(an) * 8, vx: Math.cos(an) * p.speed, vy: Math.sin(an) * p.speed, an, owner: a, team: a.team, age: 0, seen: new Set(), sk });
+      this.proj.push({ ...p, st: sk && !sk.basic ? a.fxSt || BF.styleOf(a, sk) : null, x: a.x + Math.cos(an) * 8, y: a.y - 5 + Math.sin(an) * 8, vx: Math.cos(an) * p.speed, vy: Math.sin(an) * p.speed, an, owner: a, team: a.team, age: 0, seen: new Set(), sk });
     }
   }
   zone(a, z, sk) {
@@ -267,7 +271,7 @@ export class Battle {
     if (o.stagger > 0) dmg *= 1.4;
     dmg = Math.max(1, Math.round(dmg)); o.hp -= dmg; o.flash = .1;
     this.num(o.x + rnd(-4, 4), o.y - 16, dmg, crit ? '#ffd23c' : isP ? '#ff7a6a' : '#fff', crit ? 1.35 : 1);
-    this.addFx('spark', o.x - nx * 2, o.y - 7, .55);
+    this.addFx('spark', o.x - nx * 2, o.y - 7, .55); if (!src.mon || sk) BF.impact(this, (proj && proj.st) || src.fxSt || 'steel', o, nx, ny, (h.mul || 1) >= 2.5 || crit);
     Sound.sfx(rint(0, 1) ? 'hit' : 'hit2', .8);
     if (src.isPlayer) {
       src.mp = Math.min(src.maxMp, src.mp + (sk && sk.basic ? 1.6 + (this.b.mpHit || 0) : .4));
@@ -364,7 +368,7 @@ export class Battle {
   }
   tickProj(dt) {
     for (const p of this.proj) {
-      p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.st) BF.trail(this, p.st, p);
       if (p.ret && p.age > p.life * .5) { const o = p.owner, dx = o.x - p.x, dy = o.y - 6 - p.y, d = hyp(dx, dy) || 1; p.vx = lerp(p.vx, dx / d * p.speed * 1.2, .14); p.vy = lerp(p.vy, dy / d * p.speed * 1.2, .14); if (d < 10) { p.age = 99; if (!p.seenDone) p.seen.clear(); } }
       if (p.x < 0 || p.y < 0 || p.x > this.W || p.y > this.H) { if (!p.ret) p.age = 99; }
       for (const o of this.actors) {
@@ -384,7 +388,7 @@ export class Battle {
       z.left -= dt;
       if (z.left <= 0) {
         if (z.sfx) Sound.sfx(z.sfx, .7);
-        this.addFx(z.fx || 'ring', z.x, z.y - 6, z.r / 14); this.shake(1.5);
+        this.addFx(z.fx || 'ring', z.x, z.y - 6, z.r / 14); this.shake(1.5); BF.burstAt(this, BF.styleOf(z.owner, z.sk), z.x, z.y, z.r);
         for (const o of this.actors) if (o.team !== z.team && !o.dead && o.iframe <= 0 && hyp(o.x - z.x, o.y - z.y) < z.r + o.r) this.applyHit(z.owner, o, z.h, z.sk);
       }
     }
@@ -393,7 +397,7 @@ export class Battle {
     this.teles = this.teles.filter(t => t.left > 0);
   }
   tickFx(dt) {
-    for (const f of this.fx) f.t += dt;
+    for (const f of this.fx) f.t += dt; BF.tick(this, dt); if (this.slowT > 0) this.slowT -= dt;
     this.fx = this.fx.filter(f => f.t < f.dur);
     for (const n of this.nums) { n.t += dt; n.y -= 22 * dt * (1 - n.t); }
     this.nums = this.nums.filter(n => n.t < .85);
@@ -403,7 +407,12 @@ export class Battle {
   num(x, y, v, c = '#fff', s = 1) { this.nums.push({ x, y, v, c, s, t: 0 }); }
   say(a, txt, c = '#fff') { this.nums.push({ x: a.x, y: a.y - 22, v: txt, c, s: .85, t: 0, text: 1 }); }
   shake(a) { this.shakeT = .18; this.shakeA = Math.max(a, this.shakeT > 0 ? this.shakeA : 0); }
-  cutin(name) { const c = el('div', 'cutin', name); $('#hud').appendChild(c); this.cut = { t: .55, el: c }; Sound.sfx('power2'); }
+  cutin(sk, a) {  // 절초: 화면이 어두워지고 이름띠가 문파 빛깔로 지나간다. 끝나면 잠깐 느려진다
+    const st = a.fxSt || BF.styleOf(a, sk), [c0, c1, c2] = BF.PAL[st] || BF.PAL.steel, c = el('div', 'cutin');
+    c.style.setProperty('--c0', c0); c.style.setProperty('--c2', c2); c.classList.add(a.team === 0 ? 'me' : 'foe');
+    c.innerHTML = `<b>${esc(sk.name)}</b>${sk.han ? `<i>${esc(sk.han)}</i>` : ''}${BF.NAME[st] ? `<em>${BF.NAME[st]}</em>` : ''}`;
+    $('#hud').appendChild(c); this.cut = { t: .7, el: c }; this.slowT = .45; BF.ult(this, st, a); Sound.sfx('power2');
+  }
   camera(k) { const c = this.cam, x = clamp(this.p.x - VW / 2, 0, this.W - VW), y = clamp(this.p.y - VH / 2 - 4, 0, this.H - VH); c.x = lerp(c.x, x, k); c.y = lerp(c.y, y, k); }
   // ── 적 AI ──
   ai(a, dt0) {
@@ -447,15 +456,21 @@ export class Battle {
     const cam = this.cam; let sx = 0, sy = 0;
     if (this.shakeT > 0) { sx = rnd(-this.shakeA, this.shakeA); sy = rnd(-this.shakeA, this.shakeA); } else this.shakeA = 0;
     c.save(); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); c.imageSmoothingEnabled = false;
-    const ox = -snap(cam.x + sx), oy = -snap(cam.y + sy); c.translate(ox, oy);
+    const ox = -snap(cam.x + sx), oy = -snap(cam.y + sy);
+    if (this.zoomT > 0) { const u = Math.sin(Math.min(1, this.zoomT / .75) * Math.PI), k = 1 + .1 * u, fx = this.zoomX + ox, fy = this.zoomY + oy; c.translate(fx, fy); c.scale(k, k); c.translate(-fx, -fy); }  // 절초: 쓰는 사람 쪽으로 살짝 당긴다
+    c.translate(ox, oy);
     c.fillStyle = '#000'; c.fillRect(-20, -20, this.W + 40, this.H + 40); c.drawImage(this.bg, 0, 0);
+    if (this.dimT > 0) { c.fillStyle = `rgba(6,4,14,${Math.min(.6, this.dimT)})`; c.fillRect(-20, -20, this.W + 40, this.H + 40); }
+    BF.draw(c, this, true);
     for (const t of this.teles) this.drawTele(c, t);
     for (const z of this.zones) { const u = 1 - z.left / z.tot; c.fillStyle = z.player ? 'rgba(170,200,255,.2)' : 'rgba(230,50,30,.2)'; c.beginPath(); c.ellipse(z.x, z.y, z.r, z.r * .8, 0, 0, 7); c.fill(); c.fillStyle = z.player ? 'rgba(190,220,255,.4)' : 'rgba(255,70,40,.42)'; c.beginPath(); c.ellipse(z.x, z.y, z.r * u, z.r * .8 * u, 0, 0, 7); c.fill(); }
     const list = [...this.actors].sort((a, b) => a.y - b.y);
     for (const a of list) this.drawActor(c, a);
     for (const p of this.proj) this.drawProj(c, p);
     for (const f of this.fx) this.drawFx(c, f);
+    BF.draw(c, this, false);
     c.restore();
+    if (this.flashT > 0) { c.globalAlpha = this.flashT / .16 * .4; c.fillStyle = this.flashC || '#fff'; c.fillRect(0, 0, 1280, 720); c.globalAlpha = 1; }
     // 숫자는 고해상도로
     c.save(); c.textAlign = 'center';
     for (const n of this.nums) {
@@ -486,10 +501,13 @@ export class Battle {
     const s = a.scale || 1, y = a.y;
     if (a.st === 'guard') { c.fillStyle = 'rgba(160,210,255,.28)'; c.beginPath(); c.arc(a.x + a.ax * 4, y - 6 + a.ay * 4, 9, 0, 7); c.fill(); }
     drawShadow(c, a.x, y, a.big ? 2 : s);
-    for (const g of a.ghosts) { c.globalAlpha = g.t * 2.2; this.sprite(c, a, g.x, g.y, 0, g.face); c.globalAlpha = 1; }
+    const hd = this.hdOf(a), gc = a.fxSt && BF.PAL[a.fxSt] ? BF.PAL[a.fxSt][0] : null;
+    for (const g of a.ghosts) { c.globalAlpha = g.t * 2.2; this.sprite(c, a, g.x, g.y, 0, g.face); if (gc && a.st === 'skill') { c.globalAlpha = g.t * 1.4; c.globalCompositeOperation = 'lighter'; this.sprite(c, a, g.x, g.y, 0, g.face); c.globalCompositeOperation = 'source-over'; } c.globalAlpha = 1; }  // 초식 잔상은 빛나게
     c.globalAlpha = alpha;
+    c.save(); this.pose(c, a, a.x, y);  // 몸놀림: 기 모으기(웅크림), 내지르기, 돌진(늘어남), 휘청임, 쓰러짐
     this.sprite(c, a, a.x, y - (a.z || 0), 0, a.face);
-    if (a.flash > 0 && !a.big) { const w = whiteOf(a.spr); if (w) { c.globalAlpha = .85; this.sprite(c, a, a.x, y - (a.z || 0), 0, a.face, w); } }
+    if (a.flash > 0 && !a.big) { const w = hd ? 1 : whiteOf(a.spr); if (w) { c.globalAlpha = .85; this.sprite(c, a, a.x, y - (a.z || 0), 0, a.face, w); } }
+    c.restore();
     c.globalAlpha = 1;
     if (a.swing && a.wpn) this.drawWeapon(c, a);
     if (a.st === 'stun' && !dead && a.stagger > 0) { for (let i = 0; i < 3; i++) { const an = this.t * 6 + i * 2.1; c.fillStyle = '#ffe36a'; c.fillRect(snap(a.x + Math.cos(an) * 7), snap(y - 20 + Math.sin(an) * 2), 2, 2); } }
@@ -500,8 +518,36 @@ export class Battle {
     if (a.team === 1 && !a.boss && a !== this.bossA && !dead && !a.dummy) { const w = 16; c.fillStyle = '#000'; c.fillRect(snap(a.x - w / 2 - .5), snap(y - 21), w + 1, 2.5); c.fillStyle = '#d8402e'; c.fillRect(snap(a.x - w / 2), snap(y - 20.75), w * clamp(a.hp / a.maxHp, 0, 1), 2); }
     if (a.team === 0 && !a.isPlayer && !dead) { const w = 16; c.fillStyle = '#000'; c.fillRect(snap(a.x - w / 2 - .5), snap(y - 21), w + 1, 2.5); c.fillStyle = '#58b878'; c.fillRect(snap(a.x - w / 2), snap(y - 20.75), w * clamp(a.hp / a.maxHp, 0, 1), 2); }
   }
+  // 마을과 같은 사람 도트(새 화면과 새 그림을 켰을 때). 주인공, 동료, 이름 있는 사람
+  hdOf(a) {
+    if (a.hdIm !== undefined && (a.hdIm || this.t > 1)) return a.hdIm;
+    if (!G.hd?.sheet || a.big || a.mon || a.def_?.stamp) return (a.hdIm = null);
+    if (a.isPlayer) return (a.hdIm = G.hd.sheet({ me: 1 }));
+    const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, '');
+    return (a.hdIm = G.hd.sheet({ id, keys: [a.def_?.pk, b], spr: a.spr }));
+  }
+  pose(c, a, x, y) {
+    let sx = 1, sy = 1, rot = 0, ox = 0;
+    if (a.dead) { const u = Math.min(1, a.deadT / .28); rot = u * 1.45 * (a.ax > 0 ? -1 : 1); }
+    else if (a.st === 'skill' && a.sk && !a.sk.basic) { const lead = a.hitT || 0;
+      if (a.skT < lead) { const u = a.skT / (lead || 1); sy = 1 - .1 * u; sx = 1 + .07 * u; ox = -a.ax * 1.5 * u; }  // 기를 모은다
+      else { const u = Math.max(0, 1 - (a.skT - lead) / .14); sx = 1 + .06 * u; ox = a.ax * 3 * u; rot = a.ax * .12 * u; } }  // 내지른다
+    else if (a.st === 'skill' && a.sk) { const u = Math.max(0, 1 - Math.abs(a.skT - (a.hitT || .1)) / .1); ox = a.ax * 2 * u; rot = a.ax * .08 * u; }
+    else if (a.st === 'dash' || a.mv?.ghost) { sx = 1 + .16 * Math.abs(a.ax); sy = 1 - .08; rot = a.ax * .18; }
+    else if (a.st === 'stun') rot = a.stagger > 0 ? Math.sin(this.t * 28) * .1 : -a.ax * .16 * Math.min(1, (a.stT || 0) * 4);
+    else if (a.st === 'guard') { sy = .95; sx = 1.03; }
+    else if (a.st === 'move') rot = a.ax * .05;
+    if (sx === 1 && sy === 1 && !rot && !ox) return;
+    c.translate(x + ox, y); c.rotate(rot); c.scale(sx, sy); c.translate(-x, -y);
+  }
   sprite(c, a, x, y, _, face, white) {
     const s = a.scale || 1;
+    const hd = !a.def_?.stamp && !a.big && this.hdOf(a);
+    if (hd) {  // 칸: 0 섬, 1~3 걸음. 초식과 돌진은 크게 내딛은 칸
+      const fr = a.dead ? 0 : a.st === 'move' ? Math.floor(a.walk) % 4 : a.st === 'skill' || a.st === 'dash' ? 2 : a.st === 'stun' ? 1 : 0;
+      G.hd.draw2d(c, hd, face, fr, x, y, 15 * s * (qSheet(a.spr) ? QZ : 1), !!white); return;  // 옛 쿼터뷰 인물과 같은 키
+    }
+
     if (a.def_ && a.def_.stamp) { if (!white) { const q = STAMPS[a.def_.stamp]; drawStamp(c, a.def_.stamp, snap(x - q[3] / 2), snap(y - q[4] + 2)); } return; }
     if (a.big) {
       const b = a.big, im = white || IMG[b.img]; if (!im) return; const fr = Math.floor(this.t * 7) % b.frames, k = im.hd || 1;
@@ -534,6 +580,7 @@ export class Battle {
     const iw = im.width / (im.hd || 1), ih = im.height / (im.hd || 1); c.drawImage(im, -iw / 2, -ih - push, iw, ih); c.restore();
   }
   drawProj(c, p) {
+    if (p.st && (p.img === 'p_energy' || p.img === 'p_bigenergy')) return BF.drawProj(c, p, p.st, this.t);
     c.save(); c.translate(p.x, p.y);
     if (p.img === 'tray') { c.rotate(p.age * 18); c.fillStyle = '#7a4a22'; c.beginPath(); c.ellipse(0, 0, 6, 3.4, 0, 0, 7); c.fill(); c.fillStyle = '#b57a3e'; c.beginPath(); c.ellipse(0, 0, 4.4, 2.2, 0, 0, 7); c.fill(); }
     else if (p.img === 'plum') { c.rotate(p.age * 9); c.fillStyle = '#ffb7c8'; for (let i = 0; i < 5; i++) { const q = i * 1.2566; c.beginPath(); c.arc(Math.cos(q) * 2.4, Math.sin(q) * 2.4, 1.8, 0, 7); c.fill(); } c.fillStyle = '#ffe36a'; c.fillRect(-1, -1, 2, 2); }

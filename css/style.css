@@ -106,7 +106,14 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .sk .ct{position:absolute;left:0;right:0;bottom:4px;color:var(--gold);font-size:17px}
 .sk.off{filter:grayscale(1) brightness(.7)}.sk.ready{border-color:var(--gold)}.sk.ult{border-color:var(--red)}
 .vs{position:absolute;left:0;right:0;top:44%;text-align:center;color:#fff3d6;font-size:54px;font-family:Galmuri11Bold;text-shadow:0 5px 0 #000;transform:translateY(-50%)}
-.cutin{position:absolute;left:0;right:0;top:38%;text-align:center;background:rgba(0,0,0,.72);border-top:4px solid var(--gold);border-bottom:4px solid var(--gold);padding:14px 0;color:#fff3d6;font-size:44px;font-family:Galmuri11Bold;letter-spacing:8px;text-shadow:0 4px 0 var(--red)}
+.cutin{--c0:var(--gold);--c2:var(--red);position:absolute;left:0;right:0;top:36%;text-align:center;background:linear-gradient(90deg,transparent,rgba(0,0,0,.82) 18%,rgba(0,0,0,.82) 82%,transparent);border-top:3px solid var(--c0);border-bottom:3px solid var(--c0);padding:12px 0 10px;color:#fff3d6;font-family:Galmuri11Bold;animation:cutin .7s ease-out both;pointer-events:none;overflow:hidden}
+.cutin b{display:block;font-size:46px;font-weight:400;letter-spacing:10px;text-shadow:0 0 18px var(--c0),0 4px 0 var(--c2)}
+.cutin i{display:block;font-style:normal;font-size:20px;letter-spacing:14px;color:var(--c0);margin-top:4px;opacity:.9}
+.cutin em{position:absolute;right:9%;top:50%;transform:translateY(-50%);font-style:normal;font-size:84px;color:var(--c0);opacity:.18;letter-spacing:0}
+.cutin::before{content:'';position:absolute;top:0;bottom:0;width:30%;left:-30%;background:linear-gradient(90deg,transparent,var(--c0),transparent);opacity:.35;animation:cutsweep .7s ease-out}
+.cutin.foe{border-color:#e04a3a}
+@keyframes cutin{0%{transform:translateX(-60px) scaleY(.2);opacity:0}18%{transform:none;opacity:1}82%{opacity:1}100%{transform:translateX(40px);opacity:0}}
+@keyframes cutsweep{to{left:100%}}
 .tut{position:absolute;left:50%;top:92px;transform:translateX(-50%);background:rgba(20,15,10,.9);border:3px solid var(--gold);color:#fff3d6;padding:10px 20px;font-size:20px;text-align:center;line-height:1.5;max-width:900px}
 .tut b{color:var(--gold);font-weight:400}
 .result{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--paper);border:4px solid var(--ink);box-shadow:0 8px 0 var(--ink);padding:24px 34px;min-width:440px;pointer-events:auto;text-align:center}
