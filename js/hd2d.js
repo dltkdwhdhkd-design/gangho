@@ -95,7 +95,7 @@ const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; 
 // 새 그림 맛보기(tools/hd2d_preview.py가 만든 것): 받은 집 그림과 윤설 걷기. 0단계에서 크기와 결만 보려고 잠깐 씌운다
 // 새 인물 그림(Higgsfield HN*, 게임 시트 꼴 56점 칸)이 있는 사람 종류
 const NEWNPC = { 'chars/Villager': ['n_town', 'n_villager'], 'chars/Villager2': ['n_town'], 'chars/Villager3': ['n_town'], 'chars/Woman': ['n_town2', 'n_woman'], 'chars/Boy': ['n_kid'], 'chars/OldMan': ['n_oldman'], 'chars/OldWoman': ['n_oldwoman'], 'chars/Monk': ['n_monk'], 'chars/Gisaeng': ['n_gisaeng1'], 'chars/Gisaeng2': ['n_gisaeng2'], 'chars/Gisaeng3': ['n_gisaeng3'], 'chars/Pimp': ['n_pimp'] };  // 옛 도트 이름 → 새 사람 시트(앞의 것이 있으면 그것). 대화 그림과 맞춘 시트(n_town 따위)가 먼저
-const PV = {}, PEOPLE = new Set(), PVN = [ 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'w4_front', 'w5_front', 'w6_front', 'w4_side', 'w5_side', 'w6_side', 'k_fence', 'k_palisade', 'k_stone'];
+const PV = {}, PEOPLE = new Set(), PVN = [ 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'w4_front', 'w5_front', 'w6_front', 'w4_side', 'w5_side', 'w6_side', 'k_fence', 'k_palisade', 'k_stone', 'hd_wall_tile', 'hd_wall_stone', 'hd_wall_rampart', 'hd_fence_stake', 'hd_fence_bamboo', 'hd_fence_wattle', 'gate', 'gate_arch', 'hd_gate_town'];
 const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 인물 그림 기준). 새 땅과 지붕과 벽도 이 굵기로 깐다
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
@@ -120,7 +120,7 @@ function loadPreview() { if (!loadModels.p) loadModels.p = loadModels(); return 
 const art = () => !!HD.opt.art;
 function previewTex(name) {
   const im = art() && PV[name]; if (!im) return null; if (TEX.has('p/' + name)) return TEX.get('p/' + name);
-  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') }); if (/^[gre]_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
+  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') }); if (/^([gre]|hd)_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
 }
 // 소품: 도트 그대로 올려 '또렷한 겹선형'으로 읽는다(배경도 인물과 같은 도트 결. 매끈해지는 것은 흐림과 빛뿐)
 // 옛 그림(16점 칸, 도트 2배) 소품은 새 그림보다 크고 쨍하다. 새 나무 그림(HT1)이 오기 전까지 새 화면에서만 줄이고 색을 맞춘다(막힘과 2D는 그대로)
@@ -220,6 +220,24 @@ function houseBox(s, t, W_, H_, ef) {
   return g;
 }
 // 담 덩어리: 막힘 상자를 밑면으로, 그림의 아랫부분을 앞면에, 윗부분을 윗면에. 옆면은 앞면 무늬를 어둡게
+// 담장·울타리(ChatGPT HD1·HD2): 좌우가 맞물리는 한 칸 그림을 담 길이를 따라 되풀이해 깐다. 구화성(고을)은 성벽, 문파·세가는 회벽 기와담
+const HDH = { hd_wall_tile: 26, hd_wall_stone: 18, hd_wall_rampart: 34, hd_fence_stake: 22, hd_fence_bamboo: 17, hd_fence_wattle: 15 };
+function hdWall(s, m) {
+  const n = s.name; if (n === 'wall_h' || n === 'wall_m' || n === 'wall_v') return m.id === 'guhwa' ? 'hd_wall_rampart' : 'hd_wall_tile';
+  return { wood_h: 'hd_fence_stake', wood_v: 'hd_fence_stake', fence_h: 'hd_fence_wattle', p_stonewall: 'hd_wall_stone', p_bamboofence: 'hd_fence_bamboo' }[n];
+}
+function wallRun(s, k) {
+  const st = STAMPS[s.name], sc = s.sc || 1, x0 = s.x + st[5] * sc, x1 = x0 + st[7] * sc, yb = s.y + st[6] * sc, yf = yb + st[8] * sc, zf = yf * ZS, zb = yb * ZS;
+  const t = previewTex(k), H = HDH[k], Hw = H * HS, P = H * t.image.width / t.image.height, top = 1 - 1.5 / t.image.height;  // P: 그림 한 장이 덮는 길이
+  const M = matOf(t), g = new T.Group(); g.userData = { s, wall: true };
+  const add = (geo) => { const o = new T.Mesh(geo, M.m); o.customDepthMaterial = M.d; o.castShadow = o.receiveShadow = true; o.userData = { M, t, owner: g }; g.add(o); };
+  add(face([[x0, 0, zf], [x1, 0, zf], [x1, Hw, zf], [x0, Hw, zf]], [[x0 / P, 0], [x1 / P, 0], [x1 / P, 1], [x0 / P, 1]]));  // 앞면
+  add(face([[x1, 0, zb], [x0, 0, zb], [x0, Hw, zb], [x1, Hw, zb]], [[x1 / P, 0], [x0 / P, 0], [x0 / P, 1], [x1 / P, 1]]));  // 뒷면
+  add(face([[x0, 0, zb], [x0, 0, zf], [x0, Hw, zf], [x0, Hw, zb]], [[yb / P, 0], [yf / P, 0], [yf / P, 1], [yb / P, 1]]));  // 왼면(세로 담에서 보인다)
+  add(face([[x1, 0, zf], [x1, 0, zb], [x1, Hw, zb], [x1, Hw, zf]], [[yf / P, 0], [yb / P, 0], [yb / P, 1], [yf / P, 1]]));  // 오른면
+  if (!/fence/.test(k)) add(face([[x0, Hw, zf], [x1, Hw, zf], [x1, Hw, zb], [x0, Hw, zb]], [[x0 / P, top], [x1 / P, top], [x1 / P, 1], [x0 / P, 1]]));  // 윗면: 그림 맨 윗줄(기와, 갓돌)
+  return g;
+}
 function wallBox(s, t, W_, H_) {
   const st = STAMPS[s.name], sc = s.sc || 1, x0 = s.x + st[5] * sc, x1 = x0 + st[7] * sc, yb = s.y + st[6] * sc, yf = yb + st[8] * sc, zf = yf * ZS, zb = yb * ZS;
   const top = topRow(t) / t.image.height * H_, vis = H_ - top, cap = Math.min(vis * .4, yf - yb), Hw = Math.max(4, (vis - cap) * HS), vC = 1 - (top + cap) / H_, vT = 1 - top / H_;
@@ -401,7 +419,8 @@ function setMap(m) {
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
   const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = new Map();
   list.forEach(({ s, z }, k) => {
-    const st = STAMPS[s.name], t = st && stampTex(s.name); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(s.name), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
+    const nm = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name;  // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch)
+    const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(nm), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
     const mk_ = !s.flat && art() && modelKey(s), gm = mk_ && needModel(mk_);
     if (gm) { const g = new T.Group(), o = gm.clone(true); o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; } }); g.add(o);
@@ -410,6 +429,7 @@ function setMap(m) {
     if (!s.flat && SPEC[s.name] && art() && PV.w1_front) { build ||= makeBuilder({ T, HS, ZS, DOT, PV, aniso: R.capabilities.getMaxAnisotropy(), texFrom, matOf, holed, LAMPX, face, glow: GLOW, get AO() { return aoTex(); } }); const b = build(s, st, SPEC[s.name]); if (b) { propG.add(b); return; } }  // 조립한 건물(js/hd2d/build.js)
     if (!s.flat && PARTS[s.name] && previewTex('w_front')) { propG.add(partsBox(s, PARTS[s.name])); return; }  // 새 그림: 벽 부품(HW0)과 지붕 무늬(HR1)로
     if (ef) { propG.add(houseBox(s, t, w, h, ef)); return; }
+    const hk = !s.flat && art() && hdWall(s, m); if (hk && PV[hk]) { propG.add(wallRun(s, hk)); return; }  // 새 담장·울타리(ChatGPT HD1·HD2)
     if (!s.flat && WALLS.has(s.name)) { propG.add(wallBox(s, t, w, h)); return; }
     const sw = art() && !s.flat && SWAP[s.name] && IMG['stamp/' + SWAP[s.name]] && SWAP_SZ[SWAP[s.name]];
     if (sw) { const nm = SWAP[s.name], [w2, h2] = SWAP_SZ[nm].map(v => v * (s.sc || 1) * (.9 + ((s.x * 7 + s.y * 3) % 5) * .05)), t2 = stampTex(nm), gk2 = w2.toFixed(1) + 'x' + h2.toFixed(1); if (!GEO.has(gk2)) GEO.set(gk2, standGeo(w2, h2));

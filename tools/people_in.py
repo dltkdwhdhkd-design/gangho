@@ -8,7 +8,7 @@ ROOT = H.ROOT; DIRS = [os.path.join(ROOT, 'art-src', d) for d in ('gemini', 'cha
 OUT = os.path.join(ROOT, 'assets', 'hd2d', 'preview')
 # 키(사람 키 점수). 적지 않은 사람은 48. 여자 46, 노인 44, 아이 34
 TALL = {'woman': 45, 'oldman': 44, 'oldwoman': 41, 'child': 34, 'kid': 34, 'granny': 41, 'orphan': 36}
-FEM = {'yun', 'so', 'baekrang', 'hyeok', 'clan_dang', 'clan_moyong', 'clan_namgung', 'c_owol', 'c_saira', 'gwak', 'wife', 'flower', 'oldmom', 'sosu', 'manhwa', 'namhwa', 'town2', 'clan_hwasan', 'clan_emei', 'clan_pota', 'clan_bukhae', 'clan_yang', 'ricecake', 'onlooker', 'silk', 'tea', 'cap_herbal', 'cap_musician', 'cap_dancer', 'cheon'}
+FEM = {'yuseol', 'dangsoso', 'yun', 'so', 'baekrang', 'hyeok', 'clan_dang', 'clan_moyong', 'clan_namgung', 'c_owol', 'c_saira', 'gwak', 'wife', 'flower', 'oldmom', 'sosu', 'manhwa', 'namhwa', 'town2', 'clan_hwasan', 'clan_emei', 'clan_pota', 'clan_bukhae', 'clan_yang', 'ricecake', 'onlooker', 'silk', 'tea', 'cap_herbal', 'cap_musician', 'cap_dancer', 'cheon'}
 want = sys.argv[1:]
 done = []
 for D in DIRS:
