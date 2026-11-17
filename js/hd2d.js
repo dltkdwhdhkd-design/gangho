@@ -42,6 +42,7 @@ export const HD = {
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && ROOMS.has(m.id) && art())) && !m.isoRoom && (!m.live || m.id === 'world'); },  // 강호 큰 지도는 주인공 둘레만 잘라 짓는다(winOf)  // 방은 블렌더 벽 모형이 있는 것만(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; autoLv = 'mid'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
+  gnd: () => ground && { pos: ground.position.toArray().map(Math.round), box: (() => { ground.geometry.computeBoundingBox(); const b = ground.geometry.boundingBox; return [b.min.toArray().map(Math.round), b.max.toArray().map(Math.round)]; })(), map: curMap?.id, win: curMap?.win, hgt: !!curMap?.hgt, cam: cam.position.toArray().map(Math.round) },
   init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
   snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : ACTK, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
@@ -466,7 +467,7 @@ function setMap(m) {
   const gt = new T.CanvasTexture((!m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter;
   if (m.hgt) ground = terrain(m, gt);  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(OX + Wm / 2, 0, OZ + Dm / 2); }
-  ground.receiveShadow = true; scene.add(ground);
+  ground.receiveShadow = true; ground.userData.map = m; scene.add(ground);
   water = art() ? waterMesh(m) : null; if (water) scene.add(water);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
@@ -830,7 +831,10 @@ function renderBattle(B) {
   inBattle = true;
   const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
-  resize(); setMap(B.stage); placeCamBattle(B, dt); foreground(); syncBattle(B); light();
+  resize(); setMap(B.stage);
+  // 무대 땅이 무대 것이 아니거나 장면에서 빠져 있으면 무대를 새로 짓는다. 전에 땅 없이 사람만 검은 바닥 위에서 싸우는 화면이 나왔다
+  if (!ground || ground.userData.map !== B.stage || ground.parent !== scene) { console.warn('[hd2d] 전투 무대 땅이 어긋나 다시 지음', ground?.userData.map?.id); curMap = null; setMap(B.stage); }
+  placeCamBattle(B, dt); foreground(); syncBattle(B); light();
   if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(0, 0, 0); HOLE.uHoleZ.value = 0;
   const p = B.p || { x: B.stage.w * TS / 2, y: B.stage.h * TS / 2 };
   shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx({ m: B.stage, p });
