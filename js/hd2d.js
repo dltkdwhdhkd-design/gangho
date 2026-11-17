@@ -39,7 +39,7 @@ const TIMES = {
 export const HD = {
   want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0,  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
   maps: new Set(['cheongha']),  // 시제품은 청하진만. 나머지 지도는 예전 2D로 그린다
-  active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && ROOMS.has(m.id) && art())) && !m.isoRoom && !m.live; },  // 방은 블렌더 벽 모형이 있는 것만(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
+  active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && ROOMS.has(m.id) && art())) && !m.isoRoom && (!m.live || m.id === 'world'); },  // 강호 큰 지도는 주인공 둘레만 잘라 짓는다(winOf)  // 방은 블렌더 벽 모형이 있는 것만(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; autoLv = 'mid'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
   init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
@@ -421,8 +421,8 @@ function waterMat() {
   return waterM;
 }
 function waterMesh(m) {
-  const P = [], N = [], z = y => y * TS * ZS;
-  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) { if (m.g[y][x] !== 2) continue;
+  const P = [], N = [], z = y => y * TS * ZS, WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h };
+  for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) { if (m.g[y][x] !== 2) continue;
     const h = m.hgt ? Math.min(...corners4(m, x, y)) + .4 : .25, x0 = x * TS, x1 = x0 + TS + .02, z0 = z(y), z1 = z(y + 1) + .02;
     for (const v of [[x0, z1], [x1, z1], [x1, z0], [x0, z1], [x1, z0], [x0, z0]]) { P.push(v[0], h, v[1]); N.push(0, 1, 0); } }
   if (!P.length) return null; const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new T.Float32BufferAttribute(N, 3));
@@ -460,18 +460,18 @@ function setMap(m) {
   roomModels(m);
   if (STASH.has(m)) { stashIn(m); buildMs = Math.round(performance.now() - t0); return; }
   LAMPX.length = 0;  // 등불 자리는 지도마다 새로 모은다(전에는 안 비워서 지나온 지도의 등불 자리가 계속 쌓였고, 밤에 엉뚱한 자리에 불빛이 섰다)
-  const Wm = m.w * TS, Dm = m.h * TS * ZS;
+  const WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h }, Wm = (WN.x1 - WN.x0) * TS, Dm = (WN.y1 - WN.y0) * TS * ZS, OX = WN.x0 * TS, OZ = WN.y0 * TS * ZS;  // 큰 지도는 잘라 낸 범위만
   // 땅: 지금 땅 그림을 그대로 눕힌다(땅 무늬 HB14가 오기 전 임시). 땅도 도트 결로 읽는다
-  const gc = mk(m.w * TS, m.h * TS), gx = gc.getContext('2d', { willReadFrequently: true }); m.paintBase(gx);
-  const gt = new T.CanvasTexture(groundArt(m, gc) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter;
+  const gc = mk(Wm, (WN.y1 - WN.y0) * TS), gx = gc.getContext('2d', { willReadFrequently: true }); if (m.win) G.world.paintWin(gx, OX, WN.y0 * TS, Wm, gc.height); else m.paintBase(gx);
+  const gt = new T.CanvasTexture((!m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter;
   if (m.hgt) ground = terrain(m, gt);  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다
-  else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(Wm / 2, 0, Dm / 2); }
+  else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(OX + Wm / 2, 0, OZ + Dm / 2); }
   ground.receiveShadow = true; scene.add(ground);
   water = art() ? waterMesh(m) : null; if (water) scene.add(water);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
-  skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(Wm / 2, m.hgt ? lowest(m) - 1 : -.6, Dm / 2);
+  skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(OX + Wm / 2, m.hgt ? lowest(m) - 1 : -.6, OZ + Dm / 2);
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
   const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
   // 블렌더 무대·방 모형(m.models: [{ key, x, y }], tools/blender/stages.py·rooms.py). 좌표는 평면도 그대로(x, 북쪽이 +y), 지도 (x, y)에 놓는다. 다 읽혔으면 옛 소품(s.alt)은 뺀다
@@ -507,9 +507,11 @@ function setMap(m) {
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
   if (art() && !m.room && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
-    const near = (px, py) => m.stamps.some(q => { const S = STAMPS[q.name]; return S && px > q.x - 6 && px < q.x + S[3] * (q.sc || 1) + 6 && py > q.y + S[4] * .4 - 4 && py < q.base + 8; }) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
+    // 소품 둘레 칸을 미리 표시해 둔다(전에는 풀 한 포기마다 소품을 전부 훑어서 큰 지도에서 몇 초씩 걸렸다)
+    const OCC = new Set(), C8 = 8; for (const q of m.stamps) { const S = STAMPS[q.name]; if (!S) continue; for (let yy = Math.floor((q.y + S[4] * .4 - 4) / C8); yy <= Math.floor((q.base + 8) / C8); yy++) for (let xx = Math.floor((q.x - 6) / C8); xx <= Math.floor((q.x + S[3] * (q.sc || 1) + 6) / C8); xx++) OCC.add(xx * 65536 + yy); }
+    const near = (px, py) => OCC.has(Math.floor(px / C8) * 65536 + Math.floor(py / C8)) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
     const B = new Map();
-    for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > .7) continue;
+    for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > .7) continue;
       const px = (x + hs(x, y * 3 + j)) * TS, py = (y + hs(x * 5 + j, y)) * TS; if (near(px, py) || m.g[Math.floor(py / TS)]?.[Math.floor(px / TS)] !== 0) continue;
       const k = DK[Math.floor(hs(x * 3, y * 11 + j) * DK.length)], t = stampTex(k), st = STAMPS[k]; if (!t || !st) continue; const sc = (k.startsWith('g_') ? .75 : .45) + hs(y, x + j) * .3, w = st[3] * sc, h = st[4] * sc * HS, y0 = hAt(m, px, py), z = (py + .5) * ZS;
       if (!B.has(t)) B.set(t, { P: [], U: [], I: [] }); const b = B.get(t), n = b.P.length / 3;
@@ -752,11 +754,22 @@ function shadowTick() {
   const k = { high: 1, mid: 2, low: 3 }[fxNow()] || 2, moved = Math.abs(camT.x - shCam.x) + Math.abs(camT.z - shCam.z) > 3;
   if (++shN >= k || moved) { shN = 0; shCam.x = camT.x; shCam.z = camT.z; R.shadowMap.needsUpdate = true; }
 }
+// 강호 큰 지도(1286×1053칸)는 통째로 지을 수 없어서, 주인공 둘레 WIN칸만 잘라 짓고 주인공이 가운데서 STEP칸 넘게 벗어나면 다시 짓는다.
+// 잘라 낸 지도(m.win)는 좌표를 그대로 두고(사람·소품·카메라 모두 큰 지도 좌표) 땅·물·풀만 그 범위로 짓는다
+const WIN = [100, 76], STEP = 26; let winM = null;
+function winOf(F) {
+  const W = F.m, tx = F.p.x / TS, ty = F.p.y / TS;
+  if (winM && winM.src === W && Math.abs(tx - winM.cx) < STEP && Math.abs(ty - winM.cy) < STEP * .8) return winM;
+  const x0 = Math.max(0, Math.min(W.w - WIN[0], Math.round(tx - WIN[0] / 2))), y0 = Math.max(0, Math.min(W.h - WIN[1], Math.round(ty - WIN[1] * .55))), x1 = x0 + WIN[0], y1 = y0 + WIN[1];
+  const X0 = x0 * TS, Y0 = y0 * TS, X1 = x1 * TS, Y1 = y1 * TS, stamps = W.stamps.filter(s => s.x < X1 + 40 && s.x > X0 - 120 && s.base > Y0 && s.y < Y1 + 20);
+  winM = Object.assign(Object.create(W), { src: W, cx: Math.round(tx), cy: Math.round(ty), win: { x0, y0, x1, y1 }, stamps, portals: (W.portals || []).filter(q => q.x > X0 && q.x < X1 && q.y > Y0 && q.y < Y1), models: null });
+  return winM;
+}
 function render(F) {
   inBattle = false; lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
   if (cam.view?.enabled) cam.clearViewOffset();
-  resize(); setMap(F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
+  resize(); setMap(F.m.live ? winOf(F) : F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
   { const [x, y] = proj(F.p.x, F.p.y, 8), k = post.h / H, v = V().set(F.p.x, 8 * HS, (F.p.y + 1) * ZS).applyMatrix4(cam.matrixWorldInverse);  // 구멍: 화면의 주인공 가슴 자리, 주인공 키의 0.9배 반지름
     if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(x * post.w / W, (H - y) * k, HD.pxPerUnit() * CHAR * .9 * k); HOLE.uHoleZ.value = -v.z - 2; }
   shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx(F);

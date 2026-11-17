@@ -443,4 +443,5 @@ function linkEdges(mp) {
 }
 const entry = id => { const l = LOCS.find(q => q.map === id); return l ? [Math.round(l.px[0] * K) + .5, Math.round(l.px[1] * K) + 3.5] : [Math.round(598 * K), Math.round(440 * K)]; };
 Story.providers.push(id => id === 'world' && ready ? { npcs: npcsAt(), spots: [], trigs: [], roam: [] } : { npcs: [], spots: [], trigs: [], roam: [] });
-G.world = { linkEdges, paintArea, SOFT, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };
+function paintWin(c, X, Y, w, h) { const s = CH * TS; c.save(); c.translate(-X, -Y); for (let y = Math.max(0, Math.floor(Y / s)); y <= Math.min(Math.ceil(WH / CH) - 1, Math.floor((Y + h) / s)); y++) for (let x = Math.max(0, Math.floor(X / s)); x <= Math.min(Math.ceil(WW / CH) - 1, Math.floor((X + w) / s)); x++) c.drawImage(chunk(x, y), x * s, y * s); c.restore(); }
+G.world = { paintWin, linkEdges, paintArea, SOFT, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };

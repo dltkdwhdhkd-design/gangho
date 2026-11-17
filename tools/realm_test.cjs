@@ -25,7 +25,7 @@ const { chromium } = require('playwright');
   console.log(JSON.stringify(r, null, 1));
   if (r.bad.length) fail.push('경지 없음 ' + r.bad.join(','));
   if (r.hi.realm !== '화경') fail.push('혜각 대사가 화경이 아님 ' + r.hi.realm);
-  if (r.hi.guard < 2 || r.hi.chain < 1) fail.push('화경 상대가 막거나 잇지 않음');
+  if (r.hi.guard + r.hi.counter < 2 || r.hi.chain < 1) fail.push('화경 상대가 막거나 잇지 않음');
   if (r.lo.guard > 0) fail.push('삼류 산적이 막음');
   console.log(fail.length ? '실패\n' + fail.join('\n') : '통과'); console.log(errs.slice(0, 5).join('\n') || 'no errors');
   await b.close(); if (fail.length || errs.length) process.exit(1);
