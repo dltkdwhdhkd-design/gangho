@@ -23,12 +23,14 @@ export const ctx = {
   rep(k, n) { G.S.rep[k] = (G.S.rep[k] || 0) + n; toast(`${{ jeong: '정파', sa: '사파', ma: '마교' }[k]} 평판 ${n > 0 ? '+' : ''}${n}`); },
   silver(n) { G.S.silver += n; Sound.sfx('coin'); toast(`은자 ${n}냥을 얻었다`); },
   async duel(cfg) {
+    let lost = 0, ease = 0;
     for (; ;) {
       hideCG(); await fadeTo(1); G.field.hideHud?.(); await fadeTo(0);
-      const r = await fight(cfg);
+      const pot0 = G.S.potion;
+      const r = await fight(ease ? { ...cfg, ease } : cfg);
       if (r.outcome === 'win') { await showResult(r); if (cfg.bgm === 'boss') G.S.potion = Math.max(G.S.potion, G.S.potionMax); if (cfg.yieldAt && !cfg.noLoot) await G.life.lootAfter(cfg); restoreBgm(); G.field.showHud(); return true; }
       if (cfg.optional) { restoreBgm(); G.field.showHud(); return false; }
-      G.S.potion = Math.max(G.S.potion, G.S.potionMax); await choiceLose();
+      G.S.potion = Math.max(pot0, G.S.potionMax); lost++; if (await choiceLose(lost >= 3) === 'easy') ease = Math.min(.3, ease + .1);  // 같은 싸움을 세 번 지면 '숨을 고르고 도전'(적 1할 약하게, 고를 때마다 더해 3할까지)을 고를 수 있다. 누구도 한 보스에서 영영 막히지 않게. // 다시 도전: 약은 싸우기 전만큼(달여서 한도보다 많이 들고 있었으면 그만큼). 전에는 한도까지만 채워 줘서, 한 번 지면 다음 판이 첫 판보다 어려웠다
     }
   },
   warp: (id, x, y, d) => G.field.warp(id, x, y, d),

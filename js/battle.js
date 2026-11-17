@@ -48,7 +48,8 @@ export class Battle {
   }
   spawn(id, team, x, y) {
     const f = FOES[id], d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
-    const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) : 1)), atk = f.atk * (enemy ? d.foeAtk : 1);
+    const ez = enemy ? 1 - (this.cfg.ease || 0) : 1;  // 세 번 진 뒤 '숨을 고르고 도전'을 고르면 적이 그만큼 약해진다(js/ctx.js duel)
+    const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) * ez : 1)), atk = f.atk * (enemy ? d.foeAtk * ez : 1);
     const a = new Actor({ id, def_: f, team, name: f.name, spr: f.spr, x, y, maxHp: hp, hp, atk, def: f.def, spd: f.spd, crit: .02, boss: f.boss, elite: f.elite, mon: f.mon, big: f.big, r: f.r || 6, scale: f.scale || 1, wpn: f.wpn, moves: f.moves.slice(), pause: f.pause, poise: f.poise || 0, maxPoise: f.poise || 0, phase: 0, ax: 0, ay: 1, face: 0, dummy: f.dummy, atkCd: rnd(.6, 1.3) });
     if (team === 0) { a.hp = a.maxHp = hp * 1.4; a.atk = atk * .7; }
     RL.apply(a, id, f, this.cfg, enemy);  // 경지: 능력치와 막기·연계 버릇(js/realm.js)

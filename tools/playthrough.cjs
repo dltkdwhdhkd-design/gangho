@@ -17,7 +17,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       for (const w of best.검) if (S.weapons.includes(w)) S.weapon = w;
       const buy = (id, price) => { if (!S.weapons.includes(id) && S.silver >= price) { S.silver -= price; S.weapons.push(id); } };
       buy('blue_sword', 420);
-      while (S.silver > 60 && S.potion < 6) { S.silver -= 12; S.potion++; }
+      while (S.silver > 60 && S.potion < S.potionMax) { S.silver -= 4; S.potion++; }  // 약은 객잔에서 한도(potionMax)까지만 채울 수 있다. 전에는 6개까지 사 들고 싸워서 보스가 실제보다 쉽게 재졌다
       const usable = S.skills.filter(id => { const k = D.ctx.learn && window.__SK ? 1 : 1; return true; });
     };
     const wantedMap = { r2: ['clinic', 7, 8], r2b: () => !F.r_moss ? ['cloudmt', 40, 11] : !F.r_dang ? ['fiveclans', 10, 22] : ['clinic', 7, 8], r3: ['inn', 8, 8], r4: ['shaolin', 19, 25], r5: ['guhwa', 24, 29], w1: ['oasis', 20, 18], w1b: ['oasis', 34, 13], w2: ['oasis', 20, 3], w2b: ['snowpeak', 22, 12], w3: ['snowpeak', 34, 10], w4: ['tiangate', 22, 13], x2: ['inn', 8, 8], x4: ['blackpalace', 22, 23], jg1: () => !F.jg_rice ? ['guhwa', 41, 20] : !F.jg_dang ? ['fiveclans', 10, 22] : !F.jg_date ? ['fiveclans', 28, 13] : ['valley', 26, 15], jg2: ['ninehall', 8, 12], jg3: () => !F.jg_wc ? ['c_wuchang', 29.5, 42] : !F.jg_mk ? ['ninehall', 21.5, 24] : !F.jg_gy ? ['pass', 19, 12] : ['fort', 18, 22], fr1: () => !F.fr_talk ? ['cheongha', 20, 19] : !F.fr_rice ? ['guhwa', 41, 20] : ['clinic', 7, 8], fr2: ['cheongha', 23, 20], sa3: () => !F.sa_rice2 ? ['guhwa', 41, 20] : ['guhwa', 24, 28], ma3: ['guhwa', 41, 20], sa1: ['fort', 18, 22], ma1: ['shrine', 7, 8], sa2: () => !F.sa_job1 ? ['cheongha', 22, 25] : !F.sa_job2 ? ['hall2', 7, 8] : !F.sa_job3 ? ['ninehall', 9, 13] : ['fort', 18, 22], ma2: () => !F.ma_job1 ? ['inn2', 8, 8] : !F.ma_job2 ? ['library', 7, 9] : !F.ma_job3 ? ['cheongha', 22, 25] : ['shrine', 7, 8], p0a: ['inn', 8, 8], p3: () => !F.errand ? ['inn', 8, 8] : !F.e_yun ? ['clinic', 7, 8] : !F.e_smith ? ['smith', 7, 8] : !F.e_boat ? ['cheongha', 22, 25] : ['inn', 8, 8], p4: ['inn', 8, 8], c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], s1: ['cheongha', 22, 26], s2: ['cheongha', 22, 20], s3: ['bokun', 7, 8], s4: ['cheongha', 22, 20], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2b2: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], t1: ['cloudmt', 22, 34], t2: ['shaolin', 19, 25], t3: ['sutra', 8, 8], t4: ['shaolin', 28, 16], t5: ['cliffcave', 8, 8], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
@@ -30,7 +30,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       upkeep();
       const st = S.flags.step; if (st === 'end') break; if (typeof F.__c === 'undefined') F.__c = 1;
       if (st === lastStep) stuck++; else { stuck = 0; lastStep = st; }
-      if (stuck > 400) { log.push('STUCK at ' + st + ' map ' + S.map + ' goal ' + S.goal); break; }
+      if (stuck > 400) { log.push('STUCK at ' + st + ' map ' + G.field.m.id + ' goal ' + S.goal + ' / 표시 있는 사람: ' + G.field.npcs.filter(n => n.mark && n.mark()).map(n => n.id).join(',')); break; }
       const f = G.field, m = f.m;
       let mark = f.npcs.find(n => n.mark && n.mark());
       if (st === 'c3b' && F.monk_met && (F.round || 0) >= 2 && process_clans) {
@@ -48,6 +48,7 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
         else if (r === 3 && !F.ambushed) { if (m.id !== 'inn2') { f.load('inn2', 8, 8, 1); continue; } const t = f.trigs.find(t => t.when && t.when()); if (t) { f.run(t.run); continue; } }
         else { if (m.id !== 'guhwa') { f.load('guhwa', 24, 20, 1); continue; } mark = f.npcs.find(n => n.id === 'judge'); }
       }
+      { let w0 = wantedMap[st]; if (typeof w0 === 'function') w0 = w0(); if (w0 && m.id !== w0[0] && st === 'jg3' && !window.__NOJG) { f.load(w0[0], w0[1], w0[2], 1); continue; } }  // 세 갈래 길: 다른 고을의 느낌표 달린 곁가지 사람에게 계속 말을 걸다 멈추던 것
       if (mark && mark.talk) { f.face(mark); f.run(mark.talk); continue; }
       const trig = f.trigs.find(t => !t.when || t.when()); if (trig) { f.run(trig.run); continue; }
       let w = wantedMap[st]; if (typeof w === 'function') w = w();

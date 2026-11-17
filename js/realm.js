@@ -18,6 +18,9 @@ const CHAIN = [0, 1, 1, 2, 2, 3, 3, 4];                // 쉬지 않고 이을 �
 const PAUSE = [1.15, 1.08, 1, .92, .85, .78, .72, .65];  // 초식 사이 쉬는 틈
 // 보스 능력치 배수(경지별). 시험 봇으로 재 보니 30초 안팎에 끝나는 중반 보스는 많이 올려도 쉬웠고, 1분 넘게 싸우는 화경 이상 보스는 조금만 올려도 못 이기게 돼서 거꾸로 둔다
 export const BOSS = [1, 1, 1.5, 1.5, 1.32, 1.12, 1.1, 1.1];
+// 보스마다 따로 맞춘 배수(위 경지 배수보다 먼저). 금창약을 실제 한도(3개)까지만 들고 싸우는 봇으로 다시 재서 맞췄다.
+// 처음 잴 때는 시험 봇이 약을 6개씩 사 들고 있어서, 그 숫자로 맞춘 배수가 실제로는 넘을 수 없는 벽이었다(혈마·심마·천마·위문상·구양철·혈안귀는 서툰 봇이 다섯 판을 다 졌다)
+export const BOSSID = { wei: 1.3, lion: 1.3, elder_wi: 1, so_final: 1.2, guyang_foe: 1.25, samaung_foe: 1.2, demon_eye: 1.35, fox: 1.25, chief: 1.45, hyeolma: 1.04, hyeolma2: 1.04, sand_worm: 1.1, bingma: 1, gwima: 1, chief2: .9, tianmo: .9 };
 const STUN = [1, 1, 1, .9, .8, .65, .5, .4];           // 맞고 휘청이는 시간
 const KB = [1, 1, 1, .9, .75, .6, .5, .4];             // 밀려나는 거리
 
@@ -62,7 +65,7 @@ export function apply(a, id, f, cfg, enemy) {
   const free = cfg.optional || G.S?.mode === 'free', named = f.realm != null || BYID[id] != null || /^clan_|^fan_/.test(id);
   // 보스: 시험해 보니 사람에 가까운 실력으로도 거의 다 체력 절반 넘게 남기고 이겨서, 경지만큼 더 세게 한다(처음 몇 판은 배우는 판이라 그대로)
   // 짐승 보스(물길의 괴물 등)는 막기·연계가 없어 능력치만 올리면 너무 오래 맞으므로 덜 올린다
-  if (f.boss && (G.S?.lv || 1) >= 6) { const k = f.mon ? Math.min(1.15, at(r, BOSS)) : at(r, BOSS); a.atk *= k; a.maxHp = a.hp = Math.round(a.hp * k); if (a.maxPoise) a.maxPoise = a.poise = Math.round(a.maxPoise * Math.min(k, 1.3)); }
+  if (f.boss && (G.S?.lv || 1) >= 6) { const k = BOSSID[id] ?? (f.mon ? Math.min(1.15, at(r, BOSS)) : at(r, BOSS)); a.atk *= k; a.maxHp = a.hp = Math.round(a.hp * k); if (a.maxPoise) a.maxPoise = a.poise = Math.round(a.maxPoise * Math.min(k, 1.3)); }
   if (free && named && r >= 3) {
     const L = LV[r] + 3, std = (6 + L * 1.4) * (f.boss ? 1 : .95);
     if (a.atk < std) { const k = std / a.atk; a.atk = std; a.maxHp = a.hp = Math.round(a.hp * k); if (a.maxPoise) a.maxPoise = a.poise = Math.round(a.maxPoise * Math.min(k, 1.5)); }

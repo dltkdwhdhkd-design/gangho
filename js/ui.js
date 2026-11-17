@@ -268,12 +268,13 @@ export function showResult(r) {
     const kd = ev => { if (Keys.is('ok', ev.code) || Keys.is('atk', ev.code)) go(); }; document.addEventListener('keydown', kd); e.onclick = go; e.style.pointerEvents = 'auto';
   });
 }
-export function choiceLose() {
+export function choiceLose(canEase) {
   return new Promise(res => {
     if (G.auto) return res('retry');
     const h = $('#hud'), e = el('div', 'result');
-    e.innerHTML = `<h2>패배</h2><p>정신을 차려 보니 아직 숨은 붙어 있다.</p><div class="row" style="justify-content:center"><button class="btn pri" id="rt">다시 도전</button><button class="btn" id="mn">초식 고치고 도전</button></div>`;
+    e.innerHTML = `<h2>패배</h2><p>정신을 차려 보니 아직 숨은 붙어 있다.</p><div class="row" style="justify-content:center;white-space:nowrap"><button class="btn pri" id="rt">다시 도전</button><button class="btn" id="mn">초식 고치고 도전</button></div>${canEase ? '<div class="row" style="justify-content:center;margin-top:8px;white-space:nowrap"><button class="btn" id="ez" title="이번 싸움의 적이 1할 약해집니다. 고를 때마다 더해져 3할까지">숨을 고르고 도전 (적 1할 약하게)</button></div>' : ''}`;
     h.appendChild(e); e.style.pointerEvents = 'auto';
+    if (canEase) $('#ez').onclick = () => { e.remove(); res('easy'); };
     $('#rt').onclick = () => { e.remove(); res('retry'); };
     $('#mn').onclick = () => { e.remove(); openMenu('skill'); const t = setInterval(() => { if (!G.menuOpen) { clearInterval(t); res('retry'); } }, 100); };
   });
