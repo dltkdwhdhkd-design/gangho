@@ -6,7 +6,7 @@ import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take, SLOTS, slotInfo, autoInfo, saveSlot, loadSlot, delSlot, exportSlot, readSaveFile, importToSlot } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
-import { ARMORS, gname, fxText } from './gear.js';
+import { ARMORS, SLOTS as WEAR_SLOTS, gname, fxText, wearOf, wearPut, accWorn, accPut, pairOf, pairsWith } from './gear.js';
 import { Story } from './story.js';
 import { CLANS, SAPA, clansWon } from './clandata.js';
 
@@ -109,20 +109,19 @@ function tabSkill(B) {
   });
 }
 function tabGear(B) {
-  const S = G.S;
-  let h = '<div class="two"><div><h2>무기</h2><div class="list">';
-  for (const id of S.weapons) { const w = WEAPONS[id], p = S.wplus[id] || 0; h += `<button class="item ${id === S.weapon ? 'eq' : ''}" data-w="${id}">${icon(id)}${gname('weapon', id, w.name + (p ? ` +${p}` : ''))}<span class="tag">${w.type}</span><span class="tag">공격 ${Math.round(w.atk * (1 + p * .12))}</span><small>${w.desc}</small></button>`; }
-  h += '</div></div><div><h2>장신구</h2><div class="list">';
-  for (const id of S.accs || []) { const w = ACCS[id]; h += `<button class="item ${id === S.acc ? 'eq' : ''}" data-a="${id}">${gname('acc', id, w.name)}<small>${w.desc}</small></button>`; }
-  if (!(S.accs || []).length) h += '<p class="hint">비무에서 이기면 상대의 장신구를 가져올 수 있습니다.</p>';
-  h += '</div><h2 style="margin-top:12px">옷</h2><div class="list">';
-  for (const id of S.armors || []) { const w = ARMORS[id]; h += `<button class="item ${id === S.armor ? 'eq' : ''}" data-r="${id}">${gname('armor', id, w.name)}<span class="tag">${fxText(w.fx)}</span><small>${w.desc}</small></button>`; }
-  if (!(S.armors || []).length) h += '<p class="hint">옷은 대장간과 저잣거리에서 삽니다. 등급이 높을수록 든든합니다.</p>';
-  h += '</div><h2 style="margin-top:12px">심법</h2><div class="list">';
-  for (const id of S.hearts) { const w = HEARTS[id]; h += `<button class="item ${id === S.heart ? 'eq' : ''}" data-h="${id}">${w.name}<small>${w.desc}</small></button>`; }
-  B.innerHTML = h + '</div></div></div>';
-  $$('[data-a]', B).forEach(b => b.onclick = () => { S.acc = S.acc === b.dataset.a ? null : b.dataset.a; Sound.sfx('accept'); drawMenu(); });
-  $$('[data-r]', B).forEach(b => b.onclick = () => { S.armor = S.armor === b.dataset.r ? null : b.dataset.r; Sound.sfx('accept'); drawMenu(); });
+  const S = G.S, wr = wearOf(S), pr = pairOf(S);
+  let hW = '', hA = '', hR = '', hH = '';
+  for (const id of S.weapons) { const w = WEAPONS[id], p = S.wplus[id] || 0; hW += `<button class="item ${id === S.weapon ? 'eq' : ''}" data-w="${id}">${icon(id)}${gname('weapon', id, w.name + (p ? ` +${p}` : ''))}<span class="tag">${w.type}</span><span class="tag">공격 ${Math.round(w.atk * (1 + p * .12))}</span><small>${w.desc}</small></button>`; }
+  for (const id of S.accs || []) { const w = ACCS[id], pw = pairsWith(id).filter(q => (S.accs || []).includes(q.other)).map(q => `${ACCS[q.other].name}와 함께: ${fxText(q.fx)}`).join(' / '); hA += `<button class="item ${accWorn(S).includes(id) ? 'eq' : ''}" data-a="${id}">${gname('acc', id, w.name)}<small>${w.desc}${pw ? ` · <span style="color:#b8741c">${pw}</span>` : ''}</small></button>`; }
+  if (!(S.accs || []).length) hA += '<p class="hint">장신구는 만물상과 저잣거리에서 사거나, 비무에서 이겨 얻습니다. 두 개까지 낄 수 있고, 맞는 짝을 끼면 덤이 붙습니다.</p>';
+  for (const [sk, sn] of WEAR_SLOTS) { const own = (S.armors || []).filter(id => ARMORS[id]?.slot === sk); hR += `<div class="hint" style="margin:4px 0 2px">${sn}${own.length ? '' : ' · 없음'}</div>`;
+    for (const id of own) { const w = ARMORS[id]; hR += `<button class="item ${wr[sk] === id ? 'eq' : ''}" data-r="${id}">${gname('armor', id, w.name)}<span class="tag">${fxText(w.fx)}</span><small>${w.desc}</small></button>`; } }
+  if (!(S.armors || []).length) hR += '<p class="hint">옷은 대장간과 저잣거리에서 삽니다. 머리·상의·하의·신발을 하나씩 입습니다.</p>';
+  for (const id of S.hearts) { const w = HEARTS[id]; hH += `<button class="item ${id === S.heart ? 'eq' : ''}" data-h="${id}">${w.name}<small>${w.desc}</small></button>`; }
+  B.innerHTML = `<div class="two"><div><h2>무기</h2><div class="list">${hW}</div><h2 style="margin-top:12px">옷</h2><div class="list">${hR}</div></div>
+    <div><h2>장신구 <small style="font-size:.6em;font-weight:400">두 개까지${pr ? ` · 짝 효과 <b style="font-weight:400;color:#b8741c">${pr[1]}</b> (${fxText(pr[2])})` : ''}</small></h2><div class="list">${hA}</div><h2 style="margin-top:12px">심법</h2><div class="list">${hH}</div></div></div>`;
+  $$('[data-a]', B).forEach(b => b.onclick = () => { accPut(S, b.dataset.a); Sound.sfx('accept'); drawMenu(); });
+  $$('[data-r]', B).forEach(b => b.onclick = () => { wearPut(S, b.dataset.r); Sound.sfx('accept'); drawMenu(); });
   $$('[data-w]', B).forEach(b => b.onclick = () => { S.weapon = b.dataset.w; S.slots = S.slots.map(id => id); Sound.sfx('accept'); drawMenu(); });
   $$('[data-h]', B).forEach(b => b.onclick = () => { S.heart = b.dataset.h; Sound.sfx('accept'); drawMenu(); });
 }
@@ -268,7 +267,8 @@ export function openShop(title, goods) {
   });
 }
 export const shopItem = {
-  armor: id => ({ info: () => { const w = ARMORS[id]; return { name: `${gname('armor', id, w.name)} (옷)`, price: w.price, desc: `${fxText(w.fx)}. ${w.desc}` }; }, owned: () => (G.S.armors || []).includes(id), buy: () => { (G.S.armors ||= []).push(id); G.S.armor = id; toast(`${josa(ARMORS[id].name, '을/를')} 입었다`); } }),
+  armor: id => ({ info: () => { const w = ARMORS[id]; return { name: `${gname('armor', id, w.name)} (${WEAR_SLOTS.find(q => q[0] === w.slot)[1]})`, price: w.price, desc: `${fxText(w.fx)}. ${w.desc}` }; }, owned: () => (G.S.armors || []).includes(id), buy: () => { (G.S.armors ||= []).push(id); const wr = wearOf(G.S); if (wr[ARMORS[id].slot] !== id) wearPut(G.S, id); toast(`${josa(ARMORS[id].name, '을/를')} ${ARMORS[id].slot === 'boots' ? '신었다' : ARMORS[id].slot === 'head' ? '썼다' : '입었다'}`); } }),
+  acc: id => ({ info: () => { const w = ACCS[id]; return { name: `${gname('acc', id, w.name)} (장신구)`, price: w.price, desc: w.desc + pairsWith(id).map(q => ` · ${ACCS[q.other].name}와 함께 끼면 ${fxText(q.fx)}`).join('') }; }, owned: () => (G.S.accs || []).includes(id), buy: () => { (G.S.accs ||= []).push(id); if (accWorn(G.S).length < 2) accPut(G.S, id); toast(`${josa(ACCS[id].name, '을/를')} 얻었다`); } }),
   weapon: id => ({ info: () => { const w = WEAPONS[id]; return { name: `${gname('weapon', id, w.name)} (${w.type})`, price: w.price, desc: `공격 ${w.atk}. ${w.desc}` }; }, owned: () => G.S.weapons.includes(id), buy: () => { G.S.weapons.push(id); G.S.weapon = id; toast(`${josa(WEAPONS[id].name, '을/를')} 들었다`); } }),
   potion: (price = ITEMS.hp.price) => ({ info: () => ({ name: '금창약', price, desc: `전투 중 H 키로 체력을 35% 되찾는다. 지금 ${G.S.potion}개` }), buy: () => { G.S.potion++; } }),
   stuff: (id, price) => ({ info: () => ({ name: DB[id].name, price, desc: `${DB[id].desc} 지금 ${have(id)}개` }), buy: () => give(id) }),

@@ -2,14 +2,14 @@
 import { G, Sound, toast } from './core.js';
 import { WEAPONS, HEARTS, SKILLS, expNeed, rankOf } from './data.js';
 import { DB, ACCS, TREES } from './items.js';
-import { GRADES, ARMORS, weaponGrade } from './gear.js';
+import { GRADES, ARMORS, weaponGrade, wearOf, accWorn, pairOf } from './gear.js';
 const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
 export function newState(name, look, gender, diff) {
   return {
     v: 3, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
     weapon: 'mop', weapons: ['mop'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
-    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], armors: [], armor: null, tree: {}, tp: 0, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
+    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
   };
 }
 // 무공 트리, 장신구, 요리, 배우자, 집에서 오는 효과를 합친다
@@ -18,8 +18,9 @@ export function bonus(S = G.S) {
   const b = {}, add = fx => { for (const k in fx) b[k] = (b[k] || 0) + fx[k]; };
   const wt = WEAPONS[S.weapon].type;
   for (const t of TREES) { if (t.w && t.w !== wt) continue; for (const n of t.nodes) { const r = S.tree[n.id] || 0; for (let i = 0; i < r; i++) add(n.fx); } }
-  if (S.acc && ACCS[S.acc]) add(ACCS[S.acc].fx);
-  if (S.armor && ARMORS[S.armor]) add(ARMORS[S.armor].fx);  // 옷(js/gear.js)
+  for (const id of accWorn(S)) if (ACCS[id]) add(ACCS[id].fx);  // 장신구 둘까지
+  { const pr = pairOf(S); if (pr) add(pr[2]); }  // 짝 효과
+  for (const id of Object.values(wearOf(S))) if (id && ARMORS[id]) add(ARMORS[id].fx);  // 옷 네 칸(js/gear.js)
   add(GRADES[weaponGrade(S.weapon)].fx);  // 무기 등급 덤
   if (HEARTS[S.heart]?.fx) add(HEARTS[S.heart].fx);
   if (G.party) add(G.party.fx());
