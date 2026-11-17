@@ -2,7 +2,7 @@
 import { G, Sound, toast } from './core.js';
 import { WEAPONS, HEARTS, SKILLS, expNeed, rankOf } from './data.js';
 import { DB, ACCS, TREES } from './items.js';
-import { GRADES, ARMORS, weaponGrade, wearOf, accWorn, pairOf } from './gear.js';
+import { GRADES, ARMORS, weaponGrade, wearOf, accWorn, pairOf, setsOf } from './gear.js';
 const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
 export function newState(name, look, gender, diff) {
@@ -21,6 +21,7 @@ export function bonus(S = G.S) {
   for (const id of accWorn(S)) if (ACCS[id]) add(ACCS[id].fx);  // 장신구 둘까지
   { const pr = pairOf(S); if (pr) add(pr[2]); }  // 짝 효과
   for (const id of Object.values(wearOf(S))) if (id && ARMORS[id]) add(ARMORS[id].fx);  // 옷 네 칸(js/gear.js)
+  for (const q of setsOf(S)) add(q.fx);  // 한 벌 효과
   add(GRADES[weaponGrade(S.weapon)].fx);  // 무기 등급 덤
   if (HEARTS[S.heart]?.fx) add(HEARTS[S.heart].fx);
   if (G.party) add(G.party.fx());

@@ -21,7 +21,7 @@ const { chromium } = require('playwright');
       if (G.hd.battleOk?.()) {
         // 그물이 새지 않는지: 같은 싸움을 세 번 더 하고 그물 수가 그대로인지(전에는 지도를 세울 때마다 수십 개씩 쌓였다)
         const one = async () => { let done = null; fight({ foes: ['bandit'], arena: 'ring', noIntro: true }).then(o => done = o); let i = 0; while (!done && i++ < 3000) { G.fast(30); await new Promise(r => setTimeout(r, 0)); } G.fast(2); };
-        await one(); const g0 = G.hd.mem().geometries; await one(); await one(); await one(); ret.geo = [g0, G.hd.mem().geometries];
+        await one(); for (let i = 0; i < 100 && G.hd.modelsPending > 0; i++) await new Promise(r => setTimeout(r, 100)); await one(); const g0 = G.hd.mem().geometries;  // 무대 모형을 다 읽은 뒤부터 센다 await one(); await one(); await one(); ret.geo = [g0, G.hd.mem().geometries];
         // 주인공이 어디에 서든 화면 안에 있는지(전에는 적과 떨어져 구석으로 가면 화면 밖으로 나갔다)
         fight({ foes: ['dummy'], allies: ['so_ally'], arena: 'court', noIntro: true, optional: true }); const B = G.battle, P = B.actors.find(a => a.isPlayer), E = B.actors.find(a => a.team === 1); B.update = () => { }; ret.cam = [];
         for (const [px, py, ex, ey] of [[192, 228, 192, 26], [192, 20, 192, 225], [14, 228, 370, 26], [370, 14, 14, 226], [14, 14, 370, 226], [370, 228, 14, 26]]) { P.x = px; P.y = py; E.x = ex; E.y = ey; B.camInit = false; G.fast(1); G.fast(1); ret.cam.push(G.hd.proj(P.x, P.y + 1).slice(0, 2).map(Math.round)); }

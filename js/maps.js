@@ -10,6 +10,7 @@ import './isoprops.js';
 
 // 쿼터뷰로 눕히지 않는 지도: 강호 전도, 내가 짓는 문파(위에서 내려다보며 놓는다)
 const FLATMAP = new Set(['world', 'mysect', 'isotest']);
+const ROOM_SC = 1;  // 가구를 줄이는 대신 사람을 키우기로 했다(js/field.js PSC). 1이면 꺼짐
 class MapDef {
   constructor(id, w, h, o = {}) {
     const k = o.k ?? 1;
@@ -38,9 +39,11 @@ class MapDef {
     return this;
   }
   put(name, tx, ty, o = {}) {
-    const s = STAMPS[name], px = tx * this.k * TS + (o.dx || 0), py = ty * this.k * TS + (o.dy || 0);
+    const s = STAMPS[name]; let px = tx * this.k * TS + (o.dx || 0), py = ty * this.k * TS + (o.dy || 0);
     if (!s) { console.warn('소품 없음', name); return this; }
-    const sc = o.sc || 1;  // sc: 줄여 그리기(쿼터뷰 마을의 정면 소품). 막힘 상자도 같이 줄인다
+    let sc = o.sc || 1;  // sc: 줄여 그리기(쿼터뷰 마을의 정면 소품). 막힘 상자도 같이 줄인다
+    // 방 안 가구는 사람에 비해 1.5배쯤 크게 그려져 있어서(장롱이 사람 키의 세 배) 0.7로 줄인다. 발 자리(밑변 가운데)는 그대로 둔다. 내 집은 놓는 칸 계산이 있어 그대로
+    if (this.room && this.id !== 'myhouse' && !o.sc && !o.flat && ROOM_SC < 1) { sc = ROOM_SC; px += s[3] * (1 - sc) / 2; py += s[4] * (1 - sc); }
     this.stamps.push({ name, x: px, y: py, base: py + s[4] * sc - (o.lift || 0), flat: o.flat, ...(sc !== 1 ? { sc, w: s[3] * sc } : {}), ...(o.isoAs ? { isoAs: o.isoAs } : {}), ...(o.grand ? { grand: o.grand } : {}) });  // grand: 문파·세가 전각(새 화면에서 크고 문파답게 짓는다)
     if (s.length > 5 && !o.nosolid) { const sol = { x: px + s[5] * sc, y: py + s[6] * sc, w: s[7] * sc, h: s[8] * sc }; this.solids.push(sol); Object.defineProperty(this.stamps.at(-1), 'sol', { value: sol }); }
     return this;

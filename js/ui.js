@@ -6,7 +6,7 @@ import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take, SLOTS, slotInfo, autoInfo, saveSlot, loadSlot, delSlot, exportSlot, readSaveFile, importToSlot } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
-import { ARMORS, SLOTS as WEAR_SLOTS, gname, fxText, wearOf, wearPut, accWorn, accPut, pairOf, pairsWith } from './gear.js';
+import { ARMORS, SLOTS as WEAR_SLOTS, gname, fxText, wearOf, wearPut, accWorn, accPut, pairOf, pairsWith, setsOf, SETS } from './gear.js';
 import { Story } from './story.js';
 import { CLANS, SAPA, clansWon } from './clandata.js';
 
@@ -116,7 +116,8 @@ function tabGear(B) {
   if (!(S.accs || []).length) hA += '<p class="hint">장신구는 만물상과 저잣거리에서 사거나, 비무에서 이겨 얻습니다. 두 개까지 낄 수 있고, 맞는 짝을 끼면 덤이 붙습니다.</p>';
   for (const [sk, sn] of WEAR_SLOTS) { const own = (S.armors || []).filter(id => ARMORS[id]?.slot === sk); hR += `<div class="hint" style="margin:4px 0 2px">${sn}${own.length ? '' : ' · 없음'}</div>`;
     for (const id of own) { const w = ARMORS[id]; hR += `<button class="item ${wr[sk] === id ? 'eq' : ''}" data-r="${id}">${gname('armor', id, w.name)}<span class="tag">${fxText(w.fx)}</span><small>${w.desc}</small></button>`; } }
-  if (!(S.armors || []).length) hR += '<p class="hint">옷은 대장간과 저잣거리에서 삽니다. 머리·상의·하의·신발을 하나씩 입습니다.</p>';
+  if (!(S.armors || []).length) hR += '<p class="hint">옷은 대장간과 저잣거리에서 삽니다. 보스를 쓰러뜨리면 높은 등급 옷을 떨굽니다. 머리·상의·하의·신발을 하나씩 입습니다.</p>';
+  for (const q of setsOf(S)) hR = `<p class="hint" style="color:#b8741c">${q.name} ${q.c}벌${Object.keys(q.fx).length ? ': ' + fxText(q.fx) : ''}${q.next ? ` · ${q.next}벌이면 ${fxText(SETS[q.k][q.next])}` : ''}</p>` + hR;
   for (const id of S.hearts) { const w = HEARTS[id]; hH += `<button class="item ${id === S.heart ? 'eq' : ''}" data-h="${id}">${w.name}<small>${w.desc}</small></button>`; }
   B.innerHTML = `<div class="two"><div><h2>무기</h2><div class="list">${hW}</div><h2 style="margin-top:12px">옷</h2><div class="list">${hR}</div></div>
     <div><h2>장신구 <small style="font-size:.6em;font-weight:400">두 개까지${pr ? ` · 짝 효과 <b style="font-weight:400;color:#b8741c">${pr[1]}</b> (${fxText(pr[2])})` : ''}</small></h2><div class="list">${hA}</div><h2 style="margin-top:12px">심법</h2><div class="list">${hH}</div></div></div>`;
@@ -186,13 +187,13 @@ function tabSet(B) {
     const row = (lab, key, items, cur) => `<div style="margin:3px 0"><span style="display:inline-block;width:5.5em">${lab}</span>${items.map(([v, t]) => `<button class="btn sm${String(cur) === String(v) ? ' pri' : ''}" data-k="${key}" data-v="${v}" style="margin-right:4px">${t}</button>`).join('')}</div>`;
     d.innerHTML = `<b style="font-weight:400">화면</b> <span id="hdFps" style="opacity:.75;margin-left:8px"></span>`
       + row('보기', 'view', [['hd', '새 화면'], ['2d', '옛 2D']], H.off ? '2d' : 'hd')
-      + row('화질', 'fx', [['low', '낮음'], ['mid', '보통'], ['high', '높음']], H.opt.fx)
+      + row('화질', 'fx', [['auto', '자동'], ['low', '낮음'], ['mid', '보통'], ['high', '높음']], H.opt.fx)
       + row('전투', 'battle3d', [[1, '새 화면'], [0, '옛 2D']], H.opt.battle3d ?? 1)
       + row('빛', 'time', [['auto', '게임대로'], ['morning', '아침'], ['day', '낮'], ['evening', '저녁'], ['night', '밤']], H.opt.time)
-      + `<div class="hint" style="margin-top:4px">초당 장수가 30 밑이면 화질을 낮음으로 두세요. 그래도 느리면 스스로 한 단계 더 내립니다.</div>`;
+      + `<div class="hint" style="margin-top:4px">자동은 보통으로 시작해 느리면 낮음으로 내립니다. 낮음·보통·높음을 고르면 고른 그대로 둡니다.</div>`;
     B.appendChild(d);
     d.querySelectorAll('button[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k, v = b.dataset.v; if (k === 'view') H.set2d(v === '2d'); else H.setOpt(k, k === 'battle3d' ? +v : v); Sound.sfx('tick'); drawMenu(); });
-    const fps = () => { const e = $('#hdFps'); if (!e) return clearInterval(t); e.textContent = H.off ? '' : `초당 ${H.fps()}장${H.lowNow() && H.opt.fx !== 'low' ? ' (느려서 낮춤)' : ''}`; }; const t = setInterval(fps, 500); fps();
+    const NM = { low: '낮음', mid: '보통', high: '높음' }, fps = () => { const e = $('#hdFps'); if (!e) return clearInterval(t); e.textContent = H.off ? '' : `초당 ${H.fps()}장${H.opt.fx === 'auto' ? ` · 지금 ${NM[H.fxNow()]}${H.fxNow() === 'low' ? '(느려서 낮춤)' : ''}` : ''}`; }; const t = setInterval(fps, 500); fps();
   }
   { // 쿼터뷰 미리보기: 그림을 바꾸는 동안 비스듬한 집으로 바꿔 보는 스위치. 지도를 다시 만들어야 해서 저장하고 새로 연다
     const on = (() => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } })();
@@ -266,8 +267,14 @@ export function openShop(title, goods) {
     draw();
   });
 }
+// 가게에서 옷을 볼 때 지금 그 칸에 입은 것과 견준 차이(초록은 나아짐, 빨강은 나빠짐)
+function cmpWear(id) {
+  const a = ARMORS[id], cur = wearOf(G.S)[a.slot]; if (cur === id) return ''; const c = cur ? ARMORS[cur].fx : {}, keys = new Set([...Object.keys(a.fx), ...Object.keys(c)]), N = { def: '방어', hp: '체력', mp: '내력', regen: '내력 회복', crit: '치명타', spd: '이동', cd: '쿨타임', skill: '초식 위력', atk: '공격력' };
+  const parts = [...keys].map(k => { const d = (a.fx[k] || 0) - (c[k] || 0); if (!d || !N[k]) return ''; const good = k === 'cd' ? d < 0 : d > 0; return `<span style="color:${good ? '#2f7a2c' : '#b0281c'}">${N[k]} ${d > 0 ? '+' : ''}${d}</span>`; }).filter(Boolean);
+  return parts.length ? ` (지금 ${cur ? ARMORS[cur].name : '맨몸'}보다 ${parts.join(' ')})` : '';
+}
 export const shopItem = {
-  armor: id => ({ info: () => { const w = ARMORS[id]; return { name: `${gname('armor', id, w.name)} (${WEAR_SLOTS.find(q => q[0] === w.slot)[1]})`, price: w.price, desc: `${fxText(w.fx)}. ${w.desc}` }; }, owned: () => (G.S.armors || []).includes(id), buy: () => { (G.S.armors ||= []).push(id); const wr = wearOf(G.S); if (wr[ARMORS[id].slot] !== id) wearPut(G.S, id); toast(`${josa(ARMORS[id].name, '을/를')} ${ARMORS[id].slot === 'boots' ? '신었다' : ARMORS[id].slot === 'head' ? '썼다' : '입었다'}`); } }),
+  armor: id => ({ info: () => { const w = ARMORS[id]; return { name: `${gname('armor', id, w.name)} (${WEAR_SLOTS.find(q => q[0] === w.slot)[1]})`, price: w.price, desc: `${fxText(w.fx)}${cmpWear(id)}. ${w.desc}` }; }, owned: () => (G.S.armors || []).includes(id), buy: () => { (G.S.armors ||= []).push(id); const wr = wearOf(G.S); if (wr[ARMORS[id].slot] !== id) wearPut(G.S, id); toast(`${josa(ARMORS[id].name, '을/를')} ${ARMORS[id].slot === 'boots' ? '신었다' : ARMORS[id].slot === 'head' ? '썼다' : '입었다'}`); } }),
   acc: id => ({ info: () => { const w = ACCS[id]; return { name: `${gname('acc', id, w.name)} (장신구)`, price: w.price, desc: w.desc + pairsWith(id).map(q => ` · ${ACCS[q.other].name}와 함께 끼면 ${fxText(q.fx)}`).join('') }; }, owned: () => (G.S.accs || []).includes(id), buy: () => { (G.S.accs ||= []).push(id); if (accWorn(G.S).length < 2) accPut(G.S, id); toast(`${josa(ACCS[id].name, '을/를')} 얻었다`); } }),
   weapon: id => ({ info: () => { const w = WEAPONS[id]; return { name: `${gname('weapon', id, w.name)} (${w.type})`, price: w.price, desc: `공격 ${w.atk}. ${w.desc}` }; }, owned: () => G.S.weapons.includes(id), buy: () => { G.S.weapons.push(id); G.S.weapon = id; toast(`${josa(WEAPONS[id].name, '을/를')} 들었다`); } }),
   potion: (price = ITEMS.hp.price) => ({ info: () => ({ name: '금창약', price, desc: `전투 중 H 키로 체력을 35% 되찾는다. 지금 ${G.S.potion}개` }), buy: () => { G.S.potion++; } }),

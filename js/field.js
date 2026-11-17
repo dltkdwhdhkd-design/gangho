@@ -16,6 +16,7 @@ import { stageClear } from './dialog.js';
 import { bindMini, tickMini, openMap } from './mapview.js';
 
 const DIRV = [[0, 1], [0, -1], [-1, 0], [1, 0]];
+export const PSC = 1.45;  // 방 안 사람 크기 배수(새 화면 js/hd2d.js도 같은 값을 쓴다)
 export class Field {
   constructor() { this.p = { x: 0, y: 0, dir: 0, walk: 0 }; this.npcs = []; this.spots = []; this.trigs = []; this.roam = []; this.cam = { x: 0, y: 0 }; this.busy = false; this.parts = []; this.t = 0; this.trail = []; }
   load(id, tx, ty, dir = 0) {
@@ -319,14 +320,16 @@ export class Field {
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
+        const PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(p.x, p.y); c.scale(PS, PS); c.translate(-p.x, -p.y); }  // 방 안에서는 사람을 키운다(가구 그림이 사람보다 크게 그려져 있다)
         const me = G.hd?.sheet?.({ me: 1 }), hh = 15 * (qSheet('chars/' + S.look) ? QZ : 1);  // 새 그림을 켜면 마을과 같은 주인공 도트
         if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; if (me) G.hd.draw2d(c, me, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, hh); else drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }
         drawShadow(c, p.x, p.y); if (me) G.hd.draw2d(c, me, p.dir, Math.floor(p.walk) % 4, p.x, p.y, hh); else drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
+        if (PS !== 1) c.restore();
       }
-      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, hd = !n.size && G.hd?.sheet?.(n); drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined);
-        if (hd) { G.hd.draw2d(c, hd, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (qSheet(key) ? QZ : 1)); mark(n); continue; }
+      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, hd = !n.size && G.hd?.sheet?.(n), PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(n.x, n.y); c.scale(PS, PS); c.translate(-n.x, -n.y); } drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined);
+        if (hd) { G.hd.draw2d(c, hd, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (qSheet(key) ? QZ : 1)); if (PS !== 1) c.restore(); mark(n); continue; }
         drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
-        mark(n); }
+        if (PS !== 1) c.restore(); mark(n); }
     }
     if (S.flags.burned && !S.flags.inn_rebuilt && m.id === 'cheongha' && !m.hasIso) { const st = m.stamps.find(s => s.name === 'inn'); if (st) { c.fillStyle = 'rgba(25,14,8,.62)'; c.fillRect(st.x, st.y, 4 * TS, 3 * TS - 2); } }  // 좁힌 지도에서도 객잔 자리를 따라간다
     G.warfx?.over(c, m, cam, this.t);  // 불길, 연기, 비계, 교전 칼빛
@@ -364,12 +367,12 @@ export class Field {
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720);
     c.setTransform(1.4, 0, 0, 1.4, 0, 0); this.ambient(c, 1280 / 1.4, 720 / 1.4); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); if (G.fxOverlay) G.fxOverlay(c);  // 꽃잎은 사람 머리보다 작게
     c.setTransform(1, 0, 0, 1, 0, 0); const P = (x, y, h = 0) => H.proj(x, y, h), k = Math.min(5, H.pxPerUnit());
-    if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, 25 - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
+    if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, 25 * H.actK(m) - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
     if (m.labels) { c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const [x, y] = P(l.x * TS, l.y * TS); if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); } }
     this.drawExits(c, P);
     if (m.live) G.wander?.over(c, this.roam, this.t, P);  // 무리와 길손 이름표
-    this.drawBubbles(c, P, 21);  // 새 화면은 사람이 크게 보여서 말풍선을 머리에 더 붙인다
+    this.drawBubbles(c, P, 21 * H.actK(m));  // 새 화면은 사람이 크게 보여서 말풍선을 머리에 더 붙인다
     tickMini(this);
   }
   // 나가는 곳 표시: 맵 가장자리 출구와 방문에 들썩이는 화살표, 가까이 가면 어디로 가는지 적는다

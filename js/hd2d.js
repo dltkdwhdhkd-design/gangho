@@ -5,6 +5,8 @@
 // 깊이(ZS)와 세운 판의 키(HS)를 시점만큼 늘려 둔다. 그러면 초점 거리에서는 예전 2D 화면과 같은 배치로 보이고
 // 그 앞뒤로만 원근이 붙는다. 지도를 고치지 않아도 집과 사람의 앞뒤, 위아래 걸음 빠르기가 예전과 같게 보인다.
 // 켜기: 주소 끝에 ?hd2d=1. 못 켜면(WebGL2 없음 등) 아무 일 없이 2D로 돈다.
+import { ROOMS, roomModels } from './hd2d/rooms.js';
+import { PSC } from './field.js';
 import { G, IMG, TS, $ } from './core.js';
 import { STAMPS } from './tiles.js';
 import { newState } from './state.js';
@@ -12,12 +14,15 @@ import { makeBuilder, SPEC, GRAND } from './hd2d/build.js';
 import { ROLE } from './talkdata.js';
 
 const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = .857 / Math.sin(PITCH) /* 원근 때문에 주인공 발밑에서 세로 걸음이 가로보다 1.17배 빨라 보이던 것을 맞춘다(평면도 1점이 화면에서 가로와 세로 같은 길이) */, HS = 1 / Math.cos(PITCH);
-const CHAR = 15, AHEAD = .04;  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
+const CHAR = 15, AHEAD = .04;
+// 사람 크기: 집·소품에 비해 사람이 작아 보여서(일검풍운결은 사람이 계단 한 칸의 두세 배) 새 화면의 사람을 1.3배로 세우고, 카메라는 1.12배 뒤로 뺀다. 방은 js/field.js PSC
+export const ACTK = 1.3, CAMK = 1.12;  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
 const W = 1280, H = 720;
 let T = null;  // three.js
 
 // 인물 키는 화면 높이의 1/9로 정했다(사용자). 그림은 새 그림이 기본
-const OPTK = 'gangho_hd2d_opt2', OPT0 = { zoom: 9, time: 'auto', fx: 'mid', art: 1, battle3d: 1 };
+const OPTK = 'gangho_hd2d_opt2', OPT0 = { zoom: 9, time: 'auto', fx: 'auto', art: 1, battle3d: 1 };
+let autoLv = 'mid'; const fxNow = () => HD.opt.fx === 'auto' ? autoLv : HD.opt.fx;  // 실제로 쓰는 화질
 const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } o.zoom = 9; return o; };
 const want = (() => { try { return new URLSearchParams(location.search).get('hd2d') === '1'; } catch { return false; } })();
 
@@ -34,15 +39,15 @@ const TIMES = {
 export const HD = {
   want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0,  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
   maps: new Set(['cheongha']),  // 시제품은 청하진만. 나머지 지도는 예전 2D로 그린다
-  active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso)) && !m.isoRoom && !m.live; },  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
-  setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; HD.low = v === 'low'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
+  active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && ROOMS.has(m.id) && art())) && !m.isoRoom && !m.live; },  // 방은 블렌더 벽 모형이 있는 것만(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
+  setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; autoLv = 'mid'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
   init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
-  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => !!HD.low, buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : ACTK, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
   dbg: () => ({ fg: FG.map(o => [o.visible, o.position.toArray().map(Math.round), o.scale.toArray().map(Math.round), o.material.type, o.material.map?.image?.width, (() => { const c = o.material.map?.image; if (!c?.getContext) return -1; const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let a = 0; for (let i = 3; i < d.length; i += 4) a += d[i]; return Math.round(a / (d.length / 4)); })()]), cam: cam.position.toArray().map(Math.round), far: cam.far, m: mtns?.children.map(o => [o.position.toArray().map(Math.round), o.visible, o.material.color.getHexString()]) }),
-  stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: !!HD.low, size: R ? [R.domElement.width, R.domElement.height] : null }),
+  stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: fxNow() === 'low', size: R ? [R.domElement.width, R.domElement.height] : null }),
 };
 G.hd = HD;
 // 옛 2D 화면(전투, 강호 큰 지도, 방)에서도 마을과 같은 사람 도트를 쓰게 시트를 내준다. 새 화면과 새 그림을 켰을 때만
@@ -98,7 +103,7 @@ async function init() {
     post = makePost();
     resize(true);
     if (HD.opt.art) await loadPreview();
-    HD.ready = true; HD.low = HD.opt.fx === 'low'; if (/[?&]hdpanel=1/.test(location.search)) panel();  // 시제품 판은 주소에 hdpanel=1을 붙였을 때만. 옵션은 메뉴의 설정 탭에 있다(js/ui.js)
+    HD.ready = true; if (/[?&]hdpanel=1/.test(location.search)) panel();  // 시제품 판은 주소에 hdpanel=1을 붙였을 때만. 옵션은 메뉴의 설정 탭에 있다(js/ui.js)
   } catch (e) { console.warn('새 화면을 켜지 못해 2D로 그린다', e); HD.failed = true; if (cv) cv.remove(); }
 }
 
@@ -332,6 +337,7 @@ const DECO = { grass: 1, plain: 1, rose: 1, deep: 1 };
 // 땅 얼룩 세기: 흙 드러난 자리, 짙은 자리, 이끼. 눈에는 흙과 이끼가 없고 엷은 그늘만
 const MOTTLE = { grass: { dirt: 1, dark: 1, moss: 1 }, plain: { dirt: 1, dark: 1, moss: 1 }, rose: { dirt: 1, dark: 1, moss: 1 }, deep: { dirt: .7, dark: 1, moss: 1 }, sand: { dirt: .6, dark: .6, moss: 0, dc: [120, 84, 48] }, dusk: { dirt: .6, dark: .8, moss: 0, dc: [70, 52, 40] }, snow: { dirt: 0, dark: .3, moss: 0 } };  // 풀 포기를 흩뿌리는 땅
 function groundArt(m, base) {
+  if (m.room) return null;  // 방 바닥은 2D 마루·돌바닥 그림 그대로
   if (!art() || !PV.g_grass || m.room) return null;
   const W2 = Math.round(m.w * TS * DOT), H2 = Math.round(m.h * TS * DOT), c = mk(W2, H2), x = c.getContext('2d'), out = x.createImageData(W2, H2), o = out.data;
   const GB = { sand: 'g_sand', snow: 'g_snow' }[m.biome], pats = {}; for (const k in GROUND) { const nm = k === '0' && GB && PV[GB] ? GB : GROUND[k], im = PV[nm]; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
@@ -451,6 +457,7 @@ function setMap(m) {
     if (water) { scene.remove(water); water.geometry.dispose(); water = null; }
   }
   for (const k of [...STASH.keys()]) if (!prev || (!m.stage && !k.stage && k !== m)) { dropSet(STASH.get(k)); STASH.delete(k); }
+  roomModels(m);
   if (STASH.has(m)) { stashIn(m); buildMs = Math.round(performance.now() - t0); return; }
   LAMPX.length = 0;  // 등불 자리는 지도마다 새로 모은다(전에는 안 비워서 지나온 지도의 등불 자리가 계속 쌓였고, 밤에 엉뚱한 자리에 불빛이 섰다)
   const Wm = m.w * TS, Dm = m.h * TS * ZS;
@@ -499,7 +506,7 @@ function setMap(m) {
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
-  if (art() && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  if (art() && !m.room && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
     const near = (px, py) => m.stamps.some(q => { const S = STAMPS[q.name]; return S && px > q.x - 6 && px < q.x + S[3] * (q.sc || 1) + 6 && py > q.y + S[4] * .4 - 4 && py < q.base + 8; }) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
     const B = new Map();
     for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > .7) continue;
@@ -523,6 +530,7 @@ function actor(t, sx, sy, sw, sh, flip, x, y, size, lift = 0, wx = 1) {
   used++; const M = matOf(t); o.material = M.m; o.customDepthMaterial = M.d; o.visible = true;
   const iw = t.image.width, ih = t.image.height, u0 = sx / iw, u1 = (sx + sw) / iw, v1 = 1 - sy / ih, v0 = 1 - (sy + sh) / ih, uv = o.geometry.attributes.uv;
   const a = flip ? u1 : u0, b = flip ? u0 : u1; uv.setXY(0, a, v1); uv.setXY(1, b, v1); uv.setXY(2, a, v0); uv.setXY(3, b, v0); uv.needsUpdate = true;
+  size *= curMap?.room ? PSC : ACTK;  // 사람 크기(ACTK), 방 안은 더 크게(js/field.js PSC)
   o.scale.set(size * wx, size * HS, 1); o.position.set(x, lift * HS + hAt(curMap, x, y), (y + 1) * ZS + .5);  // 2D는 발끝을 y+1에 그렸다. 같은 줄의 소품보다 반 점 앞
   return o;
 }
@@ -560,7 +568,7 @@ function syncActors(F) {
 const camT = new (class { constructor() { this.x = -1; this.y = 0; this.z = 0; } set(x, y, z) { this.x = x; this.y = y; this.z = z; } })();
 let dist = 300, lastT = 0, lastF = null;
 function placeCam(F, dt) {
-  const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom; dist = vh / (2 * Math.tan(FOV / 2 * DEG));
+  const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom * CAMK; dist = vh / (2 * Math.tan(FOV / 2 * DEG));
   const ty = 8 * HS, hc = ty + dist * Math.sin(PITCH), back = dist * Math.cos(PITCH), f = FOV / 2 * DEG, hw = dist * Math.tan(f) * W / H;
   // 화면 위 끝과 아래 끝이 닿는 땅이 지도 밖으로 너무 나가지 않게 겨냥점을 묶는다(2D 카메라가 지도 안에 머물던 것과 같다)
   // 남쪽은 화면 아래 끝이 지도 밖으로 나가지 않게 묶고, 북쪽은 주인공이 끝까지 가운데 오게 둔다(지도 너머는 안개와 넓은 땅. 먼 산은 5단계)
@@ -652,7 +660,10 @@ function foreground() {
 }
 
 // ── 빛 ──
-const timeOf = () => HD.opt.time === 'auto' ? (G.S?.flags?.night ? 'night' : 'day') : HD.opt.time;
+const timeOf0 = () => HD.opt.time === 'auto' ? (G.S?.flags?.night ? 'night' : 'day') : HD.opt.time;
+let inBattle = false;
+// 전투는 밤이어도 저녁 빛으로 그린다. 밤 빛 그대로면 무대 대부분이 시커멓고 등불 둘레만 밝아서 사람이 안 보였다
+const timeOf = () => { const t = timeOf0(); return inBattle && t === 'night' ? 'evening' : t; };
 function light() {
   const L = TIMES[timeOf()];
   for (const m of GLOW) m.emissiveIntensity = (L.lamp || 0) * .9;  // 밤에는 창에서 빛이 샌다
@@ -660,7 +671,7 @@ function light() {
   sun.color.set(L.sunC); sun.intensity = L.sunI; hemi.color.set(L.sky); hemi.groundColor.set(L.gnd); hemi.intensity = L.hemI;
   { const d = L.sun; fill.position.set(camT.x - d[0] * 800, 500, camT.z + 600); fill.target.position.set(camT.x, 0, camT.z); fill.intensity = L.sunI * (L.fill ?? .2); fill.color.set(L.fillC || '#c8c0b8'); }
   scene.fog.color.set(L.fog); scene.fog.near = dist * 3; scene.fog.far = dist * 13; backdrop(L);
-  const sz = HD.opt.fx === 'high' ? 4096 : HD.low ? 1024 : 2048; if (sun.shadow.mapSize.x !== sz) { sun.shadow.mapSize.set(sz, sz); sun.shadow.map?.dispose(); sun.shadow.map = null; }
+  const sz = fxNow() === 'high' ? 4096 : fxNow() === 'low' ? 1024 : 2048; if (sun.shadow.mapSize.x !== sz) { sun.shadow.mapSize.set(sz, sz); sun.shadow.map?.dispose(); sun.shadow.map = null; }
   const ls = (curMap._lamps || []).map(q => [q, (q[0] - camT.x) ** 2 + (q[1] * ZS - camT.z) ** 2]).sort((a, b) => a[1] - b[1]);
   lamps.forEach((l, i) => { const q = ls[i]?.[0], h = l.userData.halo; if (!q || !L.lamp) { l.intensity = 0; h.visible = false; return; } const fl = 1 + Math.sin(performance.now() / 260 + i * 1.7) * .05;
     l.intensity = 300 * L.lamp * fl; l.position.set(q[0], q[2] * HS, q[1] * ZS + 14); h.visible = true; h.position.set(q[0], q[2] * HS, q[1] * ZS + 6); h.material.opacity = L.lamp * .9 * fl; });
@@ -707,8 +718,8 @@ function makePost() {
   return P;
 }
 function resize(force) {
-  const s = Math.min(innerWidth / W, innerHeight / H), dpr = window.devicePixelRatio || 1, cap = HD.opt.fx === 'high' ? 2560 : 1920;  // 보통도 1920×1080까지
-  const bw = Math.round(Math.min(cap, Math.max(W, W * s * dpr)) * (HD.low ? .75 : 1)), bh = Math.round(bw * H / W);
+  const s = Math.min(innerWidth / W, innerHeight / H), dpr = window.devicePixelRatio || 1, cap = fxNow() === 'high' ? 2560 : 1920;  // 보통도 1920×1080까지
+  const bw = Math.round(Math.min(cap, Math.max(W, W * s * dpr)) * (fxNow() === 'low' ? .75 : 1)), bh = Math.round(bw * H / W);
   if (!force && R.domElement.width === bw) return; R.setSize(bw, bh, false); post.size(bw, bh);
 }
 function postFx(F) {
@@ -723,7 +734,7 @@ function postFx(F) {
   Object.assign(u.tS, { value: P.scene.texture }); u.tD.value = P.scene.depthTexture; u.tB1.value = P.a1.texture; u.tB2.value = P.a2.texture;
   u.cn.value = cam.near; u.cf.value = cam.far; u.focus.value = -fp.z; u.f0.value = dist * 1.6; u.f1.value = dist * 4; u.n0.value = dist * .5; u.n1.value = dist * .64;  // 가까운 흐림은 화면 앞 덤불에만(높은 지붕은 초점보다 가깝지만 흐리지 않게)
   const cool = curMap?.biome === 'snow' && !L.lamp;  // 눈 덮인 낮은 따뜻한 물들이기를 빼고 차갑게
-  u.tint.value.set(...(cool ? [.94, 1, 1.1] : L.tint)); u.expo.value = L.expo; u.sat.value = L.sat; u.bk.value = HD.opt.fx === 'high' ? .75 : .55; u.bt.value = timeOf() === 'night' ? .55 : .82; u.vig.value = L.vig ?? .62; u.con.value = L.con || 1.08; u.warm.value = curMap?.biome === 'snow' ? 0 : L.warm || 0;
+  u.tint.value.set(...(cool ? [.94, 1, 1.1] : L.tint)); u.expo.value = L.expo; u.sat.value = L.sat; u.bk.value = fxNow() === 'high' ? .75 : .55; u.bt.value = timeOf() === 'night' ? .55 : .82; u.vig.value = L.vig ?? .62; u.con.value = L.con || 1.08; u.warm.value = curMap?.biome === 'snow' ? 0 : L.warm || 0;
   P.pass(P.fin, null);
 }
 
@@ -732,17 +743,24 @@ let fpsT = 0, fpsN = 0, fpsV = 0, slow = 0;
 // 느리면 스스로 낮춘다: 높음 → 보통 → 보통(해상도 4분의 3, 그림자 작게). 3초 넘게 초당 45장이 안 되면 한 단계
 function govern() {
   if (fpsV >= 45 || document.hidden) { slow = 0; return; } if (++slow < 3) return; slow = 0;
-  if (HD.opt.fx === 'high') { HD.opt.fx = 'mid'; resize(true); panelSync(); } else if (!HD.low) { HD.low = true; resize(true); }  // 느리면 스스로 한 단계씩 내린다(설정 값은 그대로 둔다)
+  if (HD.opt.fx === 'auto' && autoLv !== 'low') { autoLv = 'low'; resize(true); }  // 화질 '자동'일 때만 느리면 스스로 낮춘다. 낮음·보통·높음을 직접 고르면 그대로 둔다(전에는 높음을 골라도 몰래 낮춰서, 단추는 높음인데 '느려서 낮춤'이 떴다)
+}
+// 그림자 지도는 그리기의 6할을 먹는다(청하진: 604번 중 378번). 높음은 매 장, 보통은 두 장에 한 번, 낮음은 세 장에 한 번만 새로 그린다. 카메라가 크게 움직이면 바로 그린다
+let shN = 0; const shCam = { x: 0, z: 0 };
+function shadowTick() {
+  if (R.shadowMap.autoUpdate) R.shadowMap.autoUpdate = false;
+  const k = { high: 1, mid: 2, low: 3 }[fxNow()] || 2, moved = Math.abs(camT.x - shCam.x) + Math.abs(camT.z - shCam.z) > 3;
+  if (++shN >= k || moved) { shN = 0; shCam.x = camT.x; shCam.z = camT.z; R.shadowMap.needsUpdate = true; }
 }
 function render(F) {
-  lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
+  inBattle = false; lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
   if (cam.view?.enabled) cam.clearViewOffset();
   resize(); setMap(F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
   { const [x, y] = proj(F.p.x, F.p.y, 8), k = post.h / H, v = V().set(F.p.x, 8 * HS, (F.p.y + 1) * ZS).applyMatrix4(cam.matrixWorldInverse);  // 구멍: 화면의 주인공 가슴 자리, 주인공 키의 0.9배 반지름
     if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(x * post.w / W, (H - y) * k, HD.pxPerUnit() * CHAR * .9 * k); HOLE.uHoleZ.value = -v.z - 2; }
-  R.setRenderTarget(post.scene); R.render(scene, cam); postFx(F);
-  fpsN++; if (now - fpsT > 1000) { fpsV = Math.round(fpsN * 1000 / (now - fpsT)); fpsN = 0; fpsT = now; const e = $('#hdfps'); if (e) e.textContent = fpsV + '장/초' + (HD.low ? ' (낮춤)' : ''); if (!G.auto && !HD.noGov) govern(); }
+  shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx(F);
+  fpsN++; if (now - fpsT > 1000) { fpsV = Math.round(fpsN * 1000 / (now - fpsT)); fpsN = 0; fpsT = now; const e = $('#hdfps'); if (e) e.textContent = fpsV + '장/초' + (fxNow() === 'low' ? ' (낮춤)' : ''); if (!G.auto && !HD.noGov) govern(); }
 }
 
 // ── 전투 ──
@@ -760,11 +778,6 @@ function bbSlot(w, h) {
   }
   usedBB++; o.mesh.visible = true; return o;
 }
-function rim(o) {
-  const cw = o.cv.width, ch = o.cv.height, x = o.x; if (!o.rim || o.rim.width !== cw || o.rim.height !== ch) o.rim = mk(cw, ch);
-  const r = o.rim.getContext('2d'); r.globalCompositeOperation = 'source-over'; r.clearRect(0, 0, cw, ch); r.drawImage(o.cv, 0, 0); r.globalCompositeOperation = 'source-in'; r.fillStyle = '#fff1cf'; r.fillRect(0, 0, cw, ch);
-  x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'destination-over'; x.globalAlpha = .85; for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2]]) x.drawImage(o.rim, dx, dy); x.restore();
-}
 function syncBattle(B) {
   used = 0; usedB = 0; usedBB = 0;
   for (const a of B.actors) {
@@ -772,9 +785,9 @@ function syncBattle(B) {
     const s = a.scale || 1, b = a.big, w = b ? b.w + 24 : 60 * s, h = b ? b.h + 20 : 54 * s, down = 4, o = bbSlot(w, h), x = o.x;
     x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, o.cv.width, o.cv.height); x.imageSmoothingEnabled = false;
     x.setTransform(BK, 0, 0, BK, (w / 2 - a.x) * BK, (h - down - a.y) * BK); B.drawActor(x, a, true);
-    if (a.isPlayer) rim(o);  // 주인공만 옅은 테를 두른다(검은 옷이 어두운 바닥에 묻혀 어디 있는지 안 보였다)
     o.tex.needsUpdate = true;
-    o.mesh.scale.set(w, h * HS, 1); o.mesh.position.set(a.x, -down * HS + hAt(curMap, a.x, a.y), (a.y + 1) * ZS + .5);
+    o.mesh.scale.set(w * ACTK, h * HS * ACTK, 1); o.mesh.position.set(a.x, -down * HS * ACTK + hAt(curMap, a.x, a.y), (a.y + 1) * ZS + .5);
+    { const mt = o.mesh.material; if (!mt.emissiveMap) { mt.emissive = new T.Color(0xffffff); mt.emissiveMap = o.tex; mt.needsUpdate = true; } mt.emissiveIntensity = a.isPlayer ? .22 : .08; }  // 어두운 무대에서 사람이 묻히지 않게 살짝 제 빛을 준다(주인공 테는 뺐다)
     if (!a.dead) blob(a.x, a.y, b ? 2 : s);
   }
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false; for (let i = usedBB; i < bboard.length; i++) bboard[i].mesh.visible = false;
@@ -783,7 +796,7 @@ function placeCamBattle(B, dt) {
   const m = B.stage, Wm = m.w * TS, Hm = m.h * TS; let sx = 0, sy = 0, n = 0;
   for (const a of B.actors) { if (a.dead) continue; const k = a.isPlayer ? 3 : 1; sx += a.x * k; sy += a.y * k; n += k; }
   const ax = n ? sx / n : Wm / 2, ay = n ? sy / n : Hm / 2, f = FOV / 2 * DEG;
-  let d = CHAR * HD.opt.zoom * 1.08 / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
+  let d = CHAR * HD.opt.zoom * 1.08 * CAMK / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
   let tx = Math.min(Wm - hw + 20, Math.max(hw - 20, ax)), tyP = Math.min(Hm - 50, Math.max(50, ay - 16));  // 사람보다 조금 북쪽을 겨눠 무대 뒤 담과 건물이 화면에 들어온다
   // 주인공은 늘 화면 안에 둔다. 전에는 싸우는 사람들의 가운데만 겨눠서, 적과 떨어져 아래나 구석으로 가면 주인공이 화면 밖으로 나갔다(시작할 때 동료도 화면 아래로 잘렸다)
   // 화면 세로 자리 sy(-1 맨 위, +1 맨 아래)에 놓이는 땅이 겨눈 곳에서 평면도로 몇 점 아래인지 구해, 주인공 발이 화면 위 15%~아래 75% 사이에 오게 겨눈 곳을 당긴다. 가로는 주인공 깊이에서 보이는 폭의 8할 안
@@ -801,12 +814,13 @@ function placeCamBattle(B, dt) {
   const sc = sun.shadow.camera, half = dist * 1.4; sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.near = 200; sc.far = 2600; sc.updateProjectionMatrix();
 }
 function renderBattle(B) {
+  inBattle = true;
   const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
   resize(); setMap(B.stage); placeCamBattle(B, dt); foreground(); syncBattle(B); light();
   if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(0, 0, 0); HOLE.uHoleZ.value = 0;
   const p = B.p || { x: B.stage.w * TS / 2, y: B.stage.h * TS / 2 };
-  R.setRenderTarget(post.scene); R.render(scene, cam); postFx({ m: B.stage, p });
+  shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx({ m: B.stage, p });
   fpsN++; if (now - fpsT > 1000) { fpsV = Math.round(fpsN * 1000 / (now - fpsT)); fpsN = 0; fpsT = now; }
 }
 // 평면도 (x, y) 둘레를 화면(1280×720)으로 옮기는 행렬. flat이면 땅에 눕힌 것, 아니면 세운 것(위로 1점 = 키 1점)

@@ -21,7 +21,7 @@ export function accGrade(id) { const a = ACCS[id]; if (!a) return 0; return a.gr
 
 // 옷 칸 넷: 머리, 상의, 하의, 신발. `G.S.armors`(가진 것), `G.S.wear = { head, top, bottom, boots }`(입은 것)
 export const SLOTS = [['head', '머리'], ['top', '상의'], ['bottom', '하의'], ['boots', '신발']];
-const A = (slot, name, grade, price, fx, desc) => ({ slot, name, grade, price, fx, desc });
+const A = (slot, name, grade, price, fx, desc, set) => ({ slot, name, grade, price, fx, desc, set });
 export const ARMORS = {
   // 상의
   cloth_robe: A('top', '무명 도포', 0, 60, { def: 2 }, '질긴 무명으로 지은 겉옷. 없는 것보다 낫다.'),
@@ -52,7 +52,35 @@ export const ARMORS = {
   hero_band: A('head', '영웅건', 2, 340, { crit: 2, def: 1 }, '이마에 매는 붉은 띠. 매면 물러서기 싫어진다.'),
   iron_helm: A('head', '철 투구', 2, 360, { def: 5, spd: -1 }, '군에서 흘러나온 투구.'),
   jade_crown: A('head', '옥관', 3, 880, { mp: 10, cd: -4 }, '상투를 고정하는 옥 장식. 정신이 맑아진다.'),
+  // 보구·신병: 가게에 없다. 보스가 떨구거나 숨은 일로 얻는다(dropFor)
+  gold_greaves: A('bottom', '금린 각반', 4, 0, { def: 8, hp: 5 }, '금빛 비늘을 이은 각반. 왕부 호위들이 찼다.', 'gold'),
+  gold_helm: A('head', '금봉 투구', 4, 0, { def: 7, crit: 2 }, '봉황을 새긴 투구. 이마의 금박이 닳아 있다.', 'gold'),
+  gold_boots: A('boots', '금사 전화', 4, 0, { spd: 8, def: 3 }, '금실로 누빈 전투화. 무겁지 않다.', 'gold'),
+  wind_robe: A('top', '청풍 도의', 4, 0, { def: 8, spd: 6, regen: 10 }, '바람이 스며드는 얇은 도의. 경공 고수의 옷이다.', 'wind'),
+  wind_pants: A('bottom', '청풍 고의', 4, 0, { def: 4, spd: 5 }, '움직임을 막지 않는 바지.', 'wind'),
+  wind_band: A('head', '청풍 영웅건', 4, 0, { crit: 3, cd: -4 }, '이마에 매는 푸른 띠.', 'wind'),
+  feather_boots: A('boots', '비연화', 4, 0, { spd: 12, cd: -3 }, '제비 깃털처럼 가벼운 신.', 'wind'),
+  cheonjam_pants: A('bottom', '천잠 하의', 5, 0, { def: 10, hp: 6 }, '천잠사로 짠 하의.', 'cheonjam'),
+  cheonjam_crown: A('head', '천잠 관', 5, 0, { mp: 14, cd: -6, def: 4 }, '천잠사를 엮은 관.', 'cheonjam'),
+  cheonjam_boots: A('boots', '천잠 운리', 5, 0, { spd: 12, def: 5 }, '구름을 밟는 듯한 신.', 'cheonjam'),
 };
+ARMORS.gold_silk.set = 'gold'; ARMORS.cheonjam.set = 'cheonjam';
+// 한 벌: 같은 이름 줄의 옷을 여럿 입으면 덤(2벌, 4벌)
+export const SETS = {
+  gold: { name: '금린 한 벌', 2: { def: 4 }, 4: { hp: 8, atk: 5 } },
+  wind: { name: '청풍 한 벌', 2: { spd: 5 }, 4: { cd: -8, crit: 4 } },
+  cheonjam: { name: '천잠 한 벌', 2: { hp: 6 }, 4: { skill: 10, def: 6 } },
+};
+export function setsOf(S) {
+  const n = {}; for (const id of Object.values(wearOf(S))) { const k = id && ARMORS[id]?.set; if (k) n[k] = (n[k] || 0) + 1; }
+  return Object.entries(n).map(([k, c]) => ({ k, c, name: SETS[k].name, fx: Object.assign({}, c >= 2 ? SETS[k][2] : {}, ...(c >= 4 ? [SETS[k][4]] : [])), next: c < 2 ? 2 : c < 4 ? 4 : 0 })).filter(q => q.c >= 1);
+}
+// 보스가 떨구는 장비: 경지가 높을수록 높은 등급. 아직 없는 것 가운데 하나
+export function dropFor(realm, owned) {
+  const g = realm >= 6 ? 5 : realm >= 4 ? 4 : realm >= 3 ? 3 : 2;
+  const pool = Object.keys(ARMORS).filter(id => ARMORS[id].grade === g && !owned.includes(id) && !(g <= 3 && ARMORS[id].price === 0));
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
 // 입은 것: 옛 저장(armor 한 칸)도 받는다
 export const wearOf = S => S.wear || (S.armor ? { top: S.armor } : {});
 export function wearPut(S, id) { const a = ARMORS[id]; if (!a) return; S.wear = { ...wearOf(S) }; S.wear[a.slot] = S.wear[a.slot] === id ? null : id; delete S.armor; }
