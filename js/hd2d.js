@@ -37,7 +37,9 @@ export const HD = {
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso)) && !m.isoRoom && !m.live; },  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
-  init, render, renderBattle, affine, resetCam: () => camT.set(-1, 0, 0), bbLeft: () => bboard.filter(o => o.mesh.visible).length, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
+  // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
+  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
   dbg: () => ({ fg: FG.map(o => [o.visible, o.position.toArray().map(Math.round), o.scale.toArray().map(Math.round), o.material.type, o.material.map?.image?.width, (() => { const c = o.material.map?.image; if (!c?.getContext) return -1; const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let a = 0; for (let i = 3; i < d.length; i += 4) a += d[i]; return Math.round(a / (d.length / 4)); })()]), cam: cam.position.toArray().map(Math.round), far: cam.far, m: mtns?.children.map(o => [o.position.toArray().map(Math.round), o.visible, o.material.color.getHexString()]) }),
   stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: !!HD.low, size: R ? [R.domElement.width, R.domElement.height] : null }),
@@ -422,6 +424,8 @@ function waterMesh(m) {
 }
 let water = null;
 let buildMs = 0;
+// 세운 그림판 그물은 크기별로 하나만 만들어 모든 지도가 같이 쓴다. 전에는 지도를 세울 때마다 새로 만들고 버리지 않아서, 지도를 옮기거나 전투를 할 때마다 수십 개씩 쌓였다
+const STANDG = new Map();
 function setMap(m) {
   if (curMap === m) return; curMap = m; const t0 = performance.now();
   for (const o of [...propG.children]) { propG.remove(o); o.traverse(c => { if (c.isMesh && !c.userData.shared) c.geometry.dispose(); }); }
@@ -440,7 +444,7 @@ function setMap(m) {
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
   skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(Wm / 2, m.hgt ? lowest(m) - 1 : -.6, Dm / 2);
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
-  const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = new Map();
+  const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
   list.forEach(({ s, z }, k) => {
     const nm = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name;  // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch)
     const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(nm), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
@@ -525,7 +529,7 @@ function syncActors(F) {
 
 // ── 카메라 ──
 const camT = new (class { constructor() { this.x = -1; this.y = 0; this.z = 0; } set(x, y, z) { this.x = x; this.y = y; this.z = z; } })();
-let dist = 300, lastT = 0;
+let dist = 300, lastT = 0, lastF = null;
 function placeCam(F, dt) {
   const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom; dist = vh / (2 * Math.tan(FOV / 2 * DEG));
   const ty = 8 * HS, hc = ty + dist * Math.sin(PITCH), back = dist * Math.cos(PITCH), f = FOV / 2 * DEG, hw = dist * Math.tan(f) * W / H;
@@ -702,7 +706,7 @@ function govern() {
   if (HD.opt.fx === 'high') { HD.opt.fx = 'mid'; resize(true); panelSync(); } else if (!HD.low) { HD.low = true; resize(true); }
 }
 function render(F) {
-  const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
+  lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
   if (cam.view?.enabled) cam.clearViewOffset();
   resize(); setMap(F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
@@ -727,6 +731,11 @@ function bbSlot(w, h) {
   }
   usedBB++; o.mesh.visible = true; return o;
 }
+function rim(o) {
+  const cw = o.cv.width, ch = o.cv.height, x = o.x; if (!o.rim || o.rim.width !== cw || o.rim.height !== ch) o.rim = mk(cw, ch);
+  const r = o.rim.getContext('2d'); r.globalCompositeOperation = 'source-over'; r.clearRect(0, 0, cw, ch); r.drawImage(o.cv, 0, 0); r.globalCompositeOperation = 'source-in'; r.fillStyle = '#fff1cf'; r.fillRect(0, 0, cw, ch);
+  x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'destination-over'; x.globalAlpha = .85; for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2]]) x.drawImage(o.rim, dx, dy); x.restore();
+}
 function syncBattle(B) {
   used = 0; usedB = 0; usedBB = 0;
   for (const a of B.actors) {
@@ -734,6 +743,7 @@ function syncBattle(B) {
     const s = a.scale || 1, b = a.big, w = b ? b.w + 24 : 60 * s, h = b ? b.h + 20 : 54 * s, down = 4, o = bbSlot(w, h), x = o.x;
     x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, o.cv.width, o.cv.height); x.imageSmoothingEnabled = false;
     x.setTransform(BK, 0, 0, BK, (w / 2 - a.x) * BK, (h - down - a.y) * BK); B.drawActor(x, a, true);
+    if (a.isPlayer) rim(o);  // 주인공만 옅은 테를 두른다(검은 옷이 어두운 바닥에 묻혀 어디 있는지 안 보였다)
     o.tex.needsUpdate = true;
     o.mesh.scale.set(w, h * HS, 1); o.mesh.position.set(a.x, -down * HS + hAt(curMap, a.x, a.y), (a.y + 1) * ZS + .5);
     if (!a.dead) blob(a.x, a.y, b ? 2 : s);
@@ -746,6 +756,12 @@ function placeCamBattle(B, dt) {
   const ax = n ? sx / n : Wm / 2, ay = n ? sy / n : Hm / 2, f = FOV / 2 * DEG;
   let d = CHAR * HD.opt.zoom * 1.08 / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
   let tx = Math.min(Wm - hw + 20, Math.max(hw - 20, ax)), tyP = Math.min(Hm - 50, Math.max(50, ay - 16));  // 사람보다 조금 북쪽을 겨눠 무대 뒤 담과 건물이 화면에 들어온다
+  // 주인공은 늘 화면 안에 둔다. 전에는 싸우는 사람들의 가운데만 겨눠서, 적과 떨어져 아래나 구석으로 가면 주인공이 화면 밖으로 나갔다(시작할 때 동료도 화면 아래로 잘렸다)
+  // 화면 세로 자리 sy(-1 맨 위, +1 맨 아래)에 놓이는 땅이 겨눈 곳에서 평면도로 몇 점 아래인지 구해, 주인공 발이 화면 위 15%~아래 75% 사이에 오게 겨눈 곳을 당긴다. 가로는 주인공 깊이에서 보이는 폭의 8할 안
+  const P = B.actors.find(a => a.isPlayer && !a.dead);
+  if (P) { const hcam = 8 * HS + d * Math.sin(PITCH), back = d * Math.cos(PITCH), planAt = sy => (back - hcam / Math.tan(PITCH + Math.atan(sy * Math.tan(f)))) / ZS;
+    tyP = Math.min(P.y - planAt(-.7), Math.max(P.y - planAt(.5), tyP));
+    const mx = (d - (P.y - tyP) * ZS * Math.cos(PITCH)) * Math.tan(f) * W / H * .8; tx = Math.min(P.x + mx, Math.max(P.x - mx, tx)); }
   if (B.zoomT > 0) { const u = Math.sin(Math.min(1, B.zoomT / .75) * Math.PI); d *= 1 - .16 * u; tx += ((B.zoomX ?? tx) - tx) * .5 * u; tyP += ((B.zoomY ?? tyP) - tyP) * .5 * u; }
   if (B.shakeT > 0) { tx += (Math.random() - .5) * 2 * B.shakeA; tyP += (Math.random() - .5) * 2 * B.shakeA; }
   dist = d; const ty = 8 * HS, tz = tyP * ZS;
@@ -782,7 +798,9 @@ function panel() {
   $('#stage').appendChild(d);
   const st = document.createElement('style'); st.textContent = '#hdp button{font:inherit;font-size:13px;background:#2a2016;color:#f3e6c8;border:1px solid #6a5232;padding:2px 7px;margin-right:3px;cursor:pointer}#hdp button.on{background:#c89a4a;color:#1a120a;border-color:#ffd88a}'; document.head.appendChild(st);
   d.querySelectorAll('.hdr button').forEach(b => b.onclick = e => { e.stopPropagation(); const k = b.parentElement.dataset.k, v = b.dataset.v; HD.setOpt(k, k === 'zoom' || k === 'art' || k === 'battle3d' ? +v : v); b.blur(); });
-  $('#hdt').onclick = e => { e.stopPropagation(); const fold = d.dataset.fold !== '1'; d.dataset.fold = fold ? '1' : ''; [...d.children].slice(1).forEach(c => c.style.display = fold ? 'none' : ''); $('#hdt b').textContent = '새 화면 시제품 ' + (fold ? '▸' : '▾'); };
+  const setFold = fold => { d.dataset.fold = fold ? '1' : ''; [...d.children].slice(1).forEach(c => c.style.display = fold ? 'none' : ''); $('#hdt b').textContent = '새 화면 시제품 ' + (fold ? '▸' : '▾'); try { localStorage.setItem('gangho_hdp_open', fold ? '' : '1'); } catch (e) { /* 저장이 막혀 있으면 기억만 못 한다 */ } };
+  $('#hdt').onclick = e => { e.stopPropagation(); setFold(d.dataset.fold !== '1'); };
+  { let open = ''; try { open = localStorage.getItem('gangho_hdp_open') || ''; } catch (e) { /* 그대로 접힌 채 */ } if (!open) setFold(true); }  // 처음에는 접어 둔다(제목 화면 글과 놀이 화면을 가렸다). 한 번 펼치면 펼친 채로 기억한다
   $('#hdgo').onclick = e => { e.stopPropagation(); e.currentTarget.blur(); tour(); };
   $('#hd2d').onclick = e => { e.stopPropagation(); e.currentTarget.blur(); HD.off = !HD.off; e.currentTarget.textContent = HD.off ? '새 화면으로' : '2D로 보기'; HD.ready = !HD.off; if (HD.off) HD.hide(); };
   panelSync();

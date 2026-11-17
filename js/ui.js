@@ -195,7 +195,7 @@ function tabSet(B) {
 // ── 저장 칸: 고른 순간을 그대로 남긴다. 다시 저장하기 전에는 바뀌지 않는다 ──
 function keepPos() { const f = G.field; if (G.scene === 'field' && f?.m && G.S.map === f.m.id) { G.S.px = f.p.x / (f.m.k || 1); G.S.py = f.p.y / (f.m.k || 1); G.S.dir = f.p.dir; } }
 function placeName() { const m = G.field?.m; if (!m) return ''; if (m.live) { const p = $('#place')?.textContent; return '강호' + (p ? ' · ' + p : ''); } return m.name || ''; }
-function shot() { try { const cv = $('#cv'), c = document.createElement('canvas'); c.width = 192; c.height = 108; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.drawImage(cv, 0, 0, 192, 108); return c.toDataURL('image/jpeg', .7); } catch (e) { return ''; } }
+function shot() { try { const cv = $('#cv'), c = document.createElement('canvas'); c.width = 192; c.height = 108; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; G.hd?.snap?.(x, 192, 108); x.drawImage(cv, 0, 0, 192, 108); return c.toDataURL('image/jpeg', .7); } catch (e) { return ''; } }
 const when = t => { const d = new Date(t), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
 const metaHtml = m => `<b>${esc(m.name)}</b> · ${m.lv}레벨 · ${m.day}일째 ${m.night ? '밤' : '낮'}<br><small>${m.mode === 'free' ? '자유' : '이야기'}${m.place ? ' · ' + esc(m.place) : ''}</small><br><small class="hint">${when(m.at)}</small>`;
 function arm(b, label, go) { // 한 번 더 눌러야 실행되는 단추
