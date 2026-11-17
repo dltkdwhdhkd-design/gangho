@@ -39,7 +39,7 @@ export class Battle {
   constructor(cfg) {
     this.cfg = cfg; this.t = 0; this.actors = []; this.fx = []; this.proj = []; this.zones = []; this.nums = []; this.teles = []; this.parts = [];
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
-    this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.stage = G.hd?.battleOk?.() ? stageOf(cfg.arena || 'village') : null; this.band = BAND;  // 새 화면이면 3D 무대(js/hd2d/stages.js) this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;
+    this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.stage = G.hd?.battleOk?.() ? stageOf(cfg.arena || 'village') : null; this.band = BAND; this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;  // 새 화면이면 3D 무대(js/hd2d/stages.js). 싸움터 끝: 이 줄이 주석에 먹혀 끝이 없어서 땅 밖 검은 곳까지 걸어 나갔다
     const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;

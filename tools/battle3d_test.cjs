@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
       const { fight } = await import('/gangho/js/battle.js'); const res = {};
       for (const ar of ['village', 'court', 'forest', 'dock', 'yard', 'ring', 'moon', 'snow', 'sand', 'fort', 'room']) {
         let done = null; fight({ foes: ['bandit', 'bandit'], allies: ['so_ally'], arena: ar, noIntro: true }).then(o => done = o);
-        const B = G.battle; res[ar] = { stage: !!B.stage };
+        const B = G.battle; res[ar] = { stage: !!B.stage, edge: [B.left, B.right, B.top, B.floorB].every(v => typeof v === 'number') };
         let i = 0; while (!done && i++ < 3000) { G.fast(30); await new Promise(r => setTimeout(r, 0)); }
         res[ar].out = done?.outcome || '멈춤';
       }
@@ -30,7 +30,7 @@ const { chromium } = require('playwright');
       return ret;
     });
     out.push(q + ' ' + JSON.stringify(r));
-    for (const [k, v] of Object.entries(r.res)) { if (v.out !== 'win') fail.push(`${q} ${k}: ${v.out}`); if (v.stage !== (q === '?hd2d=1')) fail.push(`${q} ${k}: 3D 무대 ${v.stage}`); }
+    for (const [k, v] of Object.entries(r.res)) { if (v.out !== 'win') fail.push(`${q} ${k}: ${v.out}`); if (!v.edge) fail.push(`${q} ${k}: 싸움터 끝이 없음(땅 밖으로 걸어 나감)`); if (v.stage !== (q === '?hd2d=1')) fail.push(`${q} ${k}: 3D 무대 ${v.stage}`); }
     if (r.bb) fail.push(`전투 뒤 마을에 전투 인물 ${r.bb}명이 남음`);
     if (r.geo && r.geo[1] > r.geo[0] + 2) fail.push(`전투를 거듭하면 그물이 쌓임 ${r.geo[0]}→${r.geo[1]}`);
     for (const [x, y] of r.cam || []) if (!(x > 40 && x < 1240 && y > 70 && y < 660)) fail.push(`주인공이 화면 밖 ${x},${y}`);
