@@ -40,6 +40,9 @@ export class Battle {
     this.cfg = cfg; this.t = 0; this.actors = []; this.fx = []; this.proj = []; this.zones = []; this.nums = []; this.teles = []; this.parts = [];
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
     this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.stage = G.hd?.battleOk?.() ? stageOf(cfg.arena || 'village') : null; this.band = BAND; this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;  // 새 화면이면 3D 무대(js/hd2d/stages.js). 싸움터 끝: 이 줄이 주석에 먹혀 끝이 없어서 땅 밖 검은 곳까지 걸어 나갔다
+    // 새 화면 무대는 가운데 싸움판(바닥 칸)이 따로 있다. 그 밖(풀·모래 둘레)으로는 못 나가게 싸움판 칸 안으로 끝을 좁힌다. 옛 화면은 그대로
+    if (this.stage?.g) { const g = this.stage.g, o = g[0][0]; let x0 = 99, x1 = -1, y0 = 99, y1 = -1; g.forEach((r, y) => r.forEach((v, x) => { if (v !== o) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } }));
+      if (x1 >= 0) { this.left = Math.max(this.left, x0 * TS + 8); this.right = Math.min(this.right, (x1 + 1) * TS - 8); this.top = Math.max(this.top, y0 * TS + 10); this.floorB = Math.min(this.floorB, (y1 + 1) * TS - 4); } }
     const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;
