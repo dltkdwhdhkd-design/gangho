@@ -4,6 +4,7 @@ import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { FOES } from './foes.js';
 import { set, at } from './story1.js';
+import { fiveDays } from './part2c.js';
 
 const S = () => G.S, F = () => G.S.flags;
 Object.assign(WHO, { wangchung: { name: '왕충', face: 'GreenNinja' }, seokdu: { name: '석두', face: 'Villager' }, gomom: { name: '두부 파는 노파', face: 'OldWoman', art: 'flower' } });
@@ -12,10 +13,10 @@ FOES.wang = { ...FOES.disciple, name: '왕충', hp: Math.round(FOES.disciple.hp 
 FOES.mask_low = { ...FOES.disciple, name: '복면 사내', spr: 'chars/DarkNinja', hp: Math.round(FOES.disciple.hp * 1.3), atk: FOES.disciple.atk * 1.1 };
 const LIST = [['m_so', '밤 연무장'], ['m_jang', '장팔의 부탁'], ['m_well', '우물가 소동'], ['m_cart', '쌀수레 심부름'], ['m_lord', '문주']];
 const left = () => LIST.filter(l => !F()[l[0]]).map(l => l[1]);
-function next() { const L = left(); ctx.goal(L.length ? `외문의 한 달: ${L.join(', ')}` : '연무장에서 고진 사형에게 월말 시험 보기'); }
+async function next() { const L = left(); if (!L.length && !F().days5) await fiveDays(); ctx.goal(L.length ? `외문의 한 달: ${L.join(', ')}` : '연무장에서 고진 사형에게 월말 시험 보기'); }
 export const startMonth = async () => {
   await narr('이레면 끝나는 줄 알았던 일과는 끝나지 않았다. 장팔 말로는 외문의 하루는 삼 년을 간다고 했다.');
-  set('c2b3'); next();
+  set('c2b3'); await next();
 };
 async function soNight() {
   await narr('밤에 물을 마시러 나왔더니 연무장에서 칼 소리가 났다. 소연하가 혼자 목인을 베고 있었다.');
@@ -35,7 +36,7 @@ async function soNight() {
   const c = await choice('달이 목인 그림자를 길게 늘어뜨렸다.', ['돌아갈 데가 없었어요', '칼이 짧아서요']);
   if (c === 0) { await say('me', '돌아갈 데가 없었어요.'); await say('so', '이제 있잖아. 밥은 맛없어도.', 'h'); ctx.love('so'); }
   else { await say('me', '칼이 짧아서요.'); await say('so', '네 칼이 내 칼보다 길거든. 재미없는 놈.', 'h'); await narr('그래 놓고 소연하는 조금 웃었다.'); }
-  F().m_so = true; next();
+  F().m_so = true; await next();
 }
 async function jangRope() {
   await say('jangpal', '형씨, 부탁이 있어유. 목검 안 놓치는 법 좀 알려 줘유.');
@@ -51,7 +52,7 @@ async function jangRope() {
   await say('me', '맞지는 말아야죠.');
   await say('jangpal', '그건 다음 시험 때 배울게유.');
   await narr('장팔은 그날 새끼줄 감은 목검을 안고 잤다고 한다. 같은 방 사람들이 코 고는 소리가 줄었다고 고마워했다. 왜 그런지는 아무도 몰랐다.');
-  F().m_jang = true; next();
+  F().m_jang = true; await next();
 }
 async function well() {
   await narr('우물가가 시끄러웠다. 외문 막내 석두가 쓰러져 있고 옆에 물동이가 깨져 있었다. 내문 복장을 한 사내가 신발에 튄 물을 털고 있었다.');
@@ -82,7 +83,7 @@ async function well() {
     await narr('윤설은 아무 말 없이 붕대를 감았다. 평소보다 세게 묶어서 석두가 한 번 소리를 질렀다.');
     ctx.love('yun');
   }
-  F().m_well = true; next();
+  F().m_well = true; await next();
 }
 async function cart() {
   await say('go', '따라와라. 산 아래 장터에서 쌀을 실어 와야 한다.');
@@ -108,7 +109,7 @@ async function cart() {
   await say('me', '아마도요.');
   await say('go', '이달 밥 당번은 면해 주마. 두부는 네가 먹어라.');
   await narr('식은 두부는 짭짤했다. 고진은 그날 저녁 혼자 산문까지 내려갔다가 늦게 올라왔다.');
-  F().m_cart = true; next();
+  F().m_cart = true; await next();
 }
 async function lordGame() {
   await narr('아침에 본전 앞을 쓸고 있는데 누가 비질을 보고 서 있었다. 얼굴이 흙빛인 중년 사내였다. 옷이 너무 수수해서 처음에는 집사인 줄 알았다.');
@@ -129,7 +130,7 @@ async function lordGame() {
   await narr('문주가 기침을 시작했다. 멈추는 데 한참 걸렸다. 입을 막았던 천을 소매에 넣는데 끝이 거뭇했다.');
   await say('wi', '문주님, 차 올렸습니다. 찬바람은 해롭습니다.');
   await narr('언제 왔는지 검각주가 뒤에 서 있었다. 문주는 내게 고개를 끄덕이고 천천히 일어났다. 빗자루를 다시 들었다. 비질이 잘 안 됐다.');
-  F().m_lord = true; next();
+  F().m_lord = true; await next();
 }
 async function exam() {
   await say('go', '오늘은 월말 시험이다. 외문 제자는 한 달에 한 번 칼을 내보인다. 진 사람은 다음 달에도 물을 긷고, 이긴 사람도 물을 긷는다.');

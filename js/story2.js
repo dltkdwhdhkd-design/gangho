@@ -86,7 +86,8 @@ async function cure() {
 async function library() {
   await ctx.chap(2, '구름 위의 칼', '제4장 장서각의 밤');
   ctx.cg('library');
-  await say('me', '십칠 년 전 기록이 여기 있는데 가운데가 다 뜯겨 있네.');
+  if (G.S.flags.fs_torn) { await narr('맨 위 시렁, 마 노인이 손 안 닿는 데 올려 둔 그 일지를 다시 내렸다. 십칠 년 전 봄. 칼로 반듯하게 뜯긴 자리.'); await say('me', '쥐는 칼을 안 쓴다고 했지.'); }
+  else await say('me', '십칠 년 전 기록이 여기 있는데 가운데가 다 뜯겨 있네.');
   await say('so', '너도 그거 찾으러 왔어?');
   await say('me', '언제 들어왔어요?');
   await say('so', '내 사부님이 십칠 년 전 월하문 토벌에 나갔다가 안 돌아오셨어. 벽수궁에서는 아무도 말을 안 해 주고.', 's');
