@@ -6,6 +6,7 @@ import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take, SLOTS, slotInfo, autoInfo, saveSlot, loadSlot, delSlot, exportSlot, readSaveFile, importToSlot } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
+import { ARMORS, gname, fxText } from './gear.js';
 import { Story } from './story.js';
 import { CLANS, SAPA, clansWon } from './clandata.js';
 
@@ -110,14 +111,18 @@ function tabSkill(B) {
 function tabGear(B) {
   const S = G.S;
   let h = '<div class="two"><div><h2>무기</h2><div class="list">';
-  for (const id of S.weapons) { const w = WEAPONS[id], p = S.wplus[id] || 0; h += `<button class="item ${id === S.weapon ? 'eq' : ''}" data-w="${id}">${icon(id)}${w.name}${p ? ` +${p}` : ''}<span class="tag">${w.type}</span><span class="tag">공격 ${Math.round(w.atk * (1 + p * .12))}</span><small>${w.desc}</small></button>`; }
+  for (const id of S.weapons) { const w = WEAPONS[id], p = S.wplus[id] || 0; h += `<button class="item ${id === S.weapon ? 'eq' : ''}" data-w="${id}">${icon(id)}${gname('weapon', id, w.name + (p ? ` +${p}` : ''))}<span class="tag">${w.type}</span><span class="tag">공격 ${Math.round(w.atk * (1 + p * .12))}</span><small>${w.desc}</small></button>`; }
   h += '</div></div><div><h2>장신구</h2><div class="list">';
-  for (const id of S.accs || []) { const w = ACCS[id]; h += `<button class="item ${id === S.acc ? 'eq' : ''}" data-a="${id}">${w.name}<small>${w.desc}</small></button>`; }
+  for (const id of S.accs || []) { const w = ACCS[id]; h += `<button class="item ${id === S.acc ? 'eq' : ''}" data-a="${id}">${gname('acc', id, w.name)}<small>${w.desc}</small></button>`; }
   if (!(S.accs || []).length) h += '<p class="hint">비무에서 이기면 상대의 장신구를 가져올 수 있습니다.</p>';
+  h += '</div><h2 style="margin-top:12px">옷</h2><div class="list">';
+  for (const id of S.armors || []) { const w = ARMORS[id]; h += `<button class="item ${id === S.armor ? 'eq' : ''}" data-r="${id}">${gname('armor', id, w.name)}<span class="tag">${fxText(w.fx)}</span><small>${w.desc}</small></button>`; }
+  if (!(S.armors || []).length) h += '<p class="hint">옷은 대장간과 저잣거리에서 삽니다. 등급이 높을수록 든든합니다.</p>';
   h += '</div><h2 style="margin-top:12px">심법</h2><div class="list">';
   for (const id of S.hearts) { const w = HEARTS[id]; h += `<button class="item ${id === S.heart ? 'eq' : ''}" data-h="${id}">${w.name}<small>${w.desc}</small></button>`; }
   B.innerHTML = h + '</div></div></div>';
   $$('[data-a]', B).forEach(b => b.onclick = () => { S.acc = S.acc === b.dataset.a ? null : b.dataset.a; Sound.sfx('accept'); drawMenu(); });
+  $$('[data-r]', B).forEach(b => b.onclick = () => { S.armor = S.armor === b.dataset.r ? null : b.dataset.r; Sound.sfx('accept'); drawMenu(); });
   $$('[data-w]', B).forEach(b => b.onclick = () => { S.weapon = b.dataset.w; S.slots = S.slots.map(id => id); Sound.sfx('accept'); drawMenu(); });
   $$('[data-h]', B).forEach(b => b.onclick = () => { S.heart = b.dataset.h; Sound.sfx('accept'); drawMenu(); });
 }
@@ -177,6 +182,19 @@ function tabSet(B) {
   <h2>생활</h2><div class="note">제작: 대장간(무기·강화·옥가락지), 약방(약), 부뚜막(요리), 작업대(가구) · 사냥: 청풍골에서 평타 키로 활 쏘기, 사나운 짐승은 전투 · 낚시: 뱃사공에게 낚싯대를 받고 물가에서 대화 키<br>집: 청하진 복덕방에서 구입, 집 안에서 꾸미기 키, 침상에서 자면 다음 날 · 비무: 이기면 상대 물건 하나를 고른다 · 연애: 인연 탭의 호감 조건 참고</div>
   <h2>설정</h2><div class="vol"><button class="btn sm" id="fsBtn">전체 화면 (Alt+Enter)</button></div><div class="vol"><label>음악 <input type="range" id="vBgm" min="0" max="100" value="${Math.round(Sound.bgmVol * 100)}"><span id="vBgmN">${Math.round(Sound.bgmVol * 100)}</span></label><label>효과음 <input type="range" id="vSfx" min="0" max="100" value="${Math.round(Sound.sfxVol * 100)}"><span id="vSfxN">${Math.round(Sound.sfxVol * 100)}</span></label></div><p class="hint">진행은 이 브라우저에 자동으로 저장되고, 제목 화면의 이어 하기로 이어집니다. 지금 이 순간을 따로 남기려면 저장 탭의 칸에 저장하세요. 파일로 내보내면 그 순간이 파일 한 장으로 남아서 다른 기기에서도 불러올 수 있습니다.</p><div class="row" style="justify-content:flex-start"><button class="btn" id="mute">소리 ${Sound.muted ? '켜기' : '끄기'}</button><button class="btn" id="sv">저장 칸 열기</button><button class="btn" id="svf">지금 상태를 파일로 내보내기</button><button class="btn" id="tt">제목으로</button></div>`;
   drawKeys($('#keyTable', B));
+  if (G.hd?.want && !G.hd.failed) { // 새 화면 옵션(전에는 화면 구석의 '시제품' 판에 있었다)
+    const H = G.hd, d = el('div', 'note'); d.style.marginTop = '8px';
+    const row = (lab, key, items, cur) => `<div style="margin:3px 0"><span style="display:inline-block;width:5.5em">${lab}</span>${items.map(([v, t]) => `<button class="btn sm${String(cur) === String(v) ? ' pri' : ''}" data-k="${key}" data-v="${v}" style="margin-right:4px">${t}</button>`).join('')}</div>`;
+    d.innerHTML = `<b style="font-weight:400">화면</b> <span id="hdFps" style="opacity:.75;margin-left:8px"></span>`
+      + row('보기', 'view', [['hd', '새 화면'], ['2d', '옛 2D']], H.off ? '2d' : 'hd')
+      + row('화질', 'fx', [['low', '낮음'], ['mid', '보통'], ['high', '높음']], H.opt.fx)
+      + row('전투', 'battle3d', [[1, '새 화면'], [0, '옛 2D']], H.opt.battle3d ?? 1)
+      + row('빛', 'time', [['auto', '게임대로'], ['morning', '아침'], ['day', '낮'], ['evening', '저녁'], ['night', '밤']], H.opt.time)
+      + `<div class="hint" style="margin-top:4px">초당 장수가 30 밑이면 화질을 낮음으로 두세요. 그래도 느리면 스스로 한 단계 더 내립니다.</div>`;
+    B.appendChild(d);
+    d.querySelectorAll('button[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k, v = b.dataset.v; if (k === 'view') H.set2d(v === '2d'); else H.setOpt(k, k === 'battle3d' ? +v : v); Sound.sfx('tick'); drawMenu(); });
+    const fps = () => { const e = $('#hdFps'); if (!e) return clearInterval(t); e.textContent = H.off ? '' : `초당 ${H.fps()}장${H.lowNow() && H.opt.fx !== 'low' ? ' (느려서 낮춤)' : ''}`; }; const t = setInterval(fps, 500); fps();
+  }
   { // 쿼터뷰 미리보기: 그림을 바꾸는 동안 비스듬한 집으로 바꿔 보는 스위치. 지도를 다시 만들어야 해서 저장하고 새로 연다
     const on = (() => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } })();
     const d = el('div', 'note', `쿼터뷰 미리보기 <b style="font-weight:400">${on ? '켜짐' : '꺼짐'}</b> · 그림을 쿼터뷰로 바꾸는 중이라 아직 임시 그림이 섞여 있습니다. `); d.style.marginTop = '8px';
@@ -250,7 +268,8 @@ export function openShop(title, goods) {
   });
 }
 export const shopItem = {
-  weapon: id => ({ info: () => { const w = WEAPONS[id]; return { name: `${w.name} (${w.type})`, price: w.price, desc: `공격 ${w.atk}. ${w.desc}` }; }, owned: () => G.S.weapons.includes(id), buy: () => { G.S.weapons.push(id); G.S.weapon = id; toast(`${josa(WEAPONS[id].name, '을/를')} 들었다`); } }),
+  armor: id => ({ info: () => { const w = ARMORS[id]; return { name: `${gname('armor', id, w.name)} (옷)`, price: w.price, desc: `${fxText(w.fx)}. ${w.desc}` }; }, owned: () => (G.S.armors || []).includes(id), buy: () => { (G.S.armors ||= []).push(id); G.S.armor = id; toast(`${josa(ARMORS[id].name, '을/를')} 입었다`); } }),
+  weapon: id => ({ info: () => { const w = WEAPONS[id]; return { name: `${gname('weapon', id, w.name)} (${w.type})`, price: w.price, desc: `공격 ${w.atk}. ${w.desc}` }; }, owned: () => G.S.weapons.includes(id), buy: () => { G.S.weapons.push(id); G.S.weapon = id; toast(`${josa(WEAPONS[id].name, '을/를')} 들었다`); } }),
   potion: (price = ITEMS.hp.price) => ({ info: () => ({ name: '금창약', price, desc: `전투 중 H 키로 체력을 35% 되찾는다. 지금 ${G.S.potion}개` }), buy: () => { G.S.potion++; } }),
   stuff: (id, price) => ({ info: () => ({ name: DB[id].name, price, desc: `${DB[id].desc} 지금 ${have(id)}개` }), buy: () => give(id) }),
   furn: id => ({ info: () => ({ name: FURN[id].name, price: FURN[id].price, desc: `가구. 꾸밈 점수 ${FURN[id].score}. 가진 수 ${G.S.house.furn[id] || 0}` }), buy: () => { G.S.house.furn[id] = (G.S.house.furn[id] || 0) + 1; } }),

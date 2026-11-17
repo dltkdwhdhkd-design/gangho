@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
   await p.goto(url.href); await p.waitForTimeout(2500);
   const st = await p.evaluate(() => ({ ready: __G.hd.ready, failed: __G.hd.failed }));
   console.log('켜짐', JSON.stringify(st)); if (!st.ready) { console.log('WebGL2를 못 써서 2D로 돈다. 여기서 멈춘다'); console.log(errs.join('\n')); await b.close(); return; }
-  await p.evaluate(() => { __G.hd.noGov = true; __G.hd.setOpt('art', 1); document.querySelector('#hdgo').click(); });
+  await p.evaluate(() => { __G.hd.noGov = true; __G.hd.setOpt('art', 1); __G.hd.tour(); });
   await p.waitForFunction(() => __G.field?.m?.id === 'cheongha' && !__G.field.busy && !__G.auto, null, { timeout: 90000 });
   // 1) 걸어 다니는 칸마다 주인공 발과 머리가 화면 안에 있나(카메라가 따라붙은 뒤)
   const out = await p.evaluate(async () => {

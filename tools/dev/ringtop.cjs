@@ -1,0 +1,7 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } }); const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message.slice(0, 300)));
+  await p.goto(process.env.GAME_URL + '?hd2d=1'); await p.waitForFunction(() => window.__G && __G.dbg, null, { timeout: 60000 }); await p.waitForTimeout(2500);
+  await p.evaluate(async () => { const G = __G; G.noSave = true; G.S = G.dbg.newState('진소', 'BlueSamurai', 'm', 'normal'); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; G.auto = true; G.free.start(); for (let i = 0; i < 400 && G.field.busy; i++) await new Promise(r => setTimeout(r, 30)); G.auto = false;
+    const { fight } = await import('/gangho/js/battle.js'); fight({ foes: ['bandit', 'fighter_b'], allies: ['so_ally'], arena: 'ring', noIntro: true, optional: true }); const B = G.battle; B.update = () => {}; const P = B.actors.find(a => a.isPlayer); P.x = 192; P.y = 60; for (const a of B.actors) if (!a.isPlayer) { a.y = a.team ? 26 : 80; } B.camInit = false; });
+  await p.waitForTimeout(6000); await p.evaluate(() => { __G.battle.camInit = false; }); await p.waitForTimeout(3000); await p.screenshot({ path: '/tmp/claude-0/shots/ringtop.png', timeout: 180000 });
+  console.log(errs.join('\n') || 'no errors'); await b.close(); })().catch(e => { console.log(String(e).slice(0, 600)); process.exit(1); });

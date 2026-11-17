@@ -270,7 +270,7 @@ Story.providers.push(function part8p(id) {
   if (id === 'oasis') {
     if (at('w1b', 'w2')) { n.push({ id: 'so', spr: 'RedSamurai', x: 16, y: 18, dir: 3, talk: async () => { await say('so', '칼은 닦았어?'); } }); n.push({ id: 'yun', spr: 'Princess', x: 18, y: 19, dir: 3, talk: async () => { await say('yun', '물은 하루 세 번이에요.'); } }); if (F().hyeok_join) n.push({ id: 'hyeok', spr: 'Hyeok', x: 24, y: 18, dir: 3, talk: async () => { await say('hyeok', '북문으로 나가면 설산입니다.'); } }); }
     if (at('w1')) tr.push({ x: 0, y: 0, w: 99, h: 99, when: () => at('w1'), run: oasisCome });
-    n.push({ id: 'trader', spr: 'Noble', x: 20, y: 15, dir: 0, talk: async () => { await say('trader', F().worm ? '약은 은인께 반값이오. 칼은 대장장이 몫이 있어 깎아 드리지 못하오.' : '물이 없어서 장사가 안 되오. 그래도 보시오.'); await ctx.shop('사주성 상인', [ctx.item.potion(F().worm ? 8 : 14), ctx.item.weapon('frost_sword'), ctx.item.weapon('frost_blade'), ctx.item.weapon('frost_spear'), ctx.item.weapon('frost_fist')]); } });
+    n.push({ id: 'trader', spr: 'Noble', x: 20, y: 15, dir: 0, talk: async () => { await say('trader', F().worm ? '약은 은인께 반값이오. 칼은 대장장이 몫이 있어 깎아 드리지 못하오.' : '물이 없어서 장사가 안 되오. 그래도 보시오.'); await ctx.shop('사주성 상인', [ctx.item.potion(F().worm ? 8 : 14), ctx.item.weapon('frost_sword'), ctx.item.weapon('frost_blade'), ctx.item.weapon('frost_spear'), ctx.item.weapon('frost_fist'), ctx.item.armor('frost_fur'), ctx.item.armor('gold_silk')]); } });
     if (at('w1b')) n.push(job({ id: 'job_worm', stamp: 'rocks', spr: '', x: 6, y: 12, hint: '동굴로 들어가기', talk: wormFight }));
     if (at('w2')) {  // 북문: 대화 키를 눌러도, 북문 쪽으로 걸어 나가도 설산으로 간다(전에는 키를 눌러야만 해서 걸어 나가면 아무 일도 없었다)
       const go = async () => { if (!at('w2')) return; await ctx.warp('snowpeak', 22, 30, 1); await iceStart(); set('w2b'); };

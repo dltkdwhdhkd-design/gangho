@@ -35,11 +35,11 @@ export const HD = {
   want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0,  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
   maps: new Set(['cheongha']),  // 시제품은 청하진만. 나머지 지도는 예전 2D로 그린다
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso)) && !m.isoRoom && !m.live; },  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
-  setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
+  setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; HD.low = v === 'low'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
   init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
-  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => !!HD.low, buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
   dbg: () => ({ fg: FG.map(o => [o.visible, o.position.toArray().map(Math.round), o.scale.toArray().map(Math.round), o.material.type, o.material.map?.image?.width, (() => { const c = o.material.map?.image; if (!c?.getContext) return -1; const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let a = 0; for (let i = 3; i < d.length; i += 4) a += d[i]; return Math.round(a / (d.length / 4)); })()]), cam: cam.position.toArray().map(Math.round), far: cam.far, m: mtns?.children.map(o => [o.position.toArray().map(Math.round), o.visible, o.material.color.getHexString()]) }),
   stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: !!HD.low, size: R ? [R.domElement.width, R.domElement.height] : null }),
@@ -98,7 +98,7 @@ async function init() {
     post = makePost();
     resize(true);
     if (HD.opt.art) await loadPreview();
-    HD.ready = true; panel();
+    HD.ready = true; HD.low = HD.opt.fx === 'low'; if (/[?&]hdpanel=1/.test(location.search)) panel();  // 시제품 판은 주소에 hdpanel=1을 붙였을 때만. 옵션은 메뉴의 설정 탭에 있다(js/ui.js)
   } catch (e) { console.warn('새 화면을 켜지 못해 2D로 그린다', e); HD.failed = true; if (cv) cv.remove(); }
 }
 
@@ -426,11 +426,33 @@ let water = null;
 let buildMs = 0;
 // 세운 그림판 그물은 크기별로 하나만 만들어 모든 지도가 같이 쓴다. 전에는 지도를 세울 때마다 새로 만들고 버리지 않아서, 지도를 옮기거나 전투를 할 때마다 수십 개씩 쌓였다
 const STANDG = new Map();
+// 지은 지도를 떼어서 들고 있기: 전투 무대는 한 번 지으면 계속 들고 있고, 전투에 들어갈 때는 있던 마을을 떼어 두었다가 돌아오면 그대로 붙인다.
+// 전에는 전투에 들어갈 때와 나올 때마다 무대와 마을을 처음부터 다시 지어서 멈칫했다. 다른 마을로 가면 들고 있던 마을은 버린다. curMap = null(모형·그림이 바뀜)이면 전부 버리고 새로 짓는다
+const STASH = new Map();
+const dropSet = s => { for (const o of s.props) o.traverse(c => { if (c.isMesh && !c.userData.shared) c.geometry.dispose(); }); if (s.ground) { s.ground.geometry.dispose(); s.ground.material.map.dispose(); s.ground.material.dispose(); } for (const o of s.cliffs) o.geometry.dispose(); if (s.water) s.water.geometry.dispose(); };
+function stashOut(m) {
+  const s = { props: [...propG.children], ground, cliffs: [...cliffs], water, skirt: skirt ? [skirt.material.color.clone(), skirt.scale.clone(), skirt.position.clone()] : null };
+  for (const o of s.props) propG.remove(o); if (ground) scene.remove(ground); for (const o of cliffs) scene.remove(o); if (water) scene.remove(water);
+  ground = null; water = null; cliffs.length = 0; STASH.set(m, s);
+}
+function stashIn(m) {
+  const s = STASH.get(m); STASH.delete(m);
+  for (const o of s.props) propG.add(o); ground = s.ground; if (ground) scene.add(ground); for (const o of s.cliffs) { scene.add(o); cliffs.push(o); } water = s.water; if (water) scene.add(water);
+  if (s.skirt && skirt) { skirt.material.color.copy(s.skirt[0]); skirt.scale.copy(s.skirt[1]); skirt.position.copy(s.skirt[2]); }
+  camT.set(-1, 0, 0);
+}
 function setMap(m) {
-  if (curMap === m) return; curMap = m; const t0 = performance.now();
-  for (const o of [...propG.children]) { propG.remove(o); o.traverse(c => { if (c.isMesh && !c.userData.shared) c.geometry.dispose(); }); }
-  if (ground) { scene.remove(ground); ground.geometry.dispose(); ground.material.map.dispose(); ground.material.dispose(); ground = null; }
-  for (const o of cliffs) { scene.remove(o); o.geometry.dispose(); } cliffs.length = 0;
+  if (curMap === m) return; const prev = curMap, t0 = performance.now(); curMap = m;
+  if (prev && (prev.stage || m.stage) && !STASH.has(prev)) stashOut(prev);
+  else {
+    for (const o of [...propG.children]) { propG.remove(o); o.traverse(c => { if (c.isMesh && !c.userData.shared) c.geometry.dispose(); }); }
+    if (ground) { scene.remove(ground); ground.geometry.dispose(); ground.material.map.dispose(); ground.material.dispose(); ground = null; }
+    for (const o of cliffs) { scene.remove(o); o.geometry.dispose(); } cliffs.length = 0;
+    if (water) { scene.remove(water); water.geometry.dispose(); water = null; }
+  }
+  for (const k of [...STASH.keys()]) if (!prev || (!m.stage && !k.stage && k !== m)) { dropSet(STASH.get(k)); STASH.delete(k); }
+  if (STASH.has(m)) { stashIn(m); buildMs = Math.round(performance.now() - t0); return; }
+  LAMPX.length = 0;  // 등불 자리는 지도마다 새로 모은다(전에는 안 비워서 지나온 지도의 등불 자리가 계속 쌓였고, 밤에 엉뚱한 자리에 불빛이 섰다)
   const Wm = m.w * TS, Dm = m.h * TS * ZS;
   // 땅: 지금 땅 그림을 그대로 눕힌다(땅 무늬 HB14가 오기 전 임시). 땅도 도트 결로 읽는다
   const gc = mk(m.w * TS, m.h * TS), gx = gc.getContext('2d', { willReadFrequently: true }); m.paintBase(gx);
@@ -438,14 +460,21 @@ function setMap(m) {
   if (m.hgt) ground = terrain(m, gt);  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(Wm / 2, 0, Dm / 2); }
   ground.receiveShadow = true; scene.add(ground);
-  if (water) { scene.remove(water); water.geometry.dispose(); } water = art() ? waterMesh(m) : null; if (water) scene.add(water);
+  water = art() ? waterMesh(m) : null; if (water) scene.add(water);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
   skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(Wm / 2, m.hgt ? lowest(m) - 1 : -.6, Dm / 2);
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
   const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
+  // 블렌더 무대·방 모형(m.models: [{ key, x, y }], tools/blender/stages.py·rooms.py). 좌표는 평면도 그대로(x, 북쪽이 +y), 지도 (x, y)에 놓는다. 다 읽혔으면 옛 소품(s.alt)은 뺀다
+  const useModels = art() && (m.models || []).length > 0 && m.models.map(q => needModel(q.key)).every(Boolean);
+  if (useModels) for (const q of m.models) { const gm = MODELS[q.key], g = new T.Group(), o = gm.clone(true);
+    o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; } }); g.add(o);
+    g.scale.set(1, HS, ZS); g.position.set(q.x || 0, 0, (q.y || 0) * ZS); g.userData = { backdrop: true }; propG.add(g);
+    for (const [x, y, z] of gm.userData.lamps || []) LAMPX.push([(q.x || 0) + x, (q.y || 0) - y, z]); }
   list.forEach(({ s, z }, k) => {
+    if (s.alt && useModels) return;
     const nm = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name;  // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch)
     const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(nm), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
@@ -703,7 +732,7 @@ let fpsT = 0, fpsN = 0, fpsV = 0, slow = 0;
 // 느리면 스스로 낮춘다: 높음 → 보통 → 보통(해상도 4분의 3, 그림자 작게). 3초 넘게 초당 45장이 안 되면 한 단계
 function govern() {
   if (fpsV >= 45 || document.hidden) { slow = 0; return; } if (++slow < 3) return; slow = 0;
-  if (HD.opt.fx === 'high') { HD.opt.fx = 'mid'; resize(true); panelSync(); } else if (!HD.low) { HD.low = true; resize(true); }
+  if (HD.opt.fx === 'high') { HD.opt.fx = 'mid'; resize(true); panelSync(); } else if (!HD.low) { HD.low = true; resize(true); }  // 느리면 스스로 한 단계씩 내린다(설정 값은 그대로 둔다)
 }
 function render(F) {
   lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;

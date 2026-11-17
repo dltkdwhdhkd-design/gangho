@@ -5,6 +5,7 @@ import { WHO } from './dialog.js';
 import { have, give, take, nextDay, save, stats } from './state.js';
 import { DB, ACCS, FISH, FURN, HOUSES, RECIPES, LOOT } from './items.js';
 import { WEAPONS } from './data.js';
+import { GRADES, weaponGrade, plusCap } from './gear.js';
 import { FOES } from './foes.js';
 import { MAPS, buildHouse } from './maps.js';
 import { STAMPS } from './tiles.js';
@@ -51,8 +52,8 @@ export function openCraft(at, title) {
   return panel(title, (B, redraw) => {
     const list = el('div', 'list');
     if (at === 'forge') {
-      const c = plusCost(), w = WEAPONS[S().weapon], full = c.p >= 5, ok = !full && S().silver >= c.silver && Object.entries(c.need).every(([k, n]) => have(k) >= n);
-      const b = el('button', 'item', `${icon(S().weapon)}${w.name} 강화 +${c.p} → +${c.p + 1}<small>${full ? '더 강화할 수 없다' : needText({ need: Object.fromEntries(Object.entries(c.need).filter(e => e[1] > 0)), silver: c.silver })} · 단계마다 공격 +12%</small>`);
+      const c = plusCost(), w = WEAPONS[S().weapon], full = c.p >= plusCap(S().weapon), ok = !full && S().silver >= c.silver && Object.entries(c.need).every(([k, n]) => have(k) >= n);
+      const b = el('button', 'item', `${icon(S().weapon)}${w.name} 강화 +${c.p} → +${c.p + 1}<small>${full ? `더 강화할 수 없다(${GRADES[weaponGrade(S().weapon)].name}의 한도)` : needText({ need: Object.fromEntries(Object.entries(c.need).filter(e => e[1] > 0)), silver: c.silver })} · 단계마다 공격 +12%</small>`);
       b.disabled = !ok; b.onclick = () => { for (const [k, n] of Object.entries(c.need)) if (n) take(k, n); S().silver -= c.silver; S().wplus[S().weapon] = c.p + 1; Sound.sfx('power1'); toast(`${w.name} +${c.p + 1}`); redraw(); }; list.appendChild(b);
     }
     for (const r of RECIPES.filter(q => q.at === at)) {
