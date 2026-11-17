@@ -10,12 +10,14 @@ export const NAME = RANKS.map(r => r[1]);
 export const LV = RANKS.map(r => r[0]);
 const at = (r, a) => a[Math.max(0, Math.min(a.length - 1, r))];
 // 경지별 싸움 버릇
-const GUARD = [0, .1, .3, .5, .7, .9, 1.1, 1.3];      // 막을 확률(×.4가 실제, 기존 guard 값과 같은 눈금)
+const GUARD = [0, .1, .3, .5, .65, .8, .9, 1];      // 막을 확률(×.4가 실제, 기존 guard 값과 같은 눈금)
 const READ = [0, 0, .02, .05, .08, .12, .16, .2];      // 상대 초식을 얼마나 일찍 읽나(초)
-const PERFECT = [0, 0, .1, .2, .35, .5, .65, .8];      // 막을 때 튕겨내기 확률
+const PERFECT = [0, 0, .05, .1, .18, .25, .32, .4];      // 막을 때 튕겨내기 확률
 const COMBO = [0, .05, .15, .3, .45, .6, .7, .8];      // 초식이 끝나자마자 다음 초식을 이을 확률
 const CHAIN = [0, 1, 1, 2, 2, 3, 3, 4];                // 쉬지 않고 이을 수 있는 초식 수
 const PAUSE = [1.15, 1.08, 1, .92, .85, .78, .72, .65];  // 초식 사이 쉬는 틈
+// 보스 능력치 배수(경지별). 시험 봇으로 재 보니 30초 안팎에 끝나는 중반 보스는 많이 올려도 쉬웠고, 1분 넘게 싸우는 화경 이상 보스는 조금만 올려도 못 이기게 돼서 거꾸로 둔다
+export const BOSS = [1, 1, 1.5, 1.5, 1.32, 1.12, 1.1, 1.1];
 const STUN = [1, 1, 1, .9, .8, .65, .5, .4];           // 맞고 휘청이는 시간
 const KB = [1, 1, 1, .9, .75, .6, .5, .4];             // 밀려나는 거리
 
@@ -58,6 +60,9 @@ export function apply(a, id, f, cfg, enemy) {
   if (!enemy || f.dummy) return;
   // 그 경지의 기준보다 약하면 끌어올린다(정해 둔 경지가 있는 상대만). 이야기 보스는 이미 장마다 맞춰 둔 값이라 손대지 않고 싸우는 버릇만 바꾼다
   const free = cfg.optional || G.S?.mode === 'free', named = f.realm != null || BYID[id] != null || /^clan_|^fan_/.test(id);
+  // 보스: 시험해 보니 사람에 가까운 실력으로도 거의 다 체력 절반 넘게 남기고 이겨서, 경지만큼 더 세게 한다(처음 몇 판은 배우는 판이라 그대로)
+  // 짐승 보스(물길의 괴물 등)는 막기·연계가 없어 능력치만 올리면 너무 오래 맞으므로 덜 올린다
+  if (f.boss && (G.S?.lv || 1) >= 6) { const k = f.mon ? Math.min(1.15, at(r, BOSS)) : at(r, BOSS); a.atk *= k; a.maxHp = a.hp = Math.round(a.hp * k); if (a.maxPoise) a.maxPoise = a.poise = Math.round(a.maxPoise * Math.min(k, 1.3)); }
   if (free && named && r >= 3) {
     const L = LV[r] + 3, std = (6 + L * 1.4) * (f.boss ? 1 : .95);
     if (a.atk < std) { const k = std / a.atk; a.atk = std; a.maxHp = a.hp = Math.round(a.hp * k); if (a.maxPoise) a.maxPoise = a.poise = Math.round(a.maxPoise * Math.min(k, 1.5)); }
