@@ -4,7 +4,7 @@ import { G, fadeTo } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { FOES } from './foes.js';
-import { set, at } from './story1.js';
+import { set, at, after } from './story1.js';
 import { toGuhwa } from './story2.js';
 
 const F = () => G.S.flags;
@@ -143,5 +143,41 @@ Story.providers.push(function part3a(id) {
     const [who, spr, hint, fn] = TALK[k];
     n.push({ id: 'r3_' + who, spr, x: 21, y: 15, dir: 0, hint, mark: () => true, talk: fn });
   }
+  return { npcs: n, spots: [], trigs: [], roam: [] };
+});
+
+// ── 구화성 금봉 객잔: 이름 모르는 덩치와 합석 (5부 패천도 사마웅) ──
+// 적에게 얼굴을 먼저 준다. 여기서는 이름을 끝까지 안 밝히고, 5부 담판에서 알아보게 한다(part4b samaungEcho)
+WHO.sm_guest = { name: '덩치 큰 손님', face: 'Samaung' };
+async function smDrink() {
+  await narr('금봉 객잔은 대회 손님으로 자리가 하나도 없었다. 구석 탁자에 덩치 큰 사내 하나가 혼자 술을 마시고 있었는데, 그 탁자만 비어 있었다. 아무도 거기 앉지 않았다.');
+  await say('sm_guest', '서 있지 말고 앉아. 자리는 넓다. 사람들이 안 앉아서 그렇지.');
+  await narr('사내 옆에 큰 칼이 기대 있었다. 칼집이 내 키만 했다.');
+  await say('sm_guest', '대회 나가냐? 그 칼 차고 다니는 꼴 보니 나가는구먼. 어느 문파냐.');
+  await say('me', '창운문이요. 원래는 청하진 객잔 점소이였고요.');
+  await say('sm_guest', '하하! 점소이. 좋다. 그럼 하나 묻자. 점소이가 칼을 들면 정파냐, 사파냐?');
+  await say('me', '…칼 든 점소이요.');
+  await say('sm_guest', '그 대답이 제일 위험한 거다. 이 강호는 둘 중 하나를 고르라고 한다. 안 고르면 남이 골라 준다. 대개 나쁜 쪽으로.', 'h');
+  await say('sm_guest', '이 대회도 그래. 출신을 묻지. 사파 놈은 이름을 못 올린다. 나도 젊을 때 올리러 왔다가 문 앞에서 쫓겨났다.');
+  const c = await choice('사내가 빈 잔을 내 앞에 놓고 술병을 든다.', ['따라 주는 술을 받는다', '병을 받아 내가 따른다']);
+  if (c === 0) {
+    await narr('사내가 잔을 채웠다. 내가 마시는 걸 끝까지 보고 나서야 자기 잔을 들었다.');
+    await say('sm_guest', '남이 따른 술을 의심 없이 마시는구먼. 좋은 버릇은 아니다. 나는 남이 따른 술은 안 마신다. 그러다 형제를 잃었거든.', 's');
+    F().sm_drink = 'took';
+  } else {
+    await say('me', '얻어먹는 쪽이 따르는 게 객잔 법이에요.');
+    await narr('사내가 잠깐 나를 보더니, 내가 따른 잔을 단숨에 비웠다.');
+    await say('sm_guest', '남이 따른 술은 이십 년 만이다. 점소이 손이라 그런가, 안 무섭네.', 'h');
+    F().sm_drink = 'poured';
+  }
+  await say('sm_guest', '술값은 내가 냈다. 대회에서 이겨라. 이기면 출신을 덜 묻는다.');
+  await narr('사내는 칼을 어깨에 메고 나갔다. 문 앞에 있던 손님들이 저절로 길을 비켰다.');
+  await say('host', '…저 손님이랑 무슨 얘기를 하셨소? 아니, 말하지 마시오. 모르는 게 약이오.', 'b');
+  ctx.note('구화성 금봉 객잔에서 덩치 큰 사내와 합석했다. 이름은 말하지 않았다. "점소이가 칼을 들면 정파냐, 사파냐?"');
+}
+G.r3.smDrink = smDrink;
+Story.providers.push(function part3aInn(id) {
+  const n = [];
+  if (id === 'inn2' && after('c3b') && !after('c3e') && !F().sm_drink) n.push({ id: 'sm_guest', spr: 'Villager', x: 13, y: 5.4, dir: 0, hint: '구석 탁자', mark: () => true, talk: smDrink });
   return { npcs: n, spots: [], trigs: [], roam: [] };
 });

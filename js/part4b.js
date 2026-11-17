@@ -185,6 +185,12 @@ async function guyang() {
 
 // 패천도 담판에서 이 장의 선택이 돌아온다(js/part4.js samaungTalk)
 export async function samaungEcho() {
+  // 3부 구화성 금봉 객잔에서 이름 모른 채 합석했던 사내(js/part3a.js smDrink)
+  if (F().sm_drink) {
+    await say('me', '……금봉 객잔.', 'b');
+    await say('samaung', F().sm_drink === 'poured' ? '그래, 나한테 술 따라 준 점소이. 이십 년 만에 남이 따른 술을 마시게 한 놈이 너였지.' : '그래, 내가 따른 술을 의심 없이 받아 마시던 점소이.');
+    await say('samaung', '그때 물었지. 칼 든 점소이는 정파냐 사파냐. 이제 답을 들고 왔냐?');
+  }
   if (F().jg_ogang === 'spared') { await say('ogang', '형님, 이놈이오. 무창에서 나를 살려 보낸 놈.'); await say('samaung', '오강이 빚을 졌다고? 물귀신이 빚 얘기하는 건 처음 듣는다.'); }
   if (F().jg_guyang === 'saved') await say('guyang', '팽가 놈들 횃불을 이놈이 막았소. 솥 하나 안 엎어졌소.');
   if (F().jg_guyang === 'burned') await say('guyang', '…이놈이 지나간 뒤에 산채가 탔소, 형님. 칼 맞대기 전에 그것부터 아쇼.', 'a');

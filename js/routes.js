@@ -128,6 +128,7 @@ async function toSa() {
 }
 async function samaungMeet() {
   await say('samaung', '네놈이 {호} {나}구나. 얘기는 들었다.');
+  await G.ch5.samaungEcho();
   await say('me', '맹주를 치신다고 들었습니다.');
   await say('samaung', '이십 년 전부터 벼르고 있었지. 그놈이 화해하자고 내 형제 열둘을 객잔에 불러 놓고 독주를 먹였어. 그 자리에서 다 죽었다.');
   await say('me', '처음 듣는 얘기네요.');
