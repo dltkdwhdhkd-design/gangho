@@ -6,6 +6,7 @@ import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
 import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take, SLOTS, slotInfo, autoInfo, saveSlot, loadSlot, delSlot, exportSlot, readSaveFile, importToSlot } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
+import * as MER from './meridian.js';
 import { ARMORS, SLOTS as WEAR_SLOTS, gname, fxText, wearOf, wearPut, accWorn, accPut, pairOf, pairsWith, setsOf, SETS } from './gear.js';
 import { Story } from './story.js';
 import { CLANS, SAPA, clansWon } from './clandata.js';
@@ -58,12 +59,12 @@ export function closeMenu() { G.keyWait = false; G.menuOpen = false; $('#modal')
 function menuKey(e) { if (G.keyWait) return; if (e.repeat || (Keys.is('opt', e.code) && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || Keys.is('opt', e.code)) { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['fate', '인연의 실'], ['note', '수첩'], ['save', '저장'], ['set', '설정']].filter(([k]) => k !== 'fate' || S.mode !== 'free');
+  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['mer', '경맥'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['fate', '인연의 실'], ['note', '수첩'], ['save', '저장'], ['set', '설정']].filter(([k]) => k !== 'fate' || S.mode !== 'free');
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (${Keys.label('opt')})</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab, fate: G.fate.tab })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, mer: tabMeridian, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab, fate: G.fate.tab })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
@@ -138,6 +139,18 @@ function tabBag(B) {
 let treeTab = 'sword';
 export const nodeOpen = (n, tr) => !n.req.length || n.req.some(r => (G.S.tree[r] || 0) > 0);
 export function learnNode(n) { const S = G.S, r = S.tree[n.id] || 0; if (r >= n.max || (S.tp || 0) < 1 || !nodeOpen(n)) return false; S.tree[n.id] = r + 1; S.tp--; return true; }
+// 경맥 판(js/meridian.js): 맥마다 혈 셋(임·독맥은 넷). 뚫린 혈은 붉게, 뚫을 수 있는 혈은 금빛 테
+function tabMeridian(B) {
+  const S = G.S, fx = q => fxText(q), vo = MER.vesselsOpen(S), done = MER.VESSELS.every(v => MER.full(S, v));
+  const row = m => { const n = MER.opened(S, m), lock = MER.VESSELS.includes(m) && !vo;
+    return `<div class="note" style="margin-bottom:6px;padding:6px 10px;${lock ? 'opacity:.5' : ''}"><b style="font-weight:400;font-size:17px">${m.name}</b> <small class="hint">${m.what}${lock ? ' · 여덟 맥 가운데 넷을 다 뚫으면 열린다' : ''}</small>${MER.full(S, m) ? `<span class="tag ult">다 열림 · ${fx(m.done)}</span>` : ''}
+      <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${m.pts.map((p, i) => { const got = i < n, nx = i === n && !lock, ok = nx && MER.canOpen(S, m);
+        return `<button class="btn sm${got ? ' pri' : ''}" ${nx ? `data-mer="${m.id}"` : 'disabled'} style="${got ? 'background:#a8301f;color:#fff3dc;opacity:1' : ok ? 'outline:2px solid #d8a83a' : 'opacity:.75'}" title="${fx(p.fx)}">${got ? '●' : '○'} ${p.name}<small style="display:block;font-size:11px">${fx(p.fx)}${got ? '' : ` · 깨달음 ${MER.cost(m, i)}`}</small></button>`; }).join('')}</div></div>`; };
+  B.innerHTML = `<p class="hint">깨달음 <b style="color:var(--red);font-weight:400">${S.ins || 0}</b> · 경지가 세 번 오를 때마다, 처음 꺾은 강적마다, 고수를 비무로 처음 이길 때마다 얻는다. 혈을 뚫으면 되돌릴 수 없다.${done ? ` · <b style="font-weight:400;color:#b8741c">${MER.TATONG.name}: ${fx(MER.TATONG.fx)}</b>` : ''}</p>
+    <div class="two"><div><h2>십이경 가운데 여덟 맥</h2>${MER.MERIDIANS.slice(0, 4).map(row).join('')}</div><div><h2>&nbsp;</h2>${MER.MERIDIANS.slice(4).map(row).join('')}</div></div>
+    <h2 style="margin-top:6px">기경팔맥 · 임독양맥</h2><div class="two"><div>${row(MER.VESSELS[0])}</div><div>${row(MER.VESSELS[1])}</div></div>`;
+  $$('[data-mer]', B).forEach(b => b.onclick = () => { const m = [...MER.MERIDIANS, ...MER.VESSELS].find(q => q.id === b.dataset.mer); if (MER.open(S, m)) drawMenu(); else Sound.sfx('cancel'); });
+}
 function tabTree(B) {
   const S = G.S, t = TREES.find(x => x.id === treeTab), X = c => 40 + c * 240, Y = r => 8 + r * 88;
   let lines = '', nodes = '';

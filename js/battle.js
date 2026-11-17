@@ -11,6 +11,7 @@ import { openMenu } from './ui.js';
 import * as BF from './battlefx.js';
 import * as RL from './realm.js';
 import { dropFor, ARMORS, GRADES } from './gear.js';
+import { bossDown } from './meridian.js';
 import { stageOf } from './hd2d/stages.js';
 
 // 전투 화면은 아래 기술 칸 띠(BAND) 위에만 그린다. 기술 칸이 싸움을 가리지 않게
@@ -709,6 +710,7 @@ export function fight(cfg) {
         si = Math.round(si * (1 + (G.party?.fx().silver || 0) / 100)); up = gainExp(ex); G.S.silver += si;
         for (const a of B.actors) if (a.team === 1 && a.dead) for (const [id, ch, lo, hi] of a.def_.drops || []) if (Math.random() < ch) { const n = rint(lo, hi); give(id, n); drops.push(`${DB[id].name} ${n}`); }
         // 보스는 옷을 떨군다(경지가 높을수록 높은 등급, 이름 있는 상대만, 판마다 하나). 이야기 보스는 꼭, 비무는 셋에 하나
+        for (const a of B.actors) if (a.team === 1 && a.boss && a.dead && !a.def_.dummy && !String(a.id).startsWith('fan_')) bossDown(a.id);  // 처음 꺾은 보스마다 깨달음 1(경맥)
         { const boss = B.actors.find(a => a.team === 1 && a.boss && (a.dead || a.yielded) && !a.dummy); if (boss && (cfg.bgm === 'boss' || Math.random() < .33)) { const id = dropFor(boss.realm || 2, G.S.armors || []); if (id) { (G.S.armors ||= []).push(id); const g = GRADES[ARMORS[id].grade]; drops.push(`<span style="color:${g.color}">${ARMORS[id].name}(${g.name})</span>`); } } }
       }
       const meal = G.S.meal; if (meal && --meal.left <= 0) G.S.meal = null;

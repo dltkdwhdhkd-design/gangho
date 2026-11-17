@@ -3,13 +3,14 @@ import { G, Sound, toast } from './core.js';
 import { WEAPONS, HEARTS, SKILLS, expNeed, rankOf } from './data.js';
 import { DB, ACCS, TREES } from './items.js';
 import { GRADES, ARMORS, weaponGrade, wearOf, accWorn, pairOf, setsOf } from './gear.js';
+import * as MER from './meridian.js';
 const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
 export function newState(name, look, gender, diff) {
   return {
     v: 3, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
     weapon: 'mop', weapons: ['mop'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
-    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
+    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
   };
 }
 // 무공 트리, 장신구, 요리, 배우자, 집에서 오는 효과를 합친다
@@ -22,6 +23,7 @@ export function bonus(S = G.S) {
   { const pr = pairOf(S); if (pr) add(pr[2]); }  // 짝 효과
   for (const id of Object.values(wearOf(S))) if (id && ARMORS[id]) add(ARMORS[id].fx);  // 옷 네 칸(js/gear.js)
   for (const q of setsOf(S)) add(q.fx);  // 한 벌 효과
+  add(MER.fxOf(S));  // 경맥(js/meridian.js)
   add(GRADES[weaponGrade(S.weapon)].fx);  // 무기 등급 덤
   if (HEARTS[S.heart]?.fx) add(HEARTS[S.heart].fx);
   if (G.party) add(G.party.fx());
@@ -48,7 +50,7 @@ export function stats(S = G.S) {
 export const masteryLv = id => { const n = (G.S.mastery[id] || 0); return n >= 60 ? 5 : n >= 32 ? 4 : n >= 15 ? 3 : n >= 5 ? 2 : 1; };
 export function gainExp(n) {
   const S = G.S; S.exp += n; let up = 0;
-  while (S.exp >= expNeed(S.lv)) { S.exp -= expNeed(S.lv); S.lv++; S.pts += 3; S.tp = (S.tp || 0) + 1; up++; }
+  while (S.exp >= expNeed(S.lv)) { S.exp -= expNeed(S.lv); S.lv++; S.pts += 3; S.tp = (S.tp || 0) + 1; up++; if (S.lv % 3 === 0) S.ins = (S.ins || 0) + 1; }  // 경지 세 번마다 깨달음 1(경맥)
   return up;
 }
 export function learn(id) {
@@ -116,7 +118,7 @@ function migrate(S) {
   }
   return S;
 }
-function fill(S) { if (!S.rep) S.rep = { jeong: 0, sa: 0, ma: 0 }; if (S.rep.ma === undefined) S.rep.ma = 0; if (S.side === undefined) S.side = null; if (!S.title) S.title = '떠돌이 낭인'; if (!S.titles) S.titles = ['ronin', 'dog']; if (S.sworn === undefined) S.sworn = null; if (!S.bonds) S.bonds = {}; if (S.flags.cleared && !S.flags.ended) { S.flags.chief_down = true; S.flags.cleared = false; } if (!S.seen) { const f = S.flags, q = { cheongha: 1, [S.map]: 1 }; if (f.burned) q.valley = 1; if (f.bamboo_open) q.bamboo = 1; if (f.pass_open) q.pass = 1; if (f.fort_open) q.fort = 1; if (f.cloud_open) q.cloudmt = 1; if (f.boat_guhwa) Object.assign(q, { guhwa: 1, ninehall: 1, fiveclans: 1, shaolin: 1, hwasan: 1 }); S.seen = q; } return S; }
+function fill(S) { MER.fillIns(S); if (!S.rep) S.rep = { jeong: 0, sa: 0, ma: 0 }; if (S.rep.ma === undefined) S.rep.ma = 0; if (S.side === undefined) S.side = null; if (!S.title) S.title = '떠돌이 낭인'; if (!S.titles) S.titles = ['ronin', 'dog']; if (S.sworn === undefined) S.sworn = null; if (!S.bonds) S.bonds = {}; if (S.flags.cleared && !S.flags.ended) { S.flags.chief_down = true; S.flags.cleared = false; } if (!S.seen) { const f = S.flags, q = { cheongha: 1, [S.map]: 1 }; if (f.burned) q.valley = 1; if (f.bamboo_open) q.bamboo = 1; if (f.pass_open) q.pass = 1; if (f.fort_open) q.fort = 1; if (f.cloud_open) q.cloudmt = 1; if (f.boat_guhwa) Object.assign(q, { guhwa: 1, ninehall: 1, fiveclans: 1, shaolin: 1, hwasan: 1 }); S.seen = q; } return S; }
 export const have = id => (G.S.inv[id] || 0);
 export function give(id, n = 1) { G.S.inv[id] = have(id) + n; }
 export function take(id, n = 1) { G.S.inv[id] = have(id) - n; if (G.S.inv[id] <= 0) delete G.S.inv[id]; }

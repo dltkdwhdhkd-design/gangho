@@ -1,8 +1,11 @@
 // 팬 게임 인물(『화산귀환』): 사용자가 ChatGPT로 그린 걷는 도트(assets/hd2d/preview/n_<키>.webp)를 쓰는 사람들
 // 저마다 소속 문파·세가 터(b_<문파>)나 고을에 서 있다. 말을 걸면 한두 마디 하고, 자유 모드에서는 비무를 청할 수 있다
 // 대사는 원작 문장을 옮기지 않고 새로 썼다. 대화 그림(assets/art/<키>_n)이 들어오면 그 그림으로 말한다
-import { fanRealm, LV as RLV } from './realm.js';
+import { fanRealm, LV as RLV, NAME as RNAME, playerRealm } from './realm.js';
+import { gain } from './meridian.js';
 import { G, TS, ART, pick, josa } from './core.js';
+import { SKILLS } from './data.js';
+import { learn } from './state.js';
 import { Story, ctx, say, choice, narr } from './ctx.js';
 import { WHO } from './dialog.js';
 import { FOES } from './foes.js';
@@ -138,11 +141,21 @@ function spots(id, n) {
 }
 const last = {};
 const line = (k, L) => { if (!L?.length) return null; let t = pick(L); if (L.length > 1 && t === last[k]) t = L[(L.indexOf(t) + 1) % L.length]; last[k] = t; return t; };
+// 고수를 비무로 이기면: 처음 이길 때 깨달음(나보다 경지가 높으면 2), 그 사람 문파 초식 하나를 전수받는다(경지가 높을수록 높은 초식: 일류 1단, 절정 2단, 초절정 이상 3단).
+// 나보다 경지가 낮은 상대에게서는 전수받지 않는다. 같은 사람에게서는 한 번만
+export const teachOf = (fac, rl) => { const ids = G.arts?.ID?.[fac] || []; const tier = rl >= 4 ? 3 : rl >= 3 ? 2 : 1; return ids.filter(id => (SKILLS[id]?.tier || 1) <= tier && !G.S.skills.includes(id)).sort((a, b) => (SKILLS[b].tier || 1) - (SKILLS[a].tier || 1))[0] || null; };
+async function teach(k, fac, rl, name) {
+  const S = G.S, f = S.flags; if (f['fanwin_' + k]) return; f['fanwin_' + k] = 1;
+  const me = playerRealm(); gain(rl > me ? 2 : 1, `${name}에게 이겼다`);
+  if (rl < me) return; const id = teachOf(fac, rl); if (!id) return;
+  await say('fan_' + k, `한 수 가르쳐 드리지요. ${SKILLS[id].name}. 잘 쓰시오.`); learn(id);
+}
 async function talk(k) {
   const [, name, , fac, title] = BY[k], who = 'fan_' + k, T = TALK[k] || {};
   await say(who, line(k, [...BY[k][6], ...(T.l || [])]));
   if (!fac || !G.jh?.disciple || !G.free?.fac) return;
-  const c = await choice(`${name} · ${title}`, ['비무를 청한다', '그냥 간다']); if (c) return;
+  const rl0 = fanRealm(k, title), tid = !G.S.flags['fanwin_' + k] && rl0 >= playerRealm() ? teachOf(fac, rl0) : null;  // 이기면 무엇을 얻는지 미리 보인다
+  const c = await choice(`${name} · ${title} · ${RNAME[rl0]}${tid ? ` · 이기면 ${SKILLS[tid].name} 전수` : G.S.flags['fanwin_' + k] ? ' · 이긴 적 있음' : ''}`, ['비무를 청한다', '그냥 간다']); if (c) return;
   if (T.no) return say(who, pick(T.no));
   // 경지대로 센 상대가 나온다(js/realm.js). 청명·가주급은 화경이라 낮은 경지에서 덤비면 크게 진다
   const f = G.free.fac(fac); if (!f) return; const rl = fanRealm(k, title), base = G.jh.disciple(f, Math.max(G.S.lv + 1, RLV[rl] + 3), true), id = 'fan_' + k;
@@ -150,6 +163,7 @@ async function talk(k) {
   await say(who, pick(T.ok || ['비무라. 사양하지 않겠습니다.', '한 수 부탁드립니다.']));
   const won = await ctx.duel({ foes: [id], arena: G.field.m.arena, bgm: 'fight', title: `${josa(name, '와/과')} 비무`, optional: true, noIntro: true, noLoot: true });
   await say(who, won ? pick(T.d || ['…졌습니다. 다시 겨뤄 주십시오.']) : pick(T.w || ['수련을 더 하고 오십시오.']));
+  if (won) await teach(k, fac, rl, name);
 }
 Story.providers.push(function fanchars(id) {
   const here = P.filter(r => r[2] === id); if (!here.length) return { npcs: [], spots: [], trigs: [], roam: [] };
