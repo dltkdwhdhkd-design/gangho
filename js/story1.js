@@ -225,9 +225,18 @@ async function lionFight() {
   await say('lion', '근데 놈들이 내민 서찰에 창운문 인장이 찍혀 있더라. 그 잘난 정파 나리들이 말이야.');
   await say('lion', '이것도 가져가라. 놈들이 흘리고 간 쇳조각인데 꼭 달처럼 생겼더라고.');
   await say(null, '달 모양 쇠붙이를 얻었다. 객잔 우물 뚜껑의 구멍과 크기가 비슷하다.');
-  const c = await choice('맹호가 칼을 내려놓고 눈치를 본다.', ['나중에 신세를 갚으라고 한다', '산적질을 그만두라고 한다']);
-  if (c === 0) { await say('lion', '하하, 좋다. 녹림 놈들은 빚지고는 못 산다. 언제든 찾아와라.'); F().lion_debt = true; ctx.rep('sa', 2); }
-  else { await say('lion', '말이야 쉽지. 이 산에 농사지을 땅이 어디 있다고.'); ctx.rep('jeong', 1); }
+  await say('lion', '어이, 앉아라. 진 놈이 술 한 잔 따르는 게 녹림 법이다. 안 마시면 죽이는 게 법이고.', 'h');
+  await narr('맹호가 깨진 사발 두 개에 탁주를 따랐다. 산채 사람들이 멀찍이서 우리를 구경했다. 다들 칼보다 괭이가 어울리는 얼굴이었다.');
+  await say('me', '산적치고는 다들 농사꾼 같네.');
+  await say('lion', '농사꾼 맞다. 삼 년 전에 흉년이 들었는데 관에서 세곡은 그대로 걷어 가더라. 마을 사내 서른 명 데리고 이 산에 올라왔지. 그때는 한 철만 버티고 내려갈 줄 알았다.');
+  await say('lion', '근데 산에 한 번 올라오면 못 내려가. 내려가면 도적놈이니까. 너는 왜 칼을 차고 다니냐? 점소이가.');
+  await say('me', '나도 처음엔 한 철만 버티면 되는 줄 알았어. 열 살 때 군막에서.', 's');
+  await say('lion', '…견대냐.', 'b');
+  await say('me', '알아?');
+  await say('lion', '우리 마을 애들도 몇 끌려갔다. 하나도 안 돌아왔고. 마셔라.', 's');
+  const c = await choice('맹호가 칼을 내려놓고 사발을 비운다. 산채 사람들이 숨을 죽이고 본다.', ['나중에 신세를 갚으라고 한다', '산적질을 그만두라고 한다']);
+  if (c === 0) { await say('me', '목숨값은 나중에 받을게. 빚으로 달아 둬.'); await say('lion', '하하, 좋다. 녹림 놈들은 빚지고는 못 산다. 언제든 찾아와라. 서른 명이 다 네 빚쟁이다.'); F().lion_debt = true; ctx.rep('sa', 2); }
+  else { await say('me', '다음에 길에서 만나면 그땐 안 봐줘. 다른 길 찾아.'); await say('lion', '말이야 쉽지. 이 산에 농사지을 땅이 어디 있다고.'); await say('lion', '…그래도 그 말은 기억해 두마. 네 말 듣고 내려간 놈이 있으면 네 탓이다.', 's'); ctx.rep('jeong', 1); }
   ctx.silver(120);
   ctx.note('광사자 맹호: 흑의인은 무면회. 서찰에 창운문 인장이 찍혀 있었다.');
   set('c1g'); ctx.goal('객잔 우물 뚜껑을 달 모양 쇠붙이로 열어 보기');
@@ -264,9 +273,23 @@ async function yunGo() {
   await say('me', '네?', 'b');
   await say('yun', '창운문 문주님이 오래 앓고 계시대요. 아버지한테 진맥을 부탁해 왔는데 아버지는 먼 길을 못 가시니까 제가 가기로 했어요. 따라가는 거 아니에요.', 'b');
   await say('doc', '데려가거라. 저 애 고집은 나도 못 꺾는다.');
+  await farewell();
   F().yun_join = true; set('c2a'); ctx.goal('동쪽 산길에서 남쪽으로 꺾어 창운산으로 가기');
 }
 
+// 떠나는 날: 마을 사람이 한 명씩 배웅한다. 뒤에 돌아올 얼굴들을 여기서 찍어 둔다
+async function farewell() {
+  await fadeTo(1); G.field.load('cheongha', 38, 13.5, 3); await fadeTo(0);
+  await narr('떠나는 날 아침, 동쪽 어귀에 사람들이 하나둘 나와 있었다. 부른 사람은 없었다.');
+  await say('boat', '말린 생선이여. 산에서는 이게 제일이여. 짜니까 물 많이 마시고.');
+  await say('smith', '칼날은 사흘에 한 번 기름 먹여라. 곽씨 칼은 내가 계속 갈아 둘 테니, 찾으러 와.');
+  await say('town2', '주먹밥 다섯 개. 하나는 윤씨 딸 거고 나머진 네 거다. 많이 먹어라. 곽씨가 맨날 너 말랐다고 했어.');
+  await say('kid', '아저씨, 돌아올 때 진짜 칼 갖고 와요! 쟁반 말고!');
+  if (F().l_yang) await say('yang', '계란 또 삶아 놨어. 북쪽 가는 거 아니지? …그럼 됐어. 몸 성히 다녀와.', 's');
+  if (F().l_deed) await narr('사람들 뒤쪽, 객잔 터 앞에 비단옷 하나가 서 있다가 눈이 마주치자 돌아섰다.');
+  await say('me', '…이런 거 처음이라 뭐라고 해야 할지 모르겠네.', 's');
+  await say('yun', '고맙다고 하면 돼요. 가요, 해 떨어지기 전에 산 넘어야 해요.', 'h');
+}
 const talkTown = {
   boat: async () => {
     if (F().burned && !F().rod && step() !== 'c1a') { F().rod = true; await say('boat', '객잔이 타 버렸으니 먹고살 일이 막막하겄네. 이 낚싯대 가져가. 나루 끝에서 던지면 뭐라도 물 거여.'); Sound.sfx('bonus'); await say(null, '낚싯대를 받았다. 물가에서 E 키로 낚시한다.'); return; }

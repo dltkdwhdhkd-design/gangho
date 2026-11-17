@@ -6,6 +6,7 @@ import { FOES } from './foes.js';
 import { step, set, at, evening, lastMorning, firstMeal } from './story1.js';
 
 const F = () => G.S.flags;
+Object.assign(WHO, { yang: { name: '양씨 할머니', face: 'OldWoman' }, deed: { name: '비단옷 손님', face: 'Noble' } });
 FOES.baek_train = { name: '백 노인', spr: 'chars/OldMan3', hp: 99999, atk: 3, def: 40, spd: 40, exp: 0, silver: 0, pause: .9, moves: ['dart3', 'quick'], boss: 1, poise: 99999, keep: 70, title: '장작 던지는' };
 
 async function errands() {
@@ -79,8 +80,82 @@ async function training() {
   await say('baek', '술집에 있었다. 술이나 가져와라.');
   F().trained = true; ctx.goal('곽 아주머니에게 가기');
 }
+// ── 객잔의 점심: 손님 셋 ──
+async function lunchStart() {
+  await say('gwak', '장작에 맞고 왔냐? 얼굴은 멀쩡하네. 됐다, 점심 손님 받아.');
+  await say('me', '오늘은 몇 분이에요?');
+  await say('gwak', '노씨, 양씨 할머니, 그리고 아침부터 와서 앉아 있는 비단옷. 비단옷은 국수 말고 딴 걸 찾을 거다. 상대하지 마.', 'a');
+  await say('me', '딴 거요?');
+  await say('gwak', '가 보면 알아. 노씨는 면 많이, 할머니는 국물 많이.');
+  F().lunch = true; ctx.goal('점심 손님 셋 받기 (객잔 안의 ! 표시)');
+}
+async function guestNo() {
+  await say('boat', '어, 왔냐. 면 많이. 아침부터 노 젓느라 팔이 떨어지겄어.');
+  await say('me', '오늘은 손님이 많았어요?');
+  await say('boat', '손님은 무슨. 관청 배가 또 지나갔어. 세곡 싣고. 그 배 지나가면 우리 같은 거룻배는 한나절 강가에 붙어 있어야 혀.');
+  await say('boat', '근데 너 아침마다 마당에서 이상하게 걷더라. 춤추는 것도 아니고.');
+  await say('me', '백 어르신이 걸레질을 그렇게 하래서요. 왼발로 밀고 오른발은 따라오게.');
+  await say('boat', '그 영감 말을 듣는 사람이 있었구먼. 술값 떼먹는 거 말고는 하는 일이 없는 줄 알았더니.', 'h');
+  await say('boat', '그래도 그 걸음, 물 위에서 보면 배 젓는 거랑 닮았어. 힘을 한 번에 안 쓰고 흘려보내는 거.');
+  F().l_no = true; await lunchCheck();
+}
+async function guestYang() {
+  await say('yang', '아이고, 새로 온 총각이구먼. 국물 많이. 이 늙은이는 면은 몇 가닥이면 돼.');
+  await say('me', '면도 넉넉히 드릴게요. 아주머니가 그러래요.');
+  await say('yang', '곽씨가? 그 사람 입으로는 그런 말 안 해. 손으로만 하지.', 'h');
+  await narr('그릇을 내려놓다가 젖은 바닥에 발이 미끄러졌다. 할머니가 먼저 내 팔을 잡았다.');
+  await say('yang', '바닥이 번들번들하네. 걸레질을 너무 열심히 했구먼.');
+  await say('me', '열심히 하면 혼나고 대충 하면 또 혼나요.', 'a');
+  await say('yang', '총각 몇 살이여?');
+  await say('me', '스물이요.');
+  await say('yang', '우리 손주가 살았으면 딱 그 나이여. 북쪽에 끌려갔지. 애들만 모아서 뭘 시킨다고.', 's');
+  await say('me', '…….', 's');
+  await say('yang', '늙은이가 별소리를 다 하네. 이거 먹어. 아침에 삶았어. 계란은 국숫값이 아니여, 그냥 주는 거여.');
+  await say('me', '…잘 먹을게요.', 's');
+  F().l_yang = true; ctx.note('양씨 할머니: 손주가 북쪽으로 끌려갔다. 애들만 모아서 뭘 시킨다고. (견대였을까)'); await lunchCheck();
+}
+async function guestDeed() {
+  await say('deed', '점소이, 국수는 됐고. 주인 어디 있나?');
+  await say('me', '부엌에요. 국수 안 드시면 자리값은 내셔야 하는데요.');
+  await say('deed', '하하, 자리값이라. 이 객잔 땅값을 치르러 왔네. 여기 땅문서도 있고 은자도 있어. 백 냥. 이런 촌 나루에 객잔 하나에 백 냥이면 후하지.');
+  await say('me', '아주머니가 판대요?');
+  await say('deed', '그러니까 자네가 좀 거들어 주게. 자네도 여기 묶여 있는 처지라며. 성사되면 열 냥 주지.');
+  await say('deed', '아, 그리고 하나만. 뒷마당 우물 말이야. 물은 잘 나오나?');
+  await say('me', '그 우물은 뚜껑이 쇠라 안 열려요. 물은 저 앞 공동 우물에서 길어요.');
+  await say('deed', '그래? 쇠 뚜껑이라…', 'b');
+  const c = await choice('비단옷 손님이 은자 한 냥을 탁자에 올려놓는다.', ['은자는 놔두고 나가시라고 한다', '아주머니에게 알린다']);
+  if (c === 0) { await say('me', '자리값으로 받을게요. 땅은 안 판대요. 나가세요.'); await say('deed', '허, 점소이가 장사를 할 줄 아는구먼. 또 오지.'); ctx.silver(1); }
+  else { await say('gwak', '또 왔어? 안 판다고 했지. 국자로 나가고 싶어, 발로 나가고 싶어?', 'a'); await say('deed', '…또 오겠소.'); }
+  F().l_deed = true; ctx.note('비단옷 손님이 객잔 땅을 사겠다며 백 냥을 내밀었다. 뒷마당 쇠 뚜껑 우물을 물었다.'); await lunchCheck();
+}
+async function lunchCheck() { if (F().l_no && F().l_yang && F().l_deed) ctx.goal('곽 아주머니에게 가기'); }
+async function herbErrand() {
+  await say('gwak', '비단옷은 갔냐. 됐다. 그런 놈은 또 와.', 'a');
+  await say('me', '우물을 묻던데요.');
+  await say('gwak', '…….', 'b');
+  await say('gwak', '약방 가서 내 어깨 약 받아 와. 윤씨가 달여 놨을 거다. 오는 길에 딴 데 새지 말고.');
+  F().herb = true; ctx.goal('윤씨 약방에서 곽 아주머니 어깨 약 받아 오기');
+}
+async function yunHerb() {
+  await say('yun', '또 왔네요. 어깨 약이죠? 아직 안 됐어요. 기다리는 동안 이거나 썰어요.', 'h');
+  await say('me', '제가요?');
+  await say('yun', '공짜로 기다리게요? 결대로, 얇게. 칼 쥐듯이 쥐지 말고요.');
+  await narr('약초 써는 칼은 가볍고 손잡이가 짧았다. 몇 번 썰다 보니 손이 저절로 빨라졌다.');
+  await say('yun', '…빠르네요. 근데 왜 칼끝을 자꾸 문 쪽으로 돌려요?');
+  await say('me', '버릇이에요. 칼 들고 있을 때 등 뒤에 문이 있으면 불안해서.', 's');
+  await say('yun', '여기 약방이에요. 들어오는 건 기침하는 할아버지들뿐이에요.', 'h');
+  await say('yun', '자요, 약. 하루 두 번 바르시라고 해요. 그리고 아주머니한테 비단옷 사람 조심하시라고 전해 줘요. 어제는 우리 약방 앞에서 객잔 쪽을 한참 보고 있었어요.');
+  await say('me', '전할게요.');
+  F().herb_done = true; ctx.goal('객잔으로 돌아가 곽 아주머니에게 약 드리기');
+}
 async function noodleNight() {
-  await say('gwak', '장작에 맞고 다니냐? 이리 와. 면 뽑는 거나 배워.');
+  await say('gwak', '약은 거기 둬. 윤씨 딸이 비단옷 얘기도 하디?');
+  await say('me', '조심하시래요.');
+  await say('gwak', '애들이 걱정이 많아. 손님 다 갔다. 바닥 닦고 이리 와.');
+  await narr('불 꺼진 객잔 바닥을 마지막으로 닦았다. 허리를 펴고 왼발로 밀고, 오른발은 따라오게. 바닥 끝에서 끝까지 한 번도 멈추지 않았다.');
+  await narr('다 닦고 나서야 알았다. 걸레를 든 손은 하나도 힘을 안 썼는데 몸은 방 끝까지 와 있었다.');
+  await say('me', '…이거 보법이잖아.', 'b');
+  await say('gwak', '거기서 뭐 해. 면 뽑는 거나 배워.');
   await say('me', '제가요?', 'b');
   await say('gwak', '내가 언제까지 끓일 줄 알아? 물이 끓으면 면을 넣고, 넘치려고 할 때 찬물을 한 번 끼얹어. 국물은 나중에 가르쳐 줄게.');
   await say('me', '국물은 왜 나중이에요?');
@@ -100,14 +175,18 @@ async function dayTalkImpl(who) {
     if (at('p3') && !F().errand) { await errands(); return true; }
     if (at('p3') && F().e_yun && F().e_smith && F().e_boat) { await backHome(); return true; }
     if (at('p3')) { await say('gwak', '아직도 안 갔어? 약방, 대장간, 나루!', 'a'); return true; }
-    if (at('p4') && F().trained) { await noodleNight(); return true; }
+    if (at('p4') && F().trained && !F().lunch) { await lunchStart(); return true; }
+    if (at('p4') && F().lunch && !(F().l_no && F().l_yang && F().l_deed)) { await say('gwak', '손님 기다린다. 얼른!', 'a'); return true; }
+    if (at('p4') && !F().herb) { await herbErrand(); return true; }
+    if (at('p4') && !F().herb_done) { await say('gwak', '약방 다녀오라니까!', 'a'); return true; }
+    if (at('p4') && F().herb_done) { await noodleNight(); return true; }
     return false;
   }
   if (who === 'baek' && at('p4') && !F().trained) { await training(); return true; }
   return false;
 }
 G.life.dayTalk = dayTalkImpl;
-G.life.dayMark = who => who === 'gwak' ? (at('p3') && (!F().errand || (F().e_yun && F().e_smith && F().e_boat))) || (at('p4') && !!F().trained) : at('p4') && !F().trained;
+G.life.dayMark = who => who === 'gwak' ? (at('p3') && (!F().errand || (F().e_yun && F().e_smith && F().e_boat))) || (at('p4') && !!F().trained && (!F().lunch || (F().l_no && F().l_yang && F().l_deed && !F().herb) || !!F().herb_done)) : at('p4') && !F().trained;
 
 Story.providers.push(function content7(id) {
   const n = [], tr = [];
@@ -128,6 +207,14 @@ Story.providers.push(function content7(id) {
       n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, life: 'work', barks: () => G.S.flags.plague ? ['콜록…', '물 좀…'] : ['오늘 물때가 좋네.', '그물 손봐야지.', '곽씨네 국수 냄새 좋다.'], talk: async () => { await say('town', '곽씨한테 오늘은 안 혼났나?'); } });
       n.push({ id: 'town2', spr: 'Villager4', x: 12, y: 16.8, dir: 3, life: 'work', barks: ['빨래가 산더미네.', '애들 또 어디 갔어.', '날 좋다.'], talk: async () => { await say('town2', '곽씨가 낯선 사람을 한 달이나 붙들어 두다니, 별일이야. 십칠 년을 혼자 살던 사람이.'); await say('town2', '처음 이 마을에 왔을 땐 온몸이 피투성이였지. 산적을 만났다고 하더라만.'); } });
     }
+  }
+  if (at('p4') && F().lunch) {
+    if (id === 'inn') {
+      n.push({ id: 'boat', spr: 'OldMan', x: 7.4, y: 7.5, dir: 3, mark: () => !F().l_no, talk: async () => { if (!F().l_no) await guestNo(); else await say('boat', '면 맛있다. 국물은 곽씨가 아직 안 가르쳐 줬지?'); } });
+      n.push({ id: 'yang', spr: 'OldWoman', x: 10.6, y: 7.5, dir: 1, mark: () => !F().l_yang, talk: async () => { if (!F().l_yang) await guestYang(); else await say('yang', '계란은 다 먹었어? 껍질은 밭에 뿌려.'); } });
+      n.push({ id: 'deed', spr: 'Villager', x: 10.8, y: 11.2, dir: 1, when: () => !F().l_deed, mark: () => !F().l_deed, talk: guestDeed });
+    }
+    if (id === 'clinic') n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => !!F().herb && !F().herb_done, talk: async () => { if (F().herb && !F().herb_done) await yunHerb(); else await say('yun', '약 가져갔잖아요. 또 뭐요?'); } });
   }
   return { npcs: n, spots: [], trigs: tr, roam: [] };
 });
