@@ -207,6 +207,13 @@ async function samaungTalk() {
   ctx.cg('flags');
   await narr('사마웅은 기록을 받아 들고 오래 들여다보았다. 산채 위로 검은 깃발 열두 개가 펄럭이는 소리만 들렸다.');
   await say('samaung', '이십 년 동안 그 독이 어디서 왔는지 말해 준 놈이 없었다.');
+  if (F().jg_od_token) {
+    await narr('남화가 준 푸른 패를 꺼내 기록 옆에 놓았다.');
+    await say('me', '오독문이 증언합니다. 그 독은 오독문 독이 아니었다고. 남화가 직접 그렇게 말했습니다.');
+    await say('samaung', '……남화가. 그 계집애 사부가 정천맹 옥으로 끌려갈 때 나는 구경만 했다. 오독문 독이라고 믿었으니까.', 's');
+    await say('samaung', '이십 년을 엉뚱한 놈들을 미워했구나. 그 빚도 갚아야겠다.');
+    F().sm_odok = true;
+  }
   await say('samaung', '전쟁은 못 멈춘다. 애들이 벌써 강을 건넜어. 내가 물러나라고 하면 내 목부터 날아간다.');
   await say('samaung', '대신 그믐날 월하곡 물길은 비워 주마. 연경추 목은 네가 따라. 네가 못 따면 내가 딴다.');
   ctx.cgOff(); F().jg_samaung = true; ctx.rep('sa', 2); ctx.note('패천도에게 일배혈 기록을 보였다. 전쟁은 못 멈추지만 그믐날 월하곡 물길은 비워 주겠다고 했다.');
@@ -386,7 +393,7 @@ Story.providers.push(function part4(id) {
     if (go) n.push(job({ id: 'job_store', spr: 'Knight', x: 41, y: 18, hint: '창고 뒷담 넘기', talk: granary }));
     if (at('sa3') && F().sa_rice2) n.push(job({ id: 'job_nam', spr: 'Namgung', x: 24.5, y: 26, hint: '남궁진과 맞서기', talk: saNamgung }));
   }
-  if (id === 'fort' && at('jg3') && G.ch5.done()) n.push(job({ id: 'samaung', spr: 'Samaung', x: 18, y: 20, hint: '패천도 만나기', talk: samaungTalk }));  // 흑도맹 거두 셋을 먼저 막는다(js/part4b.js)
+  if (id === 'fort' && at('jg3') && G.ch5.done() && F().jg_od) n.push(job({ id: 'samaung', spr: 'Samaung', x: 18, y: 20, hint: '패천도 만나기', talk: samaungTalk }));  // 흑도맹 거두 셋을 먼저 막는다(js/part4b.js)
   if (id === 'cheongha' && at('fr2')) n.push(job({ id: 'elder', spr: 'Monk', x: 23.5, y: 18.4, dir: 2, talk: frElder }));
   return { npcs: n, spots: [], trigs: [], roam: [] };
 });

@@ -26,7 +26,7 @@ Object.assign(FOES, {
 const done = () => !!(F().jg_wc && F().jg_mk && F().jg_gy);
 const left = () => [!F().jg_wc && '무창 나루(장강수로채)', !F().jg_mk && '구화성 구파 회관 밤 경비(혈의방)', !F().jg_gy && '동쪽 산길(녹림)'].filter(Boolean);
 function nextGoal() {
-  if (done()) { ctx.goal('흑도맹 거두 셋을 막았다. 동쪽 산길 너머 흑풍채에서 패천도 사마웅 만나기'); return; }
+  if (done()) { ctx.goal(F().jg_od ? '흑풍채에서 패천도 사마웅 만나기' : '흑도맹 거두 셋을 막았다. 구화성 금봉 객잔으로 돌아가기 (당소연이 찾는다)'); return; }
   ctx.goal(`흑도맹 남하 막기: ${left().join(', ')}. 순서는 자유. 셋을 막으면 흑풍채의 패천도에게 간다`);
 }
 // 회의가 끝나면 부른다(js/part4.js council)
