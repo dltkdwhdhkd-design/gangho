@@ -343,6 +343,11 @@ async function ending() {
   await say('gwak', '얼굴이 그게 뭐야. 밥은 먹고 다녔어?', 'a');
   await narr('뭐라고 대답하려는데 목이 막혔다. 곽 아주머니가 주먹으로 내 머리를 한 번 쥐어박았다.');
   await G.p6.soupBack();
+  await say('me', '아주머니, 낱장은 일곱 장인데…… 소림 스님은 앞에 한 장이 더 있었을 거라고 했어요.');
+  await say('gwak', '……서문은 찢지 않았다. 그것만 알아 둬.', 's');
+  await say('me', '그게 무슨…');
+  await say('gwak', '나중에. 지금은 이 애부터 들자.');
+  ctx.note('곽 아주머니: “서문은 찢지 않았다.” 그 이상은 말하지 않았다.');
   if (F().tr_kitchen) { await say('me', '부엌 터 봤어요.'); await say('gwak', '거길 봤어? 그 솥으로 삼백 명 밥을 했다. 네 아버지가 국이 싱겁다고 하도 타박해서 국자로 한 대 때린 적도 있어.', 'h'); }
   await say('gwak', '이 애 좀 같이 들어라. 혼자는 못 들겠다.');
   await narr('월천은 생각보다 가벼웠다.');
