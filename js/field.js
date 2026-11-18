@@ -367,7 +367,8 @@ export class Field {
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720);
     c.setTransform(1.4, 0, 0, 1.4, 0, 0); this.ambient(c, 1280 / 1.4, 720 / 1.4); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); if (G.fxOverlay) G.fxOverlay(c);  // 꽃잎은 사람 머리보다 작게
     c.setTransform(1, 0, 0, 1, 0, 0); const P = (x, y, h = 0) => H.proj(x, y, h), k = Math.min(5, H.pxPerUnit());
-    if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, 25 * H.actK(m) - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
+    // 느낌표: 일감 소품(독 따위)은 사람보다 낮아서 느낌표도 낮게
+    if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, (n.stamp ? 14 : 25 * H.actK(m)) - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
     if (m.labels) { c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const [x, y] = P(l.x * TS, l.y * TS); if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); } }
     this.drawExits(c, P);
