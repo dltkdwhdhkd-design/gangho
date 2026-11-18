@@ -111,9 +111,9 @@ function bolt(x1, y1, x2, y2, c0, c1, life, delay = 0) {
 // 휘두를 때: 칼 궤적과 그 둘레 조각
 export function swing(B, st, a, h, sk) {
   const [c0, c1, c2] = C(st), an = Math.atan2(a.ay, a.ax), x = a.x, y = a.y - 6, ult = sk?.ult;
-  if (h.shape === 'line') P(B, { k: 'thrust', x, y, ang: an, life: .2, s: Math.min(h.len || 40, 140), w: Math.min(h.w || 10, 40) * .45, col: c0, col2: c1, add: 1 });
+  if (h.shape === 'line') P(B, { k: 'thrust', x, y, ang: an, life: .26, s: Math.min(h.len || 40, 140), w: Math.min(h.w || 10, 40) * .45, col: c0, col2: c1, add: 1 });
   else if (h.shape === 'circle') P(B, { k: 'ring', x, y: a.y, life: .3, s: 6, s2: (h.r || 30) * .95, col: c0, w: 3, add: 1, flat: 1 });
-  else P(B, { k: 'slash', x, y, ang: an, r: Math.min(h.r || 30, 90) * .8, sweep: Math.min((h.a || 80) * Math.PI / 180, 2.6), life: .2, w: ult ? 7 : 4, col: c0, col2: c1, add: 1, flip: (a.swingN = (a.swingN || 0) + 1) % 2 });
+  else P(B, { k: 'slash', x, y, ang: an, r: Math.min(h.r || 30, 90) * .8, sweep: Math.min((h.a || 80) * Math.PI / 180, 2.6), life: .28, w: ult ? 7 : 4, col: c0, col2: c1, add: 1, flip: (a.swingN = (a.swingN || 0) + 1) % 2 });
   const R = h.shape === 'line' ? (h.len || 40) : (h.r || 30), n = ult ? 22 : 8;
   for (let i = 0; i < n; i++) {
     const d = rnd(.3, 1) * R * (h.shape === 'circle' ? 1 : .9), q = h.shape === 'circle' ? rnd(6.28) : an + rnd(-1, 1) * (h.shape === 'line' ? .12 : Math.min((h.a || 80) * Math.PI / 180, 1.3)), px = x + Math.cos(q) * d, py = y + Math.sin(q) * d * (h.shape === 'circle' ? .8 : 1);
@@ -146,6 +146,7 @@ function bit(B, st, x, y, nx, ny, c0, c1, c2, i) {
 export function impact(B, st, o, nx, ny, big) {
   const [c0, c1, c2] = C(st), x = o.x, y = o.y - 7, n = big ? 12 : 5;
   P(B, { k: 'burst', x, y, life: .14, s: big ? 11 : 7, col: c1, add: 1 });
+  P(B, { k: 'hitstar', x, y, life: big ? .18 : .13, s: big ? 12 : 7, col: c1, ang: Math.atan2(ny, nx), add: 1 });  // 맞는 순간 번쩍(빛살 여덟 갈래)
   for (let i = 0; i < n; i++) { const q = Math.atan2(ny, nx) + rnd(-1.2, 1.2); bit(B, st, x, y, Math.cos(q), Math.sin(q), c0, c1, c2, i); }
   if (st === 'plum') bloom(B, x + rnd(-3, 3), y + rnd(-3, 2), .08, big, true);  // 늦게 핀다
   if (st === 'lightning') P(B, bolt(x + rnd(-4, 4), y - 30, x, y, c0, c1, .14));
@@ -218,6 +219,13 @@ export function draw(c, B, under, ox, oy, projs = [], raw, M) {
   c.save(); c.imageSmoothingEnabled = false; if (M) c.setTransform(4, 0, 0, 4, 0, 0);
   const X = M ? 0 : -ox, Y = M ? 0 : -oy; c.drawImage(LN.canvas, X, Y); c.globalCompositeOperation = 'lighter'; c.drawImage(LA.canvas, X, Y); c.restore();
 }
+// 초승달 하나: 반지름 r, 시작각 a0에서 span만큼, 가운데 두께 w(양 끝으로 갈수록 가늘어짐)
+function crescent(c, r, a0, span, w, col, al) {
+  if (Math.abs(span) < .02 || w <= 0) return; const N = 18, A = c.globalAlpha; c.globalAlpha = A * al; c.fillStyle = col; c.beginPath();
+  for (let i = 0; i <= N; i++) { const t = i / N, a = a0 + span * t, th = w * Math.pow(Math.sin(Math.PI * t), .7) / 2; c.lineTo(Math.cos(a) * (r + th), Math.sin(a) * (r + th)); }
+  for (let i = N; i >= 0; i--) { const t = i / N, a = a0 + span * t, th = w * Math.pow(Math.sin(Math.PI * t), .7) / 2 * .55; c.lineTo(Math.cos(a) * (r - th), Math.sin(a) * (r - th)); }
+  c.closePath(); c.fill(); c.globalAlpha = A;
+}
 function shape(c, p, u) {
   const x = p.x, y = p.y;
   switch (p.k) {
@@ -271,12 +279,31 @@ function shape(c, p, u) {
       for (let i = 0; i < 7; i++) { let q = i / 7 * 6.28 + R(), px = 0, py = 0; c.beginPath(); c.moveTo(0, 0); for (let j = 1; j <= 3; j++) { q += (R() - .5) * .8; px += Math.cos(q) * r / 3; py += Math.sin(q) * r / 3; c.lineTo(px, py); } c.stroke(); } break; }
     case 'orbit': { const px = x + Math.cos(p.ang) * p.r, py = y + Math.sin(p.ang) * p.r * .5; c.fillStyle = p.col; c.fillRect(px - p.s / 2, py - p.s / 2, p.s, p.s); break; }
     case 'crescentP': { const r = p.s; c.fillStyle = p.col; c.beginPath(); c.arc(x, y, r, 0, 6.29); c.fill(); c.globalCompositeOperation = 'destination-out'; c.beginPath(); c.arc(x + r * .45, y - r * .2, r * .85, 0, 6.29); c.fill(); break; }
-    case 'slash': { // 초승달 꼴 칼빛: 휘두르는 쪽으로 쓸려 나간다
-      const sw = p.sweep, a0 = p.ang - sw / 2, a1 = p.ang + sw / 2, prog = Math.min(1, u * 2.2), [s, e] = p.flip ? [a1, a1 - sw * prog] : [a0, a0 + sw * prog], r = p.r;
-      c.translate(x, y); c.lineCap = 'round';
-      c.strokeStyle = p.col; c.lineWidth = p.w * (1 - u * .5); c.beginPath(); c.arc(0, 0, r, Math.min(s, e), Math.max(s, e)); c.stroke();
-      c.strokeStyle = p.col2; c.lineWidth = p.w * .35; c.beginPath(); c.arc(0, 0, r + p.w * .15, Math.min(s, e), Math.max(s, e)); c.stroke(); break; }
-    case 'thrust': { c.translate(x, y); c.rotate(p.ang); const l = p.s * Math.min(1, u * 3), w = p.w * (1 - u); c.fillStyle = p.col; c.beginPath(); c.moveTo(0, -w / 2); c.lineTo(l, 0); c.lineTo(0, w / 2); c.closePath(); c.fill(); c.fillStyle = p.col2; c.fillRect(0, -.5, l * .9, 1); break; }
+    case 'slash': { // 초승달 검기: 가운데가 두껍고 양 끝이 칼날처럼 가늘다. 바깥 빛 → 제 색 → 흰 날 세 겹, 뒤로 잔상 두 겹
+      if (SHEET.sw_arc && !p.big) { sheetAt(c, 'sw_arc', Math.floor(u * 8), x, y, p.r * 2.2 / SHEET.sw_arc.w, p.ang, !!p.flip); break; }
+      const sw = p.sweep, prog = Math.min(1, u * 2.6), r = p.r, W = p.w * 1.6 * (1 - u * .55), dir = p.flip ? -1 : 1;
+      const a0 = p.ang - dir * sw / 2, span = dir * sw * prog;  // 그어진 만큼만
+      c.translate(x, y);
+      // 잔상: 조금 뒤에서 따라오는 옅은 호
+      for (const [lag, al, k] of [[.22, .35, .55], [.12, .55, .75]]) if (prog > lag) { crescent(c, r * (1 - lag * .25), a0, span * (1 - lag), W * k, p.col, al); }
+      crescent(c, r, a0, span, W * 1.5, p.col, .5);      // 바깥 빛
+      crescent(c, r, a0, span, W, p.col2 || p.col, 1);    // 제 색
+      crescent(c, r + W * .12, a0, span, W * .38, '#ffffff', 1);  // 흰 날
+      // 칼끝 번쩍: 다 그어지는 순간 호 끝에 작은 십자
+      if (u > .3 && u < .55) { const ea = a0 + span, ex = Math.cos(ea) * r, ey = Math.sin(ea) * r, k = (1 - Math.abs(u - .42) / .13) * W * 1.4; c.fillStyle = '#ffffff'; c.fillRect(ex - k, ey - .6, k * 2, 1.2); c.fillRect(ex - .6, ey - k, 1.2, k * 2); }
+      break; }
+    case 'hitstar': {  // 날카로운 빛살: 긴 넷(맞은 방향으로 더 길게) + 짧은 넷
+      if (SHEET.sw_hit) { sheetAt(c, 'sw_hit', Math.floor(u * 6), x, y, p.s * 2 / SHEET.sw_hit.w); break; }
+      c.translate(x, y); c.rotate(p.ang); const L = p.s * (u < .35 ? u / .35 : 1) , th = Math.max(.6, 2.2 * (1 - u));
+      for (let i = 0; i < 8; i++) { const long = i % 2 === 0, l = L * (long ? (i === 0 ? 1.25 : 1) : .45); c.rotate(Math.PI / 4); c.fillStyle = i % 2 ? p.col : '#ffffff'; c.beginPath(); c.moveTo(0, -th / 2); c.lineTo(l, 0); c.lineTo(0, th / 2); c.closePath(); c.fill(); }
+      break; }
+    case 'thrust': {  // 찌르기 검기: 창끝처럼 뾰족한 빛줄기, 흰 심지, 끝에서 고리 충격파
+      if (SHEET.sw_thrust) { sheetAt(c, 'sw_thrust', Math.floor(u * 6), x + Math.cos(p.ang) * p.s / 2, y + Math.sin(p.ang) * p.s / 2, p.s / SHEET.sw_thrust.w, p.ang); break; }
+      c.translate(x, y); c.rotate(p.ang); const l = p.s * Math.min(1, u * 4), w = Math.max(2, p.w * 1.3) * (1 - u * .7);
+      const A = c.globalAlpha, blade = (ww, col, al, l0 = 0) => { c.globalAlpha = A * al; c.fillStyle = col; c.beginPath(); c.moveTo(l0, -ww / 2); c.lineTo(l * .78, -ww * .32); c.lineTo(l, 0); c.lineTo(l * .78, ww * .32); c.lineTo(l0, ww / 2); c.closePath(); c.fill(); };
+      blade(w * 1.8, p.col, .45); blade(w, p.col2 || p.col, 1); blade(w * .32, '#ffffff', 1, l * .1); c.globalAlpha = A;
+      if (u > .2 && u < .7) { const q = (u - .2) / .5; c.strokeStyle = '#ffffff'; c.lineWidth = Math.max(.6, 2 * (1 - q)); c.beginPath(); c.ellipse(l, 0, 2 + q * 6, 3 + q * 9, 0, 0, 6.29); c.stroke(); }
+      break; }
   }
 }
 
