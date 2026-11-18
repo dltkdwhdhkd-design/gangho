@@ -77,6 +77,7 @@ async function granary() {
 // ── 정파 길 ──
 import { crossFire } from './part45.js';
 import { warOpens, samaungEcho } from './part4b.js';
+import { haomunNight } from './part4c.js';
 async function jeong4() {
   F().night = false;
   await ctx.part(4, '쫓기는 몸', '움막');
@@ -85,10 +86,11 @@ async function jeong4() {
   await say('me', '증거가 있어야겠네요.');
   await say('yun', '칠일소혼산부터 따져 봐요. 그 독은 아무나 못 구해요. 사천당가에 물어보면 위문상이 어디서 구했는지 나올 거예요.');
   await say('cheol', '소승은 구화성 거지들한테 들은 얘기가 있소. 맹주 창고로 들어가는 쌀이 맹에 있는 사람 수보다 훨씬 많다 하더이다. 술값 대신 들은 얘기요.');
+  if (F().r3_kaifeng) await say('me', '개봉 홍두 장로도 똑같은 말을 했어요. 그 쌀을 누가 먹는지 아무도 모른다고.');
   await say('so', '그리고 토벌 명령서. 장서각 쪽지에 맹주 수결이 있었잖아. 원본은 작전을 짠 제갈세가에 있을 거야.');
   await say('me', '제 얼굴이 나루마다 붙어 있는데 구화성에 어떻게 들어가요?');
   await say('cheol', '그래서 소승이 삿갓을 구해 왔소. 값은 시주 앞으로 달아 놨소.');
-  set('jg1'); ctx.goal('증거 셋 모으기: 구화성 맹주 창고, 세가 거리의 사천당가와 제갈세가. 순서는 자유 (구화성은 청하진 나루에서 배로)');
+  set('jg1'); ctx.goal('증거 셋 모으기: 구화성 맹주 창고, 세가 거리의 사천당가와 제갈세가. 순서는 자유 (구화성은 청하진 나루에서 배로). 청풍골 피난민 움막도 들러 보기');
   ctx.note('증거를 모으기로 했다. 맹주 창고의 쌀, 당가의 처방 기록, 제갈세가의 명령서.');
 }
 async function dangRecord() {
@@ -120,13 +122,15 @@ async function jegalOrder() {
   await say('clan_jegal', '계산해 봤습니다. 드리면 제갈세가는 맹주의 적이 되고, 안 드리면 저는 스승을 저버린 제자가 됩니다.');
   await say('me', '스승이요?');
   await say('clan_jegal', '그 명령서는 스승께서 쓰셨습니다. 불이 난 사흘 뒤에요. 맹주가 시켜서 쓰시면서 날짜만은 고치지 않으셨습니다. 언젠가 누가 그 날짜를 읽어 주기를 바라신 겁니다.');
-  await say('clan_jegal', '십칠 년 동안 아무도 읽지 않았지요. 가져가십시오.');
+  if (F().fs_order) await say('clan_jegal', '십칠 년 동안 아무도 읽지 않았지요. 아니, 한 분 있었군요. 무창 나루에서 비 맞은 사본을 읽어 주신 윤 의원. 그때 제 손이 떨렸던 걸 보셨을 겁니다. 가져가십시오.');
+  else await say('clan_jegal', '십칠 년 동안 아무도 읽지 않았지요. 가져가십시오.');
   await say('me', '가문에서 가만있을까요?');
   await say('clan_jegal', '서문으로 나가시면 순찰이 넷, 동문으로 나가시면 둘입니다. 동문을 권합니다. 가문 일은 제 계산에 넣어 두었습니다.');
   await ctx.duel({ foes: ['jeong_guard', 'jeong_guard'], arena: 'ring', bgm: 'fight', title: '세가 거리 동문' });
   F().jg_date = true; ctx.note('제갈현이 토벌 명령서 원본을 내주었다. 명령서는 불이 난 사흘 뒤에 쓰였다.');
 }
 async function camp5() {
+  if (!F().jg_hao) await haomunNight();
   await say('so', '셋 다 모았네. 너 얼굴이 많이 상했다.', 's');
   await say('yun', '팔 줘 봐요.');
   await say('me', '이걸 누구한테 들고 가죠?');
@@ -372,7 +376,7 @@ const job = o => ({ dir: 0, mark: () => true, ...o });
 Story.providers.push(function part4(id) {
   const n = [];
   if (id === 'valley' && at('jg1', 'jg2', 'jg3')) {
-    const ready = () => at('jg1') && !!F().jg_rice && !!F().jg_dang && !!F().jg_date;
+    const ready = () => at('jg1') && !!F().jg_rice && !!F().jg_dang && !!F().jg_date && !!F().jg_refuge;
     n.push({ id: 'so', spr: 'RedSamurai', x: 27, y: 13, dir: 2, mark: ready, talk: async () => { if (ready()) await camp5(); else await say('so', '칼은 닦았어?'); } });
     n.push({ id: 'yun', spr: 'Princess', x: 29, y: 14, dir: 2, talk: async () => { await say('yun', '금창약은 넉넉해요?'); } });
     n.push({ id: 'cheol', spr: 'Monk2', x: 28, y: 16, dir: 2, talk: async () => { await say('cheol', '나무아미… 시주, 오늘 저녁은 뭐요?'); } });

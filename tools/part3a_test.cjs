@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
         if (!await run(n.talk())) return { err: 'talk', map: G.field.m.id, seen };
       }
       const N = G.S.notes.join('|');
-      return { step: G.S.flags.step, seen, map: G.field.m.id, rice: N.includes('사람 수보다'), order: N.includes('이월 초사흘'), poison: N.includes('칠일소혼산') };
+      return { step: G.S.flags.step, seen, map: G.field.m.id, rice: N.includes('사람 수보다'), order: N.includes('삼월 열이레'), poison: N.includes('칠일소혼산') };
     }, order));
   }
   // 구화성 금봉 객잔 합석 → 5부 패천도가 알아보는지

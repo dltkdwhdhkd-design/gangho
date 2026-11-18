@@ -16,7 +16,10 @@ import { ROLE } from './talkdata.js';
 const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = .857 / Math.sin(PITCH) /* 원근 때문에 주인공 발밑에서 세로 걸음이 가로보다 1.17배 빨라 보이던 것을 맞춘다(평면도 1점이 화면에서 가로와 세로 같은 길이) */, HS = 1 / Math.cos(PITCH);
 const CHAR = 15, AHEAD = .04;
 // 사람 크기: 집·소품에 비해 사람이 작아 보여서(일검풍운결은 사람이 계단 한 칸의 두세 배) 새 화면의 사람을 1.3배로 세우고, 카메라는 1.12배 뒤로 뺀다. 방은 js/field.js PSC
-export const ACTK = 1.3, CAMK = 1.12;  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
+// 크기 기준(일검풍운결 비교, 2026-11-18): 사람 키 ≈ 문 높이의 0.9, 큰 독 ≈ 사람의 0.65, 등롱 기둥 ≈ 사람의 1.5, 사람은 화면 높이의 약 1/7
+export const ACTK = 1.05, CAMK = .63, PROPK = .62;
+// 방 안과 전투는 따로 맞춰 둔 크기를 그대로 둔다(방: 사람 PSC 배, 카메라 CAMR / 전투: 사람 ACTB 배, 카메라 CAMB)
+const CAMR = 1.12, ACTB = 1.3, CAMB = 1.12;  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
 const W = 1280, H = 720;
 let T = null;  // three.js
 
@@ -154,8 +157,8 @@ function previewTex(name) {
   const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') }); if (/^([gre]|hd)_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
 }
 // 소품: 도트 그대로 올려 '또렷한 겹선형'으로 읽는다(배경도 인물과 같은 도트 결. 매끈해지는 것은 흐림과 빛뿐)
-// 옛 그림(16점 칸, 도트 2배) 소품은 새 그림보다 크고 쨍하다. 새 나무 그림(HT1)이 오기 전까지 새 화면에서만 줄이고 색을 맞춘다(막힘과 2D는 그대로)
-const OLDSC = { tree_round: .8, tree_big: .8, tree_pine: .82, plum: .76, plum_g: .76, plum_o: .76, grove_green: .86, pot: .66, jar: .66, box: .74, stump: .85, boulder: .85,
+// 옛 그림(16점 칸, 도트 2배) 소품은 새 그림보다 크고 쨍하다. 새 나무 그림(HT1)이 오기 전까지 새 화면에서만 줄이고 색을 맞춘다(막힘과 2D는 그대로)  // 2026-11-18 독·항아리·상자를 사람 키의 6할쯤으로 더 줄임(일검풍운결 비교)
+const OLDSC = { tree_round: .8, tree_big: .8, tree_pine: .82, plum: .76, plum_g: .76, plum_o: .76, grove_green: .86, pot: .42, jar: .42, box: .5, stump: .85, boulder: .85,
   flower1: .58, flower2: .58, flower3: .58, flower4: .58, fern1: .7, fern2: .7, bush1: .72, bush2: .72, bush3: .72, bush4: .72 };
 // 옛 그림 → 새 그림(새 화면에서만, 그림이 받아져 있을 때만). 크기는 새 그림의 평면도 폭과 키
 const SWAP = { tree_round: 't_camphor', tree_big: 't_camphor', tree_pine: 't_pine', tree_dead: 't_dead', plum: 't_plum', plum_w: 't_plum', plum_g: 't_willow', plum_o: 't_maple', grove_green: 't_shrubs', bamboo: 't_bamboo',
@@ -484,7 +487,7 @@ function setMap(m) {
   list.forEach(({ s, z }, k) => {
     if (s.alt && useModels) return;
     const nm = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name;  // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch)
-    const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const sc = s.sc || 1, pv = !!previewTex(nm), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
+    const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const pk = art() && !s.flat && /^[vp]_/.test(s.name) ? PROPK : 1, sc = (s.sc || 1) * pk, cx = s.x + st[3] * (s.sc || 1) / 2, pv = !!previewTex(nm), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
     const mk_ = !s.flat && art() && modelKey(s), gm = mk_ && needModel(mk_);
     if (gm) { const g = new T.Group(), o = gm.clone(true); o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; } }); g.add(o);
@@ -503,7 +506,7 @@ function setMap(m) {
       const M = matOf(t), o = new T.Mesh(GEO.get(gk2), M.m); o.customDepthMaterial = M.d; o.position.set(s.x + w / 2, hAt(m, s.x + w / 2, z - 1), z * ZS + k * .003);
       o.castShadow = true; o.receiveShadow = true; o.userData = { s, w: w2, h: h2, M, t, owner: o, shared: true }; propG.add(o); return; }
     if (!GEO.has(gk)) GEO.set(gk, standGeo(w, h));
-    const M = matOf(t), o = new T.Mesh(GEO.get(gk), M.m); o.customDepthMaterial = M.d; o.position.set(s.x + w / 2, hAt(m, s.x + w / 2, z - 1), z * ZS + k * .003);
+    const M = matOf(t), o = new T.Mesh(GEO.get(gk), M.m); o.customDepthMaterial = M.d; o.position.set(cx, hAt(m, cx, z - 1), z * ZS + k * .003);  // 줄인 소품도 원래 자리 가운데에 선다
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
@@ -538,7 +541,7 @@ function actor(t, sx, sy, sw, sh, flip, x, y, size, lift = 0, wx = 1) {
   return o;
 }
 // 예전 2.5등신 인물(16점 칸): 새 인물 그림이 오기 전까지 키는 주인공과 같게(칸 16점 중 사람 15점), 폭만 조금 줄여 덜 튀게
-const OLDK = CHAR / 15;
+const OLDK = CHAR / 15 * .87;  // 다시 그린 옛 도트(Knight 따위)가 새 사람 시트(n_*)와 주인공보다 한 뼘 커서 키를 맞춘다(마을에서 재 보니 83 대 72)
 let blobT = null; const blobs = []; let usedB = 0;
 function blob(x, y, s) {
   if (!blobT) { const im = IMG['chars/_Shadow']; if (!im) return; blobT = new T.Texture(im); blobT.colorSpace = T.SRGBColorSpace; blobT.needsUpdate = true; }
@@ -547,13 +550,17 @@ function blob(x, y, s) {
   usedB++; o.visible = true; o.scale.set(12 * s, 7 * s * ZS, 1); o.position.set(x, .15 + hAt(curMap, x, y), (y + .5) * ZS);
 }
 // drawActorSprite와 같은 칸을 고른다
+// 다시 그린(두 배) 도트가 없는 옛 사람 도트는 새 화면에서 머리 큰 덩어리로 보인다. 다시 그린 것이 있는 비슷한 사람으로 바꿔 그린다(옛 화면은 그대로)
+const HDALIAS = { 'chars/Noble': 'chars/Inspector', 'chars/Jegal': 'chars/Inspector', 'chars/Samaung': 'chars/Lion', 'chars/Master': 'chars/OldMan', 'chars/OldMan2': 'chars/OldMan', 'chars/OldMan3': 'chars/OldMan', 'chars/Gaebang': 'chars/Villager3', 'chars/Paeng': 'chars/Knight', 'chars/Pimp': 'chars/Villager2', 'chars/Cavegirl2': 'chars/Cavegirl', 'chars/Gisaeng': 'chars/Woman', 'chars/Gisaeng2': 'chars/Woman', 'chars/Gisaeng3': 'chars/Woman', 'chars/EggBoy': 'chars/Villager', 'chars/Child': 'chars/Villager', 'chars/Boy': 'chars/Villager' };
+const KIDS = new Set(['chars/Child', 'chars/Boy']);  // 아이는 옛 도트 그대로 두고 작게
 function frameOf(key, dirCol, row, diag) {
+  if (IMG[key] && !IMG[key].hd && HDALIAS[key] && IMG[HDALIAS[key]]?.hd) key = HDALIAS[key];
   const img = IMG[key]; if (!img) return null; const dg = diag !== undefined && IMG[key + '_d'];
   if (dg) { const k = 16 * (dg.hd || 1); return { t: sheetTex(key + '_d'), sx: (diag % 2) * k, sy: Math.min(row, 3) * k, s: k, flip: diag > 1 }; }
   const f = 16 * (img.hd || 1), r = Math.min(row, Math.floor(img.height / f) - 1); return { t: sheetTex(key), sx: dirCol * f, sy: r * f, s: f, flip: false };
 }
 function syncActors(F) {
-  used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, (o.size || 16) * OLDK, o.lift || 0, .84); blob(x, y, o.size ? o.size / 16 : 1); };
+  used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; const sz = o.size || (KIDS.has(key) ? 11 : 16); actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, sz * OLDK, o.lift || 0, .84); blob(x, y, sz / 16); };
   for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16); continue; }
     const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.id && PEOPLE.has('n_' + n.id) ? 'n_' + n.id : n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : ROLE[n.hint] && PEOPLE.has('n_' + ROLE[n.hint]) ? 'n_' + ROLE[n.hint] : null, yt = (pk && previewTex(pk)) || (key === 'chars/Princess' && previewTex('yun')) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
   const walker = (n, row) => { const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : null, yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
@@ -571,7 +578,7 @@ function syncActors(F) {
 const camT = new (class { constructor() { this.x = -1; this.y = 0; this.z = 0; } set(x, y, z) { this.x = x; this.y = y; this.z = z; } })();
 let dist = 300, lastT = 0, lastF = null;
 function placeCam(F, dt) {
-  const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom * CAMK; dist = vh / (2 * Math.tan(FOV / 2 * DEG));
+  const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom * (m.room ? CAMR : CAMK); dist = vh / (2 * Math.tan(FOV / 2 * DEG));
   const ty = 8 * HS, hc = ty + dist * Math.sin(PITCH), back = dist * Math.cos(PITCH), f = FOV / 2 * DEG, hw = dist * Math.tan(f) * W / H;
   // 화면 위 끝과 아래 끝이 닿는 땅이 지도 밖으로 너무 나가지 않게 겨냥점을 묶는다(2D 카메라가 지도 안에 머물던 것과 같다)
   // 남쪽은 화면 아래 끝이 지도 밖으로 나가지 않게 묶고, 북쪽은 주인공이 끝까지 가운데 오게 둔다(지도 너머는 안개와 넓은 땅. 먼 산은 5단계)
@@ -801,7 +808,7 @@ function syncBattle(B) {
     x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, o.cv.width, o.cv.height); x.imageSmoothingEnabled = false;
     x.setTransform(BK, 0, 0, BK, (w / 2 - a.x) * BK, (h - down - a.y) * BK); B.drawActor(x, a, true);
     o.tex.needsUpdate = true;
-    o.mesh.scale.set(w * ACTK, h * HS * ACTK, 1); o.mesh.position.set(a.x, -down * HS * ACTK + hAt(curMap, a.x, a.y), (a.y + 1) * ZS + .5);
+    o.mesh.scale.set(w * ACTB, h * HS * ACTB, 1); o.mesh.position.set(a.x, -down * HS * ACTB + hAt(curMap, a.x, a.y), (a.y + 1) * ZS + .5);
     { const mt = o.mesh.material; if (!mt.emissiveMap) { mt.emissive = new T.Color(0xffffff); mt.emissiveMap = o.tex; mt.needsUpdate = true; } mt.emissiveIntensity = a.isPlayer ? .22 : .08; }  // 어두운 무대에서 사람이 묻히지 않게 살짝 제 빛을 준다(주인공 테는 뺐다)
     if (!a.dead) blob(a.x, a.y, b ? 2 : s);
   }
@@ -811,7 +818,7 @@ function placeCamBattle(B, dt) {
   const m = B.stage, Wm = m.w * TS, Hm = m.h * TS; let sx = 0, sy = 0, n = 0;
   for (const a of B.actors) { if (a.dead) continue; const k = a.isPlayer ? 3 : 1; sx += a.x * k; sy += a.y * k; n += k; }
   const ax = n ? sx / n : Wm / 2, ay = n ? sy / n : Hm / 2, f = FOV / 2 * DEG;
-  let d = CHAR * HD.opt.zoom * 1.08 * CAMK / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
+  let d = CHAR * HD.opt.zoom * 1.08 * CAMB / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
   let tx = Math.min(Wm - hw + 20, Math.max(hw - 20, ax)), tyP = Math.min(Hm - 50, Math.max(50, ay - 16));  // 사람보다 조금 북쪽을 겨눠 무대 뒤 담과 건물이 화면에 들어온다
   // 주인공은 늘 화면 안에 둔다. 전에는 싸우는 사람들의 가운데만 겨눠서, 적과 떨어져 아래나 구석으로 가면 주인공이 화면 밖으로 나갔다(시작할 때 동료도 화면 아래로 잘렸다)
   // 화면 세로 자리 sy(-1 맨 위, +1 맨 아래)에 놓이는 땅이 겨눈 곳에서 평면도로 몇 점 아래인지 구해, 주인공 발이 화면 위 15%~아래 75% 사이에 오게 겨눈 곳을 당긴다. 가로는 주인공 깊이에서 보이는 폭의 8할 안

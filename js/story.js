@@ -4,6 +4,7 @@ import './story1.js';
 import './part2.js';
 import './part2b.js';
 import './part3a.js';
+import './part4c.js';
 import './story2.js';
 import './clans.js';
 import './life.js';
