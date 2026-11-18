@@ -30,6 +30,34 @@ async function maEscape() {
   await say('me', '같이 가요.');
   await say('hyeok', '네.');
 }
+// 1장 곁: 1부 비단옷 손님(객잔 땅을 사겠다며 우물을 묻던 사내)과 4부 피난민이 전한 "밤마다 우물을 판다"를 여기서 푼다
+// 그는 무면회였고, 우물 밑 위패 방에서 서문을 찾고 있었다. 서문은 곽 아주머니 장부 맨 앞에 있어서 못 찾았다(9부 2장에서 밝혀진다)
+FOES.deed_boss = { name: '비단옷 사내', spr: 'chars/Inspector', hp: 2600, atk: 44, def: 12, spd: 78, exp: 300, silver: 200, pause: .9, moves: ['quick', 'blink', 'dart3', 'flurry'], wpn: 'Ninjaku', boss: 1, guard: .6, poise: 200 };
+async function wellRaid() {
+  if (F().f7_well) return;
+  if (F().l_yang) await say('yang', '돌아왔구먼. 계란은 내일 삶아 줄게. 오늘은 곽씨 국부터 먹어.');
+  await narr('뒷마당으로 물을 길으러 나갔다가 걸음을 멈췄다. 우물 둘레에 낯선 울타리가 쳐져 있었고, 쇠 뚜껑이 지렛대에 비틀려 반쯤 열려 있었다.');
+  await say('gwak', '내가 돌아왔을 때부터 그랬다. 비단옷 입은 놈들이 석 달을 밤마다 팠다더라. 안 들어가 봤다. 들어가면 화가 나서.', 's');
+  await narr('사다리를 타고 내려갔다. 위패 방은 엉망이었다. 마흔아홉 개 위패가 다 엎어져 있었고, 바닥 돌이 들려 있었다. 그리고 등잔 하나가 켜져 있었다.');
+  await say('deed', '이런. 주인이 먼저 왔군. 아니지, 주인 아들인가.', 'h');
+  if (F().l_deed) await say('me', '객잔 땅 백 냥에 사겠다던 분이네요. 쇠 뚜껑 우물을 묻던.');
+  else await say('me', '남의 집 우물 밑에서 뭐 하세요.');
+  await say('deed', '서문을 찾고 있었네. 일곱 장 앞에 한 장이 더 있다지. 그 여편네가 여기 숨겼을 줄 알았는데, 석 달을 파도 없더군.');
+  await say('deed', '무면회는 얼굴이 없어서 무면회가 아닐세. 이렇게 비단옷을 입고 다니면 아무도 얼굴을 안 보거든.');
+  await say('me', '위패부터 세워 놓고 가요. 그럼 다리는 붙여 둘게요.', 'a');
+  await ctx.duel({ foes: ['deed_boss', 'shadow2', 'shadow2'], arena: 'room', bgm: 'boss', title: '무면회 · 비단옷 사내' });
+  await say('deed', '…허, 점소이 쟁반이 이렇게 아플 줄은. 서문은 여기 없네. 그건 알아 두게. 그럼 어디 있겠나.', 'h');
+  await narr('사내가 품에서 뭔가를 깨물었다. 입가로 검은 피가 흘렀다. 무면회는 잡히면 그렇게 한다고 했다.');
+  await narr('위패를 하나씩 다시 세웠다. 맨 앞 “월하문 문주 월청운 내외의 신위”를 세우는데, 위에서 곽 아주머니 목소리가 들렸다.');
+  await say('gwak', '다 세웠으면 올라와. 국 식는다.');
+  await say('me', '아주머니, 저 사람 서문을 찾았어요.');
+  await say('gwak', '……못 찾았지?', 'b');
+  await say('me', '네.');
+  await say('gwak', '그럼 됐다. 올라와.', 's');
+  await narr('곽 아주머니가 허리춤의 낡은 장부를 한 번 눌렀다. 버릇처럼.');
+  F().f7_well = true;
+  ctx.note('객잔 우물 밑 위패 방을 무면회 비단옷 사내가 석 달 동안 뒤졌다. 서문(일곱 장 앞의 한 장)을 찾았지만 못 찾았다. 곽 아주머니는 "못 찾았지?"만 물었다.');
+}
 export async function begin() {
   const s = side(), e = F().ending;
   F().act3 = true; F().inn_rebuilt = true; F().night = false; F().hyeok_join = s === 'ma';
@@ -51,6 +79,7 @@ export async function begin() {
   await say('gwak', '왔냐. 기둥은 새로 세웠는데 바닥은 아직이다. 걸레는 저기 있다.', 'h');
   await say('me', '오자마자요?');
   await say('gwak', '그럼 앉아서 손님 노릇 할래? 밥값은 있고?', 'h');
+  await wellRaid();
   ctx.cg('red_moon');
   await narr('그날 저녁 나루 쪽이 웅성거렸다. 나가 보니 서쪽 하늘에 붉은 달이 떠 있었다. 어제가 그믐이었는데 말이다.');
   await say('boat', '평생 강에서 살았는디 저런 달은 처음이여.');
