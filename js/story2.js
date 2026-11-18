@@ -281,7 +281,7 @@ async function trace(k) {
   if (F().tr1 && F().tr2 && F().tr3) { set('c4b'); ctx.goal('본전 터의 석상 앞으로 가기'); }
 }
 async function baekReunion() {
-  await ctx.chap(6, '달이 진 골짜기', '제2장 고백');
+  await ctx.chap(6, '달이 진 골짜기', '제3장 월하곡 · 백 노인의 고백');
   await say('baek', '왔느냐.');
   await say('me', '어르신.');
   await say('baek', '허리가 많이 펴졌구나.');
@@ -304,7 +304,7 @@ async function baekReunion() {
   set('c4c'); ctx.goal('북쪽 석상 앞에서 여우 가면과 맞서기');
 }
 async function foxBoss() {
-  await ctx.chap(6, '달이 진 골짜기', '제3장 여우 가면');
+  await ctx.chap(6, '달이 진 골짜기', '제4장 여우 가면');
   await say('fox', '제법 컸구나.');
   await say('me', '곽 아주머니를 내놔라.', 'a');
   await say('fox', '저 안에 있다. 살아 있다. 나도 그 노인네는 못 죽이겠더군.');
@@ -319,6 +319,7 @@ async function foxBoss() {
   await say('me', '그럼 당신이 그 큰아이…', 'b');
   await say('cheon', '형이라고 부르지 마라. 그 말을 들으면 칼을 못 든다.');
   { const c = await choice('그 사람이 칼끝을 내린다.', ['“…형.”', '말을 삼킨다']); if (c === 0) { F().wol_named = true; G.fate?.mark(); await say('me', '…형.', 's'); await narr('그 사람의 칼끝이 한 번 떨렸다. 대답은 없었다.'); } }
+  await G.p6.villageBack();
   await say('cheon', '하나만 알아 둬라. 북쪽 변경 마을을 태운 건 전쟁이 아니다. 너를 찾던 무면회다. 견대도 연경추가 고아를 모으려고 만든 곳이고.');
   await say('me', '제 마지막 임무도요?', 's');
   await say('cheon', '그래. 네가 살아 돌아온 것만 그자의 계산에 없었다.');
@@ -329,18 +330,19 @@ async function foxBoss() {
   await narr('연경추의 검이 월천의 등을 뚫었다. 월천은 쓰러지면서도 맹주의 손목을 놓지 않았다.');
   await say('cheon', '가라… 달이 뜨면… 베어라…');
   ctx.cgOff();
-  await ctx.chap(6, '달이 진 골짜기', '제4장 낙월의 밤');
+  await ctx.chap(6, '달이 진 골짜기', '제5장 낙월의 밤');
   set('c4d');
   await G.route.chiefBattle();
   await ending();
 }
 async function ending() {
-  await ctx.chap(6, '달이 진 골짜기', '제5장 달이 진 뒤');
+  await ctx.chap(6, '달이 진 골짜기', '맺음 달이 진 뒤');
   await narr('싸움이 끝난 자리에 곽 아주머니가 월천을 무릎에 눕히고 앉아 있었다. 소매로 얼굴의 피를 닦아 주고 있었다. 석 달 사이에 머리가 허옇게 세어 있었다.');
   await say('gwak', '왔냐.');
   await say('me', '네.');
   await say('gwak', '얼굴이 그게 뭐야. 밥은 먹고 다녔어?', 'a');
   await narr('뭐라고 대답하려는데 목이 막혔다. 곽 아주머니가 주먹으로 내 머리를 한 번 쥐어박았다.');
+  await G.p6.soupBack();
   if (F().tr_kitchen) { await say('me', '부엌 터 봤어요.'); await say('gwak', '거길 봤어? 그 솥으로 삼백 명 밥을 했다. 네 아버지가 국이 싱겁다고 하도 타박해서 국자로 한 대 때린 적도 있어.', 'h'); }
   await say('gwak', '이 애 좀 같이 들어라. 혼자는 못 들겠다.');
   await narr('월천은 생각보다 가벼웠다.');

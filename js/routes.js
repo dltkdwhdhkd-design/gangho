@@ -5,6 +5,7 @@ import { WHO } from './dialog.js';
 import { FOES } from './foes.js';
 import { set, at, after } from './story1.js';
 import { clansWon } from './clandata.js';
+import { mirrorCh, secondTalk, chiefBack } from './part6a.js';
 
 const S = () => G.S, F = () => G.S.flags, side = () => G.S.side || 'jeong';
 Object.assign(WHO, { samaung: { name: '패천도 사마웅', face: 'Samaung' }, hyeok: { name: '혁련하', face: 'Hyeok' }, hyeolma: { name: '혈마', face: 'Skeleton' }, makgo: { name: '혈수 막고', face: 'RedNinja' }, clerk: { name: '서기', face: 'Inspector' }, manhwa: { name: '만화부인', face: 'Woman' }, guyang: { name: '구양철', face: 'Caveman2' }, ogang: { name: '오강', face: 'Villager3' }, namhwa: { name: '남화', face: 'Woman' }, myeon: { name: '무면당 밀정', face: 'GrayNinja' } });
@@ -81,7 +82,9 @@ export async function crossroads() {
 }
 export async function toWolha() {
   set('c4a'); F().night = false;
-  await ctx.part(6, '달이 진 골짜기', '제1장 월하곡');
+  if (!F().w6_mirror) await mirrorCh();
+  if (!F().w6_talk) await secondTalk();
+  await ctx.chap(6, '달이 진 골짜기', '제3장 월하곡');
   await narr('가을 그믐밤, 물안개가 걷혔다. 달 없는 강을 거슬러 올라갔다. 세 살 때 떠난 곳이라 기억나는 것은 아무것도 없었다.');
   await say('boat', '여기서부터 바위가 많어. 다들 배 가운데로 앉어.');
   await say('me', '잘 아시네요. 일 년에 하룻밤만 열린다면서요.');
@@ -298,7 +301,8 @@ export async function chiefBattle() {
     allies = ['so_ally', 'cheol_ally'];
     if (won >= 5 || F().jg_council) { await say('clan_shaolin', '아미타불. 십칠 년 묵은 빚을 갚으러 왔소.'); allies.push('hyegak_ally'); }
     if (won >= 10 || F().kids_saved) { await say('clan_namgung', '맹주. 남궁세가도 할 말이 있다.'); allies.push('namgung_ally'); }
-    if (F().jg_samaung && F().lion_debt) { await say('lion', '나도 왔다! 빚 갚으러!'); allies.push('lion_ally'); }
+    if (F().jg_samaung && F().lion_debt && !F().lion_w6) { await say('lion', '나도 왔다! 빚 갚으러!'); allies.push('lion_ally'); }
+    if (F().lion_w6) { await say('lion', '배에서 내리니 여기구먼! 빚 갚는 자리!'); allies.push('lion_ally'); }
     if (won >= 15) { await narr('골짜기 위로 깃발이 하나둘 올라왔다. 소림, 무당, 화산, 종남, 아미, 곤륜, 공동, 점창, 청성, 개방, 그리고 오대세가의 깃발까지. 십칠 년 전 이곳을 둘러쌌던 깃발들이 이번에는 맹주를 향해 있었다.'); mul = .8; }
   }
   if (s === 'sa') {
@@ -327,6 +331,7 @@ export async function chiefBattle() {
     mul = .75;
   }
   { const a = await G.bond.join(s, allies); if (a) allies.push(a); }
+  await chiefBack();
   await ctx.duel({ foes: ['chief'], allies, foeHpMul: mul, arena: 'moon', bgm: 'boss', title: '정천맹주 연경추' });
   F().chief_down = true;
   await say('chief', '왜지… 나는 칠식을 다 익혔는데…');
