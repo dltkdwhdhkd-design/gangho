@@ -121,6 +121,12 @@ async function siege() {
   await G.side.siege();
   if (F().wei_spared) await say('wei', '점소이, 국수 외상 갚으러 왔다. 배는 다 뒤집어 놨으니 강으로는 못 물러난다.');
   if (F().lion_debt) await say('lion', '산에서 내려왔다. 녹림 놈들은 빚지고는 못 산다고 했잖냐.');
+  // 1~5부에서 만난 청하진 바깥 사람들 중 온 사람
+  if (F().l_yang) await say('yang', '부엌은 이 늙은이가 맡을게. 손주 놈 몫까지 국 끓여 놓을 테니, 다 끝나면 와서 먹어.');
+  if (F().jg_refuge) await say('rf_boy', '아저씨, 나도 쟁반 줘요. 칼은 안 줘도 돼요. 아저씨처럼 던질래요.');
+  if (F().r3_kaifeng) await say('clan_gaebang', '개방 거지들이 강가에 쫙 깔렸네. 저쪽 배가 몇 척인지, 언제 오는지 반 시진마다 알려 주지.');
+  if (F().r3_nanjing) await say('ng_young', '남궁은 대숲 쪽 문에 섰소. 이번엔 숙부님 혼담이 아니라 내 이름을 걸었소.');
+  if (F().r3_hangzhou) await say('clan_moyong', '저쪽 무공은 내가 되받아 주겠소. 내 말로 하자면, 걱정 마시오.');
   if (F().kids_saved) await narr('나무패를 벗은 아이들 서른한 명이 쟁반을 하나씩 들고 줄을 섰다. 말리는 사람이 없었다. 꼬마가 맨 앞에서 던지는 법을 가르치고 있었다.');
   const post = await deploy();
   await say('gwak', '다들 밥은 먹었어? 안 먹은 놈은 나중에 먹어. 살아서 먹어.');

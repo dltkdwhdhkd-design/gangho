@@ -175,6 +175,19 @@ async function rainCure() {
 }
 
 // ── 제3장 합석 ──
+// 합석 자리마다 한마디: 지금까지 만나고 고른 사람만 온다(1~5부 선택이 누가 오는지로 드러난다)
+async function tableVoices() {
+  await narr('쟁반을 들고 탁자 사이를 돌았다. 자리마다 아는 얼굴이 있었다.');
+  if (F().r3_kaifeng) await say('clan_gaebang', '맹주 창고 쌀 말이야, 개방이 문 따고 다 풀었네. 오늘 국수 밀가루가 거기서 나왔어. 사람 수보다 많던 쌀, 이제야 사람 입으로 들어가는구먼.', 'h');
+  if (F().fs_order) await say('clan_jegal', '무창 나루에서 젖은 사본 기억하십니까. 그날 제 손이 떨렸지요. 오늘은 안 떨립니다. 장부는 제가 맡겠습니다. 이 합석에서 쌀 한 톨 새는 일은 없을 겁니다.');
+  if (F().r3_nanjing) await say('ng_young', '구화성에서 이름 걸고 붙자 했는데, 이름은 다들 문 앞에 칼이랑 같이 풀어 놨더군. 오늘은 젓가락이나 겁시다.', 'h');
+  if (F().r3_hangzhou) { await say('clan_moyong', '……맛있소.'); await say('me', '그건 누구 말투예요?'); await say('clan_moyong', '내 말이오. 오른발은 그냥 두면 따라온다더니, 말도 그렇더군.', 'h'); }
+  if (F().wei_back) await say('wei', '청하진 나루 노는 이제 내가 젓는다. 뱃사람들한테 뜯은 돈만큼 공짜로 건네주는 중이다. 아직 반도 못 갚았다.');
+  if (F().l_yang) await say('yang', '계란 삶아 왔어. 정파고 사파고 계란은 다 먹어. 껍질은 각자 까.');
+  if (F().jg_refuge) { await say('rf_boy', '아저씨! 나 이제 여기서 그릇 날라요. 근데 아저씨, 이번엔 정파예요 사파예요?'); await say('me', '합석이야.'); await say('rf_boy', '그게 뭔데요?'); await say('gwak', '밥 같이 먹는 거다. 그릇이나 날라.', 'a'); }
+  if (F().hw_watch) { await say('fan_cheongmyeong', '화산 대표로는 매향이 왔고 나는 구경 왔어. 국수 공짜지? 공짜 아니면 저 남궁가 앞으로 달아 줘.', 'h'); await say('clan_namgung', '왜 또 남궁가 앞이냐!', 'a'); }
+  if (F().sm_drink) await say('samaung', F().sm_drink === 'poured' ? '점소이가 따라 준 술을 마시는 게 이번이 두 번째구나. 첫 번째는 금봉 객잔이었지.' : '오늘은 내가 안 따른다. 점소이가 따라라. 금봉 객잔 빚이다.');
+}
 async function tableScene() {
   const hy = F().hyegak_dead ? 'jigaek' : 'clan_shaolin'; let good = 0;
   await ctx.chap(7, PART, '제3장 합석');
@@ -197,7 +210,8 @@ async function tableScene() {
   } else if (a === 0) { await say('clan_namgung', '그럼 소림이 맨 위겠군.'); await say('samaung', '나는 곽씨 아줌마 다음이다.'); await say('gwak', '그 나이에 눈이 삐었냐?', 'a'); }
   else { await narr('제비는 사마웅이 맨 끝을 뽑았다. 사마웅은 제비를 씹어 삼키고 아무 데나 앉았다.'); }
   await say('samaung', '여기 앉은 건 저 아줌마 국수 때문이다. 내 형제 열둘 일은 안 끝났어.');
-  await say('clan_dang', '그 일이라면 제가 할 말이 있어요. 이십 년 전 그 술에 든 독은 일배혈이고, 우리 독고에서 나갔어요. 맹주관 서기가 가져갔고요.');
+  if (F().jg_od === 'so') await say('clan_dang', '그 일이라면 제가 할 말이 있어요. 오독문 늪에서 한 번 소리 내 읽었으니 이번엔 덜 떨리네요. 이십 년 전 그 술에 든 독은 일배혈이고, 우리 독고에서 나갔어요. 맹주관 서기가 가져갔고요.');
+  else await say('clan_dang', '그 일이라면 제가 할 말이 있어요. 이십 년 전 그 술에 든 독은 일배혈이고, 우리 독고에서 나갔어요. 맹주관 서기가 가져갔고요.');
   await narr('젓가락 소리가 멎었다.');
   await say('namhwa', '이십 년이네요. 독이 나왔다 하면 다들 오독문부터 쳐다본 세월이요. 당가 아가씨, 사과는 안 바라요. 오늘 국수값이나 내요.');
   await say('clan_dang', '…그 값은 제가 낼게요.', 's');
@@ -217,6 +231,7 @@ async function tableScene() {
   await say('clan_namgung', '왜 남궁가 앞이냐.', 'a');
   await say('ogang', '돈 있는 집이 내는 거지.');
   await say('manhwa', '오늘 여기서 나온 얘기는 내일 아침이면 강호가 다 알아요. 값은 안 받을게요. 이런 소문은 공짜로 풀어야 잘 퍼지거든요.');
+  await tableVoices();
   await narr('그때 문밖에서 누군가 칼을 내려놓는 소리가 났다.');
   if (side() !== 'ma') {
     await say('hyeok', '칼은 두고 왔습니다. 문 앞에 쌓인 것을 보니 그래야 하는 것 같았습니다.');
