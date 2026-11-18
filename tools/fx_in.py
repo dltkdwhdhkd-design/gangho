@@ -11,6 +11,9 @@ SRC = os.path.join(ROOT, 'art-src', 'chatgpt'); OUT = os.path.join(ROOT, 'assets
 TABLE = {
     'hs_petal': (4, 4, 8, 8), 'hs_bloom': (4, 2, 20, 20), 'hs_bloom_big': (4, 2, 64, 64), 'hs_branch': (4, 2, 96, 48),
     'hs_slash': (3, 2, 56, 56), 'hs_thrust': (1, 6, 140, 35), 'hs_swirl': (4, 2, 40, 40), 'hs_jaha': (4, 2, 40, 40), 'hs_jahawave': (4, 2, 72, 36),
+    # 모든 문파 공통 검기(흰·회색으로 받아 게임이 색을 입힌다). 요청문: docs/chatgpt-swordfx.md
+    'sw_arc': (4, 2, 64, 64), 'sw_arc_big': (4, 2, 128, 128), 'sw_thrust': (1, 6, 140, 35), 'sw_ring': (3, 2, 96, 96), 'sw_wave': (4, 1, 40, 40),
+    'sw_hit': (3, 2, 32, 32), 'sw_clash': (3, 2, 32, 32), 'sw_dash': (1, 4, 96, 24), 'sw_ult_line': (1, 8, 240, 60),
 }
 KEY = (0, 255, 0)
 

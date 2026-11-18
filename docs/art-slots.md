@@ -24,6 +24,7 @@
 | `hs_bloom_big` | 절초용 큰 만개 8칸 | `hs_bloom_big.png` | `fx_in.py hs_bloom_big` | 위와 같음(크게) | H3 | 없음 |
 | `hs_branch` | 매화 가지 검기 8칸 | `hs_branch.png` | `fx_in.py hs_branch` | 코드로 그은 붉은 가지 | H4 | 없음 |
 | `hs_slash`, `hs_thrust`, `hs_swirl`, `hs_jaha`, `hs_jahawave` | 칼빛, 칠매검, 꽃잎 소용돌이, 자하 기운, 자하검기 | 같은 이름 `.png` | `fx_in.py <이름>` | 코드 그림 | H5~H9 | 없음(게임은 아직 hs_petal·hs_bloom·hs_bloom_big·hs_branch만 읽는다. 나머지는 받으면 `js/battlefx.js`에 붙인다) |
+| `sw_arc`, `sw_arc_big`, `sw_thrust`, `sw_ring`, `sw_wave`, `sw_hit`, `sw_clash`, `sw_dash`, `sw_ult_line` | 모든 문파 공통 검기(흰·회색, 게임이 색을 입힘) | 같은 이름 `.png` | `fx_in.py <이름>` | 코드로 그은 호·선 | `docs/chatgpt-swordfx.md` S1~S9 | 없음 |
 | 다른 문파 효과 | 남궁 뇌전, 무당 태극, 소림 금강, 당가 독, 마교 혈마 | 문파 기획 문서를 만든 뒤 | `fx_in.py` 표에 이름을 더한다 | 코드 그림 | (아직 없음) | — |
 
 ## 일러스트
