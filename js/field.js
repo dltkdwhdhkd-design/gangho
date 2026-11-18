@@ -148,7 +148,8 @@ export class Field {
     else if (r) { const [a, b] = toGrid(m, fx, fy), l = out ? 1 : Math.hypot(a, b) || 1; fx = a / l; fy = b / l; }
     const x = p.x + fx * 10, y = p.y - 3 + fy * 10, far = out ? (dx, dy) => hyp(...toScreen(m, dx, dy)) * 1.25 : hyp;  // 바깥 쿼터뷰는 화면에 보이는 거리로 잰다
     let best = null, bd = 19;
-    for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y); if (d < bd) { bd = d; best = n; } }
+    // 일감 표시(걸레질 자리 따위, ! 달린 소품)는 같은 자리에 사람이 겹쳐 서 있어도 먼저 잡는다. 사람에게만 말이 걸려 일을 못 하던 것
+    for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y) - (n.stamp && n.mark?.() ? 10 : 0); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
     for (const r of this.roam) { if (r.gone || !r.peace) continue; const d = far(r.x - x, r.y - 4 - y); if (d < bd) { bd = d; best = { id: 'band', x: r.x, y: r.y, hint: `${r.tag} · ${r.trav ? '말 걸기' : '다가간다'}`, talk: () => r.trav ? G.travel.talk(r) : G.wander.talk(r) }; } }
     if (best) return best;

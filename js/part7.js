@@ -394,7 +394,7 @@ Story.providers.push(function part7(id) {
   if (id === 'cheongha' && at('end') && !F().ended && !F().act3) tr.push({ x: 0, y: 0, w: 99, h: 99, when: () => at('end') && !F().ended && !F().act3, run: begin }); // 6부까지 끝낸 저장
   if (!F().act3) return { npcs: n, spots: sp, trigs: tr, roam: [] };
   if (id === 'inn' && !at('r3')) n.push({ id: 'gwak2', spr: 'OldWoman', x: 4, y: 4.6, talk: async () => { await say('gwak', F().ended ? '일해, 일.' : '밥은 먹었어? 다치지 말고 다녀.'); } });
-  if (id === 'inn' && F().hapseok) {
+  if (id === 'inn' && F().hapseok && !at('x2')) {  // 9부 걸레질(x2) 때는 걸레질 세 자리에 겹쳐 서 있어서 비켜 둔다
     n.push({ id: 'so', spr: 'RedSamurai', x: 9, y: 9, dir: 2, talk: async () => { await say('so', '칼은 닦았어?'); } });
     if (F().hyeok_join) n.push({ id: 'hyeok', spr: 'Hyeok', x: 13, y: 9, dir: 2, talk: async () => { await say('hyeok', '천산으로 가는 길은 제가 압니다.'); } });
     if (!F().cheol_dead) n.push({ id: 'cheol', spr: 'Monk2', x: 6, y: 9, dir: 3, talk: async () => { await say('cheol', '시주, 오늘 저녁은 뭐요?'); } });
