@@ -94,7 +94,7 @@ async function luohanHall() {
   await narr('소림을 떠나 서쪽으로 갔다. 화산에 매화가 피었다는 소문이 있었고, 윤설이 그 산에서만 나는 약초를 찾았다.');
   await fadeTo(1); G.field.load('hwasan', 14, 11.5, 3); await ctx.chap(3, '강호 유람', '제2장 벼랑 아래'); await fadeTo(0);
   await narr('절벽길 아래 너른 바위에 사람이 빙 둘러서 있었다. 매화 수가 놓인 옷과 푸른 옷이 마주 보고 있었다. 화산과 종남이 비무를 한다고 했다.');
-  await say('fan_baekcheon', '화산과 종남의 비무요. 구경은 자유지만 칼 끝이 이쪽으로 튀면 알아서 피하시오.');
+  await say('fan_baekcheon', '화산과 종남의 비무요. 구경은 자유지만 칼끝이 이쪽으로 튀면 알아서 피하시오.');
   await narr('종남 제자의 검이 빠르고 곧았다. 화산 쪽에서 나온 젊은 도사는 칼을 몇 번 휘두르는 시늉만 하더니, 상대가 들어오는 순간 발을 걸어 넘어뜨렸다.');
   await say('fan_cheongmyeong', '비무에 발 쓰지 말라는 법 있어? 없지? 그럼 내가 이긴 거야.', 'h');
   await say('clan_jongnam', '이게 무슨 비무요! 화산은 검을 버렸소?');
@@ -103,7 +103,7 @@ async function luohanHall() {
   await say('fan_yunjong', '……저희도 가끔 그게 궁금합니다.', 's');
   await narr('그다음에 청명이 검을 들었다. 매화가 피었다. 그렇게밖에 말할 수가 없었다. 종남 제자 셋의 칼이 동시에 땅에 떨어졌다. 둘러선 사람들이 숨을 쉬는 것도 잊었다.');
   await say('me', '…….', 'b');
-  await say('fan_cheongmyeong', '어이, 거기 칼 찬 점소이. 너 방금 내 발을 봤지? 칼 말고 발.');
+  await say('fan_cheongmyeong', '어이, 거기 칼 찬 촌놈. 너 방금 내 발을 봤지? 칼 말고 발.');
   await say('me', '칼보다 발이 먼저 나가던데요.');
   await say('fan_cheongmyeong', '오, 보는 눈은 있네. 구경값은 안 받을게. 대신 종남 애들이 성질 내면 네가 좀 받아 줘.', 'h');
   F().hw_watch = true;

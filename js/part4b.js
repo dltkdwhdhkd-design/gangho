@@ -59,9 +59,25 @@ async function wuchang() {
   await say('ogang', '그럼 정천맹이 받던 건 뭐였냐? 역적 딱지 붙은 놈이 정천맹 나루를 지켜 주러 왔어?');
   await say('me', '정천맹 나루가 아니라 저 사람들 나루예요.');
   await say('ogang', '말은 맹주보다 낫구나. 물 밖으로 나와 주마. 물에서 붙으면 너무 쉬우니까.');
+  // 1부 청하진 나루에서 살려 보낸 위충이 오강 배에 타고 있다(늦게 닿았으면 위에서 이미 다쳐 누워 있다)
+  const wei = F().wei_spared && F().jg_late !== 'wc';
+  if (wei) {
+    await say('wei', '어이, 청하진 점소이! 나요, 위충. 그때 나루에서 살려 보내 준 그 위충.', 'b');
+    await say('me', '……여기서 뭐 해요.');
+    await say('wei', '먹고살 데가 여기밖에 없었소. 형님, 저놈은 내가 못 칩니다. 빚이 있어서.');
+    await say('ogang', '빚 많은 놈들만 모였군. 빠져 있어라. 대신 저놈이 지면 네가 묻어 줘라.');
+  }
   await ctx.duel({ foes: ['ogang_foe', 'pirate', 'pirate'], allies: ['so_ally'], arena: 'dock', bgm: 'boss', title: '장강수로채 총채주 오강' });
   await narr('오강이 창을 놓치고 나루 기둥에 등을 기댔다. 돛배들이 하나둘 닻을 올렸다.');
   await say('ogang', '…졌다. 배는 두고 가마. 애들은 보내 줘라. 물 위에서 자란 놈들이라 땅에서는 쓸모가 없다.');
+  if (wei) {
+    await say('wei', '형님이 졌으니 장강수로채엔 내 자리가 없겠소. 점소이, 나 이제 어디로 가오?', 's');
+    await say('me', '청하진 나루에 배 몰 사람이 없대요. 사람이 반밖에 안 남아서.');
+    await say('wei', '……그 나루에서 내가 뱃사람들 돈을 뜯었는데. 거기서 노를 저으라고?');
+    await say('me', '그러니까 거기서 저어야죠.');
+    await say('wei', '하, 점소이 말은 늘 이렇게 아프구먼. 알았소. 전쟁 끝나면 가 보리다.', 'h');
+    F().wei_back = true;
+  }
   const c = await choice('오강이 숨을 몰아쉰다.', ['살려 보낸다', '묶어서 정천맹에 넘긴다']);
   if (c === 0) { F().jg_ogang = 'spared'; await say('ogang', '빚졌다. 패천도 형님 앞에서 갚으마. 내가 아직 살아 있으면.'); ctx.rep('sa', 2); }
   else { F().jg_ogang = 'bound'; await say('ogang', '정천맹 옥이라. 위충이 있던 데군. 밥은 형편없다더라.'); ctx.rep('jeong', 1); }
@@ -157,6 +173,19 @@ async function guyang() {
   await say('guyang', '녹림 칠십이채 총채주 구양철이다. 이 고개 너머는 사만 식구가 사는 데다. 칼 찬 놈은 못 지나간다.');
   await say('me', '패천도를 만나러 가요. 싸우러 가는 게 아니에요.');
   await say('guyang', '정천맹 깃발 단 놈들도 다 그렇게 말하더라. 그리고 밭을 태웠지. 말은 칼로 해라. 사마웅 형님 버릇이 나한테도 옮았다.');
+  // 1부 흑풍채 맹호와 재회. 목숨값을 빚으로 달아 뒀는지, 산적질을 그만두라고 했는지에 따라 다르다
+  if (F().lion_debt) {
+    await say('lion', '점소이! 아니지, 역적 나리! 여기서 보네.', 'h');
+    await say('guyang', '맹호, 이놈이 네가 말하던 그놈이냐. 목숨값을 빚으로 달아 뒀다는.');
+    await say('lion', '예, 형님. 그러니 저는 이 판에서 빠지겠습니다. 녹림 놈은 빚쟁이한테 칼 안 듭니다.');
+    await say('guyang', '빚 많은 놈 하나 더 늘었군. 서 있어라. 대신 끝나고 술은 네가 내라.');
+  } else {
+    await say('lion', '……점소이냐.', 's');
+    await say('me', '맹호? 산에서 내려간 거 아니었어?');
+    await say('lion', '내려갔지. 네 말 듣고. 서른 명 데리고 내려가서 밭을 일궜다. 한 해 농사 지었더니 정천맹 토벌대가 와서 산적 마을이라고 다 태우더라.', 's');
+    await say('lion', '그래서 다시 올라왔다. 이번엔 칠십이채로. 네 탓이라고는 안 한다. 그때 내가 그랬지, 네 말 듣고 내려간 놈이 있으면 네 탓이라고. 그 말은 취소다.', 's');
+    await say('me', '…….', 's');
+  }
   await ctx.duel({ foes: ['guyang_foe', 'bandit', 'bandit'], allies: ['cheol_ally'], arena: 'forest', bgm: 'boss', title: '녹림 총채주 구양철' });
   await narr('구양철이 도끼를 땅에 박고 숨을 골랐다. 목책 뒤에서 아이들이 고개를 내밀었다.');
   await say('guyang', '…지나가라. 대신 산 아래 사람들은 건드리지 마라. 저 솥이 저 애들 하루치다.');
@@ -170,7 +199,8 @@ async function guyang() {
   if (c === 0) {
     await say('me', '지나가려면 저부터 넘으세요.');
     await say('paeng_cap', '역적이 산적 편까지 드는군. 좋다. 정천맹에 보고할 거리가 하나 늘었다.');
-    await ctx.duel({ foes: ['paeng_cap', 'paeng_guard', 'paeng_guard'], allies: ['cheol_ally'], arena: 'forest', bgm: 'fight', title: '하북팽가 토벌대', noLoot: true });
+    if (F().lion_debt) await say('lion', '빚 갚을 때가 왔네. 점소이, 내 칼도 끼워 줘라.');
+    await ctx.duel({ foes: ['paeng_cap', 'paeng_guard', 'paeng_guard'], allies: F().lion_debt ? ['cheol_ally', 'lion_ally'] : ['cheol_ally'], arena: 'forest', bgm: 'fight', title: '하북팽가 토벌대', noLoot: true });
     F().jg_guyang = 'saved'; ctx.rep('sa', 3); ctx.rep('jeong', -1);
     await say('paeng_cap', '이 일은 하북팽가가 잊지 않는다.');
     await say('guyang', '정파 놈이 정파를 막아? 형님한테 말해 두마. 이런 놈도 있더라고.');

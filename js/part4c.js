@@ -38,7 +38,7 @@ export async function refugees() {
   await say('levy', '정천맹 군량 징발이다! 쌀이 있는 집은 다 내놔라. 흑도맹을 치는 데 쓰는 쌀이다. 너희를 지키는 데 쓰는 거다.');
   await say('refugee', '이건 강 건너서 지고 온 씨나락이에요. 이거 뺏기면 내년엔……', 's');
   await say('levy', '내년? 흑도맹이 이기면 내년은 없다.');
-  await say('yun', '{나}, 나 저 사람 다리는 안 붙여 줄 거예요.', 'a');
+  await say('yun', '{나}, 저 사람은 다쳐도 안 고쳐 줄 거예요.', 'a');
   await ctx.duel({ foes: ['levy', 'jeong_guard', 'jeong_guard'], arena: G.field.m.arena, bgm: 'fight', title: '정천맹 징발대', optional: true });
   await say('levy', '……역적 놈이 여기 숨어 있었구나. 맹에 보고하겠다.');
   const c = await choice('징발관이 쓰러진 채 이쪽을 노려본다. 피난민들이 수레의 쌀가마를 끌어내리고 있다.', ['쌀만 두고 보내 준다', '수레까지 빼앗고 쫓아낸다']);
@@ -74,7 +74,7 @@ export async function haomunNight() {
   await say('baekrang', '단골 만들려고요, 문주님. 이 사람 오래 살 것 같거든요.', 'h');
   await narr('둘이 사라지고 나서야 손이 떨렸다. 처음으로 졌다. 칼을 쥐고도 아무것도 지키지 못했다. 철우의 피가 윤설의 소매를 타고 내려왔다.');
   await say('yun', '살아요. 살릴 거예요. 그러니까 그런 얼굴 하지 마요.', 's');
-  await say('cheol', '시주…… 내일 회관엔 소승이 업혀서라도 가겠소. 소승이 문을 부수고 나온 절이니, 소승 얼굴은 좀 봐 둬야 하오.', 's');
+  await say('cheol', '시주…… 내일 회관엔 소승이 업혀서라도 가겠소. 소승이 문을 부수고 나온 절 어른들이오. 소승 얼굴을 봐야 시주 말도 좀 들을 거요.', 's');
   F().jg_hao = true; F().cheol_hurt = true;
   ctx.note('하오문 만화부인에게 처음으로 졌다. 철우가 옆구리를 찔렸다. 움막 자리를 판 사람은 정천맹 세가 거리 동문 순찰대장이었다. 백랑이 공짜로 알려 주었다.');
 }
