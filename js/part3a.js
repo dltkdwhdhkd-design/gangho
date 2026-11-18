@@ -8,7 +8,7 @@ import { set, at, after } from './story1.js';
 import { toGuhwa } from './story2.js';
 
 const F = () => G.S.flags;
-Object.assign(WHO, { dangsang: WHO.dangsang || { name: '떠돌이 약상', face: 'Villager3' }, ng_young: { name: '남궁진', face: 'Namgung' } });
+Object.assign(WHO, { dangsang: WHO.dangsang || { name: '떠돌이 약상', face: 'Villager3' }, ng_young: { name: '남궁진', face: 'Namgung', art: 'clan_namgung' } });
 // 길 위 싸움은 경험치를 덜 줘서(.4) 구화성 대회 난이도가 그대로 가게 한다. 세가 사람들과의 비무는 대회 전 몸풀기라 소연하 밤 비무 정도로 맞춘다(문파 도전용 clan_* 는 너무 세다)
 const spar = (k, name) => ({ ...FOES['clan_' + k], name, hp: 1500, atk: 25, def: 8, boss: 0, poise: 60, phases: undefined, tier: undefined });
 Object.assign(FOES, { r3_hongdu: spar('gaebang', '홍두 장로'), r3_namgung: spar('namgung', '남궁진'), r3_moyong: spar('moyong', '모용설') });
@@ -148,7 +148,7 @@ Story.providers.push(function part3a(id) {
 
 // ── 구화성 금봉 객잔: 이름 모르는 덩치와 합석 (5부 패천도 사마웅) ──
 // 적에게 얼굴을 먼저 준다. 여기서는 이름을 끝까지 안 밝히고, 5부 담판에서 알아보게 한다(part4b samaungEcho)
-WHO.sm_guest = { name: '덩치 큰 손님', face: 'Samaung' };
+WHO.sm_guest = { name: '덩치 큰 손님', face: 'Samaung', art: 'samaung' };  // 얼굴은 5부 패천도와 같다(눈치 빠른 사람은 알아본다)
 async function smDrink() {
   await narr('금봉 객잔은 대회 손님으로 빈자리가 없었다. 구석 탁자 하나만 덩치 큰 사내가 혼자 차지하고 술을 마시고 있었다. 자리가 넉넉히 남았는데도 아무도 거기 앉지 않았다.');
   await say('sm_guest', '서 있지 말고 앉아. 자리는 넓다. 사람들이 안 앉아서 그렇지.');
