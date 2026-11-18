@@ -78,6 +78,7 @@ async function granary() {
 import { crossFire } from './part45.js';
 import { warOpens, samaungEcho } from './part4b.js';
 import { haomunNight } from './part4c.js';
+import { sneak, rift } from './part5c.js';
 async function jeong4() {
   F().night = false;
   await ctx.part(4, '쫓기는 몸', '움막');
@@ -189,9 +190,10 @@ async function council() {
   await warOpens();
 }
 async function samaungTalk() {
+  if (!F().jg_sneak) await sneak();
   await ctx.chap(5, '구파 회관의 밤', '패천도');
   if (F().lion_debt) {
-    await say('lion', '점소이 왔냐! 아니지, 이제 역적이라며. 출세했다.');
+    await say('lion', F().jg_sneak ? '형님! 뒷마당에 순찰 둘이 뻗어…… 어? 점소이? 아니지, 이제 역적이라며. 출세했다.' : '점소이 왔냐! 아니지, 이제 역적이라며. 출세했다.');
     await say('me', '패천도를 뵈러 왔어요.');
     await say('lion', '말리고 싶은데 내 말을 들을 분이 아니다. 몸조심해라.');
   }
@@ -221,6 +223,7 @@ async function samaungTalk() {
   await say('yun', '이번엔 어디를 다친 거예요. 아니, 말하지 마요. 다 보여요.', 'a');
   await say('so', '구화성 남문이 불탔대. 아미 사태가 피난민을 맡았고, 혜각 대사는 승병을 돌려보냈다더라.');
   await say('cheol', '그믐이 코앞이오, 시주.');
+  if (!F().jg_witness) await rift();
   await say('me', '가요. 아주머니가 기다리세요.');
   await G.route.toWolha();
 }
