@@ -91,6 +91,9 @@ export async function toWolha() {
   await say('me', '그럼 처음부터 다 아셨어요? 왜 말 안 하셨어요?', 'a');
   await say('boat', '입 뻥긋하면 배에 불 지른다는디. 그 여편네는 진짜 지르거든.');
   await say('boat', '너는 배 바닥에서 내내 울었어. 강을 다 내려와서야 그치더라. 이제 그 배로 네가 돌아가는구먼.');
+  // 5부 정천맹의 균열(part5c rift)에서 혜각에게 증인을 부탁했으면 뒤따라온다
+  if (F().jg_witness === 'hyegak') { await narr('뒤쪽 물안개 속에서 노 젓는 소리가 하나 더 들렸다. 작은 배 이물에 회색 가사가 앉아 있었다.'); await say('hyegak', '늦지 않겠다고 했소. 노납은 보기만 하겠소. 본 것은 다 말하겠소.'); }
+  else if (F().jg_witness === 'hall') await narr('구화성 쪽 하늘이 조용했다. 아미와 소림이 회관을 지키고 있을 것이다.');
   ctx.goal('월하곡의 흔적 세 곳을 살펴보기');
   await ctx.warp('wolha', 22, 37, 1);
 }
