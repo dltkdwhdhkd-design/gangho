@@ -13,12 +13,12 @@ import { newState } from './state.js';
 import { makeBuilder, SPEC, GRAND } from './hd2d/build.js';
 import { ROLE } from './talkdata.js';
 
-const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = .857 / Math.sin(PITCH) /* 원근 때문에 주인공 발밑에서 세로 걸음이 가로보다 1.17배 빨라 보이던 것을 맞춘다(평면도 1점이 화면에서 가로와 세로 같은 길이) */, HS = 1 / Math.cos(PITCH);
+// 주소에 붙여 미리 보는 값: &camk=0.95(마을 카메라 거리, 클수록 멀다), &gk=0.6(땅이 깊이 쪽으로 눌려 보이는 정도, 작을수록 눕는다. 지금 .857), &time=morning(빛: morning·day·evening·night)
+const qn = k => { try { const v = parseFloat(new URLSearchParams(location.search).get(k)); return v > 0 ? v : 0; } catch { return 0; } };
+const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = (qn('gk') || .857) / Math.sin(PITCH) /* 원근 때문에 주인공 발밑에서 세로 걸음이 가로보다 1.17배 빨라 보이던 것을 맞춘다(평면도 1점이 화면에서 가로와 세로 같은 길이) */, HS = 1 / Math.cos(PITCH);
 const CHAR = 15, AHEAD = .04;
 // 사람 크기: 집·소품에 비해 사람이 작아 보여서(일검풍운결은 사람이 계단 한 칸의 두세 배) 새 화면의 사람을 1.3배로 세우고, 카메라는 1.12배 뒤로 뺀다. 방은 js/field.js PSC
 // 크기 기준(일검풍운결 비교, 2026-11-18): 사람 키 ≈ 문 높이의 0.9, 큰 독 ≈ 사람의 0.65, 등롱 기둥 ≈ 사람의 1.5. (이때 사람이 화면 높이의 1/7쯤이라고 적었는데 2026-11-19에 재 보니 CAMK .63에서 1/5.4였다. 기준 그림은 1/8.5. docs/plan-2026-11-19.md 2장)
-// 주소에 &camk=0.95처럼 붙이면 마을 카메라 거리를 바꿔 미리 볼 수 있다(값이 클수록 멀다. 정해지면 아래 숫자를 바꾼다)
-const qn = k => { try { const v = parseFloat(new URLSearchParams(location.search).get(k)); return v > 0 ? v : 0; } catch { return 0; } };
 export const ACTK = 1.05, CAMK = qn('camk') || .63, PROPK = .62;
 // 큰 지도(world)는 멀리 봐야 하는 지도라 마을 값(CAMK)을 쓰면 땅 그림이 뭉개지고 좁게 보인다. 큰 지도는 만들 때 맞춘 값을 따로 둔다
 const CAMW = 1.12, ACTW = 1.3;
@@ -30,7 +30,7 @@ let T = null;  // three.js
 // 인물 키는 화면 높이의 1/9로 정했다(사용자). 그림은 새 그림이 기본
 const OPTK = 'gangho_hd2d_opt2', OPT0 = { zoom: 9, time: 'auto', fx: 'auto', art: 1, battle3d: 1 };
 let autoLv = 'mid'; const fxNow = () => HD.opt.fx === 'auto' ? autoLv : HD.opt.fx;  // 실제로 쓰는 화질
-const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } o.zoom = 9; return o; };
+const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } o.zoom = 9; const qt = (() => { try { return new URLSearchParams(location.search).get('time'); } catch { return null; } })(); if (qt && TIMES[qt]) o.time = qt; return o; };
 const want = (() => { try { return new URLSearchParams(location.search).get('hd2d') === '1'; } catch { return false; } })();
 
 // 시각별 빛. sun: 해 쪽을 가리키는 방향(x 오른쪽, y 위, z 화면 앞쪽). 낮과 저녁은 왼쪽에서 조금 앞으로 들어 왼벽이 밝고 오른벽이 그늘지며 그림자는 오른쪽으로 진다. 아침은 오른쪽에서
