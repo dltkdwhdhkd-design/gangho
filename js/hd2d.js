@@ -356,8 +356,12 @@ function groundArt(m, base) {
   const hs = (i, j) => { let h = (i * 374761393 + j * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
   const nz = (u, v, k) => { const i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j, a = fu * fu * (3 - 2 * fu), b = fv * fv * (3 - 2 * fv), A = hs(i + k, j), B = hs(i + 1 + k, j), C = hs(i + k, j + 1), E = hs(i + 1 + k, j + 1); return A + (B - A) * a + (C - A) * b + (A - B - C + E) * a * b; };
   const cell = TS * DOT, S = 1 / 18;  // 잡음 크기: 도트 18점마다 한 마디
-  // 가로로 난 길은 무늬를 눕혀 깐다(수레 자국이 길을 따라 나게)
-  const G1 = (x, y) => m.g[y]?.[x] === 1, LIE = m.g.map((r, y) => r.map((v, x) => v === 1 && (G1(x - 1, y) || G1(x + 1, y)) && !(G1(x, y - 1) && G1(x, y + 1)) && !(G1(x, y - 1) && !G1(x - 1, y) && !G1(x + 1, y)))), lie = (x, y) => LIE[y][x];
+  // 가로로 난 길은 무늬를 눕혀 깐다(수레 자국이 길을 따라 나게). 그 칸을 지나는 길이 세로보다 가로로 더 길게 이어지면 가로 길로 본다
+  // (전에는 위아래가 다 길인 칸을 세로 길로 봐서, 너비 세 칸짜리 가로 길의 가운데 줄만 자국이 세로로 서서 글자처럼 끊겨 보였다)
+  const G1 = (x, y) => m.g[y]?.[x] === 1, HR = m.g.map(r => new Int16Array(r.length)), VR = m.g.map(r => new Int16Array(r.length));
+  for (let y = 0; y < HR.length; y++) for (let x = 0, n = HR[y].length; x < n;) { if (!G1(x, y)) { x++; continue; } let e = x; while (e < n && G1(e, y)) e++; HR[y].fill(e - x, x, e); x = e; }
+  for (let x = 0, n = HR[0]?.length || 0; x < n; x++) for (let y = 0; y < VR.length;) { if (!G1(x, y)) { y++; continue; } let e = y; while (e < VR.length && G1(x, e)) e++; for (let j = y; j < e; j++) VR[j][x] = e - y; y = e; }
+  const lie = (x, y) => HR[y]?.[x] > VR[y]?.[x];
   // 흔들림은 도트 두 점마다 한 번만 잰다(경계가 도트 크기로 각지고, 세우는 시간이 4분의 1)
   const bw2 = (W2 >> 1) + 1, bh2 = (H2 >> 1) + 1, JX = new Float32Array(bw2 * bh2), JY = new Float32Array(bw2 * bh2);
   // 풀밭 얼룩: 흙 드러난 자리, 짙은 풀, 이끼를 큰 잡음과 작은 잡음으로 섞는다(넓은 풀밭이 고르게 보이지 않게)
