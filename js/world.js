@@ -408,7 +408,7 @@ function tick(dt) {
   const [dx, dy] = [[0, 1], [0, -1], [-1, 0], [1, 0]][p.dir] || [0, 1], wet = f.m.g[ty + dy * 1]?.[tx + dx * 1] === 2;
   f.spots = wet && S.flags.rod ? [{ x: tx - 1, y: ty - 1, w: 3, h: 3, hint: '낚시하기', act: () => G.life.fishing(b === 'deep' ? 'stream' : 'river') }] : [];
   spawnT -= dt; f.roam = f.roam.filter(r => !r.gone && Math.hypot(r.x - p.x, r.y - p.y) < 340); f.animals = f.animals.filter(a => !a.gone && Math.hypot(a.x - p.x, a.y - p.y) < 340);
-  if (spawnT > 0) return; spawnT = 4 + Math.random() * 6;
+  if (spawnT > 0 || G.noSpawn) return; spawnT = 4 + Math.random() * 6;  // G.noSpawn: 시험이 길 위 사람을 직접 세울 때 게임이 저절로 채우는 것을 끈다(tools/travel_test.cjs)
   const a = Math.random() * 6.28, x = p.x + Math.cos(a) * 210, y = p.y + Math.sin(a) * 150; if (f.m.blocked(x, y, 14, 12)) return;
   if (S.flags.bow && f.animals.length < 3 && Math.random() < .5) { const k = pick(b === 'snow' ? ['rabbit', 'deer'] : ['rabbit', 'pheasant', 'deer']); f.animals.push({ kind: k, ...G.life.animals[k], x, y, vx: 0, vy: 0, t: 1, walk: 0 }); return; }
   if (!S.flags.world_open && S.mode !== 'free') return;

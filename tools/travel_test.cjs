@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
     G.S = D.newState('진소', 'BlueSamurai', 'm', 'normal'); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; const S = G.S;
     G.free.start(); let n = 0; while (G.field.busy && n++ < 2000) { G.fast(60); await sleep(); }
     Object.assign(S, { lv: 30, str: 50, con: 50, agi: 40, inn: 40, potion: 2, potionMax: 9, silver: 5000 }); S.flags.world_open = 1; S.flags.world_tip = 1;
-    const run = async (name, fn, pick) => { G.autoPick = pick === undefined ? null : (typeof pick === 'function' ? pick : () => pick); let fin = false, err = null; G.field.busy = false; G.field.run(async () => { try { await fn(); } catch (e) { err = e; } fin = true; }); let i = 0, shop = 0; while (!fin && i++ < 5000) { const x = document.querySelector('#modal.on .x'); if (x) { shop++; x.click(); } G.fast(60); await sleep(); } if (shop) out.push(`  (가게 창 ${shop}번 닫음)`); out.push(`${name}: ${err ? 'ERR ' + err.message : fin ? 'ok' : 'TIMEOUT'}`); if (err || !fin) bad.push(name); G.autoPick = null; return !err && fin; };
+    const run = async (name, fn, pick) => { G.autoPick = pick === undefined ? null : (typeof pick === 'function' ? pick : () => pick); let fin = false, err = null; G.field.busy = false; G.field.run(async () => { try { await fn(); } catch (e) { err = e; } fin = true; }); let i = 0, shop = 0; while (!fin && i++ < 5000) { const x = document.querySelector('#modal.on .x'); if (x) { shop++; x.click(); } G.fast(60); await sleep(); } if (shop) out.push(`  (가게 창 ${shop}번 닫음)`); out.push(`${name}: ${err ? 'ERR ' + err.message : fin ? 'ok' : 'TIMEOUT · 장면 ' + G.scene + ' · 전투 ' + !!G.battle + ' · 바쁨 ' + G.field.busy + ' · 대화창 ' + (document.querySelector('#dialog')?.textContent || '').slice(0, 60) + ' · 창 ' + (document.querySelector('#modal.on')?.textContent || '').slice(0, 40)}`); if (err || !fin) bad.push(name); G.autoPick = null; return !err && fin; };
     const by = re => c => { const i = c.opts.findIndex(t => re.test(t)); return i < 0 ? c.opts.length - 1 : i; };
     // 1) 새 고을: 전도에 있고, 고을 지도가 서고, 청하진에서 걸어서 닿는다
     G.world.build(); const { MAPS } = await import('/gangho/js/maps.js'); const { LOCS } = await import('/gangho/js/worlddata.js'); const NEW = LOCS.filter(l => l.road);
@@ -20,7 +20,12 @@ const { chromium } = require('playwright');
     for (const l of NEW) { const [x, y] = G.world.entry(l.map), ok = !!seen[Math.floor(y) * W + Math.floor(x)]; G.world.ensure(l.map); const m = MAPS[l.map]; out.push(`${l.name}: 걸어서 ${ok ? '닿음' : '못 닿음'}, 고을 지도 ${m ? m.w + '×' + m.h : '없음'}, 이름표 ${(w.labels || []).some(q => q.text === l.name)}`); if (!ok || !m) bad.push(l.name); }
     // 2) 길손이 큰길에서 생겨 목적지 쪽으로 걷는다
     const [x0, y0] = G.world.entry('c_nakyang'); G.field.load('world', x0, y0 + 14, 0); for (let i = 0; i < 20; i++) { G.fast(30); await sleep(); }
-    const f = G.field, P = f.p, mk = kind => { for (let i = 0; i < 400; i++) { const a = Math.random() * 6.28, t = G.travel.spawn(P.x + Math.cos(a) * 120, P.y + Math.sin(a) * 100); if (t && (!kind || t.kind === kind)) return t; } return null; };
+    // 길 위의 길손은 셋까지만 생긴다(js/travel.js MAXT). 앞 장면을 돌리는 동안 게임이 길손 셋을 채워 두면 여기서 더 못 만든다.
+    // 전에는 그렇게 못 만든 null을 roam에 넣어서 화면을 그리다 터졌고, 그래서 이 시험이 가끔 실패했다(게임은 null을 넣지 않는다). 갈래를 정해 만들 때는 길 위의 길손을 먼저 비운다
+    const f = G.field, P = f.p, mk0 = kind => { for (let i = 0; i < 400; i++) { const a = Math.random() * 6.28, t = G.travel.spawn(P.x + Math.cos(a) * 120, P.y + Math.sin(a) * 100); if (t && (!kind || t.kind === kind)) return t; } return null; };
+    const mk = kind => { if (kind) f.roam = f.roam.filter(r => !r.trav); const t = mk0(kind); if (!t && kind) throw new Error('시험이 길손을 못 만듦: ' + kind + ', 길 위 길손 ' + G.travel.list().length + '명'); return t; };
+    // 여기부터는 시험이 길 위 사람을 직접 세운다. 게임이 저절로 채우는 길손·무리·적이 끼어들면 결과가 달라져서(현상범이 다른 길손을 먼저 덮치는 따위) 꺼 둔다
+    G.noSpawn = true;
     const kinds = {}; for (let i = 0; i < 60; i++) { f.roam = []; const t = mk(); if (t) kinds[t.kind] = (kinds[t.kind] || 0) + 1; } out.push('생긴 길손: ' + JSON.stringify(kinds));
     if (Object.keys(kinds).length < 5) bad.push('길손 갈래');
     f.roam = []; const T = mk('peddler'); f.roam.push(T); const [ex, ey] = G.world.entry(T.dest.map), d0 = Math.hypot(ex * 16 - T.x, ey * 16 - T.y), k0 = T.k;
@@ -43,12 +48,13 @@ const { chromium } = require('playwright');
     const Fm = mk('farmer'); f.roam = [Fm]; const inf0 = S.fr.infamy, s1 = S.silver; await run('농부 털기', () => G.travel.talk(Fm), c => { const i = c.opts.findIndex(t => /턴다/.test(t)); return i < 0 ? 0 : i; });
     out.push(`털기: 악명 ${inf0} → ${S.fr.infamy}, 은자 ${s1} → ${S.silver}, 사라짐 ${!!Fm.gone}`); if (S.fr.infamy <= inf0 || !Fm.gone) bad.push('털기');
     // 6) 현상범 무리가 길손을 덮치고, 끼어들어 구한다
-    let V = null; for (let i = 0; i < 600 && !V; i++) { const q = G.wander.spawn(P.x + 60, P.y); if (q && q.prize) V = q; }
+    const villain = () => { f.roam = f.roam.filter(r => !r.band); for (let i = 0; i < 900; i++) { const q = G.wander.spawn(P.x + 60, P.y); if (q && q.prize) return q; } throw new Error('시험이 현상범 무리를 못 만듦'); };
+    let V = villain();
     const Vt = mk('peddler'); f.roam = [V, Vt]; V.x = Vt.x + 60; V.y = Vt.y; V.dest = { x: V.x, y: V.y }; P.x = Vt.x; P.y = Vt.y + 200; S.fr.infamy = 0;
     for (let i = 0; i < 80 && !V.fight; i++) { G.fast(30); await sleep(); } out.push(`현상범이 길손을 ${V.fight?.with === Vt ? '덮침' : '안 덮침'}`); if (V.fight?.with !== Vt) bad.push('덮치기');
     const s2 = S.silver; await run('길손 구하기', () => G.travel.talk(Vt), by(/구한다/)); out.push(`구함: 은자 ${s2} → ${S.silver}, 현상범 쓰러짐 ${!!V.gone}`); if (!V.gone) bad.push('구하기');
     // 7) 무리끼리 싸움이 끝나면 길손이 털린다(구경만)
-    let V2 = null; for (let i = 0; i < 600 && !V2; i++) { const q = G.wander.spawn(P.x + 60, P.y); if (q && q.prize) V2 = q; } const Vt2 = mk('pilgrim'); f.roam = [V2, Vt2]; V2.x = Vt2.x + 20; V2.y = Vt2.y; V2.dest = { x: V2.x, y: V2.y }; P.x = Vt2.x; P.y = Vt2.y + 250;
+    let V2 = villain(); const Vt2 = mk('pilgrim'); f.roam = [V2, Vt2]; V2.x = Vt2.x + 20; V2.y = Vt2.y; V2.dest = { x: V2.x, y: V2.y }; P.x = Vt2.x; P.y = Vt2.y + 250;
     for (let i = 0; i < 900 && !Vt2.gone && !V2.gone; i++) { G.fast(30); await sleep(); } out.push(`구경만: 길손 ${Vt2.gone ? '털림' : '무사'} · 소식 ${(S.fr.news || [])[0] || ''}`);
     return { out, bad };
   });
