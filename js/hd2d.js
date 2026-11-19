@@ -603,7 +603,8 @@ function placeCam(F, dt) {
 }
 const V = () => new T.Vector3();
 // 평면도 (x, y)에서 높이 h인 곳 → 1280×720 화면 자리
-function proj(x, y, h = 0) { const v = V().set(x, h * HS, y * ZS).project(cam); return [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H, v.z]; }
+// 평면도 (x, y)에서 땅 위로 h만큼 뜬 점이 화면 어디에 오는가. 땅의 높이(단, 계단)를 더한다: 안 더하면 단 위에 선 사람의 느낌표·화살표·말풍선이 단 높이만큼 아래에 뜬다. g: 땅 높이를 따로 줄 때
+function proj(x, y, h = 0, g = hAt(curMap, x, y)) { const v = V().set(x, h * HS + g, y * ZS).project(cam); return [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H, v.z]; }
 
 // ── 가림: 주인공 몸을 카메라에서 본 줄이 앞의 그림의 칠해진 곳을 지나면 그 그림을 옅게(occl.js와 같은 판단) ──
 const BODY = [[0, 13], [0, 9], [0, 6], [-3, 3], [3, 3]], frac = v => v - Math.floor(v);
@@ -787,7 +788,7 @@ function render(F) {
   if (cv.style.display === 'none') cv.style.display = 'block';
   if (cam.view?.enabled) cam.clearViewOffset();
   resize(); setMap(F.m.live ? winOf(F) : F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
-  { const [x, y] = proj(F.p.x, F.p.y, 8), k = post.h / H, v = V().set(F.p.x, 8 * HS, (F.p.y + 1) * ZS).applyMatrix4(cam.matrixWorldInverse);  // 구멍: 화면의 주인공 가슴 자리, 주인공 키의 0.9배 반지름
+  { const [x, y] = proj(F.p.x, F.p.y, 8), k = post.h / H, v = V().set(F.p.x, 8 * HS + hAt(curMap, F.p.x, F.p.y), (F.p.y + 1) * ZS).applyMatrix4(cam.matrixWorldInverse);  // 구멍: 화면의 주인공 가슴 자리, 주인공 키의 0.9배 반지름
     if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(x * post.w / W, (H - y) * k, HD.pxPerUnit() * CHAR * .9 * k); HOLE.uHoleZ.value = -v.z - 2; }
   shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx(F);
   fpsN++; if (now - fpsT > 1000) { fpsV = Math.round(fpsN * 1000 / (now - fpsT)); fpsN = 0; fpsT = now; const e = $('#hdfps'); if (e) e.textContent = fpsV + '장/초' + (fxNow() === 'low' ? ' (낮춤)' : ''); if (!G.auto && !HD.noGov) govern(); }
@@ -858,7 +859,7 @@ function renderBattle(B) {
 }
 // 평면도 (x, y) 둘레를 화면(1280×720)으로 옮기는 행렬. flat이면 땅에 눕힌 것, 아니면 세운 것(위로 1점 = 키 1점)
 function affine(x, y, flat) {
-  const Y = y + 1, [ex, ey] = proj(x, Y), [px, py] = proj(x + 1, Y), [vx, vy] = flat ? proj(x, Y + 1) : proj(x, Y, 1);  // 사람 판은 발끝이 y+1에 선다
+  const Y = y + 1, g = hAt(curMap, x, y), [ex, ey] = proj(x, Y, 0, g), [px, py] = proj(x + 1, Y, 0, g), [vx, vy] = flat ? proj(x, Y + 1, 0, g) : proj(x, Y, 1, g);  // 사람 판은 발끝이 y+1에 선다. 세 점의 땅 높이는 같은 값으로(단 가장자리에서 축이 기울지 않게)
   const a = px - ex, b = py - ey, c = flat ? vx - ex : ex - vx, d = flat ? vy - ey : ey - vy;
   return [a, b, c, d, ex - a * x - c * y, ey - b * x - d * y];
 }
