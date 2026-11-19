@@ -19,4 +19,6 @@ cat /tmp/out/_summary.txt
 
 `run_tests.sh`가 적는 `_summary.txt`의 `exit=0`은 "끝까지 돌았다"는 뜻이다. 값을 찍기만 하는 시험이 많으니 기록(`*.log`)을 읽는다. 기록에 오류 줄(`PAGE`, `TypeError`, `실패`, `✗` 따위)이 있으면 `exit=1(기록에 오류 줄 N개)`로 적는다.
 
+시험 파일은 저장소의 `tools/*_test.cjs`가 원본이다(`run_tests.sh`가 거기서 바로 돌린다). 2026-11-20에 둘이 더해졌다: `height_test.cjs`(높낮이 지도의 계단·닿기·가림), `hd_occl_test.cjs`(새 화면에서 서 있는 사람이 가려지는지. 12분쯤 걸려 따로 돌린다).
+
 올리기 전 검사는 저장소 맨 위에서 `bash tools/check.sh`(문법, 주석에 먹힌 코드).

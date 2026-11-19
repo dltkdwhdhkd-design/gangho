@@ -146,10 +146,14 @@ Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel si
 
 HK3(절벽 앞면 둘, 모서리 둘, 바위 계단, 이끼 바위)는 받았다. 같은 바위 빛과 도트 굵기로 이어 간다. 그릴 때 HK3 그림을 같이 보여 준다(위 "참고 그림").
 
-#### HK4: 절벽 더 여섯 (정면에 가깝게 비스듬히, 3열 2행)
+**2026-11-20에 바뀐 것.** 바위, 바위산, 절벽은 이제 그림 판을 세우지 않고 블렌더 모형으로 세운다(그림 판은 눕힌 땅 위에서 종이처럼 보였다). 그래서 절벽 "조각 그림"은 더 필요 없고, 모형 겉에 입힐 **이어 붙는 바위 무늬**가 필요하다. HK4를 그것으로 바꿨다.
+
+#### HK4: 바위 무늬 여섯 (정면, 이어 붙는 정사각형, 3열 2행)
+
+이 장만은 위 "규칙" 가운데 둘을 따르지 않는다: 무늬라서 빛 방향이 없어야 하고("빛은 왼쪽 위에서"가 아니다), 칸마다 정사각형을 꽉 채운다(칸 사이는 가는 파란 줄만).
 
 ```
-Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the earlier cliff sheet HK3 (layered grey-brown rock blocks with a grass top; open the HK3 image linked in this document), solid flat pure blue #0000FF background, wide gaps, nothing touching. 1) a tall straight cliff face section, twice as tall as the earlier ones, left and right edges cut straight so copies tile side by side, no grass on top, 2) a long strip of overhanging grass and moss edge only (the top fringe of a cliff), tiles seamlessly left to right, 3) a narrow rock ledge sticking out of a cliff with a few tufts of grass, 4) a pile of fallen boulders and rubble at the foot of a cliff, 5) a small twisted pine growing out of a crack in a rock, 6) a boulder draped with hanging vines. Crisp chunky pixels, no anti-aliasing, no text.
+Texture sheet for a pixel-art wuxia RPG: six square seamless tileable rock textures in a grid of 3 columns x 2 rows, the squares separated by a thin pure blue #0000FF gutter. Flat front view, no perspective, no cast shadows, even lighting. Each square is filled edge to edge and tiles seamlessly on all four sides. Same pixel size, outline weight and colours as the rock part of the earlier cliff sheet HK3 (open the HK3 image linked in this document). 1) layered grey-brown rock strata cracked into uneven blocks (the HK3 rock, without any grass), 2) pale grey granite with long cracks, 3) the same grey-brown rock half covered with patches of green moss, 4) red sandstone in horizontal layers, 5) rock under snow: mostly white snow with dark rock showing through in streaks, 6) weathered dressed stone blocks of a retaining wall in regular courses. Crisp chunky pixels, no anti-aliasing, no text.
 ```
 
 파일 이름: `HK4.png`

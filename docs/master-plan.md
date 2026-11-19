@@ -24,8 +24,8 @@
 **시험**
 - 시험 도구는 `tools/dev/`에 있다. 새 작업 환경이면: `mkdir -p /tmp/pw && cp tools/dev/* /tmp/pw/ && cd /tmp/pw && npm i` (playwright). `launch_patch.cjs`는 `/usr/bin/google-chrome`을 쓴다. 없으면 `npx playwright install chromium` 뒤 그 파일의 `executablePath` 줄을 지운다.
 - 서버: `bash /tmp/pw/srv.sh` (저장소의 **윗 폴더**에서 8002번. 주소는 `http://localhost:8002/gangho/`). 연결이 안 되면 다시 실행.
-- 시험 실행: `bash /tmp/pw/run_tests.sh <결과폴더> http://localhost:8002/gangho/ playthrough.cjs door_test.cjs reach_test.cjs …` → `<결과폴더>/_summary.txt`에 `exit=0`이면 끝까지 돈 것이다. **그것만으로 통과라고 하지 않는다**: 37개 가운데 23개는 값을 찍기만 하니 기록(`<결과폴더>/*.log`)을 읽는다. 기록에 오류 줄이 있으면 요약에 `exit=1(기록에 오류 줄 N개)`로 적힌다(`docs/checklist.md` Q7).
-- **매 작업 뒤 반드시**: `playthrough.cjs door_test.cjs reach_test.cjs`. 전투를 건드렸으면 `free_test.cjs war_test.cjs jh_test.cjs companion_test.cjs`, 새 화면을 건드렸으면 `hd2d_test.cjs occlude_test.cjs`, 이야기를 건드렸으면 `side_test.cjs heroine_test.cjs`도.
+- 시험 실행: `bash /tmp/pw/run_tests.sh <결과폴더> http://localhost:8002/gangho/ playthrough.cjs door_test.cjs reach_test.cjs …` → `<결과폴더>/_summary.txt`에 `exit=0`이면 끝까지 돈 것이다. **그것만으로 통과라고 하지 않는다**: 39개 가운데 23개는 값을 찍기만 하니 기록(`<결과폴더>/*.log`)을 읽는다. 기록에 오류 줄이 있으면 요약에 `exit=1(기록에 오류 줄 N개)`로 적힌다(`docs/checklist.md` Q7).
+- **매 작업 뒤 반드시**: `playthrough.cjs door_test.cjs reach_test.cjs`. 전투를 건드렸으면 `free_test.cjs war_test.cjs jh_test.cjs companion_test.cjs`, 새 화면을 건드렸으면 `hd2d_test.cjs occlude_test.cjs`, 이야기를 건드렸으면 `side_test.cjs heroine_test.cjs`도. **지도의 높낮이나 소품 자리를 건드렸으면** `height_test.cjs`(계단이 이어지는지, 출구·사람·자리가 걸어서 닿는지, 남쪽 턱이 사람을 가리지 않는지)와 `hd_occl_test.cjs`(새 화면에서 서 있는 사람이 집·소품·절벽에 가려지지 않는지. 지도 78곳을 도는 데 12분쯤)도.
 - `world_test.cjs`의 "청하진 도착칸 막힘" 한 줄은 예전부터 나는 것이다.
 - **화면은 찍어서 눈으로 본다.** `tools/dev/fxshot.cjs`(전투, `SK=초식id,… WAIT=밀리초`), `shotmap.cjs`(`MAP= X= Y=`), `bshot.cjs`. 찍은 그림을 열어 보고, 어색하면 고친 뒤 보고한다.
 - 시험에서 404 콘솔 오류가 나도 종료 값이 0이면 통과다(없는 그림 자리를 찔러 보는 것).
