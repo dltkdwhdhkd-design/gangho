@@ -25,6 +25,10 @@ class MapDef {
   water(x, y, w, h) { return this.fill(x, y, w, h, 2); }
   // 땅 높낮이(새 화면이 그린다). 칸마다 높이 단(0이 보통 땅, 한 단은 사람 키의 6할쯤). 계단 칸(stair: 높은 쪽 방향)은 비탈로 잇는다.
   // 걷기는 따로 바꾸지 않는다: 높이가 다른 걸을 수 있는 칸 사이(계단이 아닌 곳)에 얇은 막힘을 넣는 것(heightEdges)으로 끝낸다
+  // 손으로 그리는 높낮이: 줄마다 한 글자가 한 칸(지도 왼쪽 위에서 x0, y0만큼 떨어진 데부터). 숫자 0~9는 그 단, a~i는 1~9단 아래, '.'은 그대로 둔다. 줄인 지도(k가 1이 아닌 지도)에는 쓰지 않는다
+  heights(rows, x0 = 0, y0 = 0) { this.hgt ||= this.g.map(r => r.map(() => 0)); rows.forEach((row, j) => [...row].forEach((c, i) => { const y = y0 + j, x = x0 + i; if (c === '.' || this.hgt[y]?.[x] === undefined) return; this.hgt[y][x] = c >= 'a' ? -(c.charCodeAt(0) - 96) : +c; })); return this; }
+  // 단의 면을 무엇으로 세울지. rocky(): 바위 절벽(산길, 골짜기. 새 화면이 면을 따라 블렌더 절벽 조각을 쌓는다). 안 부르면 돌 축대(마을, 문파)
+  rocky() { this.face = 'rock'; return this; }
   terrace(x, y, w, h, lv) { const k = this.k; if (k !== 1) { const a = Math.round(x * k), b = Math.round(y * k); w = Math.round((x + w) * k) - a; h = Math.round((y + h) * k) - b; x = a; y = b; }
     this.hgt ||= this.g.map(r => r.map(() => 0)); for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (this.hgt[j] && this.hgt[j][i] !== undefined) this.hgt[j][i] = lv; return this; }
   stairs(x, y, w, h, up = 'n') { const k = this.k; if (k !== 1) { const a = Math.round(x * k), b = Math.round(y * k); w = Math.round((x + w) * k) - a; h = Math.max(1, Math.round((y + h) * k) - b); x = a; y = b; }
@@ -113,7 +117,13 @@ class MapDef {
     } else paintGround(x, this.g, this.biome);
     if (this.pave) for (const p of this.pave) paintPave(x, p);
     for (const s of this.ground || []) drawIso(x, s);
-    if (this.hgt) { x.fillStyle = 'rgba(20,16,10,.35)'; for (let j = 0; j < this.h - 1; j++) for (let i = 0; i < this.w; i++) if (this.hgt[j][i] > this.hgt[j + 1][i] && !this.stair?.[i + ',' + j] && !this.stair?.[i + ',' + (j + 1)]) x.fillRect(i * TS, (j + 1) * TS, TS, 3); }  // 2D: 높은 칸 아래 가장자리에 그늘 띠
+    // 2D: 단의 가장자리를 그린다. 남쪽이 낮으면 높은 칸 아래에 그늘 띠, 북쪽이 낮으면 가는 줄, 동서로 높이가 다르거나 계단 옆이면 세로 줄(안 그리면 보이지 않는 벽이 된다). 계단 칸에는 디딤 줄
+    if (this.hgt) { const Hg = this.hgt, st = (i, j) => !!this.stair?.[i + ',' + j]; x.fillStyle = 'rgba(20,16,10,.35)';
+      for (let j = 0; j < this.h; j++) for (let i = 0; i < this.w; i++) { const h = Hg[j][i];
+        if (j + 1 < this.h && h > Hg[j + 1][i] && !st(i, j) && !st(i, j + 1)) x.fillRect(i * TS, (j + 1) * TS, TS, 3);
+        if (j > 0 && h > Hg[j - 1][i] && !st(i, j - 1)) x.fillRect(i * TS, j * TS - 1, TS, 2);
+        if (i + 1 < this.w && (h !== Hg[j][i + 1] || st(i, j) !== st(i + 1, j))) x.fillRect((i + 1) * TS - 1, j * TS, 2, TS); }
+      x.fillStyle = 'rgba(255,240,205,.3)'; for (const k in this.stair || {}) { const [i, j] = k.split(',').map(Number); for (let q = 0; q < 4; q++) x.fillRect(i * TS + 1, j * TS + 1 + q * 4, TS - 2, 1); } }
   }
   render() {
     const c = document.createElement('canvas'); c.width = this.w * TS; c.height = this.h * TS; const x = c.getContext('2d', { willReadFrequently: !this.room });
@@ -326,6 +336,37 @@ export function buildMaps() {
   function pick2(a, n) { return a[n % a.length]; }
   m.scatter(['bush1', 'fern1'], 18, 7);
   m.exit(0, 11, 1, 4, 'cheongha', 43.5, 15.5, 2).exit(39, 4, 1, 4, 'fort', 1, 13, 3, { when: 'fort_open', lock: '산채 입구다. 준비가 끝나면 다시 오자.' }).exit(39, 17, 1, 4, 'cloudmt', 22, 36, 1, { when: 'cloud_open', lock: '이 길 너머는 창운산이다. 지금은 갈 이유가 없다.' });
+  // 높낮이(2026-11-19): 산길답게 북쪽으로 올라간다. 서쪽 들머리와 남동쪽 길이 0단, 북쪽 길(흑풍채 쪽)이 놓인 바위 턱이 3단, 그 뒤는 바위벽(7단), 남서쪽은 골짜기로 두 번 떨어진다(-3단, -6단)
+  // 턱은 한 번에 세 단 넘게 오르내린다(한 단씩 여러 번 나누면 밭두렁처럼 보인다. 세 단이 사람 키의 1.7배). 두 세로 길은 벼랑을 파고든 세 칸 돌계단으로 턱에 오른다(계단 칸은 제 단에서 남쪽 칸의 단으로 내려간다)
+  // 사람과 일감 자리(15,10 / 19,10 / 20,12.6은 아래, 24,9 / 33,8은 턱 위, 31,20은 남동쪽)는 모두 길에서 걸어서 닿는다. 높은 땅은 늘 북쪽에 있어 사람을 가리지 않는다
+  m.heights([
+      '7777777777777777777777777777777777777777',
+      '7777777777777777777777777777777777777777',
+      '7777777777777777777777777777777777777777',
+      '7777777777777777777777777333333377777777',
+      '7777777333333777773333333333333333333333',
+      '3333333333333333333333333333333333333333',
+      '3333333333333333333333333333333333333333',
+      '3333333333333333333333333333333333333333',
+      '3333333333333333333322333333333333333333',
+      '0003333300033333333311333333333333333333',
+      '0000000000000000000000003322333333333333',
+      '0000000000000000000000003311333333000333',
+      '0000000000000000000000000000000000000000',
+      '0000000000000000000000000000000000000000',
+      '0000000000000000000000000000000000000000',
+      '0000000000000000000000000000000000000000',
+      'ccccc00000cccccc000000000000000000000000',
+      'cccccccccccccccccccc00000000000000000000',
+      'cccccccccccccccccccccc000000000000000000',
+      'ffffcccccffffffccccccc000000000000000000',
+      'fffffffffffffffccccccccc0000000000000000',
+      'ffffffffffffffffffffcccc0000000000000000',
+      'ffffffffffffffffffffffff0000000000000000',
+      'ffffffffffffffffffffffff0000000000000000',
+  ]).stairs(20, 7, 2, 3).stairs(26, 9, 2, 3).rocky().heightEdges();
+  // 바위벽 위와 골짜기 속에 벼랑바위(블렌더 모형). 북쪽 벽 위에 줄지어, 남서쪽 골짜기 속에 몇(남동쪽 가장자리에는 안 둔다: 길 앞을 가린다)
+  for (const [x, y] of [[2, 0], [9, 0], [16, -1], [23, 0], [30, -1], [36, 0], [0, 4], [5, 3], [1, 21], [9, 22], [20, 22]]) m.put('crag_b', x, y, { nosolid: true });
   // 흑풍채
   m = M('fort', 36, 26, { name: '흑풍채', bgm: 'dungeon', biome: 'dusk', arena: 'fort' });
   m.fill(1, 2, 34, 22, 1).fill(0, 11, 2, 4, 1).fill(16, 23, 4, 3, 1);  // 목책 안 마당, 서쪽 샛문 길, 남쪽 정문 길. 목책 밖은 맨땅
@@ -411,6 +452,29 @@ export function buildMaps() {
   for (const [nm, x, y] of [['plum', 3, 3], ['plum', 12, 2], ['plum', 22, 4], ['plum', 6, 14], ['plum', 18, 15], ['plum', 26, 14], ['boulder', 15, 6], ['boulder', 10, 15], ['tree_white', 26, 3]]) m.put(nm, x, y);
   m.border(['rocks', 'plum', 'boulder'], [[0, 9, 2, 5], [28, 9, 3, 5]], 4);
   m.scatter(['flower2', 'flower3', 'bush3'], 20, 61);
+  // 높낮이(2026-11-20): 이름대로 벼랑길이다. 길 북쪽은 매화가 핀 바위벽(4단), 남쪽은 두 번 떨어지는 벼랑(-4단, -8단). 3부 2장에서 이 벼랑 밑으로 떨어진다
+  m.heights([
+      '444444444444444444444444444444',
+      '444444444444444444444444444444',
+      '444444444444444444444444444444',
+      '444444444444444444444444444444',
+      '444444444444444444444444444444',
+      '444444444444444444444444444444',
+      '444444444444444444444444444444',
+      '444444000000044444400000044444',
+      '000000000000000000000000000000',
+      '000000000000000000000000000000',
+      '000000000000000000000000000000',
+      '000000000000000000000000000000',
+      '000000000000000000000000000000',
+      '000000000000000000000000000000',
+      'ddddd000000dddddd000000ddddddd',
+      'dddddddddddddddddddddddddddddd',
+      'dddddddddddddddddddddddddddddd',
+      'hhhhhhhhhdddddddhhhhhhhhhddddd',
+      'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh',
+      'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh',
+  ]).rocky().heightEdges();
   // 벼랑 아래 동굴
   m = M('cliffcave', 16, 12, { name: '벼랑 아래 동굴', bgm: 'cave', room: true, roomStyle: 1, arena: 'moon', tint: 'rgba(10,20,40,.3)' });
   m.put('boulder', 2, 2).put('boulder', 12, 8).put('jar', 12, 2).put('tablet', 7, 2).put('tablet2', 9, 2).put('fern1', 3, 8, { flat: true }).put('flower1', 5, 3, { flat: true });
