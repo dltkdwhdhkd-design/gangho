@@ -26,5 +26,8 @@ const { chromium } = require('playwright');
     }
     out.unshift(`문 ${doors}곳 가운데 못 들어가는 문 ${bad}곳`); return out;
   });
-  console.log(r.join('\n')); console.log(errs.slice(0, 5).join('\n') || '오류 없음'); await b.close();
+  console.log(r.join('\n')); console.log(errs.slice(0, 5).join('\n') || '오류 없음');
+  // 못 들어가는 문이 하나라도 있거나 오류가 찍히면 실패로 끝낸다(전에는 찍기만 하고 0으로 끝났다)
+  if (!/못 들어가는 문 0곳/.test(r[0] || '') || errs.length) { console.log('실패'); process.exitCode = 1; } else console.log('통과');
+  await b.close();
 })();

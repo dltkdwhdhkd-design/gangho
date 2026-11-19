@@ -24,5 +24,8 @@ const { chromium } = require('playwright');
     }
     return out;
   });
-  console.log(r.join('\n') || '막힌 출구 없음'); console.log(errs.slice(0, 5).join('\n') || '오류 없음'); await b.close();
+  console.log(r.join('\n') || '막힌 출구 없음'); console.log(errs.slice(0, 5).join('\n') || '오류 없음');
+  // 막힌 출구가 하나라도 있거나 오류가 찍히면 실패로 끝낸다(전에는 찍기만 하고 0으로 끝났다)
+  if (r.length || errs.length) { console.log(`실패: 막힌 출구 ${r.length}곳, 오류 ${errs.length}`); process.exitCode = 1; } else console.log('통과');
+  await b.close();
 })();

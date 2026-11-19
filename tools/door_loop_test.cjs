@@ -10,4 +10,7 @@ const { chromium } = require('playwright');
       const ex = f.m.portals.find(e => e.to === 'cheongha'); if (!ex) { out.push(q.to + ': 나가는 곳 없음'); continue; } f.p.x = ex.x + ex.w / 2; f.p.y = ex.y + ex.h / 2; for (let i = 0; i < 80 && f.m.id !== 'cheongha'; i++) await new Promise(r => setTimeout(r, 30));
       for (let i = 0; i < 80 && f.busy; i++) await new Promise(r => setTimeout(r, 30)); await new Promise(r => setTimeout(r, 1200)); out.push(`${q.to}: 나온 뒤 ${f.m.id === 'cheongha' ? '밖에 있음' : '다시 들어감(' + f.m.id + ')'}`); }
     return out; });
-  console.log(r.join('\n')); console.log(errs.slice(0, 3).join('\n') || '오류 없음'); await b.close(); })();
+  console.log(r.join('\n')); console.log(errs.slice(0, 3).join('\n') || '오류 없음');
+  // 문에서 나오자마자 다시 들어가는 곳이 있거나 오류가 찍히면 실패로 끝낸다(전에는 찍기만 하고 0으로 끝났다)
+  const again = r.filter(s => /다시 들어감/.test(s)).length; if (again || !r.length || errs.length) { console.log(`실패: 다시 들어간 문 ${again}곳, 본 문 ${r.length}곳, 오류 ${errs.length}`); process.exitCode = 1; } else console.log('통과');
+  await b.close(); })();
