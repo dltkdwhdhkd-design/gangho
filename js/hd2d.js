@@ -16,8 +16,12 @@ import { ROLE } from './talkdata.js';
 const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = .857 / Math.sin(PITCH) /* 원근 때문에 주인공 발밑에서 세로 걸음이 가로보다 1.17배 빨라 보이던 것을 맞춘다(평면도 1점이 화면에서 가로와 세로 같은 길이) */, HS = 1 / Math.cos(PITCH);
 const CHAR = 15, AHEAD = .04;
 // 사람 크기: 집·소품에 비해 사람이 작아 보여서(일검풍운결은 사람이 계단 한 칸의 두세 배) 새 화면의 사람을 1.3배로 세우고, 카메라는 1.12배 뒤로 뺀다. 방은 js/field.js PSC
-// 크기 기준(일검풍운결 비교, 2026-11-18): 사람 키 ≈ 문 높이의 0.9, 큰 독 ≈ 사람의 0.65, 등롱 기둥 ≈ 사람의 1.5, 사람은 화면 높이의 약 1/7
-export const ACTK = 1.05, CAMK = .63, PROPK = .62;
+// 크기 기준(일검풍운결 비교, 2026-11-18): 사람 키 ≈ 문 높이의 0.9, 큰 독 ≈ 사람의 0.65, 등롱 기둥 ≈ 사람의 1.5. (이때 사람이 화면 높이의 1/7쯤이라고 적었는데 2026-11-19에 재 보니 CAMK .63에서 1/5.4였다. 기준 그림은 1/8.5. docs/plan-2026-11-19.md 2장)
+// 주소에 &camk=0.95처럼 붙이면 마을 카메라 거리를 바꿔 미리 볼 수 있다(값이 클수록 멀다. 정해지면 아래 숫자를 바꾼다)
+const qn = k => { try { const v = parseFloat(new URLSearchParams(location.search).get(k)); return v > 0 ? v : 0; } catch { return 0; } };
+export const ACTK = 1.05, CAMK = qn('camk') || .63, PROPK = .62;
+// 큰 지도(world)는 멀리 봐야 하는 지도라 마을 값(CAMK)을 쓰면 땅 그림이 뭉개지고 좁게 보인다. 큰 지도는 만들 때 맞춘 값을 따로 둔다
+const CAMW = 1.12, ACTW = 1.3;
 // 방 안과 전투는 따로 맞춰 둔 크기를 그대로 둔다(방: 사람 PSC 배, 카메라 CAMR / 전투: 사람 ACTB 배, 카메라 CAMB)
 const CAMR = 1.12, ACTB = 1.3, CAMB = 1.12;  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
 const W = 1280, H = 720;
@@ -48,7 +52,7 @@ export const HD = {
   gnd: () => ground && { pos: ground.position.toArray().map(Math.round), box: (() => { ground.geometry.computeBoundingBox(); const b = ground.geometry.boundingBox; return [b.min.toArray().map(Math.round), b.max.toArray().map(Math.round)]; })(), map: curMap?.id, win: curMap?.win, hgt: !!curMap?.hgt, cam: cam.position.toArray().map(Math.round) },
   init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
-  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : ACTK, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : m?.id === 'world' ? ACTW : ACTK, bodyH: (m, battle) => 16 * OLDK * (battle ? ACTB : HD.actK(m)) /* 사람 그림 한 칸의 키(평면도 점). 화면에서 사람 키를 잴 때 쓴다(tools/dev/tour.cjs) */, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
   dbg: () => ({ fg: FG.map(o => [o.visible, o.position.toArray().map(Math.round), o.scale.toArray().map(Math.round), o.material.type, o.material.map?.image?.width, (() => { const c = o.material.map?.image; if (!c?.getContext) return -1; const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let a = 0; for (let i = 3; i < d.length; i += 4) a += d[i]; return Math.round(a / (d.length / 4)); })()]), cam: cam.position.toArray().map(Math.round), far: cam.far, m: mtns?.children.map(o => [o.position.toArray().map(Math.round), o.visible, o.material.color.getHexString()]) }),
   stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, buildMs, fps: fpsV, low: fxNow() === 'low', size: R ? [R.domElement.width, R.domElement.height] : null }),
@@ -536,7 +540,7 @@ function actor(t, sx, sy, sw, sh, flip, x, y, size, lift = 0, wx = 1) {
   used++; const M = matOf(t); o.material = M.m; o.customDepthMaterial = M.d; o.visible = true;
   const iw = t.image.width, ih = t.image.height, u0 = sx / iw, u1 = (sx + sw) / iw, v1 = 1 - sy / ih, v0 = 1 - (sy + sh) / ih, uv = o.geometry.attributes.uv;
   const a = flip ? u1 : u0, b = flip ? u0 : u1; uv.setXY(0, a, v1); uv.setXY(1, b, v1); uv.setXY(2, a, v0); uv.setXY(3, b, v0); uv.needsUpdate = true;
-  size *= curMap?.room ? PSC : ACTK;  // 사람 크기(ACTK), 방 안은 더 크게(js/field.js PSC)
+  size *= HD.actK(curMap);  // 사람 크기(ACTK), 방 안은 더 크게(js/field.js PSC)
   o.scale.set(size * wx, size * HS, 1); o.position.set(x, lift * HS + hAt(curMap, x, y), (y + 1) * ZS + .5);  // 2D는 발끝을 y+1에 그렸다. 같은 줄의 소품보다 반 점 앞
   return o;
 }
@@ -561,7 +565,7 @@ function frameOf(key, dirCol, row, diag) {
 }
 function syncActors(F) {
   used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; const sz = o.size || (KIDS.has(key) ? 11 : 16); actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, sz * OLDK, o.lift || 0, .84); blob(x, y, sz / 16); };
-  for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16 * (OLDSC[n.stamp] ?? .66) / (curMap?.room ? PSC : ACTK)); continue; }  // 일감 표시용 소품(걸레질 자리의 독 따위)은 사람 크기 배율을 안 받고 바닥 소품 크기로(방 안에서 사람만 한 독이 되던 것)
+  for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16 * (OLDSC[n.stamp] ?? .66) / HD.actK(curMap)); continue; }  // 일감 표시용 소품(걸레질 자리의 독 따위)은 사람 크기 배율을 안 받고 바닥 소품 크기로(방 안에서 사람만 한 독이 되던 것)
     const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.id && PEOPLE.has('n_' + n.id) ? 'n_' + n.id : n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : ROLE[n.hint] && PEOPLE.has('n_' + ROLE[n.hint]) ? 'n_' + ROLE[n.hint] : null, yt = (pk && previewTex(pk)) || (key === 'chars/Princess' && previewTex('yun')) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
   const walker = (n, row) => { const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : null, yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
   for (const r of F.roam) if (!r.gone) { walker(r, Math.floor(r.walk || 0) % 4); for (const q of r.crew || []) walker(q, Math.floor(q.walk || 0) % 4); }  // 떠도는 무리·길손과 그 뒤를 따르는 사람들
@@ -578,7 +582,7 @@ function syncActors(F) {
 const camT = new (class { constructor() { this.x = -1; this.y = 0; this.z = 0; } set(x, y, z) { this.x = x; this.y = y; this.z = z; } })();
 let dist = 300, lastT = 0, lastF = null;
 function placeCam(F, dt) {
-  const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom * (m.room ? CAMR : CAMK); dist = vh / (2 * Math.tan(FOV / 2 * DEG));
+  const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom * (m.room ? CAMR : m.id === 'world' ? CAMW : CAMK); dist = vh / (2 * Math.tan(FOV / 2 * DEG));
   const ty = 8 * HS, hc = ty + dist * Math.sin(PITCH), back = dist * Math.cos(PITCH), f = FOV / 2 * DEG, hw = dist * Math.tan(f) * W / H;
   // 화면 위 끝과 아래 끝이 닿는 땅이 지도 밖으로 너무 나가지 않게 겨냥점을 묶는다(2D 카메라가 지도 안에 머물던 것과 같다)
   // 남쪽은 화면 아래 끝이 지도 밖으로 나가지 않게 묶고, 북쪽은 주인공이 끝까지 가운데 오게 둔다(지도 너머는 안개와 넓은 땅. 먼 산은 5단계)
