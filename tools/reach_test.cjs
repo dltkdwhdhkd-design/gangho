@@ -18,7 +18,9 @@ const { chromium } = require('playwright');
       for (let i = 0; i < Wd * Hd; i++) { if (lab[i] >= 0 || !ok(i % Wd, Math.floor(i / Wd))) continue; const Q = [i]; lab[i] = n; let c = 0; while (Q.length) { const k = Q.pop(); c++; const x = k % Wd, y = Math.floor(k / Wd); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= Wd || Y >= Hd) continue; const j = Y * Wd + X; if (lab[j] >= 0 || !ok(X, Y)) continue; lab[j] = n; Q.push(j); } } size.push(c); n++; }
       // 출구마다 닿는 칸의 덩어리
       const comp = q => { const s = new Set(); for (let y = Math.floor((q.y - 12) / S); y <= Math.floor((q.y + q.h + 12) / S); y++) for (let x = Math.floor((q.x - 12) / S); x <= Math.floor((q.x + q.w + 12) / S); x++) { if (x < 0 || y < 0 || x >= Wd || y >= Hd) continue; const l = lab[y * Wd + x]; if (l >= 0) s.add(l); } return s; };
-      const cs = M.portals.map(q => [q, comp(q)]); const main = size.indexOf(Math.max(...size));
+      // 본 덩어리: 출구가 가장 많이 닿는 덩어리(같으면 큰 쪽). 전에는 가장 넓은 덩어리로 잡았는데, 높낮이가 생기면서 못 올라가게 만든 벼랑 위(화산 절벽길의 북쪽 바위벽 위)가 길보다 넓은 지도가 나왔다
+      const cs = M.portals.map(q => [q, comp(q)]), cnt = {}; for (const [, c] of cs) for (const l of c) cnt[l] = (cnt[l] || 0) + 1;
+      const main = +Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || size[b] - size[a])[0];
       const bad = cs.filter(([q, s]) => !s.has(main)).map(([q]) => `${q.to}@${Math.round(q.x / 16)},${Math.round(q.y / 16)}`);
       if (bad.length) out.push(`${id}(${M.name}) 막힌 출구: ${bad.join(' ')}`);
     }
