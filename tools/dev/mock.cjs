@@ -1,5 +1,5 @@
 // 본보기 밑그림 시험: 실행 중에 지도에 소품과 단을 얹어 찍는다(게임 파일은 바꾸지 않는다).
-//   WHAT=hall|hwasan  MOD=1(얹는다)|0(지금 그대로)  Q='&gk=0.6&time=morning'  OUT=/tmp/mock
+//   WHAT=hall|hwasan|cloud  MOD=1(얹는다)|0(지금 그대로)  Q='&gk=0.6&time=morning'  OUT=/tmp/mock
 const { chromium } = require('playwright'); const fs = require('fs');
 (async () => { const OUT = process.env.OUT || '/tmp/mock', WHAT = process.env.WHAT || 'hall', MOD = process.env.MOD === '1'; fs.mkdirSync(OUT, { recursive: true });
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } }); const errs = [];
@@ -21,10 +21,13 @@ const { chromium } = require('playwright'); const fs = require('fs');
       log.push('뒤: 소품 ' + m.stamps.length + ', 종류 ' + new Set(m.stamps.map(s => s.name)).size); }
     if (WHAT === 'hwasan') { m = M.hwasan; log.push('소품 ' + m.stamps.length);
       if (MOD) { m.terrace(0, 0, 30, 4, 4).terrace(0, 4, 30, 2, 2).terrace(0, 6, 30, 2, 1).terrace(0, 13, 30, 2, -2).terrace(0, 15, 30, 5, -5); m.heightEdges(); } }
+    if (WHAT === 'cloud') { m = M.cloudmt; log.push('소품 ' + m.stamps.length);
+      if (MOD) { m.terrace(0, 0, 46, 12, 2).terrace(0, 12, 46, 15, 1).stairs(21, 11, 4, 1).stairs(21, 26, 4, 1); m.heightEdges(); } }
     return log.join(' / '); }, [WHAT, MOD]);
   console.log(info);
   const at = async (id, x, y, name) => { const r = await p.evaluate(async ([id, x, y]) => { const G = __G, sl = t => new Promise(r => setTimeout(r, t)); G.field.load(id, x, y, 0); for (let i = 0; i < 600 && G.field.busy; i++) await sl(50); for (let i = 0; i < 60 && G.hd.modelsPending > 0; i++) await sl(100); await sl(3000); const F = G.field, P = F.p; return `${F.m.id} (${(P.x / 16).toFixed(1)}, ${(P.y / 16).toFixed(1)}) 막힘 ${F.m.blocked(P.x, P.y)} 새 화면 ${G.hd.active(F.m)}`; }, [id, x, y]); await p.screenshot({ path: `${OUT}/${name}.png`, timeout: 180000 }); console.log(name, r); };
   const tag = MOD ? 'mod' : 'now';
   if (WHAT === 'hall') { await at('hall_in', 9, 7.6, `hall_${tag}_a`); await at('hall_in', 9, 10.8, `hall_${tag}_b`); }
+  if (WHAT === 'cloud') { await at('cloudmt', 21, 9.5, `cloud_${tag}_a`); await at('cloudmt', 22.5, 20, `cloud_${tag}_b`); }
   if (WHAT === 'hwasan') { await at('hwasan', 14, 11.5, `hwasan_${tag}_a`); await at('hwasan', 22, 10.5, `hwasan_${tag}_b`); }
   console.log('오류', errs.length, errs.slice(0, 4).join(' | ')); await b.close(); })();
