@@ -1,12 +1,14 @@
 // 처음부터 끝까지 이야기를 자동으로 진행하며 오류와 밸런스를 확인한다
+// 쓰는 법: node playthrough.cjs [난이도 normal|hard] [봇 솜씨 .6] [clans|x] [길 jeong|sa|ma|free] [alt 0|1: 갈림에서 둘째 보기]
+// 보스 재기: SNAP=1 (끝까지 간 뒤 보스마다 다시 싸워 이긴 판 수를 적는다). ONLY=정규식(그 보스만), SOLO=정규식(그 보스는 동료 없이), N=판 수, HD=1(새 화면에서. 느리다), HDB=1(옛 화면으로 그리되 싸움판만 새 화면 무대 크기로. 새 화면 세기를 빨리 잴 때)
 const { chromium } = require('playwright');
 const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 400))); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); else if (m.text().startsWith('LOG')) console.log(m.text()); });
-  await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html')); await p.waitForFunction('window.__G', { timeout: 60000 });
-  const res = await p.evaluate(async ({ diff, skill, clans, route, alt, snapOn }) => {
-    const process_clans = clans; const G = __G, D = G.dbg; G.manual = true; G.auto = true; G.speedup = 2000; G.bot = { skill };
+  await p.goto((process.env.GAME_URL || 'http://127.0.0.1:8123/index.html') + (process.env.HD ? '?hd2d=1' : '')); await p.waitForFunction('window.__G', { timeout: 60000 });  // 환경 변수 HD를 주면 새 화면에서 잰다(싸움판이 무대 안쪽으로 좁다)
+  const res = await p.evaluate(async ({ diff, skill, clans, route, alt, snapOn, only, hdb }) => {
+    const process_clans = clans; const G = __G, D = G.dbg; G.hdBounds = hdb; G.manual = true; G.auto = true; G.speedup = 2000; G.bot = { skill };
     const log = { push: t => console.log('LOG ' + t), join: () => '' }; const sleep = () => new Promise(r => setTimeout(r, 0));
     const pump = async (n = 3) => { for (let i = 0; i < n; i++) { G.fast(60); await sleep(); } };
     G.S = D.newState('진소', 'BlueSamurai', 'm', diff); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null;
@@ -66,12 +68,12 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
       const med = a => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
       for (const kind of ['good', 'human']) { G.bot = kind === 'good' ? { skill: .6 } : { skill: .3, rest: .7, skillUse: .025 };
         console.log('LOG ==== ' + kind);
-        for (const sn of snaps) { const T = [], H = [], P = []; let win = 0; const N = 5;
+        for (const sn of snaps) { const T = [], H = [], P = []; let win = 0; const N = +only.n || 5; if (only.re && !new RegExp(only.re).test(sn.cfg.title || '')) continue; if (only.solo && new RegExp(only.solo).test(sn.cfg.title || '')) sn.cfg = { ...sn.cfg, allies: [] };
           for (let i = 0; i < N; i++) { G.S = JSON.parse(sn.s); G.S.flags.step = 'end'; const p0 = G.S.potion; G.scene = 'field'; G.battle = null; let out = null; D.fight({ ...sn.cfg, noIntro: true }).then(r => out = r); const B = G.battle; let n = 0; while (!out && n++ < 900) { G.fast(60); await sleep(); } if (B.outcome === 'win' && B.p.hp > 0) win++; T.push(B.t); H.push(B.p.hp / B.p.maxHp); P.push(p0 - G.S.potion); }
           const c = sn.cfg; console.log(`LOG ${(c.title || '').padEnd(14)} lv${JSON.parse(sn.s).lv} 승${win}/${N} ${med(T).toFixed(0)}s 체력${Math.round(med(H) * 100)}% 약${med(P)}`); }
       } return { lv: 0 }; }
     return { log, lv: S.lv, side: S.side, ending: S.flags.ending, end9: S.flags.ending9, rep: S.rep, titles: S.titles.length, step: S.flags.step, skills: S.skills, silver: S.silver, love: S.love, loses, time: S.time, flags: Object.keys(S.flags).length, pages: S.pages };
-  }, { diff, skill, clans: process.argv[4] === 'clans', route: process.argv[5] || 'jeong', alt: +(process.argv[6] || 0), snapOn: !!process.env.SNAP });
+  }, { diff, skill, clans: process.argv[4] === 'clans', route: process.argv[5] || 'jeong', alt: +(process.argv[6] || 0), snapOn: !!process.env.SNAP, only: { re: process.env.ONLY || '', solo: process.env.SOLO || '', n: process.env.N || 0 }, hdb: !!process.env.HDB });
   const stuck = /STUCK[^\n]*/.exec(String(res.log || ''))?.[0]; delete res.log; console.log(JSON.stringify(res)); if (stuck) { console.log(stuck); await b.close(); process.exit(2); }
   console.log('ERR', errs.slice(0, 10).join('\n')); await b.close();
 })().catch(e => { console.log(String(e).slice(0, 1200)); process.exit(1); });

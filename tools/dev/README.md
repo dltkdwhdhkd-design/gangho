@@ -10,3 +10,7 @@ cat /tmp/out/_summary.txt
 ```
 
 `run_tests.sh`와 `srv.sh`에는 `/home/claude/gangho` 경로가 박혀 있다. 저장소 위치가 다르면 고친다. 화면 찍기: `fxshot.cjs`(전투), `shotmap.cjs`(지도), `bshot.cjs`. 쓰는 법은 `docs/master-plan.md` 0절.
+
+`tour.cjs`는 장면마다 한 장씩 찍으면서 새 화면인지, 사람 키가 화면 높이의 몇 분의 1인지, 싸움판 크기를 적는다. 화면을 손댄 뒤에 돌려 앞뒤를 견준다. 찍은 그림의 빛깔은 `python3 tools/tone.py <그림들>`로 잰다. 쓰는 법은 `docs/checklist.md`의 "결 재는 법".
+
+올리기 전 검사는 저장소 맨 위에서 `bash tools/check.sh`(문법, 주석에 먹힌 코드).
