@@ -1,0 +1,92 @@
+# 강호행 요청 11: 적 동작 칸 1: 산적, 거한, 수적, 궁수, 자객
+
+단계 이름 `act1` · 종류: 동작 칸 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
+
+이름 없는 적들은 걷는 도트만 있어서, 싸울 때 서 있는 그림을 기울여 흉내만 낸다. 동작 칸을 받으면 칼을 휘두르고 맞고 쓰러지는 모습이 그 그림으로 나온다.
+
+**이 단계에서 만들 것: 5개**
+
+## 규칙
+
+- 한 사람에 그림 한 장. **가로 한 줄 여섯 칸**(전체 2400×320, 한 칸 400×320). 여섯 칸 모두 **왼쪽을 보는 옆모습**.
+- 칸 순서: ① 무기를 뒤로 당겨 기를 모으는 준비 ② 무기를 크게 내지른 순간(팔과 무기가 칸 왼쪽 끝 가까이 뻗는다) ③ 휘두르고 난 뒤 거두는 자세 ④ 맞아서 뒤로 젖혀짐 ⑤ 옆으로 쓰러져 누움 ⑥ 땅을 박차고 뛰어올라 공중에 뜬 경공.
+- 그 사람의 걷는 도트와 **같은 사람, 같은 도트 굵기·색·키**로 그린다. 이미 받은 주인공의 동작 칸(참고 그림)과 같은 크기와 배치로.
+- **무기는 칸 안에 그려 넣는다**(게임이 따로 그리지 않는다). ④⑤⑥에서도 무기를 들고 있거나 옆에 떨어져 있게 한다. 무기 끝이 칸 밖으로 나가지 않게.
+- 발끝(쓰러진 칸은 몸)이 칸 아래쪽에 닿게. 여섯 칸의 발끝 높이가 같게.
+- 바탕은 투명. 투명하게 못 만들면 완전한 단색 마젠타(#FF00FF). 그림자, 빛번짐, 글자, 칸 테두리를 넣지 않는다.
+
+## 참고 그림 (모두 열어 볼 것)
+
+- **이미 받은 주인공의 검 동작 칸**(이것과 같은 크기·배치로): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/me_act.webp
+- 이미 받은 큰 칼 동작 칸의 원본(2400×320): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/me_blade-c.png
+
+주소를 못 열면 주인에게 그 파일을 올려 달라고 말한다.
+
+## 만들 것
+
+### 1. `mob_bandit-c.png` — 산적 — 키 `mob_bandit`
+
+걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_bandit-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_bandit-b.png)
+
+```text
+규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+
+무기와 몸짓: 걷는 도트에 그려진 칼 그대로. 내지름은 크게 옆으로 후려 베기.
+```
+
+### 2. `mob_brute-c.png` — 거한 — 키 `mob_brute`
+
+걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_brute-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_brute-b.png)
+
+```text
+규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+
+무기와 몸짓: 맨주먹이나 걷는 도트에 그려진 몽둥이. 내지름은 위에서 아래로 내리치기.
+```
+
+### 3. `mob_pirate-c.png` — 수적 — 키 `mob_pirate`
+
+걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_pirate-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_pirate-b.png)
+
+```text
+규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+
+무기와 몸짓: 걷는 도트에 그려진 갈고리 칼. 내지름은 낮게 베어 들어가기.
+```
+
+### 4. `mob_archer-c.png` — 궁수 — 키 `mob_archer`
+
+걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_archer-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_archer-b.png)
+
+```text
+규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+
+무기와 몸짓: 활. 준비는 시위를 당긴 자세, 내지름은 화살을 막 놓은 순간(화살은 그리지 않는다), 거둠은 화살통에 손을 뻗는 자세.
+```
+
+### 5. `mob_assassin-c.png` — 자객 — 키 `mob_assassin`
+
+걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_assassin-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_assassin-b.png)
+
+```text
+규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+
+무기와 몸짓: 단검 두 자루. 내지름은 몸을 낮춰 앞으로 찌르기.
+```
+
+## 스스로 확인
+
+- 가로 한 줄 여섯 칸이고 모두 왼쪽을 보는가
+- 칸 순서가 준비, 내지름, 거둠, 맞음, 쓰러짐, 경공인가
+- 걷는 도트와 같은 사람·굵기·키인가. 무기가 칸 안에 있는가
+- 여섯 칸의 발끝 높이가 같은가
+
+## 넘기는 것
+
+- 위의 파일 이름 그대로 넣은 압축 파일 하나: `gangho_act1.zip`. 원본 크기의 PNG로(줄이거나 잘라 내지 않는다).
+- 압축 파일을 만들 수 없으면 그림을 대화에 그대로 올리고, 그림마다 파일 이름을 한 줄씩 적는다.
+- 게임 코드는 고치지 않는다. 넣는 일은 Claude가 한다.
+
+---
+
+다음 단계: 12번 `fx3` 검기 3: 칼 부딪힘, 돌진 잔상, 절초 일자 검기 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/fx3.md

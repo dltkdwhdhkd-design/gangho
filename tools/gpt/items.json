@@ -1,0 +1,1149 @@
+{
+ "scene": [
+  {
+   "code": "WL1",
+   "title": "방 벽 무늬 여섯 (정면, 이어 붙는 정사각형, 3열 2행)",
+   "note": "벽의 넓은 면에 되풀이해 입힌다. 창도 기둥도 그리지 않는다(따로 붙인다).",
+   "prompt": "Seamless wall texture sheet in exactly the same layout, pixel size and pixel-art style as the square texture swatches (roof tiles, wooden planks, cracked earth) in the reference image: 6 square swatches in 3 columns x 2 rows separated by thin solid pure blue #0000FF lines. Interior wall surfaces of Ming-dynasty buildings, flat front view, no perspective, no cast shadows, even lighting, no windows, no posts, no objects. Each swatch is filled edge to edge and must tile seamlessly left-right and top-bottom: 1) rough beige-grey lime plaster with a coarse grainy surface and faint darker stains, the same plaster as the house walls in the reference image, 2) smooth cream-white plaster with a few hairline cracks, 3) dark brown vertical wooden plank wall with visible grain and narrow dark gaps between planks, 4) grey fired-brick wall in regular courses with thin pale mortar lines, 5) yellow-brown rammed-earth wall with straw flecks and small pebbles, 6) dark blue-grey dressed stone block wall, large blocks, slightly damp. Muted, slightly dark colours. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "FL1",
+   "title": "방 바닥 무늬 여섯 (바로 위에서, 이어 붙는 정사각형, 3열 2행)",
+   "note": "방바닥 전체에 되풀이해 깐다.",
+   "prompt": "Seamless floor texture sheet in exactly the same layout, pixel size and pixel-art style as the square texture swatches (roof tiles, wooden planks, cracked earth) in the reference image: 6 square swatches in 3 columns x 2 rows separated by thin solid pure blue #0000FF lines. Indoor floors of Ming-dynasty buildings seen straight from above, no perspective, no cast shadows, even lighting, no objects. Each swatch is filled edge to edge and must tile seamlessly left-right and top-bottom: 1) fish-scale cobblestone floor: rows of small rounded beige-grey stones, each row offset by half a stone, about ten stones across the swatch, 2) dark brown floorboards: narrow planks running left to right with staggered end joints, about ten planks from top to bottom of the swatch, 3) pale worn pine floorboards, the same narrow planks running left to right, 4) square grey fired floor bricks laid in a regular grid with thin joints, about six bricks across, 5) woven rush matting in a tight herringbone weave, straw colour, 6) large dark polished stone slabs with thin joints, for a grand hall. Muted, slightly dark colours. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "WL2",
+   "title": "벽의 아랫단과 들보 여섯 (정면, 옆으로 이어 붙는 긴 띠, 1열 6행)",
+   "note": "벽 맨 아래에 두르는 단(1~3)과 벽 맨 위에 얹는 들보(4~6)다. 옆으로만 이어 붙는다.",
+   "prompt": "Horizontal strip texture sheet for a pixel-art wuxia RPG, in exactly the same pixel size and pixel-art style as the wall sheets in the reference image: 6 long horizontal strips stacked in 1 column x 6 rows on a solid flat pure blue #0000FF background, with a blue gap between strips. Flat front view, no perspective, no cast shadows, even lighting. Every strip is about 8 times wider than tall, its left and right ends are cut straight, and it must tile seamlessly left to right: 1) wall base course of rough grey fieldstones set in mortar, like the stone base of the house walls in the reference image, 2) wall base course of large dressed grey stone blocks, 3) dark brown wooden wainscot made of framed panels, 4) plain dark brown wooden beam with visible grain and a few iron nail heads, 5) red-lacquered beam with a thin gold line along its top and bottom edges, 6) painted temple beam: blue-green ground with a repeating gold cloud-scroll pattern, Ming style. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "WL3",
+   "title": "기둥과 가구의 나무 무늬 여섯 (정면, 이어 붙는 정사각형, 3열 2행)",
+   "note": "기둥, 문틀, 탁자와 선반 같은 나무 모형의 겉에 입힌다.",
+   "prompt": "Seamless material texture sheet in exactly the same layout, pixel size and pixel-art style as the square texture swatches (roof tiles, wooden planks, cracked earth) in the reference image: 6 square swatches in 3 columns x 2 rows separated by thin solid pure blue #0000FF lines. Flat front view, no perspective, no cast shadows, even lighting, no objects. Each swatch is filled edge to edge and must tile seamlessly left-right and top-bottom: 1) dark brown hardwood with vertical grain, for posts and furniture, 2) worn red-lacquered wood with vertical grain and a few small chips, 3) pale unpainted pine with vertical grain and a few knots, 4) black lacquered wood with faint grain, 5) bamboo poles standing side by side, with nodes, 6) off-white rice paper with a faint fibre texture, for window panes and lanterns. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN8",
+   "title": "창과 문 여섯 (정면, 벽에 붙는 무늬, 3열 2행)",
+   "note": "블렌더로 세운 벽에 그대로 박는다. 창은 세로로 긴 네모(가로 2 : 세로 3쯤. 폭이 사람 키의 0.7, 높이가 1.05)이고 종이 뒤에서 빛이 비친다. 밤에는 게임이 이 창을 더 밝힌다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the temple wall sheets in the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Windows and doors of a Ming-dynasty building, front orthographic view, no perspective, each with warm light glowing through pale paper: 1) a tall rectangular lattice window, about 2 wide to 3 tall, with a simple square grid, 2) the same tall window with a bamboo blind rolled halfway down over its upper half, 3) a round moon window with a cracked-ice lattice, 4) a pair of tall door panels with flower-pattern lattice on the upper half, 5) a wide window made of four narrow lattice panels, 6) a small high paper window propped open with a stick. Dark red-brown wooden frames. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN1",
+   "title": "벽 장식 여섯 (정면, 3열 2행)",
+   "note": "방 뒷벽에 거는 것. 블렌더로 세운 벽에 붙인다. 글자는 넣지 않는다(둥근 문양판의 '武' 같은 글자는 게임이 문파마다 다르게 얹는다).",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Wall-mounted decorations of a Ming-dynasty martial arts hall, front orthographic view, no perspective, no writing anywhere: 1) a large round wall disc: a pale paper circle inside a dark carved wooden ring frame, the circle left empty, 2) a long horizontal wooden plaque board with a carved gold-trim frame, the board left empty, 3) a hanging scroll with an ink landscape painting (mountains and a pine), 4) a hanging scroll with only a few abstract ink brush strokes (not readable characters), 5) a pair of tall narrow hanging couplet boards, dark wood, left empty, 6) a straight sword in a scabbard hung diagonally on two wall hooks with a red tassel. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN2",
+   "title": "제단과 예식 물건 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "본전과 사당의 북쪽 벽 앞에 놓는다. 그림 그대로 바닥이나 가구 위에 세운다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Altar furniture of a Ming-dynasty hall seen from a high three-quarter top-down view: 1) a long red-lacquered altar table with carved apron, empty top, 2) a pair of tall brass candlesticks with lit red candles and small flames, 3) a three-legged bronze incense burner with a thin line of smoke, 4) a set of three small offering bowls with fruit and buns on a tray, 5) a wooden ancestral tablet on a stepped stand, the tablet face left empty, 6) two square golden-yellow kneeling cushions. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN3",
+   "title": "도자기와 화분 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "방 구석과 탁자 옆에 놓는다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Seen from a high three-quarter top-down view: 1) a tall blue-and-white porcelain floor vase, 2) a small blue-and-white porcelain jar with a lid, 3) a bonsai pine in a shallow rectangular pot on a low wooden stand, 4) a potted orchid on a tall slender flower stand, 5) a large dark glazed storage jar with a cloth-covered mouth, 6) a celadon vase holding a branch of plum blossoms. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN4",
+   "title": "앉는 자리 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "살림집과 찻집, 장로의 방에 놓는다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Ming-dynasty hardwood furniture seen from a high three-quarter top-down view: 1) a master's armchair (taishi chair) facing the viewer, dark rosewood with a red seat cushion, 2) the same armchair seen from the side, 3) a small square tea table with a teapot and two cups, 4) a low rectangular kang table, 5) a round drum stool, 6) a four-panel folding screen painted with a misty mountain landscape. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN5",
+   "title": "병기와 수련 도구 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "무관과 연무장에 놓는다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Training hall equipment seen from a high three-quarter top-down view: 1) a wooden weapon rack holding five spears and halberds upright, 2) a low sword rack holding three swords in scabbards horizontally, 3) a staff rack with six wooden staves, 4) a wooden training dummy with three arms on a heavy base, 5) a round straw archery target on a tripod, 6) a pair of stone lock weights and a stone drum for strength training. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN6",
+   "title": "가게 물건 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "가게와 약방, 서고에 놓는다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Shop furnishings of a Ming-dynasty town seen from a high three-quarter top-down view: 1) a shelf unit stacked with rolled bolts of colored cloth, 2) a tall herbal medicine cabinet with many small drawers and brass pulls, 3) a shelf unit of bowls, plates and teapots, 4) a pile of thread-bound books and scroll tubes, 5) a shop counter with an abacus and a hanging scale, 6) a stack of wooden crates and a roped chest. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN7",
+   "title": "바닥 깔개 여섯 (바로 위에서 내려다본 그림, 3열 2행)",
+   "note": "바닥에 납작하게 깔린다. 그림자와 두께가 없어야 한다.",
+   "prompt": "Flat floor covering sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Every item is seen straight from above (pure top view), completely flat, no shadow, no thickness: 1) a long red runner carpet with gold border pattern, about 4 times longer than wide, 2) a round rug with a blue-and-cream cloud pattern, 3) a rectangular woven straw mat, 4) three round rush kneeling mats in a row, 5) a square dark blue rug with a simple geometric border, 6) a rolled-out bamboo slat mat. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "IN9",
+   "title": "방 안 불빛 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "방을 밝히는 것들. 게임이 그 자리에 불빛을 켠다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Indoor lights seen from a high three-quarter top-down view, each one lit: 1) a tall standing palace lantern on a carved wooden pole stand, 2) a single brass candlestick with a lit candle for a table, 3) a red paper lantern hanging from a short ceiling cord, 4) a bronze charcoal brazier with glowing embers, 5) a small oil lamp on a saucer, 6) a wall bracket holding a lit torch. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "HT1",
+   "title": "돌계단과 돌난간 여섯 (정면, 3열 2행)",
+   "note": "문파 안에서 단과 단을 잇는 계단, 단 가장자리를 두르는 난간이다. 난간과 축대는 옆으로 이어 붙는다.",
+   "prompt": "Stone stair and balustrade sheet for a pixel-art wuxia RPG, in exactly the same pixel size and pixel-art style as the wall sheets in the reference image, and matching the small stone steps and stone balustrade already shown among its props (Ming dynasty, front orthographic view, no perspective): 3 columns x 2 rows on a solid flat pure blue #0000FF background, wide gaps, nothing touching. 1) a flight of six dressed grey stone steps seen from the front, about 2 times wider than tall, left and right edges cut straight, 2) one straight section of carved white-grey stone balustrade: two square posts with lotus-bud caps and a carved panel between them, about 3 times wider than tall, left and right edges cut straight so copies tile side by side seamlessly, 3) a single balustrade end post with a small stone lion on top, 4) a sloped stone stair side wall (cheek block) for the left side of a stair, 5) a straight section of dressed stone retaining wall, large rectangular blocks, about 3 times wider than tall, tiles seamlessly left to right, 6) the same retaining wall with patches of moss and a few weeds in the joints, also tiling seamlessly. No ground, crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "HT2",
+   "title": "돌바닥 무늬 여섯 (바로 위에서, 이어 붙는 정사각형, 3열 2행)",
+   "note": "마당이 한 가지 벽돌 무늬로만 깔려 있다. 구역마다 달리 깔 바닥이다. 무늬 장이다(빛 방향과 그림자 없이 고르게, 칸마다 꽉 채워서).",
+   "prompt": "Seamless ground texture sheet in exactly the same layout, pixel size and pixel-art style as the square texture swatches (roof tiles, wooden planks, cracked earth) in the reference image: 6 square swatches in 3 columns x 2 rows separated by solid pure blue #0000FF gaps. Each swatch is seen straight from above and must tile seamlessly left-right and top-bottom: 1) large square grey flagstones with thin dark joints, 2) the same flagstones weathered, with moss in the joints and a few fallen leaves, 3) herringbone grey brick paving, 4) hexagonal stone pavers, 5) a wide stone slab walkway with a carved border line (tiles along its length), 6) packed earth courtyard with scattered small pebbles. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "HT3",
+   "title": "뜰에 놓는 것 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "문파의 뜰에 놓는다. 그림 그대로 바닥에 세운다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Things in a mountain sect courtyard seen from a high three-quarter top-down view: 1) a large old pine tree with a bent trunk and layered flat crowns, 2) a smaller young pine, 3) an upright weathered garden rock (scholar's rock) on a low base, 4) a tall stone lantern with a hexagonal roof, 5) a bronze incense cauldron on three legs with a small roof, 6) a stone water basin with a bamboo spout. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "HK4",
+   "title": "바위 무늬 여섯 (정면, 이어 붙는 정사각형, 3열 2행)",
+   "note": "바위와 절벽 모형의 겉에 입힌다. 무늬 장이다(빛 방향과 그림자 없이 고르게, 칸마다 꽉 채워서). 전에 받은 절벽 그림 HK3과 같은 바위 빛, 같은 도트 굵기로.",
+   "prompt": "Texture sheet for a pixel-art wuxia RPG: six square seamless tileable rock textures in a grid of 3 columns x 2 rows, the squares separated by a thin pure blue #0000FF gutter. Flat front view, no perspective, no cast shadows, even lighting. Each square is filled edge to edge and tiles seamlessly on all four sides. Same pixel size, outline weight and colours as the rock part of the earlier cliff sheet HK3 (open the HK3 image linked in this document). 1) layered grey-brown rock strata cracked into uneven blocks (the HK3 rock, without any grass), 2) pale grey granite with long cracks, 3) the same grey-brown rock half covered with patches of green moss, 4) red sandstone in horizontal layers, 5) rock under snow: mostly white snow with dark rock showing through in streaks, 6) weathered dressed stone blocks of a retaining wall in regular courses. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "HK5",
+   "title": "산길에 놓는 것 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "산길 가에 놓는다. 전에 받은 절벽 그림 HK3과 같은 도트 굵기로.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Things along a mountain path seen from a high three-quarter top-down view: 1) a section of old wooden guard rail made of rough logs, about 3 times wider than tall, tiles side by side, 2) two wooden posts joined by a sagging rope, tiles side by side, 3) a waist-high stone trail marker, the face left empty, 4) a cairn of piled stones with faded cloth strips tied to a branch, 5) a fallen dead tree trunk with moss, 6) a short flight of log steps set into earth. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "TR1",
+   "title": "나무 껍질과 잎 무늬 여섯 (정면, 이어 붙는 정사각형, 3열 2행)",
+   "note": "블렌더로 만든 나무의 줄기와 잎 덩어리에 입힌다. 무늬 장이다(빛 방향과 그림자 없이 고르게, 칸마다 꽉 채워서).",
+   "prompt": "Seamless material texture sheet in exactly the same layout, pixel size and pixel-art style as the square texture swatches (roof tiles, wooden planks, cracked earth) in the reference image: 6 square swatches in 3 columns x 2 rows separated by thin solid pure blue #0000FF lines. Flat front view, no perspective, no cast shadows, even lighting. Each swatch is filled edge to edge and must tile seamlessly left-right and top-bottom: 1) pine bark: reddish-brown scaly plates, 2) grey-brown deeply furrowed bark of an old broadleaf tree, 3) dark smooth plum-tree bark with thin horizontal marks, 4) dense dark-green pine needle foliage, 5) dense green broadleaf foliage made of many small leaves, 6) plum blossoms: many small pink-white flowers on thin dark twigs. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "TR2",
+   "title": "잎 뭉치 여섯 (옆에서, 3열 2행)",
+   "note": "가지에 꽂는 잎 뭉치. 줄기는 그리지 않는다. 가장자리가 파란 바탕과 또렷이 갈려야 오려 낼 수 있다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Foliage clumps for building trees, each seen from the side, no trunk, hard clean edges against the blue: 1) a flat layered pine bough, wider than tall, 2) a rounded clump of green broadleaf leaves, 3) a plum branch tip covered with pink-white blossoms, 4) a spray of bamboo leaves, 5) a bare twisted dead branch with a few twigs, 6) a clump of orange-red autumn leaves. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "HR3",
+   "title": "문파 지붕 무늬 여섯 (위에서 비스듬히, 이어 붙는 정사각형, 3열 2행)",
+   "note": "건물 지붕 모형에 입히는 기와 무늬다. 문파마다 기와 빛깔이 다르다. 무늬 장이다(칸마다 꽉 채워서, 네 변이 이어 붙게). 3열 2행 여섯 칸.",
+   "prompt": "Roof tile texture sheet in exactly the same layout, pixel size and pixel-art style as the reference image: 3 columns x 2 rows of square seamless roof-tile swatches separated by blue lines, solid pure blue #0000FF gaps. Each swatch is a tileable pattern of curved Chinese roof tiles seen from above at a slight angle, with clear tile ridges and dark grooves, crisp chunky pixels, light from the upper left, no text. Swatches: 1) imperial yellow-gold glazed tiles (Shaolin); 2) jade-green glazed tiles (Wudang, Qingcheng); 3) deep blue glazed tiles (Namgung, Kunlun); 4) black glazed tiles with a slight purple sheen (Tang clan); 5) grey unglazed clay tiles with moss patches (Zhongnan, Kongtong); 6) red-brown glazed tiles (Hua, Peng). All six must tile seamlessly left-right and top-bottom."
+  },
+  {
+   "code": "HE1",
+   "title": "지붕 장식과 현판 열둘 (정면과 비스듬히 위에서, 4열 3행)",
+   "note": "용마루 끝과 처마에 붙이는 장식, 처마 밑의 현판과 기둥이다. 4열 3행 열두 칸. 현판은 글자 없이 빈 채로.",
+   "prompt": "Sprite sheet of Chinese roof ornaments and hall decorations for a pixel-art wuxia RPG, 4 columns x 3 rows grid, in exactly the pixel size, outline and palette of the reference images, solid pure blue #0000FF background, wide gaps, nothing touching. Items: 1) dragon-head ridge-end ornament (chiwen), dark grey glazed, facing right; 2) the same in gold-yellow; 3) row of five small roof-ridge guardian beasts on a short ridge piece; 4) upturned flying eave corner piece with a hanging bronze wind bell; 5) long horizontal ridge band with a carved cloud pattern, tileable left-right; 6) small tower-like ridge-centre pearl/flame ornament; 7) blank dark lacquered horizontal plaque with a gold border (no text); 8) blank vertical plaque, red with gold border (no text); 9) pair of red lacquered round columns with gilded capitals; 10) row of painted dougong bracket sets under an eave, tileable left-right; 11) large bronze incense cauldron (ding) on three legs; 12) pair of tall stone lanterns with carved roofs. Same pixel scale for all: plaques about one person wide, columns about two people tall. No text or letters anywhere."
+  }
+ ],
+ "swordfx": [
+  {
+   "code": "S1",
+   "title": "초승달 베기",
+   "file": "sw_arc",
+   "grid": "정사각형, 4열 2행 8칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 4열 2행 8칸으로 나눠, 칼을 한 번 휘두를 때 생기는 초승달 모양 검기가 그어지고 사라지는 8단계를 그려. 오른쪽을 향해 위에서 아래로 그어지는 반달 호. 1 칼끝에서 가는 선이 막 시작됨, 2 호가 절반 그어짐, 3 호가 다 그어짐(가장 굵고 밝음, 가운데는 흰색 얇은 날), 4 호 바깥쪽에 회색 잔상이 한 겹 더, 5 호가 가늘어지기 시작, 6 호가 끊어지며 조각남, 7 작은 도트 조각만 흩어짐, 8 거의 사라짐. 호는 칸 너비의 3분의 2쯤. 끝이 칼날처럼 뾰족하게."
+  },
+  {
+   "code": "S2",
+   "title": "큰 반달 검기",
+   "file": "sw_arc_big",
+   "grid": "정사각형, 4열 2행 8칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 4열 2행 8칸으로 나눠, 절초(필살기)로 크게 휘두르는 반달 검기 8단계를 그려. S1보다 호가 훨씬 두껍고 길다(칸을 거의 채움). 호 안쪽에 얇은 흰 날이 두 겹, 바깥쪽에 회색 기운이 너울처럼 일렁인다. 1 시작, 2~3 그어짐, 4 가장 크고 밝음, 5 바깥 기운이 바람처럼 흩어짐, 6~7 조각나며 흩어짐, 8 거의 사라짐. 오른쪽을 향해."
+  },
+  {
+   "code": "S3",
+   "title": "찌르기 검기",
+   "file": "sw_thrust",
+   "grid": "가로로 긴 직사각형 1열 6행, 6칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 가로가 세로의 4배쯤 되는 길쭉한 칸 6개를 위에서 아래로 한 줄씩 쌓아(1열 6행), 오른쪽으로 곧게 찌르는 검기 6단계를 그려. 1 왼쪽 끝에서 가는 빛줄기가 튀어나옴, 2 오른쪽 끝까지 쭉 뻗음(창끝처럼 뾰족), 3 가장 밝고 굵음, 가운데 흰 심지와 둘레 회색 테, 4 끝에서 고리 모양 충격파가 하나 터짐, 5 줄기가 가늘어짐, 6 도트 몇 개만 남음."
+  },
+  {
+   "code": "S4",
+   "title": "회전 베기",
+   "file": "sw_ring",
+   "grid": "정사각형, 3열 2행 6칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 3열 2행 6칸으로 나눠, 제자리에서 한 바퀴 돌며 베는 원형 검기 6단계를 그려. 위에서 45도로 내려다본 시점이라 원이 가로로 납작한 타원이다. 1 타원의 4분의 1이 그어짐, 2 절반, 3 한 바퀴 다 그어짐(가장 밝음), 4 타원 바깥으로 짧은 칼바람 줄이 사방으로 튐, 5 타원이 끊어지며 흩어짐, 6 거의 사라짐. 가운데는 비워 둬(사람이 서는 자리)."
+  },
+  {
+   "code": "S5",
+   "title": "날아가는 검기",
+   "file": "sw_wave",
+   "grid": "정사각형, 4열 1행 4칸, 되풀이",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 가로로 긴 직사각형을 정사각형 칸 4개로 나눠(4열 1행), 칼에서 떨어져 나와 오른쪽으로 날아가는 초승달 검기를 그려. 네 칸이 계속 되풀이되는 움직임이다(1→2→3→4→1). 초승달의 볼록한 쪽이 오른쪽(날아가는 쪽). 칸마다 초승달 뒤쪽 꼬리 잔상의 모양만 조금씩 달라져서 바람을 가르며 떨리는 느낌."
+  },
+  {
+   "code": "S6",
+   "title": "맞는 순간 번쩍",
+   "file": "sw_hit",
+   "grid": "정사각형, 3열 2행 6칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 3열 2행 6칸으로 나눠, 검이 몸에 맞는 순간 터지는 번쩍임 6단계를 그려. 1 가운데 작은 흰 점, 2 십자 모양으로 날카롭게 번쩍(가는 빛살 넷), 3 빛살 사이에 짧은 빛살 넷이 더(여덟 갈래 별), 4 별이 커지며 가운데가 비기 시작, 5 빛살이 끊어진 조각으로, 6 도트 몇 개만. 크기는 칸의 3분의 2까지."
+  },
+  {
+   "code": "S7",
+   "title": "칼 부딪힘 불꽃",
+   "file": "sw_clash",
+   "grid": "정사각형, 3열 2행 6칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 3열 2행 6칸으로 나눠, 칼과 칼이 부딪혀 막을 때 튀는 쇳불꽃 6단계를 그려. 1 가운데 흰 번쩍, 2 짧은 불똥 줄이 부채처럼 위로 튐, 3 불똥이 길어지며 퍼짐, 4 불똥 끝이 아래로 휘며 떨어짐, 5 작은 점 불똥만, 6 거의 사라짐."
+  },
+  {
+   "code": "S8",
+   "title": "돌진 잔상",
+   "file": "sw_dash",
+   "grid": "가로로 긴 직사각형 1열 4행, 4칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 가로가 세로의 4배쯤 되는 길쭉한 칸 4개를 위에서 아래로 쌓아(1열 4행), 사람이 오른쪽으로 순식간에 돌진할 때 남는 바람 자국 4단계를 그려. 가로로 긴 가는 줄 서너 가닥이 오른쪽 끝으로 모이고, 오른쪽 끝에 칼날 모양 날카로운 끝. 1 가장 진함, 2~3 줄이 끊기며 옅어짐(회색으로), 4 짧은 도트 줄 몇 개만."
+  },
+  {
+   "code": "S9",
+   "title": "절초 일자 검기",
+   "file": "sw_ult_line",
+   "grid": "가로로 긴 직사각형 1열 8행, 8칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 가로가 세로의 4배쯤 되는 길쭉한 칸 8개를 위에서 아래로 쌓아(1열 8행), 필살기로 앞을 일직선으로 갈라 버리는 거대한 검기 8단계를 그려. 1 가운데 가로로 아주 가는 흰 선(하늘을 가른 금), 2 선이 위아래로 벌어지며 굵어짐, 3 가장 굵음, 가운데 흰 띠와 위아래 회색 기운, 4 기운 가장자리가 톱날처럼 일렁임, 5 위아래 기운이 바깥으로 흩어지기 시작, 6 띠가 가늘어짐, 7 조각난 선만, 8 거의 사라짐."
+  }
+ ],
+ "fan": [
+  {
+   "key": "cheongmyeong",
+   "name": "청명",
+   "role": "화산파 제자",
+   "desc": "청명, 화산파 제자, 남자. 뻔뻔하고 장난기 많은 눈, 한쪽 입꼬리만 올라간 비웃음, 검을 어깨에 걸침. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "baekcheon",
+   "name": "백천",
+   "role": "화산파 제자",
+   "desc": "백천, 화산파 제자, 남자. 반듯하고 단정한 대사형, 곧은 눈썹, 바른 자세. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "yuseol",
+   "name": "유이설",
+   "role": "화산파 제자",
+   "desc": "유이설, 화산파 제자, 여자. 말없고 차가운 미인, 무표정, 검을 품에 안음. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "yunjong",
+   "name": "윤종",
+   "role": "화산파 제자",
+   "desc": "윤종, 화산파 제자, 남자. 순하고 성실한 얼굴, 살짝 지친 웃음. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "jogeol",
+   "name": "조걸",
+   "role": "화산파 제자",
+   "desc": "조걸, 화산파 제자, 남자. 다혈질 청년, 찌푸린 눈썹, 주먹을 쥠. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "hyeonjong",
+   "name": "현종",
+   "role": "화산파 장문인",
+   "desc": "현종, 화산파 장문인, 남자. 온화하고 인자한 노장문인, 흰 수염. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "hyeonyeong",
+   "name": "현영",
+   "role": "화산파 장로",
+   "desc": "현영, 화산파 장로, 남자. 깐깐한 재정 담당 장로, 주판이나 장부를 듦. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "hyeonsang",
+   "name": "현상",
+   "role": "화산파 장로",
+   "desc": "현상, 화산파 장로, 남자. 엄격한 장로, 굳은 입매. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "ungeom",
+   "name": "운검",
+   "role": "화산파 교관",
+   "desc": "운검, 화산파 교관, 남자. 엄한 교관, 날카로운 눈. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "unam",
+   "name": "운암",
+   "role": "화산파 어른",
+   "desc": "운암, 화산파 어른, 남자. 자상한 어른, 부드러운 눈. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "ungak",
+   "name": "운각",
+   "role": "화산파 어른",
+   "desc": "운각, 화산파 어른, 남자. 우직한 산문 지기, 단단한 몸. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "baeksang",
+   "name": "백상",
+   "role": "화산파 제자",
+   "desc": "백상, 화산파 제자, 남자. 승부욕 강한 젊은 제자, 이를 악문 얼굴. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "jingeumryong",
+   "name": "진금룡",
+   "role": "종남파 제자",
+   "desc": "진금룡, 종남파 제자, 남자. 오만한 종남 수재, 턱을 든 자세. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "isongbaek",
+   "name": "이송백",
+   "role": "종남파 제자",
+   "desc": "이송백, 종남파 제자, 남자. 곧고 예의 바른 종남 제자, 담담한 얼굴. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "jongseohan",
+   "name": "종서한",
+   "role": "종남파 어른",
+   "desc": "종서한, 종남파 어른, 남자. 위엄 있는 종남 어른, 무거운 눈. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "gohwi",
+   "name": "고휘",
+   "role": "종남파 사람",
+   "desc": "고휘, 종남파 사람, 남자. 경계하는 종남 사람. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "gimokseung",
+   "name": "기목승",
+   "role": "종남파 사람",
+   "desc": "기목승, 종남파 사람, 남자. 피곤한 표정의 종남 사형. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "samaseung",
+   "name": "사마승",
+   "role": "종남파 사람",
+   "desc": "사마승, 종남파 사람, 남자. 생각 많은 종남 검수, 그늘진 얼굴. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "heodo",
+   "name": "허도진인",
+   "role": "무당파 장문인",
+   "desc": "허도진인, 무당파 장문인, 남자. 신선 같은 무당 장문인, 긴 흰 수염, 불진. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "heowon",
+   "name": "허원",
+   "role": "무당파 장로",
+   "desc": "허원, 무당파 장로, 남자. 과묵한 무당 장로. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "heosan",
+   "name": "허산",
+   "role": "무당파 장로",
+   "desc": "허산, 무당파 장로, 남자. 차를 즐기는 온화한 무당 장로. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "muyeon",
+   "name": "무연",
+   "role": "무당파 제자",
+   "desc": "무연, 무당파 제자, 남자. 긴장한 무당 제자. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "mujin",
+   "name": "무진",
+   "role": "무당파 제자",
+   "desc": "무진, 무당파 제자, 남자. 성실한 무당 제자. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "jinhyeon",
+   "name": "진현",
+   "role": "무당파 제자",
+   "desc": "진현, 무당파 제자, 남자. 조용하고 차분한 무당 제자. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "jinmu",
+   "name": "진무",
+   "role": "무당파 제자",
+   "desc": "진무, 무당파 제자, 남자. 투덜대는 젊은 무당 제자. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "dangsoso",
+   "name": "당소소",
+   "role": "화산파 제자 (당가 출신)",
+   "desc": "당소소, 화산파 제자 (당가 출신), 여자. 밝고 당찬 소녀, 장난스러운 미소. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "danggunak",
+   "name": "당군악",
+   "role": "사천당가 가주",
+   "desc": "당군악, 사천당가 가주, 남자. 냉철하고 위엄 있는 당가 가주. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "dangbo",
+   "name": "당보",
+   "role": "사천당가 어른",
+   "desc": "당보, 사천당가 어른, 남자. 짓궂은 당가 노고수, 손가락 사이에 암기. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "dangho",
+   "name": "당호",
+   "role": "사천당가 사람",
+   "desc": "당호, 사천당가 사람, 남자. 날카로운 당가 사람. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "danghwa",
+   "name": "당화",
+   "role": "사천당가 사람",
+   "desc": "당화, 사천당가 사람, 남자. 독약 냄새를 풍기는 당가 사람. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "dangjan",
+   "name": "당잔",
+   "role": "사천당가 사람",
+   "desc": "당잔, 사천당가 사람, 남자. 빚을 잊지 않는 무뚝뚝한 당가 사람. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "dangpae",
+   "name": "당패",
+   "role": "사천당가 사람",
+   "desc": "당패, 사천당가 사람, 남자. 암기 연습장 지기, 손에 비수. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "hongdaegwang",
+   "name": "홍대광",
+   "role": "개방 거지",
+   "desc": "홍대광, 개방 거지, 남자. 능청맞고 호탕한 개방 거지, 크게 웃음, 타구봉. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "guchil",
+   "name": "구칠",
+   "role": "개방 거지",
+   "desc": "구칠, 개방 거지, 남자. 빈 동냥 그릇을 든 개방 거지. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "jongpal",
+   "name": "종팔",
+   "role": "개방 거지",
+   "desc": "종팔, 개방 거지, 남자. 장터를 떠도는 개방 거지. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "wiripsan",
+   "name": "위립산",
+   "role": "화영문 문주",
+   "desc": "위립산, 화영문 문주, 남자. 작은 문파를 지키는 성실한 문주. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "wisoheng",
+   "name": "위소행",
+   "role": "화영문 소문주",
+   "desc": "위소행, 화영문 소문주, 남자. 아버지를 닮으려는 열의 가득한 소문주. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "yeompyeong",
+   "name": "염평",
+   "role": "화영문 사람",
+   "desc": "염평, 화영문 사람, 남자. 표국 일을 하는 화영문 사람. 생김새·옷·색은 첨부한 도트 그대로."
+  },
+  {
+   "key": "maengso",
+   "name": "맹소",
+   "role": "남만야수궁 사람",
+   "desc": "맹소, 남만야수궁 사람, 남자. 야성적인 남만야수궁 사람, 짐승 같은 눈. 생김새·옷·색은 첨부한 도트 그대로."
+  }
+ ],
+ "cg": [
+  {
+   "file": "cg_war",
+   "title": "잿더미",
+   "desc": "전쟁이 지나간 북쪽 변경 마을. 불탄 집 사이에 다섯 살 아이가 혼자 서 있다"
+  },
+  {
+   "file": "cg_camp",
+   "title": "견대",
+   "desc": "군막 뒤편, 번호패를 목에 건 아이들이 줄지어 서 있다"
+  },
+  {
+   "file": "cg_trap",
+   "title": "빈 골짜기",
+   "desc": "보급기지가 있어야 할 골짜기. 화살이 꽂힌 시신 사이로 열일곱 살 소년 혼자 걸어 나온다"
+  },
+  {
+   "file": "cg_dock",
+   "title": "청하진",
+   "desc": "봄날 나루에 내리는 스무 살 낭인. 등에 이 빠진 칼"
+  },
+  {
+   "file": "cg_ladle",
+   "title": "떨어진 국자",
+   "desc": "객잔 부엌. 곽 아주머니 손에서 국자가 떨어지는 순간"
+  },
+  {
+   "file": "cg_fire",
+   "title": "그믐밤",
+   "desc": "불타는 달맞이 객잔 앞, 국자를 든 곽 아주머니와 여우 가면"
+  },
+  {
+   "file": "cg_well",
+   "title": "마흔아홉 개의 위패",
+   "desc": "우물 밑 작은 방. 위패 마흔아홉 개 앞에 선 주인공, 곽 아주머니의 편지"
+  },
+  {
+   "file": "cg_go_yard",
+   "title": "창운문",
+   "desc": "구름 위 연무장에서 처음 칼을 맞대는 주인공과 소연하"
+  },
+  {
+   "file": "cg_library",
+   "title": "장서각의 밤",
+   "desc": "촛불 하나 켜진 장서각, 뜯겨 나간 기록을 든 주인공과 소연하"
+  },
+  {
+   "file": "cg_sweep",
+   "title": "장경각",
+   "desc": "먼지 낀 장경각 바닥을 닦는 주인공과 빗자루를 든 늙은 스님"
+  },
+  {
+   "file": "cg_cliff",
+   "title": "벼랑 아래",
+   "desc": "벼랑 밑 동굴, 무릎에 검을 올린 채 앉은 유골"
+  },
+  {
+   "file": "cg_final",
+   "title": "천하비무 결승",
+   "desc": "구화성 비무대, 함성 속에 칼을 맞댄 주인공과 소연하"
+  },
+  {
+   "file": "cg_banquet",
+   "title": "연회",
+   "desc": "정천맹 객관 연회, 잔을 내미는 맹주와 뛰어드는 윤설"
+  },
+  {
+   "file": "cg_cross",
+   "title": "네 개의 손",
+   "desc": "새벽 갈대밭, 등불을 든 소연하, 백랑, 혁련하가 주인공을 기다린다"
+  },
+  {
+   "file": "cg_kids",
+   "title": "창고 밑",
+   "desc": "쌀 창고 지하, 복면을 무릎에 벗어 놓고 말없이 밥을 먹는 아이들"
+  },
+  {
+   "file": "cg_council",
+   "title": "구파 회관의 밤",
+   "desc": "장문인들 앞 마당 한가운데 호위 없이 걸어 들어오는 맹주"
+  },
+  {
+   "file": "cg_flags",
+   "title": "열두 깃발",
+   "desc": "흑풍채 마당, 검은 깃발 열두 개 아래에서 일어서는 주인공과 패천도"
+  },
+  {
+   "file": "cg_fire_gu",
+   "title": "불타는 구화성",
+   "desc": "불타는 구화성 남문, 보따리를 끌고 지나가는 피난민들"
+  },
+  {
+   "file": "cg_evac",
+   "title": "강을 건너는 사람들",
+   "desc": "새벽 청하진 나루, 쟁반을 끌어안은 꼬마와 모루를 진 강씨가 배에 오른다"
+  },
+  {
+   "file": "cg_mask",
+   "title": "갈라진 가면",
+   "desc": "달빛 아래 갈라져 떨어지는 여우 가면, 주인공과 닮은 얼굴"
+  },
+  {
+   "file": "cg_chief_stab",
+   "title": "달이 뜨면",
+   "desc": "월천의 등을 뚫는 연경추의 검, 맹주의 손목을 놓지 않는 월천"
+  },
+  {
+   "file": "cg_red_moon",
+   "title": "붉은 달",
+   "desc": "서쪽 하늘에 뜬 붉은 달을 올려다보는 청하진 사람들"
+  },
+  {
+   "file": "cg_rain",
+   "title": "혈우",
+   "desc": "붉은 비가 내리는 청하진 약방 앞, 소매를 걷어붙인 윤설"
+  },
+  {
+   "file": "cg_table",
+   "title": "합석",
+   "desc": "다시 지은 달맞이 객잔, 정파와 사파 수뇌가 한 탁자에 앉고 쟁반을 든 주인공이 국수를 나른다"
+  },
+  {
+   "file": "cg_gate",
+   "title": "소림의 문",
+   "desc": "불타는 소림 산문 앞에 혼자 버티고 선 철우"
+  },
+  {
+   "file": "cg_retake",
+   "title": "구화성 탈환",
+   "desc": "정파와 사파 깃발이 함께 오르는 구화성 성벽"
+  },
+  {
+   "file": "cg_silk",
+   "title": "비단길",
+   "desc": "끝없는 모래 위로 줄지어 가는 원정대"
+  },
+  {
+   "file": "cg_sheath",
+   "title": "빈 칼집",
+   "desc": "눈보라 속 얼음 궁전, 사부의 칼을 빈 칼집에 넣는 소연하"
+  },
+  {
+   "file": "cg_ghost",
+   "title": "돌아온 사람",
+   "desc": "시퍼런 눈으로 칼을 든 월천, 주인공 앞에 말없이 선다"
+  },
+  {
+   "file": "cg_last_rent",
+   "title": "방값",
+   "desc": "천산 입구 봉인 앞, 은자 봉투를 내미는 백 노인"
+  },
+  {
+   "file": "cg_chief_end",
+   "title": "심마",
+   "desc": "무너지는 천산 입구, 쓰러진 연경추와 붉게 터지는 봉인"
+  },
+  {
+   "file": "cg_tianmo",
+   "title": "천마",
+   "desc": "붉은 달을 등지고 일어서는 천마 혁련무극, 앞에 쓰러진 주인공"
+  },
+  {
+   "file": "cg_mop_again",
+   "title": "걸레질",
+   "desc": "텅 빈 달맞이 객잔, 허리를 세우고 바닥을 닦는 주인공"
+  },
+  {
+   "file": "cg_preface",
+   "title": "서문",
+   "desc": "곽 아주머니가 낡은 장부 첫 장을 뜯어 건네는 밤"
+  },
+  {
+   "file": "cg_siege",
+   "title": "달맞이 객잔",
+   "desc": "객잔 앞에 늘어선 사람들, 맨 앞에 국자를 든 곽 아주머니"
+  },
+  {
+   "file": "cg_samaung_end",
+   "title": "패천도",
+   "desc": "흑운궁 다리 위, 혼자 마장 떼를 막아서는 사마웅"
+  },
+  {
+   "file": "cg_cheon_end",
+   "title": "형",
+   "desc": "가면 없는 월천이 주인공을 등 뒤로 밀어내는 순간"
+  },
+  {
+   "file": "cg_fall",
+   "title": "낙월",
+   "desc": "달이 지는 하늘 아래, 왼발로 미는 주인공의 마지막 걸음"
+  },
+  {
+   "file": "cg_bond_yun",
+   "title": "국수 한 그릇",
+   "desc": "약방 탁자에서 맹맹한 국수를 먹다 잠든 윤설"
+  },
+  {
+   "file": "cg_bond_so",
+   "title": "달밤",
+   "desc": "달빛 아래 칼등으로 주인공 발목을 툭 치는 소연하"
+  },
+  {
+   "file": "cg_bond_dang",
+   "title": "이름 새긴 찻잔",
+   "desc": "흰 찻잔을 내미는 당소연, 잔 밑바닥에 새겨진 이름"
+  },
+  {
+   "file": "cg_bond_mo",
+   "title": "배고파",
+   "desc": "거울 앞에서 처음 자기 말을 하고 얼굴이 붉어진 모용설"
+  },
+  {
+   "file": "cg_bond_nam",
+   "title": "천 번",
+   "desc": "새벽 담장 안, 피 밴 손으로 검을 내리는 남궁진"
+  },
+  {
+   "file": "cg_bond_bae",
+   "title": "손가락 한 마디",
+   "desc": "붕대 감은 손으로 주사위를 내미는 백랑"
+  },
+  {
+   "file": "cg_bond_hyeok",
+   "title": "서툰 웃음",
+   "desc": "달맞이꽃 향 앞에서 처음 소리 내어 웃는 혁련하"
+  },
+  {
+   "file": "cg_bond_cheol",
+   "title": "주먹밥 세 개",
+   "desc": "주먹밥 하나를 먼저 내미는 철우"
+  },
+  {
+   "file": "cg_wedding",
+   "title": "혼례",
+   "desc": "달맞이 객잔 마당의 혼례상, 우는 뱃사공과 웃는 곽 아주머니"
+  },
+  {
+   "file": "cg_end_full",
+   "title": "만석",
+   "desc": "상이 모자라 마당에 멍석과 문짝을 깔고 상을 편 달맞이 객잔. 정파와 사파 사람들이 섞여 앉아 국수를 먹고, 곽 아주머니가 국자를 휘두른다"
+  },
+  {
+   "file": "cg_end_inn",
+   "title": "점소이",
+   "desc": "다시 문을 연 객잔. 바닥을 닦는 주인공 뒤로 상 몇 개가 비어 있고, 빈 상마다 젓가락 한 벌"
+  },
+  {
+   "file": "cg_end_empty",
+   "title": "빈 상",
+   "desc": "저녁 객잔, 곽 아주머니와 주인공 둘만 마주 앉아 국수를 먹는다. 상 위에 젓가락이 여러 벌 더 놓여 있다"
+  },
+  {
+   "file": "cg_end_two",
+   "title": "두 그릇",
+   "desc": "그믐 저녁 객잔 문간. 머리가 하얀 월천이 국수 그릇을 들고 앉아 있고, 뒷마당 우물가에 국수 한 그릇이 놓여 있다"
+  },
+  {
+   "file": "cg_end_lord_j",
+   "title": "맹주",
+   "desc": "새로 세운 정천맹 대청. 맹주 자리에 앉은 주인공 앞에 메워진 창고 지하 입구"
+  },
+  {
+   "file": "cg_end_lord_s",
+   "title": "산채의 큰 칼",
+   "desc": "흑풍채 마당에 꽂힌 큰 칼 앞, 산적들이 맹세하는 장면"
+  },
+  {
+   "file": "cg_end_lord_m",
+   "title": "문을 잠근 교주",
+   "desc": "불 꺼진 흑운궁 제단 자리에 달맞이꽃이 피어 있다"
+  },
+  {
+   "file": "cg_end_lord_f",
+   "title": "합석 어른",
+   "desc": "정파와 사파 사람들 사이 상석에 앉아 질색하는 주인공"
+  },
+  {
+   "file": "cg_end_gate",
+   "title": "문지기",
+   "desc": "천산 돌문 앞 움막, 아침 돌계단을 닦는 사람"
+  },
+  {
+   "file": "cg_end_road",
+   "title": "그믐의 낭인",
+   "desc": "그믐밤 나루를 떠나는 낭인의 뒷모습"
+  },
+  {
+   "file": "cg_end_alone",
+   "title": "번호 없는 사람",
+   "desc": "스무 살 봄에 내렸던 그 나루. 배에서 내리는 굶은 낭인에게 위쪽 객잔을 가리키는 주인공"
+  },
+  {
+   "file": "cg_end_redmoon",
+   "title": "붉은 달",
+   "desc": "붉은 달 아래 조용한 강호. 문이 잠긴 달맞이 객잔, 문틈으로 새는 불빛"
+  },
+  {
+   "file": "cg_end_table",
+   "title": "다시, 달맞이 객잔",
+   "desc": "다시 문을 연 객잔, 국수를 나르는 주인공과 탁자마다 앉은 사람들"
+  },
+  {
+   "file": "cg_end_sa",
+   "title": "강호의 절반",
+   "desc": "검은 깃발이 장강을 따라 내려가는 풍경"
+  },
+  {
+   "file": "cg_end_ma",
+   "title": "붉은 제단",
+   "desc": "제단 앞에 선 주인공과 혁련하"
+  },
+  {
+   "file": "cg_end_free",
+   "title": "다시 길 위에서",
+   "desc": "새벽 길을 혼자 걸어가는 낭인의 뒷모습"
+  },
+  {
+   "file": "cg_end_jeong",
+   "title": "달이 진 뒤",
+   "desc": "월하곡 위패 앞에 모인 장문인들"
+  }
+ ],
+ "hwasan": [
+  {
+   "code": "H1",
+   "file": "hs_petal",
+   "title": "꽃잎",
+   "grid": "정사각형, 4열 4행 16칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 4열 4행 16칸으로 나눠, 바람에 흩날리는 매화 꽃잎 낱장을 칸마다 하나씩 16가지로 그려. 꽃잎 한 장은 칸의 3분의 1 크기(사람 머리의 4분의 1쯤)이고 칸 한가운데에 둔다. 16칸은 꽃잎이 뒤집히며 도는 모습의 여러 각도다: 정면으로 펴진 것, 비스듬히 누운 것, 옆으로 서서 가늘게 보이는 것, 뒤집힌 것, 살짝 접힌 것. 1~8칸은 진홍 꽃잎(가장자리는 짙은 진홍), 9~12칸은 분홍 꽃잎, 13~16칸은 흰 꽃잎(가장자리 연분홍). 배경은 단색 초록(#00FF00)."
+  },
+  {
+   "code": "H2",
+   "file": "hs_bloom",
+   "title": "매화 한 송이 피고 지기",
+   "grid": "정사각형, 4열 2행 8칸",
+   "prompt": ""
+  },
+  {
+   "code": "H3",
+   "file": "hs_bloom_big",
+   "title": "큰 매화 만개",
+   "grid": "정사각형, 4열 2행 8칸",
+   "prompt": ""
+  },
+  {
+   "code": "H4",
+   "file": "hs_branch",
+   "title": "매화 가지 검기",
+   "grid": "가로 2:1, 4열 2행 8칸",
+   "prompt": ""
+  },
+  {
+   "code": "H5",
+   "file": "hs_slash",
+   "title": "매화 칼빛 베기",
+   "grid": "정사각형, 3열 2행 6칸",
+   "prompt": ""
+  },
+  {
+   "code": "H6",
+   "file": "hs_thrust",
+   "title": "칠매검 찌르기",
+   "grid": "가로 4:1, 1열 6행 6칸",
+   "prompt": ""
+  },
+  {
+   "code": "H7",
+   "file": "hs_swirl",
+   "title": "꽃잎 소용돌이",
+   "grid": "정사각형, 4열 2행 8칸",
+   "prompt": ""
+  },
+  {
+   "code": "H8",
+   "file": "hs_jaha",
+   "title": "자하신공 기운",
+   "grid": "정사각형, 4열 2행 8칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 4열 2행 8칸으로 나눠, 사람 몸 둘레에서 피어오르는 보랏빛 노을 기운을 되풀이 동작 8칸으로 그려(사람은 그리지 마, 가운데는 사람 자리로 비워). 기운은 발밑에서 시작해 머리 위까지 불꽃처럼 일렁이며 올라가는 보라색 기류, 칸 높이의 4분의 3. 보라 #8A5AD8, 연보라 #C9A8FF, 짙은 보라 #4A2C7A 세 단계. 칸마다 일렁임의 위치가 조금씩 올라가서, 8칸을 이어 돌리면 끊김 없이 계속 피어오르게. 기류 사이사이 작은 연보라 빛 점. 배경은 단색 초록(#00FF00)."
+  },
+  {
+   "code": "H9",
+   "file": "hs_jahawave",
+   "title": "자하검기",
+   "grid": "가로 2:1, 4열 2행 8칸",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 가로가 세로의 두 배인 그림을 4열 2행 8칸으로 나눠(칸도 가로로 긴 2:1). 오른쪽으로 날아가는 큰 초승달 검기. 안쪽은 흰색과 연분홍, 바깥은 보랏빛 노을이 두르고, 뒤쪽 가장자리에서 매화 꽃잎이 떨어져 나간다. 1~4 날아가는 동안의 되풀이 동작(노을과 꽃잎 위치만 조금씩 바뀜), 5~8 검기가 부서지며 꽃잎과 보라 안개로 흩어져 사라짐. 배경은 단색 초록(#00FF00)."
+  },
+  {
+   "code": "H10",
+   "file": "cut_plum",
+   "title": "매화만개 이름띠 그림",
+   "grid": "가로 3:1, 도트가 아닌 일러스트 한 장",
+   "prompt": "가로가 세로의 세 배인 그림 한 장. 한국 웹툰풍 무협 일러스트(도트 아님), 또렷한 선과 셀화 채색. 검은 밤하늘 바탕에, 오른쪽에서 왼쪽으로 뻗은 붉은 빛의 매화 가지와 수십 송이의 만개한 매화, 공중을 가득 채운 꽃잎. 가운데에 검을 비스듬히 든 검객의 뒷모습 실루엣(얼굴은 보이지 않게, 검은 무복, 묶은 머리). 가운데 위아래는 글자가 얹힐 자리라 조금 어둡게. 진홍·분홍·흰색만, 다른 색 없이. 글자·서명 없이. (이 장만 배경을 초록으로 하지 않는다.)"
+  }
+ ],
+ "land": [
+  {
+   "code": "GR1",
+   "title": "바깥 땅 무늬 여섯 (바로 위에서, 이어 붙는 정사각형, 3열 2행)",
+   "note": "풀밭과 흙길이 한 가지 무늬뿐이라 넓은 땅이 밋밋하다. 구역마다 달리 깔 땅이다. 무늬 장이다(빛 방향과 그림자 없이 고르게, 칸마다 꽉 채워서).",
+   "prompt": "Seamless ground texture sheet in exactly the same layout, pixel size and pixel-art style as the square texture swatches (roof tiles, wooden planks, cracked earth) in the reference image: 6 square swatches in 3 columns x 2 rows separated by thin solid pure blue #0000FF lines. Outdoor ground seen straight from above, no perspective, no cast shadows, even lighting, no objects. Each swatch is filled edge to edge and must tile seamlessly left-right and top-bottom: 1) short olive-green grass with a few clover leaves and tiny pale flowers, 2) dry yellow-brown grass with patches of bare earth, 3) plain packed pale earth, smooth, no wheel ruts, a few tiny pebbles, 4) forest floor: dark earth covered with fallen brown and ochre leaves and small twigs, 5) river sand with small rounded pebbles, 6) snow with faint blue-grey shadows and a few dry grass tips poking through. Muted natural colours (olive, ochre, warm grey), no orange or red cast. Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "PL1",
+   "title": "풀과 꽃 포기 여섯 (비스듬히 위에서, 3열 2행)",
+   "note": "길가와 담 밑에 흩어 놓는 작은 것들. 그림 그대로 바닥에 세운다.",
+   "prompt": "Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel size, outline and palette of the reference image, solid flat pure blue #0000FF background, wide gaps, nothing touching. Small roadside plants seen from a high three-quarter top-down view, each about knee-high to a person: 1) a low clump of white wildflowers with olive leaves, 2) a clump of yellow wildflowers, 3) a clump of small pink flowers, 4) a tuft of tall thin grass blades, 5) a small mossy rock with grass growing at its base, 6) a flat patch of clover with a few fallen leaves. Muted natural greens (olive, not bright green). Crisp chunky pixels, no anti-aliasing, no text."
+  },
+  {
+   "code": "BG1",
+   "title": "먼 산 띠 셋 (옆에서, 옆으로 이어 붙는 긴 띠, 1열 3행)",
+   "note": "지도 북쪽 끝에 서면 화면 위쪽이 안개 띠로 빈다. 그 자리에 겹겹이 세울 먼 산이다. **회색 단계로만** 그린다(아침·낮·저녁·밤의 빛깔은 게임이 입힌다). 옆으로만 이어 붙는다.",
+   "prompt": "Distant mountain silhouette strips for the far background of a pixel-art wuxia RPG: 3 long horizontal strips stacked in 1 column x 3 rows on a solid flat pure blue #0000FF background, with a blue gap between strips. Each strip is about 6 times wider than tall, seen from the side, its bottom edge straight, and it must tile seamlessly left to right. Use only four grey tones (white-grey, light grey, mid grey, dark grey), no other colours, no sky, no sun: 1) the nearest ridge: a dark grey forested ridge with jagged pine-top outline, with one small pagoda roof and one hall roof as silhouettes, 2) the middle range: mid-grey steep rocky peaks like Chinese ink-painting mountains, with a band of pale mist along their base, 3) the farthest range: pale grey soft rounded mountains almost fading into mist. Flat shapes with a few lighter mist bands, crisp chunky pixels, no anti-aliasing, no text."
+  }
+ ],
+ "ui": [
+  {
+   "code": "UI1",
+   "title": "창과 단추 틀 여섯",
+   "grid": "3열 2행, 칸마다 정사각형 판 하나",
+   "use": "대화창, 메뉴 창, 알림 창, 단추의 테두리. 게임이 네 귀는 그대로 두고 변과 가운데를 늘여서 쓴다(그래서 **네 귀에만 장식**을 두고, 네 변은 어디를 잘라도 같은 무늬여야 하고, 가운데는 무늬 없이 고른 면이어야 한다)",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형을 3열 2행 6칸으로 나누고, 칸마다 정사각형 판(창 틀) 하나를 칸의 4분의 3 크기로 그려. 여섯 판 모두 네 귀에만 장식이 있고, 네 변은 곧고 고른 띠이며, 안쪽은 무늬 없는 고른 면이다. 1) 누런 한지 창: 누런 종이 바탕(옅은 섬유 결), 가는 먹선 테두리 두 줄, 네 귀에 작은 구름 무늬. 2) 먹빛 창: 짙은 먹색 바탕(거의 검정에 가까운 남갈색), 금갈색 가는 테 한 줄, 네 귀에 꺾쇠 장식. 3) 나무 현판 창: 짙은 나무판 바탕(옅은 나뭇결), 금빛 테, 네 귀에 놋 장석. 4) 두루마리 창: 한지 바탕에 위아래 변만 짙은 나무 축(둥근 막대)으로 되어 있고 좌우 변은 종이 가장자리. 5) 단추(보통): 한지색 작은 판, 먹 테두리 한 줄, 아래 변에 짙은 그림자 한 줄. 6) 단추(고른 것): 5와 같은 판에 금빛 테두리, 왼쪽 위 귀에 붉은 인장 점 하나. 글자는 넣지 않는다."
+  },
+  {
+   "code": "UI2",
+   "title": "붓자국 띠 여섯",
+   "grid": "1열 6행, 가로로 긴 붓자국 여섯",
+   "use": "말하는 사람의 이름표, 초식 이름, 목표 띠, 장 제목의 바탕. 글자는 게임이 얹는다",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 가로가 세로의 6배쯤 되는 길쭉한 칸 6개를 위에서 아래로 쌓고(1열 6행), 칸마다 먹을 듬뿍 묻힌 큰 붓으로 왼쪽에서 오른쪽으로 한 번에 그은 붓자국 하나를 그려. 왼쪽은 뭉툭하고 진하게 시작하고, 가운데는 고르게 차 있고, 오른쪽 끝은 붓이 말라 여러 가닥으로 갈라지며 흩어진다. 위아래 가장자리는 들쭉날쭉하다. 붓자국은 칸 너비의 9할, 높이의 6할. 색은 칸마다 한 가지와 그 어두운 단계 하나: 1) 먹색(#1c1a18), 2) 진홍(#8e1838), 3) 쪽빛(#22406a), 4) 자주(#6a2c7a), 5) 금갈색(#a8782a), 6) 흰 종이색(#ece4d0, 가장자리는 회갈색). 글자는 넣지 않는다."
+  },
+  {
+   "code": "UI3",
+   "title": "화면 단추 그림 열둘",
+   "grid": "4열 3행 12칸",
+   "use": "화면 구석의 단추(지도, 짐, 무공 …). 지금은 글자만 있는 네모 단추다",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 정사각형이 아닌 4열 3행 12칸(가로 4 : 세로 3)으로 나누고, 칸마다 마름모꼴(정사각형을 45도 돌린 것) 먹색 판에 금갈색 가는 테를 두른 단추 하나를 칸의 4분의 3 크기로 그려. 판 안에는 흰 종이색(#ece4d0) 붓그림 한 가지씩: 1) 지도(반쯤 펼친 두루마리 지도), 2) 짐(묶은 보따리), 3) 무공(펼친 책과 붓), 4) 장비(칼과 갑옷), 5) 경맥(가부좌한 사람과 몸의 점), 6) 임무(인장이 찍힌 문서), 7) 동료(나란한 두 사람), 8) 문파(기와 전각), 9) 도감(끈으로 묶은 책 더미), 10) 설정(팔괘 무늬), 11) 저장(붉은 인장), 12) 닫기(붓으로 그은 엑스표). 열두 판은 크기와 테가 모두 같다. 글자는 넣지 않는다."
+  },
+  {
+   "code": "UI4",
+   "title": "머리 위 표식 열둘",
+   "grid": "4열 3행 12칸",
+   "use": "사람과 문 위에 뜨는 작은 표식(말 걸 수 있음, 임무, 가게 종류). 지금은 화살표 하나뿐이다",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 4열 3행 12칸으로 나누고, 칸마다 작은 표식 하나를 칸의 절반 크기로 그려(게임에서는 사람 머리만 한 크기로 뜬다). 짙은 남갈색 외곽선 1도트, 안은 밝게. 1) 말풍선(흰 종이색, 안에 점 셋), 2) 금빛 느낌표, 3) 금빛 물음표, 4) 위로 겹친 화살표 둘(문으로 들어감), 5) 엽전 꾸러미(가게), 6) 망치와 모루(대장간), 7) 술병과 잔(객잔), 8) 약탕기(의원), 9) 말 머리(역참과 표국), 10) 물고기(낚시터), 11) 엇갈린 칼 두 자루(싸움), 12) 뜬 눈(숨은 것). 글자는 넣지 않는다."
+  },
+  {
+   "code": "UI5",
+   "title": "싸움 화면 틀 여섯",
+   "grid": "2열 3행 6칸",
+   "use": "싸움 화면의 초상 틀, 체력·내력 막대, 초식 칸. 지금은 검은 테두리 네모다",
+   "prompt": "공통 규칙대로 도트 그림 한 장. 2열 3행 6칸으로 나누고 칸마다 하나씩 그려. 1) 초상 틀: 마름모꼴 먹색 틀(안은 비워 둔다. 비운 자리는 배경 초록 그대로), 금갈색 가는 테, 아래 귀에 작은 매듭 장식. 2) 긴 막대 틀: 가로가 세로의 10배인 막대, 왼쪽 끝은 붓이 시작한 듯 뭉툭하고 오른쪽 끝은 갈라진 먹색 붓자국 모양의 바탕. 3) 막대 채움 셋: 2의 막대 안에 들어갈 가는 띠 세 줄을 위아래로 나란히(위에서부터 진홍, 쪽빛, 금빛. 각각 밝은 줄 하나와 어두운 줄 하나의 두 단계). 4) 초식 칸(보통): 모서리를 둥글린 정사각형 먹색 판, 회갈색 가는 테. 5) 초식 칸(고른 것): 4와 같은 판에 금빛 테와 네 귀의 작은 불꽃 장식. 6) 적 이름 띠: 가로가 세로의 8배인 짙은 진홍 붓자국 띠와 그 아래 가는 막대 틀. 글자는 넣지 않는다."
+  }
+ ],
+ "icons": [
+  {
+   "code": "IC1",
+   "title": "무기 아이콘 스물",
+   "grid": "5열 4행 20칸",
+   "ids": [
+    "mop",
+    "stick",
+    "army_blade",
+    "iron_sword",
+    "blue_sword",
+    "moon_sword",
+    "iron_blade",
+    "ghost_blade",
+    "iron_spear",
+    "dragon_spear",
+    "ring_blade",
+    "moon_glaive",
+    "tiger_spear",
+    "plum_spear",
+    "pine_sword",
+    "fist_wrap",
+    "iron_gauntlet",
+    "tiger_claw",
+    "diamond_fist",
+    "hp"
+   ],
+   "use": "짐과 장비 창, 가게. 지금은 무협이 아닌 다른 그림 묶음의 칼·도끼 그림을 빌려 쓴다",
+   "prompt": "공통 규칙대로 도트 아이콘 한 장. 5열 4행 20칸으로 나누고, 칸마다 무기 하나를 칸의 4분의 3 크기로 그려. 무기는 손잡이가 왼쪽 아래, 날 끝이 오른쪽 위를 향하게 비스듬히 놓는다(권갑과 약 단지는 바로 세운다). 왼쪽 위부터 오른쪽으로, 다음 줄로: 1) 걸레 자루(긴 막대 끝에 걸레) 2) 낡은 목검 3) 이 빠진 군도(날이 군데군데 빠진 외날 칼) 4) 철검(곧은 양날 검) 5) 청강검(푸른 빛이 도는 가는 검) 6) 월영검(달빛처럼 흰 날, 초승달 코등이) 7) 박도(넓은 외날 큰 칼) 8) 귀면도(칼등에 귀신 얼굴이 새겨진 검붉은 큰 칼) 9) 철창(붉은 술이 달린 창) 10) 유룡창(자루에 용이 감긴 창) 11) 환두대도(손잡이 끝에 둥근 고리가 달린 큰 칼) 12) 청룡언월도(긴 자루 끝의 초승달 모양 큰 날) 13) 호두창(창날 밑에 호랑이 머리 장식) 14) 이화창(흰 배꽃 술이 달린 창) 15) 송문고검(칼집에 소나무 무늬가 있는 오래된 검) 16) 무명 권대(손에 감는 무명 띠) 17) 철권갑(쇠 장갑) 18) 호조수투(호랑이 발톱이 달린 장갑) 19) 금강권갑(금빛 권갑) 20) 금창약(붉은 종이 딱지가 붙은 작은 약 단지)."
+  },
+  {
+   "code": "IC2",
+   "title": "옷 아이콘 열아홉(윗옷과 아래옷)",
+   "grid": "5열 4행 20칸(마지막 칸은 비운다)",
+   "ids": [
+    "cloth_robe",
+    "leather_vest",
+    "chain_shirt",
+    "silk_robe",
+    "scale_armor",
+    "cloud_robe",
+    "frost_fur",
+    "gold_silk",
+    "cheonjam",
+    "wind_robe",
+    "cloth_pants",
+    "leather_greaves",
+    "iron_greaves",
+    "silk_pants",
+    "cloud_skirt",
+    "tiger_greaves",
+    "gold_greaves",
+    "wind_pants",
+    "cheonjam_pants"
+   ],
+   "use": "장비 창. 지금은 옷 그림이 하나도 없어 글자만 뜬다",
+   "prompt": "공통 규칙대로 도트 아이콘 한 장. 5열 4행 20칸으로 나누고, 칸마다 옷 하나를 정면에서 본 모습으로 칸의 4분의 3 크기로 그려(사람 없이 옷만, 윗옷은 소매를 양옆으로 편 모습, 아래옷은 바지나 치마나 각반 한 벌). 명나라풍 무협 복식. 등급이 높을수록 무늬와 금빛 장식이 많다. 왼쪽 위부터 오른쪽으로, 다음 줄로. 윗옷: 1) 무명 도포 2) 가죽 조끼 3) 쇄자갑 4) 비단 장삼 5) 철린갑 6) 운문 도포 7) 설표 털옷 8) 금사연갑 9) 천잠보의 10) 청풍 도의. 아래옷(11번 칸부터): 11) 무명 바지 12) 가죽 각반 13) 쇠 정강이받이 14) 비단 고의 15) 운문 하상 16) 호피 각반 17) 금린 각반 18) 청풍 고의 19) 천잠 하의. 20번 칸은 비운다."
+  },
+  {
+   "code": "IC3",
+   "title": "옷 아이콘 열여섯(신발과 머리에 쓰는 것)",
+   "grid": "4열 4행 16칸",
+   "ids": [
+    "straw_shoes",
+    "leather_boots",
+    "wind_boots",
+    "iron_boots",
+    "snow_boots",
+    "gold_boots",
+    "feather_boots",
+    "cheonjam_boots",
+    "headband",
+    "bamboo_hat",
+    "hero_band",
+    "iron_helm",
+    "jade_crown",
+    "gold_helm",
+    "wind_band",
+    "cheonjam_crown"
+   ],
+   "use": "장비 창",
+   "prompt": "공통 규칙대로 도트 아이콘 한 장. 4열 4행 16칸으로 나누고, 칸마다 하나씩 칸의 4분의 3 크기로 그려. 신발은 한 켤레를 비스듬히 옆에서, 머리에 쓰는 것은 정면에서 조금 위에서 본 모습. 명나라풍 무협 복식. 왼쪽 위부터 오른쪽으로, 다음 줄로. 신발: 1) 짚신 2) 가죽신 3) 경풍화 4) 철각화 5) 답설화 6) 금사 전화 7) 비연화 8) 천잠 운리. 머리에 쓰는 것(9번 칸부터): 9) 무명 두건 10) 죽립 11) 영웅건 12) 철 투구 13) 옥관 14) 금봉 투구 15) 청풍 영웅건 16) 천잠 관."
+  },
+  {
+   "code": "SK1",
+   "title": "초식 아이콘 1 (16칸)",
+   "grid": "4열 4행 16칸",
+   "ids": [
+    "tray",
+    "dart",
+    "breath",
+    "cloud_flash",
+    "flow_three",
+    "wind_turn",
+    "swallow_qi",
+    "fall_flower",
+    "sky_sword",
+    "break_mount",
+    "mad_wind",
+    "blood_fan",
+    "tiger_roar",
+    "one_point",
+    "dragon_pass",
+    "sweep_army"
+   ],
+   "use": "싸움 화면의 초식 칸과 무공 창. 지금은 초식 칸에 글자만 있다",
+   "prompt": "공통 규칙대로 도트 아이콘 한 장. 4열 4행 16칸으로 나누고, 칸마다 무공 초식 하나를 나타내는 그림을 칸의 4분의 3 크기로 그려. 사람은 그리지 않고 그 초식의 움직임과 기운만 상징으로 그린다(검기의 궤적, 주먹과 충격파, 창끝과 소용돌이, 달과 칼빛 따위). 이름의 뜻과 문파의 색을 살려 열여섯 칸이 한눈에 서로 구별되게. 왼쪽 위부터 오른쪽으로, 다음 줄로: 1) 쟁반 던지기(점소이 잡기) 2) 비도술(강호 잡학) 3) 운기조식(강호 잡학) 4) 청운일섬(청운검법) 5) 유운삼검(청운검법) 6) 회풍검(청운검법) 7) 비연검기(청운검법) 8) 낙화유수(청운검법) 9) 창궁무애검(남궁세가) 10) 파산일도(파산도법) 11) 광풍난무(파산도법) 12) 혈선도(파산도법) 13) 오호단문도(하북팽가) 14) 일점돌(유룡창법) 15) 유룡천(유룡창법) 16) 횡소천군(유룡창법)."
+  },
+  {
+   "code": "SK2",
+   "title": "초식 아이콘 2 (16칸)",
+   "grid": "4열 4행 16칸",
+   "ids": [
+    "hundred_flower",
+    "sky_pierce",
+    "iron_fist",
+    "chain_kick",
+    "earth_stomp",
+    "diamond_body",
+    "tathagata",
+    "luohan",
+    "taiji",
+    "plum",
+    "zhongnan",
+    "emei",
+    "kunlun",
+    "kongtong",
+    "diancang",
+    "qingcheng"
+   ],
+   "use": "싸움 화면의 초식 칸과 무공 창. 지금은 초식 칸에 글자만 있다",
+   "prompt": "공통 규칙대로 도트 아이콘 한 장. 4열 4행 16칸으로 나누고, 칸마다 무공 초식 하나를 나타내는 그림을 칸의 4분의 3 크기로 그려. 사람은 그리지 않고 그 초식의 움직임과 기운만 상징으로 그린다(검기의 궤적, 주먹과 충격파, 창끝과 소용돌이, 달과 칼빛 따위). 이름의 뜻과 문파의 색을 살려 열여섯 칸이 한눈에 서로 구별되게. 왼쪽 위부터 오른쪽으로, 다음 줄로: 1) 백화난무(유룡창법) 2) 천룡강림(유룡창법) 3) 붕권(소림 외가권) 4) 연환각(소림 외가권) 5) 진각(소림 외가권) 6) 금강호체(소림 외가권) 7) 여래신장(소림사) 8) 나한복호권(소림사) 9) 태극혜검(무당파) 10) 이십사수매화검법(화산파) 11) 천하삼십육검(종남파) 12) 불광보조(아미파) 13) 운룡대팔식(곤륜파) 14) 칠상권(공동파) 15) 사일검(점창파) 16) 송풍검(청성파)."
+  },
+  {
+   "code": "SK3",
+   "title": "초식 아이콘 3 (12칸)",
+   "grid": "4열 4행 16칸(뒤의 4칸은 비운다)",
+   "ids": [
+    "tagu",
+    "hangryong",
+    "ihwa",
+    "palmun",
+    "manchen",
+    "moon1",
+    "moon2",
+    "moon3",
+    "moon4",
+    "moon5",
+    "moon6",
+    "moon7"
+   ],
+   "use": "싸움 화면의 초식 칸과 무공 창. 지금은 초식 칸에 글자만 있다",
+   "prompt": "공통 규칙대로 도트 아이콘 한 장. 4열 4행 16칸으로 나누고, 칸마다 무공 초식 하나를 나타내는 그림을 칸의 4분의 3 크기로 그려. 사람은 그리지 않고 그 초식의 움직임과 기운만 상징으로 그린다(검기의 궤적, 주먹과 충격파, 창끝과 소용돌이, 달과 칼빛 따위). 이름의 뜻과 문파의 색을 살려 열여섯 칸이 한눈에 서로 구별되게. 왼쪽 위부터 오른쪽으로, 다음 줄로: 1) 타구봉법(개방) 2) 항룡십팔장(개방) 3) 이화접목(모용세가) 4) 팔문금쇄진(제갈세가) 5) 만천화우(사천당가) 6) 제1식 초승(월하칠식) 7) 제2식 월영(월하칠식) 8) 제3식 반월(월하칠식) 9) 제4식 월광(월하칠식) 10) 제5식 만월(월하칠식) 11) 제6식 월식(월하칠식) 12) 제7식 낙월(월하칠식)."
+  }
+ ],
+ "acts": {
+  "mob": [
+   [
+    "mob_bandit",
+    "산적",
+    "걷는 도트에 그려진 칼 그대로. 내지름은 크게 옆으로 후려 베기"
+   ],
+   [
+    "mob_brute",
+    "거한",
+    "맨주먹이나 걷는 도트에 그려진 몽둥이. 내지름은 위에서 아래로 내리치기"
+   ],
+   [
+    "mob_pirate",
+    "수적",
+    "걷는 도트에 그려진 갈고리 칼. 내지름은 낮게 베어 들어가기"
+   ],
+   [
+    "mob_archer",
+    "궁수",
+    "활. 준비는 시위를 당긴 자세, 내지름은 화살을 막 놓은 순간(화살은 그리지 않는다), 거둠은 화살통에 손을 뻗는 자세"
+   ],
+   [
+    "mob_assassin",
+    "자객",
+    "단검 두 자루. 내지름은 몸을 낮춰 앞으로 찌르기"
+   ],
+   [
+    "mob_jeong",
+    "정파 제자",
+    "곧은 검. 내지름은 반듯한 찌르기"
+   ],
+   [
+    "mob_sa",
+    "사파 무사",
+    "허리에 찬 굽은 칼. 내지름은 비스듬히 올려 베기"
+   ],
+   [
+    "mob_cult",
+    "마교도",
+    "걷는 도트에 그려진 무기(없으면 손톱을 세운 두 손). 내지름은 두 팔을 벌려 덮치기"
+   ],
+   [
+    "mob_soldier",
+    "관병",
+    "창. 내지름은 두 손으로 곧게 찌르기"
+   ],
+   [
+    "mob_jiangshi",
+    "강시",
+    "무기 없음. 두 팔을 앞으로 뻗은 채 뛴다. 내지름은 두 손으로 할퀴기, 경공은 두 발을 모아 뛰어오른 자세"
+   ]
+  ],
+  "ally1": [
+   [
+    "c_haho",
+    "하호"
+   ],
+   [
+    "c_mun",
+    "문"
+   ],
+   [
+    "c_owol",
+    "오월"
+   ],
+   [
+    "clan_dang",
+    "당가 아가씨"
+   ],
+   [
+    "clan_moyong",
+    "모용 아가씨"
+   ],
+   [
+    "clan_namgung",
+    "남궁 아가씨"
+   ]
+  ],
+  "ally2": [
+   [
+    "hyeok",
+    "혁련하"
+   ],
+   [
+    "c_hyegong",
+    "혜공"
+   ],
+   [
+    "c_saira",
+    "사이라"
+   ],
+   [
+    "c_gal",
+    "갈 선생"
+   ],
+   [
+    "c_yang",
+    "양춘"
+   ],
+   [
+    "c_gu",
+    "구 노창"
+   ]
+  ]
+ }
+}

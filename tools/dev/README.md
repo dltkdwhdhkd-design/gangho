@@ -21,7 +21,9 @@ cat /tmp/out/_summary.txt
 
 시험 파일은 저장소의 `tools/*_test.cjs`가 원본이다(`run_tests.sh`가 거기서 바로 돌린다). 2026-11-20에 둘이 더해졌다: `height_test.cjs`(높낮이 지도의 계단·닿기·가림), `hd_occl_test.cjs`(새 화면에서 서 있는 사람이 가려지는지. 바깥 지도와 손으로 지은 방, 만들어지는 방 종류마다 두 곳. 3~12분 걸려 따로 돌린다. 가려짐은 "머리나 가슴이 막힌 것"이다: 계산대나 탁자 뒤에 서서 허리 아래만 가려진 사람은 세지 않는다. `LIST=1`을 주면 길에서 가려지는 사람을 다 적는다. 11-20 오후에 적게 세던 잘못을 고쳤다: `docs/checklist.md`의 잰 기록).
 
-올리기 전 검사는 저장소 맨 위에서 `bash tools/check.sh`(문법, 주석에 먹힌 코드, 블렌더 요청서와 규격·재질 이름표가 서로 맞는지).
+올리기 전 검사는 저장소 맨 위에서 `bash tools/check.sh`(문법, 주석에 먹힌 코드, 블렌더 요청서와 규격·재질 이름표가 서로 맞는지, ChatGPT 요청서 묶음이 저장소와 맞는지).
+
+ChatGPT 요청서(2026-11-21부터): 받을 그림과 모형 전부가 `docs/gpt/index.md`의 차례표 하나에 있고, 단계마다 `docs/gpt/<단계 이름>.md`가 있다. `python3 tools/gpt_queue.py`가 만든다(그림 내용은 `tools/gpt/items.json`, 모형은 `tools/blender/spec.json`, 사람은 `tools/people_new.py`와 `docs/art-requests.md`). 그림이나 모형을 받아 넣은 뒤에 다시 돌리면 "받음"이 스스로 바뀐다. 차례를 바꾸거나 단계를 더하려면 그 파일의 `ORDER`와 `step(...)`을 고친다(단계 이름은 바꾸지 않는다). 받은 그림을 넣는 도구: 걷는 도트 한 장(`<키>-walk.png`, 4열 3행)과 동작 칸(`<키>-c.png`, 한 줄 여섯 칸)은 `python3 tools/people_in.py <키>`, 효과는 `tools/fx_in.py`, 무늬는 `tools/wall_in.py`, 모형은 `tools/blender/gpt.py check … --install`.
 
 블렌더 조각(2026-11-20): ChatGPT에게 블렌더로 모형을 만들게 하는 요청서가 `docs/chatgpt-blender.md`다. 표와 틀은 `tools/blender/spec.json`(치수)과 `tools/blender/gangho_kit.py`(ChatGPT 스크립트가 불러 쓰는 틀)에서 뽑는다.
 - `python3 tools/blender/gpt.py run <받은 스크립트.py> [--install]`: 빈 폴더에서 돌려 `.glb`를 만들고 규격으로 검사한다. `--install`이면 통과한 것을 `assets/hd2d/models/`에 넣는다. 받은 스크립트는 돌리기 전에 읽어 본다.
