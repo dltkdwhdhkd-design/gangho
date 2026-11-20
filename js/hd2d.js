@@ -82,7 +82,7 @@ HD.sheetKey = o => {
 };
 HD.sheet = o => { const k = HD.sheetKey(o); return k ? PV[k] : null; };
 // 동작 시트(<키>_act: 왼쪽을 보는 옆모습 여섯 칸 — 준비, 내지름, 거둠, 맞음, 쓰러짐, 경공). tools/people_in.py가 <키>-c.png로 만든다
-HD.act = k => (k && PV[k + '_act']) || null;
+HD.act = k => (k && PV[(k === 'yun' ? 'n_yun' : k) + '_act']) || null;  // 윤설의 키는 yun인데 동작 칸은 n_yun_act로 왔다
 HD.draw2dAct = (c, im, fr, flip, x, y, h = CHAR, white) => {
   const CW = 80, CH = 64, k = h / 48; c.save(); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; if (white) c.filter = 'brightness(0) invert(1)';
   c.translate(x, y + 1); if (flip) c.scale(-1, 1); c.drawImage(im, fr * CW, 0, CW, CH, -CW / 2 * k, -CH * k, CW * k, CH * k); c.restore();

@@ -112,7 +112,7 @@ function bolt(x1, y1, x2, y2, c0, c1, life, delay = 0) {
 export function swing(B, st, a, h, sk) {
   const [c0, c1, c2] = C(st), an = Math.atan2(a.ay, a.ax), x = a.x, y = a.y - 6, ult = sk?.ult;
   if (h.shape === 'line') P(B, { k: 'thrust', x, y, ang: an, life: .26, s: Math.min(h.len || 40, 140), w: Math.min(h.w || 10, 40) * .45, col: c0, col2: c1, add: 1 });
-  else if (h.shape === 'circle') P(B, { k: 'ring', x, y: a.y, life: .3, s: 6, s2: (h.r || 30) * .95, col: c0, w: 3, add: 1, flat: 1 });
+  else if (h.shape === 'circle') P(B, { k: 'ring', x: x + a.ax * (h.off || 0), y: a.y + a.ay * (h.off || 0), life: .3, s: 6, s2: (h.r || 30) * .95, col: c0, w: 3, add: 1, flat: 1 });
   else P(B, { k: 'slash', x, y, ang: an, r: Math.min(h.r || 30, 90) * .8, sweep: Math.min((h.a || 80) * Math.PI / 180, 2.6), life: .28, w: ult ? 7 : 4, col: c0, col2: c1, add: 1, flip: (a.swingN = (a.swingN || 0) + 1) % 2 });
   const R = h.shape === 'line' ? (h.len || 40) : (h.r || 30), n = ult ? 22 : 8;
   for (let i = 0; i < n; i++) {
@@ -146,7 +146,10 @@ function bit(B, st, x, y, nx, ny, c0, c1, c2, i) {
 export function impact(B, st, o, nx, ny, big) {
   const [c0, c1, c2] = C(st), x = o.x, y = o.y - 7, n = big ? 12 : 5;
   P(B, { k: 'burst', x, y, life: .14, s: big ? 11 : 7, col: c1, add: 1 });
-  P(B, { k: 'hitstar', x, y, life: big ? .18 : .13, s: big ? 12 : 7, col: c1, ang: Math.atan2(ny, nx), add: 1 });  // 맞는 순간 번쩍(빛살 여덟 갈래)
+  const contact = st === 'plum' ? 'plumSeal' : st === 'lightning' ? 'forkFlash' :
+    st === 'cloud' || st === 'water' ? 'flowWake' : 'hitstar';
+  P(B, { k: contact, x, y, life: big ? .24 : .17, s: big ? 12 : 7,
+    col: c1, edge: c0, ang: Math.atan2(ny, nx), add: contact === 'plumSeal' ? 0 : 1 });
   for (let i = 0; i < n; i++) { const q = Math.atan2(ny, nx) + rnd(-1.2, 1.2); bit(B, st, x, y, Math.cos(q), Math.sin(q), c0, c1, c2, i); }
   if (st === 'plum') bloom(B, x + rnd(-3, 3), y + rnd(-3, 2), .08, big, true);  // 늦게 핀다
   if (st === 'lightning') P(B, bolt(x + rnd(-4, 4), y - 30, x, y, c0, c1, .14));
@@ -229,6 +232,33 @@ function crescent(c, r, a0, span, w, col, al) {
 function shape(c, p, u) {
   const x = p.x, y = p.y;
   switch (p.k) {
+    case 'plumSeal': {
+      c.translate(x, y); c.rotate(p.ang + .18 * u);
+      const r = p.s * (.24 + .55 * u);
+      for (let i = 0; i < 5; i++) {
+        c.rotate(Math.PI * 2 / 5); c.fillStyle = p.edge;
+        c.beginPath(); c.ellipse(r, 0, r * .63, r * .4, -.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = p.col; c.fillRect(r, -1, 1.5, 1);
+      }
+      c.fillStyle = '#ffdc83'; c.fillRect(-1, -1, 2, 2); break;
+    }
+    case 'forkFlash': {
+      c.translate(x, y); c.rotate(p.ang); const r = p.s * (.65 + u);
+      c.strokeStyle = p.edge; c.lineWidth = 1.6; c.beginPath();
+      for (const side of [-1, 1]) {
+        c.moveTo(0, 0); c.lineTo(r * .45, side * r * .18);
+        c.lineTo(r * .36, side * r * .43); c.lineTo(r, side * r * .67);
+      }
+      c.stroke(); c.fillStyle = p.col; c.fillRect(-1, -1, 3, 2); break;
+    }
+    case 'flowWake': {
+      c.translate(x, y); c.rotate(p.ang); const r = p.s * (.5 + u);
+      for (const side of [-1, 1]) {
+        c.save(); c.scale(1, side); c.strokeStyle = p.edge; c.lineWidth = 1.4 * (1 - u) + .4;
+        c.beginPath(); c.moveTo(-r * .3, 0); c.bezierCurveTo(0, -r * .6, r * .7, -r * .8, r, -r * .4); c.stroke(); c.restore();
+      }
+      break;
+    }
     case 'ring': { const r = lerp(p.s, p.s2, 1 - (1 - u) * (1 - u)); c.strokeStyle = p.col; c.lineWidth = Math.max(.3, p.w * (1 - u)); c.beginPath(); c.ellipse(x, y, r, r * (p.flat ? .55 : 1), 0, 0, 6.29); c.stroke(); break; }
     case 'bloom': {  // 봉오리 → 반쯤 → 만개 → 번쩍 → (터지면 꽃잎이 따로 흩날린다)
       const q = u / .58; if (q > 1.25) break; const big = p.big;

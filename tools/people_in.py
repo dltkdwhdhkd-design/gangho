@@ -28,5 +28,5 @@ for D in DIRS:
 for c, o, _, t, _ in json.load(open(os.path.join(ROOT, 'tools', 'hf_queue.json'))):
     for D in DIRS:
         if os.path.exists(os.path.join(D, c + 'a.png')) and os.path.exists(os.path.join(D, c + 'b.png')) and not os.path.exists(os.path.join(OUT, o + '.webp')): H.walker(c, o, D, t); break
-L = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(OUT, 'n_*.webp')) + glob.glob(os.path.join(OUT, 'me_act.webp')))
+L = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(OUT, 'n_*.webp')) + glob.glob(os.path.join(OUT, 'me*_act.webp')))
 json.dump(L, open(os.path.join(OUT, 'people.json'), 'w'), ensure_ascii=False); print('people.json', L)

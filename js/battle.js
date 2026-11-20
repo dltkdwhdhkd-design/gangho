@@ -187,7 +187,7 @@ export class Battle {
   }
   // ── 초식 실행 ──
   start(a, sk, key) {
-    a.st = 'skill'; a.sk = sk; a.skKey = key; a.skT = 0; a.skI = 0; a.vx = a.vy = 0; a.counter = 0; a.skSeq = (a.skSeq || 0) + 1;
+    a.st = 'skill'; a.sk = sk; a.skKey = key; a.poseBeat = null; a.skT = 0; a.skI = 0; a.vx = a.vy = 0; a.counter = 0; a.skSeq = (a.skSeq || 0) + 1;
     a.fxSt = sk.basic ? BF.styleOf(a, null) : BF.styleOf(a, sk); a.hitT = sk.steps.find(q => q.hit || q.proj || q.zone || q.rush)?.t ?? 0;  // 연출 꼴, 첫 타격 때(그 전까지는 기를 모으는 자세)
     if (!sk.basic && !sk.ult && !(a.isPlayer && sk.steps.some(q => q.cut))) { BF.cast(this, a.fxSt, a); if (a.isPlayer && sk.name) this.say(a, sk.name, BF.PAL[a.fxSt][0]); }
     if (sk.steps && sk.teleToFoe) { const T = this.near(a); a.jumpTo = T ? { x: T.x, y: T.y } : null; }
@@ -202,6 +202,7 @@ export class Battle {
   }
   runStep(a, s) {
     const sk = a.sk, dmgBase = a.atk;
+    if (s.hit || s.proj || s.rush || s.zone || s.moonstrike || s.heal || s.buff || s.counter) a.poseBeat = s.t;
     if (s.sfx) Sound.sfx(s.sfx, .9);
     if (s.armor) a.armor = Math.max(a.armor, s.armor);
     if (s.iframe) a.iframe = Math.max(a.iframe, s.iframe);
@@ -565,7 +566,9 @@ export class Battle {
     if (a.flash > 0 && !a.big) { const w = hd ? 1 : whiteOf(a.spr); if (w) { c.globalAlpha = .85; this.sprite(c, a, a.x, y - (a.z || 0), 0, a.face, w); } }
     c.restore();
     c.globalAlpha = 1;
-    if (a.swing && a.wpn) this.drawWeapon(c, a);
+    const drawnWeapon = hd && this.actionSheet(a) && this.actionFrame(a) >= 0 &&
+      (a.isPlayer ? a.wpn === 'Sword' : ['n_so', 'n_cheol', 'yun', 'n_baekrang'].includes(a.hdKey));
+    if (a.swing && a.wpn && !drawnWeapon) this.drawWeapon(c, a);
     if (a.st === 'stun' && !dead && a.stagger > 0) { for (let i = 0; i < 3; i++) { const an = this.t * 6 + i * 2.1; c.fillStyle = '#ffe36a'; c.fillRect(snap(a.x + Math.cos(an) * 7), snap(y - 20 + Math.sin(an) * 2), 2, 2); } }
     if (a.def_ && a.def_.immune && !(a.exposed > 0)) { c.strokeStyle = 'rgba(230,50,40,.75)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 9 * s, 12 * s, 0, 7); c.stroke(); }
     if (a.buffs.diamond > 0) { c.strokeStyle = 'rgba(255,220,120,.7)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 7, 10, 0, 7); c.stroke(); }
@@ -583,8 +586,20 @@ export class Battle {
     const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, ''), fm = /^(?:fd|sga|sgn)_([a-z]+)/.exec(id), al = fm && G.free?.fac?.(fm[1])?.align;
     return (a.hdIm = key({ id, keys: [a.def_?.pk, b, MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
   }
+  actionSheet(a) {
+    if (a.isPlayer && a.wpn !== 'Sword') return G.hd?.act?.('me_unarmed');
+    return a.hdAct;
+  }
+  actionFrame(a) {
+    if (a.dead) return 4;
+    if (a.st === 'stun') return 3;
+    if (a.st === 'dash' || a.jumpT > 0) return 5;
+    if (a.st !== 'skill') return -1;
+    if (a.poseBeat == null) return 0;
+    return a.skT - a.poseBeat < .10 ? 1 : 2;
+  }
   pose(c, a, x, y) {
-    if (a.hdAct && (a.dead || a.st === 'skill' || a.st === 'stun' || a.st === 'dash')) return;  // 동작 칸이 몸놀림을 대신한다
+    if (a.hdIm && this.actionSheet(a) && this.actionFrame(a) >= 0) return;  // 동작 칸이 몸놀림을 대신한다
     let sx = 1, sy = 1, rot = 0, ox = 0;
     if (a.dead) { const u = Math.min(1, a.deadT / .28); rot = u * 1.45 * (a.ax > 0 ? -1 : 1); }
     else if (a.st === 'skill' && a.sk && !a.sk.basic) { const lead = a.hitT || 0;
@@ -601,7 +616,7 @@ export class Battle {
   sprite(c, a, x, y, _, face, white) {
     const s = a.scale || 1;
     const hd = !a.def_?.stamp && !a.big && this.hdOf(a);
-    const act = hd && a.hdAct, af = !act ? -1 : a.dead ? 4 : a.st === 'stun' ? 3 : a.st === 'dash' || a.jumpT > 0 ? 5 : a.st === 'skill' ? (a.skT < (a.hitT || .08) ? 0 : a.skT < (a.hitT || .08) + .16 ? 1 : 2) : -1;
+    const act = hd && this.actionSheet(a), af = act ? this.actionFrame(a) : -1;
     if (af >= 0) { G.hd.draw2dAct(c, act, af, face === 3 || (face < 2 && a.ax > 0), x, y, 15 * s * (qSheet(a.spr) ? QZ : 1), !!white); return; }  // 동작 칸이 있으면 기울이기 흉내 대신 그 칸
     if (hd) {  // 칸: 0 섬, 1~3 걸음. 초식과 돌진은 크게 내딛은 칸
       const fr = a.dead ? 0 : a.st === 'move' ? Math.floor(a.walk) % 4 : a.st === 'skill' || a.st === 'dash' ? 2 : a.st === 'stun' ? 1 : 0;
