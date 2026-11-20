@@ -669,7 +669,7 @@ def done(pack=None):
 |---|---|---|---|---|
 | 1 | **M1** 방의 벽 조각 | `gangho_m1.py` | `rw_wall`, `rw_post`, `rw_pillar`, `rw_column`, `rw_sill`, `rw_window`, `rw_emblem` | 받음(2026-11-20). 게임에 넣었다 |
 | 2 | **M2** 큰 가구 1: 탁자와 앉는 것 | `gangho_m2.py` | `fn_table`, `fn_altar`, `fn_counter`, `fn_teatable`, `fn_chair`, `fn_stool`, `fn_bench`, `fn_bed` | 받음(2026-11-20). 게임에 넣었다 |
-| 3 | **M3** 큰 가구 2: 세워 두는 것 | `gangho_m3.py` | `fn_bookcase`, `fn_drawers`, `fn_shelf`, `fn_screen`, `fn_rack`, `fn_chest`, `fn_dummy`, `fn_drum`, `fn_stove` |  |
+| 3 | **M3** 큰 가구 2: 세워 두는 것 | `gangho_m3.py` | `fn_bookcase`, `fn_drawers`, `fn_shelf`, `fn_screen`, `fn_rack`, `fn_chest`, `fn_dummy`, `fn_drum`, `fn_stove` | 받음(2026-11-20). 게임에 넣었다 |
 | 4 | **M4** 돌계단, 난간, 축대 | `gangho_m4.py` | `st_stair`, `st_cheek`, `st_rail`, `st_railpost`, `st_wall`, `st_cap` |  |
 | 5 | **M5** 눈에 띄는 것: 문, 정자, 탑, 석등 | `gangho_m5.py` | `lm_paifang`, `lm_pavilion`, `lm_pagoda`, `lm_stele`, `lm_lantern`, `lm_censer`, `lm_well` |  |
 | 6 | **M6** 장터와 나루 | `gangho_m6.py` | `mk_stall`, `mk_cart`, `mk_boat`, `mk_junk`, `mk_crates`, `mk_barrels` |  |
@@ -844,6 +844,7 @@ M2와 같은 약속이다(사람 키 15점 기준, 원점은 바닥 한가운데
 |---|---|---|---|
 | M1 방의 벽 조각 7개 | 2026-11-20 | 치수, 꼭 닿는 축, 삼각형 수, 재질 이름, 뒤집힌 면·구멍 모두 통과. 받은 스크립트를 Claude 쪽 블렌더 5.3에서 다시 돌려 같은 모형이 나왔다 | `rw_window`의 창살 깊이를 0.62 → 0.3, 띠살 깊이를 0.88 → 0.45로 얕게 했다(옆벽의 창이 비스듬히 보일 때 살끼리 겹쳐 창이 까맣게 보였다). 나머지는 받은 그대로 쓴다 |
 | M2 큰 가구 8개(긴 탁자, 제상, 계산대, 차 탁자, 등받이 의자, 북 걸상, 긴 걸상, 침상) | 2026-11-20 | 치수, 삼각형 수, 재질 이름, 뒤집힌 면·구멍 모두 통과. 받은 스크립트를 다시 돌려 같은 모형이 나왔다 | 없음. 그대로 넣었다. 함께 온 배치 예시(객잔 식당, 문파 전각)대로 달맞이 객잔과 창운문 본전, 만들어지는 객잔을 다시 짰다(`docs/shots/1120/m2_rooms.jpg`) |
+| M3 큰 가구 9개(책장, 약장, 선반, 병풍, 병기 걸이, 궤, 목인장, 큰북, 부뚜막) | 2026-11-20 | 치수·삼각형·재질·뒤집힌 면·구멍 모두 통과 | 없음. 그대로 넣었다. 큰북은 아직 놓을 자리가 없다(방 배치는 그대로) |
 
 다음 묶음에 그대로 이어 가면 좋은 것: 단면을 이어 만든 모접기와 층진 받침, 범위와 꼭 닿는 축을 정확히 맞춘 것, 삼각형 한도 안에서 윤곽에 공을 들인 것. 벽이나 물건의 앞면에 붙는 얇은 살·띠는 비스듬히 봐도 뒤가 보이게 얕게 만든다.
 

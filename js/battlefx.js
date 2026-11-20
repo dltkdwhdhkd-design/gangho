@@ -261,8 +261,9 @@ function shape(c, p, u) {
     }
     case 'ring': { const r = lerp(p.s, p.s2, 1 - (1 - u) * (1 - u)); c.strokeStyle = p.col; c.lineWidth = Math.max(.3, p.w * (1 - u)); c.beginPath(); c.ellipse(x, y, r, r * (p.flat ? .55 : 1), 0, 0, 6.29); c.stroke(); break; }
     case 'bloom': {  // 봉오리 → 반쯤 → 만개 → 번쩍 → (터지면 꽃잎이 따로 흩날린다)
-      const q = u / .58; if (q > 1.25) break; const big = p.big;
-      if (sheetAt(c, big ? 'hs_bloom_big' : 'hs_bloom', Math.min(7, Math.floor(q * 5)), x, y)) break;
+      const big = p.big;
+      if (sheetAt(c, big ? 'hs_bloom_big' : 'hs_bloom', Math.min(7, Math.floor(u * 8)), x, y)) break;
+      const q = u / .58; if (q > 1.25) break;
       // 코드 그림은 봉오리만: 꽃 모양을 코드로 그리면 장난감처럼 보여서, 만개 그림(hs_bloom)이 오기 전까지는 봉오리가 부풀다 번쩍이며 꽃잎으로 터지는 것으로 대신한다
       const X = Math.round(x), Y = Math.round(y), b = big ? 2 : 1;
       if (q <= 1) { const g = q < .5 ? 1 : 2; c.fillStyle = HW.dark; c.fillRect(X, Y, g * b, g * b); c.fillStyle = q > .75 ? HW.white : HW.red; c.fillRect(X, Y, b, b); }  // 작은 봉오리 한두 점

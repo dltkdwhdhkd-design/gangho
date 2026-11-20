@@ -64,5 +64,5 @@ export const FURN = {
   teatable: { key: 'fn_teatable', keep: 1 }, chair: { key: 'fn_chair', keep: 1 }, stool: { key: 'fn_stool', keep: 1 }, f_stool: { key: 'fn_stool', keep: 1 },
   bed: { key: 'fn_bed' }, f_bed: { key: 'fn_bed', rot: 1 },
   bookcase: { key: 'fn_bookcase' }, drawer: { key: 'fn_drawers' }, shelf: { key: 'fn_shelf' }, shelf2: { key: 'fn_shelf' }, screen: { key: 'fn_screen' },
-  rack: { key: 'fn_rack' }, rack2: { key: 'fn_rack' }, chest: { key: 'fn_chest' }, f_dummy: { key: 'fn_dummy' },
+  rack: { key: 'fn_rack' }, rack2: { key: 'fn_rack' }, chest: { key: 'fn_chest' }, f_dummy: { key: 'fn_dummy' }, f_stove: { key: 'fn_stove' },
 };

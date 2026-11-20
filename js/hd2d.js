@@ -70,11 +70,15 @@ export const HD = {
 };
 G.hd = HD;
 // 옛 2D 화면(전투, 강호 큰 지도, 방)에서도 마을과 같은 사람 도트를 쓰게 시트를 내준다. 새 화면과 새 그림을 켰을 때만
+// 강호에서 돌아다니는 적은 무리의 선두 적 ID로 도트를 고른다.
+const roamingEnemyArt = { bandit: 'n_mob_bandit', rowdy: 'n_mob_bandit', mask_low: 'n_mob_bandit',
+  rowdy2: 'n_mob_brute', bruiser: 'n_mob_brute', archer: 'n_mob_archer', wanted2: 'n_mob_archer' };
 HD.sheetKey = o => {
   if (!want || !art() || !o) return null; const L = [];
   if (o.me) L.push('me');
   else {
     for (const k of [o.id, o.role, o.hint && ROLE[o.hint], ...(o.keys || [])]) if (k) L.push('n_' + k);
+    if (o.foes?.length) L.push(roamingEnemyArt[o.foes[0]]);
     const key = o.spr ? (o.spr.includes('/') ? o.spr : 'chars/' + o.spr) : null;
     if (key === 'chars/Princess') L.push('yun'); if (key && NEWNPC[key]) L.push(...NEWNPC[key]);
   }
@@ -763,7 +767,7 @@ function syncActors(F) {
   used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; const sz = o.size || (KIDS.has(key) ? 11 : 16); actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, sz * OLDK, o.lift || 0, .84); blob(x, y, sz / 16); };
   for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16 * (OLDSC[n.stamp] ?? .66) / HD.actK(curMap)); continue; }  // 일감 표시용 소품(걸레질 자리의 독 따위)은 사람 크기 배율을 안 받고 바닥 소품 크기로(방 안에서 사람만 한 독이 되던 것)
     const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.id && PEOPLE.has('n_' + n.id) ? 'n_' + n.id : n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : ROLE[n.hint] && PEOPLE.has('n_' + ROLE[n.hint]) ? 'n_' + ROLE[n.hint] : null, yt = (pk && previewTex(pk)) || (key === 'chars/Princess' && previewTex('yun')) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
-  const walker = (n, row) => { const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : null, yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
+  const walker = (n, row) => { const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : roamingEnemyArt[n.foes?.[0]], yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
   for (const r of F.roam) if (!r.gone) { walker(r, Math.floor(r.walk || 0) % 4); for (const q of r.crew || []) walker(q, Math.floor(q.walk || 0) % 4); }  // 떠도는 무리·길손과 그 뒤를 따르는 사람들
   if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id); if (PEOPLE.has('n_' + id)) return walker({ spr: s, role: id, dir: q.dir, x: q.x, y: q.y }, Math.floor(p.walk) % 4); const key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });  // 동료도 새 사람 시트가 있으면 그것으로
   for (const a of F.animals || []) { if (a.gone) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
