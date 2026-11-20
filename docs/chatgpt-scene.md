@@ -26,7 +26,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-scene.md
 
 **방법 2 (주소를 못 열 때)**: 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙이고, `art-src/ref-walls.png`와 `docs/ref/ws-interior.jpg`(바위를 받을 때는 `art-src/chatgpt/HK3.png`도)를 내려받아 함께 올린 뒤 "이 문서대로 받을 차례 맨 위부터 한 장씩 그려 줘"라고 한다.
 
-받은 그림은 파일 이름 그대로 저장소 `art-src/chatgpt/`에 올리거나 Claude 대화에 붙인다. 넣는 일과 블렌더로 만드는 일은 Claude가 한다.
+받은 그림은 파일 이름 그대로 저장소 `art-src/chatgpt/`에 올리거나 Claude 대화에 붙인다. 넣는 일은 Claude가 한다. 이 그림을 입힐 **블렌더 모형**은 다른 대화방에서 `docs/chatgpt-blender.md`로 따로 받는다(2026-11-20. ChatGPT가 스크립트를 쓰고 Claude가 돌린다. 오기 전에는 Claude가 임시 모형을 만들어 둔다).
 
 ## 규칙
 
