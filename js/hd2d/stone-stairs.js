@@ -22,7 +22,8 @@ export function stoneStairs(map, tile, level, place) {
       if (steps.has(id(x + side, y))) continue;
       place('st_cheek', (x + (side === 1 ? 1 : 0)) * tile, front, low * level, -side);
       // 입구 좌우 세 칸 안의 연속된 단차만 꾸민다. 평지와 계단 입구는 열린다.
-      for (let i = 1; i <= 3; i++) {
+      // 청하진 나루는 둑 끝까지 축대를 잇는다(주인이 둑 가장자리를 돌벽으로 깔끔하게 마감하라 하심). 난간은 계단 옆 세 칸에만
+      for (let i = 1; i <= (map.id === 'cheongha' ? map.w : 3); i++) {
         const cx = x + side * i, k = id(cx, y);
         const drop = high - height(cx, y + 1);
         if (!stone(cx, y) || map.stair[k] || height(cx, y) !== high || !(drop > 0 && drop <= 4)) break;
@@ -31,6 +32,7 @@ export function stoneStairs(map, tile, level, place) {
         const mid = (cx + .5) * tile;
         for (let n = 0; n < drop; n++) place('st_wall', mid, front, (high - drop + n) * level);
         place('st_cap', mid, front, high * level);
+        if (i > 3) continue;
         place('st_rail', mid, front, high * level + 2);
         for (const px of [cx, cx + 1]) {
           const p = px + ',' + y + ',' + high;
