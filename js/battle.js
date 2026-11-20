@@ -157,7 +157,8 @@ export class Battle {
     const type = this.st.wtype, list = BASIC[type];
     if (a.comboT <= 0) a.combo = 0;
     this.aim(a, d);
-    this.start(a, list[a.combo % list.length], 'basic'); a.vx = a.vy = 0;
+    a.basicFrame = a.combo % list.length;
+    this.start(a, list[a.basicFrame], 'basic'); a.vx = a.vy = 0;
     const last = a.combo === list.length - 1, b = this.b;
     a.skRate = 1 + (b.basicSpeed || 0) / 100;
     if (last && b.armorBasic) a.armor = Math.max(a.armor, .4);
@@ -567,7 +568,7 @@ export class Battle {
     if (a.flash > 0 && !a.big) { const w = hd ? 1 : whiteOf(a.spr); if (w) { c.globalAlpha = .85; this.sprite(c, a, a.x, y - (a.z || 0), 0, a.face, w); } }
     c.restore();
     c.globalAlpha = 1;
-    const drawnWeapon = hd && this.actionSheet(a) && this.actionFrame(a) >= 0;  // 동작 칸에는 무기(검)나 맨손이 그려져 있다. 무기에 맞는 칸만 쓰니(actionSheet) 따로 그리던 무기는 그리지 않는다
+    const drawnWeapon = a.nativeKey || (hd && this.actionSheet(a) && this.actionFrame(a) >= 0);  // 동작 칸에는 무기(검)나 맨손이 그려져 있다. 무기에 맞는 칸만 쓰니(actionSheet) 따로 그리던 무기는 그리지 않는다
     if (a.swing && a.wpn && !drawnWeapon) this.drawWeapon(c, a);
     if (a.st === 'stun' && !dead && a.stagger > 0) { for (let i = 0; i < 3; i++) { const an = this.t * 6 + i * 2.1; c.fillStyle = '#ffe36a'; c.fillRect(snap(a.x + Math.cos(an) * 7), snap(y - 20 + Math.sin(an) * 2), 2, 2); } }
     if (a.def_ && a.def_.immune && !(a.exposed > 0)) { c.strokeStyle = 'rgba(230,50,40,.75)'; c.lineWidth = 1; c.beginPath(); c.arc(a.x, y - 9 * s, 12 * s, 0, 7); c.stroke(); }
@@ -579,9 +580,14 @@ export class Battle {
   }
   // 마을과 같은 사람 도트(새 화면과 새 그림을 켰을 때). 주인공, 동료, 이름 있는 사람
   hdOf(a) {
-    if (a.hdIm !== undefined && (a.hdIm || this.t > 1)) return a.hdIm;
+    if (a.hdIm && a.hdArt === G.hd?.opt.art && (!a.isPlayer || a.hdLook === G.S.look)) return a.hdIm;
+    a.hdArt = G.hd?.opt.art; a.hdLook = G.S.look; a.nativeKey = null;
     if (!G.hd?.sheet || a.big || a.mon || a.def_?.stamp) return (a.hdIm = null);
-    const key = o => { const k = G.hd.sheetKey(o); a.hdKey = k; a.hdAct = G.hd.act(k); return k ? G.hd.sheet(o) : null; };
+    const key = o => {
+      a.nativeKey = G.hd.fieldKey(o);
+      if (a.nativeKey) return G.hd.fieldSheet(o);
+      const k = G.hd.sheetKey(o); a.hdKey = k; a.hdAct = G.hd.act(k); return k ? G.hd.sheet(o) : null;
+    };
     if (a.isPlayer) return (a.hdIm = key({ me: 1 }));
     const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, ''), fm = /^(?:fd|sga|sgn)_([a-z]+)/.exec(id), al = fm && G.free?.fac?.(fm[1])?.align;
     return (a.hdIm = key({ id, keys: [a.def_?.pk, b, b === 'baek' && 'baekrang', MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
@@ -602,6 +608,7 @@ export class Battle {
     return a.skT - a.poseBeat < .10 ? 1 : 2;
   }
   pose(c, a, x, y) {
+    if (a.nativeKey) return;
     if (a.hdIm && this.actionSheet(a) && this.actionFrame(a) >= 0) return;  // 동작 칸이 몸놀림을 대신한다
     let sx = 1, sy = 1, rot = 0, ox = 0;
     if (a.dead) { const u = Math.min(1, a.deadT / .28); rot = u * 1.45 * (a.ax > 0 ? -1 : 1); }
@@ -619,6 +626,11 @@ export class Battle {
   sprite(c, a, x, y, _, face, white) {
     const s = a.scale || 1;
     const hd = !a.def_?.stamp && !a.big && this.hdOf(a);
+    if (hd && a.nativeKey) {
+      if (G.hd.battleMotion(c,a,a.nativeKey,face,x,y,!!white)) return;
+      G.hd.draw2d(c,hd,face,a.st==='move'?Math.floor(a.walk)%4:0,x,y,15*QZ,!!white);
+      return;
+    }
     const act = hd && this.actionSheet(a), af = act ? this.actionFrame(a) : -1;
     if (af >= 0) { G.hd.draw2dAct(c, act, af, face === 3 || (face < 2 && a.ax > 0), x, y, 15 * s * (qSheet(a.spr) ? QZ : 1), !!white); return; }  // 동작 칸이 있으면 기울이기 흉내 대신 그 칸
     if (hd) {  // 칸: 0 섬, 1~3 걸음. 초식과 돌진은 크게 내딛은 칸

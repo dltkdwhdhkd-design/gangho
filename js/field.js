@@ -326,13 +326,13 @@ export class Field {
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
         const PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(p.x, p.y); c.scale(PS, PS); c.translate(-p.x, -p.y); }  // 방 안에서는 사람을 키운다(가구 그림이 사람보다 크게 그려져 있다)
-        const me = G.hd?.sheet?.({ me: 1 }), hh = 15 * (qSheet('chars/' + S.look) ? QZ : 1);  // 새 그림을 켜면 마을과 같은 주인공 도트
+        const me = G.hd?.fieldSheet?.({ me: 1 }), hh = me?.dataset?.fieldSheet ? 15 * QZ : 15 * (qSheet('chars/' + S.look) ? QZ : 1);
         if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; if (me) G.hd.draw2d(c, me, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, hh); else drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }
         drawShadow(c, p.x, p.y); if (me) G.hd.draw2d(c, me, p.dir, Math.floor(p.walk) % 4, p.x, p.y, hh); else drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
         if (PS !== 1) c.restore();
       }
-      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, hd = !n.size && G.hd?.sheet?.(n), PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(n.x, n.y); c.scale(PS, PS); c.translate(-n.x, -n.y); } drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined);
-        if (hd) { G.hd.draw2d(c, hd, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (qSheet(key) ? QZ : 1)); if (PS !== 1) c.restore(); mark(n); continue; }
+      else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, hd = G.hd?.fieldSheet?.(n), PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(n.x, n.y); c.scale(PS, PS); c.translate(-n.x, -n.y); } drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined);
+        if (hd) { G.hd.draw2d(c, hd, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (hd.dataset?.fieldSheet || qSheet(key) ? QZ : 1)); if (PS !== 1) c.restore(); mark(n); continue; }
         drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
         if (PS !== 1) c.restore(); mark(n); }
     }

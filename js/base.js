@@ -4,6 +4,7 @@ import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { MAPS, makeMap, isoMode } from './maps.js';
 import { STAMPS, flagOf } from './tiles.js';
+import { GRAND } from './hd2d/build.js';
 import { meta } from './iso.js';
 import { TS } from './core.js';
 import { LOOT } from './items.js';
@@ -57,7 +58,11 @@ const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 1
 const HOUSES = ['hall', 'lodge', 'house_red', 'inn', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];
 function room(m, l, stamp, x, y, kind, name, o) {
   const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2 / m.k, by: y + (SH(stamp) + 1) / m.k, kind, name, owner: l, as: o?.as };
-  m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0, ...(o?.iso ? { isoAs: o.iso } : {}) }); if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
+  const grand = kind === 'hall' && GRAND[l.fac] ? l.fac : undefined;
+  m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0, grand, ...(o?.iso ? { isoAs: o.iso } : {}) });
+  // Include the front landing so collision with the sill cannot prevent entry.
+  m.portals.at(-1).h += 7;
+  if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
 }
 // 고을 가게 안: 찻집, 주루, 비단 가게, 사당
 function shopRoom(m, as) {
@@ -128,8 +133,9 @@ function makeRoom(id) {
 }
 // 세력 본거지. 아래가 산문, 위로 갈수록 외문 구역, 연무장, 내문 구역, 본전이다
 const YARD = { x: 8, y: 24, w: 30, h: 17 };
+const hallStamp = {"ak": "lodge", "cheongseong": "hut_b", "cheonsan": "wood_b", "dang": "shop_green", "emei": "shop_green", "eon": "clay", "gaebang": "straw", "gongdong": "clay", "gonryun": "wood_b", "haenam": "wood_o", "hwangbo": "house_red", "hwasan": "hut_o", "jangbaek": "clay", "jegal": "house_red", "jeomchang": "wood_o", "jeonjin": "hut_b", "jin": "shop_blue", "jongnam": "hut_o2", "mosan": "hut_o2", "moyong": "lodge", "namgung": "hall", "paeng": "clay", "pota": "shop_green", "shaolin": "lodge", "wudang": "hut_b", "yang": "wood_b"};
 function sectLayout(m, l, st, ft) {
-  const W = 46, H = 68, cx = 21, w = st.wall, ex = ft[4] || {}, trees = ex.trees || st.trees, R = fold(l.id), mid = cx + 2, hall = ex.hall || st.hall || 'hall', big = st.big || 'lodge', small = st.small;
+  const W = 46, H = 68, cx = 21, w = st.wall, ex = ft[4] || {}, trees = ex.trees || st.trees, R = fold(l.id), mid = cx + 2, hall = hallStamp[l.fac] || ex.hall || st.hall || 'hall', big = st.big || 'lodge', small = st.small;
   // 가장자리. 산에 있는 문파는 바위와 나무를 두껍게 두른다
   const west = l.id === 'hwasan', mt = ex.mount || st.mount, closed = isoMode() && !mt && !west;  // 쿼터뷰에서는 평지 문파와 세가를 바깥담으로 한 바퀴 두른다(산중 문파는 벼랑과 숲이 담이다)
   if (!closed) m.border(trees, west ? [[cx - 1, H - 3, 6, 3], [0, 28, 3, 7]] : [[cx - 1, H - 3, 6, 3]], 3);
@@ -154,7 +160,8 @@ function sectLayout(m, l, st, ft) {
   for (let i = 0; i < 6; i++) m.put('f_dummy', YARD.x + 2 + i * 5, YARD.y + 1);
   m.put('rack', YARD.x + 1, YARD.y + 13); m.put('rack', YARD.x + YARD.w - 4, YARD.y + 13); pen(YARD.x - 1, YARD.y); pen(YARD.x + YARD.w, YARD.y); pen(YARD.x - 1, YARD.y + 14); pen(YARD.x + YARD.w, YARD.y + 14);
   // 내문 구역
-  room(m, l, big, 7, 12, 'lib', ft[2]); room(m, l, big, 35, 12, 'elder', ft[3]); room(m, l, small, 13, 13, 'clinic', '약방'); room(m, l, small, 28, 13, 'armory', '무기고');
+  room(m, l, big, 6, 10, 'lib', ft[2]); room(m, l, big, 35, 10, 'elder', ft[3]); room(m, l, small, 13, 15, 'clinic', '약방'); room(m, l, small, 28, 15, 'armory', '무기고');
+  m.fill(7, 17, 31, 2, 5);
   const dk = i => (ex.deco || st.deco)[i % (ex.deco || st.deco).length]; m.put(dk(0), closed ? 5 : 3, 18); m.put(dk(1), closed ? 39.5 : 41, 18); m.put(dk(0), 17, 19); m.put(dk(1), 28, 19);
   // 본전
   m.fill(cx - 5, 8, 14, 2, 3); room(m, l, hall, cx, 1, 'hall', ft[0]); m.put(dk(0), cx - 5, 3); m.put(dk(0), cx + 6, 3); if (fid) { m.flag(fid, cx - .5, 8.7, true); m.flag(fid, cx + 4.5, 8.7); } else { m.put(st.ban, cx - 2, 6); m.put(st.ban, cx + 5, 6); }  // 본전 계단 양옆
@@ -168,6 +175,16 @@ function sectLayout(m, l, st, ft) {
     if (!st.water) m.put('statue', 36, 55, { isoAs: 'pavilion' });
   }
   m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
+  m.court = { x: mid * m.k, y: 32.5 * m.k, radius: 4.6 * m.k, motif: l.fac === 'hwasan' ? 'plum' : 'ring' };
+  let level = 0;
+  for (const top of (mt ? [45, 44, 23, 22, 10, 9] : [44, 22, 9])) {
+    m.terrace(0, 0, W, top, ++level).stairs(cx - 1, top - 1, 6, 1);
+  }
+  for (const y of [10, 23, 45, 58]) {
+    m.put('v_stonelamp', cx - 1.9, y, { sc: .76 });
+    m.put('v_stonelamp', cx + 5.3, y, { sc: .76 });
+  }
+  m.heightEdges();
 }
 const SLAVE = ['guangzhou', 'changan', 'suzhou'];  // 노예 시장이 서는 고을
 const SHOPS = { 0: ['rest', '주루', 'restaurant'], 1: ['tea', '찻집', 'teahouse'], 2: ['silk', '비단 가게', 'silk'], ...(GIRU_ON ? { 3: ['giru', '기루', 'restaurant'] } : {}), 6: ['shrine', '사당', 'temple_town'] };  // 기루는 js/giru.js(보류 중이면 그 자리는 민가)  // 고을 민가 자리 가운데 가게가 되는 곳

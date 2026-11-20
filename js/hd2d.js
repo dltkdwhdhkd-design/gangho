@@ -6,10 +6,13 @@
 // 땅과 집이 진짜 비율 그대로 눕는다. 전에는 깊이를 1.49배 늘려 평면도가 2D 화면처럼 네모나게 보이게 했는데, 그래서 바닥과 지붕이 화면을 차지했다.
 // 켜기: 주소 끝에 ?hd2d=1. 못 켜면(WebGL2 없음 등) 아무 일 없이 2D로 돈다.
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
+import { mountainGate } from './hd2d/gate.js';
+import { fieldProps, floorMaterial, walking, loadFieldArt, paintWorldSurface, drawCourt, combatLayout } from './hd2d/field-art.js';
+import { motionFor, drawMotion } from './hd2d/combat-art.js';
 import { PAL, WALLS as WKIND, PALTEX } from './hd2d/palette.js';
 import { STONE_PARTS, stoneStairs } from './hd2d/stone-stairs.js';
 import { PSC } from './field.js';
-import { G, IMG, TS, $ } from './core.js';
+import { G, IMG, TS, QZ, $ } from './core.js';
 import { STAMPS, paintRoom } from './tiles.js';
 import { newState } from './state.js';
 import { makeBuilder, SPEC, GRAND } from './hd2d/build.js';
@@ -59,7 +62,7 @@ export const HD = {
   init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
   snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : m?.id === 'world' ? ACTW : ACTK, bodyH: (m, battle) => 16 * OLDK * (battle ? ACTB : HD.actK(m)) /* 사람 그림 한 칸의 키(평면도 점). 화면에서 사람 키를 잴 때 쓴다(tools/dev/tour.cjs) */, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
-  aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
+  aim(F) { setMap(F.m.live ? winOf(F) : F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },
   // 시험용(tools/hd_occl_test.cjs): 평면도 (x, y)에 선 사람의 몸 다섯 점(머리, 가슴, 허리, 두 무릎) 가운데 지금 카메라에서 집·소품에 가려지는 점의 수, 가리는 것의 이름, 점마다 가려졌는지.
   // 걷어 낸 집과 옅어진 소품은 가리지 않는 것으로 친다. 몸의 크기는 그 지도의 사람 크기다(방 안은 PSC배. 전에는 방에서도 바깥 크기로 재서 허리가 무릎 높이에 있었다)
   covered(x, y) { const C = cam.position, rc = new T.Raycaster(), by = new Set(), k = curMap?.room ? PSC : 1, bits = []; let n = 0;
@@ -94,6 +97,30 @@ HD.sheetKey = o => {
   for (const n of L) if (PV[n]) return n; return null;
 };
 HD.sheet = o => { const k = HD.sheetKey(o); return k ? PV[k] : null; };
+const fieldSheets = new Map();
+HD.fieldKey = o => {
+  if (!want || !art() || !o) return null;
+  const raw = (o.me ? G.S.look : o.spr || '').split('/').pop().replace(/_(q|d)$/,'');
+  const pool = [o.id,o.id?.replace(/^fan_/,''),o.role,ROLE[o.hint],...(o.keys||[]),
+    roamingEnemyArt[o.foes?.[0]]?.replace(/^n_/,''),'type_'+raw];
+  return pool.find(id=>id && walking[id]) || null;
+};
+HD.battleMotion = (c,a,id,face,x,y,white) => drawMotion(c,PV,combatLayout,walking[id],
+  motionFor(a,id,G.S.weapon),face===3 || (face<2 && a.ax>0),x,y,15*QZ,white,id);
+HD.fieldSheet = o => {
+  if (!want || !art()) return null;
+  const slot = walking[HD.fieldKey(o)];
+  if (!slot) return HD.sheet(o);
+  const [page, row] = slot, image = PV['field_' + page];
+  if (!image) return HD.sheet(o);
+  const id = page + '/' + row;
+  if (!fieldSheets.has(id)) {
+    const cut = mk(224, 224); cut.dataset.fieldSheet = '1';
+    cut.getContext('2d').drawImage(image, 0, row * 224, 224, 224, 0, 0, 224, 224);
+    fieldSheets.set(id, cut);
+  }
+  return fieldSheets.get(id);
+};
 // 동작 시트(<키>_act: 왼쪽을 보는 옆모습 여섯 칸 — 준비, 내지름, 거둠, 맞음, 쓰러짐, 경공). tools/people_in.py가 <키>-c.png로 만든다
 HD.act = k => (k && PV[(k === 'yun' ? 'n_yun' : k) + '_act']) || null;  // 윤설의 키는 yun인데 동작 칸은 n_yun_act로 왔다
 HD.draw2dAct = (c, im, fr, flip, x, y, h = CHAR, white) => {
@@ -102,7 +129,7 @@ HD.draw2dAct = (c, im, fr, flip, x, y, h = CHAR, white) => {
 };
 // 사람 시트 한 칸을 2D 캔버스에 그린다: 칸 56점, 사람 키 48점, 발이 칸 바닥. h는 사람 키(평면도 점)
 HD.draw2d = (c, im, dir, frame, x, y, h = CHAR, white) => {
-  const D = h * 56 / 48; c.save(); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; if (white) c.filter = 'brightness(0) invert(1)';
+  const D = h * 56 / 48; c.save(); c.imageSmoothingEnabled = !im.dataset?.fieldSheet; c.imageSmoothingQuality = 'high'; if (white) c.filter = 'brightness(0) invert(1)';
   c.drawImage(im, (dir & 3) * 56, (frame & 3) * 56, 56, 56, x - D / 2, y + 1 - D, D, D); c.restore();
 };
 
@@ -165,6 +192,11 @@ let pvP = null;
 // 블렌더로 지은 모형(tools/blender/hall.py → assets/hd2d/models/*.glb). 길이는 평면도 점이라 세울 때 (1, HS, ZS)로 늘린다
 const MODELS = {}, MODELN = ['daewoong', 'rw_wall', 'rw_post', 'rw_pillar', 'rw_column', 'rw_sill', 'rw_window', 'rw_emblem'], MODELM = new Map(), MODELP = {};  // MODELM: 그물(geometry) → 재질 셋. clone은 userData를 JSON으로 베껴 재질이 깨지므로 따로 둔다
 let GLL = null;
+function fieldKitTexture(texture, interior) {
+  if (!interior) return texture;
+  const surface = { pm_plaster: 'plaster', pm_plaster_white: 'plaster', pm_wood_dark: 'cedar', pm_wood_pine: 'plank', pm_base_rough: 'crag', pm_stone: 'slab', pm_brick: 'yard', r_dark: 'roof' }[texture];
+  return surface && PV['field_' + surface] ? 'field_' + surface : texture;
+}
 async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('./lib/three/addons/GLTFLoader.js'), import('./lib/three/addons/meshopt_decoder.module.js')]); GLL = new GLTFLoader(); GLL.setMeshoptDecoder(MeshoptDecoder); } const g = await GLL.loadAsync(`assets/hd2d/models/${n}.glb`);
   g.scene.traverse(o => { if (!o.isMesh) return; const sm = o.material, nm = (sm.name || o.name).replace(/\.\d+$/, ''), rk = /^rock_(\w+)/.exec(nm), top = nm === 'top', vc = !!o.geometry.attributes.color;  // 바위 모형(rock_<빛깔>)은 무늬를 게임이 입힌다. 꼭짓점 색(밑동 그늘, 이끼, 눈)이 있으면 곱한다. top은 절벽 조각의 윗면: 그 자리의 땅 그림을 입힌다
     // 조각(틀로 만든 것, docs/chatgpt-blender.md): UV가 없고 재질 이름만 있다. 이름표(PAL)에 있으면 무늬를 자리와 면 방향으로 입히고(palMat), 없으면 조각에 든 민무늬 빛깔 그대로다
@@ -175,7 +207,7 @@ async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { Meshopt
     const glow = /^(win|lantern)/.test(nm), furn = /^fn_/.test(n);
     // sh: 낮은 땅(골짜기)에 선 절벽 조각은 그 땅만큼 어둡게(terrain의 lowShade와 같은 값). kind: 바위 빛깔을 지도에 맞춰 바꿀 때(모래땅의 바위는 갈색), 방 벽 조각은 벽 종류(palette.js WALLS)
     const mkm = (sh = 1, kind) => { if (top) { const m = topMat(vc); m.color.setScalar(sh); return m; }
-      if (pal) { const pt = pal.rock ? rockTex(ROCKT_OK(kind) || pal.rock) : previewTex((wl && WKIND[kind]?.[nm]) || pal.t), m = pt ? palMat(pt, pal.lie) : new T.MeshLambertMaterial({ color: sm.color }); if (sh !== 1) m.color.multiplyScalar(sh); if (furn) m.color.multiplyScalar(FURNK); return m; }
+      if (pal) { const pt = pal.rock ? rockTex(ROCKT_OK(kind) || pal.rock) : previewTex(fieldKitTexture((wl && WKIND[kind]?.[nm]) || pal.t, wl || furn)), m = pt ? palMat(pt, pal.lie) : new T.MeshLambertMaterial({ color: sm.color }); if (sh !== 1) m.color.multiplyScalar(sh); if (furn) m.color.multiplyScalar(FURNK); return m; }
       const tt = rk && kind ? rockTex(kind) : t, m = new T.MeshLambertMaterial({ map: tt || null, color: tt ? 0xffffff : rk ? 0x8a8478 : sm.color, vertexColors: vc }); if (glow) { m.emissive = new T.Color(nm === 'win' ? 0xffb050 : nm === 'win_paper' ? 0xffe6b8 : 0xff6a30); if (tt) m.emissiveMap = tt; m.emissiveIntensity = 0; m.userData.paper = nm === 'win_paper'; GLOW.push(m); }
       // 바위: 그늘진 면이 까맣게 죽지 않게 제 빛깔을 조금 낸다(모난 면마다 밝기가 크게 달라 얼룩져 보였다)
       if (rk && tt) { m.emissive = new T.Color(0xffffff); m.emissiveMap = tt; m.emissiveIntensity = .2 * sh; }
@@ -226,11 +258,11 @@ const loadImg = n => new Promise(res => { const im = new Image(); im.onload = ()
 async function loadPeople() { try { const r = await fetch('assets/hd2d/preview/people.json'); if (!r.ok) return; const L = await r.json(); L.forEach(n => PEOPLE.add(n)); await Promise.all(L.map(loadImg)); } catch { } }
 // 그림을 다 읽은 뒤에 조각을 읽는다. 조각의 재질은 읽을 때 무늬 그림을 찾아 쓰는데(loadModel의 mkm), 전에는 둘을 한꺼번에 읽어서 조각이 먼저 오면 무늬 없이 단색이 됐다
 // (가구 조각을 미리 읽게 하자 탁자와 계산대가 밋밋한 갈색으로 나와서 알았다. 벽 조각의 창틀도 같은 까닭으로 가끔 단색이었을 것이다)
-function loadPreview() { return pvP || (pvP = Promise.all([loadPeople(), ...PVN.map(loadImg)]).then(() => loadModels.p ||= loadModels())); }
+function loadPreview() { return pvP || (pvP = Promise.all([loadPeople(), loadFieldArt(PV), ...PVN.map(loadImg)]).then(() => loadModels.p ||= loadModels())); }
 const art = () => !!HD.opt.art;
 function previewTex(name) {
   const im = art() && PV[name]; if (!im) return null; if (TEX.has('p/' + name)) return TEX.get('p/' + name);
-  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') }); if (/^([gre]|hd|cl|wt|pm|fl)_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
+  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') && !name.startsWith('field_walk') }); if (/^([gre]|hd|cl|wt|pm|fl|field)_/.test(name) && !name.startsWith('field_walk')) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } if (name.startsWith('field_walk')) { t.magFilter = t.minFilter = T.NearestFilter; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
 }
 // 소품: 도트 그대로 올려 '또렷한 겹선형'으로 읽는다(배경도 인물과 같은 도트 결. 매끈해지는 것은 흐림과 빛뿐)
 // 옛 그림(16점 칸, 도트 2배) 소품은 새 그림보다 크고 쨍하다. 새 나무 그림(HT1)이 오기 전까지 새 화면에서만 줄이고 색을 맞춘다(막힘과 2D는 그대로)  // 2026-11-18 독·항아리·상자를 사람 키의 6할쯤으로 더 줄임(일검풍운결 비교)
@@ -427,7 +459,7 @@ function groundArt(m, base) {
   if (m.room) return null;  // 방 바닥은 2D 마루·돌바닥 그림 그대로
   if (!art() || !PV.g_grass || m.room) return null;
   const W2 = Math.round(m.w * TS * DOT), H2 = Math.round(m.h * TS * DOT), c = mk(W2, H2), x = c.getContext('2d'), out = x.createImageData(W2, H2), o = out.data;
-  const GB = { sand: 'g_sand', snow: 'g_snow' }[m.biome], pats = {}; for (const k in GROUND) { const nm = k === '0' && GB && PV[GB] ? GB : GROUND[k], im = PV[nm]; if (!im) continue; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
+  const GB = { sand: 'g_sand', snow: 'g_snow' }[m.biome], pats = {}; for (const k in GROUND) { const nm = k === '0' && GB && PV[GB] ? GB : GROUND[k], im = (!m.stage && PV['field_' + ({ g_grass: m.biome === 'deep' ? 'moss' : 'grass', g_road: 'road', g_yard: 'yard', g_plank: 'plank', g_cobble: 'slab', g_snow: 'snow', g_sand: 'sand' }[nm])]) || PV[nm]; if (!im) continue; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
     if (nm === 'g_road' && m.biome === 'snow') for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; d[i] = l * .5 + 120; d[i + 1] = l * .5 + 124; d[i + 2] = l * .45 + 136; }  // 눈 위 길: 밟아 다진 회색 눈
     if (nm === 'g_grass') { const bt = BIOME_T[m.biome] || BIOME_T.grass; for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; [d[i], d[i + 1], d[i + 2]] = bt(d[i], d[i + 1], d[i + 2], l).map(v => Math.max(0, Math.min(255, v))); } }  // 풀 그림을 땅 종류(모래, 눈, 짙은 숲, 어스름)에 맞게 다시 칠한다
     pats[k] = { w: im.width, h: im.height, d }; }
@@ -467,7 +499,7 @@ function groundArt(m, base) {
     else { const j = (Math.floor(Y / DOT) * bw + Math.floor(X / DOT)) * 4; o[i] = bd[j]; o[i + 1] = bd[j + 1]; o[i + 2] = bd[j + 2]; }
     o[i + 3] = 255;
   }
-  x.putImageData(out, 0, 0); return c;
+  x.putImageData(out, 0, 0); if (m.court) drawCourt(x, m.court, cell); return c;
 }
 
 // ── 땅 높낮이 ──
@@ -673,8 +705,8 @@ function setMap(m) {
   // 땅: 지금 땅 그림을 그대로 눕힌다(땅 무늬 HB14가 오기 전 임시). 땅도 도트 결로 읽는다
   const gc = mk(Wm, (WN.y1 - WN.y0) * TS), gx = gc.getContext('2d', { willReadFrequently: true }); const flr = m.room && art(), kit = flr && !OWN.has(m.id);  // 새 화면의 방: 바닥만 칠한다(2D가 가장자리에 칠하던 납작한 벽은 뺀다). kit: 벽을 조각으로 세우는 방(동굴은 제 모형)
   // 방 바닥 무늬(받은 그림 FL1): 방 종류에 맞는 무늬를 평면도 한 점에 FLDOT점으로 되풀이해 깐다. 깔개(m.carpet)는 그 위에 따로 얹는다. 무늬가 없으면(그림 끔, 동굴) 2D 바닥 그림을 가라앉혀 깐다
-  const ft = kit && previewTex(floorOf(m));
-  if (m.win) G.world.paintWin(gx, OX, WN.y0 * TS, Wm, gc.height); else if (ft) { gx.fillStyle = '#2a2520'; gx.fillRect(0, 0, gc.width, gc.height); } else if (flr) { paintRoom(gx, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true }); calm(gx, gc.width, gc.height); } else m.paintBase(gx);
+  const ft = kit && (previewTex('field_' + floorMaterial[floorOf(m)]) || previewTex(floorOf(m)));
+  if (m.win) { G.world.paintWin(gx, OX, WN.y0 * TS, Wm, gc.height); if (art()) paintWorldSurface(gx, m, WN, PV, TS, G.world.biomeAt); } else if (ft) { gx.fillStyle = '#2a2520'; gx.fillRect(0, 0, gc.width, gc.height); } else if (flr) { paintRoom(gx, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true }); calm(gx, gc.width, gc.height); } else m.paintBase(gx);
   let gt; if (ft) { gt = ft.clone(); gt.repeat.set(Wm * FLDOT / ft.image.width, Dm / ZS * FLDOT / ft.image.height); gt.needsUpdate = true; }
   else { gt = new T.CanvasTexture((!m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter; }
   if (m.hgt && m.face === 'rock') { TOPU.map = gt; (TOPU.uGS.value ||= new T.Vector2()).set(1 / Wm, 1 / Dm); for (const t of TOPS) { if (!t.map) t.needsUpdate = true; t.map = gt; } }  // 절벽 조각의 윗면이 이 지도의 땅 그림을 받게
@@ -706,6 +738,26 @@ function setMap(m) {
     // 크기는 1.5배(GATEK): 그림의 가로를 2D 그림 폭(34점)에 맞추면 문이 사람 키만 해서 사람이 못 지나갈 문이 된다. 1.5배면 문의 폭이 21점, 높이가 사람 키의 1.3배다
     const nm0 = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name, nm = art() && s.name === 'gate' && PV[nm0 + '_open'] ? nm0 + '_open' : nm0, gk0 = art() && s.name === 'gate' && previewTex(nm) ? GATEK : 1;
     const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const pk = art() && !s.flat && /^[vp]_/.test(s.name) ? PROPK : 1, sc = (s.sc || 1) * pk, cx = s.x + st[3] * (s.sc || 1) / 2, pv = !!previewTex(nm), w = st[3] * sc * gk0, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
+    const scenery = !m.stage && !s.flat && art() && fieldProps(s.name, m.biome);
+    if (scenery) {
+      const ft = previewTex('field_' + scenery[0]);
+      if (ft) {
+        const height = scenery[1] * (s.sc || 1) * (.95 + hash2(s.x | 0, s.y | 0) * .1);
+        const width = height * ft.image.width / ft.image.height, key = 'field:' + width.toFixed(1) + ':' + height.toFixed(1);
+        if (!GEO.has(key)) GEO.set(key, standGeo(width, height));
+        const M = matOf(ft), obj = new T.Mesh(GEO.get(key), M.m);
+        obj.customDepthMaterial = M.d;
+        obj.castShadow = obj.receiveShadow = true;
+        obj.position.set(cx, hAt(m, cx, z - 1), z * ZS);
+        obj.userData = { s, w: width, h: height, M, t: ft, owner: obj, shared: true };
+        propG.add(obj); return;
+      }
+    }
+    if (!m.stage && art() && s.name === 'gate_arch') {
+      const center = m.court ? s.x + 2 * m.k * TS : cx;
+      const gate = mountainGate(T, s, center, z, HS, ZS, hAt(m, center, z), previewTex);
+      propG.add(gate); return;
+    }
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
     const rk = !s.flat && art() && rockKey(s), rm = rk && needModel(rk);
     if (rm) { const g = new T.Group(), o = rm.clone(true), ms = [], tone = ROCKB[m.biome] || ''; o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry).as(1, tone); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; ms.push(c); } }); g.add(o);
@@ -716,11 +768,11 @@ function setMap(m) {
     if (gm) { const g = new T.Group(), o = gm.clone(true); o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; } }); g.add(o);
       const xc = s.x + st[5] + st[7] / 2, yf = s.y + st[6] + st[8], pb = s.grand && GRAND[s.grand]?.model ? GRAND[s.grand].modelFront || 7 : 0; g.scale.set(1, HS, ZS); g.position.set(xc, hAt(m, xc, yf - 1), (yf - pb) * ZS); g.userData = { s, house: true }; propG.add(g);
       for (const [x, y, z] of gm.userData.lamps || []) LAMPX.push([xc + x, yf - pb - y, z]); return; }  // 블렌더 모형(tools/blender/hall.py, houses.py)
-    if (!s.flat && SPEC[s.name] && art() && PV.w1_front) { build ||= makeBuilder({ T, HS, ZS, DOT, PV, aniso: R.capabilities.getMaxAnisotropy(), texFrom, matOf, holed, LAMPX, face, glow: GLOW, get AO() { return aoTex(); } }); const b = build(s, st, SPEC[s.name]); if (b) { propG.add(b); return; } }  // 조립한 건물(js/hd2d/build.js)
-    if (!s.flat && PARTS[s.name] && previewTex('w_front')) { propG.add(partsBox(s, PARTS[s.name])); return; }  // 새 그림: 벽 부품(HW0)과 지붕 무늬(HR1)로
-    if (ef) { propG.add(houseBox(s, t, w, h, ef)); return; }
-    const hk = !s.flat && art() && hdWall(s, m); if (hk && PV[hk]) { propG.add(wallRun(s, hk)); return; }  // 새 담장·울타리(ChatGPT HD1·HD2)
-    if (!s.flat && WALLS.has(s.name)) { propG.add(wallBox(s, t, w, h)); return; }
+    if (!s.flat && SPEC[s.name] && art() && PV.w1_front) { build ||= makeBuilder({ T, HS, ZS, DOT, PV, aniso: R.capabilities.getMaxAnisotropy(), texFrom, matOf, holed, LAMPX, face, glow: GLOW, get AO() { return aoTex(); } }); const b = build(s, st, SPEC[s.name]); if (b) { b.position.y += hAt(m, cx, z - 1); propG.add(b); return; } }  // 조립한 건물(js/hd2d/build.js)
+    if (!s.flat && PARTS[s.name] && previewTex('w_front')) { const group = partsBox(s, PARTS[s.name]); group.position.y += hAt(m, cx, z - 1); propG.add(group); return; }  // 새 그림: 벽 부품(HW0)과 지붕 무늬(HR1)로
+    if (ef) { const group = houseBox(s, t, w, h, ef); group.position.y += hAt(m, cx, z - 1); propG.add(group); return; }
+    const hk = !s.flat && art() && hdWall(s, m); if (hk && PV[hk]) { const group = wallRun(s, hk); group.position.y += hAt(m, cx, z - 1); propG.add(group); return; }  // 새 담장·울타리(ChatGPT HD1·HD2)
+    if (!s.flat && WALLS.has(s.name)) { const group = wallBox(s, t, w, h); group.position.y += hAt(m, cx, z - 1); propG.add(group); return; }
     const sw = art() && !s.flat && SWAP[s.name] && IMG['stamp/' + SWAP[s.name]] && SWAP_SZ[SWAP[s.name]];
     if (sw) { const nm = SWAP[s.name], [w2, h2] = SWAP_SZ[nm].map(v => v * (s.sc || 1) * (.9 + ((s.x * 7 + s.y * 3) % 5) * .05)), t2 = stampTex(nm), gk2 = w2.toFixed(1) + 'x' + h2.toFixed(1); if (!GEO.has(gk2)) GEO.set(gk2, standGeo(w2, h2));
       const M = matOf(t2), o = new T.Mesh(GEO.get(gk2), M.m); o.customDepthMaterial = M.d; o.position.set(s.x + w / 2, hAt(m, s.x + w / 2, z - 1), z * ZS + k * .003);
@@ -738,7 +790,7 @@ function setMap(m) {
     const OCC = new Set(), C8 = 8; for (const q of m.stamps) { const S = STAMPS[q.name]; if (!S) continue; for (let yy = Math.floor((q.y + S[4] * .4 - 4) / C8); yy <= Math.floor((q.base + 8) / C8); yy++) for (let xx = Math.floor((q.x - 6) / C8); xx <= Math.floor((q.x + S[3] * (q.sc || 1) + 6) / C8); xx++) OCC.add(xx * 65536 + yy); }
     const near = (px, py) => OCC.has(Math.floor(px / C8) * 65536 + Math.floor(py / C8)) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
     const B = new Map();
-    for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > .7) continue;
+    for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > (m.stage ? .7 : m.win ? .22 : .35)) continue;
       const px = (x + hs(x, y * 3 + j)) * TS, py = (y + hs(x * 5 + j, y)) * TS; if (near(px, py) || m.g[Math.floor(py / TS)]?.[Math.floor(px / TS)] !== 0) continue;
       const k = DK[Math.floor(hs(x * 3, y * 11 + j) * DK.length)], t = stampTex(k), st = STAMPS[k]; if (!t || !st) continue; const sc = (k.startsWith('g_') ? .75 : .45) + hs(y, x + j) * .3, w = st[3] * sc, h = st[4] * sc * HS, y0 = hAt(m, px, py), z = (py + .5) * ZS;
       if (!B.has(t)) B.set(t, { P: [], U: [], I: [] }); const b = B.get(t), n = b.P.length / 3;
@@ -782,16 +834,28 @@ function frameOf(key, dirCol, row, diag) {
   if (dg) { const k = 16 * (dg.hd || 1); return { t: sheetTex(key + '_d'), sx: (diag % 2) * k, sy: Math.min(row, 3) * k, s: k, flip: diag > 1 }; }
   const f = 16 * (img.hd || 1), r = Math.min(row, Math.floor(img.height / f) - 1); return { t: sheetTex(key), sx: dirCol * f, sy: r * f, s: f, flip: false };
 }
+function fieldWalker(n, row, identity) {
+  if (!art()) return false;
+  const slot = walking[identity || HD.fieldKey(n)];
+  if (!slot) return false;
+  const texture = previewTex('field_' + slot[0]);
+  if (!texture) return false;
+  const height = CHAR * 56 / 48;
+  actor(texture, n.dir * 56, (slot[1] * 4 + (row % 4)) * 56, 56, 56, false, n.x, n.y, height);
+  blob(n.x, n.y, 1);
+  return true;
+}
 function syncActors(F) {
   used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; const sz = o.size || (KIDS.has(key) ? 11 : 16); actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, sz * OLDK, o.lift || 0, .84); blob(x, y, sz / 16); };
   for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16 * (OLDSC[n.stamp] ?? .66) / HD.actK(curMap)); continue; }  // 일감 표시용 소품(걸레질 자리의 독 따위)은 사람 크기 배율을 안 받고 바닥 소품 크기로(방 안에서 사람만 한 독이 되던 것)
+    if (fieldWalker(n, n.pose ?? Math.floor(n.walk || 0) % 4)) continue;
     const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.id && PEOPLE.has('n_' + n.id) ? 'n_' + n.id : n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : ROLE[n.hint] && PEOPLE.has('n_' + ROLE[n.hint]) ? 'n_' + ROLE[n.hint] : null, yt = (pk && previewTex(pk)) || (key === 'chars/Princess' && previewTex('yun')) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
-  const walker = (n, row) => { const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : roamingEnemyArt[n.foes?.[0]], yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
+  const walker = (n, row) => { if (fieldWalker(n, row)) return; const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : roamingEnemyArt[n.foes?.[0]], yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
   for (const r of F.roam) if (!r.gone) { walker(r, Math.floor(r.walk || 0) % 4); for (const q of r.crew || []) walker(q, Math.floor(q.walk || 0) % 4); }  // 떠도는 무리·길손과 그 뒤를 따르는 사람들
-  if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id); if (PEOPLE.has('n_' + id)) return walker({ spr: s, role: id, dir: q.dir, x: q.x, y: q.y }, Math.floor(p.walk) % 4); const key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });  // 동료도 새 사람 시트가 있으면 그것으로
+  if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id); if (walking[id] || walking['type_' + s] || PEOPLE.has('n_' + id)) return walker({ spr: s, role: id, dir: q.dir, x: q.x, y: q.y }, Math.floor(p.walk) % 4); const key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });  // 동료도 새 사람 시트가 있으면 그것으로
   for (const a of F.animals || []) { if (a.gone) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
   const me = previewTex('me');  // 맛보기: 칸 56점, 사람 키 48점 → 사람 키가 CHAR가 되게 판을 키운다
-  if (F.hideMe) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48); blob(p.x, p.y, 1); }
+  if (F.hideMe || fieldWalker({ ...p, spr: S.look }, Math.floor(p.walk) % 4, 'type_' + S.look)) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48); blob(p.x, p.y, 1); }
   else put('chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false;
   for (const o of bboard) o.mesh.visible = false;  // 전투 때 쓴 인물 판(주인공·적)을 마을에서 숨긴다. 안 숨겨서 전투가 끝난 자리에 주인공 닮은 사람이 덩그러니 서 있었다
@@ -843,7 +907,7 @@ const KNEE = 6;
 function cutHouse(g, on, dt) {
   const u = g.userData, k = 1 - Math.exp(-dt * 6); u.cutV = (u.cutV || 0) + ((on ? 1 : 0) - (u.cutV || 0)) * k; if (!on && u.cutV < .01) u.cutV = 0;
   const want = u.cutV > 0; if (!u.cutU) { if (!want) return; const bb = new T.Box3().setFromObject(g); u.top = bb.max.y + 2; u.cutU = { value: u.top }; u.cutM = new Map(); }
-  u.cutU.value = u.top + (KNEE * HS - u.top) * u.cutV;
+  u.cutU.value = u.top + (g.position.y + KNEE * HS - u.top) * u.cutV;
   if (!!u.cutOn === want) return; u.cutOn = want;
   const ms = []; g.traverse(c => { if (c.isMesh) ms.push(c); });  // 블렌더 모형은 물체가 한 겹 더 안에 있다
   for (const c of ms) { if (c.userData.flat) continue; if (!c.userData.base) c.userData.base = c.material;

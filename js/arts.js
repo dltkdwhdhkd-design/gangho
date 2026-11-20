@@ -44,7 +44,7 @@ function flavor(a, kind) {
   if (kind === 'armor' && !steps.some(q => q.armor)) steps.unshift({ t: .02, armor: .45 });
   return { ...a, steps, cd: kind === 'fast' ? a.cd * .82 : a.cd };
 }
-const make = (id, name, han, w, school, arch, t, desc, fac) => { let a = ARCH[arch](t); const fx = fac && ART_FX[fac]; if (fx) { a = flavor(a, fx[1]); desc = `${desc} · ${fx[0]}`; } SKILLS[id] = { id, name, han, w, school, mp: Math.round(a.mp), cd: +a.cd.toFixed(1), desc, dur: a.dur, steps: a.steps, tier: t, fac, ...(a.o || {}) }; };
+const make = (id, name, han, w, school, arch, t, desc, fac) => { let a = ARCH[arch](t); const fx = fac && ART_FX[fac]; if (fx) { a = flavor(a, fx[1]); desc = `${desc} · ${fx[0]}`; } SKILLS[id] = { id, name, han, w, school, arch, mp: Math.round(a.mp), cd: +a.cd.toFixed(1), desc, dur: a.dur, steps: a.steps, tier: t, fac, ...(a.o || {}) }; };
 const nameOf = fid => fid === 'jabhak' ? '강호 잡학' : ART_NAMES[fid] || (FACS.find(f => f.id === fid) || {}).name || fid;
 export const ID = {}; // 세력 id → 초식 id 목록
 for (const fid in ARTS) { ID[fid] = ARTS[fid].map((a, i) => { const id = `x_${fid}${i + 1}`; make(id, a[0], a[1], a[2], nameOf(fid), a[3], a[4], a[5], fid); return id; }); }
@@ -56,7 +56,7 @@ function toMove(k) {
   const useful = k.steps.some(q => q.hit || q.proj || q.zone); if (!useful) return null;
   const sc = k.ult ? .42 : .55, steps = k.steps.map(q => { const r = { ...q, t: q.t + .36 }; delete r.cut; delete r.heal; if (q.hit) r.hit = { ...q.hit, mul: q.hit.mul * sc, ub: false }; if (q.proj) r.proj = { ...q.proj, mul: q.proj.mul * sc }; if (q.zone) r.zone = { ...q.zone, mul: q.zone.mul * sc, player: false }; if (q.blink) r.blink = { ...q.blink, enemy: true }; return r; });
   const h = k.steps.find(q => q.hit)?.hit, range = k.teleToFoe ? 130 : k.steps.some(q => q.proj) ? 120 : k.steps.some(q => q.blink) ? 130 : k.steps.some(q => q.zone) ? 60 : h ? (h.len || h.r || 30) + (k.steps[0].move?.d || 0) * .6 : 40;
-  return { range, dur: k.dur + .4, steps, teleToFoe: k.teleToFoe, noTele: k.steps.some(q => q.blink), name: k.name };
+  return { range, arch:k.arch, w:k.w, dur: k.dur + .4, steps, teleToFoe: k.teleToFoe, noTele: k.steps.some(q => q.blink), name: k.name };
 }
 for (const k in SKILLS) if (k.startsWith('x_') && !MOVES[k]) { const m = toMove(SKILLS[k]); if (m) MOVES[k] = { ...m, id: k, fromSkill: true, cd: SKILLS[k].cd }; }
 export const usable = fid => (ID[fid] || []).filter(k => MOVES[k]);
