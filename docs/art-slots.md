@@ -43,6 +43,8 @@
 | HG2 | 물 셋(강물, 연못, 여울) | 받음 | `python3 tools/ground_in.py` → `wt_river`, `wt_pond`, `wt_rapid` | 코드로 그린 잔물결 | `chatgpt-now.md` | **넣음(11-20)** |
 | HP5 | 나루·배·갈대 | 받음 | 널만: `tools/ground_in.py` → `g_plank`(나루와 다리 바닥) | 2D 타일을 키운 것 | `chatgpt-now.md` | 널만 넣음(11-20). 배·말뚝·갈대는 고을 채울 때 모형의 무늬로 |
 | HP6 | 좌판·수레 | 받음 | 고을 채울 때 모형의 무늬로(그림 판으로 세우지 않는다) | 지금 그림 | `chatgpt-now.md` | 받음(아직 안 씀) |
+| WL1, WL2, WL3, FL1 | 방 벽 무늬, 아랫단과 들보, 나무 무늬, 방 바닥 무늬 | `WL1.png` … (요청서 0번 묶음) | 무늬를 잘라 `assets/hd2d/preview/`에(`tools/wall_in.py`를 만들 것. `tools/ground_in.py`와 같은 방법) | 있는 집 벽 그림에서 자른 임시 무늬 | `chatgpt-scene.md` | 없음(11-20 요청) |
+| 방 벽 조각 `rw_*` | 방의 뒷벽과 옆벽, 기둥 | 블렌더 `tools/blender/walls.py`(만들 것). 겉무늬는 넣지 않고 게임이 벽 종류에 따라 입힌다 | 그대로 `assets/hd2d/models/`에 | 방 한 채짜리 모형 `rm_*` 14개(낮다) | — | 없음 |
 | 바위·바위산·벼랑바위·절벽 조각 `rk_*` | 큰 지도의 산, 바위, 높낮이 지형의 절벽 면 | 블렌더 `python3 tools/blender/rocks.py [이름…]` (42개, 2.3MB. 무늬는 넣지 않는다) | 그대로 `assets/hd2d/models/`에 쓴다 | 2D 그림 판 | — | **있음(11-20)** |
 | 전투 무대 모형 `st_<테마>` | 무대 둘레(뒤와 양옆) | 블렌더 `tools/blender/stages.py`(만들 것) | `pack.sh` | `js/hd2d/stages.js`가 놓는 집·담·나무 | — | 없음 |
 | 방 안 틀 | 객잔 홀, 객잔 방, 약방, 대장간, 전각 안, 서고, 감옥, 동굴 | 블렌더 `tools/blender/rooms.py`(만들 것) | `pack.sh` | 예전 2D 방 | — | 없음 |
