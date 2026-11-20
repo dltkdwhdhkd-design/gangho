@@ -11,6 +11,16 @@ TALL = {'woman': 45, 'oldman': 44, 'oldwoman': 41, 'child': 34, 'kid': 34, 'gran
 FEM = {'yuseol', 'dangsoso', 'yun', 'so', 'baekrang', 'hyeok', 'clan_dang', 'clan_moyong', 'clan_namgung', 'c_owol', 'c_saira', 'gwak', 'wife', 'flower', 'oldmom', 'sosu', 'manhwa', 'namhwa', 'town2', 'clan_hwasan', 'clan_emei', 'clan_pota', 'clan_bukhae', 'clan_yang', 'ricecake', 'onlooker', 'silk', 'tea', 'cap_herbal', 'cap_musician', 'cap_dancer', 'cheon'}
 want = sys.argv[1:]
 done = []
+# 한 장짜리 걷기 그림(<키>-walk.png 또는 <키>-src.png: 가로 2 : 세로 1, 4열 3행. 열은 정면, 뒷모습, 옆모습, 옆모습 중간 걸음)은
+# 왼쪽 절반을 <키>-a.png, 오른쪽 절반을 <키>-b.png로 나눠 둔다(2026-11-21부터 ChatGPT에게 이 한 장으로 받는다: docs/gpt/)
+from PIL import Image
+for D in DIRS:
+    for w in sorted(glob.glob(os.path.join(D, '*-walk.png')) + glob.glob(os.path.join(D, '*-src.png'))):
+        key = os.path.basename(w).rsplit('-', 1)[0]
+        if os.path.exists(os.path.join(D, key + '-a.png')): continue
+        im = Image.open(w); W_, H_ = im.size
+        if W_ < H_ * 1.6: print('한 장짜리 걷기 그림이 아니다(가로가 세로의 두 배가 아니다):', os.path.basename(w)); continue
+        im.crop((0, 0, W_ // 2, H_)).save(os.path.join(D, key + '-a.png')); im.crop((W_ // 2, 0, W_, H_)).save(os.path.join(D, key + '-b.png')); print('나눔:', key)
 for D in DIRS:
     for a in sorted(glob.glob(os.path.join(D, '*-a.png'))):
         key = os.path.basename(a)[:-6]
@@ -18,7 +28,6 @@ for D in DIRS:
         if not os.path.exists(os.path.join(D, key + '-b.png')) or key in done: continue
         src = D
         if D.endswith('gemini'):  # 오른쪽 아래 Gemini 표시를 바탕색으로 덮은 사본을 쓴다
-            from PIL import Image
             src = '/tmp/people_in'; os.makedirs(src, exist_ok=True)
             for s_ in 'ab':
                 im = Image.open(os.path.join(D, f'{key}-{s_}.png')).convert('RGB'); w, h = im.size; bg = im.getpixel((5, 5))

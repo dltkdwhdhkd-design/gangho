@@ -586,8 +586,8 @@ export class Battle {
     const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, ''), fm = /^(?:fd|sga|sgn)_([a-z]+)/.exec(id), al = fm && G.free?.fac?.(fm[1])?.align;
     return (a.hdIm = key({ id, keys: [a.def_?.pk, b, b === 'baek' && 'baekrang', MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
   }
-  // 동작 칸은 무기에 맞을 때만 쓴다. 주인공의 칸은 검을 든 것(me_act)과 맨손(me_unarmed) 둘뿐이라, 검(철검·군도·청강검·월영검·송문고검)은 검 칸, 권갑(권대·철권갑·호조수투·금강권갑)은 맨손 칸,
-  // 도·창·봉(박도·귀면도·환두대도·청룡언월도·창·목검·걸레 자루)은 맞는 칸이 없어 전처럼 서 있는 그림을 기울이고 그 무기를 휘두르게 한다.
+  // 동작 칸은 무기에 맞는 것을 쓴다. 주인공의 칸은 다섯 장이다: 검(me_act: 철검·군도·청강검·월영검·송문고검), 맨손(me_unarmed: 권대·철권갑·호조수투·금강권갑),
+  // 큰 칼(me_blade: 박도·귀면도·환두대도·청룡언월도), 창(me_spear), 봉(me_staff: 목검·걸레 자루). 그 무기의 칸이 아직 안 읽혔으면 전처럼 서 있는 그림을 기울이고 무기를 휘두른다.
   // 전에는 검이 아니면 다 맨손 칸이어서 창이나 큰 칼을 든 채 주먹을 내지르고, 그 위에 무기를 또 그렸다(주인이 보고 알려 주심)
   actionSheet(a) {
     if (!a.isPlayer) return a.hdAct;

@@ -85,20 +85,27 @@ def walker(code, out, src=None, tall_=48):
 
 
 def actor(code, out, src=None, tall_=48):
-    """동작 그림(<키>-c.png: 2열 3행, 왼쪽을 보는 옆모습. 1열 위부터 준비·내지름·거둠, 2열 위부터 맞음·쓰러짐·경공)
-    → 게임 시트 한 줄 여섯 칸(칸 80×64, 발끝을 칸 아래에). 키는 같은 사람 걷기 그림(-a)의 차렷 키에 맞춘다"""
+    """동작 그림(<키>-c.png, 왼쪽을 보는 옆모습 여섯 칸: 준비·내지름·거둠·맞음·쓰러짐·경공)
+    → 게임 시트 한 줄 여섯 칸(칸 80×64, 발끝을 칸 아래에). 키는 같은 사람 걷기 그림(-a)의 차렷 키에 맞춘다.
+    원본의 칸 배치는 둘 다 받는다: 가로 한 줄 여섯 칸(가로가 세로의 네 배 넘게. 2026-11-21부터의 규격), 또는 2열 3행(1열 위부터 준비·내지름·거둠, 2열 위부터 맞음·쓰러짐·경공)"""
     CW, CH = 80, 64
     S = src or SRC; ld = lambda f: (lambda im: im if im.mode == 'RGBA' and np.asarray(im)[..., 3].min() < 10 else key_out(im))(Image.open(os.path.join(S, f)).convert('RGBA'))
     A = ld(code + 'a.png'); C = ld(code + 'c.png')
     stand = dict(((i, j), c) for i, j, c in cells(A, 2, 3))[0, 0]; bb = stand.getbbox(); sc = tall_ / (bb[3] - bb[1])
-    c6 = dict(((i, j), c) for i, j, c in cells(C, 2, 3)); order = [c6[0, 0], c6[0, 1], c6[0, 2], c6[1, 0], c6[1, 1], c6[1, 2]]
+    if C.width >= C.height * 4:
+        # 한 줄 여섯 칸짜리는 걷기 그림과 그린 크기가 다르다(칸 400×320에 사람이 250쯤). 칸을 칸으로 줄이되(320 → 64), 몸이 너무 크거나 작게 그려졌으면 키 50에 맞춘다
+        order = [c for i, j, c in cells(C, 6, 1)]; hs = sorted(c.getbbox()[3] - c.getbbox()[1] for c in order[:3] if c.getbbox()); body = hs[len(hs) // 2] if hs else C.height * .78
+        sc = CH / C.height
+        if not 44 <= body * sc <= 58: sc = 50 / body
+    else: c6 = dict(((i, j), c) for i, j, c in cells(C, 2, 3)); order = [c6[0, 0], c6[0, 1], c6[0, 2], c6[1, 0], c6[1, 1], c6[1, 2]]
     sheet = Image.new('RGBA', (CW * 6, CH))
     for k, c in enumerate(order):
         b = c.getbbox()
         if not b: continue
         s = shrink(c.crop(b), sc)
         if s.width > CW or s.height > CH: s = s.resize((min(CW, s.width), min(CH, s.height)), Image.NEAREST)
-        sheet.paste(s, (k * CW + (CW - s.width) // 2, CH - s.height - 1), s)
+        keep = C.width >= C.height * 4 and abs(sc - CH / C.height) < 1e-9  # 한 줄짜리를 칸째로 줄였으면 칸 안의 가로 자리를 그대로 둔다(내지른 칸에서 몸이 한쪽으로 쏠려 있는 것이 맞다)
+        sheet.paste(s, (k * CW + (min(CW - s.width, max(0, round(b[0] * sc))) if keep else (CW - s.width) // 2), CH - s.height - 1), s)
     sheet.save(os.path.join(OUT, out + '.webp'), lossless=True); print(out, sheet.size, 'scale', round(sc, 4))
 
 
