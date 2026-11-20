@@ -330,7 +330,8 @@ function townNpcs(l, id, out, folk) {
   // 길을 오가는 사람들. 짝수 번째는 가끔 집이나 가게에 들어갔다 나온다
   [[29, 12], [24, 22], [36, 23], [29, 30], [12, 22], [46, 22], [29, 36]].slice(0, night ? 2 : 7).forEach(([x, y], i) => { const P = VO[i], spr = P.spr; out.npcs.push({ id: `folk${i}`, spr, x: x + .5, y: y + .75, dir: i % 4, life: 'stroll', enters: i % 2 === 0, speed: 17 + (i * 7) % 11, hint: P.who, barks: () => night ? SLEEPY : [...CT.bark, ...P.p.bark], talk: talkOf(i, spr) }); });
   // 거리에 오가는 사람을 더 둔다. 넓은 광장에 일곱 명뿐이라 도시가 텅 비어 보였다(문 앞 길, 광장, 큰길 양쪽)
-  const MORE = [[29, 39], [31, 37], [27, 34], [22, 24], [38, 20], [33, 13], [26, 15], [8, 23], [18, 23], [42, 23], [52, 23], [30, 6], [44, 31], [16, 33], [48, 14], [12, 12]];
+  // 남문 바로 안쪽(29, 39)과 관아 깃발 뒤(30, 6)에서 걷기 시작하던 두 사람은 길에서 보면 성문과 깃발에 통째로 가려졌다(고을마다 같은 자리). 성문 앞은 두 칸 물리고, 깃발 뒤는 같은 길의 동쪽으로 두 칸 옮겼다
+  const MORE = [[27, 37], [31, 37], [27, 34], [22, 24], [38, 20], [33, 13], [26, 15], [8, 23], [18, 23], [42, 23], [52, 23], [32, 6], [44, 31], [16, 33], [48, 14], [12, 12]];
   MORE.slice(0, night ? 3 : MORE.length).forEach(([x, y], k) => { const i = 7 + k, P = VO[i] || VO[k % 7], spr = P.spr; out.npcs.push({ id: `folk${i}`, spr, x: x + .5, y: y + .75, dir: k % 4, life: 'stroll', far: 18 + (k * 5) % 12, enters: k % 3 === 0, speed: 15 + (k * 7) % 13, hint: P.who, barks: () => night ? SLEEPY : [...CT.bark, ...P.p.bark], talk: talkOf(i, spr) }); });
   // 순라군 둘. 하나는 광장을 돌고 하나는 큰길을 오간다
   [[[20, 15], [39, 15], [39, 31], [20, 31]], [[30, 10], [30, 38], [30, 23], [55, 23], [4, 23], [30, 23]]].forEach((route, i) => out.npcs.push({ id: 'guard' + i, spr: 'Knight', x: route[0][0] + .5, y: route[0][1] + .75, dir: 0, life: 'patrol', route, speed: 19, hint: '순라군', barks: () => night ? PATROL.night : PATROL.day, talk: async () => { await npcSay('순라군', 'Knight', nextLine(id + 'pt', PATROL.talk)); } }));
