@@ -1,6 +1,6 @@
 # 방의 벽 조각(rw_*). 규격은 tools/blender/spec.json의 M1, 틀은 gangho_kit.py(ChatGPT에게 주는 것과 같은 틀이다).
-# 이 파일은 Claude가 만든 임시 조각이다. ChatGPT가 같은 이름의 조각을 만들어 오면(docs/chatgpt-blender.md) 견주어 보고 나은 쪽을 쓴다.
-# 쓰는 법: python3 tools/blender/gpt.py run tools/blender/walls.py --install   (돌리고, 규격으로 검사하고, 통과한 것을 assets/hd2d/models/에 넣는다)
+# 이 파일은 Claude가 만든 임시 조각이다. **2026-11-20에 ChatGPT의 M1(art-src/blender/gangho_m1.py)을 받아 게임은 그쪽을 쓴다.** 이 파일은 견줘 볼 때만 돌린다(--install을 붙이면 받은 조각을 덮어쓰니 붙이지 않는다).
+# 쓰는 법: python3 tools/blender/gpt.py run tools/blender/walls.py   (돌리고 규격으로 검사한다. 만든 것은 임시 폴더에 남는다)
 # 약속: 벽의 앞면(방 안을 보는 넓은 면)이 y = 0, 방 안쪽이 -y, 벽의 몸은 +y 쪽으로 두께 5. 길이는 평면도 점(방 안 사람 키 22).
 # ---- 머리말(그대로 둔다): 틀(gangho_kit.py)을 불러온다. 옆에 없으면 받아 온다 ----
 import importlib, os, sys, urllib.request

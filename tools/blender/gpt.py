@@ -22,7 +22,8 @@ def measure(path):
     """.glb 하나를 블렌더로 읽어 잰다(블렌더 좌표: z가 위)"""
     import bpy
     bpy.ops.wm.read_factory_settings(use_empty=True); bpy.ops.import_scene.gltf(filepath=path)
-    lo, hi, tris, mats, uv, lamps = [1e9] * 3, [-1e9] * 3, 0, set(), False, 0
+    import bmesh
+    lo, hi, tris, mats, uv, lamps, flip, hole = [1e9] * 3, [-1e9] * 3, 0, set(), False, 0, 0, 0
     for o in bpy.context.scene.objects:
         if o.name.startswith('lamps'): lamps = len(json.loads(o.get('pts', '[]')))
         if o.type != 'MESH': continue
@@ -31,8 +32,15 @@ def measure(path):
             p = W @ v.co
             for i in range(3): lo[i], hi[i] = min(lo[i], p[i]), max(hi[i], p[i])
         mats |= {s.material.name.split('.')[0] for s in o.material_slots if s.material}
+        # 면의 앞뒤와 구멍: 게임은 면의 앞쪽만 그리니 뒤집힌 면은 뚫려 보인다. 내보낼 때 면마다 갈라진 꼭짓점을 다시 붙인 다음,
+        # 이웃한 두 면의 방향이 어긋난 모서리(뒤집힘)와 한 면만 붙은 모서리(구멍. 틀이 지운 바닥 밑면의 둘레는 뺀다)를 센다. 덩어리가 안팎이 뒤집혔는지는 부피의 부호로 본다
+        bm = bmesh.new(); bm.from_mesh(me); bm.transform(W); bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
+        flip += sum(1 for e in bm.edges if len(e.link_faces) == 2 and not e.is_contiguous)
+        hole += sum(1 for e in bm.edges if len(e.link_faces) == 1 and not all(abs(v.co.z) < 1e-3 for v in e.verts))
+        if flip == 0 and bm.calc_volume(signed=True) < -1e-6: flip += 1
+        bm.free()
     imgs = [i.name for i in bpy.data.images if i.name not in ('Render Result', 'Viewer Node')]
-    return dict(lo=lo, hi=hi, tris=tris, mats=sorted(mats), uv=uv, imgs=imgs, lamps=lamps)
+    return dict(lo=lo, hi=hi, tris=tris, mats=sorted(mats), uv=uv, imgs=imgs, lamps=lamps, flip=flip, hole=hole)
 
 
 def judge(name, m, pal):
@@ -44,6 +52,8 @@ def judge(name, m, pal):
         if k not in pal and not k.startswith('c_'): bad.append(f"이름표에 없는 재질 '{k}'")
     if m['imgs']: bad.append('그림이 들어 있다: ' + ', '.join(m['imgs'][:3]))
     if m['uv']: note.append('UV가 들어 있다(게임은 쓰지 않는다)')
+    if m['flip']: bad.append(f"앞뒤가 뒤집힌 면이 있다(어긋난 모서리 {m['flip']}곳). 게임에서 뚫려 보인다")
+    if m['hole']: bad.append(f"닫히지 않은 곳이 있다(열린 모서리 {m['hole']}곳)")
     if name in PIECES:
         p, st = PIECES[name]
         for i, ax in enumerate('xyz'):
@@ -109,7 +119,7 @@ def gen():
     pal, out = palette(), {}
     out['palette'] = '| 재질 이름 | 무엇 |\n|---|---|\n' + '\n'.join(f'| `{k}` | {v[0]} |' for k, v in pal.items())
     out['kit'] = '```python\n' + open(KIT, encoding='utf-8').read().rstrip() + '\n```'
-    out['order'] = '| 차례 | 묶음 | 파일 이름 | 모형 |\n|---|---|---|---|\n' + '\n'.join(f"| {i + 1} | **{st['id']}** {st['ko']} | `{st['file']}` | {', '.join('`' + p['name'] + '`' for p in st['pieces'])} |" for i, st in enumerate(SPEC['sets']))
+    out['order'] = '| 차례 | 묶음 | 파일 이름 | 모형 | 상태 |\n|---|---|---|---|---|\n' + '\n'.join(f"| {i + 1} | **{st['id']}** {st['ko']} | `{st['file']}` | {', '.join('`' + p['name'] + '`' for p in st['pieces'])} | {st.get('got', '')} |" for i, st in enumerate(SPEC['sets']))
     for st in SPEC['sets']:
         t = [asc(st['intro']), '', '| 모형 | 무엇 | x | y | z | 꼭 닿는 축 | 삼각형 한도 |', '|---|---|---|---|---|---|---|']
         for p in st['pieces']:

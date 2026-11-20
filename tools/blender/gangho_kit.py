@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from mathutils import Matrix, Vector
 
 KIT = 1
-BUILD = '2026-11-20b'  # 틀을 고친 날(끝 줄에 찍힌다. 받은 파일이 어느 틀로 만들어졌는지 본다)
+BUILD = '2026-11-20c'  # 틀을 고친 날(끝 줄에 찍힌다. 받은 파일이 어느 틀로 만들어졌는지 본다)
 OUT = os.environ.get('GANGHO_OUT') or os.path.join(os.path.expanduser('~'), 'gangho_models')
 # 재질 이름표: 이름 -> (무엇, 임시 빛깔). 게임이 이 이름을 보고 무늬를 입힌다. 표에 없는 이름은 쓰지 않는다
 PALETTE = {
@@ -197,6 +197,18 @@ class Model:
         k = len(outline)
         s.mesh(mat, [(x, y, z0) for x, y in outline] + [(x, y, z1) for x, y in outline],
                [tuple(reversed(range(k))), tuple(range(k, 2 * k))] + [(i, (i + 1) % k, k + (i + 1) % k, k + i) for i in range(k)])
+
+    def loft(s, mat, loops, ring=False):
+        """단면들을 차례로 이은 모양(모서리를 깎은 기둥, 층진 받침, 들린 지붕, 창틀). loops=[[(x, y, z)…], …]: 꼭짓점 수가 같은 단면을 차례로.
+        처음과 마지막 단면은 막는다. ring=True면 마지막 단면을 처음과 이어 고리로 만든다(막지 않는다)"""
+        w = len(loops[0])
+        faces = []
+        for r in range(len(loops) if ring else len(loops) - 1):
+            q = (r + 1) % len(loops)
+            faces += [(r * w + i, r * w + (i + 1) % w, q * w + (i + 1) % w, q * w + i) for i in range(w)]
+        if not ring:
+            faces += [tuple(reversed(range(w))), tuple(range((len(loops) - 1) * w, len(loops) * w))]
+        s.mesh(mat, [p for row in loops for p in row], faces)
 
     def bar(s, mat, p0, p1, w, h=None, n=4):
         """두 점 p0, p1을 잇는 막대(비스듬한 버팀목, 난간, 창대, 가지). 폭 w(옆으로), 두께 h(위아래. 안 주면 w). n=4는 네모, 6 이상은 둥근 막대"""

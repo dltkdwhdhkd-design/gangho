@@ -20,12 +20,12 @@ ChatGPT에게 **블렌더로 모형을 만들게** 하는 문서다. 방의 벽 
 ```text
 아래 주소의 문서를 읽어 줘. 내 게임 '강호행'에 넣을 블렌더 모형 요청문이야.
 https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-blender.md
-너는 내 블렌더에 연결돼 있어. 문서의 "규칙"을 지키고 문서의 "틀"을 블렌더에 불러와서, "만들 차례"의 맨 위 묶음(M1)부터 한 묶음씩 만들어 줘. 한 번에 한 묶음만. 내가 "다음"이라고 하면 다음 묶음을 만들어.
-만든 다음에는 문서의 "스스로 확인"대로 [모형] 줄이 전부 OK인지 보고, 게임과 같은 각도로 화면을 찍어 보면서 모양을 다듬어 줘. 끝나면 마지막에 돌린 스크립트 전체를 파일(gangho_m1.py)이나 코드 블록 하나로 나한테 주고, 내 컴퓨터 어느 폴더에 무슨 파일이 생겼는지 알려 줘.
+너는 내 블렌더에 연결돼 있어. 문서의 "규칙"을 지키고 문서의 "틀"을 블렌더에 불러와서, "만들 차례" 표에서 상태 칸이 비어 있는(아직 받지 않은) 맨 위 묶음부터 한 묶음씩 만들어 줘. 한 번에 한 묶음만. 내가 "다음"이라고 하면 다음 묶음을 만들어.
+만든 다음에는 문서의 "스스로 확인"대로 [모형] 줄이 전부 OK인지 보고, 게임과 같은 각도로 화면을 찍어 보면서 모양을 다듬어 줘. 끝나면 마지막에 돌린 스크립트 전체를 파일(gangho_m2.py처럼 묶음 이름으로)이나 코드 블록 하나로 나한테 주고, 내 컴퓨터 어느 폴더에 무슨 파일이 생겼는지 알려 줘.
 블렌더에 연결이 안 돼 있으면 그렇다고 말하고 스크립트만 줘. 묶음 설명에 나오는 참고 그림 주소도 열어 봐. 주소를 못 열면 나한테 그 파일을 올려 달라고 말해.
 ```
 
-**방법 2 (주소를 못 열 때)**: 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙인 뒤 "너는 내 블렌더에 연결돼 있어. 이 문서대로 M1부터 한 묶음씩 만들어 줘"라고 한다. 참고 그림(`docs/ref/ws-interior.jpg`, `docs/shots/1120/wallkit_blender.jpg`)도 내려받아 함께 올린다.
+**방법 2 (주소를 못 열 때)**: 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙인 뒤 "너는 내 블렌더에 연결돼 있어. 이 문서대로 아직 받지 않은 맨 위 묶음부터 한 묶음씩 만들어 줘"라고 한다. 참고 그림(`docs/ref/ws-interior.jpg`, `docs/shots/1120/wallkit_blender.jpg`)도 내려받아 함께 올린다.
 
 **블렌더에 연결하지 않고도 된다.** 연결이 안 되는 날에는 ChatGPT가 스크립트만 써 주면 된다. 그 파일을 Claude 대화에 올리면 Claude가 여기서 블렌더로 돌려 모형으로 만든다.
 
@@ -41,13 +41,13 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-blender.md
 - 벽, 계단, 난간 같은 조각은 게임이 칸에 맞춰 줄지어 세우고 돌려 세운다. **치수가 정확해야** 조각끼리 이어 붙는다.
 - 받은 모형은 Claude가 블렌더 5.3으로(화면 없이, `python3`에서 `bpy`로) 스크립트를 다시 돌려 만들고, 치수를 검사한 뒤 게임에 넣는다. 그래서 **스크립트가 원본**이다.
 
-벽 조각(M1)을 조립하면 이런 방이 된다. Claude가 임시로 만든 조각을 블렌더에서 조립해 게임과 같은 각도로 찍은 것이다. 빛깔은 임시고, 붉은 막대가 사람 키(22점)다.
+벽 조각(M1)을 조립하면 이런 방이 된다. 받은 M1 조각을 블렌더에서 조립해 게임과 같은 각도로 찍은 것이다. 빛깔은 임시고, 붉은 막대가 사람 키(22점)다.
 
 ![벽 조각을 조립한 모습](shots/1120/wallkit_blender.jpg)
 
 그림 주소: https://dltkdwhdhkd-design.github.io/gangho/docs/shots/1120/wallkit_blender.jpg
 
-같은 임시 조각을 게임에 세운 모습이다(왼쪽 위는 닮게 만들려는 기준 그림, 나머지 셋이 게임 화면). 게임이 재질 이름마다 도트 무늬를 입히고, 창과 문양판을 벽에 붙이고, 문양판에 글자를 얹는다. 조각이 상자 몇 개뿐이라 처마와 기둥머리, 주춧돌이 밋밋하다. M1에서 나아져야 할 곳이다.
+같은 조각을 게임에 세운 모습이다(왼쪽 위는 닮게 만들려는 기준 그림, 나머지 셋이 게임 화면). 게임이 재질 이름마다 도트 무늬를 입히고, 창과 문양판을 벽에 붙이고, 문양판에 글자를 얹는다. 화면에서 조각 하나는 이만한 크기로 보인다: 큰 윤곽(처마, 기둥머리, 주춧돌의 층)은 읽히고, 0.5점보다 잔 굴곡은 보이지 않는다.
 
 ![게임에 세운 모습](shots/1120/room_walls.jpg)
 
@@ -207,6 +207,7 @@ done('gangho_m1')       # 묶음 파일 이름(확장자 없이). gangho_m1.zip�
 | `m.lathe(재질, (x, y), [(반지름, 높이), …], n=8, ring=False)` | 세로 축 둘레로 돌려 만든 모양(항아리, 북, 향로, 지붕 꼭지). `ring=True`면 고리(우물전, 바퀴 테) |
 | `m.prism(재질, [(y, z), …], x0, x1)` | 옆에서 본 단면을 x 방향으로 민 모양(지붕, 처마, 계단의 옆모습) |
 | `m.poly(재질, [(x, y), …], z0, z1)` | 위에서 본 윤곽을 세운 모양(여섯모 단, 배의 바닥) |
+| `m.loft(재질, [[(x, y, z), …], …], ring=False)` | 꼭짓점 수가 같은 단면들을 차례로 이은 모양(모서리를 깎은 기둥, 층진 받침, 들린 지붕, 창틀). `ring=True`면 마지막 단면을 처음과 이어 고리로 |
 | `m.bar(재질, (x, y, z), (x, y, z), 폭, 두께=None, n=4)` | 두 점을 잇는 막대(버팀목, 난간, 창대, 가지). `n=4`는 네모, 6 이상은 둥근 막대 |
 | `m.mesh(재질, [(x, y, z), …], [(꼭짓점 번호, …), …])` | 아무 그물. 면의 앞뒤는 틀이 바깥으로 맞춘다 |
 | `m.add(오브젝트, 재질=None)` | 블렌더로 만든 오브젝트를 넣는다(수정자와 변환을 적용하고 원래 오브젝트는 지운다) |
@@ -250,7 +251,7 @@ done('gangho_ex')
 == 끝: 모형 1개, 문제 0개, 폴더 …/gangho_models (틀 2026-11-20b) ==
 ```
 
-M1의 벽 조각은 Claude가 같은 틀로 임시로 만들어 둔 스크립트가 있다: https://dltkdwhdhkd-design.github.io/gangho/tools/blender/walls.py — 묶음 하나를 어떻게 쓰는지 볼 수 있다. 상자와 막대 몇 개로 치수만 맞춘 것이니, **M1은 이것보다 나은 모양으로** 만든다(기와 덮개의 기왓골과 처마, 기둥머리의 받침, 주춧돌의 깎임, 창살의 짜임).
+묶음 하나를 통째로 쓴 본보기는 **받아서 게임에 넣은 M1**이다: https://dltkdwhdhkd-design.github.io/gangho/art-src/blender/gangho_m1.py — 단면을 이어(`loft`) 모서리를 깎은 기둥과 층진 주춧돌, 골이 파인 기와 덮개를 만들었다. 다음 묶음도 이만큼 한다(Claude가 상자 몇 개로 치수만 맞춘 것은 `tools/blender/walls.py`에 견줄 거리로 남아 있다).
 
 ### 틀 전문
 
@@ -265,7 +266,7 @@ from contextlib import contextmanager
 from mathutils import Matrix, Vector
 
 KIT = 1
-BUILD = '2026-11-20b'  # 틀을 고친 날(끝 줄에 찍힌다. 받은 파일이 어느 틀로 만들어졌는지 본다)
+BUILD = '2026-11-20c'  # 틀을 고친 날(끝 줄에 찍힌다. 받은 파일이 어느 틀로 만들어졌는지 본다)
 OUT = os.environ.get('GANGHO_OUT') or os.path.join(os.path.expanduser('~'), 'gangho_models')
 # 재질 이름표: 이름 -> (무엇, 임시 빛깔). 게임이 이 이름을 보고 무늬를 입힌다. 표에 없는 이름은 쓰지 않는다
 PALETTE = {
@@ -455,6 +456,18 @@ class Model:
         k = len(outline)
         s.mesh(mat, [(x, y, z0) for x, y in outline] + [(x, y, z1) for x, y in outline],
                [tuple(reversed(range(k))), tuple(range(k, 2 * k))] + [(i, (i + 1) % k, k + (i + 1) % k, k + i) for i in range(k)])
+
+    def loft(s, mat, loops, ring=False):
+        """단면들을 차례로 이은 모양(모서리를 깎은 기둥, 층진 받침, 들린 지붕, 창틀). loops=[[(x, y, z)…], …]: 꼭짓점 수가 같은 단면을 차례로.
+        처음과 마지막 단면은 막는다. ring=True면 마지막 단면을 처음과 이어 고리로 만든다(막지 않는다)"""
+        w = len(loops[0])
+        faces = []
+        for r in range(len(loops) if ring else len(loops) - 1):
+            q = (r + 1) % len(loops)
+            faces += [(r * w + i, r * w + (i + 1) % w, q * w + (i + 1) % w, q * w + i) for i in range(w)]
+        if not ring:
+            faces += [tuple(reversed(range(w))), tuple(range((len(loops) - 1) * w, len(loops) * w))]
+        s.mesh(mat, [p for row in loops for p in row], faces)
 
     def bar(s, mat, p0, p1, w, h=None, n=4):
         """두 점 p0, p1을 잇는 막대(비스듬한 버팀목, 난간, 창대, 가지). 폭 w(옆으로), 두께 h(위아래. 안 주면 w). n=4는 네모, 6 이상은 둥근 막대"""
@@ -652,15 +665,15 @@ def done(pack=None):
 ## 만들 차례
 
 <!-- gen:order -->
-| 차례 | 묶음 | 파일 이름 | 모형 |
-|---|---|---|---|
-| 1 | **M1** 방의 벽 조각 | `gangho_m1.py` | `rw_wall`, `rw_post`, `rw_pillar`, `rw_column`, `rw_sill`, `rw_window`, `rw_emblem` |
-| 2 | **M2** 큰 가구 1: 탁자와 앉는 것 | `gangho_m2.py` | `fn_table`, `fn_altar`, `fn_counter`, `fn_teatable`, `fn_chair`, `fn_stool`, `fn_bench`, `fn_bed` |
-| 3 | **M3** 큰 가구 2: 세워 두는 것 | `gangho_m3.py` | `fn_bookcase`, `fn_drawers`, `fn_shelf`, `fn_screen`, `fn_rack`, `fn_chest`, `fn_dummy`, `fn_drum`, `fn_stove` |
-| 4 | **M4** 돌계단, 난간, 축대 | `gangho_m4.py` | `st_stair`, `st_cheek`, `st_rail`, `st_railpost`, `st_wall`, `st_cap` |
-| 5 | **M5** 눈에 띄는 것: 문, 정자, 탑, 석등 | `gangho_m5.py` | `lm_paifang`, `lm_pavilion`, `lm_pagoda`, `lm_stele`, `lm_lantern`, `lm_censer`, `lm_well` |
-| 6 | **M6** 장터와 나루 | `gangho_m6.py` | `mk_stall`, `mk_cart`, `mk_boat`, `mk_junk`, `mk_crates`, `mk_barrels` |
-| 7 | **M7** 나무 (시험 삼아 한 그루) | `gangho_m7.py` | `tr_pine` |
+| 차례 | 묶음 | 파일 이름 | 모형 | 상태 |
+|---|---|---|---|---|
+| 1 | **M1** 방의 벽 조각 | `gangho_m1.py` | `rw_wall`, `rw_post`, `rw_pillar`, `rw_column`, `rw_sill`, `rw_window`, `rw_emblem` | 받음(2026-11-20). 게임에 넣었다 |
+| 2 | **M2** 큰 가구 1: 탁자와 앉는 것 | `gangho_m2.py` | `fn_table`, `fn_altar`, `fn_counter`, `fn_teatable`, `fn_chair`, `fn_stool`, `fn_bench`, `fn_bed` |  |
+| 3 | **M3** 큰 가구 2: 세워 두는 것 | `gangho_m3.py` | `fn_bookcase`, `fn_drawers`, `fn_shelf`, `fn_screen`, `fn_rack`, `fn_chest`, `fn_dummy`, `fn_drum`, `fn_stove` |  |
+| 4 | **M4** 돌계단, 난간, 축대 | `gangho_m4.py` | `st_stair`, `st_cheek`, `st_rail`, `st_railpost`, `st_wall`, `st_cap` |  |
+| 5 | **M5** 눈에 띄는 것: 문, 정자, 탑, 석등 | `gangho_m5.py` | `lm_paifang`, `lm_pavilion`, `lm_pagoda`, `lm_stele`, `lm_lantern`, `lm_censer`, `lm_well` |  |
+| 6 | **M6** 장터와 나루 | `gangho_m6.py` | `mk_stall`, `mk_cart`, `mk_boat`, `mk_junk`, `mk_crates`, `mk_barrels` |  |
+| 7 | **M7** 나무 (시험 삼아 한 그루) | `gangho_m7.py` | `tr_pine` |  |
 <!-- /gen:order -->
 
 표의 x, y, z는 모형이 들어가야 하는 범위(점)다. "꼭 닿는 축"에 적힌 축은 범위의 양 끝에 정확히 닿아야 한다.
@@ -685,7 +698,7 @@ def done(pack=None):
 - **`rw_pillar` 모서리 기둥**: 벽이 꺾이는 모서리와 옆벽의 남쪽 끝에 서는 굵은 네모 기둥. 네 면이 다 보일 수 있다. 원점은 기둥 축의 바닥. ① 주춧돌 `wl_base`: z 0~4, 9 × 9 ② 몸 `wl_post`: z 4~62, 7 × 7 ③ 머리 `wl_roof`: z 62~70, 9 × 9에서 가운데로 모이는 낮은 사모 덮개(기와).
 - **`rw_column` 방 안 두리기둥**: 넓은 방 한가운데에 서는 둥근 기둥. 원점은 기둥 축의 바닥. ① 주춧돌 `stone`: z 0~3, 지름 7의 여덟모 돌 ② 몸 `wl_post`: z 3~55, 지름 4.8의 둥근 기둥(10각) ③ 기둥머리 `wl_post`: z 55~60, 위로 갈수록 넓어지는 받침(지름 7까지). 지붕을 걷어 낸 방이라 꼭대기는 평평하게 잘린 채로 둔다.
 - **`rw_sill` 문지방 돌**: 방 남쪽 가장자리(카메라 쪽)에 벽 대신 놓는 낮은 턱. 가로 16, 깊이 4, 높이 2.5. 윗모서리를 살짝 깎는다.
-- **`rw_window` 세로 살창**: 벽의 넓은 면에 붙이는 세로로 긴 살창(가로 14, 높이 23). 원점은 창 아래 가운데, 벽에 붙는 면(y = 0). 벽에 구멍을 내지 않고 벽 앞에 얹는 것이라 y -1.6~0 안에 들어온다. ① 창틀 `wood_dark`: 폭 1.5의 네모 테, 깊이 1.6 ② 창호지 `win_paper`: 틀 안쪽을 채우는 판(y -0.5~0). 밤에는 게임이 이 면을 밝힌다 ③ 창살 `wood_dark`: 창호지 앞에 세로 살 여섯(굵기 0.7), 가로 띠살 둘(위에서 4분의 1, 아래에서 4분의 1 자리).
+- **`rw_window` 세로 살창**: 벽의 넓은 면에 붙이는 세로로 긴 살창(가로 14, 높이 23). 원점은 창 아래 가운데, 벽에 붙는 면(y = 0). 벽에 구멍을 내지 않고 벽 앞에 얹는 것이라 y -1.6~0 안에 들어온다. ① 창틀 `wood_dark`: 폭 1.5의 네모 테, 깊이 1.6 ② 창호지 `win_paper`: 틀 안쪽을 채우는 판(y -0.5~0). 밤에는 게임이 이 면을 밝힌다 ③ 창살 `wood_dark`: 창호지 앞에 세로 살 여섯(굵기 0.7), 가로 띠살 둘(위에서 4분의 1, 아래에서 4분의 1 자리). 살은 얕게 만든다(창호지에서 0.3쯤만 나오게): 옆벽에 박힌 창은 비스듬히 보이는데, 살이 깊으면 살끼리 겹쳐 창호지가 가려지고 창이 까맣게 보인다.
 - **`rw_emblem` 둥근 문양판**: 뒷벽 가운데에 거는 둥근 판(지름 30). 원점은 원판 맨 아래, 벽에 붙는 면(y = 0). ① 원판 `paper`: 지름 27, 두께 0.8, 20각의 민무늬 판. 글자는 게임이 문파마다 다르게 얹으니 아무것도 새기지 않는다 ② 테 `wood_dark`: 원판을 두르는 폭 1.5, 두께 1.6의 고리.
 <!-- /gen:M1 -->
 
@@ -825,12 +838,20 @@ M2와 같은 약속이다(사람 키 15점 기준, 원점은 바닥 한가운데
 
 ---
 
+## 받은 것
+
+| 묶음 | 받은 날 | 검사 | 고친 것 |
+|---|---|---|---|
+| M1 방의 벽 조각 7개 | 2026-11-20 | 치수, 꼭 닿는 축, 삼각형 수, 재질 이름, 뒤집힌 면·구멍 모두 통과. 받은 스크립트를 Claude 쪽 블렌더 5.3에서 다시 돌려 같은 모형이 나왔다 | `rw_window`의 창살 깊이를 0.62 → 0.3, 띠살 깊이를 0.88 → 0.45로 얕게 했다(옆벽의 창이 비스듬히 보일 때 살끼리 겹쳐 창이 까맣게 보였다). 나머지는 받은 그대로 쓴다 |
+
+다음 묶음에 그대로 이어 가면 좋은 것: 단면을 이어 만든 모접기와 층진 받침, 범위와 꼭 닿는 축을 정확히 맞춘 것, 삼각형 한도 안에서 윤곽에 공을 들인 것. 벽이나 물건의 앞면에 붙는 얇은 살·띠는 비스듬히 봐도 뒤가 보이게 얕게 만든다.
+
 ## 받은 뒤 (Claude가 하는 일)
 
 1. 받은 스크립트를 읽어 본다(남이 쓴 코드다).
-2. `python3 tools/blender/gpt.py run gangho_m1.py`로 돌린다. `.glb`만 받았으면 `python3 tools/blender/gpt.py check <폴더>`로 검사한다. 치수, 꼭 닿는 축, 삼각형 수, 재질 이름을 `tools/blender/spec.json`과 견준다.
+2. `python3 tools/blender/gpt.py run gangho_m1.py`로 돌린다. `.glb`나 `.zip`만 받았으면 `python3 tools/blender/gpt.py check <파일>`로 검사한다. 치수, 꼭 닿는 축, 삼각형 수, 재질 이름을 `tools/blender/spec.json`과 견주고, 앞뒤가 뒤집힌 면과 구멍이 있는지 본다(게임은 면의 앞쪽만 그린다).
 3. 작은 문제(재질 이름 오타, 범위를 0.몇 점 넘은 것, 블렌더 판 차이로 안 도는 줄)는 Claude가 스크립트를 직접 고친다. 모양을 다시 잡아야 하는 큰 문제만 ChatGPT에게 돌려보낼 말을 주인께 드린다.
 4. `--install`로 `assets/hd2d/models/`에 넣고, 게임 화면에서 찍어 본다. 임시 조각(`tools/blender/walls.py`)과 나란히 견주어 나은 쪽을 쓴다.
-5. 받은 스크립트는 `art-src/blender/`에 그대로 둔다.
+5. 받은 스크립트는 `art-src/blender/`에 둔다. Claude가 고친 줄에는 "Claude가 고침"이라고 적는다.
 
 이 문서의 표와 틀은 `tools/blender/spec.json`과 `tools/blender/gangho_kit.py`에서 뽑는다(`python3 tools/blender/gpt.py doc`). 치수를 바꿀 때는 `spec.json`을 고치고 다시 뽑는다.
