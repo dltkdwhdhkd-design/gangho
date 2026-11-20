@@ -179,7 +179,7 @@ async function teach(k, fac, rl, name) {
 }
 async function talk(k) {
   const [, name, , fac, title] = BY[k], who = 'fan_' + k, T = TALK[k] || {};
-  await say(who, line(k, [...BY[k][6], ...(T.l || [])]));
+  await say(who, line(k, [...BY[k][6], ...(T.l || [])]), k === 'cheongmyeong' ? 'h' : 'n');
   if (!fac || !G.jh?.disciple || !G.free?.fac) return;
   const rl0 = fanRealm(k, title), tid = !G.S.flags['fanwin_' + k] && rl0 >= playerRealm() ? teachOf(fac, rl0) : null;  // 이기면 무엇을 얻는지 미리 보인다
   const c = await choice(`${name} · ${title} · ${RNAME[rl0]}${tid ? ` · 이기면 ${SKILLS[tid].name} 전수` : G.S.flags['fanwin_' + k] ? ' · 이긴 적 있음' : ''}`, ['비무를 청한다', '그냥 간다']); if (c) return;

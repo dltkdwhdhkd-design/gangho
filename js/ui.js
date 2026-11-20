@@ -177,7 +177,16 @@ function tabLove(B) {
   B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와는 셋째 사연 뒤에 의형제를 맺습니다.</p>` + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${faces[k]}" data-a="${k}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated;border-radius:4px"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || S.sworn === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${desc[k]}</div></div></div>`).join('');
   // 일러스트가 있으면 얼굴 부분을 잘라 쓴다. 없으면 옛 도트 얼굴
   $$('canvas[data-f]', B).forEach(c => { const x = c.getContext('2d'), a = ART.get(c.dataset.a + '_n');
-    if (a && a.complete && a.naturalWidth) { c.width = c.height = 132; c.style.imageRendering = 'auto'; const w = a.naturalWidth, side = w * .34; x.drawImage(a, w * .5 - side / 2, a.naturalHeight * .215 - side / 2, side, side, 0, 0, 132, 132); return; }
+    if (a) {
+      const paint = () => {
+        if (!a.naturalWidth) return;
+        c.width = c.height = 132; c.style.imageRendering = 'auto';
+        const side = a.naturalWidth * .75;
+        x.drawImage(a, (a.naturalWidth-side)/2, a.naturalHeight*.43-side/2, side, side, 0, 0, 132, 132);
+      };
+      if (a.complete && a.naturalWidth) { paint(); return; }
+      a.addEventListener('load',paint,{once:true});
+    }
     x.imageSmoothingEnabled = false; const im = IMG['faces/' + c.dataset.f]; if (im) x.drawImage(im, 0, 0); });
 }
 // 키 설정. 칸을 누르고 쓰고 싶은 키나 마우스 버튼을 누른다

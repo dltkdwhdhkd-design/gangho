@@ -50,12 +50,24 @@ export async function loadAll(onp) {
   for (const [a, b] of Object.entries(SAME)) if (!IMG['stamp/' + a] && IMG['stamp/' + b]) IMG['stamp/' + a] = IMG['stamp/' + b];
 }
 // 나중에 일러스트를 넣으면 쓰는 자리. 파일이 없으면 얼굴 그림으로 대체한다.
-export const ART = new Map();
+class PortraitLibrary extends Map {
+  get(key) {
+    const item = super.get(key);
+    if (typeof item !== 'string') return item;
+    const image = new Image();
+    image.src = item;
+    this.set(key, image);
+    return image;
+  }
+}
+export const ART = new PortraitLibrary();
 export async function loadArtList() {
   try {
     const r = await fetch('assets/art/list.json'); if (!r.ok) return;
     const l = await r.json(); l.sort((a, b) => (b === 'cg_title') - (a === 'cg_title'));  // 제목 화면 그림부터 받는다
-    await Promise.all(l.map(n => new Promise(res => { const im = new Image(); im.onload = () => { ART.set(n, im); res(); }; im.onerror = res; im.src = `assets/art/${n}.webp`; })));
+    for (const n of l) ART.set(n, `assets/art/${n}.webp`);
+    const title = ART.get('cg_title');
+    if (title) await title.decode().catch(() => {});
   } catch (e) { /* 일러스트가 아직 없으면 그대로 진행 */ }
 }
 

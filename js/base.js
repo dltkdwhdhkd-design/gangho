@@ -129,6 +129,10 @@ function makeRoom(id) {
   if (k === 'temple') { m.carpet = [6, 3, 4, 8]; m.put('censer', 7.5, 3.4).put('tablet', 7, 1).put('tablet2', 3, 2).put('tablet2', 12, 2).put('lantern', 1, 4).put('lantern', 14, 4).put('longtable', 6, 5).put('plant', 1, 9).put('plant', 14, 9); }
   if (k === 'home' && info.as) shopRoom(m, info.as);
   else if (k === 'home') { const v = [...id].reduce((a, c) => a + c.charCodeAt(0), 0) % 4; if (v === 0) m.put('f_bed', 1, 1).put('chest', 4, 1).put('longtable', 6, 5).row('stool', 6, 4, 3, 1).put('jar', 12, 1).put('f_stove', 10, 1); if (v === 1) m.put('bed', 9, 1).put('drawer', 1, 1).put('shelf', 4, 1).put('longtable', 3, 6).put('plant', 12, 7); if (v === 2) m.put('shelf2', 1, 1).put('box', 5, 1).put('box', 7, 1).put('jar', 10, 1).put('pot', 12, 1).put('counter', 2, 5).put('f_bed', 10, 6); if (v === 3) m.put('f_stove', 1, 1).put('longtable', 5, 5).put('f_bed', 10, 1).put('f_lamp', 8, 1).put('f_bonsai', 1, 7).put('stool', 5, 4).put('stool', 7, 4); }
+  if (k === 'hall') {
+    m.terrace(2,0,w-4,6,1).stairs(9,5,4,1);
+    m.terrace(4,0,w-8,3,2).stairs(9,2,4,1).heightEdges();
+  }
   m.exit(ex, h - 1, 4, 1, info.back, info.bx, info.by, 0, { door: true }); m.render();
 }
 // 세력 본거지. 아래가 산문, 위로 갈수록 외문 구역, 연무장, 내문 구역, 본전이다
@@ -180,6 +184,16 @@ function sectLayout(m, l, st, ft) {
   for (const top of (mt ? [45, 44, 23, 22, 10, 9] : [44, 22, 9])) {
     m.terrace(0, 0, W, top, ++level).stairs(cx - 1, top - 1, 6, 1);
   }
+  // 두 회랑은 연무장 양옆의 돌 기단 위에 서고, 남쪽 짧은 계단에서 올라간다.
+  m.galleries=[];
+  for (const x of [11,32]) {
+    const y=27, width=3, length=10;
+    const lv=m.hgt[Math.round(y*m.k)][Math.round(x*m.k)];
+    m.terrace(x,y,width,length+1,lv+1).fill(x,y,width,length,4).stairs(x,y+length,width,1);
+    m.galleries.push({x:Math.round(x*m.k),y:Math.round(y*m.k),
+      w:Math.round((x+width)*m.k)-Math.round(x*m.k),h:Math.round((y+length)*m.k)-Math.round(y*m.k),
+      color:['wudang','cheongseong','emei'].includes(l.fac)?'green':'red'});
+  }
   for (const y of [10, 23, 45, 58]) {
     m.put('v_stonelamp', cx - 1.9, y, { sc: .76 });
     m.put('v_stonelamp', cx + 5.3, y, { sc: .76 });
@@ -201,6 +215,7 @@ function townLayout(m, l) {
   for (const [x, y] of [[21, 16], [34, 16], [21, 26], [34, 26]]) { m.put('awning', x, y, { nosolid: true }); m.put('counter', x + 1.5, y + 2); }
   m.put('jar', 21, 18.6); m.put('pot', 38.7, 18.6); m.put('box', 21, 28.6); m.put('jar', 38.7, 28.6); m.put('sign_sword', 9, 25.3); m.scatter(['flower1', 'fern1'], 18, 4);
   if (SLAVE.includes(l.id)) { m.fill(47, 6, 9, 3, 4); m.row('wood_h', 47, 5, 9); m.put('banner7', 46.4, 5.4); m.put('banner7', 55.8, 5.4); m.put('log', 45.6, 9.6); m.put('box', 55.6, 9.4); m.label(51.5, 4.4, '노예 시장'); }
+  m.terrace(23,0,14,12,1).stairs(28,11,4,1).heightEdges();
 }
 // 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다
 // 거리 채움 소품(지도마다 성격에 맞게). 길 북쪽 가장자리에 띄엄띄엄

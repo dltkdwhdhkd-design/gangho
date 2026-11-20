@@ -1,4 +1,6 @@
+import { bridgeHeight } from './walkways.js';
 const materials = 'grass moss road yard slab plank sand snow cedar roof plaster crag'.split(' ');
+const margins = ['bank_ledge','bank_reeds','trail_dry','trail_fern','trail_paving','trail_frost'];
 const scenery = {
   statue: ['lion_guard', 23], statue_big: ['lion_guard', 33],
   lantern: ['silk_lamp', 23], v_lamppost: ['silk_lamp', 27], sign: ['shop_sign', 17],
@@ -21,23 +23,38 @@ export const fieldProps = (name, biome) => biome === 'snow' && ['tree_pine','t_p
 export const floorMaterial = { fl_pine: 'plank', fl_dark: 'cedar', fl_slab: 'slab', fl_brick: 'yard', fl_scale: 'slab', fl_mat: 'plank' };
 export const walking = {};
 export let combatLayout;
-export async function loadFieldArt(images) {
-  const names = new Set([...materials, ...Object.values(scenery).map(a => a[0]), 'fir']);
-  const [manifest, motions] = await Promise.all(['walk','motions'].map(name => fetch('assets/hd2d/field/'+name+'.json')));
-  if (motions.ok) { combatLayout=await motions.json(); names.add('weapons'); }
-  if (manifest.ok) {
-    Object.assign(walking, await manifest.json());
-    for (const [page] of Object.values(walking)) {
-      names.add(page);
-      if (combatLayout) names.add(page.replace('walk','combat'));
-    }
+const loading = new Map();
+let castIndex;
+export function loadActorPage(images,page) {
+  if (!page || images['field_'+page]) return;
+  if (!loading.has(page)) {
+    loading.set(page, new Promise(resolve => {
+      const image = new Image();
+      image.onload = () => { images['field_'+page] = image; loading.delete(page); resolve(); };
+      image.onerror = () => { loading.delete(page); resolve(); };
+      image.src = 'assets/hd2d/field/' + page + '.webp';
+    }));
   }
-  await Promise.all([...names].map(name => new Promise(resolve => {
-    const image = new Image();
-    image.onload = () => { images['field_' + name] = image; resolve(); };
-    image.onerror = resolve;
-    image.src = 'assets/hd2d/field/' + name + '.webp';
-  })));
+  return loading.get(page);
+}
+export function loadCombatArt(images,slot) {
+  return slot && loadActorPage(images,slot[0].replace('walk','combat'));
+}
+export function loadCastIndex(images) {
+  if (!castIndex) castIndex = Promise.all(['walk','motions'].map(async name => {
+    const response=await fetch('assets/hd2d/field/'+name+'.json');
+    if(!response.ok)throw Error(name+' '+response.status);
+    const data=await response.json();
+    if(name==='walk')Object.assign(walking,data);
+    else {combatLayout=data;await loadActorPage(images,'weapons');}
+  })).catch(()=>{castIndex=null;});
+  return castIndex;
+}
+export async function loadFieldArt(images) {
+  const names = new Set([...materials, ...margins, ...Object.values(scenery).map(a => a[0]), 'fir']);
+  await Promise.all([loadCastIndex(images), ...[...names].map(name=>loadActorPage(images,name))]);
+  const hero=walking.type_BlueSamurai;
+  if(hero)await Promise.all([loadActorPage(images,hero[0]),loadCombatArt(images,hero)]);
 }
 
 // Preserve the existing mapped rivers, mountain shadows, settlement footprints and coastline.
@@ -57,6 +74,17 @@ export function paintWorldSurface(ctx, m, area, images, tile, biomeAt) {
   for (let y = area.y0; y < area.y1; y++) for (let x = area.x0; x < area.x1; x++) {
     const ground = m.g[y]?.[x];
     if (ground === 2) continue;
+    if (ground===4) {
+      ctx.globalAlpha=1;ctx.fillStyle='#568c7c';ctx.fillRect(x*tile,y*tile,tile,tile);
+      const seed=(x*257+y*79)>>>0;
+      ctx.globalAlpha=.30;ctx.fillStyle='#a8c6ab';
+      for(let i=0;i<4;i++)ctx.fillRect((x+((seed+31*i)%79)/80)*tile,(y+((seed+19*i)%89)/90)*tile,tile*.18,tile*.03);
+      const shelf=images.field_bank_ledge;
+      if(shelf && bridgeHeight(m,(x+.5)*tile,(y+.5)*tile,tile)<.5){
+        ctx.globalAlpha=.80;ctx.drawImage(shelf,(x-.05)*tile,(y+.15)*tile,tile*1.1,tile*.6);
+      }
+      continue;
+    }
     const biome = biomeAt(x, y);
     const material = { 1: 'road', 3: 'yard', 4: 'plank', 5: 'slab' }[ground]
       || ({ deep: 'moss', sand: 'sand', snow: 'snow' }[biome] || 'grass');
@@ -70,6 +98,30 @@ export function paintWorldSurface(ctx, m, area, images, tile, biomeAt) {
       ctx.beginPath();
       ctx.moveTo(...edge(x,y)); ctx.lineTo(...edge(x+1,y));
       ctx.lineTo(...edge(x+1,y+1)); ctx.lineTo(...edge(x,y+1)); ctx.closePath(); ctx.fill();
+    }
+  }
+  paintMargins(ctx,m,area,images,tile,biomeAt);
+  ctx.restore();
+}
+
+export function paintMargins(ctx,m,area,images,tile,biomeAt) {
+  ctx.save();
+  for(let y=area.y0;y<area.y1;y++)for(let x=area.x0;x<area.x1;x++){
+    const ground=m.g[y]?.[x];
+    if(ground!==0 && ground!==1)continue;
+    for(const [dx,dy,turn] of [[0,1,0],[1,0,-1],[0,-1,2],[-1,0,1]]){
+      const next=m.g[y+dy]?.[x+dx];
+      if(next!==2 && (ground!==0 || ![1,3,5].includes(next)))continue;
+      const seed=((x+31)*73856093^(y+67)*19349663^(dx+3*dy)*83492791)>>>0;
+      if(seed%7<(next===2?2:4))continue;
+      const biome=biomeAt?biomeAt(x,y):m.biome;
+      const name=next===2 ? margins[seed%2] : biome==='snow'?'trail_frost':
+        next===3||next===5?'trail_paving':seed%3?'trail_dry':'trail_fern';
+      const im=images['field_'+name];if(!im)continue;
+      const w=tile*(.78+(seed%49)/100), h=Math.min(tile*.52,w*im.height/im.width);
+      ctx.save();ctx.translate((x+.5+dx*.47)*tile,(y+.5+dy*.47)*tile);
+      ctx.rotate(turn*Math.PI/2);if(seed&64)ctx.scale(-1,1);
+      ctx.globalAlpha=next===2?.89:.77;ctx.drawImage(im,-w/2,-h*.76,w,h);ctx.restore();
     }
   }
   ctx.restore();

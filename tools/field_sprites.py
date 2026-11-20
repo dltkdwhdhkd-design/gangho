@@ -274,4 +274,6 @@ def main():
                     atlas.alpha_composite(sprite,(56*direction,224*row+56*phase))
         atlas.save(DEST/(page+'.webp'),lossless=True,method=5)
     (DEST/'walk.json').write_text(json.dumps(manifest,separators=(',',':'))+'\n',encoding='utf8')
-if __name__=='__main__':main()
+if __name__ == '__main__':
+    from painted_actors import main as import_painted_cast
+    import_painted_cast()

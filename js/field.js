@@ -26,6 +26,7 @@ export class Field {
     const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir; if (m.k < 1) { [this.p.x, this.p.y] = m.freeNear(this.p.x, this.p.y); this.offPortal(m); }  // 좁힌 지도: 막힌 자리에 서면 가까운 빈 곳으로
     // 넓힌 지도로 방에서 나오면 그 방 문 바로 앞에 선다
     if (((m.k || 1) !== 1 || m.hasIso) && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
+    if (id==='world' && G.hd?.active(m) && G.hd.opt.art) [this.p.x,this.p.y]=G.world.bridgeLanding(m,this.p.x,this.p.y,TS);
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];

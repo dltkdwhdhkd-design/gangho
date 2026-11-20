@@ -176,4 +176,6 @@ def main():
     (DEST/'motions.json').write_text(json.dumps(data,separators=(',',':'))+'\n',encoding='utf8')
 
 
-if __name__=='__main__':main()
+if __name__ == '__main__':
+    from painted_actors import main as import_painted_cast
+    import_painted_cast()

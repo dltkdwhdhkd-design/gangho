@@ -123,6 +123,18 @@ export function motionFor(actor,identity,equipped) {
   return [f<.77 ? follow : rest,gear];
 }
 
+function paintedPose(pose,gear,base) {
+  if (['spear','dragon','staff','glaive'].includes(gear)) {
+    if (['point','palm','step','chamber','loose'].includes(pose)) return 11;
+    if (['sweep','cut','low','plant'].includes(pose)) return 13;
+  }
+  if (['blade','glaive','club','ringblade','dragon'].includes(gear) &&
+      ['lift','highguard','rear','highpoint'].includes(pose)) return 12;
+  if (['sword','wood','rapier','sabre','dagger','piercer'].includes(gear) &&
+      ['edge','highpoint'].includes(pose)) return 14;
+  return base;
+}
+
 export function drawMotion(c,images,layout,slot,motion,flip,x,y,height,white,identity) {
   if (!layout || !slot || !motion) return false;
   const body = images['field_'+slot[0].replace('walk','combat')], weapons=images.field_weapons;
@@ -133,11 +145,28 @@ export function drawMotion(c,images,layout,slot,motion,flip,x,y,height,white,ide
   c.save();c.imageSmoothingEnabled=false;
   if (white) c.filter='brightness(0) invert(1)';
   c.translate(x,y+1);c.scale(flip?-scale:scale,scale);
-  const [bw,bh]=layout.body;
-  c.drawImage(body,(i%layout.cols)*bw,(slot[1]*layout.rows+Math.floor(i/layout.cols))*bh,bw,bh,-bw/2,-56-(bh-56)/2,bw,bh);
-  const [px,py]=layout.pivots[i], [mx,my,lx,ly]=layout.builds[layout.figures[identity]][i];
+  const [bw,bh]=layout.body, resolution=layout.resolution || 1;
+  const tile=layout.cols===5 ? paintedPose(motion[0],motion[1],layout.poseTiles[i]) : (layout.poseTiles?.[i] ?? i);
+  const srcW=bw*resolution, srcH=bh*resolution;
+  const [anchorX,anchorY]=layout.bodyAnchor || [bw/2,56+(bh-56)/2];
+  c.drawImage(body,(tile%layout.cols)*srcW,(slot[1]*layout.rows+Math.floor(tile/layout.cols))*srcH,
+    srcW,srcH,-anchorX,-anchorY,bw,bh);
+  const [px,py]=layout.pivots[i];
+  const [mx,my,lx,ly]=layout.hands?.[identity]?.[tile] || layout.builds[layout.figures[identity]][i];
   const at=(dx,dy)=>c.drawImage(weapons,i*layout.width,w*layout.height,layout.width,layout.height,-28-ox+dx,-56-oy+dy,layout.width,layout.height);
-  if(motion[0]==='down') at(0,0);
+  if ((tile===11 || tile===13) && layout.angles) {
+    const angle=Math.atan2(ly-my,lx-mx), original=layout.angles[i]*Math.PI/180;
+    c.save();c.translate(mx-28,my-56);c.rotate(angle);
+    const reach=Math.hypot(lx-mx,ly-my);
+    if(reach>14) {
+      c.fillStyle='#30262b';c.fillRect(13,-1.1,reach-11,2.2);
+      c.fillStyle='#a08059';c.fillRect(13,-.45,reach-11,.9);
+    }
+    c.rotate(-original);
+    c.drawImage(weapons,i*layout.width,w*layout.height,layout.width,layout.height,
+      -ox-px,-oy-py,layout.width,layout.height);
+    c.restore();
+  } else if(motion[0]==='down') at(0,0);
   else {
     at(mx-px,my-py);
     if(['fist','claw','ironfist','goldfist'].includes(motion[1])) at(lx-px,ly-py);

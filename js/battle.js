@@ -580,12 +580,16 @@ export class Battle {
   }
   // 마을과 같은 사람 도트(새 화면과 새 그림을 켰을 때). 주인공, 동료, 이름 있는 사람
   hdOf(a) {
-    if (a.hdIm && a.hdArt === G.hd?.opt.art && (!a.isPlayer || a.hdLook === G.S.look)) return a.hdIm;
-    a.hdArt = G.hd?.opt.art; a.hdLook = G.S.look; a.nativeKey = null;
+    if (a.hdIm && a.hdArt === G.hd?.opt.art && a.hdIndexReady === G.hd?.castReady?.() && (!a.isPlayer || a.hdLook === G.S.look) &&
+        (a.hdIm.dataset?.fieldSheet || !a.nativeKey)) return a.hdIm;
+    a.hdArt = G.hd?.opt.art; a.hdLook = G.S.look; a.hdIndexReady=G.hd?.castReady?.(); a.nativeKey = null;
     if (!G.hd?.sheet || a.big || a.mon || a.def_?.stamp) return (a.hdIm = null);
     const key = o => {
       a.nativeKey = G.hd.fieldKey(o);
-      if (a.nativeKey) return G.hd.fieldSheet(o);
+      if (a.nativeKey) {
+        G.hd.prepareCombat([a.nativeKey]);
+        return G.hd.fieldSheet(o);
+      }
       const k = G.hd.sheetKey(o); a.hdKey = k; a.hdAct = G.hd.act(k); return k ? G.hd.sheet(o) : null;
     };
     if (a.isPlayer) return (a.hdIm = key({ me: 1 }));

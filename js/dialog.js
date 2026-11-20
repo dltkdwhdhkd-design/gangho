@@ -10,7 +10,16 @@ function faceCanvas(key, size = 228) {
   return c;
 }
 // 대화 무대: 주인공은 왼쪽, 상대는 오른쪽에 서고 말하는 사람만 밝다
-const pic = (who, expr) => { const w = who === 'me' ? { face: G.S.look, art: 'me' } : WHO[who]; if (!w) return null; const k = w.art || who; return { w, art: ART.get(`${k}_${expr || 'n'}`) || ART.get(`${k}_n`) }; };
+function pic(who, expr = 'n') {
+  const w = who === 'me' ? { face: G.S.look, art: 'type_' + G.S.look } : WHO[who];
+  if (!w) return null;
+  const keys = [w.art || who, 'type_' + w.face];
+  for (const key of keys) {
+    const art = ART.get(key + '_' + expr) || ART.get(key + '_n');
+    if (art) return { w, art };
+  }
+  return { w };
+}
 function slot(side, who, expr) {
   const st = $('#vn'), old = st.querySelector('.st.' + side), p = pic(who, expr), key = `${who}|${expr || 'n'}`;
   if (!p || (!p.art && !p.w.face) || (old && old.dataset.key === key)) return;

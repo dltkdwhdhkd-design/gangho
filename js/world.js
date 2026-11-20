@@ -7,6 +7,7 @@ import { DB } from './items.js';
 import { give, nextDay } from './state.js';
 import { Story, ctx, say, choice } from './ctx.js';
 import { LOCS, ROADS, PROV } from './worlddata.js';
+import { bridgeRail, bridgeLanding } from './hd2d/walkways.js';
 
 const K = 1.6, WW = Math.round(804 * K), WH = Math.round(658 * K), CH = 32;
 const BN = ['grass', 'deep', 'sand', 'plain', 'snow', 'dusk'];
@@ -116,6 +117,7 @@ export function buildWorld() {
   for (const s of m.stamps) add(m.og, Math.floor((s.x + (s.w || STAMPS[s.name][3]) / 2) / S), Math.floor(s.base / S), s);
   m.pg = new Map(); for (const c of m.polys || []) for (let cy = Math.floor(c.K[1] / S); cy <= Math.floor(c.F[1] / S); cy++) for (let cx = Math.floor(c.L[0] / S); cx <= Math.floor(c.R[0] / S); cx++) add(m.pg, cx, cy, c);
   m.blocked = function (px, py, w = 9, h = 5) {
+    if (G.hd?.active(m) && G.hd.opt.art && bridgeRail(m,px,py,w,TS)) return true;
     const x0 = px - w / 2, y0 = py - h, x1 = px + w / 2, y1 = py; if (x0 < 0 || y0 < 0 || x1 > WW * TS || y1 > WH * TS) return true;
     for (let ty = Math.floor(y0 / TS); ty <= Math.floor((y1 - .01) / TS); ty++) for (let tx = Math.floor(x0 / TS); tx <= Math.floor((x1 - .01) / TS); tx++) { const v = g[ty][tx]; if (v === 2 || v === 6) return true; }
     for (let cy = Math.floor(y0 / S); cy <= Math.floor(y1 / S); cy++) for (let cx = Math.floor(x0 / S); cx <= Math.floor(x1 / S); cx++) { const L = m.sg.get(cx + cy * 4096); if (L) for (const s of L) if (s.x < x1 && s.x + s.w > x0 && s.y < y1 && s.y + s.h > y0) return true; const P = m.pg.get(cx + cy * 4096); if (P) for (const c of P) if (hitsBox(c, px, py, w, h)) return true; }
@@ -444,4 +446,4 @@ function linkEdges(mp) {
 const entry = id => { const l = LOCS.find(q => q.map === id); return l ? [Math.round(l.px[0] * K) + .5, Math.round(l.px[1] * K) + 3.5] : [Math.round(598 * K), Math.round(440 * K)]; };
 Story.providers.push(id => id === 'world' && ready ? { npcs: npcsAt(), spots: [], trigs: [], roam: [] } : { npcs: [], spots: [], trigs: [], roam: [] });
 function paintWin(c, X, Y, w, h) { const s = CH * TS; c.save(); c.translate(-X, -Y); for (let y = Math.max(0, Math.floor(Y / s)); y <= Math.min(Math.ceil(WH / CH) - 1, Math.floor((Y + h) / s)); y++) for (let x = Math.max(0, Math.floor(X / s)); x <= Math.min(Math.ceil(WW / CH) - 1, Math.floor((X + w) / s)); x++) c.drawImage(chunk(x, y), x * s, y * s); c.restore(); }
-G.world = { biomeAt: (x, y) => BN[B?.[y]?.[x]] || 'grass', paintWin, linkEdges, paintArea, SOFT, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };
+G.world = { bridgeLanding, biomeAt: (x, y) => BN[B?.[y]?.[x]] || 'grass', paintWin, linkEdges, paintArea, SOFT, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };

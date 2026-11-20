@@ -1,0 +1,395 @@
+[
+ {
+  "index": 0,
+  "ids": [
+   "baekcheon",
+   "type_BlueNinja",
+   "type_Boy",
+   "type_Cavegirl",
+   "type_Cavegirl2",
+   "type_Caveman"
+  ]
+ },
+ {
+  "index": 1,
+  "ids": [
+   "yunjong",
+   "type_Caveman2",
+   "type_Child",
+   "type_Dang",
+   "type_DarkNinja",
+   "type_EggBoy"
+  ]
+ },
+ {
+  "index": 2,
+  "ids": [
+   "jogeol",
+   "type_EggGirl",
+   "type_Eskimo",
+   "type_EskimoNinja",
+   "type_Gaebang",
+   "type_Gisaeng"
+  ]
+ },
+ {
+  "index": 3,
+  "ids": [
+   "hyeonjong",
+   "type_Gisaeng2",
+   "type_Gisaeng3",
+   "type_GoldKnight",
+   "type_GrayNinja",
+   "type_Greenman"
+  ]
+ },
+ {
+  "index": 4,
+  "ids": [
+   "hyeonyeong",
+   "type_GreenNinja",
+   "type_Hwasan",
+   "type_Hyeok",
+   "type_Inspector",
+   "type_Jegal"
+  ]
+ },
+ {
+  "index": 5,
+  "ids": [
+   "hyeonsang",
+   "type_Knight",
+   "type_Lion",
+   "type_MaskedNinja",
+   "type_MaskFrog",
+   "type_Master"
+  ]
+ },
+ {
+  "index": 6,
+  "ids": [
+   "ungeom",
+   "type_Monk",
+   "type_Monk2",
+   "type_Moyong",
+   "type_Namgung",
+   "type_Noble"
+  ]
+ },
+ {
+  "index": 7,
+  "ids": [
+   "unam",
+   "type_OldMan",
+   "type_OldMan2",
+   "type_OldMan3",
+   "type_OldWoman",
+   "type_Paeng"
+  ]
+ },
+ {
+  "index": 8,
+  "ids": [
+   "ungak",
+   "type_Pimp",
+   "type_Princess",
+   "type_RedNinja",
+   "type_RedNinja2",
+   "type_RedSamurai"
+  ]
+ },
+ {
+  "index": 9,
+  "ids": [
+   "baeksang",
+   "type_Samaung",
+   "type_Samurai",
+   "type_Skeleton",
+   "type_Sodi",
+   "type_Villager"
+  ]
+ },
+ {
+  "index": 10,
+  "ids": [
+   "jingeumryong",
+   "type_Villager2",
+   "type_Villager3",
+   "type_Villager4",
+   "type_Woman",
+   "baekrang"
+  ]
+ },
+ {
+  "index": 11,
+  "ids": [
+   "isongbaek",
+   "cheol",
+   "clan_dang",
+   "clan_moyong",
+   "clan_namgung",
+   "c_haho"
+  ]
+ },
+ {
+  "index": 12,
+  "ids": [
+   "jongseohan",
+   "c_mun",
+   "c_owol",
+   "gisaeng1",
+   "mob_archer",
+   "mob_assassin"
+  ]
+ },
+ {
+  "index": 13,
+  "ids": [
+   "gohwi",
+   "mob_bandit",
+   "mob_brute",
+   "mob_cult",
+   "mob_jeong",
+   "mob_jiangshi"
+  ]
+ },
+ {
+  "index": 14,
+  "ids": [
+   "gimokseung",
+   "mob_pirate",
+   "mob_sa",
+   "mob_soldier",
+   "monk",
+   "oldman"
+  ]
+ },
+ {
+  "index": 15,
+  "ids": [
+   "samaseung",
+   "oldwoman",
+   "so",
+   "villager",
+   "woman",
+   "me"
+  ]
+ },
+ {
+  "index": 16,
+  "ids": [
+   "heodo",
+   "yun",
+   "baek",
+   "bandit",
+   "beggar",
+   "believer"
+  ]
+ },
+ {
+  "index": 17,
+  "ids": [
+   "heowon",
+   "bingma",
+   "boat",
+   "c_gal",
+   "c_gu",
+   "c_hyegong"
+  ]
+ },
+ {
+  "index": 18,
+  "ids": [
+   "heosan",
+   "c_saira",
+   "c_yang",
+   "cheon",
+   "cheonma",
+   "chief"
+  ]
+ },
+ {
+  "index": 19,
+  "ids": [
+   "muyeon",
+   "clan_ak",
+   "clan_bukhae",
+   "clan_cheongseong",
+   "clan_cheonsan",
+   "clan_emei"
+  ]
+ },
+ {
+  "index": 20,
+  "ids": [
+   "mujin",
+   "clan_eon",
+   "clan_gaebang",
+   "clan_gongdong",
+   "clan_gonryun",
+   "clan_haenam"
+  ]
+ },
+ {
+  "index": 21,
+  "ids": [
+   "jinhyeon",
+   "clan_hwangbo",
+   "clan_hwasan",
+   "clan_jangbaek",
+   "clan_jegal",
+   "clan_jeomchang"
+  ]
+ },
+ {
+  "index": 22,
+  "ids": [
+   "jinmu",
+   "clan_jeonjin",
+   "clan_jin",
+   "clan_jongnam",
+   "clan_mosan",
+   "clan_noeum"
+  ]
+ },
+ {
+  "index": 23,
+  "ids": [
+   "danggunak",
+   "clan_paeng",
+   "clan_podalra",
+   "clan_pota",
+   "clan_shaolin",
+   "clan_wudang"
+  ]
+ },
+ {
+  "index": 24,
+  "ids": [
+   "dangbo",
+   "clan_yang",
+   "clerk",
+   "deung",
+   "disc",
+   "doc"
+  ]
+ },
+ {
+  "index": 25,
+  "ids": [
+   "dangho",
+   "drill",
+   "elder",
+   "flower",
+   "fox",
+   "ghost"
+  ]
+ },
+ {
+  "index": 26,
+  "ids": [
+   "danghwa",
+   "go",
+   "guyang",
+   "gwak",
+   "gwakchung",
+   "gwima"
+  ]
+ },
+ {
+  "index": 27,
+  "ids": [
+   "dangjan",
+   "host",
+   "hunter",
+   "husband",
+   "hyeok",
+   "hyeolma"
+  ]
+ },
+ {
+  "index": 28,
+  "ids": [
+   "dangpae",
+   "jigaek",
+   "judge",
+   "kid",
+   "lion",
+   "lord"
+  ]
+ },
+ {
+  "index": 29,
+  "ids": [
+   "hongdaegwang",
+   "luohan",
+   "makgo",
+   "manhwa",
+   "merchant",
+   "myeon"
+  ]
+ },
+ {
+  "index": 30,
+  "ids": [
+   "guchil",
+   "namhwa",
+   "ogang",
+   "ohbok",
+   "oldmom",
+   "oldsword"
+  ]
+ },
+ {
+  "index": 31,
+  "ids": [
+   "jongpal",
+   "orphan",
+   "pirate",
+   "rainman",
+   "realtor",
+   "rowdy"
+  ]
+ },
+ {
+  "index": 32,
+  "ids": [
+   "wiripsan",
+   "samaung",
+   "shadow",
+   "shopk",
+   "smith",
+   "sodi"
+  ]
+ },
+ {
+  "index": 33,
+  "ids": [
+   "wisoheng",
+   "sosu",
+   "steward",
+   "town2",
+   "town",
+   "trader"
+  ]
+ },
+ {
+  "index": 34,
+  "ids": [
+   "yeompyeong",
+   "wander",
+   "wei",
+   "wi",
+   "wife",
+   "type_IceGirl"
+  ]
+ },
+ {
+  "index": 35,
+  "ids": [
+   "maengso",
+   "type_RedArmor",
+   "type_Sosu"
+  ]
+ }
+]

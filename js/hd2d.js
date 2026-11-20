@@ -7,7 +7,8 @@
 // 켜기: 주소 끝에 ?hd2d=1. 못 켜면(WebGL2 없음 등) 아무 일 없이 2D로 돈다.
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { mountainGate } from './hd2d/gate.js';
-import { fieldProps, floorMaterial, walking, loadFieldArt, paintWorldSurface, drawCourt, combatLayout } from './hd2d/field-art.js';
+import { addWalkways, bridgeHeight } from './hd2d/walkways.js';
+import { fieldProps, floorMaterial, walking, loadFieldArt, loadCastIndex, loadActorPage, loadCombatArt, paintWorldSurface, paintMargins, drawCourt, combatLayout } from './hd2d/field-art.js';
 import { motionFor, drawMotion } from './hd2d/combat-art.js';
 import { PAL, WALLS as WKIND, PALTEX } from './hd2d/palette.js';
 import { STONE_PARTS, stoneStairs } from './hd2d/stone-stairs.js';
@@ -98,25 +99,34 @@ HD.sheetKey = o => {
 };
 HD.sheet = o => { const k = HD.sheetKey(o); return k ? PV[k] : null; };
 const fieldSheets = new Map();
+HD.castReady = () => !!walking.type_BlueSamurai;
 HD.fieldKey = o => {
-  if (!want || !art() || !o) return null;
+  if (!art() || !o) return null;
+  if (!walking.type_BlueSamurai) {loadCastIndex(PV);return null;}
   const raw = (o.me ? G.S.look : o.spr || '').split('/').pop().replace(/_(q|d)$/,'');
   const pool = [o.id,o.id?.replace(/^fan_/,''),o.role,ROLE[o.hint],...(o.keys||[]),
     roamingEnemyArt[o.foes?.[0]]?.replace(/^n_/,''),'type_'+raw];
   return pool.find(id=>id && walking[id]) || null;
 };
-HD.battleMotion = (c,a,id,face,x,y,white) => drawMotion(c,PV,combatLayout,walking[id],
-  motionFor(a,id,G.S.weapon),face===3 || (face<2 && a.ax>0),x,y,15*QZ,white,id);
+HD.prepareCombat = ids => Promise.all(ids.flatMap(id => {
+  const slot=walking[id];return slot?[loadActorPage(PV,slot[0]),loadCombatArt(PV,slot)]:[];
+}));
+HD.battleMotion = (c,a,id,face,x,y,white) => {
+  const slot = walking[id];
+  if (slot && !PV['field_' + slot[0].replace('walk','combat')]) loadCombatArt(PV,slot);
+  return drawMotion(c,PV,combatLayout,slot,motionFor(a,id,G.S.weapon),
+    face===3 || (face<2 && a.ax>0),x,y,15*QZ,white,id);
+};
 HD.fieldSheet = o => {
-  if (!want || !art()) return null;
+  if (!art()) return null;
   const slot = walking[HD.fieldKey(o)];
   if (!slot) return HD.sheet(o);
   const [page, row] = slot, image = PV['field_' + page];
-  if (!image) return HD.sheet(o);
+  if (!image) {loadActorPage(PV,page);return HD.sheet(o);}
   const id = page + '/' + row;
   if (!fieldSheets.has(id)) {
-    const cut = mk(224, 224); cut.dataset.fieldSheet = '1';
-    cut.getContext('2d').drawImage(image, 0, row * 224, 224, 224, 0, 0, 224, 224);
+    const size = image.width, cut = mk(size, size); cut.dataset.fieldSheet = '1';
+    cut.getContext('2d').drawImage(image, 0, row * size, size, size, 0, 0, size, size);
     fieldSheets.set(id, cut);
   }
   return fieldSheets.get(id);
@@ -130,7 +140,8 @@ HD.draw2dAct = (c, im, fr, flip, x, y, h = CHAR, white) => {
 // 사람 시트 한 칸을 2D 캔버스에 그린다: 칸 56점, 사람 키 48점, 발이 칸 바닥. h는 사람 키(평면도 점)
 HD.draw2d = (c, im, dir, frame, x, y, h = CHAR, white) => {
   const D = h * 56 / 48; c.save(); c.imageSmoothingEnabled = !im.dataset?.fieldSheet; c.imageSmoothingQuality = 'high'; if (white) c.filter = 'brightness(0) invert(1)';
-  c.drawImage(im, (dir & 3) * 56, (frame & 3) * 56, 56, 56, x - D / 2, y + 1 - D, D, D); c.restore();
+  const cell = im.width / 4;
+  c.drawImage(im, (dir & 3) * cell, (frame & 3) * cell, cell, cell, x - D / 2, y + 1 - D, D, D); c.restore();
 };
 
 let R, cv, scene, cam, sun, fill, hemi, ground, skirt, propG, actG, lamps = [], post, curMap = null;
@@ -499,7 +510,10 @@ function groundArt(m, base) {
     else { const j = (Math.floor(Y / DOT) * bw + Math.floor(X / DOT)) * 4; o[i] = bd[j]; o[i + 1] = bd[j + 1]; o[i + 2] = bd[j + 2]; }
     o[i + 3] = 255;
   }
-  x.putImageData(out, 0, 0); if (m.court) drawCourt(x, m.court, cell); return c;
+  x.putImageData(out,0,0);
+  if(!m.stage)paintMargins(x,m,{x0:0,y0:0,x1:m.w,y1:m.h},PV,cell);
+  if(m.court)drawCourt(x,m.court,cell);
+  return c;
 }
 
 // ── 땅 높낮이 ──
@@ -512,7 +526,11 @@ function corners4(m, x, y) {
   const h = m.hgt[y][x] * LV * HS; if (m.stair?.[x + ',' + y] && m.hgt[y + 1]) { const s = m.hgt[y + 1][x] * LV * HS; return [h, h, s, s]; } return [h, h, h, h];
 }
 // 평면도 자리(x, y)의 땅 높이(사람과 소품을 세울 때)
-function hAt(m, x, y) { if (!m?.hgt) return 0; const tx = Math.floor(x / TS), ty = Math.floor(y / TS), c = corners4(m, tx, ty), f = Math.min(1, Math.max(0, y / TS - ty)); return c[0] + (c[2] - c[0]) * f; }
+function hAt(m, x, y) {
+  if (!m?.hgt) return m?.id === 'world' ? bridgeHeight(m,x,y,TS)*HS : 0;
+  const tx = Math.floor(x / TS), ty = Math.floor(y / TS), c = corners4(m, tx, ty);
+  const f = Math.min(1, Math.max(0, y / TS - ty)); return c[0] + (c[2] - c[0]) * f;
+}
 // 절벽·계단 재질(지도마다 새로 만들지 않는다). 면은 꼭짓점 색으로 밑동을 어둡게 한다
 const KMAT = new Map();
 function kmat(name) { if (KMAT.has(name)) return KMAT.get(name); const t = previewTex(name); if (!t) return null; const mt = sharpen(new T.MeshLambertMaterial({ map: t, vertexColors: true })); KMAT.set(name, mt); return mt; }
@@ -524,7 +542,7 @@ function terrain(m, gt) {
   const quad = (B, a, b, c, d, ua, ub, uc, ud, n, ca = 1, cb = ca, cc = cb, cd = ca) => { for (const [q, u, k] of [[a, ua, ca], [b, ub, cb], [c, uc, cc], [a, ua, ca], [c, uc, cc], [d, ud, cd]]) { B.P.push(...q); B.U.push(...u); B.N.push(...n); B.C.push(k, k, k); } };
   const rocky = m.face === 'rock' && !!previewTex('cl_rock'), stepArt = !!previewTex('cl_step');
   const lvOf = (x, y) => m.hgt[y]?.[x] ?? 0, isStair = (x, y) => !!m.stair?.[x + ',' + y];
-  const useStone = art() && !m.room && m.face !== 'rock' && Object.keys(m.stair || {}).length &&
+  const useStone = art() && (!m.room || m.roomKind==='hall') && m.face !== 'rock' && Object.keys(m.stair || {}).length &&
     STONE_PARTS.every(k => KITS.has(k)) && STONE_PARTS.map(needModel).every(Boolean);
   const modelSteps = useStone && stoneStairs(m, TS, LV, (key, x, y, z, sx = 1) => {
     const g = piece(key, m.wallKind, x, y, z, 0, sx);
@@ -597,11 +615,12 @@ function furnFit(s, f, mdl) { const st = STAMPS[s.name], sol = s.sol || { x: s.x
   return { sol, side, k, fit, n, top: bb.max.y * k }; }
 function furniture(s, f, mdl) { const { sol, side, k, fit, n } = furnFit(s, f, mdl);
   for (let i = 0; i < n; i++) { const g = piece(f.key, curMap.wallKind, sol.x + sol.w * (i + .5) / n, sol.y + sol.h / 2 + (f.dy || 0), 0, f.rot || 0, 1);
+    g.position.y += hAt(curMap,g.position.x,g.position.z/ZS);
     g.scale.multiplyScalar(k); if (side) g.scale.z *= fit; else g.scale.x *= fit; g.userData.furn = true; } }
 // 가구 위에 얹은 것(m.on: 찻주전자, 촛대, 향로)이 설 높이: 발 자리를 덮는 가구가 조각으로 서 있으면 그 윗면, 아직 그림이면 그림 키의 절반쯤
 function onTop(m, s, cx, fy) { const q = m.stamps.find(u => u !== s && u.sol && cx >= u.sol.x && cx <= u.sol.x + u.sol.w && fy >= u.sol.y && fy <= u.sol.y + u.sol.h); if (!q) return 0;
   const f = FURN[q.name], mdl = f && KITS.has(f.key) && needModel(f.key); return mdl ? furnFit(q, f, mdl).top : STAMPS[q.name][4] * (q.sc || 1) * .5; }
-function column(s) { const st = STAMPS[s.name]; piece('rw_column', curMap.wallKind, s.x + st[3] / 2, s.base - 3, 0); }  // 기둥 그림(pillar)의 발 자리에 세운다
+function column(s) { const x=s.x+STAMPS[s.name][3]/2, y=s.base-3; piece('rw_column',curMap.wallKind,x,y,hAt(curMap,x,y)/HS); }
 function cliffKit(m) {
   if (m.face !== 'rock' || !art()) return;
   const lv = (x, y) => m.hgt[y][x], ok = (x, y) => x >= 0 && y >= 0 && x < m.w && y < m.h && !m.stair?.[x + ',' + y];
@@ -663,7 +682,7 @@ function waterKinds(m) {
 }
 function waterMesh(m) {
   const P = [], N = [], KD = [], z = y => y * TS * ZS, WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h }, K = waterKinds(m);
-  for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) { if (m.g[y][x] !== 2) continue;
+  for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) { if (m.g[y][x] !== 2 && !(m.id==='world' && m.g[y][x]===4)) continue;
     const h = m.hgt ? Math.min(...corners4(m, x, y)) + .4 : .25, x0 = x * TS, x1 = x0 + TS + .02, z0 = z(y), z1 = z(y + 1) + .02, k = K ? K[y][x] : 0;
     for (const v of [[x0, z1], [x1, z1], [x1, z0], [x0, z1], [x1, z0], [x0, z0]]) { P.push(v[0], h, v[1]); N.push(0, 1, 0); KD.push(k); } }
   if (!P.length) return null; const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new T.Float32BufferAttribute(N, 3)); g.setAttribute('aKind', new T.Float32BufferAttribute(KD, 1));
@@ -714,8 +733,17 @@ function setMap(m) {
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(OX + Wm / 2, 0, OZ + Dm / 2); }
   if (ft) ground.material.color.setScalar(FLK[floorOf(m)] || 1.45);
   ground.receiveShadow = true; ground.userData.map = m; scene.add(ground);
+  if (art()) addWalkways(T,propG,m,WN,TS,HS,ZS,hAt,previewTex);
   if (ft && m.carpet) { const cc = mk(Wm, gc.height), cx2 = cc.getContext('2d', { willReadFrequently: true }); paintRoom(cx2, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true, noFloor: true }); calm(cx2, cc.width, cc.height);  // 깔개만 그린 투명한 판을 바닥 바로 위에
-    const rug = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: texFrom(cc, { mips: false }), alphaTest: .5 }))); rug.rotation.x = -Math.PI / 2; rug.position.set(OX + Wm / 2, .12, OZ + Dm / 2); rug.receiveShadow = true; rug.userData = { flat: true }; propG.add(rug); }
+    const cloth = new T.PlaneGeometry(Wm,Dm,m.hgt?m.w*4:1,m.hgt?m.h*4:1);
+    cloth.rotateX(-Math.PI/2);
+    if (m.hgt) {
+      const p=cloth.getAttribute('position');
+      for(let i=0;i<p.count;i++) p.setY(i,hAt(m,OX+Wm/2+p.getX(i), (OZ+Dm/2+p.getZ(i))/ZS));
+      cloth.computeVertexNormals();
+    }
+    const rug=new T.Mesh(cloth,sharpen(new T.MeshLambertMaterial({map:texFrom(cc,{mips:false}),alphaTest:.5})));
+    rug.position.set(OX+Wm/2,.35,OZ+Dm/2);rug.receiveShadow=true;rug.userData={flat:true};propG.add(rug); }
   water = art() ? waterMesh(m) : null; if (water) scene.add(water);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
@@ -839,9 +867,10 @@ function fieldWalker(n, row, identity) {
   const slot = walking[identity || HD.fieldKey(n)];
   if (!slot) return false;
   const texture = previewTex('field_' + slot[0]);
-  if (!texture) return false;
+  if (!texture) {loadActorPage(PV,slot[0]);return false;}
   const height = CHAR * 56 / 48;
-  actor(texture, n.dir * 56, (slot[1] * 4 + (row % 4)) * 56, 56, 56, false, n.x, n.y, height);
+  const cell = texture.image.width / 4;
+  actor(texture, n.dir * cell, (slot[1] * 4 + (row % 4)) * cell, cell, cell, false, n.x, n.y, height);
   blob(n.x, n.y, 1);
   return true;
 }
@@ -874,7 +903,7 @@ function placeCam(F, dt) {
   const dn = hc / Math.tan(PITCH + f) - back, lo = m.wallTop ? Math.max(4 * TS * ZS, 16 * ZS + (hc - m.wallTop * HS) / Math.tan(PITCH - f) - back) : 4 * TS * ZS, hi = Math.max(lo, Dm + 4 * ZS + dn);
   let tx = p.x, tz = Math.min(hi, Math.max(lo, (p.y - vh * (m.room ? AHEADR : AHEAD)) * ZS));  // 주인공보다 조금 앞(북쪽)을 겨눠 주인공이 화면 가운데보다 아래에 선다(일검풍운결처럼). 앞쪽 집이 더 크게 들어온다
   tx = Wm < hw * 2 ? Wm / 2 : Math.min(Wm - hw, Math.max(hw, tx));  // 가로도 지도 안에 묶는다(이 줄이 위 주석에 먹혀 동서 끝에서 지도 밖이 보였다)
-  const gy = m.hgt ? hAt(m, p.x, p.y) : 0;  // 주인공이 선 땅의 높이. 단 위에 서면 카메라도 그만큼 따라 올라간다(안 그러면 두 단 위에서 주인공이 사람 키의 1.2배만큼 화면 위로 밀려났다)
+  const gy = hAt(m,p.x,p.y);  // 주인공이 선 땅의 높이. 단 위에 서면 카메라도 그만큼 따라 올라간다(안 그러면 두 단 위에서 주인공이 사람 키의 1.2배만큼 화면 위로 밀려났다)
   if (camT.x < 0) camT.set(tx, ty + gy, tz); else { const k = 1 - Math.exp(-dt * 7), ky = 1 - Math.exp(-dt * 4); camT.set(camT.x + (tx - camT.x) * k, camT.y + (ty + gy - camT.y) * ky, camT.z + (tz - camT.z) * k); }
   cam.position.set(camT.x, camT.y + dist * Math.sin(PITCH), camT.z + back);
   if (HD.orbit) { const a = HD.orbit * DEG; cam.position.set(camT.x + Math.sin(a) * back, camT.y + dist * Math.sin(PITCH), camT.z + Math.cos(a) * back); }  // 시험 화면용: 겨냥점 둘레로 돌려 옆과 뒤에서 본다(게임에서는 쓰지 않는다)
