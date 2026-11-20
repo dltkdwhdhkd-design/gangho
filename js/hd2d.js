@@ -980,7 +980,7 @@ function postFx(F) {
   Object.assign(u.tS, { value: P.scene.texture }); u.tD.value = P.scene.depthTexture; u.tB1.value = P.a1.texture; u.tB2.value = P.a2.texture;
   u.cn.value = cam.near; u.cf.value = cam.far; u.focus.value = -fp.z; u.f0.value = dist * 1.6; u.f1.value = dist * 4; u.n0.value = dist * .5; u.n1.value = dist * .64;  // 가까운 흐림은 화면 앞 덤불에만(높은 지붕은 초점보다 가깝지만 흐리지 않게)
   const cool = curMap?.biome === 'snow' && !L.lamp;  // 눈 덮인 낮은 따뜻한 물들이기를 빼고 차갑게
-  u.tint.value.set(...(cool ? [.94, 1, 1.1] : L.tint)); u.expo.value = L.expo; u.sat.value = L.sat; u.bk.value = fxNow() === 'high' ? .75 : .55; u.bt.value = timeOf() === 'night' ? .55 : .82; u.vig.value = L.vig ?? .62; u.con.value = L.con || 1.08; u.warm.value = curMap?.biome === 'snow' ? 0 : L.warm || 0;
+  u.tint.value.set(...(cool ? [.86, .97, 1.16] : L.tint)); u.expo.value = L.expo * (cool ? .62 : 1);  // 눈밭은 땅이 온통 흰색이라 낮의 밝기 그대로면 하얗게 날아간다(재 보니 밝기 211). 눈의 결이 보이게 줄이고, 누런 해 빛을 푸른 쪽으로 되돌려 눈이 희게 보이게 한다 u.sat.value = L.sat; u.bk.value = fxNow() === 'high' ? .75 : .55; u.bt.value = timeOf() === 'night' ? .55 : .82; u.vig.value = L.vig ?? .62; u.con.value = L.con || 1.08; u.warm.value = curMap?.biome === 'snow' ? 0 : L.warm || 0;
   P.pass(P.fin, null);
 }
 
