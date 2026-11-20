@@ -389,7 +389,7 @@ export function buildMaps() {
   m = M('cloudmt', 46, 38, { name: '창운산', bgm: 'temple', biome: 'deep', arena: 'court' });
   m.road(22, 26, 22, 37, 2).fill(12, 13, 22, 13, 3).road(22, 7, 22, 13, 2);
   m.row('wall_h', 10, 11, 12).row('wall_h', 24, 11, 12).col('wall_h', 10, 11, 16).col('wall_h', 35, 11, 16).row('wall_h', 10, 26, 12).row('wall_h', 24, 26, 12);
-  m.put('gate', 21, 25, { nosolid: true });
+  m.put('gate', 21.94, 25, { nosolid: true });  // 담이 트인 곳(22~24칸)의 가운데. 전에는 한 칸 왼쪽(21)에 있어서 대문이 담 끝을 가리고 서고 트인 곳은 그 옆에 따로 있었다(tools/gate_test.cjs가 본다)
   m.house('hall', 19, 0, 'hall_in', 8, 11, 1).put('lodge', 13, 15).put('lodge', 29, 15);
   m.house('wood_b', 3, 15, 'library', 7, 9, 1).road(5, 18, 5, 19, 2).road(5, 19, 10, 19, 2).fill(10, 19, 1, 2, 3);
   m.solids = m.solids.filter(s => !(s.x === 10 * TS && s.y >= 19 * TS && s.y <= 20 * TS + 8)); m.stamps = m.stamps.filter(s => !(s.name === 'wall_h' && s.x === 10 * TS && (s.y === 19 * TS || s.y === 20 * TS)));
@@ -411,7 +411,7 @@ export function buildMaps() {
   m = M('guhwa', 50, 36, { name: '구화성', bgm: 'good', biome: 'sand', arena: 'ring' });
   m.fill(4, 4, 42, 28, 3).road(24, 32, 24, 35, 2);
   m.row('wall_h', 2, 2, 46).row('wall_h', 2, 32, 22).row('wall_h', 26, 32, 22).col('wall_h', 2, 2, 31).col('wall_h', 47, 2, 31);
-  m.put('gate', 23, 31, { nosolid: true });
+  m.put('gate', 23.94, 31, { nosolid: true });  // 담이 트인 곳(24~26칸)의 가운데
   m.house('inn', 8, 6, 'inn2', 8, 10, 1).house('shop_blue', 16, 7, 'shop2', 6, 7, 1).house('shop_green', 37, 7, 'hall2', 7, 8, 1).put('hut_b', 8, 20).put('hut_o', 36, 20).put('hut_o2', 15, 22).put('hut_b', 30, 23).put('wood_o', 40, 14);
   m.fill(19, 11, 12, 9, 5);
   m.put('banner1', 19, 9, { nosolid: true }).put('banner2', 22, 9, { nosolid: true }).put('banner3', 27, 9, { nosolid: true }).put('banner1', 30, 9, { nosolid: true }).put('banner4', 12.1, 7.3, { nosolid: true }).put('hall', 21.5, 0, { dy: 8 });
@@ -440,14 +440,14 @@ export function buildMaps() {
   // 자유 모드: 내 문파. 건물은 살 때마다 sect.js가 얹는다
   m = M('mysect', 40, 30, { name: '내 문파', bgm: 'temple', biome: 'grass', arena: 'court' });
   m.road(19, 8, 19, 29, 2).fill(10, 14, 20, 11, 3);
-  m.put('hall', 18, 1).put('gate', 18, 27, { nosolid: true }).put('lantern', 16, 11).put('lantern', 23, 11);
+  m.put('hall', 18, 1).put('gate', 18.94, 27, { nosolid: true }).put('lantern', 16, 11).put('lantern', 23, 11);
   m.border(['tree_pine', 'grove_green', 'tree_big'], [[18, 28, 4, 3]], 3);
   m.scatter(['fern1', 'bush2', 'flower2'], 26, 6);
   m.exit(18, 29, 4, 1, 'valley', 35, 15.5, 2);
   // 소림사: 숭산의 절
   m = M('shaolin', 40, 30, { name: '소림사', bgm: 'temple', biome: 'grass', arena: 'court', ambient: 'leaf' });
   m.fill(14, 8, 12, 14, 3).road(19, 22, 19, 29, 2).road(5, 15, 14, 15, 2).road(26, 15, 34, 15, 2);
-  m.put('hall', 17, 0, { grand: 'shaolin_main' }).label(19, -.2 + 1, '대웅전').put('statue', 15, 9).put('statue', 23, 9).put('gate', 18.3, 21, { nosolid: true });
+  m.put('hall', 17, 0, { grand: 'shaolin_main' }).label(19, -.2 + 1, '대웅전').put('statue', 15, 9).put('statue', 23, 9).put('gate', 18.94, 21, { nosolid: true });  // 길(19~21칸)의 가운데
   m.house('wood_b', 3, 12, 'sutra', 7, 9, 1).label(5, 11.6, '장경각').put('lodge', 32, 9, { grand: 'shaolin' }).label(34, 8.6, '나한당');
   m.put('tree_big', 10, 6).put('tree_pine', 28, 5).put('tree_round', 6, 22).put('tree_big', 31, 23).put('tree_pine', 12, 25).put('plum_g', 26, 25);
   m.border(['grove_pine', 'tree_big', 'grove_green'], [[18, 28, 4, 3]], 3);

@@ -48,6 +48,7 @@ const TIMES = {
 export const HD = {
   want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0,  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
   maps: new Set(['cheongha']),  // 시제품은 청하진만. 나머지 지도는 예전 2D로 그린다
+  remap(m) { if (!m || curMap === m) curMap = null; },  // 지도에 놓인 것이 바뀌었을 때(내 문파에 건물을 지음): 다음 그릴 때 그 지도를 새로 짓는다
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && art())) && !m.isoRoom && (!m.live || m.id === 'world'); },  // 강호 큰 지도는 주인공 둘레만 잘라 짓는다(winOf)  // 방은 전부 새 화면으로(벽을 조각으로 세운다: roomKit)(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; autoLv = 'mid'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
@@ -144,7 +145,7 @@ const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; 
 // 새 그림 맛보기(tools/hd2d_preview.py가 만든 것): 받은 집 그림과 윤설 걷기. 0단계에서 크기와 결만 보려고 잠깐 씌운다
 // 새 인물 그림(Higgsfield HN*, 게임 시트 꼴 56점 칸)이 있는 사람 종류
 const NEWNPC = { 'chars/Villager': ['n_town', 'n_villager'], 'chars/Villager2': ['n_town'], 'chars/Villager3': ['n_town'], 'chars/Woman': ['n_town2', 'n_woman'], 'chars/Boy': ['n_kid'], 'chars/OldMan': ['n_oldman'], 'chars/OldWoman': ['n_oldwoman'], 'chars/Monk': ['n_monk'], 'chars/Gisaeng': ['n_gisaeng1'], 'chars/Gisaeng2': ['n_gisaeng2'], 'chars/Gisaeng3': ['n_gisaeng3'], 'chars/Pimp': ['n_pimp'] };  // 옛 도트 이름 → 새 사람 시트(앞의 것이 있으면 그것). 대화 그림과 맞춘 시트(n_town 따위)가 먼저
-const PV = {}, PEOPLE = new Set(), PVN = [ 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'w4_front', 'w5_front', 'w6_front', 'w4_side', 'w5_side', 'w6_side', 'k_fence', 'k_palisade', 'k_stone', 'hd_wall_tile', 'hd_wall_stone', 'hd_wall_rampart', 'hd_fence_stake', 'hd_fence_bamboo', 'hd_fence_wattle', 'gate', 'gate_arch', 'hd_gate_town', 'cl_rock', 'cl_step', 'g_plank', 'wt_river', 'wt_pond', 'wt_rapid', ...PALTEX.filter(n => n.startsWith('pm_')), ...FLOORS];  // pm_*: 블렌더 조각에 입히는 무늬(js/hd2d/palette.js)
+const PV = {}, PEOPLE = new Set(), PVN = [ 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'w4_front', 'w5_front', 'w6_front', 'w4_side', 'w5_side', 'w6_side', 'k_fence', 'k_palisade', 'k_stone', 'hd_wall_tile', 'hd_wall_stone', 'hd_wall_rampart', 'hd_fence_stake', 'hd_fence_bamboo', 'hd_fence_wattle', 'gate', 'gate_arch', 'hd_gate_town', 'gate_open', 'hd_gate_town_open', 'cl_rock', 'cl_step', 'g_plank', 'wt_river', 'wt_pond', 'wt_rapid', ...PALTEX.filter(n => n.startsWith('pm_')), ...FLOORS];  // pm_*: 블렌더 조각에 입히는 무늬(js/hd2d/palette.js)
 const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 인물 그림 기준). 새 땅과 지붕과 벽도 이 굵기로 깐다
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
@@ -514,6 +515,7 @@ function terrain(m, gt) {
 function calm(x, w, h) { const d = x.getImageData(0, 0, w, h), a = d.data; for (let i = 0; i < a.length; i += 4) { const l = a[i] * .3 + a[i + 1] * .59 + a[i + 2] * .11; a[i] = (l + (a[i] - l) * .5) * .86; a[i + 1] = (l + (a[i + 1] - l) * .5) * .86; a[i + 2] = (l + (a[i + 2] - l) * .5) * .8; } x.putImageData(d, 0, 0); }
 // 방의 벽: 조각(rw_*)을 방 크기와 종류대로 세운다(자리는 js/hd2d/rooms.js roomWalls). 옆벽은 같은 조각을 돌려 세운다(ZS가 1이 아니어도 모양이 안 변하게 배율을 바꿔 준다: cliffKit과 같은 방법).
 // 벽의 겉(회벽, 판자, 벽돌 …)은 재질을 고를 때 정한다(as(1, 벽 종류)). 사람을 가리면 뚫어 보이게 userData를 단다(fades)
+const GATEK = 1.5;  // 새 화면에서 대문 그림의 배율(위 setMap의 대문 대목)
 const FURNK = 1.35;  // 가구 조각(fn_)의 밝기. 방의 빛만 받으면 탁자 윗면이 칠한 색의 0.7배로 나와 ChatGPT의 배치 예시보다 칙칙했다(긴 탁자 윗면의 밝기 58 → 72, 예시 82)
 const FLDOT = 3.2, FLK = { fl_scale: 1.75, fl_dark: 1.9, fl_pine: 1.45, fl_brick: 1.6, fl_mat: 1.45, fl_slab: 1.6 };  // 방 바닥 무늬의 굵기(평면도 한 점에 도트 3.2점. 비늘 하나가 사람 키의 4분의 1쯤 된다)와 밝기. 방의 빛을 그대로 받으면 바닥이 그린 색의 절반 밝기로 가라앉아 무늬가 묻힌다(벽의 절반). 기준 그림(docs/ref/ws-interior.jpg)은 바닥과 벽이 비슷하게 밝고, ChatGPT의 배치 예시는 바닥이 그린 색 그대로 보인다. 짙은 무늬일수록 더 올린다
 const TALL = /^rw_(wall|post|pillar|column)$/;  // 높이를 WALL_K배로 세우는 조각(벽 높이를 기준 그림의 사람 키 2.7배에 맞춘다. 무늬는 자리로 입히니 늘어나지 않는다)
@@ -677,8 +679,10 @@ function setMap(m) {
     if (s.alt && useModels) return;
     if (walled && s.name === 'pillar' && MODELS.rw_column) { column(s); return; }  // 방 안의 기둥 그림은 두리기둥 조각으로
     if (art() && m.room && !s.flat && FURN[s.name] && KITS.has(FURN[s.name].key)) { const mdl = needModel(FURN[s.name].key); if (mdl) { furniture(s, FURN[s.name], mdl); return; } }  // 가구 그림은 조각이 들어와 있으면 조각으로
-    const nm = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name;  // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch)
-    const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const pk = art() && !s.flat && /^[vp]_/.test(s.name) ? PROPK : 1, sc = (s.sc || 1) * pk, cx = s.x + st[3] * (s.sc || 1) / 2, pv = !!previewTex(nm), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
+    // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch). 받은 대문과 성문은 문이 닫힌 그림인데 그리로 드나드니, 문짝 자리를 비운 것(_open. tools/walls_hd.py)을 쓴다.
+    // 크기는 1.5배(GATEK): 그림의 가로를 2D 그림 폭(34점)에 맞추면 문이 사람 키만 해서 사람이 못 지나갈 문이 된다. 1.5배면 문의 폭이 21점, 높이가 사람 키의 1.3배다
+    const nm0 = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name, nm = art() && s.name === 'gate' && PV[nm0 + '_open'] ? nm0 + '_open' : nm0, gk0 = art() && s.name === 'gate' && previewTex(nm) ? GATEK : 1;
+    const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const pk = art() && !s.flat && /^[vp]_/.test(s.name) ? PROPK : 1, sc = (s.sc || 1) * pk, cx = s.x + st[3] * (s.sc || 1) / 2, pv = !!previewTex(nm), w = st[3] * sc * gk0, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
     const rk = !s.flat && art() && rockKey(s), rm = rk && needModel(rk);
     if (rm) { const g = new T.Group(), o = rm.clone(true), ms = [], tone = ROCKB[m.biome] || ''; o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry).as(1, tone); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; ms.push(c); } }); g.add(o);

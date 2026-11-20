@@ -37,10 +37,11 @@ const mkD = () => ({ n: dName(), lv: Math.max(1, Math.round(S().lv * rnd(.3, .6)
 const TAL = ['둔재', '평범함', '쓸 만함', '뛰어남', '기재'];
 
 export function buildSect() {
-  const m = MAPS.mysect, s = Se(); if (!m.objs0) { m.objs0 = m.objs.slice(); m.solids0 = m.solids.slice(); }
-  m.name = s ? s.name : '내 문파'; m.stamps = []; m.solids = m.solids0.slice();
+  const m = MAPS.mysect, s = Se(); if (!m.objs0) { m.objs0 = m.objs.slice(); m.solids0 = m.solids.slice(); m.stamps0 = m.stamps.slice(); }
+  // 터에 처음부터 있던 것(본전, 대문, 등, 둘레의 나무)은 stamps0에 두었다가 다시 깐다. 전에는 stamps를 비우고 2D가 그리는 목록(objs)에만 남겨서, stamps를 보고 짓는 새 화면에서는 본전과 대문과 나무가 통째로 사라졌다
+  m.name = s ? s.name : '내 문파'; m.stamps = m.stamps0.slice(); m.solids = m.solids0.slice();
   if (s) for (const id in BLD) BLD[id].stamps.slice(0, id === 'yard' ? blv(id) * 2 + 1 : id === 'farm' || id === 'lodge' || id === 'tower' ? blv(id) * (id === 'tower' ? 1 : 1) : blv(id) ? 1 : 0).forEach(([n, x, y]) => { if (blv(id)) m.put(n, x, y); });
-  m.objs = [...m.objs0, ...m.stamps.filter(x => !x.flat)]; m._whole = null;
+  m.objs = m.stamps.filter(x => !x.flat); m._whole = null; G.hd?.remap?.(m);
   if (s) { const b = site(), q = m.portals[0]; if (q) { q.to = b.map; q.tx = b.back[0]; q.ty = b.back[1]; } }
 }
 export async function foundSect() {
