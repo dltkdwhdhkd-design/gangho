@@ -43,8 +43,9 @@
 | HG2 | 물 셋(강물, 연못, 여울) | 받음 | `python3 tools/ground_in.py` → `wt_river`, `wt_pond`, `wt_rapid` | 코드로 그린 잔물결 | `chatgpt-now.md` | **넣음(11-20)** |
 | HP5 | 나루·배·갈대 | 받음 | 널만: `tools/ground_in.py` → `g_plank`(나루와 다리 바닥) | 2D 타일을 키운 것 | `chatgpt-now.md` | 널만 넣음(11-20). 배·말뚝·갈대는 고을 채울 때 모형의 무늬로 |
 | HP6 | 좌판·수레 | 받음 | 고을 채울 때 모형의 무늬로(그림 판으로 세우지 않는다) | 지금 그림 | `chatgpt-now.md` | 받음(아직 안 씀) |
-| WL1, WL2, WL3, FL1 | 방 벽 무늬, 아랫단과 들보, 나무 무늬, 방 바닥 무늬 | `WL1.png` … (요청서 0번 묶음) | 무늬를 잘라 `assets/hd2d/preview/`에(`tools/wall_in.py`를 만들 것. `tools/ground_in.py`와 같은 방법) | 있는 집 벽 그림에서 자른 임시 무늬 | `chatgpt-scene.md` | 없음(11-20 요청) |
-| 방 벽 조각 `rw_*` | 방의 뒷벽과 옆벽, 기둥 | 블렌더 `tools/blender/walls.py`(만들 것). 겉무늬는 넣지 않고 게임이 벽 종류에 따라 입힌다 | 그대로 `assets/hd2d/models/`에 | 방 한 채짜리 모형 `rm_*` 14개(낮다) | — | 없음 |
+| WL1, WL2, WL3, FL1 | 방 벽 무늬, 아랫단과 들보, 나무 무늬, 방 바닥 무늬 | `WL1.png` … (요청서 0번 묶음) | `python3 tools/wall_in.py`가 잘라 `assets/hd2d/preview/pm_*.webp`로(파일 맨 아래 "받은 그림" 대목에 자르는 줄을 넣는다) | 받아 둔 담·지붕·땅 그림에서 자른 임시 무늬 열넷(`pm_plaster`, `pm_base_rough`, `pm_wood_dark` …. 11-20) | `chatgpt-scene.md` | 없음(11-20 요청) |
+| 방 벽 조각 `rw_*` 일곱 | 방의 뒷벽과 옆벽, 기둥, 문지방, 살창, 문양판 | 블렌더 스크립트: ChatGPT의 `gangho_m1.py`(요청서 `chatgpt-blender.md`의 M1). 무늬와 UV는 넣지 않고 재질 이름만 단다 | `python3 tools/blender/gpt.py run <스크립트> --install`(돌리고, 규격으로 검사하고, 넣는다). `.zip`이나 `.glb`만 받았으면 `gpt.py check <파일> --install` | Claude의 임시 조각(`tools/blender/walls.py`, 11-20) | `chatgpt-blender.md` | 없음(11-20 요청) |
+| 그 밖의 블렌더 조각: 큰 가구 `fn_*` 17, 돌계단과 난간 `st_*` 6, 눈에 띄는 것 `lm_*` 7, 장터와 나루 `mk_*` 6, 소나무 `tr_pine` | 방 안 가구, 문파의 단, 문·정자·탑·석등, 좌판·배, 나무 | ChatGPT의 `gangho_m2.py` ~ `gangho_m7.py` | 위와 같다. 넣은 뒤 게임에서 쓰게 잇는 일(소품 그림 → 조각)은 그때 한다 | 지금은 2D 그림을 세운 것 | `chatgpt-blender.md` | 없음 |
 | 바위·바위산·벼랑바위·절벽 조각 `rk_*` | 큰 지도의 산, 바위, 높낮이 지형의 절벽 면 | 블렌더 `python3 tools/blender/rocks.py [이름…]` (42개, 2.3MB. 무늬는 넣지 않는다) | 그대로 `assets/hd2d/models/`에 쓴다 | 2D 그림 판 | — | **있음(11-20)** |
 | 전투 무대 모형 `st_<테마>` | 무대 둘레(뒤와 양옆) | 블렌더 `tools/blender/stages.py`(만들 것) | `pack.sh` | `js/hd2d/stages.js`가 놓는 집·담·나무 | — | 없음 |
 | 방 안 틀 | 객잔 홀, 객잔 방, 약방, 대장간, 전각 안, 서고, 감옥, 동굴 | 블렌더 `tools/blender/rooms.py`(만들 것) | `pack.sh` | 예전 2D 방 | — | 없음 |

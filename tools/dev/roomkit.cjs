@@ -1,0 +1,16 @@
+// 방을 새 벽으로 찍고 잰다. ROOMS="hall_in inn" POS="n m s"(북·가운데·남) OUT=/tmp/rm/c  GEN="hall home"(만들어지는 방 종류)
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } }); const errs = []; p.on('pageerror', e => errs.push(e.message.slice(0, 200))); p.on('console', m => { if (m.type() === 'error' || /모형 못 읽음/.test(m.text())) errs.push(m.text().slice(0, 160)); });
+  await p.goto(process.env.GAME_URL + '?hd2d=1' + (process.env.Q || '')); await p.waitForFunction(() => window.__G && __G.dbg && __G.hd?.ready, null, { timeout: 90000 }); await p.waitForTimeout(1500);
+  const ex = await p.evaluate(async () => { const G = __G, sl = t => new Promise(r => setTimeout(r, t)); G.noSave = true; G.S = G.dbg.newState('진소', 'BlueSamurai', 'm', 'normal'); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; G.auto = true; G.noSpawn = true; G.free.start(); for (let i = 0; i < 400 && G.field.busy; i++) await sl(30); G.free.tick = () => {}; G.hd.noGov = true;
+    const W = await import('/gangho/js/worlddata.js'); for (const l of W.LOCS || []) { try { G.world.ensure(l.map); } catch (e) { } }
+    const M = G.dbg.MAPS, to = new Set(); for (const id in M) for (const q of M[id].portals || []) if (q.door || /^r_/.test(q.to)) to.add(q.to);
+    const o = {}; for (const k of ['hall', 'home', 'inn', 'shop', 'dorm', 'mess', 'temple', 'gov', 'lib', 'elder', 'clinic', 'armory', 'book', 'gamble']) o[k] = [...to].find(t => new RegExp('^r_.*_' + k + '\\d*$').test(t)); o.house = [...to].find(t => /^h_/.test(t)); return o; });
+  const list = (process.env.ROOMS || 'hall_in').split(' ').filter(Boolean).concat((process.env.GEN || '').split(' ').filter(Boolean).map(k => ex[k]).filter(Boolean)), POS = (process.env.POS || 'm').split(' ');
+  for (const id of list) for (const ps of POS) { const r = await p.evaluate(async ([id, ps]) => { const G = __G, sl = t => new Promise(r => setTimeout(r, t)); G.field.busy = false; if (G.field.m?.id !== id) { try { G.field.load(id, 0, 0, 0); } catch (e) { return id + ' 불러오기 실패 ' + e.message; } for (let i = 0; i < 600 && G.field.busy; i++) await sl(50); }
+      const m = G.field.m; G.field.roam.length = 0; G.field.trigs.length = 0; const e = m.portals[0]; G.field.p.x = e ? e.x + e.w / 2 : m.w * 8; G.field.p.y = m.h * 16 * (ps === 'n' ? .2 : ps === 's' ? .86 : .55);
+      for (let i = 0; i < 60; i++) { await sl(300); if (i > 6 && !G.hd.modelsPending) break; } await sl(1800);
+      const P = G.field.p, H = 720, pr = G.hd.proj, f = pr(P.x, P.y + 1, 0), hd = pr(P.x, P.y + 1, 15 * G.hd.actK(m)), wb = pr(P.x, 16, 0), wt = pr(P.x, 16, 54), wr = pr(P.x, 18.5, 57.6);
+      return `${id} ${m.name} ${m.w}x${m.h} ${ps} 새 화면 ${G.hd.active(m)} 벽 ${m.wallKind} | 사람 키 ${(f[1] - hd[1]).toFixed(0)}px(화면의 1/${(H / (f[1] - hd[1])).toFixed(1)}) 벽 ${(wb[1] - wt[1]).toFixed(0)}px = 사람의 ${((wb[1] - wt[1]) / (f[1] - hd[1])).toFixed(2)}배, 벽 밑동 y ${(wb[1] / H * 100).toFixed(0)}% 꼭대기 y ${(wr[1] / H * 100).toFixed(0)}% 발 y ${(f[1] / H * 100).toFixed(0)}%`; }, [id, ps]);
+    await p.screenshot({ path: `${process.env.OUT || '/tmp/rm/c'}_${id}_${ps}.png` }); console.log(r); }
+  console.log('오류', errs.length, errs.slice(0, 4).join(' | ')); await b.close(); })();

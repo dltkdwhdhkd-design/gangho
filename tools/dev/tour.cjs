@@ -27,7 +27,7 @@ const fs = require('fs');
     Object.assign(G.S, { lv: 16, str: 18, con: 14, agi: 10, inn: 14, pts: 2, silver: 860, weapon: 'blue_sword', weapons: ['stick', 'iron_sword', 'blue_sword'], ins: 3 }); }, process.env.TIME || '');
   // 큰 지도는 처음 나가면 안내 글이 떠서 입력을 기다린다(G.auto가 넘긴다). 멈춘 것이 아니다
   for (const [n, m, x, y] of [['01_town_cheongha', ''], ['02_town_guhwa', 'guhwa'], ['03_sect_hwasan', 'b_hwasan', 22, 30], ['04_valley', 'valley', 20, 16], ['05_room_inn', 'inn', 9, 8]]) if (on(n)) await shot(n, await go(m, x, y));
-  // 문파 안 방(r_<곳>_<종류>)과 내 집은 아직 옛 2D로 뜬다(js/hd2d/rooms.js ROOMS에 없는 방)
+  // 문파 안 방(r_<곳>_<종류>)도 2026-11-20부터 새 화면으로 뜬다(벽을 조각으로 세운다: js/hd2d/rooms.js)
   if (on('06_room_base')) await shot('06_room_base', await go('r_hwasan_hall', 10, 10));
   if (on('07_world')) { await p.evaluate(() => { const G = __G, [x, y] = G.world.entry('guhwa') || G.world.entry('cheongha'); G.field.load('world', x, y + 2, 0); }); await shot('07_world', await go('', 0, 0)); }
   await p.evaluate(() => { __G.auto = false; });

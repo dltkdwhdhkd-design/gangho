@@ -50,7 +50,7 @@ def judge(name, m, pal):
             a, b = p['lim'][i]; l, h = m['lo'][i], m['hi'][i]
             if l < a - .06 or h > b + .06: bad.append(f'{ax}가 범위 {a}~{b}를 벗어난다({l:.2f}~{h:.2f})')
             elif ax in p.get('exact', '') and (abs(l - a) > .06 or abs(h - b) > .06): bad.append(f'{ax}가 {a}~{b}에 꼭 닿아야 한다({l:.2f}~{h:.2f})')
-            elif (h - l) < (b - a) * p.get('fill', .5): bad.append(f'{ax} 크기가 너무 작다({h - l:.1f}. 범위는 {b - a:g})')  # 단위를 잘못 잡았을 때(미터로 만들었을 때) 걸린다
+            elif (h - l) < (b - a) * p.get('fill', .5) and (b - a) >= 4: bad.append(f'{ax} 크기가 너무 작다({h - l:.1f}. 범위는 {b - a:g})')  # 단위를 잘못 잡았을 때(미터로 만들었을 때) 걸린다. 4점보다 얇은 범위(창의 깊이 따위)는 보지 않는다
         if m['tris'] > p['tris']: bad.append(f"삼각형 {m['tris']}개(한도 {p['tris']})")
     return bad, note
 
@@ -120,6 +120,16 @@ def gen():
     return out
 
 
+def sync():
+    """게임의 재질 이름표(js/hd2d/palette.js)가 틀의 이름표와 맞는지, 거기 적힌 무늬 그림이 다 있는지 본다"""
+    js = open(os.path.join(ROOT, 'js', 'hd2d', 'palette.js'), encoding='utf-8').read(); pal = palette(); bad = 0
+    for k in sorted(set(re.findall(r"\b(\w+): \{ t: '", js)) | set(re.findall(r"\b(wl_\w+): '", js))):
+        if k not in pal: print(f"js/hd2d/palette.js의 재질 '{k}'이 틀(gangho_kit.py PALETTE)에 없다"); bad += 1
+    for t in sorted(set(re.findall(r"'((?:pm|r|e|g|k|cl)_\w+)'", js))):
+        if not os.path.exists(os.path.join(ROOT, 'assets', 'hd2d', 'preview', t + '.webp')): print(f"무늬 그림이 없다: assets/hd2d/preview/{t}.webp (python3 tools/wall_in.py)"); bad += 1
+    return bad
+
+
 def doc(only_check=False):
     src = open(DOC, encoding='utf-8').read(); new = src
     for key, body in gen().items():
@@ -128,7 +138,7 @@ def doc(only_check=False):
         i = new.index(a) + len(a); j = new.index(b); new = new[:i] + '\n' + body + '\n' + new[j:]
     if only_check:
         if new != src: print('docs/chatgpt-blender.md의 표나 틀이 spec.json·gangho_kit.py와 어긋난다. python3 tools/blender/gpt.py doc 을 돌린다'); return 1
-        return 0
+        return 1 if sync() else 0
     if new != src: open(DOC, 'w', encoding='utf-8').write(new); print('요청서를 고쳐 썼다')
     else: print('요청서는 그대로다')
     return 0
