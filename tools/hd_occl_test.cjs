@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
     const out = [], seen = new Set(); let people = 0, street = 0, near = 0, maps = 0;
     const check = async id => {
       if (seen.has(id)) return; seen.add(id);
-      try { G.world.ensure(id); if (!MAPS[id]) return; G.field.load(id, 5, 5, 1); } catch (e) { out.push(`✗ ${id}: 불러오기 오류 ${e.message}`); return; }
+      try { G.world.ensure(id); if (!MAPS[id] && !/^[rh]_/.test(id)) return; G.field.load(id, 5, 5, 1); } catch (e) { out.push(`✗ ${id}: 불러오기 오류 ${e.message}`); return; }  // 만들어지는 방(r_, h_)은 들어갈 때 생긴다
       for (let i = 0; i < 300 && G.field.busy; i++) await sl(20);
       const F = G.field, m = F.m; if (!H.active(m)) return; maps++;
       H.peek = null; H.aim(F); for (let i = 0; i < 60 && H.modelsPending > 0; i++) await sl(100);
@@ -35,6 +35,9 @@ const { chromium } = require('playwright');
     };
     for (const l of LOCS) await check(l.map);
     for (const id of Object.keys(MAPS)) if (id !== 'world') await check(id);
+    // 만들어지는 방: 종류마다 두 곳씩(문파와 고을의 방, 민가). 벽과 기둥 조각이 사람을 가리지 않는지 본다(2026-11-20에 방이 다 새 화면으로 떴다)
+    const rooms = {}; for (const id of Object.keys(MAPS)) for (const q of MAPS[id].portals || []) { const to = q.to || '', k = (/^r_.*_([a-z]+)\d*$/.exec(to) || [])[1] || (/^h_/.test(to) ? 'house' : ''); if (k && (rooms[k] ||= []).length < 2 && !rooms[k].includes(to)) rooms[k].push(to); }
+    const before = maps; for (const k in rooms) for (const id of rooms[k]) await check(id); out.push(`만들어지는 방 ${maps - before}곳(${Object.keys(rooms).length}가지)을 더 봤다`);
     out.push(`지도 ${maps}곳, 서 있는 사람 ${people}명: 길에서 가려지는 사람 ${street}명, 옆에 서도 가려지는 사람 ${near}명`);
     return out.join('\n');
   }, [process.argv[2] || 'free', !!process.env.LIST]);
