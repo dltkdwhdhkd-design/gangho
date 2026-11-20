@@ -1,5 +1,7 @@
 // 새 화면에서 서 있는 사람이 집이나 소품 뒤에 가려지는지 본다(옛 2D는 occlude_test.cjs).
-// 지도마다 제자리 사람의 몸 다섯 점에 카메라에서 줄을 그어, 셋 이상이 집·소품에 막히면 "가려짐"으로 센다.
+// 지도마다 제자리 사람의 몸 다섯 점(머리, 가슴, 허리, 두 무릎)에 카메라에서 줄을 그어, 머리나 가슴이 집·소품에 막히면 "가려짐"으로 센다.
+// 허리 아래만 막힌 사람(계산대나 탁자 뒤에 선 사람, 좌판 뒤의 장수)은 가슴 위가 보이니 가려진 것으로 치지 않는다.
+//   2026-11-20까지는 "다섯 점 가운데 셋"이었고, 지도를 막 세운 뒤에는 줄이 빗나가 실제보다 적게 셌다(js/hd2d.js covered에서 고침). 그때의 수(길에서 6명)는 믿을 수 없다
 //   길에서: 주인공이 멀리 있고 카메라만 그 사람을 본다(지나가다 보이는가)
 //   옆에서: 주인공이 그 사람 바로 옆(남·동·서·북 가운데 설 수 있는 곳)에 선다. 가리던 집은 걷히고 소품은 옅어진다. 어느 쪽에 서도 가려지면 문제다 → 실패
 //   node hd_occl_test.cjs [free|story]    Q='&gk=0.857'을 주면 그 값으로 견줄 수 있다    LIST=1이면 길에서 가려지는 사람도 다 적는다
@@ -14,7 +16,7 @@ const { chromium } = require('playwright');
     if (mode === 'free') { G.free.start(); for (let i = 0; i < 400 && G.field.busy; i++) await sl(30); G.free.tick = () => {}; }
     else { G.scene = 'field'; G.S.flags = { step: 'c3b', met_yun: true, met_so: true, boat_guhwa: true, burned: true, world_open: true, world_tip: 1 }; }
     G.S.flags.night = false; H.noGov = true;
-    const out = [], seen = new Set(); let people = 0, street = 0, near = 0, maps = 0;
+    const out = [], seen = new Set(); let people = 0, street = 0, near = 0, maps = 0; const hid = c => c[2][0] || c[2][1];  // 가려짐: 머리(0)나 가슴(1)이 막힌 것
     const check = async id => {
       if (seen.has(id)) return; seen.add(id);
       try { G.world.ensure(id); if (!MAPS[id] && !/^[rh]_/.test(id)) return; G.field.load(id, 5, 5, 1); } catch (e) { out.push(`✗ ${id}: 불러오기 오류 ${e.message}`); return; }  // 만들어지는 방(r_, h_)은 들어갈 때 생긴다
@@ -22,14 +24,14 @@ const { chromium } = require('playwright');
       const F = G.field, m = F.m; if (!H.active(m)) return; maps++;
       H.peek = null; H.aim(F); for (let i = 0; i < 60 && H.modelsPending > 0; i++) await sl(100);
       for (const n of F.npcs) { if (n.stamp || !n.spr || n.hide > 0) continue; people++;
-        H.peek = [n.x, n.y + 20]; H.aim(F); const [c1, by1] = H.covered(n.x, n.y); if (c1 < 3) continue; street++;
+        H.peek = [n.x, n.y + 20]; H.aim(F); const c0 = H.covered(n.x, n.y), [c1, by1] = c0; if (!hid(c0)) continue; street++;
         // 옆에 서 본다: 설 수 있는 네 자리 가운데 가장 덜 가려지는 쪽
-        const p0 = [F.p.x, F.p.y]; let best = 9, by = by1, stood = 0;
-        for (const [dx, dy] of [[0, 18], [18, 0], [-18, 0], [0, -18], [0, 30], [26, 0], [-26, 0]]) { const x = n.x + dx, y = n.y + dy; if (m.blocked(x, y)) continue; stood++; F.p.x = x; F.p.y = y; H.peek = null; H.aim(F); H.aim(F); const [c2, by2] = H.covered(n.x, n.y); if (c2 < best) { best = c2; by = by2; } }
+        const p0 = [F.p.x, F.p.y]; let best = 9, by = by1, stood = 0, seen1 = false;
+        for (const [dx, dy] of [[0, 18], [18, 0], [-18, 0], [0, -18], [0, 30], [26, 0], [-26, 0]]) { const x = n.x + dx, y = n.y + dy; if (m.blocked(x, y)) continue; stood++; F.p.x = x; F.p.y = y; H.peek = null; H.aim(F); H.aim(F); const cc = H.covered(n.x, n.y), [c2, by2] = cc; if (!hid(cc)) seen1 = true; if (c2 < best) { best = c2; by = by2; } }
         F.p.x = p0[0]; F.p.y = p0[1]; H.peek = null;
         const tag = `${id}(${m.name || ''}) ${n.id}(${n.hint || n.name || ''}) ${(n.x / 16).toFixed(1)},${(n.y / 16).toFixed(1)}`;
         if (!stood) out.push(`  ${tag}: 옆에 설 자리 없음, 길에서 ${c1}/5 ← ${by1.join(',')}`);
-        else if (best >= 3) { near++; out.push(`✗ ${tag}: 옆에 서도 ${best}/5 가려짐 ← ${by.join(',')}`); }
+        else if (!seen1) { near++; out.push(`✗ ${tag}: 옆에 서도 머리나 가슴이 가려짐(${best}/5) ← ${by.join(',')}`); }
         else if (LIST) out.push(`  ${tag}: 길에서 ${c1}/5 ← ${by1.join(',')} (옆에 서면 ${best}/5)`);
       }
     };

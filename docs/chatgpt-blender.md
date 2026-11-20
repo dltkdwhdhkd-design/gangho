@@ -668,7 +668,7 @@ def done(pack=None):
 | 차례 | 묶음 | 파일 이름 | 모형 | 상태 |
 |---|---|---|---|---|
 | 1 | **M1** 방의 벽 조각 | `gangho_m1.py` | `rw_wall`, `rw_post`, `rw_pillar`, `rw_column`, `rw_sill`, `rw_window`, `rw_emblem` | 받음(2026-11-20). 게임에 넣었다 |
-| 2 | **M2** 큰 가구 1: 탁자와 앉는 것 | `gangho_m2.py` | `fn_table`, `fn_altar`, `fn_counter`, `fn_teatable`, `fn_chair`, `fn_stool`, `fn_bench`, `fn_bed` |  |
+| 2 | **M2** 큰 가구 1: 탁자와 앉는 것 | `gangho_m2.py` | `fn_table`, `fn_altar`, `fn_counter`, `fn_teatable`, `fn_chair`, `fn_stool`, `fn_bench`, `fn_bed` | 받음(2026-11-20). 게임에 넣었다 |
 | 3 | **M3** 큰 가구 2: 세워 두는 것 | `gangho_m3.py` | `fn_bookcase`, `fn_drawers`, `fn_shelf`, `fn_screen`, `fn_rack`, `fn_chest`, `fn_dummy`, `fn_drum`, `fn_stove` |  |
 | 4 | **M4** 돌계단, 난간, 축대 | `gangho_m4.py` | `st_stair`, `st_cheek`, `st_rail`, `st_railpost`, `st_wall`, `st_cap` |  |
 | 5 | **M5** 눈에 띄는 것: 문, 정자, 탑, 석등 | `gangho_m5.py` | `lm_paifang`, `lm_pavilion`, `lm_pagoda`, `lm_stele`, `lm_lantern`, `lm_censer`, `lm_well` |  |
@@ -843,15 +843,23 @@ M2와 같은 약속이다(사람 키 15점 기준, 원점은 바닥 한가운데
 | 묶음 | 받은 날 | 검사 | 고친 것 |
 |---|---|---|---|
 | M1 방의 벽 조각 7개 | 2026-11-20 | 치수, 꼭 닿는 축, 삼각형 수, 재질 이름, 뒤집힌 면·구멍 모두 통과. 받은 스크립트를 Claude 쪽 블렌더 5.3에서 다시 돌려 같은 모형이 나왔다 | `rw_window`의 창살 깊이를 0.62 → 0.3, 띠살 깊이를 0.88 → 0.45로 얕게 했다(옆벽의 창이 비스듬히 보일 때 살끼리 겹쳐 창이 까맣게 보였다). 나머지는 받은 그대로 쓴다 |
+| M2 큰 가구 8개(긴 탁자, 제상, 계산대, 차 탁자, 등받이 의자, 북 걸상, 긴 걸상, 침상) | 2026-11-20 | 치수, 삼각형 수, 재질 이름, 뒤집힌 면·구멍 모두 통과. 받은 스크립트를 다시 돌려 같은 모형이 나왔다 | 없음. 그대로 넣었다. 함께 온 배치 예시(객잔 식당, 문파 전각)대로 달맞이 객잔과 창운문 본전, 만들어지는 객잔을 다시 짰다(`docs/shots/1120/m2_rooms.jpg`) |
 
 다음 묶음에 그대로 이어 가면 좋은 것: 단면을 이어 만든 모접기와 층진 받침, 범위와 꼭 닿는 축을 정확히 맞춘 것, 삼각형 한도 안에서 윤곽에 공을 들인 것. 벽이나 물건의 앞면에 붙는 얇은 살·띠는 비스듬히 봐도 뒤가 보이게 얕게 만든다.
+
+M2를 게임에 세워 보고 알게 된 것(M3부터 참고):
+
+- 가구는 방 안에서 사람과 같이 1.45배로 커진다. 그래서 긴 탁자(32점)가 게임에서는 세 칸(46점)이고, 계산대(높이 8.8점) 뒤에 선 사람은 가슴 위만 보인다. 사람이 뒤에 서는 가구(계산대, 약장 앞 탁자)는 지금 높이를 넘기지 않는다.
+- 게임의 방은 예시보다 조금 어둡다. 짙은 나무(`wood_dark`)만으로 된 면은 바닥과 한 덩어리로 보이니, 윗면이나 앞판 한 곳은 밝은 재질(`plank`, `wood_pine`, `wood_red`)로 둔다. M2의 탁자 윗면과 계산대 앞판, 의자 등판의 붉은 띠가 그래서 잘 읽힌다.
+- 가구 위에 놓는 작은 것(찻주전자, 촛대, 향로)은 게임이 있던 그림을 윗면 높이에 세운다. 모형에 넣지 않아도 된다.
+- 배치 예시를 같이 보내 준 것이 방을 짜는 데 가장 쓸모 있었다. 다음 묶음에도 그 가구가 놓인 방 한두 곳을 같은 각도로 찍어 보내 주면 그대로 따라 짠다.
 
 ## 받은 뒤 (Claude가 하는 일)
 
 1. 받은 스크립트를 읽어 본다(남이 쓴 코드다).
 2. `python3 tools/blender/gpt.py run gangho_m1.py`로 돌린다. `.glb`나 `.zip`만 받았으면 `python3 tools/blender/gpt.py check <파일>`로 검사한다. 치수, 꼭 닿는 축, 삼각형 수, 재질 이름을 `tools/blender/spec.json`과 견주고, 앞뒤가 뒤집힌 면과 구멍이 있는지 본다(게임은 면의 앞쪽만 그린다).
 3. 작은 문제(재질 이름 오타, 범위를 0.몇 점 넘은 것, 블렌더 판 차이로 안 도는 줄)는 Claude가 스크립트를 직접 고친다. 모양을 다시 잡아야 하는 큰 문제만 ChatGPT에게 돌려보낼 말을 주인께 드린다.
-4. `--install`로 `assets/hd2d/models/`에 넣고, 게임 화면에서 찍어 본다. 임시 조각(`tools/blender/walls.py`)과 나란히 견주어 나은 쪽을 쓴다.
+4. `--install`로 `assets/hd2d/models/`에 넣고(들어온 조각의 이름이 `kit.json`에 적힌다), 게임 화면에서 찍어 본다. 가구는 `js/hd2d/rooms.js`의 `FURN` 표에 "소품 그림 이름 → 조각"을 적어 두면 그 그림이 놓인 자리마다 조각이 선다. 그림이 없던 가구(제상, 등받이 의자, 차 탁자, 긴 걸상)는 `js/tiles.js`에 새 이름을 붙이고 방의 배치(`js/maps.js`, `js/base.js`)에 놓는다.
 5. 받은 스크립트는 `art-src/blender/`에 둔다. Claude가 고친 줄에는 "Claude가 고침"이라고 적는다.
 
 이 문서의 표와 틀은 `tools/blender/spec.json`과 `tools/blender/gangho_kit.py`에서 뽑는다(`python3 tools/blender/gpt.py doc`). 치수를 바꿀 때는 `spec.json`을 고치고 다시 뽑는다.
