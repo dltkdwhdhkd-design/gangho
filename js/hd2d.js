@@ -78,7 +78,8 @@ const roamingEnemyArt = {
   shadow0: 'n_mob_assassin', shadow: 'n_mob_assassin', shadow2: 'n_mob_assassin',
   fox: 'n_mob_assassin', fox0: 'n_mob_assassin', sand_cut: 'n_mob_assassin',
   disciple: 'n_mob_jeong', jeong: 'n_mob_jeong', bandit: 'n_mob_bandit', rowdy: 'n_mob_bandit', mask_low: 'n_mob_bandit',
-  rowdy2: 'n_mob_brute', bruiser: 'n_mob_brute', archer: 'n_mob_archer', wanted2: 'n_mob_archer' };
+  rowdy2: 'n_mob_brute', bruiser: 'n_mob_brute', archer: 'n_mob_archer', wanted2: 'n_mob_archer',
+  soldier: 'n_mob_soldier', sa: 'n_mob_sa', ma: 'n_mob_cult', hyeolgyo: 'n_mob_cult', puppet: 'n_mob_jiangshi', skull: 'n_mob_jiangshi' };  // js/battle.js MOB와 같게
 HD.sheetKey = o => {
   if (!want || !art() || !o) return null; const L = [];
   if (o.me) L.push('me');

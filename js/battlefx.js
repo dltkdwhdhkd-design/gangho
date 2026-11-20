@@ -111,7 +111,7 @@ function bolt(x1, y1, x2, y2, c0, c1, life, delay = 0) {
 // 휘두를 때: 칼 궤적과 그 둘레 조각
 export function swing(B, st, a, h, sk) {
   const [c0, c1, c2] = C(st), an = Math.atan2(a.ay, a.ax), x = a.x, y = a.y - 6, ult = sk?.ult;
-  if (h.shape === 'line') P(B, { k: 'thrust', x, y, ang: an, life: .26, s: Math.min(h.len || 40, 140), w: Math.min(h.w || 10, 40) * .45, col: c0, col2: c1, add: 1 });
+  if (h.shape === 'line') P(B, { k: 'thrust', x, y, ang: an, plum: st === 'plum' && !!sk && !sk.basic && !!SHEET.hs_thrust, life: st === 'plum' && sk && !sk.basic && SHEET.hs_thrust ? .5 : .26, s: Math.min(h.len || 40, 140), w: Math.min(h.w || 10, 40) * .45, col: c0, col2: c1, add: 1 });
   else if (h.shape === 'circle') P(B, { k: 'ring', x: x + a.ax * (h.off || 0), y: a.y + a.ay * (h.off || 0), life: .3, s: 6, s2: (h.r || 30) * .95, col: c0, w: 3, add: 1, flat: 1 });
   else P(B, { k: 'slash', x, y, ang: an, plum: st === 'plum' && !!sk && !sk.basic, r: Math.min(h.r || 30, 90) * .8, sweep: Math.min((h.a || 80) * Math.PI / 180, 2.6), life: .28, w: ult ? 7 : 4, col: c0, col2: c1, add: 1, flip: (a.swingN = (a.swingN || 0) + 1) % 2 });
   const R = h.shape === 'line' ? (h.len || 40) : (h.r || 30), n = ult ? 22 : 8;
@@ -173,6 +173,8 @@ export function burstAt(B, st, x, y, r) {
   if (st === 'taiji') P(B, { k: 'taiji', x, y, life: .4, s: r * .8, col: c1, col2: c2, vr: 9, flat: 1 });
 }
 // 절초: 판 전체를 덮는 연출
+// 화산 보법(암향표 따위 순간이동): 사라진 자리와 나타난 자리에 꽃잎 회오리(hs_swirl). 그림이 없으면 아무것도 안 한다
+export function blink(B, st, x0, y0, x1, y1) { if (st !== 'plum' || !SHEET.hs_swirl) return; for (const [x, y, d] of [[x0, y0, 0], [x1, y1, .08]]) P(B, { k: 'hsswirl', x, y: y - 14, life: .55, delay: d }); }
 export function ult(B, st, a) {
   cast(B, st, a, true);
   const [c0, c1] = C(st); B.flashC = c0; B.flashT = .16; B.dimT = .9; B.zoomT = .75; B.zoomX = a.x; B.zoomY = a.y - 8;
@@ -260,6 +262,7 @@ function shape(c, p, u) {
       break;
     }
     case 'ring': { const r = lerp(p.s, p.s2, 1 - (1 - u) * (1 - u)); c.strokeStyle = p.col; c.lineWidth = Math.max(.3, p.w * (1 - u)); c.beginPath(); c.ellipse(x, y, r, r * (p.flat ? .55 : 1), 0, 0, 6.29); c.stroke(); break; }
+    case 'hsswirl': { if (sheetAt(c, 'hs_swirl', Math.min(7, Math.floor(u * 8)), x, y, 1.1)) break; break; }
     case 'bloom': {  // 봉오리 → 반쯤 → 만개 → 번쩍 → (터지면 꽃잎이 따로 흩날린다)
       const big = p.big;
       if (sheetAt(c, big ? 'hs_bloom_big' : 'hs_bloom', Math.min(7, Math.floor(u * 8)), x, y)) break;
@@ -335,6 +338,7 @@ function shape(c, p, u) {
       for (let i = 0; i < 8; i++) { const long = i % 2 === 0, l = L * (long ? (i === 0 ? 1.25 : 1) : .45); c.rotate(Math.PI / 4); c.fillStyle = i % 2 ? p.col : '#ffffff'; c.beginPath(); c.moveTo(0, -th / 2); c.lineTo(l, 0); c.lineTo(0, th / 2); c.closePath(); c.fill(); }
       break; }
     case 'thrust': {  // 찌르기 검기: 창끝처럼 뾰족한 빛줄기, 흰 심지, 끝에서 고리 충격파
+      if (p.plum) { sheetAt(c, 'hs_thrust', Math.min(5, Math.floor(u * 6)), x + Math.cos(p.ang) * p.s / 2, y + Math.sin(p.ang) * p.s / 2, p.s / SHEET.hs_thrust.w, p.ang); break; }  // 화산 찌르기(칠매검): 선을 따라 매화 일곱 송이가 피고 흩어진다(hs_thrust)
       if (SHEET.sw_thrust) { sheetAt(c, 'sw_thrust', Math.floor(u * 6), x + Math.cos(p.ang) * p.s / 2, y + Math.sin(p.ang) * p.s / 2, p.s / SHEET.sw_thrust.w, p.ang); break; }
       c.translate(x, y); c.rotate(p.ang); const l = p.s * Math.min(1, u * 4), w = Math.max(2, p.w * 1.3) * (1 - u * .7);
       const A = c.globalAlpha, blade = (ww, col, al, l0 = 0) => { c.globalAlpha = A * al; c.fillStyle = col; c.beginPath(); c.moveTo(l0, -ww / 2); c.lineTo(l * .78, -ww * .32); c.lineTo(l, 0); c.lineTo(l * .78, ww * .32); c.lineTo(l0, ww / 2); c.closePath(); c.fill(); };
