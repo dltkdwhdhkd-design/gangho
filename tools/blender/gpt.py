@@ -2,6 +2,7 @@
 # ChatGPT가 블렌더로 만든 모형을 받아 넣는 도구. 규격은 tools/blender/spec.json, 틀은 tools/blender/gangho_kit.py, 요청서는 docs/chatgpt-blender.md.
 #   python3 tools/blender/gpt.py run <받은 스크립트.py> [--install]   받은 스크립트를 돌려 .glb를 만들고 검사한다. --install이면 통과한 것을 assets/hd2d/models/에 넣는다
 #   python3 tools/blender/gpt.py check <.glb나 폴더나 .zip…> [--install]   받은 .glb를 규격으로 검사한다
+#   python3 tools/blender/gpt.py kit                                 게임이 읽는 조각 목록(assets/hd2d/models/kit.json)을 들어와 있는 파일로 다시 쓴다(--install이 알아서 한다)
 #   python3 tools/blender/gpt.py doc [--check]                       요청서의 표와 틀을 spec.json·gangho_kit.py에서 다시 뽑는다(--check는 어긋났는지만 본다)
 # 받은 스크립트는 남이 쓴 코드다. 돌리기 전에 읽어 본다(파일을 지우거나 밖으로 내보내는 줄이 없는지). 돌릴 때는 빈 폴더에서 돌린다.
 import json, os, re, shutil, subprocess, sys, tempfile
@@ -65,6 +66,12 @@ def judge(name, m, pal):
     return bad, note
 
 
+def kitlist(add=()):
+    """게임이 읽는 조각 목록(assets/hd2d/models/kit.json): 규격에 있는 이름 가운데 파일이 들어와 있는 것. 게임은 이 목록에 있는 조각만 소품 그림 대신 세운다"""
+    names = sorted(n for n in PIECES if os.path.exists(os.path.join(MODELS, n + '.glb')))
+    json.dump(names, open(os.path.join(MODELS, 'kit.json'), 'w', encoding='utf-8')); return names
+
+
 def check(paths, install=False):
     pal, files, nbad = palette(), [], 0
     for p in paths:
@@ -93,6 +100,7 @@ def check(paths, install=False):
     if install:
         for name, m, bad, note, f in rows:
             if not bad: shutil.copy(f, os.path.join(MODELS, name + '.glb')); print('넣음: assets/hd2d/models/' + name + '.glb')
+        print('조각 목록(kit.json): ' + ', '.join(kitlist()))
     return nbad
 
 
@@ -135,6 +143,8 @@ def sync():
     js = open(os.path.join(ROOT, 'js', 'hd2d', 'palette.js'), encoding='utf-8').read(); pal = palette(); bad = 0
     for k in sorted(set(re.findall(r"\b(\w+): \{ t: '", js)) | set(re.findall(r"\b(wl_\w+): '", js))):
         if k not in pal: print(f"js/hd2d/palette.js의 재질 '{k}'이 틀(gangho_kit.py PALETTE)에 없다"); bad += 1
+    have = sorted(n for n in PIECES if os.path.exists(os.path.join(MODELS, n + '.glb'))); kj = os.path.join(MODELS, 'kit.json')
+    if not os.path.exists(kj) or json.load(open(kj, encoding='utf-8')) != have: print('assets/hd2d/models/kit.json이 들어와 있는 조각과 다르다. python3 tools/blender/gpt.py kit 을 돌린다'); bad += 1
     for t in sorted(set(re.findall(r"'((?:pm|r|e|g|k|cl)_\w+)'", js))):
         if not os.path.exists(os.path.join(ROOT, 'assets', 'hd2d', 'preview', t + '.webp')): print(f"무늬 그림이 없다: assets/hd2d/preview/{t}.webp (python3 tools/wall_in.py)"); bad += 1
     return bad
@@ -160,4 +170,5 @@ if __name__ == '__main__':
     if a[0] == 'run': sys.exit(run(a[1], inst))
     if a[0] == 'check': sys.exit(1 if check(a[1:], inst) else 0)
     if a[0] == 'doc': sys.exit(doc('--check' in sys.argv))
+    if a[0] == 'kit': print('조각 목록(kit.json): ' + ', '.join(kitlist())); sys.exit(0)
     print('모르는 명령: ' + a[0]); sys.exit(2)

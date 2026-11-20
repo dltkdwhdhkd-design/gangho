@@ -7,6 +7,7 @@
 #   pm_wallplank, pm_plank, pm_wood_dark, pm_wood_red, pm_wood_pine, pm_wood_black, pm_bark : 널 지붕 그림(r_plank)의 빛깔을 바꾼 것
 #   pm_earth                     : 흙(길 g_road)
 # 도트 굵기는 다른 그림과 같다(평면도 한 점에 3.2점. 방 안에서는 게임이 2.2점으로 굵게 입힌다).
+#   fl_scale, fl_dark, fl_pine, fl_brick, fl_mat, fl_slab : 방 바닥 여섯(받은 그림 FL1.png. 맨 아래 대목)
 # 쓰는 법: python3 tools/wall_in.py
 import os
 import numpy as np
@@ -45,3 +46,15 @@ save(tone(load('g_road'), (.98, .9, .78), .8), 'pm_earth')
 # WL3.png(나무 여섯: 짙은 나무, 붉은 칠, 생나무, 검은 칠, 대나무, 창호지) → pm_wood_dark, pm_wood_red, pm_wood_pine, pm_wood_black, pm_bamboo, pm_paper
 for f in ('WL1.png', 'WL2.png', 'WL3.png'):
     if os.path.exists(os.path.join(SRC, f)): print('받은 그림이 있다:', f, '— 자르는 대목을 여기에 넣는다')
+
+# FL1.png(방 바닥 여섯, 2026-11-20에 받음): 비늘 돌바닥, 짙은 마루, 빛바랜 소나무 마루, 잿빛 전돌, 돗자리, 짙은 판석 → fl_scale, fl_dark, fl_pine, fl_brick, fl_mat, fl_slab
+# 그림은 도트 한 점이 4px이고 한 칸이 128×128점이다(512px. 칸 둘레의 반 점은 파란 줄에 덮여 있다). 점마다 파랗지 않은 픽셀 하나를 골라 128×128로 줄인다.
+# 게임은 이 바닥을 평면도 한 점에 3.2점으로 깐다(js/hd2d.js FLDOT): 비늘 하나가 사람 키의 4분의 1쯤, 널 하나의 폭이 5분의 1쯤이 된다(기준 그림과 ChatGPT가 보낸 배치 그림의 굵기)
+fl = os.path.join(SRC, 'FL1.png')
+if os.path.exists(fl):
+    a = np.asarray(Image.open(fl).convert('RGB')).astype(np.float32)
+    for i, name in enumerate(('fl_scale', 'fl_dark', 'fl_pine', 'fl_brick', 'fl_mat', 'fl_slab')):
+        cx, cy = (i % 3) * 512, (i // 3) * 512; out = np.zeros((128, 128, 3), np.float32)
+        for y in range(128):
+            for x in range(128): out[y, x] = a[cy + y * 4 + (2 if y < 127 else 1), cx + x * 4 + (2 if x < 127 else 1)]
+        save(out, name)
