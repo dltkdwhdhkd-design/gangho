@@ -1,4 +1,4 @@
-# 강호행 요청 33: 지붕: 문파 지붕 무늬, 지붕 장식과 현판
+# 강호행 요청 34: 지붕: 문파 지붕 무늬, 지붕 장식과 현판
 
 단계 이름 `roof1` · 종류: 그림 장 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -57,4 +57,4 @@ Sprite sheet of Chinese roof ornaments and hall decorations for a pixel-art wuxi
 
 ---
 
-다음 단계: 34번 `m6` 모형 M6: 장터와 나루 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m6.md
+다음 단계: 35번 `m6` 모형 M6: 장터와 나루 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m6.md

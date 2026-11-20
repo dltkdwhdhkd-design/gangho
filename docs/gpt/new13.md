@@ -1,4 +1,4 @@
-# 강호행 요청 67: 새 사람 13: 무관 낙제생, 악사, 대장간 도제
+# 강호행 요청 69: 새 사람 13: 무관 낙제생, 악사, 대장간 도제
 
 단계 이름 `new13` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 68번 `new14` 새 사람 14: 사냥꾼, 농사꾼, 춤꾼 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new14.md
+다음 단계: 70번 `new14` 새 사람 14: 사냥꾼, 농사꾼, 춤꾼 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new14.md

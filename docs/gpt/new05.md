@@ -1,4 +1,4 @@
-# 강호행 요청 59: 새 사람 5: 노름꾼·골목 건달, 아전, 순라군
+# 강호행 요청 61: 새 사람 5: 노름꾼·골목 건달, 아전, 순라군
 
 단계 이름 `new05` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 60번 `new06` 새 사람 6: 숙수, 점소이, 전각지기·사당지기 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new06.md
+다음 단계: 62번 `new06` 새 사람 6: 숙수, 점소이, 전각지기·사당지기 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new06.md

@@ -1,4 +1,4 @@
-# 강호행 요청 27: 화면 틀 2: 화면 단추 그림, 머리 위 표식
+# 강호행 요청 28: 화면 틀 2: 화면 단추 그림, 머리 위 표식
 
 단계 이름 `ui2` · 종류: 화면 틀 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -56,4 +56,4 @@
 
 ---
 
-다음 단계: 28번 `act3` 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act3.md
+다음 단계: 29번 `act3` 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act3.md

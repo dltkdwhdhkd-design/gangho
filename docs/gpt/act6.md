@@ -1,4 +1,4 @@
-# 강호행 요청 50: 맞서는 사람 동작 칸 2: 고진, 월천, 연경추, 남화, 만화부인
+# 강호행 요청 52: 맞서는 사람 동작 칸 2: 고진, 월천, 연경추, 남화, 만화부인
 
 단계 이름 `act6` · 종류: 동작 칸 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -26,7 +26,7 @@
 
 ### 1. `go-c.png` — 고진 — 키 `go`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_go.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`go-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/go_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -36,7 +36,7 @@
 
 ### 2. `cheon-c.png` — 월천 — 키 `cheon`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_cheon.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`cheon-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/cheon_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -46,7 +46,7 @@
 
 ### 3. `chief-c.png` — 연경추 — 키 `chief`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_chief.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`chief-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/chief_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -56,7 +56,7 @@
 
 ### 4. `namhwa-c.png` — 남화 — 키 `namhwa`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_namhwa.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`namhwa-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/namhwa_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -66,7 +66,7 @@
 
 ### 5. `manhwa-c.png` — 만화부인 — 키 `manhwa`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_manhwa.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`manhwa-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/manhwa_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -89,4 +89,4 @@
 
 ---
 
-다음 단계: 51번 `m13` 모형 M13: 눈에 띄는 것 2: 다리, 누각, 종각, 돌사자, 비무대 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m13.md
+다음 단계: 53번 `m13` 모형 M13: 눈에 띄는 것 2: 다리, 누각, 종각, 돌사자, 비무대 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m13.md

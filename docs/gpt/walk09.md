@@ -1,4 +1,4 @@
-# 강호행 요청 41: 사람 도트 9: 동네 꼬마, 개방 거지, 창운문 제자, 꽃 파는 노파
+# 강호행 요청 42: 사람 도트 9: 동네 꼬마, 개방 거지, 창운문 제자, 꽃 파는 노파
 
 단계 이름 `walk09` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 42번 `walk10` 사람 도트 10: 떠돌이 비무객, 순이네, 순이 아버지 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk10.md
+다음 단계: 43번 `walk10` 사람 도트 10: 떠돌이 비무객, 순이네, 순이 아버지 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk10.md

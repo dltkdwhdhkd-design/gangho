@@ -1,4 +1,4 @@
-# 강호행 요청 40: 아이콘 1: 무기 스물
+# 강호행 요청 41: 아이콘 1: 무기 스물
 
 단계 이름 `icon1` · 종류: 아이콘 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -46,4 +46,4 @@
 
 ---
 
-다음 단계: 41번 `walk09` 사람 도트 9: 동네 꼬마, 개방 거지, 창운문 제자, 꽃 파는 노파 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk09.md
+다음 단계: 42번 `walk09` 사람 도트 9: 동네 꼬마, 개방 거지, 창운문 제자, 꽃 파는 노파 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk09.md

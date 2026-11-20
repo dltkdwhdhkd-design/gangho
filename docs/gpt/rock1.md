@@ -1,4 +1,4 @@
-# 강호행 요청 43: 산길: 바위 무늬, 산길에 놓는 것
+# 강호행 요청 44: 산길: 바위 무늬, 산길에 놓는 것
 
 단계 이름 `rock1` · 종류: 그림 장 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -58,4 +58,4 @@ Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel si
 
 ---
 
-다음 단계: 44번 `tree1` 나무: 껍질과 잎 무늬, 잎 뭉치 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/tree1.md
+다음 단계: 45번 `tree1` 나무: 껍질과 잎 무늬, 잎 뭉치 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/tree1.md

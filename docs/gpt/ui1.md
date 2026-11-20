@@ -1,4 +1,4 @@
-# 강호행 요청 24: 화면 틀 1: 창과 단추 틀, 붓자국 띠
+# 강호행 요청 25: 화면 틀 1: 창과 단추 틀, 붓자국 띠
 
 단계 이름 `ui1` · 종류: 화면 틀 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -56,4 +56,4 @@
 
 ---
 
-다음 단계: 25번 `face3` 화산귀환 인물 얼굴 3: 진금룡, 이송백, 종서한, 고휘, 기목승, 사마승 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face3.md
+다음 단계: 26번 `face3` 화산귀환 인물 얼굴 3: 진금룡, 이송백, 종서한, 고휘, 기목승, 사마승 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face3.md

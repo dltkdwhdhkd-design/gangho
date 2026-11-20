@@ -1,4 +1,4 @@
-# 강호행 요청 68: 새 사람 14: 사냥꾼, 농사꾼, 춤꾼
+# 강호행 요청 70: 새 사람 14: 사냥꾼, 농사꾼, 춤꾼
 
 단계 이름 `new14` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 69번 `new15` 새 사람 15: 떠돌이 무사, 역참 마부, 행상 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new15.md
+다음 단계: 71번 `new15` 새 사람 15: 떠돌이 무사, 역참 마부, 행상 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new15.md

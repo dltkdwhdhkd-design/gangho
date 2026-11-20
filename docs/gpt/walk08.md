@@ -1,4 +1,4 @@
-# 강호행 요청 37: 사람 도트 8: 만물상 주인, 객잔 주인, 마을 사람, 마을 아낙
+# 강호행 요청 38: 사람 도트 8: 만물상 주인, 객잔 주인, 마을 사람, 마을 아낙
 
 단계 이름 `walk08` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 38번 `m7` 모형 M7: 나무 (시험 삼아 한 그루) — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m7.md
+다음 단계: 39번 `m7` 모형 M7: 나무 (시험 삼아 한 그루) — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m7.md

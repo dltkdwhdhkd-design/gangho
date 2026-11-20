@@ -1,4 +1,4 @@
-# 강호행 요청 62: 새 사람 8: 구경꾼, 할멈·나물 파는 할머니, 포목전·잡화 상인
+# 강호행 요청 64: 새 사람 8: 구경꾼, 할멈·나물 파는 할머니, 포목전·잡화 상인
 
 단계 이름 `new08` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 63번 `new09` 새 사람 9: 비단 장수·포목점 안주인, 찻집 주인, 무관 문하생 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new09.md
+다음 단계: 65번 `new09` 새 사람 9: 비단 장수·포목점 안주인, 찻집 주인, 무관 문하생 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new09.md

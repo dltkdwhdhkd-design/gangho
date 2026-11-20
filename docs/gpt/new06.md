@@ -1,4 +1,4 @@
-# 강호행 요청 60: 새 사람 6: 숙수, 점소이, 전각지기·사당지기
+# 강호행 요청 62: 새 사람 6: 숙수, 점소이, 전각지기·사당지기
 
 단계 이름 `new06` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 61번 `new07` 새 사람 7: 이야기꾼, 재주꾼, 떡장수 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new07.md
+다음 단계: 63번 `new07` 새 사람 7: 이야기꾼, 재주꾼, 떡장수 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new07.md

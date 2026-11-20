@@ -1,4 +1,4 @@
-# 강호행 요청 23: 화산귀환 인물 얼굴 2: 현영, 현상, 운검, 운암, 운각, 백상
+# 강호행 요청 24: 화산귀환 인물 얼굴 2: 현영, 현상, 운검, 운암, 운각, 백상
 
 단계 이름 `face2` · 종류: 일러스트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -95,4 +95,4 @@
 
 ---
 
-다음 단계: 24번 `ui1` 화면 틀 1: 창과 단추 틀, 붓자국 띠 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui1.md
+다음 단계: 25번 `ui1` 화면 틀 1: 창과 단추 틀, 붓자국 띠 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui1.md

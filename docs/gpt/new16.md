@@ -1,4 +1,4 @@
-# 강호행 요청 70: 새 사람 16: 순례자, 문파 전령, 입문 지망생 아이
+# 강호행 요청 72: 새 사람 16: 순례자, 문파 전령, 입문 지망생 아이
 
 단계 이름 `new16` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 71번 `new17` 새 사람 17: 떠돌이 의원, 농부, 남궁세가 장로 남궁위 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new17.md
+다음 단계: 73번 `new17` 새 사람 17: 떠돌이 의원, 농부, 남궁세가 장로 남궁위 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new17.md

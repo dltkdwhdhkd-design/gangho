@@ -1,4 +1,4 @@
-# 강호행 요청 71: 새 사람 17: 떠돌이 의원, 농부, 남궁세가 장로 남궁위
+# 강호행 요청 73: 새 사람 17: 떠돌이 의원, 농부, 남궁세가 장로 남궁위
 
 단계 이름 `new17` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 72번 `new18` 새 사람 18: 제갈세가 군량관, 하북팽가 토벌대장 팽호 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new18.md
+다음 단계: 74번 `new18` 새 사람 18: 제갈세가 군량관, 하북팽가 토벌대장 팽호 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new18.md

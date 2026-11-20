@@ -1,4 +1,4 @@
-# 강호행 요청 64: 새 사람 10: 늙은 표사, 과거 준비생·책방 서생, 짐꾼·부두 일꾼
+# 강호행 요청 66: 새 사람 10: 늙은 표사, 과거 준비생·책방 서생, 짐꾼·부두 일꾼
 
 단계 이름 `new10` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 65번 `new11` 새 사람 11: 탁발승, 떠돌이 약장수, 어부 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new11.md
+다음 단계: 67번 `new11` 새 사람 11: 탁발승, 떠돌이 약장수, 어부 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new11.md

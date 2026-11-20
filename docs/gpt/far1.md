@@ -1,4 +1,4 @@
-# 강호행 요청 49: 먼 곳: 먼 산 띠 셋
+# 강호행 요청 51: 먼 곳: 먼 산 띠 셋
 
 단계 이름 `far1` · 종류: 그림 장 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -49,4 +49,4 @@ Distant mountain silhouette strips for the far background of a pixel-art wuxia R
 
 ---
 
-다음 단계: 50번 `act6` 맞서는 사람 동작 칸 2: 고진, 월천, 연경추, 남화, 만화부인 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act6.md
+다음 단계: 52번 `act6` 맞서는 사람 동작 칸 2: 고진, 월천, 연경추, 남화, 만화부인 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act6.md

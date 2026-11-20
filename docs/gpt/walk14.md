@@ -1,4 +1,4 @@
-# 강호행 요청 76: 사람 도트 14: 황보웅, 진태석, 악정산, 양 태군
+# 강호행 요청 78: 사람 도트 14: 황보웅, 진태석, 악정산, 양 태군
 
 단계 이름 `walk14` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 77번 `walk15` 사람 도트 15: 언창호, 장양 진인, 허정자, 무량 법사 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk15.md
+다음 단계: 79번 `walk15` 사람 도트 15: 언창호, 장양 진인, 허정자, 무량 법사 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk15.md

@@ -1,4 +1,4 @@
-# 강호행 요청 31: 화산귀환 인물 얼굴 7: 위소행, 염평, 맹소
+# 강호행 요청 32: 화산귀환 인물 얼굴 7: 위소행, 염평, 맹소
 
 단계 이름 `face7` · 종류: 일러스트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -65,4 +65,4 @@
 
 ---
 
-다음 단계: 32번 `ui3` 화면 틀 3: 싸움 화면 틀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md
+다음 단계: 33번 `ui3` 화면 틀 3: 싸움 화면 틀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md

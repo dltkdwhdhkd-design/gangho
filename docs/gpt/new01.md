@@ -1,4 +1,4 @@
-# 강호행 요청 55: 새 사람 1: 장팔, 왕충, 석두
+# 강호행 요청 57: 새 사람 1: 장팔, 왕충, 석두
 
 단계 이름 `new01` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 56번 `new02` 새 사람 2: 운청, 화산 검수, 노예상 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new02.md
+다음 단계: 58번 `new02` 새 사람 2: 운청, 화산 검수, 노예상 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new02.md

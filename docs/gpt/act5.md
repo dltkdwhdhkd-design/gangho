@@ -1,4 +1,4 @@
-# 강호행 요청 46: 맞서는 사람 동작 칸 1: 낭리비어 위충, 광사자 맹호, 패천도 사마웅, 오강, 구양철, 혈수 막고
+# 강호행 요청 47: 맞서는 사람 동작 칸 1: 낭리비어 위충, 광사자 맹호, 패천도 사마웅, 오강, 구양철, 혈수 막고
 
 단계 이름 `act5` · 종류: 동작 칸 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -26,7 +26,7 @@
 
 ### 1. `wei-c.png` — 낭리비어 위충 — 키 `wei`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_wei.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`wei-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/wei_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -36,7 +36,7 @@
 
 ### 2. `lion-c.png` — 광사자 맹호 — 키 `lion`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_lion.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`lion-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/lion_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -46,7 +46,7 @@
 
 ### 3. `samaung-c.png` — 패천도 사마웅 — 키 `samaung`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_samaung.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`samaung-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/samaung_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -56,7 +56,7 @@
 
 ### 4. `ogang-c.png` — 오강 — 키 `ogang`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_ogang.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`ogang-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/ogang_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -66,7 +66,7 @@
 
 ### 5. `guyang-c.png` — 구양철 — 키 `guyang`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_guyang.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`guyang-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/guyang_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -76,7 +76,7 @@
 
 ### 6. `makgo-c.png` — 혈수 막고 — 키 `makgo`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_makgo.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`makgo-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/makgo_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -99,4 +99,4 @@
 
 ---
 
-다음 단계: 47번 `m12` 모형 M12: 덤불과 풀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m12.md
+다음 단계: 48번 `m12` 모형 M12: 덤불과 풀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m12.md

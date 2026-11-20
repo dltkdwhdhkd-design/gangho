@@ -1,4 +1,4 @@
-# 강호행 요청 54: 아이콘 4: 초식 스물여덟
+# 강호행 요청 56: 아이콘 4: 초식 스물여덟
 
 단계 이름 `icon4` · 종류: 아이콘 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -54,4 +54,4 @@
 
 ---
 
-다음 단계: 55번 `new01` 새 사람 1: 장팔, 왕충, 석두 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new01.md
+다음 단계: 57번 `new01` 새 사람 1: 장팔, 왕충, 석두 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new01.md

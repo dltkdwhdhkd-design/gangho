@@ -1,4 +1,4 @@
-# 강호행 요청 74: 사람 도트 12: 설봉자, 막철심, 섭일, 진다명
+# 강호행 요청 76: 사람 도트 12: 설봉자, 막철심, 섭일, 진다명
 
 단계 이름 `walk12` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 75번 `walk13` 사람 도트 13: 서문각, 홍두 장로, 제갈현, 팽대악 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk13.md
+다음 단계: 77번 `walk13` 사람 도트 13: 서문각, 홍두 장로, 제갈현, 팽대악 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk13.md

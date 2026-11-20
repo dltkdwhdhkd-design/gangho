@@ -1,4 +1,4 @@
-# 강호행 요청 44: 나무: 껍질과 잎 무늬, 잎 뭉치
+# 강호행 요청 45: 나무: 껍질과 잎 무늬, 잎 뭉치
 
 단계 이름 `tree1` · 종류: 그림 장 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -57,4 +57,4 @@ Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel si
 
 ---
 
-다음 단계: 45번 `m11` 모형 M11: 나무 다섯 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m11.md
+다음 단계: 46번 `m11` 모형 M11: 나무 다섯 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m11.md

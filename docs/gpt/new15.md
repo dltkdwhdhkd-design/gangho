@@ -1,4 +1,4 @@
-# 강호행 요청 69: 새 사람 15: 떠돌이 무사, 역참 마부, 행상
+# 강호행 요청 71: 새 사람 15: 떠돌이 무사, 역참 마부, 행상
 
 단계 이름 `new15` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 70번 `new16` 새 사람 16: 순례자, 문파 전령, 입문 지망생 아이 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new16.md
+다음 단계: 72번 `new16` 새 사람 16: 순례자, 문파 전령, 입문 지망생 아이 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new16.md

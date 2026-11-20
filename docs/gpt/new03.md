@@ -1,4 +1,4 @@
-# 강호행 요청 57: 새 사람 3: 노예상 부하, 물주, 도박장 주인
+# 강호행 요청 59: 새 사람 3: 노예상 부하, 물주, 도박장 주인
 
 단계 이름 `new03` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 58번 `new04` 새 사람 4: 도박장 덩치, 호객꾼, 취객 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new04.md
+다음 단계: 60번 `new04` 새 사람 4: 도박장 덩치, 호객꾼, 취객 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new04.md

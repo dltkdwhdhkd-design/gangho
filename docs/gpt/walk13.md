@@ -1,4 +1,4 @@
-# 강호행 요청 75: 사람 도트 13: 서문각, 홍두 장로, 제갈현, 팽대악
+# 강호행 요청 77: 사람 도트 13: 서문각, 홍두 장로, 제갈현, 팽대악
 
 단계 이름 `walk13` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 76번 `walk14` 사람 도트 14: 황보웅, 진태석, 악정산, 양 태군 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk14.md
+다음 단계: 78번 `walk14` 사람 도트 14: 황보웅, 진태석, 악정산, 양 태군 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk14.md

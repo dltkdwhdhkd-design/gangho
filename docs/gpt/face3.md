@@ -1,4 +1,4 @@
-# 강호행 요청 25: 화산귀환 인물 얼굴 3: 진금룡, 이송백, 종서한, 고휘, 기목승, 사마승
+# 강호행 요청 26: 화산귀환 인물 얼굴 3: 진금룡, 이송백, 종서한, 고휘, 기목승, 사마승
 
 단계 이름 `face3` · 종류: 일러스트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -95,4 +95,4 @@
 
 ---
 
-다음 단계: 26번 `face4` 화산귀환 인물 얼굴 4: 허도진인, 허원, 허산, 무연, 무진, 진현 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face4.md
+다음 단계: 27번 `face4` 화산귀환 인물 얼굴 4: 허도진인, 허원, 허산, 무연, 무진, 진현 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face4.md

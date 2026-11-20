@@ -1,4 +1,4 @@
-# 강호행 요청 30: 화산귀환 인물 얼굴 6: 당잔, 당패, 홍대광, 구칠, 종팔, 위립산
+# 강호행 요청 31: 화산귀환 인물 얼굴 6: 당잔, 당패, 홍대광, 구칠, 종팔, 위립산
 
 단계 이름 `face6` · 종류: 일러스트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -95,4 +95,4 @@
 
 ---
 
-다음 단계: 31번 `face7` 화산귀환 인물 얼굴 7: 위소행, 염평, 맹소 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face7.md
+다음 단계: 32번 `face7` 화산귀환 인물 얼굴 7: 위소행, 염평, 맹소 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face7.md

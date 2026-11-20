@@ -1,4 +1,4 @@
-# 강호행 요청 39: 동료 동작 칸 2: 혁련하, 혜공, 사이라, 갈 선생, 양춘, 구 노창
+# 강호행 요청 40: 동료 동작 칸 2: 혁련하, 혜공, 사이라, 갈 선생, 양춘, 구 노창
 
 단계 이름 `act4` · 종류: 동작 칸 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -26,7 +26,7 @@
 
 ### 1. `hyeok-c.png` — 혁련하 — 키 `hyeok`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_hyeok.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`hyeok-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/hyeok_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -36,7 +36,7 @@
 
 ### 2. `c_hyegong-c.png` — 혜공 — 키 `c_hyegong`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_c_hyegong.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`c_hyegong-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/c_hyegong_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -46,7 +46,7 @@
 
 ### 3. `c_saira-c.png` — 사이라 — 키 `c_saira`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_c_saira.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`c_saira-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/c_saira_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -56,7 +56,7 @@
 
 ### 4. `c_gal-c.png` — 갈 선생 — 키 `c_gal`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_c_gal.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`c_gal-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/c_gal_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -66,7 +66,7 @@
 
 ### 5. `c_yang-c.png` — 양춘 — 키 `c_yang`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_c_yang.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`c_yang-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/c_yang_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -76,7 +76,7 @@
 
 ### 6. `c_gu-c.png` — 구 노창 — 키 `c_gu`
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_c_gu.webp — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**
+걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`c_gu-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: https://dltkdwhdhkd-design.github.io/gangho/assets/art/c_gu_n.webp
 
 ```text
 규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
@@ -99,4 +99,4 @@
 
 ---
 
-다음 단계: 40번 `icon1` 아이콘 1: 무기 스물 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon1.md
+다음 단계: 41번 `icon1` 아이콘 1: 무기 스물 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon1.md

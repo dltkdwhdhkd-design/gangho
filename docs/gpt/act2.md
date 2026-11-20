@@ -89,4 +89,4 @@
 
 ---
 
-다음 단계: 22번 `face1` 화산귀환 인물 얼굴 1: 청명, 백천, 유이설, 윤종, 조걸, 현종 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face1.md
+다음 단계: 22번 `beast1` 짐승과 귀신 도트 1: 멧돼지, 독사, 너구리, 죽귀, 원혼 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/beast1.md

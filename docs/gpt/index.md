@@ -2,7 +2,7 @@
 
 도트 무협 게임 '강호행'에 아직 없는 그림(사람 도트, 일러스트, 효과, 무늬와 소품, 화면 틀, 아이콘, 장면 그림)과 블렌더 모형을 **한 줄로 세운 차례표**다. 위에서부터 한 단계씩 받는다. 단계마다 문서가 하나씩 있고, 그 문서에 규칙·크기·칸 배치·파일 이름이 다 적혀 있다.
 
-단계 95개, 만들 것 413개 가운데 19개를 받았다. **지금 할 차례는 2번 `fx1`**: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/fx1.md
+단계 97개, 만들 것 426개 가운데 19개를 받았다. **지금 할 차례는 2번 `fx1`**: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/fx1.md
 
 2026-11-21에 처음부터 다시 썼다. 전에는 요청서가 종류마다 따로 열 군데에 흩어져 있었다(`docs/chatgpt-*.md`. 받은 기록은 거기 그대로 있다). 이 문서와 단계 문서는 `python3 tools/gpt_queue.py`가 만든다. "받음"은 저장소에 그 그림이나 모형이 들어와 있는지를 보고 스스로 적는다. 받은 단계는 지우지 않는다.
 
@@ -59,6 +59,8 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
 ## 차례표
 
+위에서부터 게임에서 티가 많이 나는 순서다. 큰 줄기는 이렇다: ① 전투가 바로 좋아지는 것과 방·문파의 얼굴(검기, 방의 벽과 살림, 산문, 동료와 맞서는 사람의 도트, 적의 동작 칸) ② 화산귀환 인물의 얼굴, 화면 틀, 청하진 사람, 뜰과 나무와 덤불 ③ 아이콘, 새 사람, 문파 장문인 ④ 이야기의 장면 그림. 그림 단계 사이사이에 블렌더 모형 단계가 끼어 있다.
+
 | 차례 | 단계 | 무엇 | 종류 | 만들 것 | 상태 | 문서 |
 |---|---|---|---|---|---|---|
 | 1 | `act0` | 주인공의 무기별 동작 칸(큰 칼, 창, 봉) | 동작 칸 | 3 | 받음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act0.md |
@@ -82,86 +84,88 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 | 19 | `yard1` | 문파 터: 돌계단과 난간의 겉, 돌바닥 무늬, 뜰에 놓는 것 | 그림 장 | 3 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/yard1.md |
 | 20 | `m10` | 모형 M10: 뜰과 길가에 놓는 것 | 모형(블렌더) | 8 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m10.md |
 | 21 | `act2` | 적 동작 칸 2: 정파 제자, 사파 무사, 마교도, 관병, 강시 | 동작 칸 | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act2.md |
-| 22 | `face1` | 화산귀환 인물 얼굴 1: 청명, 백천, 유이설, 윤종, 조걸, 현종 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face1.md |
-| 23 | `face2` | 화산귀환 인물 얼굴 2: 현영, 현상, 운검, 운암, 운각, 백상 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face2.md |
-| 24 | `ui1` | 화면 틀 1: 창과 단추 틀, 붓자국 띠 | 화면 틀 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui1.md |
-| 25 | `face3` | 화산귀환 인물 얼굴 3: 진금룡, 이송백, 종서한, 고휘, 기목승, 사마승 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face3.md |
-| 26 | `face4` | 화산귀환 인물 얼굴 4: 허도진인, 허원, 허산, 무연, 무진, 진현 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face4.md |
-| 27 | `ui2` | 화면 틀 2: 화면 단추 그림, 머리 위 표식 | 화면 틀 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui2.md |
-| 28 | `act3` | 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진 | 동작 칸 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act3.md |
-| 29 | `face5` | 화산귀환 인물 얼굴 5: 진무, 당소소, 당군악, 당보, 당호, 당화 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face5.md |
-| 30 | `face6` | 화산귀환 인물 얼굴 6: 당잔, 당패, 홍대광, 구칠, 종팔, 위립산 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face6.md |
-| 31 | `face7` | 화산귀환 인물 얼굴 7: 위소행, 염평, 맹소 | 일러스트 | 3 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face7.md |
-| 32 | `ui3` | 화면 틀 3: 싸움 화면 틀 | 화면 틀 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md |
-| 33 | `roof1` | 지붕: 문파 지붕 무늬, 지붕 장식과 현판 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/roof1.md |
-| 34 | `m6` | 모형 M6: 장터와 나루 | 모형(블렌더) | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m6.md |
-| 35 | `walk06` | 사람 도트 6: 곽 아주머니, 백 노인, 촌장 어른, 대장장이 강씨 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk06.md |
-| 36 | `walk07` | 사람 도트 7: 윤 의원, 뱃사공 노씨, 사냥꾼 호씨, 복덕방 영감 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk07.md |
-| 37 | `walk08` | 사람 도트 8: 만물상 주인, 객잔 주인, 마을 사람, 마을 아낙 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk08.md |
-| 38 | `m7` | 모형 M7: 나무 (시험 삼아 한 그루) | 모형(블렌더) | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m7.md |
-| 39 | `act4` | 동료 동작 칸 2: 혁련하, 혜공, 사이라, 갈 선생, 양춘, 구 노창 | 동작 칸 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act4.md |
-| 40 | `icon1` | 아이콘 1: 무기 스물 | 아이콘 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon1.md |
-| 41 | `walk09` | 사람 도트 9: 동네 꼬마, 개방 거지, 창운문 제자, 꽃 파는 노파 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk09.md |
-| 42 | `walk10` | 사람 도트 10: 떠돌이 비무객, 순이네, 순이 아버지 | 도트(걷기) | 3 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk10.md |
-| 43 | `rock1` | 산길: 바위 무늬, 산길에 놓는 것 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/rock1.md |
-| 44 | `tree1` | 나무: 껍질과 잎 무늬, 잎 뭉치 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/tree1.md |
-| 45 | `m11` | 모형 M11: 나무 다섯 | 모형(블렌더) | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m11.md |
-| 46 | `act5` | 맞서는 사람 동작 칸 1: 낭리비어 위충, 광사자 맹호, 패천도 사마웅, 오강, 구양철, 혈수 막고 | 동작 칸 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act5.md |
-| 47 | `m12` | 모형 M12: 덤불과 풀 | 모형(블렌더) | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m12.md |
-| 48 | `land1` | 바깥 땅: 땅 무늬 여섯, 풀과 꽃 포기 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/land1.md |
-| 49 | `far1` | 먼 곳: 먼 산 띠 셋 | 그림 장 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/far1.md |
-| 50 | `act6` | 맞서는 사람 동작 칸 2: 고진, 월천, 연경추, 남화, 만화부인 | 동작 칸 | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act6.md |
-| 51 | `m13` | 모형 M13: 눈에 띄는 것 2: 다리, 누각, 종각, 돌사자, 비무대 | 모형(블렌더) | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m13.md |
-| 52 | `icon2` | 아이콘 2: 옷 서른다섯(윗옷, 아래옷, 신발, 머리) | 아이콘 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon2.md |
-| 53 | `icon3` | 아이콘 3: 초식 열여섯 | 아이콘 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon3.md |
-| 54 | `icon4` | 아이콘 4: 초식 스물여덟 | 아이콘 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon4.md |
-| 55 | `new01` | 새 사람 1: 장팔, 왕충, 석두 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new01.md |
-| 56 | `new02` | 새 사람 2: 운청, 화산 검수, 노예상 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new02.md |
-| 57 | `new03` | 새 사람 3: 노예상 부하, 물주, 도박장 주인 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new03.md |
-| 58 | `new04` | 새 사람 4: 도박장 덩치, 호객꾼, 취객 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new04.md |
-| 59 | `new05` | 새 사람 5: 노름꾼·골목 건달, 아전, 순라군 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new05.md |
-| 60 | `new06` | 새 사람 6: 숙수, 점소이, 전각지기·사당지기 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new06.md |
-| 61 | `new07` | 새 사람 7: 이야기꾼, 재주꾼, 떡장수 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new07.md |
-| 62 | `new08` | 새 사람 8: 구경꾼, 할멈·나물 파는 할머니, 포목전·잡화 상인 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new08.md |
-| 63 | `new09` | 새 사람 9: 비단 장수·포목점 안주인, 찻집 주인, 무관 문하생 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new09.md |
-| 64 | `new10` | 새 사람 10: 늙은 표사, 과거 준비생·책방 서생, 짐꾼·부두 일꾼 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new10.md |
-| 65 | `new11` | 새 사람 11: 탁발승, 떠돌이 약장수, 어부 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new11.md |
-| 66 | `new12` | 새 사람 12: 어부의 아들, 서생, 약초꾼 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new12.md |
-| 67 | `new13` | 새 사람 13: 무관 낙제생, 악사, 대장간 도제 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new13.md |
-| 68 | `new14` | 새 사람 14: 사냥꾼, 농사꾼, 춤꾼 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new14.md |
-| 69 | `new15` | 새 사람 15: 떠돌이 무사, 역참 마부, 행상 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new15.md |
-| 70 | `new16` | 새 사람 16: 순례자, 문파 전령, 입문 지망생 아이 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new16.md |
-| 71 | `new17` | 새 사람 17: 떠돌이 의원, 농부, 남궁세가 장로 남궁위 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new17.md |
-| 72 | `new18` | 새 사람 18: 제갈세가 군량관, 하북팽가 토벌대장 팽호 | 일러스트와 도트 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new18.md |
-| 73 | `walk11` | 사람 도트 11: 혜각 대사, 청허 도장, 매향, 정혜 사태 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk11.md |
-| 74 | `walk12` | 사람 도트 12: 설봉자, 막철심, 섭일, 진다명 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk12.md |
-| 75 | `walk13` | 사람 도트 13: 서문각, 홍두 장로, 제갈현, 팽대악 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk13.md |
-| 76 | `walk14` | 사람 도트 14: 황보웅, 진태석, 악정산, 양 태군 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk14.md |
-| 77 | `walk15` | 사람 도트 15: 언창호, 장양 진인, 허정자, 무량 법사 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk15.md |
-| 78 | `walk16` | 사람 도트 16: 임해조, 고산옥, 박무산, 설한연 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk16.md |
-| 79 | `walk17` | 사람 도트 17: 금강 법왕, 자운 사태 | 도트(걷기) | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk17.md |
-| 80 | `cg01` | 장면 그림 1: 잿더미, 견대, 빈 골짜기, 청하진 | 장면 그림 | 4 | 받음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg01.md |
-| 81 | `cg02` | 장면 그림 2: 떨어진 국자, 그믐밤, 마흔아홉 개의 위패, 창운문 | 장면 그림 | 4 | 일부 받음(남은 것 3) | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg02.md |
-| 82 | `cg03` | 장면 그림 3: 장서각의 밤, 장경각, 벼랑 아래, 천하비무 결승 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg03.md |
-| 83 | `cg04` | 장면 그림 4: 연회, 네 개의 손, 창고 밑, 구파 회관의 밤 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg04.md |
-| 84 | `cg05` | 장면 그림 5: 열두 깃발, 불타는 구화성, 강을 건너는 사람들, 갈라진 가면 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg05.md |
-| 85 | `cg06` | 장면 그림 6: 달이 뜨면, 붉은 달, 혈우, 합석 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg06.md |
-| 86 | `cg07` | 장면 그림 7: 소림의 문, 구화성 탈환, 비단길, 빈 칼집 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg07.md |
-| 87 | `cg08` | 장면 그림 8: 돌아온 사람, 방값, 심마, 천마 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg08.md |
-| 88 | `cg09` | 장면 그림 9: 걸레질, 서문, 달맞이 객잔, 패천도 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg09.md |
-| 89 | `cg10` | 장면 그림 10: 형, 낙월, 국수 한 그릇, 달밤 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg10.md |
-| 90 | `cg11` | 장면 그림 11: 이름 새긴 찻잔, 배고파, 천 번, 손가락 한 마디 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg11.md |
-| 91 | `cg12` | 장면 그림 12: 서툰 웃음, 주먹밥 세 개, 혼례, 만석 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg12.md |
-| 92 | `cg13` | 장면 그림 13: 점소이, 빈 상, 두 그릇, 맹주 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg13.md |
-| 93 | `cg14` | 장면 그림 14: 산채의 큰 칼, 문을 잠근 교주, 합석 어른, 문지기 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg14.md |
-| 94 | `cg15` | 장면 그림 15: 그믐의 낭인, 번호 없는 사람, 붉은 달, 다시, 달맞이 객잔 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg15.md |
-| 95 | `cg16` | 장면 그림 16: 강호의 절반, 붉은 제단, 다시 길 위에서, 달이 진 뒤 | 장면 그림 | 4 | 받음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg16.md |
+| 22 | `beast1` | 짐승과 귀신 도트 1: 멧돼지, 독사, 너구리, 죽귀, 원혼 | 도트(짐승) | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/beast1.md |
+| 23 | `face1` | 화산귀환 인물 얼굴 1: 청명, 백천, 유이설, 윤종, 조걸, 현종 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face1.md |
+| 24 | `face2` | 화산귀환 인물 얼굴 2: 현영, 현상, 운검, 운암, 운각, 백상 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face2.md |
+| 25 | `ui1` | 화면 틀 1: 창과 단추 틀, 붓자국 띠 | 화면 틀 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui1.md |
+| 26 | `face3` | 화산귀환 인물 얼굴 3: 진금룡, 이송백, 종서한, 고휘, 기목승, 사마승 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face3.md |
+| 27 | `face4` | 화산귀환 인물 얼굴 4: 허도진인, 허원, 허산, 무연, 무진, 진현 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face4.md |
+| 28 | `ui2` | 화면 틀 2: 화면 단추 그림, 머리 위 표식 | 화면 틀 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui2.md |
+| 29 | `act3` | 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진 | 동작 칸 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act3.md |
+| 30 | `face5` | 화산귀환 인물 얼굴 5: 진무, 당소소, 당군악, 당보, 당호, 당화 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face5.md |
+| 31 | `face6` | 화산귀환 인물 얼굴 6: 당잔, 당패, 홍대광, 구칠, 종팔, 위립산 | 일러스트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face6.md |
+| 32 | `face7` | 화산귀환 인물 얼굴 7: 위소행, 염평, 맹소 | 일러스트 | 3 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face7.md |
+| 33 | `ui3` | 화면 틀 3: 싸움 화면 틀 | 화면 틀 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md |
+| 34 | `roof1` | 지붕: 문파 지붕 무늬, 지붕 장식과 현판 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/roof1.md |
+| 35 | `m6` | 모형 M6: 장터와 나루 | 모형(블렌더) | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m6.md |
+| 36 | `walk06` | 사람 도트 6: 곽 아주머니, 백 노인, 촌장 어른, 대장장이 강씨 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk06.md |
+| 37 | `walk07` | 사람 도트 7: 윤 의원, 뱃사공 노씨, 사냥꾼 호씨, 복덕방 영감 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk07.md |
+| 38 | `walk08` | 사람 도트 8: 만물상 주인, 객잔 주인, 마을 사람, 마을 아낙 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk08.md |
+| 39 | `m7` | 모형 M7: 나무 (시험 삼아 한 그루) | 모형(블렌더) | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m7.md |
+| 40 | `act4` | 동료 동작 칸 2: 혁련하, 혜공, 사이라, 갈 선생, 양춘, 구 노창 | 동작 칸 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act4.md |
+| 41 | `icon1` | 아이콘 1: 무기 스물 | 아이콘 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon1.md |
+| 42 | `walk09` | 사람 도트 9: 동네 꼬마, 개방 거지, 창운문 제자, 꽃 파는 노파 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk09.md |
+| 43 | `walk10` | 사람 도트 10: 떠돌이 비무객, 순이네, 순이 아버지 | 도트(걷기) | 3 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk10.md |
+| 44 | `rock1` | 산길: 바위 무늬, 산길에 놓는 것 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/rock1.md |
+| 45 | `tree1` | 나무: 껍질과 잎 무늬, 잎 뭉치 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/tree1.md |
+| 46 | `m11` | 모형 M11: 나무 다섯 | 모형(블렌더) | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m11.md |
+| 47 | `act5` | 맞서는 사람 동작 칸 1: 낭리비어 위충, 광사자 맹호, 패천도 사마웅, 오강, 구양철, 혈수 막고 | 동작 칸 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act5.md |
+| 48 | `m12` | 모형 M12: 덤불과 풀 | 모형(블렌더) | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m12.md |
+| 49 | `beast2` | 짐승 도트 2: 사냥감 다섯과 마을의 개, 닭, 말 | 도트(짐승) | 8 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/beast2.md |
+| 50 | `land1` | 바깥 땅: 땅 무늬 여섯, 풀과 꽃 포기 | 그림 장 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/land1.md |
+| 51 | `far1` | 먼 곳: 먼 산 띠 셋 | 그림 장 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/far1.md |
+| 52 | `act6` | 맞서는 사람 동작 칸 2: 고진, 월천, 연경추, 남화, 만화부인 | 동작 칸 | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act6.md |
+| 53 | `m13` | 모형 M13: 눈에 띄는 것 2: 다리, 누각, 종각, 돌사자, 비무대 | 모형(블렌더) | 5 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m13.md |
+| 54 | `icon2` | 아이콘 2: 옷 서른다섯(윗옷, 아래옷, 신발, 머리) | 아이콘 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon2.md |
+| 55 | `icon3` | 아이콘 3: 초식 열여섯 | 아이콘 | 1 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon3.md |
+| 56 | `icon4` | 아이콘 4: 초식 스물여덟 | 아이콘 | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon4.md |
+| 57 | `new01` | 새 사람 1: 장팔, 왕충, 석두 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new01.md |
+| 58 | `new02` | 새 사람 2: 운청, 화산 검수, 노예상 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new02.md |
+| 59 | `new03` | 새 사람 3: 노예상 부하, 물주, 도박장 주인 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new03.md |
+| 60 | `new04` | 새 사람 4: 도박장 덩치, 호객꾼, 취객 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new04.md |
+| 61 | `new05` | 새 사람 5: 노름꾼·골목 건달, 아전, 순라군 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new05.md |
+| 62 | `new06` | 새 사람 6: 숙수, 점소이, 전각지기·사당지기 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new06.md |
+| 63 | `new07` | 새 사람 7: 이야기꾼, 재주꾼, 떡장수 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new07.md |
+| 64 | `new08` | 새 사람 8: 구경꾼, 할멈·나물 파는 할머니, 포목전·잡화 상인 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new08.md |
+| 65 | `new09` | 새 사람 9: 비단 장수·포목점 안주인, 찻집 주인, 무관 문하생 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new09.md |
+| 66 | `new10` | 새 사람 10: 늙은 표사, 과거 준비생·책방 서생, 짐꾼·부두 일꾼 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new10.md |
+| 67 | `new11` | 새 사람 11: 탁발승, 떠돌이 약장수, 어부 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new11.md |
+| 68 | `new12` | 새 사람 12: 어부의 아들, 서생, 약초꾼 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new12.md |
+| 69 | `new13` | 새 사람 13: 무관 낙제생, 악사, 대장간 도제 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new13.md |
+| 70 | `new14` | 새 사람 14: 사냥꾼, 농사꾼, 춤꾼 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new14.md |
+| 71 | `new15` | 새 사람 15: 떠돌이 무사, 역참 마부, 행상 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new15.md |
+| 72 | `new16` | 새 사람 16: 순례자, 문파 전령, 입문 지망생 아이 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new16.md |
+| 73 | `new17` | 새 사람 17: 떠돌이 의원, 농부, 남궁세가 장로 남궁위 | 일러스트와 도트 | 6 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new17.md |
+| 74 | `new18` | 새 사람 18: 제갈세가 군량관, 하북팽가 토벌대장 팽호 | 일러스트와 도트 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new18.md |
+| 75 | `walk11` | 사람 도트 11: 혜각 대사, 청허 도장, 매향, 정혜 사태 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk11.md |
+| 76 | `walk12` | 사람 도트 12: 설봉자, 막철심, 섭일, 진다명 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk12.md |
+| 77 | `walk13` | 사람 도트 13: 서문각, 홍두 장로, 제갈현, 팽대악 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk13.md |
+| 78 | `walk14` | 사람 도트 14: 황보웅, 진태석, 악정산, 양 태군 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk14.md |
+| 79 | `walk15` | 사람 도트 15: 언창호, 장양 진인, 허정자, 무량 법사 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk15.md |
+| 80 | `walk16` | 사람 도트 16: 임해조, 고산옥, 박무산, 설한연 | 도트(걷기) | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk16.md |
+| 81 | `walk17` | 사람 도트 17: 금강 법왕, 자운 사태 | 도트(걷기) | 2 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk17.md |
+| 82 | `cg01` | 장면 그림 1: 잿더미, 견대, 빈 골짜기, 청하진 | 장면 그림 | 4 | 받음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg01.md |
+| 83 | `cg02` | 장면 그림 2: 떨어진 국자, 그믐밤, 마흔아홉 개의 위패, 창운문 | 장면 그림 | 4 | 일부 받음(남은 것 3) | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg02.md |
+| 84 | `cg03` | 장면 그림 3: 장서각의 밤, 장경각, 벼랑 아래, 천하비무 결승 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg03.md |
+| 85 | `cg04` | 장면 그림 4: 연회, 네 개의 손, 창고 밑, 구파 회관의 밤 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg04.md |
+| 86 | `cg05` | 장면 그림 5: 열두 깃발, 불타는 구화성, 강을 건너는 사람들, 갈라진 가면 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg05.md |
+| 87 | `cg06` | 장면 그림 6: 달이 뜨면, 붉은 달, 혈우, 합석 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg06.md |
+| 88 | `cg07` | 장면 그림 7: 소림의 문, 구화성 탈환, 비단길, 빈 칼집 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg07.md |
+| 89 | `cg08` | 장면 그림 8: 돌아온 사람, 방값, 심마, 천마 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg08.md |
+| 90 | `cg09` | 장면 그림 9: 걸레질, 서문, 달맞이 객잔, 패천도 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg09.md |
+| 91 | `cg10` | 장면 그림 10: 형, 낙월, 국수 한 그릇, 달밤 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg10.md |
+| 92 | `cg11` | 장면 그림 11: 이름 새긴 찻잔, 배고파, 천 번, 손가락 한 마디 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg11.md |
+| 93 | `cg12` | 장면 그림 12: 서툰 웃음, 주먹밥 세 개, 혼례, 만석 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg12.md |
+| 94 | `cg13` | 장면 그림 13: 점소이, 빈 상, 두 그릇, 맹주 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg13.md |
+| 95 | `cg14` | 장면 그림 14: 산채의 큰 칼, 문을 잠근 교주, 합석 어른, 문지기 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg14.md |
+| 96 | `cg15` | 장면 그림 15: 그믐의 낭인, 번호 없는 사람, 붉은 달, 다시, 달맞이 객잔 | 장면 그림 | 4 | 남음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg15.md |
+| 97 | `cg16` | 장면 그림 16: 강호의 절반, 붉은 제단, 다시 길 위에서, 달이 진 뒤 | 장면 그림 | 4 | 받음 | https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg16.md |
 
 ## 종류마다 넘기는 것
 
 | 종류 | 파일 | Claude가 넣는 방법 |
 |---|---|---|
-| 도트(걷기) | `<키>-walk.png` (2:1, 4열 3행, 마젠타 바탕) | `python3 tools/people_in.py <키>` |
+| 도트(걷기), 도트(짐승) | `<키>-walk.png` (2:1, 4열 3행, 마젠타 바탕) | `python3 tools/people_in.py <키>` |
 | 일러스트 | `<키>_n.png` (1024×1536) | `assets/art/`에 넣고 `list.json`에 이름을 적는다 |
 | 동작 칸 | `<키>-c.png` (2400×320, 여섯 칸) | `python3 tools/people_in.py <키>` |
 | 효과 | `<이름>.png` (초록 바탕) | `python3 tools/fx_in.py <이름>` |

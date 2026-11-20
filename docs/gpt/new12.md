@@ -1,4 +1,4 @@
-# 강호행 요청 66: 새 사람 12: 어부의 아들, 서생, 약초꾼
+# 강호행 요청 68: 새 사람 12: 어부의 아들, 서생, 약초꾼
 
 단계 이름 `new12` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 67번 `new13` 새 사람 13: 무관 낙제생, 악사, 대장간 도제 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new13.md
+다음 단계: 69번 `new13` 새 사람 13: 무관 낙제생, 악사, 대장간 도제 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new13.md

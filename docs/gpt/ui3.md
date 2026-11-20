@@ -1,4 +1,4 @@
-# 강호행 요청 32: 화면 틀 3: 싸움 화면 틀
+# 강호행 요청 33: 화면 틀 3: 싸움 화면 틀
 
 단계 이름 `ui3` · 종류: 화면 틀 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -48,4 +48,4 @@
 
 ---
 
-다음 단계: 33번 `roof1` 지붕: 문파 지붕 무늬, 지붕 장식과 현판 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/roof1.md
+다음 단계: 34번 `roof1` 지붕: 문파 지붕 무늬, 지붕 장식과 현판 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/roof1.md

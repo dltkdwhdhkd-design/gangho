@@ -1,4 +1,4 @@
-# 강호행 요청 63: 새 사람 9: 비단 장수·포목점 안주인, 찻집 주인, 무관 문하생
+# 강호행 요청 65: 새 사람 9: 비단 장수·포목점 안주인, 찻집 주인, 무관 문하생
 
 단계 이름 `new09` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 64번 `new10` 새 사람 10: 늙은 표사, 과거 준비생·책방 서생, 짐꾼·부두 일꾼 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new10.md
+다음 단계: 66번 `new10` 새 사람 10: 늙은 표사, 과거 준비생·책방 서생, 짐꾼·부두 일꾼 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new10.md

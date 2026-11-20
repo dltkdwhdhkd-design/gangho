@@ -1,4 +1,4 @@
-# 강호행 요청 77: 사람 도트 15: 언창호, 장양 진인, 허정자, 무량 법사
+# 강호행 요청 79: 사람 도트 15: 언창호, 장양 진인, 허정자, 무량 법사
 
 단계 이름 `walk15` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 78번 `walk16` 사람 도트 16: 임해조, 고산옥, 박무산, 설한연 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk16.md
+다음 단계: 80번 `walk16` 사람 도트 16: 임해조, 고산옥, 박무산, 설한연 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk16.md

@@ -1,4 +1,4 @@
-# 강호행 요청 79: 사람 도트 17: 금강 법왕, 자운 사태
+# 강호행 요청 81: 사람 도트 17: 금강 법왕, 자운 사태
 
 단계 이름 `walk17` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -61,4 +61,4 @@
 
 ---
 
-다음 단계: 81번 `cg02` 장면 그림 2: 떨어진 국자, 그믐밤, 마흔아홉 개의 위패, 창운문 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg02.md
+다음 단계: 83번 `cg02` 장면 그림 2: 떨어진 국자, 그믐밤, 마흔아홉 개의 위패, 창운문 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/cg02.md

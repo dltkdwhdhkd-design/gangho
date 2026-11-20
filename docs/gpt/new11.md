@@ -1,4 +1,4 @@
-# 강호행 요청 65: 새 사람 11: 탁발승, 떠돌이 약장수, 어부
+# 강호행 요청 67: 새 사람 11: 탁발승, 떠돌이 약장수, 어부
 
 단계 이름 `new11` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 66번 `new12` 새 사람 12: 어부의 아들, 서생, 약초꾼 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new12.md
+다음 단계: 68번 `new12` 새 사람 12: 어부의 아들, 서생, 약초꾼 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new12.md

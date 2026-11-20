@@ -1,4 +1,4 @@
-# 강호행 요청 58: 새 사람 4: 도박장 덩치, 호객꾼, 취객
+# 강호행 요청 60: 새 사람 4: 도박장 덩치, 호객꾼, 취객
 
 단계 이름 `new04` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 59번 `new05` 새 사람 5: 노름꾼·골목 건달, 아전, 순라군 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new05.md
+다음 단계: 61번 `new05` 새 사람 5: 노름꾼·골목 건달, 아전, 순라군 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new05.md

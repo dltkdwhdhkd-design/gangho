@@ -1,4 +1,4 @@
-# 강호행 요청 42: 사람 도트 10: 떠돌이 비무객, 순이네, 순이 아버지
+# 강호행 요청 43: 사람 도트 10: 떠돌이 비무객, 순이네, 순이 아버지
 
 단계 이름 `walk10` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -71,4 +71,4 @@
 
 ---
 
-다음 단계: 43번 `rock1` 산길: 바위 무늬, 산길에 놓는 것 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/rock1.md
+다음 단계: 44번 `rock1` 산길: 바위 무늬, 산길에 놓는 것 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/rock1.md

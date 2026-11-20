@@ -1,4 +1,4 @@
-# 강호행 요청 28: 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진
+# 강호행 요청 29: 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진
 
 단계 이름 `act3` · 종류: 동작 칸 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -99,4 +99,4 @@
 
 ---
 
-다음 단계: 29번 `face5` 화산귀환 인물 얼굴 5: 진무, 당소소, 당군악, 당보, 당호, 당화 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face5.md
+다음 단계: 30번 `face5` 화산귀환 인물 얼굴 5: 진무, 당소소, 당군악, 당보, 당호, 당화 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face5.md

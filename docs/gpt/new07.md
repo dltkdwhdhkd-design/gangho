@@ -1,4 +1,4 @@
-# 강호행 요청 61: 새 사람 7: 이야기꾼, 재주꾼, 떡장수
+# 강호행 요청 63: 새 사람 7: 이야기꾼, 재주꾼, 떡장수
 
 단계 이름 `new07` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -100,4 +100,4 @@
 
 ---
 
-다음 단계: 62번 `new08` 새 사람 8: 구경꾼, 할멈·나물 파는 할머니, 포목전·잡화 상인 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new08.md
+다음 단계: 64번 `new08` 새 사람 8: 구경꾼, 할멈·나물 파는 할머니, 포목전·잡화 상인 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/new08.md

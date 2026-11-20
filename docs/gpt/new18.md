@@ -1,4 +1,4 @@
-# 강호행 요청 72: 새 사람 18: 제갈세가 군량관, 하북팽가 토벌대장 팽호
+# 강호행 요청 74: 새 사람 18: 제갈세가 군량관, 하북팽가 토벌대장 팽호
 
 단계 이름 `new18` · 종류: 일러스트와 도트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -84,4 +84,4 @@
 
 ---
 
-다음 단계: 73번 `walk11` 사람 도트 11: 혜각 대사, 청허 도장, 매향, 정혜 사태 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk11.md
+다음 단계: 75번 `walk11` 사람 도트 11: 혜각 대사, 청허 도장, 매향, 정혜 사태 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk11.md

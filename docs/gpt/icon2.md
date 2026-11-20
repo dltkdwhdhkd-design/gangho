@@ -1,4 +1,4 @@
-# 강호행 요청 52: 아이콘 2: 옷 서른다섯(윗옷, 아래옷, 신발, 머리)
+# 강호행 요청 54: 아이콘 2: 옷 서른다섯(윗옷, 아래옷, 신발, 머리)
 
 단계 이름 `icon2` · 종류: 아이콘 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -54,4 +54,4 @@
 
 ---
 
-다음 단계: 53번 `icon3` 아이콘 3: 초식 열여섯 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon3.md
+다음 단계: 55번 `icon3` 아이콘 3: 초식 열여섯 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon3.md

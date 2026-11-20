@@ -1,4 +1,4 @@
-# 강호행 요청 22: 화산귀환 인물 얼굴 1: 청명, 백천, 유이설, 윤종, 조걸, 현종
+# 강호행 요청 23: 화산귀환 인물 얼굴 1: 청명, 백천, 유이설, 윤종, 조걸, 현종
 
 단계 이름 `face1` · 종류: 일러스트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -95,4 +95,4 @@
 
 ---
 
-다음 단계: 23번 `face2` 화산귀환 인물 얼굴 2: 현영, 현상, 운검, 운암, 운각, 백상 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face2.md
+다음 단계: 24번 `face2` 화산귀환 인물 얼굴 2: 현영, 현상, 운검, 운암, 운각, 백상 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face2.md

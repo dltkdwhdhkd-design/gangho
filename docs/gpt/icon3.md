@@ -1,4 +1,4 @@
-# 강호행 요청 53: 아이콘 3: 초식 열여섯
+# 강호행 요청 55: 아이콘 3: 초식 열여섯
 
 단계 이름 `icon3` · 종류: 아이콘 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -46,4 +46,4 @@
 
 ---
 
-다음 단계: 54번 `icon4` 아이콘 4: 초식 스물여덟 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon4.md
+다음 단계: 56번 `icon4` 아이콘 4: 초식 스물여덟 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/icon4.md

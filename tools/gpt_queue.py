@@ -113,6 +113,7 @@ R_MODEL = """- 규칙, 재질 이름표, 틀(`gangho_kit.py`)은 모형 규칙 �
 REF = {
  'walk': [('도트의 급', 'art-src/ref-people.png'), ('**칸 배치의 본보기**(이미 받은 사파 무사: 4열 3행, 마젠타 바탕)', 'art-src/chatgpt/mob_sa-src.png')],
  'ill': [('일러스트 그림체', 'art-src/ref-art.png')],
+ 'beast': [('사람 도트의 급(이것과 같은 굵기로)', 'art-src/ref-people.png'), ('**칸 배치의 본보기**(이미 받은 사파 무사: 4열 3행, 마젠타 바탕)', 'art-src/chatgpt/mob_sa-src.png')],
  'act': [('**이미 받은 주인공의 검 동작 칸**(이것과 같은 크기·배치로)', 'assets/hd2d/preview/me_act.webp'), ('이미 받은 큰 칼 동작 칸의 원본(2400×320)', 'art-src/chatgpt/me_blade-c.png')],
  'fx': [('지금 전투 화면(사람 도트 크기와 굵기)', 'art-src/ref-fx.png'), ('이미 받은 효과의 본보기(칸 나누기와 굵기)', 'art-src/chatgpt/hs_slash.png')],
  'fxh': [('지금 전투 화면(사람 도트 크기와 굵기)', 'art-src/ref-fx.png'), ('이미 받은 매화 칼빛(같은 굵기와 색으로)', 'art-src/chatgpt/hs_slash.png'), ('이미 받은 꽃잎 회오리', 'art-src/chatgpt/hs_swirl.png')],
@@ -125,6 +126,7 @@ REF = {
 CHECK = {
  'walk': ['4열 3행 열두 칸인가. 열의 순서가 정면, 뒷모습, 옆모습, 옆모습 중간 걸음인가', '2행과 3행이 서로 반대 발인가', '열두 칸의 키와 옷과 색이 같은가. 일러스트와 같은 사람인가', '바탕이 단색 마젠타이고 그림자와 글자가 없는가'],
  'ill': ['세로 1024×1536, 허벅지 위까지, 머리와 손이 잘리지 않았는가', '글자와 서명이 없는가'],
+ 'beast': ['4열 3행 열두 칸인가. 열의 순서가 정면, 뒷모습, 옆모습, 옆모습 중간 걸음인가', '크기가 항목에 적힌 사람 키의 몇 배에 맞는가(사람 도트 옆에 세웠을 때)', '바탕이 단색 마젠타이고 그림자와 글자가 없는가'],
  'act': ['가로 한 줄 여섯 칸이고 모두 왼쪽을 보는가', '칸 순서가 준비, 내지름, 거둠, 맞음, 쓰러짐, 경공인가', '걷는 도트와 같은 사람·굵기·키인가. 무기가 칸 안에 있는가', '여섯 칸의 발끝 높이가 같은가'],
  'fx': ['격자의 열과 행이 항목대로인가. 칸 크기가 모두 같은가', '흰색과 회색 네 단계만 썼는가', '바탕이 단색 초록인가. 그림이 칸 밖으로 나가지 않았는가'],
  'fxh': ['격자의 열과 행이 항목대로인가. 칸 크기가 모두 같은가', '적힌 색만 썼는가. 벚꽃이 아니라 매화인가', '바탕이 단색 초록인가(이름띠 그림은 빼고)'],
@@ -134,7 +136,7 @@ CHECK = {
  'cg': ['가로 16:9인가. 아래쪽 4분의 1에 얼굴이 없는가', '나오는 사람이 일러스트와 같은 사람으로 보이는가', '글자와 서명이 없는가'],
  'model': ['`[모형]` 줄이 전부 `OK`이고 맨 끝이 `문제 0개`인가', '재질 이름이 이름표에 있는 것뿐인가', '`look()`으로 본 화면에서 사람 막대와 견준 크기가 맞는가'],
 }
-KIND = {'walk': '도트(걷기)', 'new': '일러스트와 도트', 'face': '일러스트', 'act': '동작 칸', 'fx': '효과', 'fxh': '효과', 'sheet': '그림 장', 'model': '모형(블렌더)', 'ui': '화면 틀', 'icon': '아이콘', 'cg': '장면 그림'}
+KIND = {'beast': '도트(짐승)', 'walk': '도트(걷기)', 'new': '일러스트와 도트', 'face': '일러스트', 'act': '동작 칸', 'fx': '효과', 'fxh': '효과', 'sheet': '그림 장', 'model': '모형(블렌더)', 'ui': '화면 틀', 'icon': '아이콘', 'cg': '장면 그림'}
 
 
 # ── 단계를 짓는다 ──
@@ -176,7 +178,7 @@ def act_items(rows):
     out = []
     for r in rows:
         k = r[0]; mob = k.startswith('mob_'); nm = r[1] if mob else short(k); hint = r[2] if len(r) > 2 else '걷는 도트에 그려진(들거나 찬) 무기 그대로. 무기가 없는 사람은 맨손(주먹과 손바닥)으로'
-        out.append(it_prompt(k + '-c.png', f'{nm} — 키 `{k}`', got_act(k), f"규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.\n\n무기와 몸짓: {hint}.", f"걷는 도트(이 사람의 기준): {sprite(k)}" + ('' if got_walk(k) else ' — **아직 없다. 이 사람의 걷는 도트를 먼저 받은 뒤에 한다(차례표에서 앞 단계).**')))
+        out.append(it_prompt(k + '-c.png', f'{nm} — 키 `{k}`', got_act(k), f"규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.\n\n무기와 몸짓: {hint}.", (f"걷는 도트(이 사람의 기준): {sprite(k)}" if got_walk(k) else f"걷는 도트: **아직 없다.** 차례표의 앞 단계에서 이 사람의 걷는 도트(`{k}-walk.png`)를 먼저 받고, 그 그림을 기준으로 삼는다. 일러스트: {U('assets/art/' + k + '_n.webp')}")))
     return out
 CGREF = [('주인공', 'me_n'), ('낭인', 'me_n'), ('연경추', 'chief_n'), ('곽 아주머니', 'gwak_n'), ('곽씨', 'gwak_n'), ('소연하', 'so_n'), ('백랑', 'baekrang_n'), ('혁련하', 'hyeok_n'), ('윤설', 'yun_n'), ('철우', 'cheol_n'), ('맹주', 'chief_n'), ('월천', 'cheon_n'), ('패천도', 'samaung_n'), ('사마웅', 'samaung_n'), ('강씨', 'smith_n'), ('꼬마', 'kid_n'), ('맹호', 'lion_n'), ('위충', 'wei_n')]
 def cg_items(rows):
@@ -214,6 +216,16 @@ step('act4', 'act', '동료 동작 칸 2: 혁련하, 혜공, 사이라, 갈 선�
 BOSS = ['wei', 'lion', 'samaung', 'ogang', 'guyang', 'makgo', 'go', 'cheon', 'chief', 'namhwa', 'manhwa']
 step('act5', 'act', '맞서는 사람 동작 칸 1: ' + ', '.join(short(k) for k in BOSS[:6]), '이야기에서 주인공과 칼을 맞대는 사람들이다. 걷는 도트(차례표의 "사람 도트 3~5")가 온 뒤에 한다.', act_items([[k] for k in BOSS[:6]]))
 step('act6', 'act', '맞서는 사람 동작 칸 2: ' + ', '.join(short(k) for k in BOSS[6:]), '맞서는 사람의 나머지 다섯이다.', act_items([[k] for k in BOSS[6:]]))
+R_BEAST = """- 한 마리에 그림 한 장. 가로가 세로의 두 배(2:1, 2048×1024쯤)인 그림을 **4열 3행 12칸**으로 나눠 같은 짐승을 열두 번 그린다(사람의 걷는 도트와 같은 칸 배치다).
+- 열: 1열 정면, 2열 뒷모습, 3열 왼쪽을 보는 옆모습, 4열 왼쪽을 보는 옆모습의 중간 걸음.
+- 행: 1행 가만히 선 모습(4열은 숨 쉬는 모습), 2행과 3행은 걷는 두 동작(네발짐승이면 앞뒤 다리가 엇갈리는 두 순간, 뱀이면 몸이 물결치는 두 순간, 떠 있는 귀신이면 옷자락이 흔들리는 두 순간). 4열의 2행과 3행은 그 사이의 중간 동작이다.
+- 열두 칸 모두 크기와 색이 같다. 칸끼리 넉넉히 떼고, 발끝(땅에 닿는 곳)은 줄마다 같은 높이에 둔다.
+- 도트의 급은 사람 도트와 같다: 사람이라면 키가 300픽셀쯤으로 그려지는 굵기로 그리고, 항목에 적힌 "사람 키의 몇 배"에 맞춰 크기를 잡는다. 털과 비늘은 3~4단 명암, 외곽선은 짙은 갈색이나 짙은 남색 1도트, 빛은 왼쪽 위에서 약하게.
+- 각진 도트로(안티앨리어싱·블러·그라데이션·반투명 없이). 바탕은 완전한 단색 마젠타(#FF00FF)이고 그림 안에는 마젠타를 쓰지 않는다. 바닥 그림자, 빛번짐, 글자, 칸 테두리를 넣지 않는다.
+- 귀엽게 줄인 만화풍이 아니라 사람 도트와 어울리는 사실적인 비례로 그린다."""
+def beast_items(rows): return [it_prompt(k + '-walk.png', f'{nm} — 키 `{k}`', got_walk(k), f"규칙대로 이 짐승의 걷는 도트 한 장(4열 3행).\n\n생김새와 크기: {d}.") for k, nm, d in rows]
+step('beast1', 'beast', '짐승과 귀신 도트 1: 멧돼지, 독사, 너구리, 죽귀, 원혼', '싸움에 나오는 짐승과 귀신이 아직 옛 작은 도트(16도트짜리)라서 새 사람 도트 옆에 서면 급이 다르다.', beast_items(IT['beast']['fight']))
+step('beast2', 'beast', '짐승 도트 2: 사냥감 다섯과 마을의 개, 닭, 말', '사냥감(토끼, 멧돼지 새끼, 꿩, 노루, 오소리)이 옛 작은 도트다. 마을에는 짐승이 한 마리도 없어서 개와 닭, 역참의 말을 더한다.', beast_items(IT['beast']['life']))
 # 방
 step('room1', 'sheet', '방의 벽: 벽 무늬, 아랫단과 들보, 나무 무늬', '방의 벽과 기둥은 블렌더 조각으로 서 있는데 겉무늬가 임시다. 이 세 장을 받으면 벽이 회벽·판자·벽돌·흙벽으로, 기둥과 가구가 제 나뭇결로 바뀐다. 방 바닥 무늬(FL1)는 받아서 깔았다.', sheets(['WL1', 'WL2', 'WL3', 'FL1']))
 step('room2', 'sheet', '방의 벽: 창과 문, 벽에 거는 것', '벽에 박는 창과 문, 뒷벽에 거는 문양판·현판·족자·검이다. 지금 창은 한 가지뿐이고 벽에 건 것이 거의 없다.', sheets(['IN8', 'IN1']))
@@ -268,9 +280,9 @@ for i, part in enumerate(chunks(IT['cg'], 4)):
     step(code, 'cg', f"장면 그림 {i + 1}: " + ', '.join(x['title'] for x in part), '이야기의 큰 장면에 뜨는 그림이다. 게임에는 자리가 이미 있고, 그림이 없으면 색 바탕에 장면 제목만 뜬다.', cg_items(part))
 
 W = WALKCODES
-ORDER = (['act0', 'fx1', 'room1', 'room2', 'm5'] + W['동료와 히로인'] + ['fx2', 'room3', 'm8', 'act1', 'fx3', 'room4', 'm9'] + W['이야기에서 맞서는 사람'] + ['fx4', 'yard1', 'm10', 'act2']
+ORDER = (['act0', 'fx1', 'room1', 'room2', 'm5'] + W['동료와 히로인'] + ['fx2', 'room3', 'm8', 'act1', 'fx3', 'room4', 'm9'] + W['이야기에서 맞서는 사람'] + ['fx4', 'yard1', 'm10', 'act2', 'beast1']
          + FACECODES[:2] + ['ui1'] + FACECODES[2:4] + ['ui2', 'act3'] + FACECODES[4:] + ['ui3', 'roof1', 'm6'] + W['청하진과 자주 만나는 사람'][:3] + ['m7', 'act4', 'icon1'] + W['청하진과 자주 만나는 사람'][3:]
-         + ['rock1', 'tree1', 'm11', 'act5', 'm12', 'land1', 'far1', 'act6', 'm13', 'icon2', 'icon3', 'icon4'] + NEWCODES + W['문파 장문인과 세가 가주'] + CGCODES)
+         + ['rock1', 'tree1', 'm11', 'act5', 'm12', 'beast2', 'land1', 'far1', 'act6', 'm13', 'icon2', 'icon3', 'icon4'] + NEWCODES + W['문파 장문인과 세가 가주'] + CGCODES)
 assert sorted(ORDER) == sorted(STEPS), (set(ORDER) ^ set(STEPS))
 NUM = {c: i + 1 for i, c in enumerate(ORDER)}
 
@@ -289,7 +301,7 @@ def model_table(st):
     return '\n'.join(t)
 
 def page(s):
-    k = s['kind']; n = NUM[s['code']]; left = [x for x in s['items'] if not x['got']]; rules = {'walk': R_WALK, 'face': R_FACE, 'act': R_ACT, 'fx': R_FX, 'fxh': R_FXH, 'sheet': R_SHEET, 'ui': R_UI, 'icon': R_ICON, 'cg': R_CG, 'model': R_MODEL}
+    k = s['kind']; n = NUM[s['code']]; left = [x for x in s['items'] if not x['got']]; rules = {'beast': R_BEAST, 'walk': R_WALK, 'face': R_FACE, 'act': R_ACT, 'fx': R_FX, 'fxh': R_FXH, 'sheet': R_SHEET, 'ui': R_UI, 'icon': R_ICON, 'cg': R_CG, 'model': R_MODEL}
     o = [f"# 강호행 요청 {n}: {s['title']}", '', f"단계 이름 `{s['code']}` · 종류: {KIND[k]} · 차례표: {U('docs/gpt/index.md')}", '', s['why'], '']
     if not left: o += ['**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.', '']
     else: o += [f"**이 단계에서 만들 것: {len(left)}개**" + (f" (이미 받은 {len(s['items']) - len(left)}개는 아래에 '받음'으로 적혀 있다. 다시 만들지 않는다.)" if len(left) < len(s['items']) else ''), '']
@@ -352,12 +364,13 @@ def index():
          '| 문파의 산문(패루) | 높이 5, 가운데 칸의 폭 2.5~3 |', '| 본전 앞마당의 큰 향로 | 2.2 |', '| 돌난간 | 0.7 |', '| 돌계단 디딤판 하나의 높이 | 0.14 |', '| 본전의 기단(월대) | 2.5 |', '| 담(기와 덮개까지) | 3 |',
          '| 덤불 | 높이 1~1.5, 폭 1.5~2 |', '| 작은 나무, 큰 나무 | 2.5, 4 |', '| 마당의 태극 무늬 | 지름 4.8 |', '',
          '## 차례표', '',
+         '위에서부터 게임에서 티가 많이 나는 순서다. 큰 줄기는 이렇다: ① 전투가 바로 좋아지는 것과 방·문파의 얼굴(검기, 방의 벽과 살림, 산문, 동료와 맞서는 사람의 도트, 적의 동작 칸) ② 화산귀환 인물의 얼굴, 화면 틀, 청하진 사람, 뜰과 나무와 덤불 ③ 아이콘, 새 사람, 문파 장문인 ④ 이야기의 장면 그림. 그림 단계 사이사이에 블렌더 모형 단계가 끼어 있다.', '',
          '| 차례 | 단계 | 무엇 | 종류 | 만들 것 | 상태 | 문서 |', '|---|---|---|---|---|---|---|']
     for c in ORDER:
         s = STEPS[c]; o.append(f"| {NUM[c]} | `{c}` | {s['title']} | {KIND[s['kind']]} | {len(s['items'])} | {status(s)} | {U('docs/gpt/' + c + '.md')} |")
     o += ['', '## 종류마다 넘기는 것', '',
           '| 종류 | 파일 | Claude가 넣는 방법 |', '|---|---|---|',
-          '| 도트(걷기) | `<키>-walk.png` (2:1, 4열 3행, 마젠타 바탕) | `python3 tools/people_in.py <키>` |',
+          '| 도트(걷기), 도트(짐승) | `<키>-walk.png` (2:1, 4열 3행, 마젠타 바탕) | `python3 tools/people_in.py <키>` |',
           '| 일러스트 | `<키>_n.png` (1024×1536) | `assets/art/`에 넣고 `list.json`에 이름을 적는다 |',
           '| 동작 칸 | `<키>-c.png` (2400×320, 여섯 칸) | `python3 tools/people_in.py <키>` |',
           '| 효과 | `<이름>.png` (초록 바탕) | `python3 tools/fx_in.py <이름>` |',

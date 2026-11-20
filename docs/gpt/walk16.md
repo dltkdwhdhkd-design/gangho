@@ -1,4 +1,4 @@
-# 강호행 요청 78: 사람 도트 16: 임해조, 고산옥, 박무산, 설한연
+# 강호행 요청 80: 사람 도트 16: 임해조, 고산옥, 박무산, 설한연
 
 단계 이름 `walk16` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 79번 `walk17` 사람 도트 17: 금강 법왕, 자운 사태 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk17.md
+다음 단계: 81번 `walk17` 사람 도트 17: 금강 법왕, 자운 사태 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk17.md

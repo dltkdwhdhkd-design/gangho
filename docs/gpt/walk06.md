@@ -1,4 +1,4 @@
-# 강호행 요청 35: 사람 도트 6: 곽 아주머니, 백 노인, 촌장 어른, 대장장이 강씨
+# 강호행 요청 36: 사람 도트 6: 곽 아주머니, 백 노인, 촌장 어른, 대장장이 강씨
 
 단계 이름 `walk06` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 36번 `walk07` 사람 도트 7: 윤 의원, 뱃사공 노씨, 사냥꾼 호씨, 복덕방 영감 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk07.md
+다음 단계: 37번 `walk07` 사람 도트 7: 윤 의원, 뱃사공 노씨, 사냥꾼 호씨, 복덕방 영감 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk07.md

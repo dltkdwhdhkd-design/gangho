@@ -1,4 +1,4 @@
-# 강호행 요청 73: 사람 도트 11: 혜각 대사, 청허 도장, 매향, 정혜 사태
+# 강호행 요청 75: 사람 도트 11: 혜각 대사, 청허 도장, 매향, 정혜 사태
 
 단계 이름 `walk11` · 종류: 도트(걷기) · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -81,4 +81,4 @@
 
 ---
 
-다음 단계: 74번 `walk12` 사람 도트 12: 설봉자, 막철심, 섭일, 진다명 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk12.md
+다음 단계: 76번 `walk12` 사람 도트 12: 설봉자, 막철심, 섭일, 진다명 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/walk12.md

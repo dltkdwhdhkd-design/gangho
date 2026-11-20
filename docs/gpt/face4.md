@@ -1,4 +1,4 @@
-# 강호행 요청 26: 화산귀환 인물 얼굴 4: 허도진인, 허원, 허산, 무연, 무진, 진현
+# 강호행 요청 27: 화산귀환 인물 얼굴 4: 허도진인, 허원, 허산, 무연, 무진, 진현
 
 단계 이름 `face4` · 종류: 일러스트 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -95,4 +95,4 @@
 
 ---
 
-다음 단계: 27번 `ui2` 화면 틀 2: 화면 단추 그림, 머리 위 표식 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui2.md
+다음 단계: 28번 `ui2` 화면 틀 2: 화면 단추 그림, 머리 위 표식 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui2.md

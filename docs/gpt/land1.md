@@ -1,4 +1,4 @@
-# 강호행 요청 48: 바깥 땅: 땅 무늬 여섯, 풀과 꽃 포기
+# 강호행 요청 50: 바깥 땅: 땅 무늬 여섯, 풀과 꽃 포기
 
 단계 이름 `land1` · 종류: 그림 장 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
@@ -57,4 +57,4 @@ Sprite sheet for a pixel-art wuxia RPG, 3 columns x 2 rows, exactly the pixel si
 
 ---
 
-다음 단계: 49번 `far1` 먼 곳: 먼 산 띠 셋 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/far1.md
+다음 단계: 51번 `far1` 먼 곳: 먼 산 띠 셋 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/far1.md
