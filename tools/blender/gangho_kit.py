@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from mathutils import Matrix, Vector
 
 KIT = 1
+BUILD = '2026-11-20b'  # 틀을 고친 날(끝 줄에 찍힌다. 받은 파일이 어느 틀로 만들어졌는지 본다)
 OUT = os.environ.get('GANGHO_OUT') or os.path.join(os.path.expanduser('~'), 'gangho_models')
 # 재질 이름표: 이름 -> (무엇, 임시 빛깔). 게임이 이 이름을 보고 무늬를 입힌다. 표에 없는 이름은 쓰지 않는다
 PALETTE = {
@@ -299,7 +300,15 @@ class Model:
         want = dict(filepath=path, export_format='GLB', export_yup=True, export_apply=True, use_selection=True, export_cameras=False, export_lights=False,
                     export_extras=True, export_animations=False, export_texcoords=False, export_normals=True)
         have = bpy.ops.export_scene.gltf.get_rna_type().properties.keys()
-        bpy.ops.export_scene.gltf(**{k: v for k, v in want.items() if k in have})
+        kw = {k: v for k, v in want.items() if k in have}
+        try:
+            bpy.ops.export_scene.gltf(**kw)
+        except Exception:  # 블렌더 화면이 떠 있는데 창 없이 불렸을 때(연결 도구가 뒤에서 실행할 때): 첫 창을 빌려 다시 해 본다
+            wins = bpy.context.window_manager.windows
+            if not wins or not hasattr(bpy.context, 'temp_override'):
+                raise
+            with bpy.context.temp_override(window=wins[0], screen=wins[0].screen):
+                bpy.ops.export_scene.gltf(**kw)
         for o in objs:
             if o.name == 'lamps':
                 bpy.data.objects.remove(o, do_unlink=True)
@@ -376,6 +385,6 @@ def done(pack=None):
             if os.path.exists(os.path.join(OUT, pack + '.py')):
                 z.write(os.path.join(OUT, pack + '.py'), pack + '.py')
         print(f'묶음 파일: {os.path.join(OUT, pack + ".zip")}')
-    print(f'== 끝: 모형 {len(_report)}개, 문제 {sum(1 for r in _report if r[1])}개, 폴더 {OUT} ==')
+    print(f'== 끝: 모형 {len(_report)}개, 문제 {sum(1 for r in _report if r[1])}개, 폴더 {OUT} (틀 {BUILD}) ==')
     del _report[:]
 # ==== 강호행 틀 끝 ====

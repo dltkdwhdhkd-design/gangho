@@ -47,6 +47,12 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-blender.md
 
 그림 주소: https://dltkdwhdhkd-design.github.io/gangho/docs/shots/1120/wallkit_blender.jpg
 
+같은 임시 조각을 게임에 세운 모습이다(왼쪽 위는 닮게 만들려는 기준 그림, 나머지 셋이 게임 화면). 게임이 재질 이름마다 도트 무늬를 입히고, 창과 문양판을 벽에 붙이고, 문양판에 글자를 얹는다. 조각이 상자 몇 개뿐이라 처마와 기둥머리, 주춧돌이 밋밋하다. M1에서 나아져야 할 곳이다.
+
+![게임에 세운 모습](shots/1120/room_walls.jpg)
+
+그림 주소: https://dltkdwhdhkd-design.github.io/gangho/docs/shots/1120/room_walls.jpg
+
 ## 넘기는 것
 
 - **묶음 하나에 스크립트 하나.** 그 묶음의 모형을 전부 한 스크립트에서 만든다. 이름은 "만들 차례"의 표에 있다(`gangho_m1.py` …).
@@ -241,7 +247,7 @@ done('gangho_ex')
 ```text
 [모형] ex_lampstand  x -2.2~4.8  y -2.2~2.2  z 0.0~15.0  삼각형 218  OK
 묶음 파일: …/gangho_models/gangho_ex.zip
-== 끝: 모형 1개, 문제 0개, 폴더 …/gangho_models ==
+== 끝: 모형 1개, 문제 0개, 폴더 …/gangho_models (틀 2026-11-20b) ==
 ```
 
 M1의 벽 조각은 Claude가 같은 틀로 임시로 만들어 둔 스크립트가 있다: https://dltkdwhdhkd-design.github.io/gangho/tools/blender/walls.py — 묶음 하나를 어떻게 쓰는지 볼 수 있다. 상자와 막대 몇 개로 치수만 맞춘 것이니, **M1은 이것보다 나은 모양으로** 만든다(기와 덮개의 기왓골과 처마, 기둥머리의 받침, 주춧돌의 깎임, 창살의 짜임).
@@ -259,6 +265,7 @@ from contextlib import contextmanager
 from mathutils import Matrix, Vector
 
 KIT = 1
+BUILD = '2026-11-20b'  # 틀을 고친 날(끝 줄에 찍힌다. 받은 파일이 어느 틀로 만들어졌는지 본다)
 OUT = os.environ.get('GANGHO_OUT') or os.path.join(os.path.expanduser('~'), 'gangho_models')
 # 재질 이름표: 이름 -> (무엇, 임시 빛깔). 게임이 이 이름을 보고 무늬를 입힌다. 표에 없는 이름은 쓰지 않는다
 PALETTE = {
@@ -551,7 +558,15 @@ class Model:
         want = dict(filepath=path, export_format='GLB', export_yup=True, export_apply=True, use_selection=True, export_cameras=False, export_lights=False,
                     export_extras=True, export_animations=False, export_texcoords=False, export_normals=True)
         have = bpy.ops.export_scene.gltf.get_rna_type().properties.keys()
-        bpy.ops.export_scene.gltf(**{k: v for k, v in want.items() if k in have})
+        kw = {k: v for k, v in want.items() if k in have}
+        try:
+            bpy.ops.export_scene.gltf(**kw)
+        except Exception:  # 블렌더 화면이 떠 있는데 창 없이 불렸을 때(연결 도구가 뒤에서 실행할 때): 첫 창을 빌려 다시 해 본다
+            wins = bpy.context.window_manager.windows
+            if not wins or not hasattr(bpy.context, 'temp_override'):
+                raise
+            with bpy.context.temp_override(window=wins[0], screen=wins[0].screen):
+                bpy.ops.export_scene.gltf(**kw)
         for o in objs:
             if o.name == 'lamps':
                 bpy.data.objects.remove(o, do_unlink=True)
@@ -628,7 +643,7 @@ def done(pack=None):
             if os.path.exists(os.path.join(OUT, pack + '.py')):
                 z.write(os.path.join(OUT, pack + '.py'), pack + '.py')
         print(f'묶음 파일: {os.path.join(OUT, pack + ".zip")}')
-    print(f'== 끝: 모형 {len(_report)}개, 문제 {sum(1 for r in _report if r[1])}개, 폴더 {OUT} ==')
+    print(f'== 끝: 모형 {len(_report)}개, 문제 {sum(1 for r in _report if r[1])}개, 폴더 {OUT} (틀 {BUILD}) ==')
     del _report[:]
 # ==== 강호행 틀 끝 ====
 ```
