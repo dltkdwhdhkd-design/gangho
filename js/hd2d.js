@@ -15,9 +15,9 @@ import { newState } from './state.js';
 import { makeBuilder, SPEC, GRAND } from './hd2d/build.js';
 import { ROLE } from './talkdata.js';
 
-// 주소에 붙여 견주어 보는 값: &camk=0.63(마을 카메라 거리, 클수록 멀다. 기본 .95), &gk=0.857(땅이 깊이 쪽으로 눌려 보이는 정도, 클수록 덜 눕는다. 기본은 진짜 비율인 sin(PITCH) = .574, 예전 값은 .857), &time=morning(빛: morning·day·evening·night)
+// 주소에 붙여 견주어 보는 값: &camk=0.63(마을 카메라 거리, 클수록 멀다. 기본 .95), &gk=0.857(땅이 깊이 쪽으로 눌려 보이는 정도, 클수록 덜 눕는다. 기본은 진짜 비율인 sin(PITCH) = .574, 예전 값은 .857), &time=morning(빛: morning·day·evening·night), &pitch=25&fov=22(카메라가 내려다보는 각과 세로 시야. 기본 35와 34. 일검풍운결은 15와 18쯤인데 우리 지도에서는 낮추면 사람이 집에 가려진다: docs/ws-study.md)
 const qn = k => { try { const v = parseFloat(new URLSearchParams(location.search).get(k)); return v > 0 ? v : 0; } catch { return 0; } };
-const DEG = Math.PI / 180, PITCH = 35 * DEG, FOV = 34, ZS = qn('gk') ? qn('gk') / Math.sin(PITCH) : 1 /* 깊이를 늘리지 않는다: 땅이 카메라 각도(35도)대로 눕는다. 평면도의 한 칸이 화면에서 가로 1에 세로 .574(원근까지 치면 주인공 발밑에서 .65쯤) */, HS = 1 / Math.cos(PITCH);
+const DEG = Math.PI / 180, PITCH = (qn('pitch') || 35) * DEG, FOV = qn('fov') || 34, ZS = qn('gk') ? qn('gk') / Math.sin(PITCH) : 1 /* 깊이를 늘리지 않는다: 땅이 카메라 각도(35도)대로 눕는다. 평면도의 한 칸이 화면에서 가로 1에 세로 .574(원근까지 치면 주인공 발밑에서 .65쯤) */, HS = 1 / Math.cos(PITCH);
 const CHAR = 15, AHEAD = .04;
 // 사람 크기: 집·소품에 비해 사람이 작아 보여서(일검풍운결은 사람이 계단 한 칸의 두세 배) 새 화면의 사람을 1.3배로 세우고, 카메라는 1.12배 뒤로 뺀다. 방은 js/field.js PSC
 // 크기 기준(일검풍운결 비교, 2026-11-18): 사람 키 ≈ 문 높이의 0.9, 큰 독 ≈ 사람의 0.65, 등롱 기둥 ≈ 사람의 1.5.
@@ -41,13 +41,15 @@ const TIMES = {
   // 명암: 해(sunI)는 세게, 하늘빛(hemI)은 약하게 해서 해 받는 면과 그늘의 차이를 크게 둔다. 해 높이를 낮춰 그림자를 길게.
   // 저녁은 화면 전체를 물들이지 않는다(tint는 거의 그대로). 해만 주황이고 하늘빛은 푸르고 어둡다
   morning: { sun: [.82, .38, .3], sunC: '#ffe0b4', sunI: 4, sky: '#8ea8d8', gnd: '#3a3628', hemI: .4, con: 1.15, fog: '#d4dae2', skyT: '#8fb4e6', mtn: '#7d8fa8', tint: [.99, 1, 1.03], expo: 1.02, sat: 1, lamp: 0 },
-  day: { sun: [-.74, .5, .3], sunC: '#ffdca0', sunI: 5, sky: '#8a9cb8', gnd: '#3a2a1c', hemI: .4, fill: .14, con: 1.55, vig: .85, fog: '#b8b4a4', skyT: '#7fa6dc', mtn: '#6c7880', tint: [1.08, 1, .86], expo: .95, sat: .92, warm: 1, lamp: 0 },
+  // 낮(2026-11-21에 다시 맞춤): 일검풍운결을 직접 켜서 낮 화면 열여덟 장을 재 보니 밝기 95~125, 누런 올리브빛이 5~8할, 주황은 1할 안팎이었다(tools/tone.py).
+  // 전의 값은 어두운 홍보 그림 한 장에 맞춘 것이라 어디서나 주황이 8~9할이고 밝기가 50~70이었다. 해는 옅은 누런빛, 하늘빛은 올리브 잿빛, 물들이기(warm)는 끈다. 잰 기록: docs/ws-study.md
+  day: { sun: [-.74, .5, .3], sunC: '#fff0c8', sunI: 5.5, sky: '#a8b090', gnd: '#4a4630', hemI: .5, fill: .25, con: 1.25, vig: .7, fog: '#d4d6c4', skyT: '#9fb8d8', mtn: '#7d8a8a', tint: [.9, 1.02, 1], expo: 1.4, sat: .78, warm: 0, lamp: 0 },
   evening: { sun: [-.94, .12, .2], sunC: '#ff8a3a', sunI: 4.6, sky: '#5068a8', gnd: '#1c1a24', hemI: .75, fog: '#a58ca4', skyT: '#4c5c9c', mtn: '#4e4a6c', tint: [.98, .97, 1.04], expo: 1, sat: 1.08, lamp: .55 },
   night: { sun: [-.4, .75, -.15], sunC: '#7f9cff', sunI: 1.3, sky: '#3a54a8', gnd: '#10142a', hemI: .62, fog: '#141c3c', skyT: '#0a1028', mtn: '#1a2240', tint: [.74, .88, 1.3], expo: 1.05, sat: .8, lamp: 1.2 },
 };
 
 export const HD = {
-  want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0,  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
+  want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0, times: TIMES, get roomLight() { return ROOML; },  // times·roomLight: 빛 값을 시험에서 바꿔 가며 찍을 때 쓴다(tools/dev/lt.cjs)  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
   maps: new Set(['cheongha']),  // 시제품은 청하진만. 나머지 지도는 예전 2D로 그린다
   remap(m) { if (!m || curMap === m) curMap = null; },  // 지도에 놓인 것이 바뀌었을 때(내 문파에 건물을 지음): 다음 그릴 때 그 지도를 새로 짓는다
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && art())) && !m.isoRoom && (!m.live || m.id === 'world'); },  // 강호 큰 지도는 주인공 둘레만 잘라 짓는다(winOf)  // 방은 전부 새 화면으로(벽을 조각으로 세운다: roomKit)(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
@@ -900,7 +902,8 @@ function foreground() {
 const ROOMSUN = [.14, .8, .58];
 // 방 안의 빛: 바깥의 낮 빛(센 해, 누렇게 물들이기)을 그대로 쓰면 방이 온통 주황이다(기준 그림은 주황 8%, 거의 검정 48%, 밝기 48).
 // 해를 약하게, 물들이기를 빼고, 채도를 낮추고, 낮에도 등불을 켠다. 방 바닥과 벽 그림(FL1, WL1)이 오면 다시 맞춘다
-const ROOMT = { day: { sunC: '#fff0d8', sunI: 2.7, sky: '#9a9486', gnd: '#3a3026', hemI: .5, fill: .1, con: 1.25, vig: .95, tint: [1, .98, .9], expo: .84, sat: .78, warm: 0, lamp: .45 },
+// 2026-11-21: 직접 잰 방(소림의 방, 무당 삼청전 안)은 밝기 37, 거의 검정이 5할이고 등롱 둘레만 밝았다. 우리 방은 밝기 52~64, 거의 검정 5~13%였다. 해와 하늘빛을 줄이고 등불을 키워 밝기 40~58, 거의 검정 14~30%로 옮겼다(사람이 어둠에 묻히지 않는 데까지만)
+const ROOMT = { day: { sunC: '#fff0d8', sunI: 2.1, sky: '#9a9486', gnd: '#3a3026', hemI: .36, fill: .1, con: 1.36, vig: 1.1, tint: [1, .98, .91], expo: .86, sat: .74, warm: 0, lamp: .75 },
   night: { sunC: '#ffc890', sunI: 1.5, sky: '#6e5e4c', gnd: '#261e16', hemI: .62, fill: .1, con: 1.2, vig: 1.05, tint: [1, .95, .88], expo: .9, sat: .85, warm: 0, lamp: 1.2 } }, ROOML = {};  // 밤의 방은 달빛이 아니라 촛불 빛이다: 누렇고 어둑하게, 등불 둘레가 밝다
 const LT = () => { const t = timeOf(), L = TIMES[t]; return curMap?.room ? (ROOML[t] ||= { ...L, ...ROOMT[t === 'night' ? 'night' : 'day'] }) : L; };
 const timeOf0 = () => HD.opt.time === 'auto' ? (G.S?.flags?.night ? 'night' : 'day') : HD.opt.time;
