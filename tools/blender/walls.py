@@ -1,10 +1,21 @@
 # 방의 벽 조각(rw_*). 규격은 tools/blender/spec.json의 M1, 틀은 gangho_kit.py(ChatGPT에게 주는 것과 같은 틀이다).
 # 이 파일은 Claude가 만든 임시 조각이다. ChatGPT가 같은 이름의 조각을 만들어 오면(docs/chatgpt-blender.md) 견주어 보고 나은 쪽을 쓴다.
-# 쓰는 법: GANGHO_OUT=assets/hd2d/models python3 tools/blender/walls.py && python3 tools/blender/gpt.py check assets/hd2d/models/rw_*.glb
+# 쓰는 법: python3 tools/blender/gpt.py run tools/blender/walls.py --install   (돌리고, 규격으로 검사하고, 통과한 것을 assets/hd2d/models/에 넣는다)
 # 약속: 벽의 앞면(방 안을 보는 넓은 면)이 y = 0, 방 안쪽이 -y, 벽의 몸은 +y 쪽으로 두께 5. 길이는 평면도 점(방 안 사람 키 22).
-import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# ---- 머리말(그대로 둔다): 틀(gangho_kit.py)을 불러온다. 옆에 없으면 받아 온다 ----
+import importlib, os, sys, urllib.request
+_d = os.path.join(os.path.expanduser('~'), 'gangho_models')
+os.makedirs(_d, exist_ok=True)
+try:
+    _src = urllib.request.urlopen('https://dltkdwhdhkd-design.github.io/gangho/tools/blender/gangho_kit.py', timeout=15).read()
+    open(os.path.join(_d, 'gangho_kit.py'), 'wb').write(_src)
+except Exception:
+    pass
+sys.path[:0] = ([os.path.dirname(os.path.abspath(__file__))] if '__file__' in globals() else []) + [_d]
+import gangho_kit
+importlib.reload(gangho_kit)
 from gangho_kit import *
+# ---- 머리말 끝 ----
 
 # 벽 한 칸: 아랫단, 넓은 면, 들보, 기와 덮개
 m = Model('rw_wall')
@@ -64,4 +75,5 @@ with m.at((0, 0, 15), rx=90):
     m.lathe('paper', (0, 0), [(13.5, 0), (13.5, .8)], n=20)
     m.lathe('wood_dark', (0, 0), [(13.5, 0), (15, 0), (15, 1.6), (13.5, 1.6)], n=20, ring=True)
 m.save(lim=((-15, 15), (-1.6, 0), (0, 30)), tris=300)
-done()
+look(22)
+done('gangho_m1')

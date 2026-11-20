@@ -6,11 +6,12 @@ ChatGPT에게 **블렌더로 모형을 만들게** 하는 문서다. 방의 벽 
 
 ## 주인이 하실 일
 
-1. ChatGPT **새 대화**에 아래 "처음 하는 말"을 그대로 붙인다.
-2. ChatGPT가 준 파일(`gangho_m1.py`. `.glb` 파일도 주면 그것까지)을 Claude 대화에 올린다. 파일로 못 받았으면 코드를 통째로 복사해 붙여도 된다.
-3. ChatGPT에게 "다음"이라고 하면 다음 묶음을 만든다.
+1. 블렌더에 연결된 ChatGPT **새 대화**에 아래 "처음 하는 말"을 그대로 붙인다.
+2. ChatGPT가 한 묶음을 다 만들면 주인 컴퓨터의 **사용자 폴더 아래 `gangho_models` 폴더**(윈도우라면 `C:\Users\내이름\gangho_models`)에 `gangho_m1.zip`이 생긴다. 그 파일을 Claude 대화에 올린다.
+3. ChatGPT가 대화에 준 스크립트(`gangho_m1.py`나 코드)도 같이 올린다. 없으면 zip만 올려도 된다(스크립트가 있으면 Claude가 작은 문제를 직접 고칠 수 있다).
+4. ChatGPT에게 "다음"이라고 하면 다음 묶음을 만든다.
 
-받은 것을 돌려 보고 게임에 넣는 일은 Claude가 한다. 주인 컴퓨터에는 아무것도 깔지 않아도 된다.
+받은 것을 검사하고 게임에 넣는 일은 Claude가 한다.
 
 ## ChatGPT에게 처음 하는 말
 
@@ -19,12 +20,14 @@ ChatGPT에게 **블렌더로 모형을 만들게** 하는 문서다. 방의 벽 
 ```text
 아래 주소의 문서를 읽어 줘. 내 게임 '강호행'에 넣을 블렌더 모형 요청문이야.
 https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-blender.md
-문서의 "규칙"을 지키고 문서에 있는 "틀"을 써서, "만들 차례"의 맨 위 묶음(M1)부터 한 묶음씩 만들어 줘. 한 메시지에 한 묶음만. 내가 "다음"이라고 하면 다음 묶음을 만들어.
-블렌더를 실행할 수 있으면(연결된 블렌더가 있거나 네 실행 환경에서 돌릴 수 있으면) 직접 실행해서 문서의 "스스로 확인"대로 확인한 다음, 스크립트 파일과 만들어진 .glb 파일들을 같이 줘. 실행할 수 없으면 스크립트 파일만 줘. 내 쪽에서 돌릴 거야.
-묶음 설명에 나오는 참고 그림 주소도 열어 봐. 주소를 못 열면 나한테 그 파일을 올려 달라고 말해.
+너는 내 블렌더에 연결돼 있어. 문서의 "규칙"을 지키고 문서의 "틀"을 블렌더에 불러와서, "만들 차례"의 맨 위 묶음(M1)부터 한 묶음씩 만들어 줘. 한 번에 한 묶음만. 내가 "다음"이라고 하면 다음 묶음을 만들어.
+만든 다음에는 문서의 "스스로 확인"대로 [모형] 줄이 전부 OK인지 보고, 게임과 같은 각도로 화면을 찍어 보면서 모양을 다듬어 줘. 끝나면 마지막에 돌린 스크립트 전체를 파일(gangho_m1.py)이나 코드 블록 하나로 나한테 주고, 내 컴퓨터 어느 폴더에 무슨 파일이 생겼는지 알려 줘.
+블렌더에 연결이 안 돼 있으면 그렇다고 말하고 스크립트만 줘. 묶음 설명에 나오는 참고 그림 주소도 열어 봐. 주소를 못 열면 나한테 그 파일을 올려 달라고 말해.
 ```
 
-**방법 2 (주소를 못 열 때)**: 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙인 뒤 "이 문서대로 M1부터 한 묶음씩 만들어 줘"라고 한다. 참고 그림(`docs/ref/ws-interior.jpg`, `docs/shots/1120/wallkit_blender.jpg`)도 내려받아 함께 올린다.
+**방법 2 (주소를 못 열 때)**: 이 문서를 GitHub에서 열고 오른쪽 위 복사 단추(Copy raw file)로 전부 복사해 새 대화에 붙인 뒤 "너는 내 블렌더에 연결돼 있어. 이 문서대로 M1부터 한 묶음씩 만들어 줘"라고 한다. 참고 그림(`docs/ref/ws-interior.jpg`, `docs/shots/1120/wallkit_blender.jpg`)도 내려받아 함께 올린다.
+
+**블렌더에 연결하지 않고도 된다.** 연결이 안 되는 날에는 ChatGPT가 스크립트만 써 주면 된다. 그 파일을 Claude 대화에 올리면 Claude가 여기서 블렌더로 돌려 모형으로 만든다.
 
 ---
 
@@ -46,11 +49,11 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-blender.md
 
 ## 넘기는 것
 
-- **묶음 하나에 스크립트 파일 하나.** 파일 이름은 "만들 차례"의 표에 있다(`gangho_m1.py` …). 그 묶음의 모형을 전부 한 파일에서 만든다.
-- 스크립트는 아래 "틀"(`gangho_kit.py`)을 써서 쓴다. 틀이 치수를 검사하고 `.glb`로 내보낸다.
-- 블렌더를 실행할 수 있었다면: 실행해서 찍힌 `[모형] …` 줄들을 답에 붙이고, 만들어진 `.glb` 파일들을 함께 준다(여럿이면 zip 하나로).
-- 실행할 수 없었다면: 스크립트 파일만 준다. 그 대신 "스스로 확인"의 셈을 손으로 해 본다.
-- 파일을 붙일 수 없으면 코드 블록 하나에 스크립트 전체를 넣는다(줄이지 말 것).
+- **묶음 하나에 스크립트 하나.** 그 묶음의 모형을 전부 한 스크립트에서 만든다. 이름은 "만들 차례"의 표에 있다(`gangho_m1.py` …).
+- 스크립트는 아래 "틀"(`gangho_kit.py`)을 써서 쓴다. 틀이 치수를 검사하고, 모형마다 `이름.glb`로 내보내고, 맨 끝에서 묶음을 `gangho_m1.zip` 하나로 묶는다. 파일은 블렌더가 도는 컴퓨터의 사용자 폴더 아래 `gangho_models` 폴더에 생긴다.
+- **블렌더에 연결돼 있을 때**: 스크립트를 블렌더에서 실행한다 → 찍힌 `[모형] …` 줄이 전부 `OK`인지 본다 → `look()`으로 게임과 같은 각도의 화면을 차려 놓고 화면을 찍어 보며 모양을 다듬는다(고칠 때는 스크립트를 고쳐 처음부터 다시 실행한다. 블렌더 화면에서 손으로 옮기거나 고친 것은 파일에 남지 않는다) → 마지막에 돌린 스크립트 전체를 주인에게 파일이나 코드 블록 하나로 주고, 생긴 파일의 자리(`…/gangho_models/gangho_m1.zip`)를 알려 준다.
+- **연결돼 있지 않을 때**: 스크립트만 준다(파일을 붙일 수 없으면 코드 블록 하나에 전부. 줄이지 말 것). 그 대신 "스스로 확인"의 셈을 손으로 해 본다.
+- Claude는 받은 스크립트를 블렌더 5.3으로 다시 돌려 모형을 만든다. 그래서 **스크립트가 원본**이고, 화면이 없는 곳에서도 처음부터 끝까지 혼자 돌아야 한다.
 
 ## 규칙
 
@@ -109,7 +112,8 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-blender.md
 
   `OK` 대신 `문제: …`가 찍히면 고쳐서 다시 돌린다. 맨 끝 줄이 `문제 0개`여야 한다.
 - 실행할 수 없으면: 모형마다 x, y, z의 가장 작은 값과 큰 값을 손으로 셈해 범위 안인지, 꼭 닿는 축의 양 끝에 닿는지 확인하고, 그 값을 답에 적는다.
-- 블렌더 화면을 볼 수 있으면 게임과 같은 눈으로 본다: 모형의 높이(z)를 1.22배로 늘리고, 남쪽 위에서 35° 내려다보는 정사영으로 본다. 이렇게 보면 가로 1점과 높이 1점이 화면에서 같은 길이다.
+- 블렌더 화면을 볼 수 있으면 게임과 같은 눈으로 본다: 모형을 다 `save()`한 뒤에 `look(사람 키)`를 부르면 틀이 모형들을 옆으로 늘어놓은 채 높이를 1.22배로 늘려 보이게 하고(게임이 그렇게 세운다), 남쪽 위에서 35° 내려다보는 정사영 카메라 `gangho_cam`을 세우고, 오른쪽 끝에 사람 키만 한 붉은 막대를 둔다. 이 카메라로 본 화면에서는 가로 1점과 높이 1점이 같은 길이다. 사람 키는 묶음 제목에 적혀 있다(22, 16, 15). 화면에서 살필 것: 사람 막대와 견준 크기, 윗면과 앞면의 윤곽, 너무 가늘어 안 보이는 부분, 깜빡이는 겹친 면.
+- 블렌더를 처음 열면 있는 기본 큐브·조명·카메라는 지워도 되고 그대로 둬도 된다(틀은 자기가 만든 것만 내보낸다).
 
 ## 재질 이름표
 
@@ -161,21 +165,33 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-blender.md
 
 파일 주소: https://dltkdwhdhkd-design.github.io/gangho/tools/blender/gangho_kit.py
 
-이 파일을 **고치지 않고** 스크립트와 같은 폴더에 두고 불러 쓴다. 스크립트는 늘 이렇게 시작하고 이렇게 끝난다:
+이 파일을 **고치지 않고** 불러 쓴다. 스크립트는 늘 아래 머리말로 시작하고 `done('묶음 파일 이름')`으로 끝난다. 머리말은 한 글자도 바꾸지 않는다: 틀을 위 주소에서 받아 `gangho_models` 폴더에 두고 불러온다(받지 못하면 스크립트 옆이나 그 폴더에 있는 틀을 쓴다).
 
 ```python
-import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# ---- 머리말(그대로 둔다): 틀(gangho_kit.py)을 불러온다. 옆에 없으면 받아 온다 ----
+import importlib, os, sys, urllib.request
+_d = os.path.join(os.path.expanduser('~'), 'gangho_models')
+os.makedirs(_d, exist_ok=True)
+try:
+    _src = urllib.request.urlopen('https://dltkdwhdhkd-design.github.io/gangho/tools/blender/gangho_kit.py', timeout=15).read()
+    open(os.path.join(_d, 'gangho_kit.py'), 'wb').write(_src)
+except Exception:
+    pass
+sys.path[:0] = ([os.path.dirname(os.path.abspath(__file__))] if '__file__' in globals() else []) + [_d]
+import gangho_kit
+importlib.reload(gangho_kit)
 from gangho_kit import *
+# ---- 머리말 끝 ----
 
 # … 모형들 …
 
-done()
+look(22)                # 블렌더 화면으로 살필 때만. 사람 키는 묶음 제목에 있다
+done('gangho_m1')       # 묶음 파일 이름(확장자 없이). gangho_m1.zip으로 묶인다
 ```
 
-블렌더 안에서 바로 실행해서 파일을 옆에 둘 수 없을 때는, 위 석 줄 대신 틀 전체를 스크립트 맨 위에 그대로 붙여도 된다(첫 줄 `# ==== 강호행 틀 v1 시작`부터 `# ==== 강호행 틀 끝 ====`까지 한 글자도 바꾸지 않는다. Claude가 받아서 그 부분을 저장소의 틀로 바꿔 돌린다).
+주소에서 틀을 받을 수 없는 곳(인터넷이 막힌 실행 환경)에서는 아래 "틀 전문"을 `gangho_kit.py`라는 파일로 스크립트 옆에 저장해 두면 된다. 머리말은 그대로 둔다.
 
-내보내는 폴더는 환경 변수 `GANGHO_OUT`이고, 없으면 홈 폴더의 `gangho_models`다.
+내보내는 폴더는 사용자 폴더 아래 `gangho_models`다(환경 변수 `GANGHO_OUT`이 있으면 그 폴더).
 
 | 쓰는 법 | 무엇 |
 |---|---|
@@ -192,7 +208,8 @@ done()
 | `m.lamp(x, y, z)` | 불빛 자리 |
 | `m.color('이름', '#rrggbb')` | 이름표에 없는 민무늬 빛깔. 돌려주는 이름을 재질로 쓴다 |
 | `m.save(lim=((x0, x1), (y0, y1), (z0, z1)), exact='x', tris=500)` | 검사하고 `이름.glb`로 내보낸다. 모형마다 한 번 |
-| `done()` | 스크립트 맨 끝에 한 번 |
+| `look(사람 키)` | 블렌더 화면에서 게임과 같은 각도로 보게 카메라 `gangho_cam`과 사람 키 막대를 차린다. `save()`를 다 한 뒤에 부른다. 내보낸 파일은 바뀌지 않는다 |
+| `done('gangho_m1')` | 스크립트 맨 끝에 한 번. 만든 모형 수와 문제 수를 찍고, 이번에 만든 `.glb`를 `gangho_m1.zip`으로 묶는다 |
 
 `cyl`, `lathe`의 반지름은 **축에서 평평한 면까지의 거리**다. `n`이 4의 배수(4, 8, 12, 16 …)이면 가로와 깊이가 정확히 반지름의 두 배가 된다(`n=4`는 축에 나란한 네모 기둥). 6각이나 10각은 좌우 폭이 반지름의 두 배이고 앞뒤는 조금 더 크다(6각은 15%, 10각은 5%).
 
@@ -201,9 +218,7 @@ done()
 서 있는 등 하나를 만드는 스크립트다(만들 차례에는 없는 물건이다. 쓰는 법만 본다).
 
 ```python
-import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gangho_kit import *
+# (맨 위에 머리말)
 
 m = Model('ex_lampstand')                                             # 본보기: 서 있는 등(사람 키 15점 기준)
 m.lathe('stone', (0, 0), [(2.2, 0), (2.2, 1), (1.4, 1.8)], n=8)       # 돌 받침: 아래가 넓은 여덟모
@@ -217,14 +232,16 @@ with m.at((3.2, 0, 9.4)):                                             # 팔 끝�
     m.lathe('wood_black', (0, 0), [(1, -.4), (1, 0)], n=8)            # 밑받침
     m.lamp(0, 0, 1.6)                                                 # 불빛 자리
 m.save(lim=((-2.5, 5), (-2.5, 2.5), (0, 15.2)), tris=400)
-done()
+look(15)
+done('gangho_ex')
 ```
 
 돌리면 이렇게 찍힌다:
 
 ```text
 [모형] ex_lampstand  x -2.2~4.8  y -2.2~2.2  z 0.0~15.0  삼각형 218  OK
-== 끝: 모형 1개, 문제 0개, 폴더 … ==
+묶음 파일: …/gangho_models/gangho_ex.zip
+== 끝: 모형 1개, 문제 0개, 폴더 …/gangho_models ==
 ```
 
 M1의 벽 조각은 Claude가 같은 틀로 임시로 만들어 둔 스크립트가 있다: https://dltkdwhdhkd-design.github.io/gangho/tools/blender/walls.py — 묶음 하나를 어떻게 쓰는지 볼 수 있다. 상자와 막대 몇 개로 치수만 맞춘 것이니, **M1은 이것보다 나은 모양으로** 만든다(기와 덮개의 기왓골과 처마, 기둥머리의 받침, 주춧돌의 깎임, 창살의 짜임).
@@ -532,7 +549,7 @@ class Model:
             o.select_set(True)
         bpy.context.view_layer.objects.active = objs[0]
         want = dict(filepath=path, export_format='GLB', export_yup=True, export_apply=True, use_selection=True, export_cameras=False, export_lights=False,
-                    export_extras=True, export_animations=False, export_texcoords=False, export_normals=True, export_materials='EXPORT', export_image_format='NONE')
+                    export_extras=True, export_animations=False, export_texcoords=False, export_normals=True)
         have = bpy.ops.export_scene.gltf.get_rna_type().properties.keys()
         bpy.ops.export_scene.gltf(**{k: v for k, v in want.items() if k in have})
         for o in objs:
@@ -546,9 +563,73 @@ class Model:
         return not bad
 
 
-def done():
-    """맨 끝에 한 번 부른다. 만든 모형 수와 문제 수를 찍는다"""
+def look(person=15):
+    """게임과 같은 눈으로 보게 장면을 차린다(블렌더 화면으로 모양을 살필 때 쓴다. 내보낸 파일은 바뀌지 않는다).
+    만든 모형들을 높이 1.22배로 늘려 보이게 하고(게임이 그렇게 세운다), 남쪽 위 35도에서 내려다보는 정사영 카메라 gangho_cam을 세우고,
+    오른쪽 끝에 사람 키(person점)만 한 붉은 막대를 둔다. 이 카메라로 보면 가로 1점과 높이 1점이 화면에서 같은 길이다"""
+    coll = _collection()
+    objs = [o for o in coll.objects if o.type == 'MESH' and '__' in o.name]
+    if not objs:
+        return
+    for n in ('gangho_view', 'gangho_person', 'gangho_cam'):
+        if bpy.data.objects.get(n):
+            bpy.data.objects.remove(bpy.data.objects[n], do_unlink=True)
+    k = 1 / math.cos(math.radians(35))
+    root = bpy.data.objects.new('gangho_view', None)
+    coll.objects.link(root)
+    root.scale = (1, 1, k)
+    lo, hi = [1e9] * 3, [-1e9] * 3
+    for o in objs:
+        o.parent = root
+        for c in o.bound_box:
+            p = Vector((c[0] + o.location.x, c[1] + o.location.y, c[2] * k))
+            for i in range(3):
+                lo[i], hi[i] = min(lo[i], p[i]), max(hi[i], p[i])
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1)
+    for v in bm.verts:
+        v.co = Vector((v.co.x * 7 + hi[0] + 10, v.co.y * 4 + lo[1], (v.co.z + .5) * person))
+    me = bpy.data.meshes.new('gangho_person')
+    bm.to_mesh(me)
+    bm.free()
+    man = bpy.data.objects.new('gangho_person', me)
+    coll.objects.link(man)
+    man.parent = root
+    man.data.materials.append(_material('gangho_person', '#c83a2a'))
+    hi[0] += 14
+    hi[2] = max(hi[2], person * k)
+    cam = bpy.data.cameras.new('gangho_cam')
+    cam.type, cam.clip_end = 'ORTHO', 100000
+    a = math.radians(35)
+    cam.ortho_scale = max(hi[0] - lo[0], ((hi[2] - lo[2]) * math.cos(a) + (hi[1] - lo[1]) * math.sin(a)) * 16 / 9) * 1.12
+    co = bpy.data.objects.new('gangho_cam', cam)
+    coll.objects.link(co)
+    co.rotation_euler = (math.radians(90) - a, 0, 0)
+    co.location = Vector(((lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2)) + Vector((0, -math.cos(a), math.sin(a))) * (hi[0] - lo[0] + hi[2] + 200)
+    bpy.context.scene.camera = co
+    try:
+        for win in bpy.context.window_manager.windows:
+            for area in win.screen.areas:
+                if area.type == 'VIEW_3D':
+                    area.spaces.active.region_3d.view_perspective = 'CAMERA'
+    except Exception:
+        pass
+
+
+def done(pack=None):
+    """맨 끝에 한 번 부른다. 만든 모형 수와 문제 수를 찍는다. pack='gangho_m1'처럼 묶음 이름을 주면 이번에 만든 .glb를 <이름>.zip 하나로 묶는다
+    (같은 폴더에 <이름>.py가 있으면 그것도 넣는다)"""
+    if pack and _report:
+        import zipfile
+        with zipfile.ZipFile(os.path.join(OUT, pack + '.zip'), 'w', zipfile.ZIP_DEFLATED) as z:
+            for name in dict.fromkeys(r[0] for r in _report):
+                if os.path.exists(os.path.join(OUT, name + '.glb')):
+                    z.write(os.path.join(OUT, name + '.glb'), name + '.glb')
+            if os.path.exists(os.path.join(OUT, pack + '.py')):
+                z.write(os.path.join(OUT, pack + '.py'), pack + '.py')
+        print(f'묶음 파일: {os.path.join(OUT, pack + ".zip")}')
     print(f'== 끝: 모형 {len(_report)}개, 문제 {sum(1 for r in _report if r[1])}개, 폴더 {OUT} ==')
+    del _report[:]
 # ==== 강호행 틀 끝 ====
 ```
 <!-- /gen:kit -->

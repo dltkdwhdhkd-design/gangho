@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ChatGPT가 블렌더로 만든 모형을 받아 넣는 도구. 규격은 tools/blender/spec.json, 틀은 tools/blender/gangho_kit.py, 요청서는 docs/chatgpt-blender.md.
 #   python3 tools/blender/gpt.py run <받은 스크립트.py> [--install]   받은 스크립트를 돌려 .glb를 만들고 검사한다. --install이면 통과한 것을 assets/hd2d/models/에 넣는다
-#   python3 tools/blender/gpt.py check <.glb나 폴더…> [--install]     받은 .glb를 규격으로 검사한다
+#   python3 tools/blender/gpt.py check <.glb나 폴더나 .zip…> [--install]   받은 .glb를 규격으로 검사한다
 #   python3 tools/blender/gpt.py doc [--check]                       요청서의 표와 틀을 spec.json·gangho_kit.py에서 다시 뽑는다(--check는 어긋났는지만 본다)
 # 받은 스크립트는 남이 쓴 코드다. 돌리기 전에 읽어 본다(파일을 지우거나 밖으로 내보내는 줄이 없는지). 돌릴 때는 빈 폴더에서 돌린다.
 import json, os, re, shutil, subprocess, sys, tempfile
@@ -57,7 +57,16 @@ def judge(name, m, pal):
 
 def check(paths, install=False):
     pal, files, nbad = palette(), [], 0
-    for p in paths: files += sorted(os.path.join(p, f) for f in os.listdir(p) if f.endswith('.glb')) if os.path.isdir(p) else [p]
+    for p in paths:
+        if p.endswith('.zip'):  # ChatGPT가 묶어 준 파일(gangho_m1.zip): 빈 폴더에 풀어서 본다
+            import zipfile
+            d = tempfile.mkdtemp(prefix='gpt_zip_'); z = zipfile.ZipFile(p)
+            for n in z.namelist():
+                if os.path.basename(n) == n and n.endswith(('.glb', '.py')): z.extract(n, d)
+            py = [n for n in os.listdir(d) if n.endswith('.py')]
+            if py: print(f'스크립트도 들어 있다: {os.path.join(d, py[0])}  (읽어 본 뒤 gpt.py run으로 돌릴 수 있다)')
+            p = d
+        files += sorted(os.path.join(p, f) for f in os.listdir(p) if f.endswith('.glb')) if os.path.isdir(p) else [p]
     rows = []
     for f in files:
         name = os.path.splitext(os.path.basename(f))[0]; m = measure(f); bad, note = judge(name, m, pal); nbad += bool(bad)

@@ -297,7 +297,7 @@ class Model:
             o.select_set(True)
         bpy.context.view_layer.objects.active = objs[0]
         want = dict(filepath=path, export_format='GLB', export_yup=True, export_apply=True, use_selection=True, export_cameras=False, export_lights=False,
-                    export_extras=True, export_animations=False, export_texcoords=False, export_normals=True, export_materials='EXPORT', export_image_format='NONE')
+                    export_extras=True, export_animations=False, export_texcoords=False, export_normals=True)
         have = bpy.ops.export_scene.gltf.get_rna_type().properties.keys()
         bpy.ops.export_scene.gltf(**{k: v for k, v in want.items() if k in have})
         for o in objs:
@@ -311,7 +311,71 @@ class Model:
         return not bad
 
 
-def done():
-    """맨 끝에 한 번 부른다. 만든 모형 수와 문제 수를 찍는다"""
+def look(person=15):
+    """게임과 같은 눈으로 보게 장면을 차린다(블렌더 화면으로 모양을 살필 때 쓴다. 내보낸 파일은 바뀌지 않는다).
+    만든 모형들을 높이 1.22배로 늘려 보이게 하고(게임이 그렇게 세운다), 남쪽 위 35도에서 내려다보는 정사영 카메라 gangho_cam을 세우고,
+    오른쪽 끝에 사람 키(person점)만 한 붉은 막대를 둔다. 이 카메라로 보면 가로 1점과 높이 1점이 화면에서 같은 길이다"""
+    coll = _collection()
+    objs = [o for o in coll.objects if o.type == 'MESH' and '__' in o.name]
+    if not objs:
+        return
+    for n in ('gangho_view', 'gangho_person', 'gangho_cam'):
+        if bpy.data.objects.get(n):
+            bpy.data.objects.remove(bpy.data.objects[n], do_unlink=True)
+    k = 1 / math.cos(math.radians(35))
+    root = bpy.data.objects.new('gangho_view', None)
+    coll.objects.link(root)
+    root.scale = (1, 1, k)
+    lo, hi = [1e9] * 3, [-1e9] * 3
+    for o in objs:
+        o.parent = root
+        for c in o.bound_box:
+            p = Vector((c[0] + o.location.x, c[1] + o.location.y, c[2] * k))
+            for i in range(3):
+                lo[i], hi[i] = min(lo[i], p[i]), max(hi[i], p[i])
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1)
+    for v in bm.verts:
+        v.co = Vector((v.co.x * 7 + hi[0] + 10, v.co.y * 4 + lo[1], (v.co.z + .5) * person))
+    me = bpy.data.meshes.new('gangho_person')
+    bm.to_mesh(me)
+    bm.free()
+    man = bpy.data.objects.new('gangho_person', me)
+    coll.objects.link(man)
+    man.parent = root
+    man.data.materials.append(_material('gangho_person', '#c83a2a'))
+    hi[0] += 14
+    hi[2] = max(hi[2], person * k)
+    cam = bpy.data.cameras.new('gangho_cam')
+    cam.type, cam.clip_end = 'ORTHO', 100000
+    a = math.radians(35)
+    cam.ortho_scale = max(hi[0] - lo[0], ((hi[2] - lo[2]) * math.cos(a) + (hi[1] - lo[1]) * math.sin(a)) * 16 / 9) * 1.12
+    co = bpy.data.objects.new('gangho_cam', cam)
+    coll.objects.link(co)
+    co.rotation_euler = (math.radians(90) - a, 0, 0)
+    co.location = Vector(((lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2)) + Vector((0, -math.cos(a), math.sin(a))) * (hi[0] - lo[0] + hi[2] + 200)
+    bpy.context.scene.camera = co
+    try:
+        for win in bpy.context.window_manager.windows:
+            for area in win.screen.areas:
+                if area.type == 'VIEW_3D':
+                    area.spaces.active.region_3d.view_perspective = 'CAMERA'
+    except Exception:
+        pass
+
+
+def done(pack=None):
+    """맨 끝에 한 번 부른다. 만든 모형 수와 문제 수를 찍는다. pack='gangho_m1'처럼 묶음 이름을 주면 이번에 만든 .glb를 <이름>.zip 하나로 묶는다
+    (같은 폴더에 <이름>.py가 있으면 그것도 넣는다)"""
+    if pack and _report:
+        import zipfile
+        with zipfile.ZipFile(os.path.join(OUT, pack + '.zip'), 'w', zipfile.ZIP_DEFLATED) as z:
+            for name in dict.fromkeys(r[0] for r in _report):
+                if os.path.exists(os.path.join(OUT, name + '.glb')):
+                    z.write(os.path.join(OUT, name + '.glb'), name + '.glb')
+            if os.path.exists(os.path.join(OUT, pack + '.py')):
+                z.write(os.path.join(OUT, pack + '.py'), pack + '.py')
+        print(f'묶음 파일: {os.path.join(OUT, pack + ".zip")}')
     print(f'== 끝: 모형 {len(_report)}개, 문제 {sum(1 for r in _report if r[1])}개, 폴더 {OUT} ==')
+    del _report[:]
 # ==== 강호행 틀 끝 ====
