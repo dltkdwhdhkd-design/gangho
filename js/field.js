@@ -37,6 +37,9 @@ export class Field {
     this.npcs = c.npcs.map(n => { const q = { dir: 0, walk: 0, ...n, x: n.x * TS, y: n.y * TS, hx: n.x * TS, hy: n.y * TS }, o = old.get(n.id);
       if (o && o.hx === q.hx && o.hy === q.hy && q.life && q.life !== 'still') Object.assign(q, { x: o.x, y: o.y, dir: o.dir, lt: o.lt, greetT: o.greetT, trip: o.trip, hide: o.hide, ri: o.ri, off: o.off, door: o.door });  // 같은 사람이면 서 있던 자리를 지킨다
       return q; });
+    // 계산대 바로 뒤에 선 사람(객잔 주인, 약방 주인)은 가까이 갈 수 없다. 계산대 너머로 말이 걸리게 말 거는 거리를 늘린다(target의 reach)
+    if (this.m.room) for (const n of this.npcs) { if (n.reach !== undefined || n.stamp) continue;
+      if (this.m.stamps.some(s => s.name === 'counter' && s.sol && n.x > s.sol.x - 2 && n.x < s.sol.x + s.sol.w + 2 && n.y <= s.sol.y + 4 && n.y > s.sol.y - 20)) n.reach = 14; }
     // 쿼터뷰 건물 바닥 안에 선 사람은 가까운 빈자리로 비켜 세운다
     const ft = this.m.isoFoot, inFoot = (x, y, pad) => ft.some(b => x > b.x - pad && x < b.x + b.w + pad && y > b.y - pad && y < b.y + b.h + pad + 3);
     if (ft) for (const n of this.npcs) { if (!inFoot(n.x, n.y, 2)) continue;
@@ -149,7 +152,8 @@ export class Field {
     const x = p.x + fx * 10, y = p.y - 3 + fy * 10, far = out ? (dx, dy) => hyp(...toScreen(m, dx, dy)) * 1.25 : hyp;  // 바깥 쿼터뷰는 화면에 보이는 거리로 잰다
     let best = null, bd = 19;
     // 일감 표시(걸레질 자리 따위, ! 달린 소품)는 같은 자리에 사람이 겹쳐 서 있어도 먼저 잡는다. 사람에게만 말이 걸려 일을 못 하던 것
-    for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y) - (n.stamp && n.mark?.() ? 10 : 0); if (d < bd) { bd = d; best = n; } }
+    // reach: 계산대 뒤에 선 사람처럼 가까이 갈 수 없는 사람은 그만큼 멀리서도 말이 걸린다
+    for (const n of this.npcs) { if (n.hide > 0) continue; const d = far(n.x - x, n.y - 4 - y) - (n.stamp && n.mark?.() ? 10 : 0) - (n.reach || 0); if (d < bd) { bd = d; best = n; } }
     if (best) return best;
     for (const r of this.roam) { if (r.gone || !r.peace) continue; const d = far(r.x - x, r.y - 4 - y); if (d < bd) { bd = d; best = { id: 'band', x: r.x, y: r.y, hint: `${r.tag} · ${r.trav ? '말 걸기' : '다가간다'}`, talk: () => r.trav ? G.travel.talk(r) : G.wander.talk(r) }; } }
     if (best) return best;

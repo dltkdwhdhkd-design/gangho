@@ -37,6 +37,10 @@ export const FLAG_IDS = ['shaolin', 'wudang', 'hwasan', 'jongnam', 'emei', 'gonr
 for (const id of FLAG_IDS) { STAMPS['flag_' + id] = [H, 352, 320, 20, 44]; STAMPS['flagl_' + id] = [H, 352, 320, 20, 44]; STAMPS['pen_' + id] = [H, 352, 320, 16, 28]; }
 // 전각 안 꾸밈(tools/decor_gen.py): 붉은 기둥, 병풍, 향로
 STAMPS.pillar = [H, 352, 320, 12, 44, 1, 38, 10, 6]; STAMPS.screen = [H, 352, 320, 56, 30, 0, 22, 56, 8]; STAMPS.censer = [H, 352, 320, 18, 22, 2, 15, 14, 7];
+// 방 가구의 새 이름(ChatGPT가 블렌더로 만든 M2 조각이 서는 자리). 새 화면에서는 조각으로 서고(js/hd2d/rooms.js FURN), 옛 2D 화면은 있던 그림을 빌려 그린다(js/core.js SAME).
+//   altar 제상(2D는 붉은 긴 탁자 그림) / chair 등받이 의자(2D는 stool 그림) / teatable 차 탁자(2D는 작은 상 그림) / seat 긴 걸상(2D는 거리의 걸상 그림)
+// 막힘 상자는 조각의 바닥 크기(사람 키 15점 기준 × 방 안 1.45배)에 맞췄다
+STAMPS.altar = [E, 176, 16, 48, 16, 2, 2, 44, 13]; STAMPS.chair = [E, 17, 19, 14, 13, 1, 5, 12, 8]; STAMPS.teatable = [E, 80, 16, 16, 16, 0, 1, 16, 16]; STAMPS.seat = [H, 0, 0, 38, 16, 1, 8, 36, 6];
 // 세력 자리 id → 깃발 id
 export const flagOf = id => FLAG_IDS.includes(id) ? id : ({ fort: 'heukpung', blackpalace: 'cheonma' }[id] || null);
 export function drawStamp(ctx, name, x, y, sc = 1) { const s = STAMPS[name]; if (!s) return; const hd = IMG['stamp/' + name]; if (hd) { ctx.drawImage(hd, x, y, s[3] * sc, s[4] * sc); return; } const im = IMG['tiles/' + s[0]]; if (im) ctx.drawImage(im, s[1], s[2], s[3], s[4], x, y, s[3] * sc, s[4] * sc); }  // sc: 쿼터뷰 마을에서 정면 소품을 사람 키에 맞게 줄인다

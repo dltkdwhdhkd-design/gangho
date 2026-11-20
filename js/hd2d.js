@@ -5,7 +5,7 @@
 // 세운 판의 키(HS)는 시점만큼 늘려 둔다(내려다봐도 사람 도트가 눌리지 않게). 깊이(ZS)는 늘리지 않는다(2026-11-19부터 ZS = 1):
 // 땅과 집이 진짜 비율 그대로 눕는다. 전에는 깊이를 1.49배 늘려 평면도가 2D 화면처럼 네모나게 보이게 했는데, 그래서 바닥과 지붕이 화면을 차지했다.
 // 켜기: 주소 끝에 ?hd2d=1. 못 켜면(WebGL2 없음 등) 아무 일 없이 2D로 돈다.
-import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K } from './hd2d/rooms.js';
+import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { PAL, WALLS as WKIND, PALTEX } from './hd2d/palette.js';
 import { PSC } from './field.js';
 import { G, IMG, TS, $ } from './core.js';
@@ -56,11 +56,14 @@ export const HD = {
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
   snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : m?.id === 'world' ? ACTW : ACTK, bodyH: (m, battle) => 16 * OLDK * (battle ? ACTB : HD.actK(m)) /* 사람 그림 한 칸의 키(평면도 점). 화면에서 사람 키를 잴 때 쓴다(tools/dev/tour.cjs) */, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },  // 시험용: 그리지 않고 카메라만 주인공에게 바로 맞춘다
-  // 시험용(tools/hd_occl_test.cjs): 평면도 (x, y)에 선 사람의 몸 다섯 점 가운데 지금 카메라에서 집·소품에 가려지는 점의 수와 가리는 것의 이름. 걷어 낸 집과 옅어진 소품은 가리지 않는 것으로 친다
-  covered(x, y) { const C = cam.position, rc = new T.Raycaster(), by = new Set(); let n = 0;
-    for (const [dx, dh] of BODY) { const v = new T.Vector3(x + dx, dh * HS + hAt(curMap, x, y), (y + 1) * ZS + .5), d = v.distanceTo(C); rc.set(C, v.sub(C).normalize()); rc.far = d - 1;
-      for (const h of rc.intersectObjects(propG.children, true)) { const u = h.object.userData, ow = u.owner?.userData || {}; if (!u.M || u.flat) continue; if (u.t && h.uv && !alphaAt(u.t, frac(h.uv.x), frac(h.uv.y))) continue; if (ow.faded || ow.cutV > .5) continue; n++; by.add(ow.s?.name || (ow.backdrop ? '방 모형' : '모형')); break; } }
-    return [n, [...by]]; },
+  // 시험용(tools/hd_occl_test.cjs): 평면도 (x, y)에 선 사람의 몸 다섯 점(머리, 가슴, 허리, 두 무릎) 가운데 지금 카메라에서 집·소품에 가려지는 점의 수, 가리는 것의 이름, 점마다 가려졌는지.
+  // 걷어 낸 집과 옅어진 소품은 가리지 않는 것으로 친다. 몸의 크기는 그 지도의 사람 크기다(방 안은 PSC배. 전에는 방에서도 바깥 크기로 재서 허리가 무릎 높이에 있었다)
+  covered(x, y) { const C = cam.position, rc = new T.Raycaster(), by = new Set(), k = curMap?.room ? PSC : 1, bits = []; let n = 0;
+    scene.updateMatrixWorld();  // 지도를 막 세운 뒤(한 번도 그리기 전)에는 새 물체의 자리 행렬이 비어 있어 줄이 다 빗나간다. 그래서 가려진 사람을 못 세는 일이 있었다
+    for (const [dx, dh] of BODY) { const v = new T.Vector3(x + dx * k, dh * k * HS + hAt(curMap, x, y), (y + 1) * ZS + .5), d = v.distanceTo(C); rc.set(C, v.sub(C).normalize()); rc.far = d - 1; let hit = false;
+      for (const h of rc.intersectObjects(propG.children, true)) { const u = h.object.userData, ow = u.owner?.userData || {}; if (!u.M || u.flat) continue; if (u.t && h.uv && !alphaAt(u.t, frac(h.uv.x), frac(h.uv.y))) continue; if (ow.faded || ow.cutV > .5) continue; n++; hit = true; by.add(ow.s?.name || (ow.backdrop ? '방 모형' : '모형')); break; }
+      bits.push(hit); }
+    return [n, [...by], bits]; },
   dbg: () => ({ fg: FG.map(o => [o.visible, o.position.toArray().map(Math.round), o.scale.toArray().map(Math.round), o.material.type, o.material.map?.image?.width, (() => { const c = o.material.map?.image; if (!c?.getContext) return -1; const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let a = 0; for (let i = 3; i < d.length; i += 4) a += d[i]; return Math.round(a / (d.length / 4)); })()]), cam: cam.position.toArray().map(Math.round), far: cam.far, m: mtns?.children.map(o => [o.position.toArray().map(Math.round), o.visible, o.material.color.getHexString()]) }),
   stats: () => ({ props: propG?.children.length || 0, faded: propG ? propG.children.filter(o => o.userData.faded || o.userData.cutOn).length : 0, boxes: propG ? propG.children.filter(o => o.isGroup).length : 0, cliffs: propG ? propG.children.filter(o => o.userData.cliff).length : 0, buildMs, fps: fpsV, low: fxNow() === 'low', size: R ? [R.domElement.width, R.domElement.height] : null }),
 };
@@ -119,6 +122,7 @@ async function init() {
     resize(true);
     if (HD.opt.art) await loadPreview();
     HD.ready = true; if (/[?&]hdpanel=1/.test(location.search)) panel();  // 시제품 판은 주소에 hdpanel=1을 붙였을 때만. 옵션은 메뉴의 설정 탭에 있다(js/ui.js)
+    const see = /[?&]see=(\w+)/.exec(location.search); if (see) (async () => { while (!G.field || !G.dbg) await new Promise(r => setTimeout(r, 50)); tour(see[1]); })();  // 주소에 see 값으로 지도 이름을 붙이면(쓰는 법은 tools/dev/README.md) 저장을 건드리지 않는 둘러보기로 그 곳에 바로 선다. 방을 고친 뒤 주인께 주소로 보여 드릴 때 쓴다
   } catch (e) { console.warn('새 화면을 켜지 못해 2D로 그린다', e); HD.failed = true; if (cv) cv.remove(); }
 }
 
@@ -140,7 +144,7 @@ const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; 
 // 새 그림 맛보기(tools/hd2d_preview.py가 만든 것): 받은 집 그림과 윤설 걷기. 0단계에서 크기와 결만 보려고 잠깐 씌운다
 // 새 인물 그림(Higgsfield HN*, 게임 시트 꼴 56점 칸)이 있는 사람 종류
 const NEWNPC = { 'chars/Villager': ['n_town', 'n_villager'], 'chars/Villager2': ['n_town'], 'chars/Villager3': ['n_town'], 'chars/Woman': ['n_town2', 'n_woman'], 'chars/Boy': ['n_kid'], 'chars/OldMan': ['n_oldman'], 'chars/OldWoman': ['n_oldwoman'], 'chars/Monk': ['n_monk'], 'chars/Gisaeng': ['n_gisaeng1'], 'chars/Gisaeng2': ['n_gisaeng2'], 'chars/Gisaeng3': ['n_gisaeng3'], 'chars/Pimp': ['n_pimp'] };  // 옛 도트 이름 → 새 사람 시트(앞의 것이 있으면 그것). 대화 그림과 맞춘 시트(n_town 따위)가 먼저
-const PV = {}, PEOPLE = new Set(), PVN = [ 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'w4_front', 'w5_front', 'w6_front', 'w4_side', 'w5_side', 'w6_side', 'k_fence', 'k_palisade', 'k_stone', 'hd_wall_tile', 'hd_wall_stone', 'hd_wall_rampart', 'hd_fence_stake', 'hd_fence_bamboo', 'hd_fence_wattle', 'gate', 'gate_arch', 'hd_gate_town', 'cl_rock', 'cl_step', 'g_plank', 'wt_river', 'wt_pond', 'wt_rapid', ...PALTEX.filter(n => n.startsWith('pm_'))];  // pm_*: 블렌더 조각에 입히는 무늬(js/hd2d/palette.js)
+const PV = {}, PEOPLE = new Set(), PVN = [ 'hut_o', 'hut_b', 'hut_o2', 'straw', 'mud', 'clay', 'me', 'yun', 'w_front', 'w_side', 'g_grass', 'g_road', 'g_yard', 'g_cobble', 'g_sand', 'g_snow', 'r_orange', 'r_dark', 'r_thatch', 'r_plank', 'r_mud', 'r_snow', 'e_orange', 'e_dark', 'e_thatch', 'e_plank', 'e_ridge', 'e_bracket', 'w1_front', 'w2_front', 'w3_front', 'w1_side', 'w2_side', 'w3_side', 'w4_front', 'w5_front', 'w6_front', 'w4_side', 'w5_side', 'w6_side', 'k_fence', 'k_palisade', 'k_stone', 'hd_wall_tile', 'hd_wall_stone', 'hd_wall_rampart', 'hd_fence_stake', 'hd_fence_bamboo', 'hd_fence_wattle', 'gate', 'gate_arch', 'hd_gate_town', 'cl_rock', 'cl_step', 'g_plank', 'wt_river', 'wt_pond', 'wt_rapid', ...PALTEX.filter(n => n.startsWith('pm_')), ...FLOORS];  // pm_*: 블렌더 조각에 입히는 무늬(js/hd2d/palette.js)
 const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 인물 그림 기준). 새 땅과 지붕과 벽도 이 굵기로 깐다
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
@@ -154,10 +158,10 @@ async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { Meshopt
     if (pal) { o.geometry = o.geometry.toNonIndexed(); o.geometry.computeVertexNormals(); }  // 면마다 평평하게: 둥글린 법선으로는 무늬 방향이 면 안에서 흔들린다
     const t = pal ? null : rk ? rockTex(rk[1]) : sm.map;
     if (t && !rk) { t.magFilter = T.LinearFilter; t.minFilter = T.LinearMipmapLinearFilter; t.generateMipmaps = true; t.anisotropy = R.capabilities.getMaxAnisotropy(); t.needsUpdate = true; }
-    const glow = /^(win|lantern)/.test(nm);
+    const glow = /^(win|lantern)/.test(nm), furn = /^fn_/.test(n);
     // sh: 낮은 땅(골짜기)에 선 절벽 조각은 그 땅만큼 어둡게(terrain의 lowShade와 같은 값). kind: 바위 빛깔을 지도에 맞춰 바꿀 때(모래땅의 바위는 갈색), 방 벽 조각은 벽 종류(palette.js WALLS)
     const mkm = (sh = 1, kind) => { if (top) { const m = topMat(vc); m.color.setScalar(sh); return m; }
-      if (pal) { const pt = pal.rock ? rockTex(ROCKT_OK(kind) || pal.rock) : previewTex((wl && WKIND[kind]?.[nm]) || pal.t), m = pt ? palMat(pt, pal.lie) : new T.MeshLambertMaterial({ color: sm.color }); if (sh !== 1) m.color.multiplyScalar(sh); return m; }
+      if (pal) { const pt = pal.rock ? rockTex(ROCKT_OK(kind) || pal.rock) : previewTex((wl && WKIND[kind]?.[nm]) || pal.t), m = pt ? palMat(pt, pal.lie) : new T.MeshLambertMaterial({ color: sm.color }); if (sh !== 1) m.color.multiplyScalar(sh); if (furn) m.color.multiplyScalar(FURNK); return m; }
       const tt = rk && kind ? rockTex(kind) : t, m = new T.MeshLambertMaterial({ map: tt || null, color: tt ? 0xffffff : rk ? 0x8a8478 : sm.color, vertexColors: vc }); if (glow) { m.emissive = new T.Color(nm === 'win' ? 0xffb050 : nm === 'win_paper' ? 0xffe6b8 : 0xff6a30); if (tt) m.emissiveMap = tt; m.emissiveIntensity = 0; m.userData.paper = nm === 'win_paper'; GLOW.push(m); }
       // 바위: 그늘진 면이 까맣게 죽지 않게 제 빛깔을 조금 낸다(모난 면마다 밝기가 크게 달라 얼룩져 보였다)
       if (rk && tt) { m.emissive = new T.Color(0xffffff); m.emissiveMap = tt; m.emissiveIntensity = .2 * sh; }
@@ -183,7 +187,8 @@ function palMat(t, lie) { const m = new T.MeshLambertMaterial({ map: t }), pt = 
    vMapUv = q * uDot / uPT.xy; }
 #endif`); };
   m.customProgramCacheKey = () => 'sharp-pal'; return m; }
-async function loadModels() { await Promise.all(MODELN.map(loadModel)); }
+const KITS = new Set();  // 들어와 있는 블렌더 조각의 이름(assets/hd2d/models/kit.json). 이 목록에 있는 것만 소품 그림 대신 세운다(없는 파일을 찾느라 헛걸음하지 않게)
+async function loadModels() { try { for (const n of await (await fetch('assets/hd2d/models/kit.json')).json()) KITS.add(n); } catch (e) { } await Promise.all([...new Set([...MODELN, ...[...KITS].filter(n => /^(rw|fn)_/.test(n))])].map(loadModel)); }  // 방의 벽과 가구 조각은 미리 읽어 둔다(방에 들어설 때 그림이 섰다가 조각으로 바뀌는 깜박임이 없게. 가구 여덟 개 110KB)
 // 바위 모형의 무늬: 받아 둔 절벽 그림(cl_rock)을 바위 빛깔로 바꿔 쓴다. brown 그대로, grey 잿빛 바위, snow 눈 덮인 바위, red 붉은 바위
 const ROCKT = {};
 function rockTex(kind) { if (kind in ROCKT) return ROCKT[kind]; const im = art() && PV.cl_rock; if (!im) return null; const c = mk(im.width, im.height), x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0);
@@ -205,11 +210,13 @@ function modelKey(s) { const gs = s.grand && GRAND[s.grand]; return gs?.model ||
 // 사람 도트 시트(n_*)는 people.json에 적힌 것만 읽는다(tools/people_in.py가 시트를 만들며 적는다). 사람 키는 npc id, 역할(talkdata ROLE), 옛 도트 이름(NEWNPC) 순으로 찾는다
 const loadImg = n => new Promise(res => { const im = new Image(); im.onload = () => { PV[n] = im; res(); }; im.onerror = res; im.src = `assets/hd2d/preview/${n}.webp`; });
 async function loadPeople() { try { const r = await fetch('assets/hd2d/preview/people.json'); if (!r.ok) return; const L = await r.json(); L.forEach(n => PEOPLE.add(n)); await Promise.all(L.map(loadImg)); } catch { } }
-function loadPreview() { if (!loadModels.p) loadModels.p = loadModels(); return pvP || (pvP = Promise.all([loadModels.p, loadPeople(), ...PVN.map(loadImg)])); }
+// 그림을 다 읽은 뒤에 조각을 읽는다. 조각의 재질은 읽을 때 무늬 그림을 찾아 쓰는데(loadModel의 mkm), 전에는 둘을 한꺼번에 읽어서 조각이 먼저 오면 무늬 없이 단색이 됐다
+// (가구 조각을 미리 읽게 하자 탁자와 계산대가 밋밋한 갈색으로 나와서 알았다. 벽 조각의 창틀도 같은 까닭으로 가끔 단색이었을 것이다)
+function loadPreview() { return pvP || (pvP = Promise.all([loadPeople(), ...PVN.map(loadImg)]).then(() => loadModels.p ||= loadModels())); }
 const art = () => !!HD.opt.art;
 function previewTex(name) {
   const im = art() && PV[name]; if (!im) return null; if (TEX.has('p/' + name)) return TEX.get('p/' + name);
-  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') }); if (/^([gre]|hd|cl|wt|pm)_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
+  const c = mk(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); const t = texFrom(c, { mips: name !== 'me' && name !== 'yun' && !name.startsWith('n_') }); if (/^([gre]|hd|cl|wt|pm|fl)_/.test(name)) { t.wrapS = t.wrapT = T.RepeatWrapping; t.needsUpdate = true; } TEX.set('p/' + name, t); return t;
 }
 // 소품: 도트 그대로 올려 '또렷한 겹선형'으로 읽는다(배경도 인물과 같은 도트 결. 매끈해지는 것은 흐림과 빛뿐)
 // 옛 그림(16점 칸, 도트 2배) 소품은 새 그림보다 크고 쨍하다. 새 나무 그림(HT1)이 오기 전까지 새 화면에서만 줄이고 색을 맞춘다(막힘과 2D는 그대로)  // 2026-11-18 독·항아리·상자를 사람 키의 6할쯤으로 더 줄임(일검풍운결 비교)
@@ -507,9 +514,12 @@ function terrain(m, gt) {
 function calm(x, w, h) { const d = x.getImageData(0, 0, w, h), a = d.data; for (let i = 0; i < a.length; i += 4) { const l = a[i] * .3 + a[i + 1] * .59 + a[i + 2] * .11; a[i] = (l + (a[i] - l) * .5) * .86; a[i + 1] = (l + (a[i + 1] - l) * .5) * .86; a[i + 2] = (l + (a[i + 2] - l) * .5) * .8; } x.putImageData(d, 0, 0); }
 // 방의 벽: 조각(rw_*)을 방 크기와 종류대로 세운다(자리는 js/hd2d/rooms.js roomWalls). 옆벽은 같은 조각을 돌려 세운다(ZS가 1이 아니어도 모양이 안 변하게 배율을 바꿔 준다: cliffKit과 같은 방법).
 // 벽의 겉(회벽, 판자, 벽돌 …)은 재질을 고를 때 정한다(as(1, 벽 종류)). 사람을 가리면 뚫어 보이게 userData를 단다(fades)
+const FURNK = 1.35;  // 가구 조각(fn_)의 밝기. 방의 빛만 받으면 탁자 윗면이 칠한 색의 0.7배로 나와 ChatGPT의 배치 예시보다 칙칙했다(긴 탁자 윗면의 밝기 58 → 72, 예시 82)
+const FLDOT = 3.2, FLK = { fl_scale: 1.75, fl_dark: 1.9, fl_pine: 1.45, fl_brick: 1.6, fl_mat: 1.45, fl_slab: 1.6 };  // 방 바닥 무늬의 굵기(평면도 한 점에 도트 3.2점. 비늘 하나가 사람 키의 4분의 1쯤 된다)와 밝기. 방의 빛을 그대로 받으면 바닥이 그린 색의 절반 밝기로 가라앉아 무늬가 묻힌다(벽의 절반). 기준 그림(docs/ref/ws-interior.jpg)은 바닥과 벽이 비슷하게 밝고, ChatGPT의 배치 예시는 바닥이 그린 색 그대로 보인다. 짙은 무늬일수록 더 올린다
 const TALL = /^rw_(wall|post|pillar|column)$/;  // 높이를 WALL_K배로 세우는 조각(벽 높이를 기준 그림의 사람 키 2.7배에 맞춘다. 무늬는 자리로 입히니 늘어나지 않는다)
 function piece(key, kind, x, y, z, rot = 0, sx = 1) { const g = new T.Group(), o = MODELS[key].clone(true), ms = [], side = rot % 2 !== 0;
   o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry).as(1, kind); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; ms.push(c); } }); g.add(o);
+  if (side && /^rw_/.test(key)) for (const c of ms) c.castShadow = false;  // 옆벽은 그림자를 드리우지 않는다. 빛이 조금 동쪽에서 와서 동쪽 벽을 따라 바닥에 긴 그늘이 졌고, 그 구석에 놓은 것(술통, 분재)이 묻혔다
   g.scale.set(sx * (side ? ZS : 1), HS * (TALL.test(key) ? WALL_K : 1), side ? 1 : ZS); g.rotation.y = rot * Math.PI / 2; g.position.set(x, z * HS, y * ZS); g.userData = { wall: true, ms }; propG.add(g); return g; }
 function roomKit(m) { const { kind, parts } = roomWalls(m); m.wallKind = kind; if (!parts.map(q => needModel(q.key)).every(Boolean)) return false;
   for (const q of parts) { piece(q.key, kind, q.x, q.y, q.z, q.rot, q.sx); if (q.key === 'rw_emblem') glyph(emblemOf(m), q.x, q.y + 1, q.z + 15); } return true; }
@@ -521,6 +531,19 @@ function glyphTex(ch) { if (ch in GLY) return GLY[ch]; const N = 30, draw = t =>
   if (same || ink < 20) return GLY[ch] = null; x.putImageData(d, 0, 0); return GLY[ch] = texFrom(c, { mips: false }); }
 function glyph(ch, x, y, zc) { const t = ch && glyphTex(ch); if (!t) return; const q = new T.Mesh(new T.PlaneGeometry(17, 17), sharpen(new T.MeshLambertMaterial({ map: t, alphaTest: .5 })));
   q.scale.y = HS; q.position.set(x, zc * HS, y * ZS); q.userData = { flat: true }; propG.add(q); }
+// 가구 조각을 소품 그림의 자리에 세운다. 자리는 그림의 막힘 상자(2D에서 사람이 못 지나가는 네모) 가운데. 크기는 사람과 같은 배율(방 안 PSC)로 키운 다음,
+// 가로를 막힘 폭에 맞춘다: 조금 다르면 가로만 늘이거나 줄이고(무늬는 자리로 입히니 늘어나지 않는다), 그림이 한참 좁으면 통째로 줄이고, 한참 넓으면(긴 걸상) 여러 개를 이어 놓는다.
+// keep인 것(의자, 걸상, 차 탁자)은 제 모양대로 세운다. top: 세운 조각의 윗면 높이(그 위에 얹는 것이 설 높이)
+function furnFit(s, f, mdl) { const st = STAMPS[s.name], sol = s.sol || { x: s.x, y: s.base - 6, w: st[3] * (s.sc || 1), h: 6 }, side = (f.rot || 0) % 2 !== 0;
+  const bb = mdl.userData.bb ||= new T.Box3().setFromObject(mdl), mw = side ? bb.max.z - bb.min.z : bb.max.x - bb.min.x;
+  let k = HD.actK(curMap), fit = sol.w / (mw * k), n = 1; if (f.keep) fit = 1; else if (fit < .75) { k *= fit; fit = 1; } else if (fit > 1.45) { n = Math.round(fit); fit /= n; }
+  return { sol, side, k, fit, n, top: bb.max.y * k }; }
+function furniture(s, f, mdl) { const { sol, side, k, fit, n } = furnFit(s, f, mdl);
+  for (let i = 0; i < n; i++) { const g = piece(f.key, curMap.wallKind, sol.x + sol.w * (i + .5) / n, sol.y + sol.h / 2 + (f.dy || 0), 0, f.rot || 0, 1);
+    g.scale.multiplyScalar(k); if (side) g.scale.z *= fit; else g.scale.x *= fit; g.userData.furn = true; } }
+// 가구 위에 얹은 것(m.on: 찻주전자, 촛대, 향로)이 설 높이: 발 자리를 덮는 가구가 조각으로 서 있으면 그 윗면, 아직 그림이면 그림 키의 절반쯤
+function onTop(m, s, cx, fy) { const q = m.stamps.find(u => u !== s && u.sol && cx >= u.sol.x && cx <= u.sol.x + u.sol.w && fy >= u.sol.y && fy <= u.sol.y + u.sol.h); if (!q) return 0;
+  const f = FURN[q.name], mdl = f && KITS.has(f.key) && needModel(f.key); return mdl ? furnFit(q, f, mdl).top : STAMPS[q.name][4] * (q.sc || 1) * .5; }
 function column(s) { const st = STAMPS[s.name]; piece('rw_column', curMap.wallKind, s.x + st[3] / 2, s.base - 3, 0); }  // 기둥 그림(pillar)의 발 자리에 세운다
 function cliffKit(m) {
   if (m.face !== 'rock' || !art()) return;
@@ -624,19 +647,25 @@ function setMap(m) {
   const WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h }, Wm = (WN.x1 - WN.x0) * TS, Dm = (WN.y1 - WN.y0) * TS * ZS, OX = WN.x0 * TS, OZ = WN.y0 * TS * ZS;  // 큰 지도는 잘라 낸 범위만
   // 땅: 지금 땅 그림을 그대로 눕힌다(땅 무늬 HB14가 오기 전 임시). 땅도 도트 결로 읽는다
   const gc = mk(Wm, (WN.y1 - WN.y0) * TS), gx = gc.getContext('2d', { willReadFrequently: true }); const flr = m.room && art(), kit = flr && !OWN.has(m.id);  // 새 화면의 방: 바닥만 칠한다(2D가 가장자리에 칠하던 납작한 벽은 뺀다). kit: 벽을 조각으로 세우는 방(동굴은 제 모형)
-  if (m.win) G.world.paintWin(gx, OX, WN.y0 * TS, Wm, gc.height); else if (flr) { paintRoom(gx, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true }); calm(gx, gc.width, gc.height); } else m.paintBase(gx);
-  const gt = new T.CanvasTexture((!m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter;
+  // 방 바닥 무늬(받은 그림 FL1): 방 종류에 맞는 무늬를 평면도 한 점에 FLDOT점으로 되풀이해 깐다. 깔개(m.carpet)는 그 위에 따로 얹는다. 무늬가 없으면(그림 끔, 동굴) 2D 바닥 그림을 가라앉혀 깐다
+  const ft = kit && previewTex(floorOf(m));
+  if (m.win) G.world.paintWin(gx, OX, WN.y0 * TS, Wm, gc.height); else if (ft) { gx.fillStyle = '#2a2520'; gx.fillRect(0, 0, gc.width, gc.height); } else if (flr) { paintRoom(gx, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true }); calm(gx, gc.width, gc.height); } else m.paintBase(gx);
+  let gt; if (ft) { gt = ft.clone(); gt.repeat.set(Wm * FLDOT / ft.image.width, Dm / ZS * FLDOT / ft.image.height); gt.needsUpdate = true; }
+  else { gt = new T.CanvasTexture((!m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter; }
   if (m.hgt && m.face === 'rock') { TOPU.map = gt; (TOPU.uGS.value ||= new T.Vector2()).set(1 / Wm, 1 / Dm); for (const t of TOPS) { if (!t.map) t.needsUpdate = true; t.map = gt; } }  // 절벽 조각의 윗면이 이 지도의 땅 그림을 받게
   if (m.hgt) { ground = terrain(m, gt); cliffKit(m); }  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다. 바위 지도는 그 면에 절벽 조각을 붙인다
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(OX + Wm / 2, 0, OZ + Dm / 2); }
+  if (ft) ground.material.color.setScalar(FLK[floorOf(m)] || 1.45);
   ground.receiveShadow = true; ground.userData.map = m; scene.add(ground);
+  if (ft && m.carpet) { const cc = mk(Wm, gc.height), cx2 = cc.getContext('2d', { willReadFrequently: true }); paintRoom(cx2, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true, noFloor: true }); calm(cx2, cc.width, cc.height);  // 깔개만 그린 투명한 판을 바닥 바로 위에
+    const rug = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: texFrom(cc, { mips: false }), alphaTest: .5 }))); rug.rotation.x = -Math.PI / 2; rug.position.set(OX + Wm / 2, .12, OZ + Dm / 2); rug.receiveShadow = true; rug.userData = { flat: true }; propG.add(rug); }
   water = art() ? waterMesh(m) : null; if (water) scene.add(water);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
   skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(OX + Wm / 2, m.hgt ? lowest(m) - 1 : -.6, OZ + Dm / 2);
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
-  const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
+  const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.on ? s.y + STAMPS[s.name][4] * s.sc : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
   // 블렌더 무대·방 모형(m.models: [{ key, x, y }], tools/blender/stages.py·rooms.py). 좌표는 평면도 그대로(x, 북쪽이 +y), 지도 (x, y)에 놓는다. 다 읽혔으면 옛 소품(s.alt)은 뺀다
   const useModels = art() && (m.models || []).length > 0 && m.models.map(q => needModel(q.key)).every(Boolean);
   if (useModels) for (const q of m.models) { const gm = MODELS[q.key], g = new T.Group(), o = gm.clone(true);
@@ -647,6 +676,7 @@ function setMap(m) {
   list.forEach(({ s, z }, k) => {
     if (s.alt && useModels) return;
     if (walled && s.name === 'pillar' && MODELS.rw_column) { column(s); return; }  // 방 안의 기둥 그림은 두리기둥 조각으로
+    if (art() && m.room && !s.flat && FURN[s.name] && KITS.has(FURN[s.name].key)) { const mdl = needModel(FURN[s.name].key); if (mdl) { furniture(s, FURN[s.name], mdl); return; } }  // 가구 그림은 조각이 들어와 있으면 조각으로
     const nm = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name;  // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch)
     const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const pk = art() && !s.flat && /^[vp]_/.test(s.name) ? PROPK : 1, sc = (s.sc || 1) * pk, cx = s.x + st[3] * (s.sc || 1) / 2, pv = !!previewTex(nm), w = st[3] * sc, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
@@ -672,7 +702,7 @@ function setMap(m) {
       const M = matOf(t), o = new T.Mesh(GEO.get(gk2), M.m); o.customDepthMaterial = M.d; o.position.set(s.x + w / 2, hAt(m, s.x + w / 2, z - 1), z * ZS + k * .003);
       o.castShadow = true; o.receiveShadow = true; o.userData = { s, w: w2, h: h2, M, t, owner: o, shared: true }; propG.add(o); return; }
     if (!GEO.has(gk)) GEO.set(gk, standGeo(w, h));
-    const M = matOf(t), o = new T.Mesh(GEO.get(gk), M.m); o.customDepthMaterial = M.d; o.position.set(cx, hAt(m, cx, z - 1), z * ZS + k * .003);  // 줄인 소품도 원래 자리 가운데에 선다
+    const M = matOf(t), o = new T.Mesh(GEO.get(gk), M.m); o.customDepthMaterial = M.d; o.position.set(cx, hAt(m, cx, z - 1) + (s.on ? onTop(m, s, cx, z) * HS : 0), z * ZS + k * .003);  // 줄인 소품도 원래 자리 가운데에 선다. 가구에 얹은 것은 그 윗면에
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
@@ -689,7 +719,7 @@ function setMap(m) {
     for (const [t, b] of B) { const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(b.P, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(b.U, 2)); g.setAttribute('normal', new T.Float32BufferAttribute(b.P.map((_, i) => i % 3 === 1 ? 1 : 0), 3)); g.setIndex(b.I);
       const o = new T.Mesh(g, matOf(t).m); o.receiveShadow = true; o.userData = { deco: true }; propG.add(o); } }
   // 등불 자리: 문 위, 등롱, 객잔 기
-  m._lamps = [...LAMPX, ...m.portals.filter(q => q.door && !m.room && !LAMPX.some(l => Math.abs(l[0] - q.x - q.w / 2) < 30 && Math.abs(l[1] - q.y) < 12)).map(q => [q.x + q.w / 2, q.y - 2, 26]), ...m.stamps.filter(s => /lantern|banner|censer|v_lamp|v_stonelamp/.test(s.name)).map(s => { const st = STAMPS[s.name]; return [s.x + st[3] * (s.name === 'v_lamppost' ? .7 : .5), s.base + 1, st[4] * (s.name === 'v_lamppost' ? .6 : s.name === 'v_stonelamp' ? .6 : .7)]; })]; LAMPX.length = 0;
+  m._lamps = [...LAMPX, ...m.portals.filter(q => q.door && !m.room && !LAMPX.some(l => Math.abs(l[0] - q.x - q.w / 2) < 30 && Math.abs(l[1] - q.y) < 12)).map(q => [q.x + q.w / 2, q.y - 2, 26]), ...m.stamps.filter(s => /lantern|banner|censer|v_lamp|v_stonelamp/.test(s.name)).map(s => { const st = STAMPS[s.name]; if (s.on) { const cx = s.x + s.w / 2, fy = s.y + st[4] * s.sc; return [cx, fy + 1, onTop(m, s, cx, fy) + st[4] * s.sc * .7]; }  /* 가구에 얹은 향로: 그 높이에서 빛난다 */ return [s.x + st[3] * (s.name === 'v_lamppost' ? .7 : .5), s.base + 1, st[4] * (s.name === 'v_lamppost' ? .6 : s.name === 'v_stonelamp' ? .6 : .7)]; })]; LAMPX.length = 0;
   camT.set(-1, 0, 0);  // 다음 장면에서 카메라를 바로 주인공에게
   buildMs = Math.round(performance.now() - t0);
 }
@@ -1052,9 +1082,10 @@ function panel() {
 }
 function panelSync() { const d = $('#hdp'); if (!d) return; d.querySelectorAll('.hdr').forEach(r => r.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(HD.opt[r.dataset.k]) === b.dataset.v))); }
 // 저장을 건드리지 않는 둘러보기: 새 낭인으로 자유 모드를 열어 청하진에 세운다. 이 판은 자동 저장하지 않는다
-async function tour() {
+async function tour(to) {
   if (G.field?.busy && G.scene === 'field') return;
   G.noSave = true; G.S = newState('나그네', 'BlueSamurai', 'm', 'normal'); $('#screen').innerHTML = ''; G.bgDraw = null; G.auto = true;
   G.free.start(); for (let i = 0; i < 400 && G.field.busy; i++) await new Promise(r => setTimeout(r, 30));
-  G.auto = false; G.S.flags.night = false; G.field.load('cheongha', 22.5, 16, 0);
+  G.auto = false; G.S.flags.night = false; const m = typeof to === 'string' && G.dbg.MAPS[to], e = m && m.portals[0];  // to: 바로 설 지도(방이면 나가는 문 앞)
+  if (m) G.field.load(to, e ? (e.x + e.w / 2) / TS : m.w / 2, e ? Math.max(2, e.y / TS - 1.6) : m.h / 2, 1); else G.field.load('cheongha', 22.5, 16, 0);
 }

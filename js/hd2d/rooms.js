@@ -10,6 +10,12 @@ export function roomModels(m) { if (m.room && OWN.has(m.id) && !m.models) m.mode
 const KIND = { hall: 'hall', lib: 'hall', temple: 'hall', gov: 'hall', elder: 'plaster', inn: 'plaster', shop: 'plaster', book: 'plaster', clinic: 'plaster', home: 'plaster', dorm: 'plank', mess: 'plank', gamble: 'plank', armory: 'brick' };
 const BYID = { inn: 'plaster', inn2: 'plaster', clinic: 'plaster', shop: 'plaster', shop2: 'plaster', myhouse: 'plaster', smith: 'brick', hall_in: 'hall', hall2: 'hall', library: 'hall', sutra: 'hall', bokun: 'hall', well: 'dark', shrine: 'dark' };
 export const wallKind = m => m.wall || BYID[m.id] || (m.roomStyle === 1 ? 'dark' : KIND[m.roomKind]) || 'plaster';
+// 방 바닥(받은 그림 FL1 → assets/hd2d/preview/fl_*.webp): 방 종류마다 다르게 깐다. 지도에 m.floor를 적으면 그것을 쓴다
+//   fl_scale 비늘 돌바닥(본전, 사당) / fl_dark 짙은 마루(객잔, 식당, 가게) / fl_pine 빛바랜 소나무 마루(숙소, 살림집) / fl_brick 잿빛 전돌(서고, 약방) / fl_slab 짙은 판석(관아, 대장간, 밀실) / fl_mat 돗자리(초가)
+const FLOOR = { hall: 'fl_scale', temple: 'fl_scale', gov: 'fl_slab', lib: 'fl_brick', book: 'fl_brick', clinic: 'fl_brick', armory: 'fl_slab', inn: 'fl_dark', mess: 'fl_dark', gamble: 'fl_dark', shop: 'fl_dark', elder: 'fl_dark', dorm: 'fl_pine', home: 'fl_pine' };
+const FLOORID = { hall_in: 'fl_scale', hall2: 'fl_scale', bokun: 'fl_scale', inn: 'fl_dark', inn2: 'fl_dark', shop: 'fl_dark', shop2: 'fl_dark', clinic: 'fl_brick', library: 'fl_brick', sutra: 'fl_brick', smith: 'fl_slab', well: 'fl_slab', shrine: 'fl_slab', myhouse: 'fl_pine' };
+export const floorOf = m => m.floor || FLOORID[m.id] || (wallKind(m) === 'earth' ? 'fl_mat' : FLOOR[m.roomKind]) || (m.roomStyle === 1 ? 'fl_slab' : 'fl_pine');
+export const FLOORS = ['fl_scale', 'fl_dark', 'fl_pine', 'fl_brick', 'fl_mat', 'fl_slab'];
 const WIN = { plaster: 3, hall: 3, plank: 2, earth: 1, brick: 0, dark: 0 };  // 기둥 사이 한 칸에 낼 수 있는 창의 수(벽돌과 돌 방에는 창이 없다)
 // 뒷벽 가운데에 둥근 문양판을 거는 방: 문파의 본전
 export const hasEmblem = m => m.emblem !== undefined ? !!m.emblem : m.roomKind === 'hall' || m.id === 'hall_in';
@@ -47,3 +53,16 @@ export function roomWalls(m) {
   const ns = Math.max(1, Math.round(inner / TS)); for (let i = 0; i < ns; i++) add('rw_sill', XW + inner * (i + .5) / ns, H - 5, { sx: inner / ns / TS });
   return { kind, parts: P };
 }
+
+// 소품 그림 → 블렌더 조각(docs/chatgpt-blender.md의 M2 이후). 조각 파일이 들어와 있을 때만(assets/hd2d/models/kit.json. tools/blender/gpt.py --install이 적는다)
+// 그림 대신 조각을 세운다. 그래서 받기 전에는 아무것도 바뀌지 않고, 받아 넣으면 바로 선다. 넣은 뒤에는 화면에서 보고 어울리지 않는 줄은 뺀다.
+// 조각은 사람 키 15점 기준이라 사람과 같은 배율로 키우고(방 안 1.45배), 가로는 그림의 막힘 폭에 맞춘다(js/hd2d.js furniture).
+//   rot: 90°씩 돌려 놓기 / keep: 가로를 맞추지 않고 제 모양대로(의자, 걸상, 차 탁자처럼 늘이면 티가 나는 것)
+// altar, chair, teatable, seat는 조각을 세우려고 새로 붙인 이름이다(js/tiles.js). 장문인 자리(f_chair)는 그림이 넓은 옥좌라 그대로 둔다
+export const FURN = {
+  longtable: { key: 'fn_table' }, altar: { key: 'fn_altar' }, counter: { key: 'fn_counter' }, bench: { key: 'fn_bench' }, seat: { key: 'fn_bench' },
+  teatable: { key: 'fn_teatable', keep: 1 }, chair: { key: 'fn_chair', keep: 1 }, stool: { key: 'fn_stool', keep: 1 }, f_stool: { key: 'fn_stool', keep: 1 },
+  bed: { key: 'fn_bed' }, f_bed: { key: 'fn_bed', rot: 1 },
+  bookcase: { key: 'fn_bookcase' }, drawer: { key: 'fn_drawers' }, shelf: { key: 'fn_shelf' }, shelf2: { key: 'fn_shelf' }, screen: { key: 'fn_screen' },
+  rack: { key: 'fn_rack' }, rack2: { key: 'fn_rack' }, chest: { key: 'fn_chest' }, f_dummy: { key: 'fn_dummy' },
+};

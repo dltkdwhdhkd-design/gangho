@@ -32,6 +32,8 @@ const IMAGES = {
   items: ['hp', 'mp', 'scroll', 'letter', 'silver', 'gold', 'key', 'chest', 'Beaf', 'Fish', 'Honey', 'Noodle', 'Nut', 'Onigiri', 'Shrimp', 'Sushi', 'TeaLeaf', 'Yakitori', 'SeedBig1', 'SeedBig2', 'SeedBig3', 'SeedLarge', 'SeedLargeWhite', 'Octopus', 'Calamari', 'Stamp', 'Letter2', 'GoldCup', 'SilverCup', 'SilverKey', 'Hear', 'MilkPot', 'EmptyPot', 'Medipack'],
   ani: ['pheasant', 'piglet', 'deer', 'rabbit', 'badger'],
 };
+// 그림을 빌려 쓰는 소품(js/tiles.js의 새 가구 이름): 새 이름 → 있던 그림. 2D 화면에서만 보인다(새 화면에서는 블렌더 조각으로 선다)
+const SAME = { altar: 'longtable', chair: 'stool', teatable: 'f_bench', seat: 'p_bench' };
 export async function loadAll(onp) {
   const list = [];
   // 다시 그린 도트는 assets/hd에 있다. 있으면 기본 그림 대신 쓴다. 칸 크기가 두 배다
@@ -45,6 +47,7 @@ export async function loadAll(onp) {
     im.onerror = () => { console.warn('그림 없음', url); done++; res(); };
     im.src = url;
   })));
+  for (const [a, b] of Object.entries(SAME)) if (!IMG['stamp/' + a] && IMG['stamp/' + b]) IMG['stamp/' + a] = IMG['stamp/' + b];
 }
 // 나중에 일러스트를 넣으면 쓰는 자리. 파일이 없으면 얼굴 그림으로 대체한다.
 export const ART = new Map();
