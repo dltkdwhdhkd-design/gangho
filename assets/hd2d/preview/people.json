@@ -61,5 +61,8 @@
  "n_yuseol",
  "n_mob_archer",
  "n_mob_bandit",
- "n_mob_brute"
+ "n_mob_brute",
+ "n_mob_assassin",
+ "n_mob_jeong",
+ "n_mob_pirate"
 ]

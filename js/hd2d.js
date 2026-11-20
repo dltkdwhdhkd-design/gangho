@@ -7,6 +7,7 @@
 // 켜기: 주소 끝에 ?hd2d=1. 못 켜면(WebGL2 없음 등) 아무 일 없이 2D로 돈다.
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { PAL, WALLS as WKIND, PALTEX } from './hd2d/palette.js';
+import { STONE_PARTS, stoneStairs } from './hd2d/stone-stairs.js';
 import { PSC } from './field.js';
 import { G, IMG, TS, $ } from './core.js';
 import { STAMPS, paintRoom } from './tiles.js';
@@ -71,7 +72,11 @@ export const HD = {
 G.hd = HD;
 // 옛 2D 화면(전투, 강호 큰 지도, 방)에서도 마을과 같은 사람 도트를 쓰게 시트를 내준다. 새 화면과 새 그림을 켰을 때만
 // 강호에서 돌아다니는 적은 무리의 선두 적 ID로 도트를 고른다.
-const roamingEnemyArt = { bandit: 'n_mob_bandit', rowdy: 'n_mob_bandit', mask_low: 'n_mob_bandit',
+const roamingEnemyArt = {
+  pirate: 'n_mob_pirate', pirate_bow: 'n_mob_pirate', pirate_hook: 'n_mob_pirate',
+  shadow0: 'n_mob_assassin', shadow: 'n_mob_assassin', shadow2: 'n_mob_assassin',
+  fox: 'n_mob_assassin', fox0: 'n_mob_assassin', sand_cut: 'n_mob_assassin',
+  disciple: 'n_mob_jeong', jeong: 'n_mob_jeong', bandit: 'n_mob_bandit', rowdy: 'n_mob_bandit', mask_low: 'n_mob_bandit',
   rowdy2: 'n_mob_brute', bruiser: 'n_mob_brute', archer: 'n_mob_archer', wanted2: 'n_mob_archer' };
 HD.sheetKey = o => {
   if (!want || !art() || !o) return null; const L = [];
@@ -483,10 +488,20 @@ function terrain(m, gt) {
   const quad = (B, a, b, c, d, ua, ub, uc, ud, n, ca = 1, cb = ca, cc = cb, cd = ca) => { for (const [q, u, k] of [[a, ua, ca], [b, ub, cb], [c, uc, cc], [a, ua, ca], [c, uc, cc], [d, ud, cd]]) { B.P.push(...q); B.U.push(...u); B.N.push(...n); B.C.push(k, k, k); } };
   const rocky = m.face === 'rock' && !!previewTex('cl_rock'), stepArt = !!previewTex('cl_step');
   const lvOf = (x, y) => m.hgt[y]?.[x] ?? 0, isStair = (x, y) => !!m.stair?.[x + ',' + y];
+  const useStone = art() && !m.room && m.face !== 'rock' && Object.keys(m.stair || {}).length &&
+    STONE_PARTS.every(k => KITS.has(k)) && STONE_PARTS.map(needModel).every(Boolean);
+  const modelSteps = useStone && stoneStairs(m, TS, LV, (key, x, y, z, sx = 1) => {
+    const g = piece(key, m.wallKind, x, y, z, 0, sx);
+    g.userData.wall = false;
+    g.userData.cliff = true;
+    for (const mesh of g.userData.ms) mesh.userData.shared = true;
+  });
   for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
     const [nw, ne, sw, se] = corners4(m, x, y), x0 = x * TS, x1 = x0 + TS, z0 = z(y), z1 = z(y + 1), u0 = x / m.w, u1 = (x + 1) / m.w, v0 = 1 - y / m.h, v1 = 1 - (y + 1) / m.h, sh = lowShade(lvOf(x, y));
     const d = nw - sw, kind = m.g[y][x] === 4 ? 'wood' : rocky ? 'rock' : 'stone';
-    if (isStair(x, y) && stepArt && kind !== 'wood' && Math.abs(d) > .5) {
+    if (modelSteps && modelSteps.has(x + ',' + y)) {
+      // 모형이 디딤판을 모두 그린다. 아래의 옆면 처리는 그대로 쓴다.
+    } else if (isStair(x, y) && stepArt && kind !== 'wood' && Math.abs(d) > .5) {
       // 계단: 비탈 대신 디딤판을 놓는다. 사람은 비탈(hAt)을 따라 걷고, 디딤판은 그 비탈을 가운데로 지나게 반 단 어긋나 있다
       const n = Math.max(1, Math.round(Math.abs(d) / (LV * HS) * STEPS)), dz = (z1 - z0) / n, ua = x0 / STEP_W, ub = x1 / STEP_W, lo = Math.min(sw, nw), up = d > 0;
       for (let i = 0; i < n; i++) { const za = up ? z1 - dz * i : z0 + dz * i, zb = up ? za - dz : za + dz, ht = lo + Math.abs(d) * (i + .5) / n, hb = i ? lo + Math.abs(d) * (i - .5) / n : lo;

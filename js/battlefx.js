@@ -113,7 +113,7 @@ export function swing(B, st, a, h, sk) {
   const [c0, c1, c2] = C(st), an = Math.atan2(a.ay, a.ax), x = a.x, y = a.y - 6, ult = sk?.ult;
   if (h.shape === 'line') P(B, { k: 'thrust', x, y, ang: an, life: .26, s: Math.min(h.len || 40, 140), w: Math.min(h.w || 10, 40) * .45, col: c0, col2: c1, add: 1 });
   else if (h.shape === 'circle') P(B, { k: 'ring', x: x + a.ax * (h.off || 0), y: a.y + a.ay * (h.off || 0), life: .3, s: 6, s2: (h.r || 30) * .95, col: c0, w: 3, add: 1, flat: 1 });
-  else P(B, { k: 'slash', x, y, ang: an, r: Math.min(h.r || 30, 90) * .8, sweep: Math.min((h.a || 80) * Math.PI / 180, 2.6), life: .28, w: ult ? 7 : 4, col: c0, col2: c1, add: 1, flip: (a.swingN = (a.swingN || 0) + 1) % 2 });
+  else P(B, { k: 'slash', x, y, ang: an, plum: st === 'plum' && !!sk && !sk.basic, r: Math.min(h.r || 30, 90) * .8, sweep: Math.min((h.a || 80) * Math.PI / 180, 2.6), life: .28, w: ult ? 7 : 4, col: c0, col2: c1, add: 1, flip: (a.swingN = (a.swingN || 0) + 1) % 2 });
   const R = h.shape === 'line' ? (h.len || 40) : (h.r || 30), n = ult ? 22 : 8;
   for (let i = 0; i < n; i++) {
     const d = rnd(.3, 1) * R * (h.shape === 'circle' ? 1 : .9), q = h.shape === 'circle' ? rnd(6.28) : an + rnd(-1, 1) * (h.shape === 'line' ? .12 : Math.min((h.a || 80) * Math.PI / 180, 1.3)), px = x + Math.cos(q) * d, py = y + Math.sin(q) * d * (h.shape === 'circle' ? .8 : 1);
@@ -311,6 +311,12 @@ function shape(c, p, u) {
     case 'orbit': { const px = x + Math.cos(p.ang) * p.r, py = y + Math.sin(p.ang) * p.r * .5; c.fillStyle = p.col; c.fillRect(px - p.s / 2, py - p.s / 2, p.s, p.s); break; }
     case 'crescentP': { const r = p.s; c.fillStyle = p.col; c.beginPath(); c.arc(x, y, r, 0, 6.29); c.fill(); c.globalCompositeOperation = 'destination-out'; c.beginPath(); c.arc(x + r * .45, y - r * .2, r * .85, 0, 6.29); c.fill(); break; }
     case 'slash': { // 초승달 검기: 가운데가 두껍고 양 끝이 칼날처럼 가늘다. 바깥 빛 → 제 색 → 흰 날 세 겹, 뒤로 잔상 두 겹
+      if (p.plum && SHEET.hs_slash) {
+        c.translate(x, y); c.rotate(p.ang);
+        if (p.flip) c.scale(1, -1);
+        sheetAt(c, 'hs_slash', Math.floor(u * 6), p.r * .65, 0, p.r * 1.65 / SHEET.hs_slash.w);
+        break;
+      }
       if (SHEET.sw_arc && !p.big) { sheetAt(c, 'sw_arc', Math.floor(u * 8), x, y, p.r * 2.2 / SHEET.sw_arc.w, p.ang, !!p.flip); break; }
       const sw = p.sweep, prog = Math.min(1, u * 2.6), r = p.r, W = p.w * 1.6 * (1 - u * .55), dir = p.flip ? -1 : 1;
       const a0 = p.ang - dir * sw / 2, span = dir * sw * prog;  // 그어진 만큼만
