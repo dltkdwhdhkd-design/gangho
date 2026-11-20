@@ -52,6 +52,13 @@ class MapDef {
     if (s.length > 5 && !o.nosolid) { const sol = { x: px + s[5] * sc, y: py + s[6] * sc, w: s[7] * sc, h: s[8] * sc }; this.solids.push(sol); Object.defineProperty(this.stamps.at(-1), 'sol', { value: sol }); }
     return this;
   }
+  // 가구 위에 얹는 작은 것(찻주전자, 촛대, 향로). (cx, cy)는 그것의 발 가운데가 놓일 자리(칸)이고, 먼저 놓은 가구의 막힘 상자 안이어야 한다. sc: 줄여 그리는 배율(가구 위의 것은 작다).
+  // 막힘이 없고, 2D에서는 밑의 가구 바로 다음에 그려진다. 새 화면에서는 밑에 있는 가구 조각의 윗면 높이에 선다(js/hd2d.js)
+  on(name, cx, cy, sc = .3) {
+    const s = STAMPS[name]; if (!s) { console.warn('소품 없음', name); return this; } const X = cx * this.k * TS, Y = cy * this.k * TS;
+    const under = this.stamps.findLast(q => q.sol && X >= q.sol.x && X <= q.sol.x + q.sol.w && Y >= q.sol.y && Y <= q.sol.y + q.sol.h); if (!under) console.warn('얹을 가구가 없다', name, cx, cy);
+    this.stamps.push({ name, x: X - s[3] * sc / 2, y: Y - s[4] * sc, base: under ? under.base + .01 : Y, sc, w: s[3] * sc, on: true }); return this;
+  }
   // 줄지어 놓기. 넓힌 지도에서 한 칸짜리를 촘촘히 잇던 줄(담, 목책)은 조각을 더 넣어 틈이 생기지 않게 한다
   row(name, tx, ty, n, step = 1, o = {}) { const k = step === 1 ? this.k : 1, N = Math.ceil(n * k - (k - 1)); for (let i = 0; i < N; i++) this.put(name, tx + i * step / k, ty, o); return this; }
   col(name, tx, ty, n, step = 1, o = {}) { const k = step === 1 ? this.k : 1, N = Math.ceil(n * k - (k - 1)); for (let i = 0; i < N; i++) this.put(name, tx, ty + i * step / k, o); return this; }
@@ -291,10 +298,12 @@ export function buildMaps() {
   m.label(3.5, 13.2, '← 청풍골');
   m.place(23, 13.8, '광장').place(23, 27, '나루터').place(13, 24.2, '복덕방');
   m.exit(21, 0, 4, 1, 'bamboo', 18, 30, 1, { when: 'bamboo_open', lock: '아직 산으로 갈 때가 아니다.' }).exit(45, 14, 1, 4, 'pass', 1, 13.5, 3, { when: 'pass_open', lock: '동쪽 산길은 지금 갈 이유가 없다.' });
-  // 객잔 내부
+  // 객잔 내부(ChatGPT가 M2 가구로 짠 배치 예시대로: art-src/chatgpt/M2_sheet.jpg). 계산대 뒤에 주인이 서고 옆에 술독, 뒷벽 오른쪽 구석에 술통과 등롱 장대,
+  // 긴 탁자마다 앞쪽에 긴 걸상, 구석방 백 노인 자리에 차 탁자와 북 걸상. 탁자 넷의 자리는 그대로다(이야기의 사람 자리와 걸레질 자리가 여기에 맞춰져 있다)
   m = M('inn', 18, 13, { name: '달맞이 객잔', bgm: 'peaceful', room: true, arena: 'yard' });
-  m.put('counter', 1, 2).put('shelf', 5, 1).put('shelf2', 9, 1).put('bookcase2', 1, 1).put('rack', 13, 2).put('longtable', 3, 6).put('longtable', 10, 6).put('longtable', 3, 9).put('longtable', 10, 9);
-  m.row('stool', 3, 5, 3, 1).row('stool', 10, 5, 3, 1).row('stool', 3, 8, 3, 1).row('stool', 10, 8, 3, 1).put('plant', 16, 2).put('jar', 15, 10).put('pot', 15.5, 11);
+  m.put('v_jars', .7, 1.75).put('counter', 2, 2).put('shelf', 5.3, 1).put('shelf2', 8.5, 1).put('rack', 11.3, 2).put('p_barrels', 15.9, 1.3).put('p_lanterns', 14.2, 1.3);
+  for (const [x, y] of [[3, 6], [10, 6], [3, 9], [10, 9]]) m.put('longtable', x, y).put('seat', x + .3, y + .65);
+  m.on('teapot', 4.5, 6.55).on('teapot', 11.5, 9.55).put('f_stool', 14.06, 4.875).put('teatable', 15.05, 4.95).on('teapot', 15.55, 5.5).put('f_stool', 16.16, 4.9).put('jar', 15, 10).put('pot', 15.5, 11);
   m.exit(7, 12, 4, 1, 'cheongha', 21, 12, 0, { door: true });
   // 약방
   m = M('clinic', 14, 11, { name: '윤씨 약방', bgm: 'quiet', room: true, arena: 'yard' });
@@ -390,8 +399,9 @@ export function buildMaps() {
   m.scatter(['fern1', 'fern2', 'bush2', 'bush4', 'flower4'], 40, 11);
   m.exit(21, 37, 4, 1, 'pass', 37.5, 18.5, 2);
   // 창운문 본전
+  // 뒷벽의 문양판(雲) 아래 제상을 놓고 촛대 둘과 향로를 올린다. 그 좌우 앞에 의자, 뒤쪽 두 모서리에 분재(ChatGPT의 배치 예시대로). 가운데는 비워 둔다(문주와 윤설, 위문상이 서는 자리)
   m = M('hall_in', 18, 14, { name: '창운문 본전', bgm: 'temple', room: true, arena: 'room' });
-  m.put('statue_big', 7, 1).row('lantern', 3, 2, 2, 11).put('longtable', 7, 6).put('bookcase', 1, 1).put('bookcase', 15, 1);
+  m.put('altar', 7.5, 1.05).on('f_lamp', 7.95, 1.6, .32).on('censer', 9, 1.55).on('f_lamp', 10.05, 1.6, .32).put('chair', 4.6, 2.5).put('chair', 12.525, 2.5).put('f_bonsai', .9, .4).put('f_bonsai', 16.1, .4).put('lantern', 2.5, 6.5).put('lantern', 14.5, 6.5);
   m.exit(7, 13, 4, 1, 'cloudmt', 21, 8, 0, { door: true });
   // 장서각
   m = M('library', 16, 12, { name: '장서각', bgm: 'mystic', room: true, arena: 'room' });
@@ -507,7 +517,9 @@ export function buildMaps() {
   m.exit(41, 10, 1, 3, 'guhwa', 3.5, 19.5, 3);
   // 구화성 객잔과 맹주관
   m = M('inn2', 18, 13, { name: '금봉 객잔', bgm: 'peaceful', room: true, arena: 'room' });
-  m.put('counter', 1, 2).put('shelf', 5, 1).put('rack', 13, 2).put('longtable', 3, 6).put('longtable', 10, 6).put('bed', 12, 9).put('bed', 3, 9).row('stool', 3, 5, 3).row('stool', 10, 5, 3);
+  m.put('v_jars', .7, 1.75).put('counter', 2, 2).put('shelf', 5.3, 1).put('rack', 11.3, 2).put('p_barrels', 15.9, 1.3).put('p_lanterns', 14.2, 1.3).put('bed', 12, 9).put('bed', 3, 9).row('stool', 3, 5, 3).row('stool', 10, 5, 3);
+  for (const x of [3, 10]) m.put('longtable', x, 6).put('seat', x + .3, 6.65);
+  m.on('teapot', 4.5, 6.55).on('teapot', 11.5, 6.55);
   m.exit(7, 12, 4, 1, 'guhwa', 10, 10, 0, { door: true });
   m = M('shop2', 12, 10, { name: '구화 상회', bgm: 'good', room: true, arena: 'room' });
   m.put('shelf', 1, 1).put('rack', 3, 1).put('shelf2', 7, 1).put('counter', 3, 4).put('box', 1, 6);

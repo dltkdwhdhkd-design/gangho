@@ -62,7 +62,7 @@ function room(m, l, stamp, x, y, kind, name, o) {
 // 고을 가게 안: 찻집, 주루, 비단 가게, 사당
 function shopRoom(m, as) {
   if (as === 'giru') return giruRoom(m);
-  if (as === 'tea') m.put('counter', 1, 2).put('shelf', 4, 1).put('f_scroll', 8, 1).put('f_scroll', 11, 1).put('longtable', 2, 6).put('teapot', 3.5, 6).put('longtable', 8, 6).put('teapot', 9.5, 6).row('stool', 2, 5, 3, 1).row('stool', 8, 5, 3, 1).put('f_bonsai', 12, 3).put('plant', 1, 8);
+  if (as === 'tea') m.put('counter', 1, 2).put('shelf', 4, 1).put('f_scroll', 8, 1).put('f_scroll', 11, 1).put('longtable', 2, 6).on('teapot', 3.5, 6.55).put('longtable', 8, 6).on('teapot', 9.5, 6.55).row('stool', 2, 5, 3, 1).row('stool', 8, 5, 3, 1).put('f_bonsai', 12, 3).put('plant', 1, 8);
   if (as === 'rest') m.put('f_stove', 1, 1).put('f_stove', 3, 1).put('jar', 5.5, 1).put('pot', 7, 1).put('counter', 9, 2).put('longtable', 2, 6).put('longtable', 8, 6).row('stool', 2, 5, 3, 1).row('stool', 8, 5, 3, 1).put('lantern', 1, 8).put('lantern', 12.5, 8);
   if (as === 'silk') m.put('shelf', 1, 1).put('shelf2', 4, 1).put('shelf', 8, 1).put('counter', 4, 4).put('box', 1, 7).put('box', 11, 7).put('jar', 11.5, 2);
   if (as === 'shrine') { m.carpet = [5, 3, 4, 6]; m.put('tablet', 5.5, 1).put('censer', 6.5, 3.4).put('tablet2', 2, 2).put('tablet2', 10, 2).put('lantern', 1, 4).put('lantern', 12.5, 4).put('f_bonsai', 1, 8).put('f_bonsai', 12, 8); }
@@ -104,13 +104,17 @@ function makeRoom(id) {
   const info = ROOMS[id] || (() => { if (id.startsWith('h_')) return null; const o = LOCS.find(q => id.startsWith(`r_${q.id}_`)); if (o) { G.world.ensure(o.map); return ROOMS[id]; } })(); if (!info) { console.warn('없는 방', id); return; }
   const [w, h, ex] = ROOM[info.kind], dark = ['fort', 'dark'].includes(info.owner.style), m = makeMap(id, w, h, { name: `${info.owner.name} ${info.name}`, bgm: info.owner.style === 'temple' ? 'temple' : 'quiet', room: true, roomStyle: dark ? 1 : 0, roomKind: info.kind, arena: 'room', tint: dark ? 'rgba(30,8,20,.22)' : undefined });
   const k = info.kind;
-  // 본전: 문에서 장문인 자리까지 붉은 깔개, 양옆으로 붉은 기둥, 자리 뒤에 병풍, 앞에 향로
-  if (k === 'hall') { m.carpet = [9, 3, 4, 11]; m.put('screen', 9.25, .55).put('f_chair', 10.5, 2.6).put('censer', 6.6, 2.2).put('censer', 14.3, 2.2).put('f_scroll', 3.5, 1).put('f_scroll', 17.5, 1).put('rack', 1, 2).put('rack', 19, 2); for (const y of [3.4, 8]) m.put('pillar', 7.6, y).put('pillar', 13.65, y); m.put('lantern', 3, 6).put('lantern', 18, 6).put('longtable', 2.6, 9.4).put('longtable', 16.4, 9.4).put('plant', 1, 11).put('plant', 20, 11); }
+  // 본전: 뒷벽의 문양판 아래 제상(촛대 둘과 향로), 그 좌우 앞에 의자. 문에서 제상 앞까지 붉은 깔개, 양옆으로 붉은 기둥.
+  // ChatGPT의 문파 전각 배치 예시(art-src/chatgpt/M2_sheet.jpg)를 따랐다. 전에는 병풍 앞 장문인 의자와 바닥 향로 둘이었다. 장문인은 제상 앞 깔개 위에 선다
+  if (k === 'hall') { m.carpet = [9, 3, 4, 11]; m.put('altar', 9.5, 1.05).on('f_lamp', 9.95, 1.6, .32).on('censer', 11, 1.55).on('f_lamp', 12.05, 1.6, .32).put('chair', 6.2, 2.5).put('chair', 14.925, 2.5).put('f_scroll', 3.5, 1).put('f_scroll', 17.5, 1).put('rack', 1, 2).put('rack', 19, 2); for (const y of [3.4, 8]) m.put('pillar', 7.6, y).put('pillar', 13.65, y); m.put('lantern', 3, 6).put('lantern', 18, 6).put('longtable', 2.6, 9.4).put('longtable', 16.4, 9.4).put('plant', 1, 11).put('plant', 20, 11); }
   if (k === 'lib') { m.row('bookcase', 1, 1, 4, 4).row('bookcase2', 2, 5, 4, 4).put('scrollcase', 14, 8).put('counter', 2, 8).put('f_lamp', 9, 8); }
-  if (k === 'elder') { m.carpet = [7, 3, 4, 9]; m.put('screen', 7.25, .55).put('f_scroll', 3, 1).put('f_scroll', 13, 1).put('f_chair', 4, 3).put('f_chair', 13, 3).put('teapot', 8.5, 5).put('longtable', 7, 5).put('f_bonsai', 1, 9).put('f_bonsai', 16, 9); }
+  if (k === 'elder') { m.carpet = [7, 3, 4, 9]; m.put('screen', 7.25, .55).put('f_scroll', 3, 1).put('f_scroll', 13, 1).put('chair', 4.56, 3.25).put('chair', 13.56, 3.25).put('longtable', 7, 5).on('teapot', 8.5, 5.55).put('f_bonsai', 1, 9).put('f_bonsai', 16, 9); }
   if (k === 'dorm') { m.row('f_bed', 1, 1, 5, 3).row('f_bed', 1, 6, 5, 3).put('chest', 16, 9).put('f_lamp', 1, 10); }
   if (k === 'mess') { m.put('f_stove', 1, 1).put('f_stove', 4, 1).put('jar', 8, 1).put('pot', 10, 1).put('longtable', 3, 5).put('longtable', 10, 5).put('longtable', 3, 8).put('longtable', 10, 8).row('stool', 3, 4, 3, 1).row('stool', 10, 4, 3, 1); }
-  if (k === 'inn') { m.put('counter', 1, 2).put('shelf', 5, 1).put('rack', 11, 1).put('longtable', 3, 6).put('longtable', 11, 6).put('longtable', 3, 9).put('longtable', 11, 9).row('stool', 3, 5, 3, 1).row('stool', 11, 5, 3, 1).put('plant', 16, 2); }
+  // 객잔: 계산대 뒤에 주인, 옆에 술독, 뒷벽 구석에 술통과 등롱 장대, 긴 탁자 앞쪽에 긴 걸상, 구석에 차 탁자와 북 걸상(달맞이 객잔과 같은 짜임. js/maps.js)
+  if (k === 'inn') { m.put('v_jars', .7, 1.75).put('counter', 2, 2).put('shelf', 5.3, 1).put('rack', 11, 1).put('p_barrels', 15.9, 1.3).put('p_lanterns', 14.2, 1.3).row('stool', 3, 5, 3, 1).row('stool', 11, 5, 3, 1);
+    for (const [x, y] of [[3, 6], [11, 6], [3, 9], [11, 9]]) m.put('longtable', x, y).put('seat', x + .3, y + .65);
+    m.on('teapot', 4.5, 6.55).on('teapot', 12.5, 9.55).put('f_stool', 14.06, 4.9).put('teatable', 15.05, 4.95).on('teapot', 15.55, 5.5).put('f_stool', 16.16, 4.9); }
   if (k === 'shop') { m.put('shelf', 1, 1).put('shelf2', 4, 1).put('shelf', 8, 1).put('counter', 4, 4).put('box', 1, 7).put('box', 13, 7).put('jar', 13, 2); }
   if (k === 'book') { m.row('bookcase', 1, 1, 3, 4).put('scrollcase', 13, 1).put('counter', 4, 5).put('f_lamp', 1, 8).put('box', 13, 7); }
   if (k === 'clinic') { m.put('shelf2', 1, 1).put('shelf2', 4, 1).put('drawer', 8, 1).put('bed', 9, 5).put('counter', 1, 5).put('jar', 12, 8).put('plant', 1, 8); }
@@ -292,7 +296,7 @@ function roomNpcs(id, out) {
   }
   if (kind === 'inn') {  // 객잔은 소문이 모이는 곳이다
     const CT = CITYTALK[l.id] || { talk: CHAT.town }, gossip = i => async () => { const n = hearsay('hao'); await npcSay('술손님', ['Villager2', 'Samurai', 'Villager'][i], n && Math.random() < .6 ? pick(CTX.hao.news).replace('{n}', n) : nextLine(id + 'pt' + i, rot(CT.talk, i + 3))); };
-    out.npcs.push({ id: 'cinn', spr: 'OldWoman', x: 3, y: 4.6, dir: 0, hint: '객잔 주인', talk: () => innTalk(l) },
+    out.npcs.push({ id: 'cinn', spr: 'OldWoman', x: 3.5, y: 1.3, life: 'work', dir: 0, hint: '객잔 주인', talk: () => innTalk(l) },  // 계산대 뒤에 선다. 말은 계산대 너머로 걸린다(js/field.js refresh의 reach)
       { id: 'pt0', spr: 'Villager2', x: 4.4, y: 5.8, dir: 0, life: 'still', lively: 1, hint: '술손님', barks: ['술 한 병 더!', '들었소? 그 소문.', '캬, 좋다.'], talk: gossip(0) },
       { id: 'pt1', spr: 'Samurai', x: 12.4, y: 5.8, dir: 0, life: 'still', hint: '삿갓 쓴 손님', barks: ['…', '술이 싱겁군.'], talk: gossip(1) },
       { id: 'pt2', spr: 'Villager', x: 4.6, y: 8.6, dir: 0, life: 'still', lively: 1, hint: '술손님', barks: ['여기 국수 하나!', '쉿, 저 사람 강호인이오.'], talk: gossip(2) },

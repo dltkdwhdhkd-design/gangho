@@ -211,7 +211,7 @@ Story.providers.push(function content7(id) {
   if (at('p4') && F().lunch) {
     if (id === 'inn') {
       n.push({ id: 'boat', spr: 'OldMan', x: 7.4, y: 7.5, dir: 3, mark: () => !F().l_no, talk: async () => { if (!F().l_no) await guestNo(); else await say('boat', '면 맛있다. 국물은 곽씨가 아직 안 가르쳐 줬지?'); } });
-      n.push({ id: 'yang', spr: 'OldWoman', x: 10.6, y: 7.5, dir: 1, mark: () => !F().l_yang, talk: async () => { if (!F().l_yang) await guestYang(); else await say('yang', '계란은 다 먹었어? 껍질은 밭에 뿌려.'); } });
+      n.push({ id: 'yang', spr: 'OldWoman', x: 10.6, y: 7.85, dir: 1, mark: () => !F().l_yang, talk: async () => { if (!F().l_yang) await guestYang(); else await say('yang', '계란은 다 먹었어? 껍질은 밭에 뿌려.'); } });
       n.push({ id: 'deed', spr: 'Villager', x: 10.8, y: 11.2, dir: 1, when: () => !F().l_deed, mark: () => !F().l_deed, talk: guestDeed });
     }
     if (id === 'clinic') n.push({ id: 'yun', spr: 'Princess', x: 3.5, y: 4.8, dir: 0, mark: () => !!F().herb && !F().herb_done, talk: async () => { if (F().herb && !F().herb_done) await yunHerb(); else await say('yun', '약 가져갔잖아요. 또 뭐요?'); } });

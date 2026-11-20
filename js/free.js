@@ -294,7 +294,7 @@ function npcsFree(id, L) {
   let out = L.filter(n => !HIDE.includes(n.id) && !FACS.some(f => f.key === n.id && f.at[0] !== id));
   out.forEach(n => { const f = FACS.find(x => x.key === n.id && x.at[0] === id); if (f) { n.talk = () => facTalk(f); n.mark = () => Fr().fac === f.id && canPromote(); } });
   out.forEach(n => { if (n.id === 'beggar') { n.talk = roninBoard; n.mark = null; n.hint = '일거리 묻기'; } });
-  if (id === 'inn') out.push({ id: 'gwak', spr: 'OldWoman', x: 4, y: 4.6, dir: 0, hint: '곽 아주머니', talk: gwakTalk });
+  if (id === 'inn') out.push({ id: 'gwak', spr: 'OldWoman', x: 3.5, y: 1.3, life: 'work', dir: 0, hint: '곽 아주머니', talk: gwakTalk });
   if (id === 'ninehall' || id === 'fiveclans') out.push({ id: 'hall_clerk', spr: 'Villager', x: 22, y: 10.5, dir: 0, hint: '회관지기', talk: async () => { await say(null, '어른들은 다들 본산으로 돌아가셨습니다. 뵈려면 본산까지 가셔야 합니다.'); } });
   for (const f of FACS) if (f.at[0] === id && !out.some(n => n.id === f.key) && !G.jh.fallen(f.id) && !Fr().dead?.[f.id]) out.push({ id: f.key, spr: f.spr, x: f.at[1], y: f.at[2], dir: 0, hint: f.name, mark: () => Fr().fac === f.id && canPromote(), talk: () => facTalk(f) });
   out.push(...jobNpcs(id));

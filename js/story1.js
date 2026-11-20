@@ -322,11 +322,11 @@ Story.providers.push(function content1(id) {
   const n = [], sp = [], tr = [], ro = [], s = step();
   if (id === 'inn') {
     if (!F().burned) {
-      n.push({ id: 'gwak', spr: 'OldWoman', x: 4, y: 4.6, dir: 0, mark: () => G.life.dayMark('gwak'), talk: async () => { if (await G.life.dayTalk('gwak')) return; if (s === 'p1') await say('gwak', '저기 구석방이다. 오늘은 꼭 받아 와.'); else await say('gwak', '일해, 일.'); } });
+      n.push({ id: 'gwak', spr: 'OldWoman', x: 3.5, y: 1.3, life: 'work', dir: 0, mark: () => G.life.dayMark('gwak'), talk: async () => { if (await G.life.dayTalk('gwak')) return; if (s === 'p1') await say('gwak', '저기 구석방이다. 오늘은 꼭 받아 와.'); else await say('gwak', '일해, 일.'); } });
       n.push({ id: 'baek', spr: 'OldMan3', x: 14.5, y: 5.6, dir: 2, mark: () => at('p1') || G.life.dayMark('baek'), talk: async () => { if (at('p1')) { set('p2'); await baekFirst(); } else if (!(await G.life.dayTalk('baek'))) await say('baek', '허리 펴라.'); } });
       n.push({ id: 'guest', spr: 'Villager', x: 13.7, y: 8.6, dir: 2, talk: async () => { await say('town', '여기 국수는 곽씨한테 욕을 먹으면서 먹어야 제맛이지.'); } });
     } else {
-      sp.push({ x: 1, y: 3, w: 3, h: 1, hint: '살펴보기', when: () => !F().c1inn, act: c1Inn });
+      sp.push({ x: 2, y: 3, w: 3, h: 1, hint: '살펴보기', when: () => !F().c1inn, act: c1Inn });
       sp.push({ x: 13, y: 10, w: 2, h: 2, hint: F().well_open ? '우물 아래로' : '우물 뚜껑', act: async () => { if (F().well_open) await ctx.warp('well', 6, 7, 1); else if (at('c1g')) await wellOpen(); else await say(null, '쇠 뚜껑에 달 모양 구멍이 나 있다. 꿈쩍도 하지 않는다.'); } });
       sp.push({ x: 7, y: 5, w: 2, h: 2, hint: '구석방 탁자', when: () => after('c1a') && !F().inn_rebuilt, act: async () => { await say(null, '타다 남은 탁자에 술잔 자국이 남아 있다.'); } });
     }
