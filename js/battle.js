@@ -18,7 +18,7 @@ import { stageOf } from './hd2d/stages.js';
 export const BAND = 0; const ZB = 3.6, VWB = 1280 / ZB, VHB = (720 - BAND) / ZB;  // 2D 전투는 마을(4배)보다 조금 멀리(3.3배): 싸움터 가로가 한눈에 들어온다
 const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
-const PCLASS = { Sword: 'sword', Rapier: 'sword', Katana: 'sword', Ninjaku: 'sword', Sai: 'fist', Club: 'fist' };  // 주인공 무기 그림 → 동작 칸(아래 actionSheet). 플레이어의 Club·Sai는 권갑이다(js/data.js WEAPONS)
+const PCLASS = { Sword: 'sword', Rapier: 'sword', Katana: 'sword', Ninjaku: 'sword', Sai: 'fist', Club: 'fist', BigSword: 'blade', Axe: 'blade', Lance: 'spear', Lance2: 'spear', Stick: 'staff' };  // 주인공 무기 그림 → 동작 칸(아래 actionSheet). 플레이어의 Club·Sai는 권갑이다(js/data.js WEAPONS)
 const MOB = { bandit: 'mob_bandit', rowdy: 'mob_bandit', mask_low: 'mob_bandit', rowdy2: 'mob_brute', bruiser: 'mob_brute', pirate: 'mob_pirate', pirate_bow: 'mob_pirate', pirate_hook: 'mob_pirate', archer: 'mob_archer', wanted2: 'mob_archer',
   shadow0: 'mob_assassin', shadow: 'mob_assassin', shadow2: 'mob_assassin', fox: 'mob_assassin', fox0: 'mob_assassin', sand_cut: 'mob_assassin', puppet: 'mob_jiangshi', skull: 'mob_jiangshi', disciple: 'mob_jeong',
   soldier: 'mob_soldier', jeong: 'mob_jeong', sa: 'mob_sa', ma: 'mob_cult', hyeolgyo: 'mob_cult', 'chars/Skeleton': 'mob_jiangshi' };
@@ -591,7 +591,7 @@ export class Battle {
   // 전에는 검이 아니면 다 맨손 칸이어서 창이나 큰 칼을 든 채 주먹을 내지르고, 그 위에 무기를 또 그렸다(주인이 보고 알려 주심)
   actionSheet(a) {
     if (!a.isPlayer) return a.hdAct;
-    const k = PCLASS[a.wpn]; return k === 'sword' ? a.hdAct : k === 'fist' ? G.hd?.act?.('me_unarmed') : null;
+    const k = PCLASS[a.wpn]; return k === 'sword' ? a.hdAct : k === 'fist' ? G.hd?.act?.('me_unarmed') : k ? G.hd?.act?.('me_' + k) || null : null;  // 큰 칼·창·봉 칸(me_blade_act, me_spear_act, me_staff_act. docs/chatgpt-weapons.md)은 들어오면 바로 쓴다
   }
   actionFrame(a) {
     if (a.dead) return 4;
