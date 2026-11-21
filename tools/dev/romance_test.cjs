@@ -3,7 +3,8 @@ async function checkCourtship() {
   const G = window.__G, st = G.dbg.state, dlg = G.dbg.dialog;
   const saved = {state:G.S,auto:G.auto,pick:G.autoPick,noSave:G.noSave,manual:G.manual};
   const female = ['yun','so','clan_dang','clan_moyong','clan_namgung','baekrang','hyeok'];
-  const ids = [...female,'igyeom','cheol'];
+  const male = ['igyeom','mugyeong','yeonjae','jaeha'];
+  const ids = [...female,...male,'cheol'];
   const assert = (ok,reason) => { if (!ok) throw Error(reason); };
   const sleep = () => new Promise(resolve=>setTimeout(resolve,0));
   // Exercise the same menu used by the stationary NPC, travelling party and house.
@@ -31,7 +32,7 @@ async function checkCourtship() {
     for(const g of ['m','f']){
       for(const id of ids){
         const s=G.S=st.newState('강호객',st.LEAD_LOOK[g],g,'normal');
-        const allowed=g==='m'?female.includes(id):id==='igyeom';
+        const allowed=g==='m'?female.includes(id):male.includes(id);
         const ctx=g+'/'+id;
         assert(st.canRomance(id,s)===allowed,ctx+' eligibility');
         s.love[id]=100;s.bonds[id]=3;s.flags.cross=true;s.flags.cheol_dead=true;
@@ -54,7 +55,7 @@ async function checkCourtship() {
       }
     }
     // Complete an original male/female pairing as well as the new female/male pairing.
-    for(const [g,id] of [['m','yun'],['f','igyeom']]){
+    for(const [g,id] of [['m','yun'],...male.map(id=>['f',id])]){
       const s=G.S=st.newState('낭인',st.LEAD_LOOK[g],g,'normal');
       if(!G.field.m) G.field.load('cheongha',22,25,1);
       s.love[id]=100;s.bonds[id]=3;s.house.lv=1;s.flags.own_house=true;s.inv.jade_ring=1;

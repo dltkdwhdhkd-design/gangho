@@ -37,6 +37,7 @@ import './compbonds.js';
 import './world.js';
 import './base.js';
 import './era.js';
+import './chronicle.js';
 import './sect.js';
 import './evil.js';
 import './crime.js';

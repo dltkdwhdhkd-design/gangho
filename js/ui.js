@@ -37,7 +37,7 @@ function showCreate() {
   <div class="field"><span id="gender-label">주인공</span><div class="seg" id="leads" role="group" aria-labelledby="gender-label"><button type="button" class="btn on" data-gender="m" aria-pressed="true">남성</button><button type="button" class="btn" data-gender="f" aria-pressed="false">여성</button></div></div>
   <div class="field"><label for="nm">이름</label><input id="nm" maxlength="6" placeholder="이름을 입력하세요" autocomplete="off"></div>
   <div class="field"><span>방식</span><div class="seg" id="md"></div></div>
-  <div class="hint" id="mdh">아홉 부로 이어지는 이야기를 따라갑니다.</div>
+  <div class="hint" id="mdh">아홉 부의 본편과 달맞이 행록을 함께 진행합니다. 첫 권은 객잔에서 점소이가 된 뒤 열립니다.</div>
   <div class="field"><span>난이도</span><div class="seg" id="df"></div></div>
   <div class="hint">쉬움은 적이 약하고, 어려움은 적의 공격이 세고 체력도 많습니다. 나중에 바꿀 수 없습니다.</div>
   <div class="row"><button class="btn" id="back">돌아가기</button><button class="btn pri" id="go">시작</button></div></div></div></div>`;
@@ -55,9 +55,9 @@ function showCreate() {
     };
   }
   for (const k of ['easy', 'normal', 'hard']) { const b = el('button', 'btn' + (k === diff ? ' on' : ''), DIFF[k].name); b.onclick = () => { diff = k; $$('#df .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); }; $('#df').appendChild(b); }
-  for (const [k, n, h] of [['story', '이야기', '아홉 부로 이어지는 이야기를 따라갑니다.'], ['free', '자유', '이야기 없이 강호를 삽니다. 문파에 들어가도, 낭인으로 살아도, 내 문파를 세워도, 악인이 되어도 됩니다.']]) { const b = el('button', 'btn' + (k === mode ? ' on' : ''), n); b.onclick = () => { mode = k; $$('#md .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); $('#mdh').textContent = h; }; $('#md').appendChild(b); }
+  for (const [k, n, h] of [['story', '이야기', '아홉 부의 본편과 달맞이 행록을 함께 진행합니다. 첫 권은 객잔에서 점소이가 된 뒤 열립니다.'], ['free', '자유', '이야기 없이 강호를 삽니다. 문파에 들어가도, 낭인으로 살아도, 내 문파를 세워도, 악인이 되어도 됩니다.']]) { const b = el('button', 'btn' + (k === mode ? ' on' : ''), n); b.onclick = () => { mode = k; $$('#md .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); $('#mdh').textContent = h; }; $('#md').appendChild(b); }
   $('#back').onclick = showTitle;
-  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LEAD_LOOK[gender], gender, diff); s.innerHTML = ''; G.bgDraw = null; if (mode === 'free') G.free.start(); else Story.begin(); };
+  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LEAD_LOOK[gender], gender, diff); s.innerHTML = ''; G.bgDraw = null; if (mode === 'free') G.free.start(); else { const journal=G.chronicle.ledger(); journal.mode='together'; Story.begin(); } };
   setTimeout(() => $('#nm')?.focus(), 50);
 }
 // ── 메뉴 ──
@@ -68,16 +68,17 @@ export function openMenu(t) {
   Sound.sfx('select');
 }
 G.closeMenu = () => closeMenu();
-export function closeMenu() { G.keyWait = false; G.menuOpen = false; $('#modal').classList.remove('on'); $('#modal').innerHTML = ''; Input.clear(); save(); document.removeEventListener('keydown', menuKey); if (G.battle) G.battle.refreshGear(); else if (G.field?.m && G.scene === 'field') G.field.showHud(); }
+export function closeMenu() { G.chronicle?.closed(); G.keyWait = false; G.menuOpen = false; $('#modal').classList.remove('on'); $('#modal').innerHTML = ''; Input.clear(); save(); document.removeEventListener('keydown', menuKey); if (G.battle) G.battle.refreshGear(); else if (G.field?.m && G.scene === 'field') G.field.showHud(); }
 function menuKey(e) { if (G.keyWait) return; if (e.repeat || (Keys.is('opt', e.code) && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || Keys.is('opt', e.code)) { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['mer', '경맥'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['fate', '인연의 실'], ['note', '수첩'], ['save', '저장'], ['set', '설정']].filter(([k]) => k !== 'fate' || S.mode !== 'free');
+  if (tab === 'chronicle' && G.battle) tab='stat';
+  const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['mer', '경맥'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['fate', '인연의 실'], ['note', '수첩'], ['chronicle', '달맞이 행록'], ['save', '저장'], ['set', '설정']].filter(([k]) => (k !== 'fate' || S.mode !== 'free') && (k !== 'chronicle' || !G.battle));
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (${Keys.label('opt')})</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, mer: tabMeridian, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab, fate: G.fate.tab })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, mer: tabMeridian, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, chronicle: G.chronicle.tab, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab, fate: G.fate.tab })[tab](B); B.scrollTop = keep;
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);
@@ -182,13 +183,15 @@ function tabClan(B) {
 function tabNote(B) {
   const S = G.S, moon = ['moon1', 'moon2', 'moon3', 'moon4', 'moon5', 'moon6', 'moon7'];
   B.innerHTML = `<div class="two"><div><h2>월하칠식 낱장 ${S.pages.length} / 7</h2>${moon.map((id, i) => S.pages.includes(id) ? `<div class="note">${SKILLS[id].name} <small class="hint">${SKILLS[id].han}</small></div>` : `<div class="note" style="opacity:.5">제${i + 1}식 ……</div>`).join('')}</div><div><h2>적어 둔 것</h2>${S.notes.length ? S.notes.map(n => `<div class="note">${n}</div>`).join('') : '<p class="hint">아직 적어 둔 것이 없습니다.</p>'}</div></div>`;
+  if (!G.battle) { const button=el('button','btn','달맞이 행록 열기'); button.onclick=()=>{tab='chronicle';drawMenu();}; B.prepend(button); }
 }
 function tabLove(B) {
   const S = G.S, L = G.life, list = Object.entries(L.cand).filter(([k]) => S.flags['met_' + k] || (S.love[k] || 0) > 0);
   const faces = { igyeom: 'Igyeom', yun: 'Princess', so: 'RedSamurai', cheol: 'Monk2', baekrang: 'Cavegirl', hyeok: 'Hyeok', clan_dang: 'Dang', clan_moyong: 'Moyong', clan_namgung: 'Namgung' }, desc = { igyeom: '청하진 나루의 뱃사공. 안개가 끼면 밧줄 매듭으로 길을 읽는다.', yun: '청하진 약방집 딸. 말이 짧고 손이 빠르다.', so: '벽수궁 출신의 검객. 찾는 사람이 있다.', cheol: '소림에서 쫓겨난 스님. 밥값을 낸 적이 없다.', clan_dang: '사천당가의 딸. 찻잔에 손대지 말 것.', clan_moyong: '받은 것은 그대로 돌려주는 모용세가의 딸.', clan_namgung: '남궁세가의 딸이자 후계자. 자존심이 높다.', baekrang: '하오문의 소문을 쥔 도박장 주인. 값을 먼저 말한다.', hyeok: '천마신교의 성녀. 향을 판다고 했다.' };
   const riverHint = !S.flags.met_igyeom ? '<p class="hint">청하진 나루에 가면 수로 지도를 그리는 서이겸을 만날 수 있습니다.</p>' : '';
-  if (!list.length) { B.innerHTML = riverHint; return; }
-  B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 이성 인물에게는 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와는 셋째 사연 뒤에 ${S.gender === 'f' ? '의남매' : '의형제'}를 맺을 수 있습니다.</p>` + riverHint + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${faces[k]}" data-a="${k}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated;border-radius:4px"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || S.sworn === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">${canRomance(k) ? '연애 가능' : '우정'} · 호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${desc[k]}</div></div></div>`).join('');
+  const roadHints = Object.entries(L.cand).filter(([key,c]) => c.place && !S.flags['met_'+key]).map(([,c]) => '<p class="hint">'+c.place+' · '+c.name+'</p>').join('');
+  if (!list.length) { B.innerHTML = riverHint + roadHints; return; }
+  B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 이성 인물에게는 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와는 셋째 사연 뒤에 ${S.gender === 'f' ? '의남매' : '의형제'}를 맺을 수 있습니다.</p>` + riverHint + roadHints + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${c.spr || faces[k]}" data-a="${k}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated;border-radius:4px"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || S.sworn === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">${canRomance(k) ? '연애 가능' : '우정'} · 호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${c.desc || desc[k]}</div></div></div>`).join('');
   // 일러스트가 있으면 얼굴 부분을 잘라 쓴다. 없으면 옛 도트 얼굴
   $$('canvas[data-f]', B).forEach(c => { const x = c.getContext('2d'), a = ART.get(c.dataset.a + '_n');
     if (a) {

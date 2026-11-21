@@ -216,8 +216,8 @@ async function ambush() {
 async function lantern() {
   await say('yun', '오늘 밤에 등불 놀이가 있대요. 약재 사러 나왔다가 봤어요. 진짜로요.', 'h');
   const c = await choice('윤설이 등불을 보고 있다.', ['같이 보자고 한다', '내일 경기를 준비하러 간다']);
-  if (c === 0) { await say('me', '같이 보실래요? 등불은 제가 살게요.', 'h'); await say('yun', '웬일이에요? {나} 씨가 돈을 다 쓰고.', 'h'); await say('yun', '오늘은 좋네요. 고마워요.', 'h'); ctx.love('yun'); if (!S().hearts.includes('mercy')) { S().hearts.push('mercy'); toast('심법 인의심공을 익혔다'); } }
-  else await say('yun', '네, 그러세요.', 'h');
+  if (c === 0) { await say('me', '같이 보실래요? 등불은 제가 살게요.', 'h'); await say('yun', '그럼 불은 내가 붙일게요. 잔돈은 두세요. 내일 아침은 먹고 나가야죠.', 'h'); await say('yun', '약방 문 닫을 땐 불 꺼진 등만 봤거든요. 오늘은 처음부터 같이 보네요.', 'h'); ctx.love('yun'); if (!S().hearts.includes('mercy')) { S().hearts.push('mercy'); toast('심법 인의심공을 익혔다'); } }
+  else await say('yun', '그럼 나는 여기서 조금 더 볼게요. 내일 아침에 약방 앞에서 봐요.', 'h');
   F().ev_lantern = true;
 }
 async function soEve() {
@@ -225,7 +225,7 @@ async function soEve() {
   await say('me', '알아요.');
   await say('so', '네가 이기면 달거울은 네 거고, 내가 이기면 같이 맹주 앞에 서자. 어느 쪽이든 그 사람 얼굴은 볼 거야.');
   const c = await choice('소연하가 칼을 닦는다.', ['사부님을 꼭 찾자고 한다', '살살 해 달라고 한다']);
-  if (c === 0) { await say('so', '고맙다. 사실 돌아가셨을 거라는 건 알아. 그래도 고마워.', 's'); ctx.love('so'); if (!S().hearts.includes('swift')) { S().hearts.push('swift'); toast('심법 쾌검심결을 익혔다'); } }
+  if (c === 0) { await say('so', '그래. 끝까지 묻고 싶어. 내가 찾는 사람이 어떤 길을 걸었는지, 남이 멋대로 마지막을 정하진 않게.', 's'); ctx.love('so'); if (!S().hearts.includes('swift')) { S().hearts.push('swift'); toast('심법 쾌검심결을 익혔다'); } }
   else await say('so', '싫은데.', 'h');
   F().ev_soeve = true;
 }

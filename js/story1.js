@@ -25,7 +25,7 @@ Story.scenes.opening = async () => {
   set('p0a'); ctx.goal('마을 위쪽 달맞이 객잔에서 밥 먹기 (WASD 이동)');
 };
 export async function firstMeal() {
-  await say('gwak', '어서 와. 칼 찬 손님은 돈부터 내고 앉아.');
+  await say('gwak', '어서 와. 칼은 집째 저 벽에 기대고 앉아. 손부터 좀 녹여.');
   await say('me', '국수 한 그릇이요.');
   await narr('사흘을 굶었더니 눈에 뵈는 게 없었다. 국물까지 싹 비우고 나서야 주머니 사정이 떠올랐다. 뒤져 보니 동전 네 닢. 국수는 한 그릇에 열 닢이었다.');
   await say('gwak', '왜, 돈이 없어? 어쩐지 먹는 꼴이 심상치 않더라니.');
@@ -50,6 +50,10 @@ export async function firstMeal() {
   await say('me', '그 어르신, 제가 가면 걸레질 잔소리만 하시던데요.');
   await say('gwak', '잔소리를 하든 말든 돈만 받아 오면 될 거 아냐. 얼른 가!', 'a');
   set('p1'); ctx.goal('구석방의 백 노인에게 방값 받기');
+  if (G.S.chronicle?.mode === 'together') {
+    await say('gwak', '참, 부엌에 점례가 삼베 한 폭을 놓고 갔더라. 장부에 대접 하나가 남는다고. 빈 그릇 하나 장부에서 빼는 데 네 점소이 눈이 좀 필요하단다.');
+    G.S.chronicle.notice=1;
+  }
 }
 async function baekFirst() {
   await say('baek', '또 왔느냐.');

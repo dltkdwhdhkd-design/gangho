@@ -303,6 +303,7 @@ async function finale() {
 }
 const LEAD = { jeong: ['정천맹을 다시 세운다', '맹주 자리는 내가 맡았다. 맨 처음 한 일은 맹주 창고 지하를 메운 것이었다.'], sa: ['흑도맹을 이끈다', '사마웅의 큰 칼은 산채 마당에 꽂아 두었다. 흑도맹은 그 칼 앞에서 맹세한 뒤로 양민의 쌀을 건드리지 않는다.'], ma: ['교단을 거두어 잠근다', '남은 신도들을 데리고 제단의 불을 껐다. 제단 자리에 달맞이꽃을 심었다.'], free: ['강호의 일을 맡는다', '깃발 없는 사람이 정파와 사파 사이에 앉는 자리가 생겼다. 다들 나를 합석 어른이라고 불렀는데, 그 말이 제일 듣기 싫었다.'] };
 async function lastChoice() {
+  if (await G.chronicle.deferEnding()) return;
   const s = side() || 'jeong', lead = LEAD[s];
   await narr('달이 지고 나서도 세상은 그대로 있었다. 무너진 산문을 고치고, 불탄 나루를 다시 놓고, 죽은 사람들 이름을 적는 데 한 해가 갔다.');
   if (!F().ma_side_end) {
@@ -314,13 +315,14 @@ async function lastChoice() {
   await G.endings.play(c);
   await G.side.ending();
   await G.bond.ending();
+  await G.chronicle.ending();
   ctx.cgOff();
   await narr('그 뒤로 강호에서는 나를 이렇게 불렀다. {호} {나}.\n\n사람들이 뭐라고 부르든, 나는 곽씨네 점소이였다.');
   await G.act3.credits();
 }
 async function credits() {
   await ctx.part(9, '강호행', '끝');
-  set('end'); F().cleared = true; F().ended = true; ctx.goal('');
+  set('end'); delete F().awaitingRoadEnding; F().cleared = true; F().ended = true; ctx.goal('');
   await ctx.warp('cheongha', 22.5, 16, 0);
   toast('이야기를 끝냈습니다. 강호를 계속 돌아다닐 수 있습니다.', 5);
 }

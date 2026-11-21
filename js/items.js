@@ -1,3 +1,4 @@
+import { roadCompanions } from './road-companions.js';
 // 물건, 제작법, 물고기, 가구, 장신구, 무공 트리 자료
 import { WEAPONS } from './data.js';
 
@@ -21,6 +22,7 @@ export const DB = {
 // 장신구: 비무 전리품. 한 번에 하나만 찬다.
 const A = (name, desc, fx) => ({ name, desc, fx });
 export const ACCS = {
+  ...Object.fromEntries(Object.entries(roadCompanions).map(([id,c]) => ['b_'+id,A(...c.keepsake)])),
   a_haenam: A('조개 부적', '내력 회복 +20%', { regen: 20 }), a_cheonsan: A('설련 향낭', '체력 +10%', { hp: 10 }), a_jeonjin: A('전진 호패', '방어 +7', { def: 7 }), a_mosan: A('모산 부적', '치명타 +6%', { crit: 6 }), a_jangbaek: A('백호 이빨', '치명타 +7%', { crit: 7 }), a_pota: A('보타 염주', '내력 회복 +25%', { regen: 25 }), a_hwangbo: A('황보 가문패', '방어 +8', { def: 8 }), a_ak: A('정충보국 패', '체력 +11%', { hp: 11 }), a_yang: A('양가 창끈', '치명타 +8%', { crit: 8 }), a_eon: A('언가 쇠가락지', '방어 +6', { def: 6 }), a_jin: A('진가 약낭', '체력 +9%', { hp: 9 }), a_bukhae: A('빙정 구슬', '내력 회복 +35%', { regen: 35 }), a_noeum: A('뇌음 금강저', '체력 +13%', { hp: 13 }), a_podalra: A('법왕 염주', '방어 +10', { def: 10 }),
   a_beads: A('항마염주', '체력 +12%', { hp: 12 }), a_taiji: A('태극패', '내력 회복 +30%', { regen: 30 }), a_plum: A('매화향낭', '치명타 +8%', { crit: 8 }), a_jongnam: A('종남옥패', '방어 +8', { def: 8 }), a_emei: A('아미 불진', '금창약 효과 +30%', { potion: 30 }),
   a_kunlun: A('설련화', '내력 +15%', { mp: 15 }), a_gong: A('칠상부', '공격력 +10%, 체력 -5%', { atk: 10, hp: -5 }), a_diancang: A('경풍화', '이동 속도 +10%', { spd: 10 }), a_qing: A('청성 찻잔', '초식 내력 소모 -12%', { mpCost: -12 }), a_gae: A('거지 표주박', '타격 피해의 2%를 체력으로', { lifeHit: 2 }),

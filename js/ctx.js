@@ -36,8 +36,8 @@ export const ctx = {
   warp: (id, x, y, d) => G.field.warp(id, x, y, d),
   cg: id => showCG(id), cgOff: () => hideCG(),
   // 부 표지, 장 표지. 수첩에 지금 어디쯤인지 남긴다
-  async part(no, name, chap) { G.S.chapter = chap ? `제${no}부 ${name} · ${chap}` : `제${no}부 ${name}`; await card(`제${no}부`, name, chap); },
-  async chap(no, name, chap) { G.S.chapter = `제${no}부 ${name} · ${chap}`; await card(`제${no}부 ${name}`, chap); },
+  async part(no, name, chap) { G.chronicle?.recordPart(no); G.S.chapter = chap ? `제${no}부 ${name} · ${chap}` : `제${no}부 ${name}`; await card(`제${no}부`, name, chap); if (chap !== '끝') await G.chronicle?.chapterEcho(no); },
+  async chap(no, name, chap) { G.chronicle?.recordPart(no); G.S.chapter = `제${no}부 ${name} · ${chap}`; await card(`제${no}부 ${name}`, chap); },
   npc: id => G.field.npcs.find(n => n.id === id),
   shop: (...a) => openShop(...a), get item() { return shopItem; }, learn: id => learn(id),
 };

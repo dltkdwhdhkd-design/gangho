@@ -112,7 +112,7 @@ HD.fieldKey = o => {
   if (!walking.type_BlueSamurai) {loadCastIndex(PV);return null;}
   const raw = (o.me ? G.S.look : o.spr || '').split('/').pop().replace(/_(q|d)$/,'');
   const pool = [o.id,o.id?.replace(/^fan_/,''),o.role,ROLE[o.hint],...(o.keys||[]),
-    roamingEnemyArt[o.foes?.[0]]?.replace(/^n_/,''),raw === 'Igyeom' && 'igyeom','type_'+raw];
+    roamingEnemyArt[o.foes?.[0]]?.replace(/^n_/,''),({Igyeom:'igyeom', Mugyeong:'mugyeong', Yeonjae:'yeonjae', Jaeha:'jaeha'})[raw],'type_'+raw];
   return pool.find(id=>id && walking[id]) || null;
 };
 HD.prepareCombat = ids => Promise.all(ids.flatMap(id => {

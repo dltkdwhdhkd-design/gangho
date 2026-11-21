@@ -1,3 +1,4 @@
+import { roadCompanions } from './road-companions.js';
 // 동료: 호감을 쌓아 데리고 다니고, 집터에 머물게 하고, 일을 맡기고, 초식을 가르친다
 import { G, Sound, toast, josa, esc } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
@@ -12,6 +13,7 @@ const S = () => G.S, MAX = 2;
 const st = () => (S().pt = S().pt || { in: [], home: {}, met: {}, up: {}, moves: {} });
 // 인연이 있는 인물
 export const COMP = {  // art: 그 사람이 속한 무공 갈래(js/artdata.js). 호감이 쌓이면 그 무공을 전수해 준다
+  ...Object.fromEntries(Object.entries(roadCompanions).map(([id,c]) => [id,{name:c.name,spr:c.spr,hp:1.02,atk:1,good:1,...c.combat}])),
   igyeom: { spr: 'Igyeom', wpn: 'Lance', hp: 1.06, atk: 1, moves: ['x_janggang1', 'x_janggang2', 'x_janggang3'], art: 'janggang', fx: { parry: .02, regen: 5 }, good: 1, boon: '튕겨내기 시간 +0.02초, 내력 회복 +5%', bark: ['{p}에선 빗물이 어디로 빠지는지부터 보세요. 큰길은 그다음이에요.', '길 물을 사람이 없으면 나무에 매인 배를 보세요. 뱃머리가 상류예요.', '다음 쉬는 곳은 당신이 골라요. 이번만큼은 길 잃어도 괜찮아요.'] },
   yun: { spr: 'Princess', wpn: 'Ninjaku', hp: .85, atk: .8, moves: ['x_yunui1', 'x_yunui2', 'dart3'], art: 'yunui', fx: { potion: 20 }, good: 1, boon: '금창약 효과 +20%', bark: ['{p}요? 약초가 다르겠네요. 잠깐만요, 이것 좀 뜯고요.', '오늘은 왼쪽 안 맞았죠?', '밥은 제때 먹어야 해요. 강호고 뭐고.'] },
   so: { spr: 'RedSamurai', wpn: 'Sword', hp: 1, atk: 1.1, moves: ['x_byeoksu1', 'x_byeoksu2', 'x_byeoksu4'], art: 'byeoksu', fx: { atk: 3 }, good: 1, boon: '공격 +3%', bark: ['{p}까지 왔네. 사부가 들으면 웃겠다.', '왼발 늦었어. 방금 그 돌부리.', '여기서 지는 사람이 술 사기다.'] },
@@ -67,8 +69,7 @@ const pickLine = (id, L) => { if (!L?.length) return null; const k = id + L[0]; 
 async function chat(id) {
   const c = COMP[id], s = S(); if (G.bond?.next(id)) return G.bond.play(id);
   const T = TALK[id] || {}, cand = G.life?.cand?.[id], L = love(id), tier = L >= 70 ? 2 : L >= 30 ? 1 : 0;
-  const friend = cand && !cand.sworn && !canRomance(id);
-  const personalLines = friend ? G.life.chatLines(id) : T.me?.[tier];
+  const personalLines = cand && !cand.sworn ? G.life.chatLines(id) : T.me?.[tier];
   const topics = [['요즘 어때?', () => pickLine(id, T.now)], ['여기는 어때?', () => pickLine(id, T.here)], ['네 이야기 좀 해 줘', () => pickLine(id, T.self)], ['나를 어떻게 생각해?', () => pickLine(id, personalLines)], ['아무 이야기나', () => pickLine(id, [...c.bark, ...(cand ? G.life.chatLines(id) : [])])], ['그만둔다', null]].filter(t => !t[1] || t[1]() !== null);
   const k = await choice(`${nameOf(id)}에게 무엇을 물을까?`, topics.map(t => t[0])); if (!topics[k][1]) return;
   if (!s.daily['chat_' + id]) { s.daily['chat_' + id] = 1; addLove(id, 3); }

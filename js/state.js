@@ -9,7 +9,7 @@ export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: 
 export const LEAD_LOOK = { m: 'BlueSamurai', f: 'JadeRunner' };
 const romanceGender = Object.freeze({
   yun: 'f', so: 'f', clan_dang: 'f', clan_moyong: 'f', clan_namgung: 'f', baekrang: 'f', hyeok: 'f',
-  igyeom: 'm',
+  igyeom: 'm', mugyeong: 'm', yeonjae: 'm', jaeha: 'm',
 });
 export function canRomance(id, s = G.S) {
   return !!s && (s.gender === 'm' && romanceGender[id] === 'f' || s.gender === 'f' && romanceGender[id] === 'm');
@@ -18,11 +18,11 @@ export function newState(name, look, gender, diff) {
   return {
     v: 5, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
     weapon: 'mop', weapons: ['mop'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
-    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0, igyeom: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
+    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0, igyeom: 0, mugyeong: 0, yeonjae: 0, jaeha: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
   };
 }
 // 무공 트리, 장신구, 요리, 배우자, 집에서 오는 효과를 합친다
-export const SPOUSE_FX = { yun: { potion: 25, hp: 6 }, so: { atk: 6, crit: 3 }, cheol: { hp: 10, def: 4 }, clan_dang: { venom: 1, atk: 3 }, clan_moyong: { parry: .04, skill: 5 }, clan_namgung: { atk: 8 }, baekrang: { crit: 5, atk: 3 }, hyeok: { skill: 8, hp: 4 }, igyeom: { parry: .03, regen: 8 } };
+export const SPOUSE_FX = { yun: { potion: 25, hp: 6 }, so: { atk: 6, crit: 3 }, cheol: { hp: 10, def: 4 }, clan_dang: { venom: 1, atk: 3 }, clan_moyong: { parry: .04, skill: 5 }, clan_namgung: { atk: 8 }, baekrang: { crit: 5, atk: 3 }, hyeok: { skill: 8, hp: 4 }, igyeom: { parry: .03, regen: 8 }, mugyeong: { hp: 6, def: 3 }, yeonjae: { skill: 6, regen: 4 }, jaeha: { crit: 3, regen: 6 } };
 export function bonus(S = G.S) {
   const b = {}, add = fx => { for (const k in fx) b[k] = (b[k] || 0) + fx[k]; };
   const wt = WEAPONS[S.weapon].type;
@@ -149,7 +149,9 @@ function migrate(S) {
       if (['원앙지계', '공처가'].includes(S.title)) S.title = '떠돌이 낭인';
     }
   }
+  S.love ??= {};
   for (const id of Object.keys(romanceGender)) {
+    S.love[id] ??= 0;
     if (!canRomance(id, S) && S.bonds?.[id] > 3) S.bonds[id] = 3;
   }
   S.v = Math.max(5, S.v || 0);

@@ -61,8 +61,9 @@ export class Field {
   }
   flashPlace() { const e = $('#place'); if (!e) return; e.textContent = this.m.name; e.classList.add('on'); clearTimeout(this._pt); this._pt = setTimeout(() => e.classList.remove('on'), 1800); }
   showHud() {
-    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (' + Keys.label('decor') + ')</button>' : ''}<button class="btn sm" id="mapb">지도 (${Keys.label('map')})</button><button class="btn sm" id="mbtn">메뉴 (${Keys.label('opt')})</button></div><canvas id="mm"></canvas><div class="keys" id="keys"><span id="dayl">${G.S.day}일째${G.S.mode === 'free' ? ' ' + G.free.period() : ''}</span>${G.touch ? '' : ` · 대화 ${Keys.label('ok')} · 경공 ${Keys.label('dash')}${[...(Keys.map.dash || []), ...(Keys.map.guard || [])].includes('ShiftLeft') ? '·Shift' : ''} · 메뉴 ${Keys.label('opt')} · 지도 ${Keys.label('map')}`}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
+    const h = $('#hud'); h.innerHTML = `<div class="goal" id="goal"></div><div class="place" id="place"></div><div class="mini">${this.m.id === 'myhouse' ? '<button class="btn sm" id="dbtn">꾸미기 (' + Keys.label('decor') + ')</button>' : ''}<button class="btn sm" id="chronb">행록</button><button class="btn sm" id="mapb">지도 (${Keys.label('map')})</button><button class="btn sm" id="mbtn">메뉴 (${Keys.label('opt')})</button></div><canvas id="mm"></canvas><div class="keys" id="keys"><span id="dayl">${G.S.day}일째${G.S.mode === 'free' ? ' ' + G.free.period() : ''}</span>${G.touch ? '' : ` · 대화 ${Keys.label('ok')} · 경공 ${Keys.label('dash')}${[...(Keys.map.dash || []), ...(Keys.map.guard || [])].includes('ShiftLeft') ? '·Shift' : ''} · 메뉴 ${Keys.label('opt')} · 지도 ${Keys.label('map')}`}${G.S.flags.bow && this.m.hunting !== false && (this.animals || []).length ? ' · 활 J' : ''}</div><div class="talkhint" id="thint" style="display:none"></div>`;
     $('#mbtn').onclick = () => openMenu();
+    $('#chronb').onclick = () => { if (!this.busy && !G.decor) openMenu('chronicle'); };
     $('#mapb').onclick = () => { if (!this.busy && !G.decor) openMap(); };
     bindMini(this);
     if ($('#dbtn')) $('#dbtn').onclick = () => { if (!this.busy && !G.decor) G.life.openDecor(); };
@@ -72,7 +73,7 @@ export class Field {
   async run(fn) {
     if (this.busy) return; this.busy = true; Input.clear();
     try { await fn(); } catch (e) { console.error(e); }
-    this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.jh && G.scene === 'field') G.jh.storyTime(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x / (this.m.k || 1); G.S.py = this.p.y / (this.m.k || 1); G.S.dir = this.p.dir; save();
+    this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.jh && G.scene === 'field') G.jh.storyTime(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x / (this.m.k || 1); G.S.py = this.p.y / (this.m.k || 1); G.S.dir = this.p.dir; save(); G.chronicle?.arrive();
   }
   async warp(id, tx, ty, dir = 0) {
     await fadeTo(1); this.load(id, tx, ty, dir); await wait(.08); await fadeTo(0);
