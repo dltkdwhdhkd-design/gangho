@@ -1,41 +1,60 @@
-"""Check the shipped walking sheets against each character's three-head design."""
+"""Validate the shipped cast atlases, including proportions, transparency and gear anchors."""
 import json
-
+from pathlib import Path
 from PIL import Image
 
-from field_sprites import DEST, ROOT, Figure
-
-
+ROOT=Path(__file__).resolve().parents[1]
+FIELD=ROOT/'assets/hd2d/field'
+read=lambda p:json.loads(p.read_text(encoding='utf8'))
 def main():
-    people = json.loads((ROOT / 'tools/field_people.json').read_text(encoding='utf8'))
-    walking = json.loads((DEST / 'walk.json').read_text(encoding='utf8'))
-    motion = json.loads((DEST / 'motions.json').read_text(encoding='utf8'))
-    heights = set()
-    pages = {}
-    frames = 0
-    for person in people:
-        identity = person[0]
-        figure = Figure(person)
-        unit = figure.head
-        heights.add(unit * 3)
-        crown, chin, sole = (figure.point(27, y)[1] for y in (6, 21, 53))
-        assert chin - crown + 1 == unit, identity
-        assert sole - crown + 1 == unit * 3, identity
-        assert motion['figures'][identity] == f'{unit}-{figure.build}', identity
-        page, row = walking[identity]
-        if page not in pages:
-            with Image.open(DEST / (page + '.webp')) as atlas:
-                pages[page] = atlas.getchannel('A')
-        for direction in range(4):
-            for phase in range(4):
-                x, y = direction * 56, (4 * row + phase) * 56
-                silhouette = pages[page].crop((x, y, x + 56, y + 56)).getbbox()
-                assert silhouette and silhouette[1] == crown and silhouette[3] == sole + 1, (identity, direction, phase)
-                frames += 1
-    assert len(heights) > 1, 'A shared head-to-body ratio must preserve differences in stature'
-    assert set(walking) == set(motion['figures']) == {p[0] for p in people}
-    print(f'{len(people)} designs, {frames} frames, visible heights {sorted(heights)}')
+    people=read(ROOT/'tools/field_people.json')
+    walking=read(FIELD/'walk.json')
+    layout=read(FIELD/'motions.json')
+    people_by_id={p[0]:p for p in people}
+    assert set(walking)==set(layout['hands'])==set(people_by_id)
+    groups={}
+    for key,(page,row) in walking.items():groups.setdefault(page,[]).append((row,key))
+    statures=set();walks,actions=0,0
+    for page,entries in groups.items():
+        with Image.open(FIELD/(page+'.webp')) as im:
+            cell=im.width//4; mask=im.getchannel('A').point(lambda a:255 if a>100 else 0)
+            assert cell==112 and im.height==len(entries)*4*cell
+            for row,key in entries:
+                head=people_by_id[key][11];statures.add(head*3)
+                for d in range(4):
+                    poses=set()
+                    for j in range(4):
+                        x=d*cell;y=(4*row+j)*cell
+                        patch=mask.crop((x,y,x+cell,y+cell));box=patch.getbbox()
+                        assert box and 0<=box[1]<box[3]<=cell, (key,d,j,box)
+                        height=box[3]-box[1];expected=3*head*cell/56
+                        assert abs(height-expected)<=max(5,expected*.09),(key,height,expected)
+                        assert patch.getpixel((0,0))==patch.getpixel((cell-1,0))==0,(key,d,j)
+                        poses.add(patch.tobytes());walks+=1
+                    assert len(poses)>=3,(key,d,'walk strides')
+        with Image.open(FIELD/(page.replace('walk','combat')+'.webp')) as im:
+            w,h=[layout['resolution']*q for q in layout['body']]
+            assert im.size==(layout['cols']*w,len(entries)*layout['rows']*h)
+            mask=im.getchannel('A').point(lambda a:255 if a>90 else 0)
+            for row,key in entries:
+                assert len(layout['hands'][key])==15
+                for tile,grips in enumerate(layout['hands'][key]):
+                    x=tile%layout['cols']*w;y=(row*layout['rows']+tile//layout['cols'])*h
+                    box=mask.crop((x,y,x+w,y+h)).getbbox()
+                    assert box and 0<box[0] and box[2]<w and box[1]>=0 and box[3]<h,(key,tile,box)
+                    for gx,gy in zip(grips[::2],grips[1::2]):
+                        rx=round((gx-28+layout['bodyAnchor'][0])*layout['resolution'])
+                        ry=round((gy-56+layout['bodyAnchor'][1])*layout['resolution'])
+                        assert mask.crop((x+rx-2,y+ry-2,x+rx+3,y+ry+3)).getbbox(),(key,tile,'hand')
+                    actions+=1
+    assert len(statures)>1
+    names=set(read(ROOT/'assets/art/list.json'))
+    for key in walking:
+        assert key+'_n' in names,key
+        with Image.open(ROOT/'assets/art'/(key+'_n.webp')) as portrait:
+            a=portrait.getchannel('A')
+            assert portrait.size==(432,648) and a.getextrema()==(0,255) and a.getpixel((0,0))==0,key
+            assert sum(a.histogram()[155:])>portrait.width*portrait.height*.15,(key,'missing portrait ink')
+    print(f'{len(people)} people, {walks} walking frames, {actions} combat frames, designed heights {sorted(statures)}')
+if __name__=='__main__':main()
 
-
-if __name__ == '__main__':
-    main()
