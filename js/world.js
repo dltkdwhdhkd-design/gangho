@@ -8,6 +8,8 @@ import { give, nextDay } from './state.js';
 import { Story, ctx, say, choice } from './ctx.js';
 import { LOCS, ROADS, PROV } from './worlddata.js';
 import { bridgeRail, bridgeLanding } from './hd2d/walkways.js';
+import { buildLandscape, loadWildernessArt, paintLandscape } from './landscape.js';
+import { scenicRoutes } from './scenic-routes.js';
 
 const K = 1.6, WW = Math.round(804 * K), WH = Math.round(658 * K), CH = 32;
 const BN = ['grass', 'deep', 'sand', 'plain', 'snow', 'dusk'];
@@ -103,12 +105,23 @@ export function buildWorld() {
   if (ready) return; ready = true;
   m = makeMap('world', WW, WH, { name: '강호', bgm: 'road', biome: 'grass', arena: 'village', live: true });
   readTerrain(); carve(); const g = m.g; RES = new Uint8Array(WW * WH); STOPS = [];
+  const footprints=LOCS.map(l=>{const x=Math.round(l.px[0]*K),y=Math.round(l.px[1]*K),[rx,ry]=SIZE[shape(l)];return [x-rx-2,y-ry-3,x+rx+2,y+4];});
+  m.scenicStops=scenicRoutes(T,WW,WH,K,footprints);
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const c = T[y * WW + x]; g[y][x] = c === SEA || c === RIVER ? 2 : c === ROAD ? 1 : c === BRIDGE ? 4 : 0; if (c === INN) STOPS.push({ x, y }); }
   // 길가 두 칸은 비워 둔다
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const c = T[y * WW + x]; if (c === ROAD || c === BRIDGE) reserve(x - 2, y - 2, x + 2, y + 2); }
   for (const t of STOPS) { reserve(t.x - 5, t.y - 6, t.x + 5, t.y + 3); m.put('hut_o', t.x - 2, t.y - 4, { isoAs: 'tavern' }); m.put('banner4', t.x + 2, t.y - 2); m.put('jar', t.x - 3.2, t.y - 1.6); m.put('log', t.x + 3.3, t.y - .6); m.label(t.x, t.y - 5, '주막'); }
   for (const l of LOCS) compound(l);
+  for(const s of m.scenicStops){
+    reserve(Math.floor(s.x)-2,Math.floor(s.y)-2,Math.ceil(s.x)+2,Math.ceil(s.y)+1);
+    const name=s.prop==='teahut'?'hut_o':'tablet',st=STAMPS[name];
+    m.put(name,s.x-st[3]/(2*TS),s.y-st[4]/TS,{nosolid:true,landmark:s.prop});
+    m.stamps.at(-1).landmark=s.prop;
+    m.label(s.x,s.y-1.5,s.name);
+  }
   nature();
+  m.landscape=buildLandscape(m,{classes:T,biomes:B,sites:m.sites});
+  loadWildernessArt();
   m.objs = m.stamps; m.canvas = null;
   // 칸 묶음별 충돌과 소품
   m.sg = new Map(); m.og = new Map();
@@ -322,6 +335,11 @@ function chunk(cx, cy) {
   chunks.set(k, { c, t: G.field.t }); return c;
 }
 function ground(c, cam) {
+  if(m.landscape){
+    const x=Math.max(0,Math.floor(cam.x/TS)),y=Math.max(0,Math.floor(cam.y/TS));
+    c.save();c.translate(x*TS,y*TS);
+    paintLandscape(c,m.landscape,{x0:x,y0:y,x1:Math.min(WW,x+Math.ceil(VW/TS)+2),y1:Math.min(WH,y+Math.ceil(VH/TS)+2)},TS);c.restore();return;
+  }
   const s = CH * TS, x0 = Math.max(0, Math.floor(cam.x / s)), y0 = Math.max(0, Math.floor(cam.y / s)), x1 = Math.min(Math.ceil(WW / CH) - 1, Math.floor((cam.x + VW) / s)), y1 = Math.min(Math.ceil(WH / CH) - 1, Math.floor((cam.y + VH) / s));
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) c.drawImage(chunk(x, y), x * s, y * s);
 }
@@ -409,6 +427,9 @@ function tick(dt) {
   // 물가에 서면 낚시
   const [dx, dy] = [[0, 1], [0, -1], [-1, 0], [1, 0]][p.dir] || [0, 1], wet = f.m.g[ty + dy * 1]?.[tx + dx * 1] === 2;
   f.spots = wet && S.flags.rod ? [{ x: tx - 1, y: ty - 1, w: 3, h: 3, hint: '낚시하기', act: () => G.life.fishing(b === 'deep' ? 'stream' : 'river') }] : [];
+  for(const s of m.scenicStops)if(Math.hypot(s.x-tx,s.y-ty)<5){
+    f.spots.push({x:s.x-1.4,y:s.y-.2,w:2.8,h:2.1,hint:s.name,act:()=>say(null,s.note)});
+  }
   spawnT -= dt; f.roam = f.roam.filter(r => !r.gone && Math.hypot(r.x - p.x, r.y - p.y) < 340); f.animals = f.animals.filter(a => !a.gone && Math.hypot(a.x - p.x, a.y - p.y) < 340);
   if (spawnT > 0 || G.noSpawn) return; spawnT = 4 + Math.random() * 6;  // G.noSpawn: 시험이 길 위 사람을 직접 세울 때 게임이 저절로 채우는 것을 끈다(tools/travel_test.cjs)
   const a = Math.random() * 6.28, x = p.x + Math.cos(a) * 210, y = p.y + Math.sin(a) * 150; if (f.m.blocked(x, y, 14, 12)) return;

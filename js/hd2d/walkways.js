@@ -183,7 +183,7 @@ export function addWalkways(T,group,map,area,tile,hs,zs,heightAt,texture) {
     const building=gallery(T,texture,g.w*tile,g.h*tile,g.color);
     building.position.set(x,heightAt(map,x,y),y*zs);building.scale.set(1,hs,zs);group.add(building);
   }
-  if(map.id!=='world')return;
+  if(map.id!=='world'&&!map.encounter?.bridges&&!map.canal)return;
   for(const s of bridges(map).spans){
     if(s.x1<area.x0||s.y1<area.y0||s.x0>=area.x1||s.y0>=area.y1)continue;
     const obj=bridge(T,texture,s,tile);

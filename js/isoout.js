@@ -123,7 +123,7 @@ export function buildIsoOut(m) {
   const cv = document.createElement('canvas'); cv.width = r.W; cv.height = r.H; ground(m, r, cv);
   const objs = [], flat = [], isoAt = (key, x, y, flip, extra) => { const q = meta(key, flip), [X, Y] = P(x, y); const o = { name: key, x: Math.round(X - q.ax), y: Math.round(Y - q.ay), w: q.w, h: q.h, base: Y, iso: corners(X, Y, q.fw, q.fh, q.ls, q.rs), flip: !!flip, ...extra }; objs.push(o); return o; };
   const byStamp = new Map(P0.B.map(b => [b.st, b])), blds = [];
-  for (const b of P0.B) blds.push(b.obj = isoAt(b.key, b.x1, b.y1, false, { src: b.name, bld: true }));
+  for (const b of P0.B) blds.push(b.obj = isoAt(b.key, b.x1, b.y1, false, { src:b.name,bld:true,archName:b.st.name,archRole:b.st.archRole,grand:b.st.grand }));
   // 담: 가로로 이어진 줄(같은 높이, 붙어 있는 칸)을 찾아 쿼터뷰 담 조각으로 잇는다. 동쪽 끝에서 서쪽으로, 남쪽 끝에서 북쪽으로
   const used = new Set(), walls = m.stamps.filter(s => WALLS[s.name] && !s.flat), at = new Set(walls.map(s => `${Math.round(s.x)},${Math.round(s.y)}`)), has = (x, y) => at.has(`${Math.round(x)},${Math.round(y)}`);
   const wallArt = n => { const k = P0.town && n === 'wall_h' ? 'city_wall' : (n === 'wall_h' || n === 'wall_m') && P0.sect ? P0.sect[2] : WALLS[n]; return real(k) || 'wall_tile'; };

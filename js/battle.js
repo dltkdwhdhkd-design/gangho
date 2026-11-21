@@ -4,7 +4,7 @@ import { Keys, ART } from './core.js';
 import { stageClear } from './dialog.js';
 import { SKILLS, BASIC, WEAPONS } from './data.js';
 import { MOVES, FOES } from './foes.js';
-import { arena, ARENA_W, ARENA_H, drawStamp, STAMPS } from './tiles.js';
+import { drawStamp, STAMPS } from './tiles.js';
 import { stats, bonus, masteryLv, canEquip, DIFF, gainExp, save, give } from './state.js';
 import { DB } from './items.js';
 import { openMenu } from './ui.js';
@@ -12,10 +12,10 @@ import * as BF from './battlefx.js';
 import * as RL from './realm.js';
 import { dropFor, ARMORS, GRADES } from './gear.js';
 import { bossDown } from './meridian.js';
-import { stageOf } from './hd2d/stages.js';
+import { encounterStage, encounterFloor } from './hd2d/encounter.js';
 
 // 전투 화면은 아래 기술 칸 띠(BAND) 위에만 그린다. 기술 칸이 싸움을 가리지 않게
-export const BAND = 0; const ZB = 3.6, VWB = 1280 / ZB, VHB = (720 - BAND) / ZB;  // 2D 전투는 마을(4배)보다 조금 멀리(3.3배): 싸움터 가로가 한눈에 들어온다
+export const BAND = 0; const ZB = 2.85, VWB = 1280 / ZB, VHB = (720 - BAND) / ZB;
 const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
 const PCLASS = { Sword: 'sword', Rapier: 'sword', Katana: 'sword', Ninjaku: 'sword', Sai: 'fist', Club: 'fist', BigSword: 'blade', Axe: 'blade', Lance: 'spear', Lance2: 'spear', Stick: 'staff' };  // 주인공 무기 그림 → 동작 칸(아래 actionSheet). 플레이어의 Club·Sai는 권갑이다(js/data.js WEAPONS)
@@ -40,20 +40,25 @@ export class Battle {
   constructor(cfg) {
     this.cfg = cfg; this.t = 0; this.actors = []; this.fx = []; this.proj = []; this.zones = []; this.nums = []; this.teles = []; this.parts = [];
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
-    this.W = ARENA_W * TS; this.H = ARENA_H * TS; this.bg = arena(cfg.arena || 'village'); this.stage = G.hd?.battleOk?.() ? stageOf(cfg.arena || 'village') : null; this.band = BAND; this.top = cfg.arena === 'room' ? 18 : 22; this.floorB = this.H - 12; this.left = 10; this.right = this.W - 10;  // 새 화면이면 3D 무대(js/hd2d/stages.js). 싸움터 끝: 이 줄이 주석에 먹혀 끝이 없어서 땅 밖 검은 곳까지 걸어 나갔다
-    // 새 화면 무대는 가운데 싸움판(바닥 칸)이 따로 있다. 그 밖(풀·모래 둘레)으로는 못 나가게 싸움판 칸 안으로 끝을 좁힌다. 옛 화면은 그대로
-    const sg = this.stage?.g || (G.hdBounds ? stageOf(cfg.arena || 'village').g : null);  // G.hdBounds: 옛 화면으로 그리되 싸움판만 새 화면 무대 크기로(자동 진행으로 새 화면 세기를 빨리 잴 때 쓴다. tools/playthrough.cjs에 환경 변수 HDB를 주면 켜진다)
-    if (sg) { const g = sg, o = g[0][0]; let x0 = 99, x1 = -1, y0 = 99, y1 = -1; g.forEach((r, y) => r.forEach((v, x) => { if (v !== o) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } }));
-      if (x1 >= 0) { this.left = Math.max(this.left, x0 * TS + 8); this.right = Math.min(this.right, (x1 + 1) * TS - 8); this.top = Math.max(this.top, y0 * TS + 10); this.floorB = Math.min(this.floorB, (y1 + 1) * TS - 4); } }
+    this.venue=encounterStage(G.field,cfg.arena);
+    this.W=this.venue.w*TS;this.H=this.venue.h*TS;this.nav=this.venue.encounter.nav;
+    this.stage=G.hd?.battleOk?.()?this.venue:null;this.bg=this.stage?null:encounterFloor(this.venue);
+    this.band=BAND;this.left=TS;this.right=this.W-TS;this.top=TS;this.floorB=this.H-TS;
     const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;
-    (cfg.allies || []).forEach((id, i, l) => this.spawn(id, 0, this.W / 2 + (i - (l.length - 1) / 2) * 34 + (l.length % 2 ? 20 : 0), this.H * .74 + (i % 2) * 10));
-    const list = cfg.foes; list.forEach((id, i) => { const n = list.length, ox = (i - (n - 1) / 2) * 38; this.spawn(id, 1, this.W / 2 + ox, this.H * .3 + (i % 2) * 14); });
+    [p.x,p.y]=this.nav.focus;
+    (cfg.allies||[]).forEach((id,i,l)=>this.spawn(id,0,p.x+(i-(l.length-1)/2)*34+20,p.y+18+(i%2)*10));
+    const list=cfg.foes;list.forEach((id,i)=>this.spawn(id,1,p.x+(i-(list.length-1)/2)*38,p.y-82+(i%2)*14));
     this.camera(1);
     this.buildHud();
   }
   spawn(id, team, x, y) {
+    [x,y]=this.nav.snap(x,y);
+    if(team===1 && this.p && hyp(x-this.p.x,y-this.p.y)<35){
+      const choices=[[78,0],[-78,0],[0,78],[58,55],[-58,55]].map(([dx,dy])=>this.nav.snap(this.p.x+dx,this.p.y+dy));
+      [x,y]=choices.reduce((best,q)=>hyp(q[0]-this.p.x,q[1]-this.p.y)>hyp(best[0]-this.p.x,best[1]-this.p.y)?q:best,[x,y]);
+    }
     const f = FOES[id], d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
     const ez = enemy ? 1 - (this.cfg.ease || 0) : 1;  // 세 번 진 뒤 '숨을 고르고 도전'을 고르면 적이 그만큼 약해진다(js/ctx.js duel)
     const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) * ez : 1)), atk = f.atk * (enemy ? d.foeAtk * ez : 1);
@@ -144,7 +149,8 @@ export class Battle {
     for (let i = 0; i < 4; i++) { const id = G.S.slots[i]; if (id && (a.cd[i] || 0) <= 0 && a.mp >= SKILLS[id].mp && !SKILLS[id].self && d < 62 && Math.random() < (G.bot.skillUse ?? .08)) { this.trySkill(a, id, i); return; } }
     a.botWait = (a.botWait || 0) - dt; if (a.botWait > 0) { a.st = 'idle'; a.vx = a.vy = 0; return; } // 사람처럼 쉬어 가며 때리는 시험용 지연
     if (d < 24) { this.basic(a, { x: dx / d, y: dy / d }); if (G.bot.rest && a.combo === 0) a.botWait = G.bot.rest; return; }
-    a.vx = dx / d * a.spd; a.vy = dy / d * a.spd; a.st = 'move';
+    const way=this.nav.steer(a,T)||[dx/d,dy/d];
+    a.vx=way[0]*a.spd;a.vy=way[1]*a.spd;a.st='move';
   }
   aim(a, d) {
     let dx = a.ax, dy = a.ay;
@@ -377,7 +383,7 @@ export class Battle {
     let vx = a.vx, vy = a.vy;
     if (a.mv) { vx = a.mv.vx; vy = a.mv.vy; a.mv.t -= dt; if (a.mv.t <= 0) a.mv = null; }
     if (a.kT > 0) { a.kT -= dt; vx += a.kx; vy += a.ky; }
-    a.x = clamp(a.x + vx * dt, this.left, this.right); a.y = clamp(a.y + vy * dt, this.top, this.floorB);
+    [a.x,a.y]=this.nav.move(a.x,a.y,clamp(a.x+vx*dt,this.left,this.right),clamp(a.y+vy*dt,this.top,this.floorB));
     if ((a.st === 'move') || a.mv) a.walk += dt * (a.mon ? 7 : 9);
     if (a.rush) for (const o of this.foes(a)) if (!a.rush.seen.has(o) && o.iframe <= 0 && hyp(o.x - a.x, o.y - a.y) < o.r + a.r + 4) { a.rush.seen.add(o); this.applyHit(a, o, a.rush, a.sk); }
   }
@@ -385,7 +391,7 @@ export class Battle {
     const L = this.actors.filter(a => !a.dead);
     for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
       const a = L[i], b = L[j], d = hyp(b.x - a.x, b.y - a.y), m = a.r + b.r - 1;
-      if (d < m && d > .01) { const px = (b.x - a.x) / d * (m - d) * .5, py = (b.y - a.y) / d * (m - d) * .5; if (!a.mv) { a.x -= px; a.y -= py; } if (!b.mv) { b.x += px; b.y += py; } }
+      if (d < m && d > .01) { const px = (b.x - a.x) / d * (m - d) * .5, py = (b.y - a.y) / d * (m - d) * .5; if (!a.mv) [a.x,a.y]=this.nav.move(a.x,a.y,a.x-px,a.y-py); if (!b.mv) [b.x,b.y]=this.nav.move(b.x,b.y,b.x+px,b.y+py); }
     }
   }
   tickProj(dt) {
@@ -447,6 +453,8 @@ export class Battle {
     if (a.st === 'guard') { a.guardT += dt; a.guardAI -= dt; a.vx = a.vy = 0; if (a.guardAI <= 0) { a.st = 'idle'; a.atkCd = Math.min(a.atkCd, a.counterNext ? 0 : .2); } return; }
     a.ax = lerp(a.ax, nx, .25); a.ay = lerp(a.ay, ny, .25); const l = hyp(a.ax, a.ay) || 1; a.ax /= l; a.ay /= l; a.face = faceOf(a.ax, a.ay);
     const f = a.def_;
+    const detour=this.nav.steer(a,T);
+    if(detour){a.vx=detour[0]*a.spd;a.vy=detour[1]*a.spd;a.face=faceOf(a.vx,a.vy);a.st='move';return;}
     // 막기: 플레이어가 코앞에서 공격하면 일정 확률로 막는다
     // 막기: 상대가 코앞에서 초식을 시작하면 경지만큼 미리 읽고 막는다. 높은 경지는 아예 튕겨 낼 때가 많다
     if (a.rGuard && T.st === 'skill' && d < 44 + a.realm * 3 && T.skT < .08 + a.rRead && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < a.rGuard * .4) { a.st = 'guard'; a.guardT = Math.random() < a.rPerfect ? -1 : .3; a.guardAI = rnd(.35, .7) + a.rRead; return; } }

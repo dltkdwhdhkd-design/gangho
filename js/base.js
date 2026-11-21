@@ -5,6 +5,7 @@ import { WHO } from './dialog.js';
 import { MAPS, makeMap, isoMode } from './maps.js';
 import { STAMPS, flagOf } from './tiles.js';
 import { GRAND } from './hd2d/build.js';
+import { regionFor } from './hd2d/regional-buildings.js';
 import { meta } from './iso.js';
 import { TS } from './core.js';
 import { LOOT } from './items.js';
@@ -57,9 +58,24 @@ const SW = id => STAMPS[id][3] / TS, SH = id => STAMPS[id][4] / TS;
 const ROOM = { hall: [22, 14, 9, 13], lib: [18, 12, 7, 11], elder: [18, 12, 7, 11], dorm: [18, 12, 7, 11], mess: [18, 12, 7, 11], inn: [18, 12, 7, 11], shop: [16, 11, 6, 10], book: [16, 11, 6, 10], clinic: [14, 10, 5, 9], armory: [14, 10, 5, 9], gov: [20, 13, 8, 12], gamble: [20, 13, 8, 12], home: [14, 10, 5, 9], temple: [16, 11, 6, 10] };
 const HOUSES = ['hall', 'lodge', 'house_red', 'inn', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];
 function room(m, l, stamp, x, y, kind, name, o) {
+  const style=regionFor(l.id)?.[0];
+  const offset={
+    workshop:{clinic:[-2,1],armory:[2,2],elder:[-1,-2]},observatory:{lib:[2,1],elder:[1,-2],clinic:[-2,1]},
+    canal:{lib:[-1,1],elder:[1,-1],clinic:[1,1],armory:[2,-1]},bamboo:{dorm:[-1,1],elder:[-2,1]},
+    fortress:{lib:[0,-2],elder:[0,-2],armory:[1,2]},harbor:{clinic:[-1,-1],mess:[-2,1],armory:[1,2]},
+    alpine:{elder:[-2,0],lib:[2,0]},tao:{clinic:[-1,-2],armory:[1,-2]}
+  }[style]?.[kind];
+  if(offset){x+=offset[0];y+=offset[1];}
+  if(l.kind==='city'&&kind==='home'&&y>=30){
+    if(style==='canal'||style==='harbor')y+=x<20?-1:1;
+    else if(style==='fortress')x+=x<20?1:-1;
+    else if(style==='workshop')x+=o.n%2===0?-1:1;
+  }
   const id = `r_${l.id}_${kind}${o?.n || ''}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: l.map, bx: x + SW(stamp) / 2 / m.k, by: y + (SH(stamp) + 1) / m.k, kind, name, owner: l, as: o?.as };
   const grand = kind === 'hall' && GRAND[l.fac] ? l.fac : undefined;
   m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0, grand, ...(o?.iso ? { isoAs: o.iso } : {}) });
+  const role={hall:'hall',gov:'hall',lib:'wing',elder:'wing',clinic:'shop',shop:'shop',book:'shop',armory:'shop',inn:'inn',gamble:'inn',mess:'cottage'}[kind];
+  if(role)m.stamps.at(-1).archRole=role;
   // Include the front landing so collision with the sill cannot prevent entry.
   m.portals.at(-1).h += 7;
   if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
@@ -109,6 +125,13 @@ function makeRoom(id) {
   const info = ROOMS[id] || (() => { if (id.startsWith('h_')) return null; const o = LOCS.find(q => id.startsWith(`r_${q.id}_`)); if (o) { G.world.ensure(o.map); return ROOMS[id]; } })(); if (!info) { console.warn('없는 방', id); return; }
   const [w, h, ex] = ROOM[info.kind], dark = ['fort', 'dark'].includes(info.owner.style), m = makeMap(id, w, h, { name: `${info.owner.name} ${info.name}`, bgm: info.owner.style === 'temple' ? 'temple' : 'quiet', room: true, roomStyle: dark ? 1 : 0, roomKind: info.kind, arena: 'room', tint: dark ? 'rgba(30,8,20,.22)' : undefined });
   const k = info.kind;
+  if(k==='hall'||k==='gov'){
+    const profile=regionFor(info.owner.id);
+    const inside={workshop:['plank','fl_brick'],observatory:['hall','fl_slab'],fortress:['brick','fl_slab'],
+      alpine:['plank','fl_slab'],canal:['plaster','fl_dark'],bamboo:['plank','fl_mat'],
+      highland:['earth','fl_brick'],shadow:['dark','fl_slab'],harbor:['plank','fl_dark'],tao:['plaster','fl_pine']};
+    if(profile){m.emblem=profile[2];const finish=inside[profile[0]];if(finish)[m.wall,m.floor]=finish;}
+  }
   // 본전: 뒷벽의 문양판 아래 제상(촛대 둘과 향로), 그 좌우 앞에 의자. 문에서 제상 앞까지 붉은 깔개, 양옆으로 붉은 기둥.
   // ChatGPT의 문파 전각 배치 예시(art-src/chatgpt/M2_sheet.jpg)를 따랐다. 전에는 병풍 앞 장문인 의자와 바닥 향로 둘이었다. 장문인은 제상 앞 깔개 위에 선다
   if (k === 'hall') { m.carpet = [9, 3, 4, 11]; m.put('altar', 9.5, 1.05).on('f_lamp', 9.95, 1.6, .32).on('censer', 11, 1.55).on('f_lamp', 12.05, 1.6, .32).put('chair', 6.2, 2.5).put('chair', 14.925, 2.5).put('f_scroll', 3.5, 1).put('f_scroll', 17.5, 1).put('rack', 1, 2).put('rack', 19, 2); for (const y of [3.4, 8]) m.put('pillar', 7.6, y).put('pillar', 13.65, y); m.put('lantern', 3, 6).put('lantern', 18, 6).put('longtable', 2.6, 9.4).put('longtable', 16.4, 9.4).put('plant', 1, 11).put('plant', 20, 11); }
@@ -179,15 +202,18 @@ function sectLayout(m, l, st, ft) {
     if (!st.water) m.put('statue', 36, 55, { isoAs: 'pavilion' });
   }
   m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
-  m.court = { x: mid * m.k, y: 32.5 * m.k, radius: 4.6 * m.k, motif: l.fac === 'hwasan' ? 'plum' : 'ring' };
+  const profile=regionFor(l.id),style=profile?.[0];
+  m.court = { x: mid * m.k, y: 32.5 * m.k, radius: 4.6 * m.k, motif: style||'ring', crest:profile?.[2] };
   let level = 0;
   for (const top of (mt ? [45, 44, 23, 22, 10, 9] : [44, 22, 9])) {
     m.terrace(0, 0, W, top, ++level).stairs(cx - 1, top - 1, 6, 1);
   }
   // 두 회랑은 연무장 양옆의 돌 기단 위에 서고, 남쪽 짧은 계단에서 올라간다.
   m.galleries=[];
-  for (const x of [11,32]) {
-    const y=27, width=3, length=10;
+  const wings={workshop:[[9,27,4,7],[34,30,2,6]],observatory:[[10,26,3,6],[33,33,3,6]],
+    canal:[[9,31,3,7],[33,25,3,9]],bamboo:[[11,26,2,6]],harbor:[[32,27,3,10]],
+    shadow:[[9,26,3,11],[34,26,3,11]],alpine:[[12,28,2,7],[31,28,2,7]]};
+  for (const [x,y,width,length] of wings[style]||[[11,27,3,10],[32,27,3,10]]) {
     const lv=m.hgt[Math.round(y*m.k)][Math.round(x*m.k)];
     m.terrace(x,y,width,length+1,lv+1).fill(x,y,width,length,4).stairs(x,y+length,width,1);
     m.galleries.push({x:Math.round(x*m.k),y:Math.round(y*m.k),
@@ -215,6 +241,13 @@ function townLayout(m, l) {
   for (const [x, y] of [[21, 16], [34, 16], [21, 26], [34, 26]]) { m.put('awning', x, y, { nosolid: true }); m.put('counter', x + 1.5, y + 2); }
   m.put('jar', 21, 18.6); m.put('pot', 38.7, 18.6); m.put('box', 21, 28.6); m.put('jar', 38.7, 28.6); m.put('sign_sword', 9, 25.3); m.scatter(['flower1', 'fern1'], 18, 4);
   if (SLAVE.includes(l.id)) { m.fill(47, 6, 9, 3, 4); m.row('wood_h', 47, 5, 9); m.put('banner7', 46.4, 5.4); m.put('banner7', 55.8, 5.4); m.put('log', 45.6, 9.6); m.put('box', 55.6, 9.4); m.label(51.5, 4.4, '노예 시장'); }
+  const style=regionFor(l.id)?.[0];
+  if(style==='canal'||style==='harbor'){
+    m.canal=true;
+    const x=style==='canal'?19:37;
+    m.water(x,25,3,15).fill(x,30,3,2,4).fill(x,36,3,2,4);
+    m.fill(x-1,25,1,15,5).fill(x+3,25,1,15,5);
+  }
   m.terrace(23,0,14,12,1).stairs(28,11,4,1).heightEdges();
 }
 // 지도에 있는 건물 가운데 문이 없는 것에 문을 달아 준다

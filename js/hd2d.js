@@ -8,6 +8,9 @@
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { mountainGate } from './hd2d/gate.js';
 import { addWalkways, bridgeHeight } from './hd2d/walkways.js';
+import { landscapeOf, paintLandscape } from './landscape.js';
+import { reliefMesh, localScenery, addRiverMargins, addSurround, addVista } from './hd2d/wilderness.js';
+import { architectureOf, regionalBuilding } from './hd2d/regional-buildings.js';
 import { fieldProps, floorMaterial, walking, loadFieldArt, loadCastIndex, loadActorPage, loadCombatArt, paintWorldSurface, paintMargins, drawCourt, combatLayout } from './hd2d/field-art.js';
 import { motionFor, drawMotion } from './hd2d/combat-art.js';
 import { PAL, WALLS as WKIND, PALTEX } from './hd2d/palette.js';
@@ -527,7 +530,18 @@ function corners4(m, x, y) {
 }
 // 평면도 자리(x, y)의 땅 높이(사람과 소품을 세울 때)
 function hAt(m, x, y) {
-  if (!m?.hgt) return m?.id === 'world' ? bridgeHeight(m,x,y,TS)*HS : 0;
+  if(m?.canal&&m.g[Math.floor(y/TS)]?.[Math.floor(x/TS)]===4){
+    const rise=bridgeHeight(m,x,y,TS);
+    if(rise>0)return rise*HS;
+  }
+  if (!m?.hgt) {
+    const land=art() && landscapeOf(m);
+    if(land){
+      if((m.id==='world'||m.encounter?.bridges)&&m.g[Math.floor(y/TS)]?.[Math.floor(x/TS)]===4)return bridgeHeight(m,x,y,TS)*HS;
+      return land.height(x/TS,y/TS)*HS;
+    }
+    return m?.id === 'world' ? bridgeHeight(m,x,y,TS)*HS : 0;
+  }
   const tx = Math.floor(x / TS), ty = Math.floor(y / TS), c = corners4(m, tx, ty);
   const f = Math.min(1, Math.max(0, y / TS - ty)); return c[0] + (c[2] - c[0]) * f;
 }
@@ -656,7 +670,13 @@ function waterMat() {
       float row = floor(uv.y * 43.);                                             // 도트 두 줄씩 묶어, 줄마다 다른 때에 한 점씩 좌우로 밀린다
       vec2 wob = vec2(floor(sin(row * .9 + uT * 1.4) * 1.49 + .5), 0.) / 86.;
       vec3 c;
-      if (vKind < .5) c = texture2D(uW0, uv + wob + vec2(uT * .004, uT * .0015)).rgb;                       // 강: 천천히 흐른다
+      if (vKind < 0.) {
+        vec3 deep=texture2D(uW0,uv+wob+vec2(uT*.004,uT*.0015)).rgb;
+        vec3 stones=texture2D(uW2,uv*.82+wob*.33).rgb;
+        float bank=clamp(-vKind-1.+.045*sin(vWp.x*.19+vWp.z*.13+uT*.38),0.,1.);
+        c=mix(deep,stones,bank*.52);
+        diffuseColor.a*=1.-bank*.28;
+      } else if (vKind < .5) c = texture2D(uW0, uv + wob + vec2(uT * .004, uT * .0015)).rgb;                       // 강: 천천히 흐른다
       else if (vKind < 1.5) c = texture2D(uW1, uv + vec2(floor(sin(row * .7 + uT * .6) * .99 + .5), 0.) / 86.).rgb;  // 못: 거의 고요하다
       else { c = texture2D(uW2, uv).rgb; vec3 r = texture2D(uW0, uv * 1.3 + vec2(uT * .02, uT * .011)).rgb; c += smoothstep(.62, .85, dot(r, vec3(.3, .59, .11))) * .22; }  // 여울: 바닥 돌은 그대로, 물비늘만 흐른다
       float far = smoothstep(0., 600., length(vWp.xz - cameraPosition.xz)); c = mix(c, uSky, far * .16);
@@ -681,10 +701,14 @@ function waterKinds(m) {
   return K;
 }
 function waterMesh(m) {
-  const P = [], N = [], KD = [], z = y => y * TS * ZS, WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h }, K = waterKinds(m);
-  for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) { if (m.g[y][x] !== 2 && !(m.id==='world' && m.g[y][x]===4)) continue;
-    const h = m.hgt ? Math.min(...corners4(m, x, y)) + .4 : .25, x0 = x * TS, x1 = x0 + TS + .02, z0 = z(y), z1 = z(y + 1) + .02, k = K ? K[y][x] : 0;
-    for (const v of [[x0, z1], [x1, z1], [x1, z0], [x0, z1], [x1, z0], [x0, z0]]) { P.push(v[0], h, v[1]); N.push(0, 1, 0); KD.push(k); } }
+  const P = [], N = [], KD = [], z = y => y * TS * ZS, WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h }, land=!m.hgt&&landscapeOf(m), K = land?null:waterKinds(m);
+  for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) {
+    if(land ? land.shore(x+.5,y+.5)>1.45 : m.g[y][x]!==2&&!(m.id==='world'&&m.g[y][x]===4))continue;
+    const h = m.hgt ? Math.min(...corners4(m, x, y)) + .4 : land ? -1.5*HS : .25, x0 = x * TS, x1 = x0 + TS, z0 = z(y), z1 = z(y + 1), k=K?K[y][x]:0;
+    for (const v of [[x0, z1], [x1, z1], [x1, z0], [x0, z1], [x1, z0], [x0, z0]]) {
+      P.push(v[0], h, v[1]); N.push(0, 1, 0);
+      KD.push(land ? -1-Math.min(1,Math.max(0,(land.shore(v[0]/TS,v[1]/(TS*ZS))+3.8)/4.6)) : k);
+    } }
   if (!P.length) return null; const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new T.Float32BufferAttribute(N, 3)); g.setAttribute('aKind', new T.Float32BufferAttribute(KD, 1));
   const o = new T.Mesh(g, waterMat()); o.receiveShadow = true; o.renderOrder = 1; return o;
 }
@@ -695,7 +719,13 @@ const STANDG = new Map();
 // 지은 지도를 떼어서 들고 있기: 전투 무대는 한 번 지으면 계속 들고 있고, 전투에 들어갈 때는 있던 마을을 떼어 두었다가 돌아오면 그대로 붙인다.
 // 전에는 전투에 들어갈 때와 나올 때마다 무대와 마을을 처음부터 다시 지어서 멈칫했다. 다른 마을로 가면 들고 있던 마을은 버린다. curMap = null(모형·그림이 바뀜)이면 전부 버리고 새로 짓는다
 const STASH = new Map();
-const dropSet = s => { for (const o of s.props) o.traverse(c => { if (c.isMesh && !c.userData.shared) c.geometry.dispose(); }); if (s.ground) { s.ground.geometry.dispose(); s.ground.material.map.dispose(); s.ground.material.dispose(); } for (const o of s.cliffs) o.geometry.dispose(); if (s.water) s.water.geometry.dispose(); };
+function releaseProp(node) {
+  if(node.userData.cutM)for(const mat of node.userData.cutM.values())mat.dispose();
+  if(!node.isMesh)return;
+  if(!node.userData.shared)node.geometry.dispose();
+  if(node.userData.ownPaint){node.material.map.dispose();node.material.dispose();}
+}
+const dropSet = s => { for (const o of s.props) o.traverse(releaseProp); if (s.ground) { s.ground.geometry.dispose(); s.ground.material.map.dispose(); s.ground.material.dispose(); } for (const o of s.cliffs) o.geometry.dispose(); if (s.water) s.water.geometry.dispose(); };
 function stashOut(m) {
   const s = { props: [...propG.children], ground, cliffs: [...cliffs], water, skirt: skirt ? [skirt.material.color.clone(), skirt.scale.clone(), skirt.position.clone()] : null };
   for (const o of s.props) propG.remove(o); if (ground) scene.remove(ground); for (const o of cliffs) scene.remove(o); if (water) scene.remove(water);
@@ -709,31 +739,37 @@ function stashIn(m) {
 }
 function setMap(m) {
   if (curMap === m) return; const prev = curMap, t0 = performance.now(); curMap = m;
-  if (prev && (prev.stage || m.stage) && !STASH.has(prev)) stashOut(prev);
+  if (prev && !prev.encounter && (prev.stage || m.stage) && !STASH.has(prev)) stashOut(prev);
   else {
-    for (const o of [...propG.children]) { propG.remove(o); o.traverse(c => { if (c.isMesh && !c.userData.shared) c.geometry.dispose(); }); }
+    for (const o of [...propG.children]) { propG.remove(o); o.traverse(releaseProp); }
     if (ground) { scene.remove(ground); ground.geometry.dispose(); ground.material.map.dispose(); ground.material.dispose(); ground = null; }
     for (const o of cliffs) { scene.remove(o); o.geometry.dispose(); } cliffs.length = 0;
     if (water) { scene.remove(water); water.geometry.dispose(); water = null; }
   }
-  for (const k of [...STASH.keys()]) if (!prev || (!m.stage && !k.stage && k !== m)) { dropSet(STASH.get(k)); STASH.delete(k); }
+  for (const k of [...STASH.keys()]) if (k.encounter || !prev || (!m.stage && !k.stage && k !== m)) { dropSet(STASH.get(k)); STASH.delete(k); }
   roomModels(m); PALU.uDot.value = m.room ? DOT / PSC : DOT;  // 방 안은 사람을 PSC배로 그리니 조각의 무늬도 그만큼 굵게
   if (STASH.has(m)) { stashIn(m); buildMs = Math.round(performance.now() - t0); return; }
   LAMPX.length = 0;  // 등불 자리는 지도마다 새로 모은다(전에는 안 비워서 지나온 지도의 등불 자리가 계속 쌓였고, 밤에 엉뚱한 자리에 불빛이 섰다)
   const WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h }, Wm = (WN.x1 - WN.x0) * TS, Dm = (WN.y1 - WN.y0) * TS * ZS, OX = WN.x0 * TS, OZ = WN.y0 * TS * ZS;  // 큰 지도는 잘라 낸 범위만
   // 땅: 지금 땅 그림을 그대로 눕힌다(땅 무늬 HB14가 오기 전 임시). 땅도 도트 결로 읽는다
-  const gc = mk(Wm, (WN.y1 - WN.y0) * TS), gx = gc.getContext('2d', { willReadFrequently: true }); const flr = m.room && art(), kit = flr && !OWN.has(m.id);  // 새 화면의 방: 바닥만 칠한다(2D가 가장자리에 칠하던 납작한 벽은 뺀다). kit: 벽을 조각으로 세우는 방(동굴은 제 모형)
+  const land=art()&&landscapeOf(m),detail=land?2:1;
+  const gc = mk(Wm*detail, (WN.y1 - WN.y0) * TS*detail), gx = gc.getContext('2d', { willReadFrequently: true });gx.scale(detail,detail);
+  const flr = m.room && art(), kit = flr && !OWN.has(m.id);
   // 방 바닥 무늬(받은 그림 FL1): 방 종류에 맞는 무늬를 평면도 한 점에 FLDOT점으로 되풀이해 깐다. 깔개(m.carpet)는 그 위에 따로 얹는다. 무늬가 없으면(그림 끔, 동굴) 2D 바닥 그림을 가라앉혀 깐다
   const ft = kit && (previewTex('field_' + floorMaterial[floorOf(m)]) || previewTex(floorOf(m)));
-  if (m.win) { G.world.paintWin(gx, OX, WN.y0 * TS, Wm, gc.height); if (art()) paintWorldSurface(gx, m, WN, PV, TS, G.world.biomeAt); } else if (ft) { gx.fillStyle = '#2a2520'; gx.fillRect(0, 0, gc.width, gc.height); } else if (flr) { paintRoom(gx, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true }); calm(gx, gc.width, gc.height); } else m.paintBase(gx);
+  if(land){paintLandscape(gx,land,WN,TS);if(m.court)drawCourt(gx,m.court,TS);}
+  else if (m.win) { G.world.paintWin(gx, OX, WN.y0 * TS, Wm, gc.height); if (art()) paintWorldSurface(gx, m, WN, PV, TS, G.world.biomeAt); } else if (ft) { gx.fillStyle = '#2a2520'; gx.fillRect(0, 0, gc.width, gc.height); } else if (flr) { paintRoom(gx, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true }); calm(gx, gc.width, gc.height); } else m.paintBase(gx);
   let gt; if (ft) { gt = ft.clone(); gt.repeat.set(Wm * FLDOT / ft.image.width, Dm / ZS * FLDOT / ft.image.height); gt.needsUpdate = true; }
-  else { gt = new T.CanvasTexture((!m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter; }
+  else { gt = new T.CanvasTexture((!land && !m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter; }
   if (m.hgt && m.face === 'rock') { TOPU.map = gt; (TOPU.uGS.value ||= new T.Vector2()).set(1 / Wm, 1 / Dm); for (const t of TOPS) { if (!t.map) t.needsUpdate = true; t.map = gt; } }  // 절벽 조각의 윗면이 이 지도의 땅 그림을 받게
   if (m.hgt) { ground = terrain(m, gt); cliffKit(m); }  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다. 바위 지도는 그 면에 절벽 조각을 붙인다
+  else if(land)ground=reliefMesh(T,land,WN,TS,HS,ZS,sharpen(new T.MeshLambertMaterial({map:gt})));
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(OX + Wm / 2, 0, OZ + Dm / 2); }
   if (ft) ground.material.color.setScalar(FLK[floorOf(m)] || 1.45);
   ground.receiveShadow = true; ground.userData.map = m; scene.add(ground);
   if (art()) addWalkways(T,propG,m,WN,TS,HS,ZS,hAt,previewTex);
+  if(land){addRiverMargins(T,propG,m,WN,land,TS,HS,ZS,previewTex,matOf,hAt);addSurround(T,propG,m,TS,HS,ZS);}
+  if(art())addVista(T,propG,m,WN,land,TS,ZS);
   if (ft && m.carpet) { const cc = mk(Wm, gc.height), cx2 = cc.getContext('2d', { willReadFrequently: true }); paintRoom(cx2, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true, noFloor: true }); calm(cx2, cc.width, cc.height);  // 깔개만 그린 투명한 판을 바닥 바로 위에
     const cloth = new T.PlaneGeometry(Wm,Dm,m.hgt?m.w*4:1,m.hgt?m.h*4:1);
     cloth.rotateX(-Math.PI/2);
@@ -748,7 +784,7 @@ function setMap(m) {
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
-  skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(OX + Wm / 2, m.hgt ? lowest(m) - 1 : -.6, OZ + Dm / 2);
+  skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(OX + Wm / 2, m.hgt ? lowest(m) - 1 : land?-22:-.6, OZ + Dm / 2);
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
   const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.on ? s.y + STAMPS[s.name][4] * s.sc : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
   // 블렌더 무대·방 모형(m.models: [{ key, x, y }], tools/blender/stages.py·rooms.py). 좌표는 평면도 그대로(x, 북쪽이 +y), 지도 (x, y)에 놓는다. 다 읽혔으면 옛 소품(s.alt)은 뺀다
@@ -766,7 +802,14 @@ function setMap(m) {
     // 크기는 1.5배(GATEK): 그림의 가로를 2D 그림 폭(34점)에 맞추면 문이 사람 키만 해서 사람이 못 지나갈 문이 된다. 1.5배면 문의 폭이 21점, 높이가 사람 키의 1.3배다
     const nm0 = s.name === 'gate' && m.id === 'guhwa' && PV.hd_gate_town ? 'hd_gate_town' : s.name, nm = art() && s.name === 'gate' && PV[nm0 + '_open'] ? nm0 + '_open' : nm0, gk0 = art() && s.name === 'gate' && previewTex(nm) ? GATEK : 1;
     const st = STAMPS[s.name], t = st && stampTex(nm); if (!t) return; const pk = art() && !s.flat && /^[vp]_/.test(s.name) ? PROPK : 1, sc = (s.sc || 1) * pk, cx = s.x + st[3] * (s.sc || 1) / 2, pv = !!previewTex(nm), w = st[3] * sc * gk0, h = pv ? w * t.image.height / t.image.width : st[4] * sc, gk = w + 'x' + h;
-    const scenery = !m.stage && !s.flat && art() && fieldProps(s.name, m.biome);
+    const profile=art()&&architectureOf(m,s,TS);
+    if(profile){
+      const library=needModel('regional_'+profile.style);
+      const building=library&&regionalBuilding(T,m,s,st,profile,library,MODELM,hAt,HS,ZS,TS);
+      if(building){propG.add(building);return;}
+    }
+    const scenery = !s.flat && art() && ((land && localScenery(m,s,cx,z)) || ((!m.stage||m.encounter)&&fieldProps(s.name, m.biome)));
+    if(scenery && !scenery[0])return;
     if (scenery) {
       const ft = previewTex('field_' + scenery[0]);
       if (ft) {
@@ -813,7 +856,7 @@ function setMap(m) {
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
-  if (art() && !m.room && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  if (art() && !land && !m.room && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
     // 소품 둘레 칸을 미리 표시해 둔다(전에는 풀 한 포기마다 소품을 전부 훑어서 큰 지도에서 몇 초씩 걸렸다)
     const OCC = new Set(), C8 = 8; for (const q of m.stamps) { const S = STAMPS[q.name]; if (!S) continue; for (let yy = Math.floor((q.y + S[4] * .4 - 4) / C8); yy <= Math.floor((q.base + 8) / C8); yy++) for (let xx = Math.floor((q.x - 6) / C8); xx <= Math.floor((q.x + S[3] * (q.sc || 1) + 6) / C8); xx++) OCC.add(xx * 65536 + yy); }
     const near = (px, py) => OCC.has(Math.floor(px / C8) * 65536 + Math.floor(py / C8)) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);
@@ -1147,7 +1190,8 @@ function placeCamBattle(B, dt) {
   const m = B.stage, Wm = m.w * TS, Hm = m.h * TS; let sx = 0, sy = 0, n = 0;
   for (const a of B.actors) { if (a.dead) continue; const k = a.isPlayer ? 3 : 1; sx += a.x * k; sy += a.y * k; n += k; }
   const ax = n ? sx / n : Wm / 2, ay = n ? sy / n : Hm / 2, f = FOV / 2 * DEG;
-  let d = CHAR * HD.opt.zoom * 1.08 * CAMB / (2 * Math.tan(f)); const hw = d * Math.tan(f) * W / H;  // 마을보다 3할 멀리: 싸움터 전체가 들어오게  // 마을 카메라와 같은 거리: 사람이 마을과 같은 크기
+  const spread=Math.max(0,...B.actors.filter(a=>!a.dead).map(a=>Math.hypot(a.x-ax,(a.y-ay)*.85)));
+  let d=CHAR*HD.opt.zoom*CAMB*Math.min(1.73,1.34+spread/880)/(2*Math.tan(f));const hw=d*Math.tan(f)*W/H;
   let tx = Math.min(Wm - hw + 20, Math.max(hw - 20, ax)), tyP = Math.min(Hm - 50, Math.max(50, ay - 16));  // 사람보다 조금 북쪽을 겨눠 무대 뒤 담과 건물이 화면에 들어온다
   // 주인공은 늘 화면 안에 둔다. 전에는 싸우는 사람들의 가운데만 겨눠서, 적과 떨어져 아래나 구석으로 가면 주인공이 화면 밖으로 나갔다(시작할 때 동료도 화면 아래로 잘렸다)
   // 화면 세로 자리 sy(-1 맨 위, +1 맨 아래)에 놓이는 땅이 겨눈 곳에서 평면도로 몇 점 아래인지 구해, 주인공 발이 화면 위 15%~아래 75% 사이에 오게 겨눈 곳을 당긴다. 가로는 주인공 깊이에서 보이는 폭의 8할 안
@@ -1157,7 +1201,7 @@ function placeCamBattle(B, dt) {
     const mx = (d - (P.y - tyP) * ZS * Math.cos(PITCH)) * Math.tan(f) * W / H * .8; tx = Math.min(P.x + mx, Math.max(P.x - mx, tx)); }
   if (B.zoomT > 0) { const u = Math.sin(Math.min(1, B.zoomT / .75) * Math.PI); d *= 1 - .16 * u; tx += ((B.zoomX ?? tx) - tx) * .5 * u; tyP += ((B.zoomY ?? tyP) - tyP) * .5 * u; }
   if (B.shakeT > 0) { tx += (Math.random() - .5) * 2 * B.shakeA; tyP += (Math.random() - .5) * 2 * B.shakeA; }
-  dist = d; const ty = 8 * HS, tz = tyP * ZS;
+  dist = d; const ty = 8 * HS+hAt(m,P?.x??ax,P?.y??ay), tz = tyP * ZS;
   if (camT.x < 0 || !B.camInit) { camT.set(tx, ty, tz); B.camInit = true; } else { const k = 1 - Math.exp(-dt * 6); camT.set(camT.x + (tx - camT.x) * k, ty, camT.z + (tz - camT.z) * k); }
   cam.position.set(camT.x, camT.y + dist * Math.sin(PITCH), camT.z + dist * Math.cos(PITCH)); cam.lookAt(camT.x, camT.y, camT.z); cam.updateMatrixWorld();
   cam.setViewOffset(W, H, 0, (B.band || 0) / 2, W, H);  // 아래 기술 칸 띠만큼 그림을 위로 올린다(화면 행렬 proj도 같이 따라간다)
@@ -1172,6 +1216,16 @@ function renderBattle(B) {
   // 무대 땅이 무대 것이 아니거나 장면에서 빠져 있으면 무대를 새로 짓는다. 전에 땅 없이 사람만 검은 바닥 위에서 싸우는 화면이 나왔다
   if (!ground || ground.userData.map !== B.stage || ground.parent !== scene) { console.warn('[hd2d] 전투 무대 땅이 어긋나 다시 지음', ground?.userData.map?.id); curMap = null; setMap(B.stage); }
   placeCamBattle(B, dt); foreground(); syncBattle(B); light();
+  const living=B.actors.filter(a=>!a.dead);
+  for(const obj of propG.children){
+    const u=obj.userData,s=u.s;if(!s||s.flat)continue;
+    const spec=STAMPS[s.name];if(!spec)continue;
+    const width=u.w||spec[3]*(s.sc||1),height=u.h||spec[4]*(s.sc||1);
+    const cx=u.house?obj.position.x:s.x+spec[3]*(s.sc||1)*.5;
+    const blocks=living.some(a=>s.base>a.y+1&&s.base-a.y<height*.91&&Math.abs(a.x-cx)<width*.46+3);
+    if(u.house)cutHouse(obj,blocks,dt);
+    else if(!u.flat)obj.visible=!blocks;
+  }
   if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(0, 0, 0); HOLE.uHoleZ.value = 0;
   const p = B.p || { x: B.stage.w * TS / 2, y: B.stage.h * TS / 2 };
   shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx({ m: B.stage, p });

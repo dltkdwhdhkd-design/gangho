@@ -1,4 +1,6 @@
 import { bridgeHeight } from './walkways.js';
+import { loadWildernessArt } from '../landscape.js';
+import { loadRegionalAtlas } from './regional-buildings.js';
 const materials = 'grass moss road yard slab plank sand snow cedar roof plaster crag'.split(' ');
 const margins = ['bank_ledge','bank_reeds','trail_dry','trail_fern','trail_paving','trail_frost'];
 const scenery = {
@@ -52,7 +54,9 @@ export function loadCastIndex(images) {
 }
 export async function loadFieldArt(images) {
   const names = new Set([...materials, ...margins, ...Object.values(scenery).map(a => a[0]), 'fir']);
-  await Promise.all([loadCastIndex(images), ...[...names].map(name=>loadActorPage(images,name))]);
+  await Promise.all([loadCastIndex(images),loadRegionalAtlas(),loadWildernessArt().then(a=>{
+    for(const [key,im] of Object.entries(a.props))images['field_'+key]=im;
+  }), ...[...names].map(name=>loadActorPage(images,name))]);
   const hero=walking.type_BlueSamurai;
   if(hero)await Promise.all([loadActorPage(images,hero[0]),loadCombatArt(images,hero)]);
 }
@@ -144,6 +148,10 @@ export function drawCourt(ctx, court, cell) {
     if (motif === 'plum') ctx.ellipse(0, -radius * .29, radius * .19, radius * .25, 0, 0, Math.PI * 2);
     else { ctx.moveTo(-radius * .15, -radius * .71); ctx.lineTo(radius * .15, -radius * .71); }
     ctx.stroke();
+  }
+  if(court.crest && motif!=='plum'){
+    ctx.fillStyle='rgba(110,91,63,.42)';ctx.font='bold '+(radius*.58)+'px serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(court.crest,0,0);
   }
   ctx.restore();
 }
