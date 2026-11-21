@@ -29,6 +29,46 @@ GRIPS = [[.32,.51,.62,.54],[.31,.50,.66,.53],[.73,.32,.17,.52],
          [.43,.22,.52,.26],[.19,.62,.62,.50],[.23,.25,.77,.56]]
 LANCZOS = Image.Resampling.LANCZOS
 
+# Pupil centers in Cheongmyeong's source drawings, measured before atlas reduction.
+# The sign is the outer corner of the eyelid. Zero marks a partly hidden far eye.
+CHEONG_GAZE = {
+    'w0': [(0.383, 0.221, -1), (0.631, 0.218, 1)],
+    'w1': [(0.331, 0.221, 1)],
+    'a0': [(0.416, 0.276, 1)], 'a1': [(0.427, 0.268, 1)],
+    'a2': [(0.393, 0.320, 1)], 'a3': [(0.279, 0.361, 1)],
+    'b0': [(0.446, 0.300, 0), (0.532, 0.284, 1)],
+    'b1': [(0.374, 0.311, 0), (0.449, 0.287, 1)],
+    'b2': [(0.361, 0.271, 0), (0.439, 0.255, 1)],
+    'b3': [(0.581, 0.253, 0), (0.654, 0.239, 1)],
+    'c0': [(0.480, 0.274, 1)], 'c1': [(0.363, 0.268, 1)],
+    'c2': [(0.324, 0.294, 1)], 'c3': [(0.417, 0.221, 1)],
+}
+
+def ink_cheong_eyes(body, pose, reflected=False):
+    # Re-establish the eyelid, iris and sclera on the final pixel grid.
+    # The source fringe covers the far eye in most three-quarter poses.
+    pixels = body.load()
+    for u, v, outer in CHEONG_GAZE.get(pose, ()):
+        x = round(u * body.width - 0.5)
+        y = round(v * body.height - 0.5)
+        if reflected:
+            x = body.width - 1 - x
+            outer = -outer
+        iris = (94, 64, 71)
+        lid = (66, 47, 51)
+        ivory = (237, 213, 199)
+        if outer:
+            strokes = [(0,-1,lid), (outer,-1,lid), (outer*2,-1,(103,75,76)),
+                       (-outer,0,ivory), (0,0,iris), (outer,0,(213,190,180))]
+        else:
+            strokes = [(0,-1,(88,60,64)), (0,0,iris), (1,0,(211,183,172))]
+        for dx, dy, rgb in strokes:
+            px, py = x + dx, y + dy
+            if 0 <= px < body.width and 0 <= py < body.height:
+                old = pixels[px, py]
+                if old[3] > 220:
+                    pixels[px, py] = (*rgb, old[3])
+
 def read(path):
     return json.loads(path.read_text(encoding='utf8'))
 
@@ -157,6 +197,8 @@ def walking_actor(cache,key,head):
     imgs.append(ImageOps.mirror(imgs[2]))
     for d,im in enumerate(imgs):
         body=scaled(im,min(H/im.height,(F-4)/im.width))
+        if key == 'cheongmyeong':
+            ink_cheong_eyes(body, ('w0', None, 'w1', 'w1')[d], reflected=d == 3)
         still=Image.new('RGBA',(F,F))
         still.alpha_composite(body,((F-body.width)//2,108-body.height))
         for phase in range(4):
@@ -191,12 +233,16 @@ def combat_actor(cache,key,head):
         left=int(np.clip(round(BW*R/2-core),2,BW*R-body.width-2))
         bottom=(BH-6)*R-(8 if i==7 else 0)
         top=bottom-body.height
-        block.alpha_composite(body,((i%5)*BW*R+left,(i//5)*BH*R+top))
         pairs=[]
         for fx,fy in np.array(GRIPS[i]).reshape(2,2):
             x,y=grip(body,fx,fy)
             pairs.extend([round((left+x)/R-BW/2+28,1),round((top+y)/R-(BH-6)+56,1)])
         hands.append(pairs)
+        if key == 'cheongmyeong':
+            poses = ('w1', 'a0', 'a1', 'a2', 'a3', 'b0', 'b1', 'b2', 'b3',
+                     None, None, 'c0', 'c1', 'c2', 'c3')
+            ink_cheong_eyes(body, poses[i])
+        block.alpha_composite(body,((i%5)*BW*R+left,(i//5)*BH*R+top))
     return block,hands
 
 def pack(source,groups):
@@ -247,6 +293,8 @@ def pack(source,groups):
         keys=sorted((k for k,v in slots.items() if v[0]==pg),key=lambda k:slots[k][1])
         for kind,out in [('walk',pg),('combat',pg.replace('walk','combat'))]:
             srcs=[cache/(k+'_'+p+'.png') for k in keys for p in (['w0','w1','w2'] if kind=='walk' else ['w1','a0','a1','a2','a3','b0','b1','b2','b3','c0','c1','c2','c3'])]
+            if 'cheongmyeong' in keys:
+                srcs.append(Path(__file__))
             stamp=cache/(out+'.packed')
             if not all(p.is_file() for p in srcs):continue
             if stamp.exists() and stamp.stat().st_mtime>=max(p.stat().st_mtime for p in srcs):continue
