@@ -1,3 +1,4 @@
+import { fighterEquipment, armedStats } from './combat-loadout.js';
 import { suspendBondScene } from './cg.js';
 import { rankedStats } from './martial-standing.js';
 // 직접 조작 전투
@@ -62,12 +63,14 @@ export class Battle {
       const choices=[[78,0],[-78,0],[0,78],[58,55],[-58,55]].map(([dx,dy])=>this.nav.snap(this.p.x+dx,this.p.y+dy));
       [x,y]=choices.reduce((best,q)=>hyp(q[0]-this.p.x,q[1]-this.p.y)>hyp(best[0]-this.p.x,best[1]-this.p.y)?q:best,[x,y]);
     }
-    const f = rankedStats(FOES[id]), d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
+    const base = rankedStats(FOES[id]), equipment = fighterEquipment(id,base);
+    const f = armedStats(base,equipment), d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
     const ez = enemy ? 1 - (this.cfg.ease || 0) : 1;  // 세 번 진 뒤 '숨을 고르고 도전'을 고르면 적이 그만큼 약해진다(js/ctx.js duel)
     const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) * ez : 1)), atk = f.atk * (enemy ? d.foeAtk * ez : 1);
-    const a = new Actor({ id, def_: f, team, name: f.name, spr: f.spr, x, y, maxHp: hp, hp, atk, def: f.def, spd: f.spd, crit: .02, boss: f.boss, elite: f.elite, mon: f.mon, big: f.big, r: f.r || 6, scale: f.scale || 1, wpn: f.wpn, moves: f.moves.slice(), pause: f.pause, poise: f.poise || 0, maxPoise: f.poise || 0, phase: 0, ax: 0, ay: 1, face: 0, dummy: f.dummy, atkCd: rnd(.6, 1.3) });
+    const a = new Actor({ id, def_: f, equipment, team, name: f.name, spr: f.spr, x, y, maxHp: hp, hp, atk, def: f.def, spd: f.spd, crit: .02+(equipment?.fx.crit || 0)/200, boss: f.boss, elite: f.elite, mon: f.mon, big: f.big, r: f.r || 6, scale: f.scale || 1, wpn: f.wpn, moves: f.moves.slice(), pause: f.pause, poise: f.poise || 0, maxPoise: f.poise || 0, phase: 0, ax: 0, ay: 1, face: 0, dummy: f.dummy, atkCd: rnd(.6, 1.3) });
     if (team === 0) { a.hp = a.maxHp = hp * 1.4; a.atk = atk * .7; }
     RL.apply(a, id, f, this.cfg, enemy);  // 경지: 능력치와 막기·연계 버릇(js/realm.js)
+    a.rPerfect = Math.min(.9,(a.rPerfect || 0)+(equipment?.fx.parry || 0));
     this.actors.push(a); return a;
   }
   foes(a) { return this.actors.filter(o => o.team !== a.team && !o.dead); }
@@ -229,9 +232,9 @@ export class Battle {
     if (s.zone) this.zone(a, s.zone, sk);
     if (s.clearProj) this.proj = this.proj.filter(p => p.team === a.team);
     if (s.selfhurt) { const v = Math.round(a.maxHp * s.selfhurt); a.hp = Math.max(1, a.hp - v); this.num(a.x, a.y - 18, v, '#ff7a6a', .8); }
-    if (s.heal) { const h = Math.round(a.maxHp * s.heal.hp); a.hp = Math.min(a.maxHp, a.hp + h); a.mp = Math.min(a.maxMp, a.mp + a.maxMp * s.heal.mp); this.num(a.x, a.y - 18, '+' + h, '#7fe08a', 1); }
+    if (s.heal) { const h = Math.round(a.maxHp * s.heal.hp * (1+(a.equipment?.fx.potion || 0)/200)); a.hp = Math.min(a.maxHp, a.hp + h); a.mp = Math.min(a.maxMp, a.mp + a.maxMp * s.heal.mp); this.num(a.x, a.y - 18, '+' + h, '#7fe08a', 1); }
     if (s.buff) { a.buffs[s.buff.id] = s.buff.dur; this.say(a, sk.name, '#ffd27a'); }
-    if (s.counter) { a.counter = s.counter.dur; a.counterMul = s.counter.mul; a.counterAll = s.counter.all; a.counterName = sk.name; a.counterKey = a.skKey; }
+    if (s.counter) { a.counter = s.counter.dur; a.counterMul = s.counter.mul; a.counterAll = s.counter.all; a.counterName = sk.name; a.counterKey = a.skKey; a.counterSkill = sk; }
     if (s.pull) for (const o of this.foes(a)) { const dx = a.x - o.x, dy = a.y - o.y, d = hyp(dx, dy) || 1; if (d < s.pull.r) { o.kx = dx / d * s.pull.f; o.ky = dy / d * s.pull.f; o.kT = .3; } }
     if (s.slowfoes) for (const o of this.foes(a)) { o.slowT = s.slowfoes.dur; o.slowF = s.slowfoes.f; }
     if (s.moonstrike) { const list = this.foes(a); if (list.length) { const T = list[(a.msI = (a.msI || 0) + 1) % list.length]; a.x = clamp(T.x + rnd(-12, 12), this.left, this.right); a.y = clamp(T.y + rnd(-10, 10), this.top, this.floorB); a.ghostT = .1; this.addFx('cut', T.x, T.y - 6, s.moonstrike.big ? 3 : 1.5, rnd(6.28)); this.applyHit(a, T, { mul: s.moonstrike.mul, kb: 16, stun: .5, ub: true }, sk); } }
@@ -259,9 +262,10 @@ export class Battle {
   }
   shoot(a, p, sk) {
     const n = p.n || 1, base = Math.atan2(a.ay, a.ax);
+    const volley = n>1 && p.spread ? new Map() : null;
     for (let i = 0; i < n; i++) {
       const an = base + (i - (n - 1) / 2) * (p.spread || 0) * D2R;
-      this.proj.push({ ...p, st: sk && !sk.basic ? a.fxSt || BF.styleOf(a, sk) : null, x: a.x + Math.cos(an) * 8, y: a.y - 5 + Math.sin(an) * 8, vx: Math.cos(an) * p.speed, vy: Math.sin(an) * p.speed, an, owner: a, team: a.team, age: 0, seen: new Set(), sk });
+      this.proj.push({ ...p, volley, st: sk && !sk.basic ? a.fxSt || BF.styleOf(a, sk) : null, x: a.x + Math.cos(an) * 8, y: a.y - 5 + Math.sin(an) * 8, vx: Math.cos(an) * p.speed, vy: Math.sin(an) * p.speed, an, owner: a, team: a.team, age: 0, seen: new Set(), sk });
     }
   }
   zone(a, z, sk) {
@@ -280,7 +284,7 @@ export class Battle {
     if (sk && sk.expose && o.def_ && o.def_.immune) { o.exposed = 5.5; this.say(o, '달빛이 벗겨졌다!', '#fff3c8'); this.shake(3); this.addFx('ringw', o.x, o.y - 8, 2.4); }
     const dx = o.x - src.x, dy = o.y - src.y, d = hyp(dx, dy) || 1, nx = dx / d, ny = dy / d;
     if (o.counter > 0 && (!h.ub || o.counterAll)) { // 낙화유수, 이화접목
-      o.counter = 0; o.iframe = .4; const m = o.counterMul; this.addFx('double', src.x, src.y - 6, 1.6); this.say(o, (o.counterName || '반격') + '!', '#ffd27a'); this.stop = .08; Sound.sfx('sword2'); this.applyHit(o, src, { mul: m, kb: 60, stun: .7, ub: true }, o.sk); return;
+      o.counter = 0; o.iframe = .4; const m = o.counterMul; this.addFx('double', src.x, src.y - 6, 1.6); this.say(o, (o.counterName || '반격') + '!', '#ffd27a'); this.stop = .08; Sound.sfx('sword2'); this.applyHit(o, src, { mul: m, kb: 60, stun: .7, ub: true }, o.counterSkill || o.sk); return;
     }
     const front = (-nx * o.ax + -ny * o.ay) > -.1 || proj;
     if (o.st === 'guard' && front && !h.ub) {
@@ -306,9 +310,12 @@ export class Battle {
     if (src.isPlayer) {
       src.mp = Math.min(src.maxMp, src.mp + (sk && sk.basic ? 1.6 + (this.b.mpHit || 0) : .4));
       if (this.b.lifeHit) src.hp = Math.min(src.maxHp, src.hp + dmg * this.b.lifeHit / 100);
-      if (this.b.venom && sk && sk.basic) o.dots.push({ dps: src.atk * .12, t: 2, n: 0 });
+      if (this.b.venom && sk?.basic) this.poison(src,o,'weapon',.12,2);
     }
-    if (h.dot) o.dots.push({ dps: src.atk * h.dot.dps, t: h.dot.t, n: 0 });
+    const gear=src.equipment?.fx;
+    if (gear?.lifeHit) src.hp=Math.min(src.maxHp,src.hp+dmg*gear.lifeHit/200);
+    if (gear?.venom && (!sk?.fromSkill || sk.basic)) this.poison(src,o,'weapon',.08,2);
+    if (h.dot) this.poison(src,o,sk || 'poison',h.dot.dps,h.dot.t);
     if (h.slow) { o.slowT = Math.max(o.slowT || 0, h.slow.dur); o.slowF = h.slow.f; }  // 한기·물살: 느려진다
     if (h.drain) src.hp = Math.min(src.maxHp, src.hp + dmg * h.drain);  // 흡기: 준 피해만큼 조금 돌아온다
     if (h.shock && !h.chain) { this.addFx('thunder', o.x, o.y - 12, 1.2); const n2 = this.foes(src).filter(q => q !== o && hyp(q.x - o.x, q.y - o.y) < 80).sort((a, b) => hyp(a.x - o.x, a.y - o.y) - hyp(b.x - o.x, b.y - o.y))[0]; if (n2) { this.addFx('thunder', n2.x, n2.y - 12, 1); this.applyHit(src, n2, { mul: (h.mul || 1) * .4, kb: 20, stun: .35, ub: true, chain: 1 }, sk); } }  // 뇌전: 벼락이 떨어지고 가까운 적 하나로 튄다
@@ -326,14 +333,26 @@ export class Battle {
     if ((h.mul || 1) >= 3) this.shake(3);
     if (o.hp <= 0) this.kill(o, src);
   }
+  poison(src,target,skill,factor,duration) {
+    const existing=target.dots.find(d=>d.src===src && d.skill===skill);
+    if (existing) existing.t=Math.max(existing.t,duration);
+    else target.dots.push({src,skill,dps:src.atk*factor,t:duration,n:0});
+  }
   calc(src, o, h, sk) {
     let m = h.mul || 1;
     if (src.isPlayer) {
       const b = this.b;
-      if (sk && !sk.basic) m *= this.st.power * (1 + (masteryLv(src.skKey) - 1) * .07) * (1 + ((b.skill || 0) + (sk.ult ? (b.ult || 0) : 0)) / 100);
+      if (sk && !sk.basic) m *= this.st.power * (1 + (masteryLv(sk.id || src.skKey) - 1) * .07) * (1 + ((b.skill || 0) + (sk.ult ? (b.ult || 0) : 0)) / 100);
       else m *= 1 + (b.basic || 0) / 100;
     }
-    if (src.team === 1 && sk && sk.fromSkill) m *= .55;
+    if (!src.isPlayer && sk?.fromSkill) {
+      if (sk.fac) m *= sk.ult ? .64 : .72;
+      else if (src.team===1) m *= .55;
+    }
+    if (src.equipment) {
+      const fx=src.equipment.fx;
+      m *= 1+((sk?.fromSkill?fx.skill:fx.basic) || 0)/200;
+    }
     return src.atk * m * (60 / (60 + o.def)) * rnd(.93, 1.07);
   }
   parry(o, src, proj) {
@@ -406,7 +425,10 @@ export class Battle {
         if (o.team === p.team || o.dead || o.iframe > 0 || p.seen.has(o)) continue;
         if (hyp(o.x - p.x, o.y - 5 - p.y) < o.r + p.r) {
           p.seen.add(o);
-          this.applyHit(p.owner, o, { mul: p.mul, kb: p.kb ?? 22, stun: p.stun, ub: p.ub, dot: p.dot, slow: p.slow, drain: p.drain, shock: p.shock }, p.sk, p);
+          const previous = p.volley?.get(o) || 0;
+          if (p.volley) p.volley.set(o,previous+1);
+          const scale = [1,.55,.45,.30][previous] || 0;
+          if (scale) this.applyHit(p.owner, o, { mul: p.mul*scale, kb: p.kb ?? 22, stun: p.stun, ub: p.ub, dot: p.dot, slow: p.slow, drain: p.drain, shock: p.shock }, p.sk, p);
           if (!p.pierce) p.age = 99;
           break;
         }
@@ -463,10 +485,14 @@ export class Battle {
     if (a.rGuard && T.st === 'skill' && d < 44 + a.realm * 3 && T.skT < .08 + a.rRead && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < Math.min(.76, a.rGuard * (a.def_.position && a.realm >= 4 ? .64 : .4))) { a.st = 'guard'; a.guardT = Math.random() < a.rPerfect ? -1 : .3; a.guardAI = rnd(.35, .7) + a.rRead; return; } }
     const attackers = this.actors.filter(o => o.team === 1 && !o.dead && o.st === 'skill').length;
     if (a.atkCd <= 0 && (a.boss || attackers < 2 || a.team === 0)) {
-      const opts = a.moves.map(m => MOVES[m]).filter(m => m && d <= m.range + 8 && (a.cd[m.id] || 0) <= 0);
+      const opts = a.moves.map(m => MOVES[m]).filter(m => m && (!m.healing || a.hp<a.maxHp*.60) && d <= m.range + 8 && (a.cd[m.id] || 0) <= 0);
       if (opts.length) {
         const m = a.counterNext ? opts.reduce((p, q) => q.dur < p.dur ? q : p) : pick(opts); a.ax = nx; a.ay = ny; a.face = faceOf(nx, ny);
-        this.start(a, m, m.id); a.cd[m.id] = m.once || (m.ult ? 16 : 0) || (m.fromSkill ? Math.min(m.cd, 8) : 0) || (m.range > 90 ? 3 : .5);
+        this.start(a, m, m.id); a.cd[m.id] = m.once || (m.healing ? Math.max(18,m.cd || 0) : m.ult ? Math.max(16,m.cd || 0) : m.fromSkill ? (m.cd || 4) : m.range>90 ? 3 : .5);
+        if (a.equipment) {
+          const fx=a.equipment.fx;
+          a.cd[m.id]*=1+((fx.cd || 0)-(fx.regen || 0)*.15+(fx.mpCost || 0)*.2-(fx.mp || 0)*.15)/100;
+        }
         a.atkCd = a.pause * rnd(.75, 1.3) + m.dur * .35;
         // 연계: 경지가 높으면 초식이 끝나자마자 다음 초식을 잇는다. 막은 뒤 되받아친 초식도 한 번 더 이을 수 있다
         if (a.chainN < a.rChain && Math.random() < a.rCombo + (a.counterNext ? .2 : 0)) { a.atkCd = m.dur * .9; a.chainN++; } else a.chainN = 0;

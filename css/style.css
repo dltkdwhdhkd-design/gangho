@@ -214,3 +214,9 @@ h1,h2,h3{font-family:Galmuri11Bold,Galmuri14,sans-serif;font-weight:400}
 .sk .ct{font-size:14px;bottom:2px}
 #stage.inbattle #hdp>*:not(:first-child){display:none!important}
 .bname .realm{font-size:.7em;color:#ffcf8a;border:1px solid rgba(255,207,138,.55);padding:0 5px;margin-left:6px;vertical-align:middle;border-radius:3px;background:rgba(0,0,0,.35)}
+
+#cg .bond-paint{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#cg .bond-paint img{position:absolute;width:200%;height:200%;max-width:none;display:block}
+#cg .bond-paint.single img{inset:0;width:100%;height:100%;object-fit:cover}
+#cg .bond-actor.protagonist{left:5%;width:42%;height:81%}
+#cg .bond-actor.spouse{left:auto;right:5%;width:42%;height:81%}

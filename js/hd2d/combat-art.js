@@ -71,6 +71,7 @@ const specialGear = {
   w_jegal:'fan',w_dang:'dagger',w_noeum:'staff',w_podalra:'vajra',w_emei:'piercer'
 };
 function equipment(actor, equipped, identity) {
+  if (actor.equipment?.gear) return actor.equipment.gear;
   if (actor.isPlayer) {
     if (specialGear[equipped]) return specialGear[equipped];
     if(actor.wpn==='Club')return 'ironfist';
@@ -96,6 +97,7 @@ export function motionFor(actor,identity,equipped) {
   const plan = analyze(sk);
   let kind = sk.arch || techniques[id] || plan.inferred;
   kind = ult[kind] || kind;
+  if (sk.w==='검' && ['fan','dart'].includes(kind)) kind='wave';
   if (id === 'tray') gear = 'tray';
   else if (plan.proj === 'p_arrow') gear = 'bow';
   else if (/kunai|shuriken/.test(plan.proj || '') || (['dart','fan'].includes(kind) && sk.w !== '검')) gear = 'dart';

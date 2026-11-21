@@ -1,3 +1,5 @@
+import { nativeMoveNames } from './combat-loadout.js';
+import { MOVES as combatMoves } from './foes.js';
 // 제목 화면, 주인공 만들기, 메뉴, 상점, 결과창
 import { TITLES } from './titles.js';
 import { G, IMG, ART, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS, josa } from './core.js';
@@ -72,13 +74,26 @@ export function closeMenu() { G.chronicle?.closed(); G.keyWait = false; G.menuOp
 function menuKey(e) { if (G.keyWait) return; if (e.repeat || (Keys.is('opt', e.code) && document.activeElement?.tagName === 'INPUT')) return; if (e.code === 'Escape' || Keys.is('opt', e.code)) { e.preventDefault(); e.stopPropagation(); closeMenu(); } }
 function drawMenu() {
   document.removeEventListener('keydown', menuKey); document.addEventListener('keydown', menuKey);
-  if (tab === 'chronicle' && G.battle) tab='stat';
+  if ((tab==='chronicle' && G.battle) || (tab==='fighters' && !G.battle)) tab='stat';
   const M = $('#modal'), S = G.S, tabs = [['stat', '상태'], ['skill', '초식'], ['tree', '트리'], ['mer', '경맥'], ['lib', '무공록'], ['gear', '장비'], ['bag', '소지품'], ['clan', '강호'], ['news', '소식'], ['party', '동료'], ['love', '인연'], ['fate', '인연의 실'], ['note', '수첩'], ['chronicle', '달맞이 행록'], ['save', '저장'], ['set', '설정']].filter(([k]) => (k !== 'fate' || S.mode !== 'free') && (k !== 'chronicle' || !G.battle));
+  if (G.battle) tabs.splice(2,0,['fighters','참전 인물']);
   const keep = M.querySelector('.body')?.scrollTop || 0;
   M.innerHTML = `<div class="menu"><div class="pane"><div class="tabs">${tabs.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}<button class="x">닫기 (${Keys.label('opt')})</button></div><div class="body"></div></div></div>`;
   $$('.tabs button[data-t]', M).forEach(b => b.onclick = () => { tab = b.dataset.t; Sound.sfx('tick'); drawMenu(); });
   $('.tabs .x', M).onclick = closeMenu;
-  const B = $('.body', M); ({ stat: tabStat, skill: tabSkill, tree: tabTree, mer: tabMeridian, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, chronicle: G.chronicle.tab, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab, fate: G.fate.tab })[tab](B); B.scrollTop = keep;
+  const B = $('.body', M); ({ fighters: tabFighters, stat: tabStat, skill: tabSkill, tree: tabTree, mer: tabMeridian, gear: tabGear, bag: tabBag, clan: S.mode === 'free' ? G.free.tab : tabClan, note: tabNote, chronicle: G.chronicle.tab, love: tabLove, save: B => slotPanel(B, true), set: tabSet, title: tabTitle, lib: G.arts.codex, party: G.party.tab, news: G.jh.tab, fate: G.fate.tab })[tab](B); B.scrollTop = keep;
+}
+function tabFighters(B) {
+  B.innerHTML='<h2>참전 인물</h2>';
+  for (const a of G.battle.actors.filter(a=>!a.isPlayer)) {
+    const e=a.equipment, line=document.createElement('section');
+    const moves=a.moves.map(k=>combatMoves[k]?.name || SKILLS[k]?.name || nativeMoveNames[k]).filter(Boolean);
+    const title=document.createElement('h3'), gear=document.createElement('p'), skills=document.createElement('p');
+    title.textContent=(a.team===0?'아군 · ':'상대 · ')+a.name;
+    gear.textContent=e?[e.weapon.name,e.armor.name,e.trinket.name].join(' · '):'타고난 무장';
+    skills.textContent='초식 · '+moves.join(' · ');
+    line.append(title,gear,skills); B.append(line);
+  }
 }
 function tabStat(B) {
   const S = G.S, st = stats(), need = expNeed(S.lv);

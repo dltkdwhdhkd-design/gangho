@@ -1,5 +1,5 @@
 import { fanCandidates } from './fan-bonds.js';
-import { withBondScene } from './cg.js';
+import { withBondScene, outingPlace } from './cg.js';
 import { factionOptions } from './faction-talk.js';
 import { companionDialogue } from './companion-dialogue.js';
 import { roadCompanions } from './road-companions.js';
@@ -252,9 +252,15 @@ async function propose(id) {
   const c = CAND[id];
   if (!F().own_house) { await say(id, c.house); return; }
   if (have('jade_ring') < 1) { await say('me', '(옥가락지가 있어야 한다. 대장간에서 옥돌로 만들 수 있다.)'); return; }
-  take('jade_ring'); await say('me', c.promiseLead || '저랑 혼인해 주세요.', 'b'); for (const l of c.propose) await say(id, l);
-  ctx.cg(roadCompanions[id] || id === 'igyeom' ? 'bond_'+id : 'wedding'); await narr(`${F().inn_rebuilt ? '달맞이 객잔 마당에 혼례상이 차려졌다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니는 그날만큼은 밥값을 받지 않았다.' : '청하진 사람들이 내 집 마당에 혼례상을 차렸다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니 자리는 비워 두었다.'}\n\n${josa(S().name, '과/와')} ${josa(c.name, '은/는')} 부부가 되었다.`); ctx.cgOff();
+  take('jade_ring');
+  await withBondScene(id,'proposal',async()=>{
+    await say('me', c.promiseLead || '저랑 혼인해 주세요.', 'b');
+    for (const line of c.propose) await say(id,line);
+  });
+  return withBondScene(id,'wedding',async()=>{
+  ctx.cg('wedding'); await narr(`${F().inn_rebuilt ? '달맞이 객잔 마당에 혼례상이 차려졌다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니는 그날만큼은 밥값을 받지 않았다.' : '청하진 사람들이 내 집 마당에 혼례상을 차렸다.\n뱃사공 노씨는 술도 안 마셨는데 울었고, 대장장이 강씨가 술을 돌렸다.\n곽 아주머니 자리는 비워 두었다.'}\n\n${josa(S().name, '과/와')} ${josa(c.name, '은/는')} 부부가 되었다.`); ctx.cgOff();
   S().married = id; addLove(id, 100); Sound.sfx('ok3'); toast('혼인했다! 배우자가 집에서 기다린다.', 3.5); G.field.refresh();
+  });
 }
 async function swear(id) {
   const c=CAND[id]; if(isSworn(id)||S().partner===id||S().married===id)return;
@@ -276,13 +282,13 @@ async function romance(id, base) {
     if(f)opts.push(...factionOptions(f,id));
   }
   if (!d['gift_' + id]) opts.push(['선물을 준다', () => giveGift(id)]);
-  if (((eligible && s.partner === id) || (c.sworn && isSworn(id))) && !d['date_' + id]) opts.push([isSworn(id) ? '밥을 먹으러 간다' : '나들이를 간다', async () => { d['date_' + id] = 1; addLove(id, 7); await withBondScene(id,'outing',()=>narr(pick(c.date)),c.outingScene); }]);
+  if (((eligible && s.partner === id) || (c.sworn && isSworn(id))) && !d['date_' + id]) opts.push([isSworn(id) ? '밥을 먹으러 간다' : '나들이를 간다', async () => { d['date_' + id] = 1; addLove(id, 7); const i = Math.floor(Math.random()*c.date.length); await withBondScene(id,'outing',()=>narr(c.date[i]),outingPlace(id,i,c.outingScene),i); }]);
   if (c.sworn && L>=70 && !isSworn(id) && s.partner!==id && s.married!==id && G.bond.done(id)>=3) {
     opts.push([kinName(id)+'를 맺는다',()=>withBondScene(id,'oath',()=>swear(id),c.oathScene)]);
   }
   if (eligible && !isSworn(id)) {
     if (L>=70 && !s.partner && !s.married && G.bond.done(id)>=3)opts.push(['마음을 전한다',()=>withBondScene(id,'confess',()=>confess(id))]);
-    if (s.partner===id && !s.married && L>=100) opts.push(['혼인을 청한다',()=>withBondScene(id,'wedding',()=>propose(id))]);
+    if (s.partner===id && !s.married && L>=100) opts.push(['혼인을 청한다',()=>propose(id)]);
   }
   { const q = G.party.loveOpt(id); if (q) opts.push(q); }
   opts.push(['그만둔다', async () => { }]);

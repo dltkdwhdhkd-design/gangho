@@ -92,38 +92,85 @@ const locations = {
   clan_dang:['clinic','market','clinic','grove'], clan_moyong:['hall','archive','court','hall'],
   clan_namgung:['inn','court','court','inn'], baekrang:['market','inn','market','river'],
   hyeok:['market','archive','grove','grove'], cheol:['inn','hall','river'],
-  igyeom:['river','river','market','river'], mugyeong:['market','court','market','inn'],
-  yeonjae:['archive','market','archive','hall'], jaeha:['market','river','grove','grove'],
+  igyeom:['river','river','market','river'], mugyeong:['forge','forge','market','forge'],
+  yeonjae:['market','archive','market','archive'], jaeha:['relay','relay','relay','relay'],
 };
+const illustrated = new Set([
+  'yun','so','clan_dang','clan_moyong','clan_namgung','baekrang','hyeok',
+  'igyeom','mugyeong','yeonjae','jaeha','cheongmyeong','baekcheon','yuseol',
+  'yunjong','jogeol','dangsoso','baeksang','jingeumryong','isongbaek','dangpae',
+]);
+const outings = {
+  yun:['inn','grove'], so:['court','court'], clan_dang:['inn','hall'], clan_moyong:['grove','archive'],
+  clan_namgung:['market','court'], baekrang:['market','inn'], hyeok:['market','hall'],
+  igyeom:['river','river'], mugyeong:['market','court'], yeonjae:['archive','archive'], jaeha:['grove','relay'],
+  cheongmyeong:['grove'], baekcheon:['grove'], yuseol:['grove'], yunjong:['market'], jogeol:['market'],
+  dangsoso:['grove'], baeksang:['market'], jingeumryong:['inn'], isongbaek:['grove'], dangpae:['river'],
+  cheol:['market','river','hall'],
+};
+export const outingPlace = (id, index, defaultPlace) => outings[id]?.[index] || defaultPlace || 'inn';
+const paintedOaths=new Set(['cheongmyeong','baekcheon','yuseol','yunjong','jogeol','dangsoso','baeksang','jingeumryong','isongbaek','dangpae']);
 let currentScene;
-function drawBond() {
-  if(!currentScene)return;
-  const {id,phase,place}=currentScene, e=layer();
-  if(!e)return;
-  const original=id==='clan_namgung' && (phase===0 ? 'bond_nam_noodles' : phase===1 ? 'bond_nam' : null);
-  const painted=original && sceneArt(original);
-  e.className='on'; e.replaceChildren(); e.dataset.actor=id; e.dataset.place=place;
-  if(painted){e.style.background=`#282424 url("${painted.src}") center/cover`;return;}
-  e.style.background=`#403731 url("assets/art/scenes/${place}.webp") center/cover`;
-  const emotion=phase==='confess'||phase==='wedding'||phase===3?'b':phase===2?'h':'n';
-  const portrait=ART.get(id+'_'+emotion)||ART.get(id+'_n');
-  if(portrait){
-    const actor=new Image(); actor.className='bond-actor';actor.src=portrait.src; e.append(actor);
-  }
+function portrait(e, id, expression, role) {
+  const src = ART.get(id+'_'+expression) || ART.get(id+'_n');
+  if (!src) return;
+  const img = new Image();
+  img.className = 'bond-actor ' + role;
+  img.alt = ''; img.src = src.src;
+  e.append(img);
 }
-export async function withBondScene(id,phase,run,explicitPlace) {
+function drawBond() {
+  if (!currentScene) return;
+  const {id, phase, place, variant} = currentScene, e = layer();
+  if (!e) return;
+  e.className='on'; e.replaceChildren(); e.dataset.actor=id; e.dataset.place=place;
+  e.dataset.phase=String(phase); e.dataset.art='portrait';
+  e.style.background='#403731 url("assets/art/scenes/'+place+'.webp") center/cover';
+  const wedding = phase === 'wedding';
+  if (wedding) portrait(e,'type_'+G.S.look,'b','protagonist');
+  portrait(e,id,wedding || phase==='confess' || phase===3 ? 'b' : phase===2 ? 'h' : 'n',wedding?'spouse':'');
+  if (!illustrated.has(id)) return;
+  const story=Number.isInteger(phase);
+  const panels={confess:0,outing:1+variant,proposal:3};
+  if (phase==='oath' && paintedOaths.has(id)) panels.oath=2;
+  const frame=story?phase:panels[phase];
+  if (frame===undefined) return;
+  const original = id==='clan_namgung' && (phase===0?'bond_nam_noodles':phase===1?'bond_nam':null);
+  const approved = original && sceneArt(original);
+  const crop = document.createElement('div');
+  crop.className = approved ? 'bond-paint single' : 'bond-paint';
+  const img = new Image();
+  img.alt = ''; img.decoding='async';
+  img.onload = () => {
+    if (crop.parentElement !== e) return;
+    e.dataset.art = approved?'painting':'atlas';
+    e.querySelectorAll('.bond-actor').forEach(actor=>actor.remove());
+  };
+  if (!approved) {
+    img.style.left=frame%2?'-100%':'0';
+    img.style.top=frame>=2?'-100%':'0';
+  }
+  img.onerror=()=>crop.remove();
+  crop.append(img); e.append(crop);
+  img.src=approved?approved.src:'assets/art/bonds/'+id+(story?'':'_courtship')+'.webp';
+}
+export async function withBondScene(id,phase,run,explicitPlace,variant=0) {
   const old=currentScene;
-  const place=explicitPlace || (phase==='wedding'?'hall':phase==='confess'?'grove':phase==='oath'?'river':null)
+  const place=explicitPlace || (phase==='wedding'?(G.S.flags.inn_rebuilt?'inn_wedding':'home_wedding'):
+    (phase==='confess' || phase==='proposal')?locations[id]?.[3] || outings[id]?.[0] || 'grove':phase==='oath'?'river':null)
     || locations[id]?.[Number.isInteger(phase)?phase:0] || 'inn';
-  currentScene={id,phase,place};
+  currentScene={id,phase,place,variant};
   try {drawBond();return await run();} finally {currentScene=old;hideCG();}
 }
 export function showCG(id) {
   const e=layer();if(!e)return;
   const c=CG[id]||[id,'#14110f','#2a2018'],pic=sceneArt(id);
-  if (currentScene && (!pic || (currentScene.phase==='wedding' && id!=='wedding'))) return drawBond();
+  if (currentScene && (currentScene.phase==='wedding' || !pic)) {
+    if (e.dataset.actor!==currentScene.id || !e.classList.contains('on')) drawBond();
+    return;
+  }
   e.className='on';e.replaceChildren();
-  if(pic){e.style.background=`#221e1c url("${pic.src}") center/cover`;return;}
+  if(pic){e.dataset.art='painting';e.style.background=`#221e1c url("${pic.src}") center/cover`;return;}
   e.style.background=`linear-gradient(${c[1]},${c[2]})`;
   e.innerHTML=`<div class="ttl">${c[0]}</div>`;
 }
@@ -135,6 +182,6 @@ export function suspendBondScene() {
 }
 export function hideCG() {
   if(currentScene)return drawBond();
-  const e=layer();if(e){e.className='';e.replaceChildren();e.style.background='';delete e.dataset.actor;delete e.dataset.place;}
+  const e=layer();if(e){e.className='';e.replaceChildren();e.style.background='';delete e.dataset.actor;delete e.dataset.place;delete e.dataset.phase;delete e.dataset.art;}
 }
 G.hideCG=hideCG;

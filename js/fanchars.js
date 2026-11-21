@@ -135,14 +135,14 @@ export const teachOf = (fac, rl) => { const ids = G.arts?.ID?.[fac] || []; const
 async function teach(k, fac, rl, name) {
   const S = G.S, f = S.flags; if (f['fanwin_' + k]) return; f['fanwin_' + k] = 1;
   const me = playerRealm(); gain(rl > me ? 2 : 1, `${name}에게 이겼다`);
-  if (rl < me) return; const id = teachOf(fac, rl); if (!id) return;
+  if (rl < me) return; const id = personalTeaching(k, fac, rl); if (!id) return;
   await say('fan_' + k, `한 수 가르쳐 드리지요. ${SKILLS[id].name}. 잘 쓰시오.`); learn(id);
 }
 async function talk(k, direct = false) {
   const [, name, , native, title] = BY[k], fac = native || (k==='maengso'?'nokrim':'hwasan'), who = 'fan_' + k, T = TALK[k] || {};
   if (!direct) await say(who, line(k, [...BY[k][6], ...(T.l || [])]), k === 'cheongmyeong' ? 'h' : 'n');
   if (!fac || !G.jh?.disciple || !G.free?.fac) return;
-  const rl0 = fanRealm(k, title), tid = !G.S.flags['fanwin_' + k] && rl0 >= playerRealm() ? teachOf(fac, rl0) : null;  // 이기면 무엇을 얻는지 미리 보인다
+  const rl0 = fanRealm(k, title), tid = !G.S.flags['fanwin_' + k] && rl0 >= playerRealm() ? personalTeaching(k, fac, rl0) : null;  // 이기면 무엇을 얻는지 미리 보인다
   const c = direct ? 0 : await choice(`${name} · ${title} · ${RNAME[rl0]}${tid ? ` · 이기면 ${SKILLS[tid].name} 전수` : G.S.flags['fanwin_' + k] ? ' · 이긴 적 있음' : ''}`, ['비무를 청한다', '그냥 간다']); if (c) return;
   if (T.no && !direct) return say(who, pick(T.no));
   // 문파의 초식과 인물 고유의 경지를 함께 쓴다.
@@ -159,16 +159,31 @@ Story.providers.push(function fanchars(id) {
   const npcs = here.map((r, i) => G.S.married!==r[0] && S[i] && { id: r[0], spr: r[5] ? 'Woman' : 'Samurai', x: S[i][0], y: S[i][1], dir: 0, hint: `${r[1]} · ${r[4]}`, talk: () => talk(r[0]) }).filter(Boolean);
   return { npcs, spots: [], trigs: [], roam: [] };
 });
-function personalArms(k,fac,realm) {
-  if (k==='cheongmyeong') return {moves:['quick','x_hwasan6','x_hwasan7','x_hwasan8','x_hwasan4','x_hwasan5']};
-  if (k==='baekcheon') return {moves:['double','x_hwasan6','x_hwasan3','x_hwasan4']};
-  if (k==='yuseol') return {moves:['lunge','x_hwasan6','x_hwasan7','x_hwasan8','x_hwasan4']};
-  if (k==='jogeol') return {moves:['quick','lunge','x_hwasan7','x_hwasan2']};
-  if (k==='yunjong') return {moves:['double','x_hwasan6','x_hwasan1','x_hwasan2']};
-  if (k==='dangsoso') return {moves:['quick','x_hwasan6','x_hwasan1','x_hwasan7']};
-  if (k==='maengso') return {wpn:null,moves:['iron_fist','chain_kick','earth_stomp','quake']};
-  if (k==='dangbo') return {wpn:null,moves:['dart3','fan5','blink','x_dang4','x_dang3']};
-  return {moves:['slash',...G.arts.trainingMoves(fac,realm)]};
+// 같은 문파에서도 각 인물이 즐겨 쓰는 수와 연계 순서는 다르다.
+const personalMoves = {
+  cheongmyeong:['quick',6,7,8,4,5], baekcheon:['double',6,3,4], yuseol:['lunge',6,7,8,4],
+  yunjong:['double',6,1,2], jogeol:['quick','lunge',7,2], dangsoso:['quick',6,1,7,'x_yunui3'],
+  hyeonjong:[6,3,'fall_flower',4], hyeonyeong:['quick',6,2,3], hyeonsang:['heavy',6,1,4],
+  ungeom:['lunge',6,8,4], unam:['double',6,2], ungak:['heavy',6,3,1], baeksang:['quick',6,1],
+  jingeumryong:['lunge',1,2,3,4], isongbaek:['lunge',1,'zhongnan',2],
+  jongseohan:['double',2,3,4], gohwi:['quick',1,2], gimokseung:['heavy',3,4], samaseung:['lunge',1,3,4],
+  heodo:['double',1,4,5], heowon:['lunge',1,3,5], heosan:['quick',1,2,4], muyeon:[2,1,'taiji',3],
+  mujin:['double',1,3,'taiji'], jinhyeon:['lunge',1,2,3], jinmu:['quick',1,2],
+  danggunak:['dart3',1,2,4,3], dangbo:['dart3','fan5','blink',4,3], dangho:['quick',2,'dart3',4],
+  danghwa:['dart3',1,2], dangjan:['dart3','blink',1,4], dangpae:['dart3',1,2,4],
+  hongdaegwang:['spin',1,3,4,5], guchil:['punch',1,2], jongpal:['heavy',2,4],
+  wiripsan:['double',6,1,2], wisoheng:['lunge',6,1], yeompyeong:['quick',6,2],
+  maengso:['iron_fist','chain_kick','earth_stomp','quake'],
+};
+function personalArms(k,fac) {
+  const moves=personalMoves[k].map(m=>typeof m==='number'?'x_'+fac+m:m);
+  return {school:fac,moves};
+}
+function personalTeaching(k,fac,realm) {
+  const maxTier=realm>=4?3:realm>=3?2:1;
+  return personalArms(k,fac).moves.filter(id=>SKILLS[id] && !SKILLS[id].ult &&
+    (SKILLS[id].tier || 1)<=maxTier && !G.S.skills.includes(id))
+    .sort((a,b)=>(SKILLS[b].tier || 1)-(SKILLS[a].tier || 1))[0] || null;
 }
 G.fan = { P, spots, spar:k=>talk(k,true), accepts:k=>!TALK[k]?.no,
   chat:k=>line(k,[...BY[k][6],...(TALK[k]?.l||[])]),

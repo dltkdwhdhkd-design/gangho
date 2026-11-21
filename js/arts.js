@@ -21,7 +21,7 @@ const ARCH = {
   dash: t => ({ mp: 9 + t * 4, cd: 3.5 + t * 1.5, dur: .44, steps: [{ t: 0, sfx: 'sword2', move: { d: 64 + t * 8, dur: .13, iframe: true, ghost: true } }, { t: .13, hit: lineH(70 + t * 8, 14, 2.05 * pw(t), { back: 66 + t * 8 }), fx: { n: 'cut', s: 1.5, along: 1 } }] }),
   spin: t => ({ mp: 11 + t * 3, cd: 5 + t * 1.3, dur: .5, steps: [{ t: .13, sfx: 'sword2', hit: ring(36, 2 * pw(t), { kb: 62 }), fx: { n: 'circle', s: 1.6, at: 'self' } }] }),
   wave: t => ({ mp: 8 + t * 3.5, cd: 3 + t * 1.3, dur: .36, steps: [{ t: .13, sfx: 'magic1', proj: { img: t === 3 ? 'p_bigenergy' : 'p_energy', speed: 200, mul: 1.55 * pw(t), life: .95, r: t === 3 ? 10 : 7, pierce: true, stun: .3 } }] }),
-  fan: t => ({ mp: 8 + t * 3, cd: 3.5 + t * 1.2, dur: .36, steps: [{ t: .12, sfx: 'magic1', proj: { img: 'p_energy', speed: 200, mul: .85 * pw(t), life: .7, n: t === 3 ? 5 : 3, spread: 15, r: 6, stun: .2 } }] }),
+  fan: t => ({ mp: 8 + t * 3, cd: 3.5 + t * 1.2, dur: .36, steps: [{ t: .12, sfx: 'magic1', proj: { img: 'p_energy', speed: 200, mul: 1.18 * pw(t), life: .7, n: t === 3 ? 5 : 3, spread: 15, r: 6, stun: .2 } }] }),
   dart: t => ({ mp: 6 + t * 2, cd: 2.5 + t, dur: .3, steps: [{ t: .1, sfx: 'sword', proj: { img: 'p_kunai', speed: 250, mul: 1.5 * pw(t), life: .9, r: 4, stun: .2 } }] }),
   palm: t => ({ mp: 8 + t * 3, cd: 3 + t * 1.3, dur: .42, steps: [{ t: .15, sfx: 'hit3', move: { d: 9, dur: .05 }, hit: arcH(30, 62, 2.35 * pw(t), { kb: 90, stun: .45 }), fx: { n: 'spark', s: 1.6, at: 'front', off: 16 } }] }),
   crush: t => ({ mp: 12 + t * 4, cd: 5 + t * 1.5, dur: .62, steps: [{ t: .02, armor: .4 }, { t: .3, sfx: 'boom2', move: { d: 10, dur: .05 }, hit: arcH(34, 70, 3.1 * pw(t), { kb: 110, stun: .6, ub: t === 3 }), fx: { n: 'spark', s: 2.2, at: 'front', off: 18 }, shake: 3 }] }),
@@ -34,7 +34,7 @@ const ARCH = {
   ult_line: () => ({ mp: 45, cd: 28, dur: .9, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .34, sfx: 'boom', hit: lineH(130, 40, 5.6, { kb: 120, stun: .8, ub: true }), fx: { n: 'cut', s: 3.4, along: 1 }, shake: 6 }] }),
   ult_arc: () => ({ mp: 45, cd: 28, dur: .9, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .36, sfx: 'boom', hit: arcH(76, 60, 5.8, { kb: 130, stun: .9, ub: true }), fx: { n: 'spark', s: 4, at: 'front', off: 34 }, shake: 6 }] }),
   ult_ring: () => ({ mp: 45, cd: 28, dur: .9, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .4, sfx: 'boom', hit: ring(62, 5.2, { kb: 90, stun: .9, ub: true }), fx: { n: 'thunder', s: 2.6, at: 'self' }, shake: 6 }] }),
-  ult_fan: () => ({ mp: 45, cd: 28, dur: .8, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .3, sfx: 'boom2', proj: { img: 'p_kunai', speed: 260, mul: 1.5, life: .8, n: 9, spread: 11, r: 5, stun: .3 }, shake: 4 }] }),
+  ult_fan: () => ({ mp: 45, cd: 28, dur: .8, o: { ult: true }, steps: [{ t: .02, ...ULT }, { t: .3, sfx: 'boom2', proj: { img: 'p_kunai', speed: 260, mul: 2.35, life: .8, n: 9, spread: 11, r: 5, stun: .3 }, shake: 4 }] }),
   ult_pull: () => ({ mp: 45, cd: 28, dur: .95, o: { ult: true }, steps: [{ t: .02, ...ULT, sfx: 'magic2', pull: { r: 110, f: 170 } }, { t: .42, sfx: 'boom', hit: ring(58, 5, { kb: 70, stun: .9, ub: true }), heal: { hp: .12, mp: .2 }, fx: { n: 'aurap', s: 2.6, at: 'self' }, shake: 5 }] }),
 };
 // 세력의 특색(ART_FX)을 초식에 입힌다: 뇌전(shock: 벼락이 가까운 적 하나로 튐), 독(dot), 한기·물살(slow), 흡기(drain), 금강(armor), 패도(kb), 점혈·진법(stun), 쾌검(fast)
@@ -47,7 +47,12 @@ function flavor(a, kind) {
   if (kind === 'armor' && !steps.some(q => q.armor)) steps.unshift({ t: .02, armor: .45 });
   return { ...a, steps, cd: kind === 'fast' ? a.cd * .82 : a.cd };
 }
-const make = (id, name, han, w, school, arch, t, desc, fac) => { let a = ARCH[arch](t); const fx = fac && ART_FX[fac]; if (fx) { a = flavor(a, fx[1]); desc = `${desc} · ${fx[0]}`; } SKILLS[id] = { id, name, han, w, school, arch, mp: Math.round(a.mp), cd: +a.cd.toFixed(1), desc, dur: a.dur, steps: a.steps, tier: t, fac, ...(a.o || {}) }; };
+const make = (id, name, han, w, school, arch, t, desc, fac) => { let a = ARCH[arch](t); if (w==='검' && ['fan','ult_fan','dart'].includes(arch)) {
+    for (const step of a.steps) if (step.proj) step.proj.img=fac==='hwasan'?'plum':'p_energy';
+  } else if (fac==='dang' && ['fan','ult_fan','dart'].includes(arch)) {
+    for (const step of a.steps) if (step.proj) step.proj.img='p_kunai';
+  }
+  const fx = fac && ART_FX[fac]; if (fx) { a = flavor(a, fx[1]); desc = `${desc} · ${fx[0]}`; } SKILLS[id] = { id, name, han, w, school, arch, mp: Math.round(a.mp), cd: +a.cd.toFixed(1), desc, dur: a.dur, steps: a.steps, tier: t, fac, ...(a.o || {}) }; };
 const nameOf = fid => fid === 'jabhak' ? '강호 잡학' : ART_NAMES[fid] || (FACS.find(f => f.id === fid) || {}).name || fid;
 export const ID = {}; // 세력 id → 초식 id 목록
 for (const fid in ARTS) { ID[fid] = ARTS[fid].map((a, i) => { const id = `x_${fid}${i + 1}`; make(id, a[0], a[1], a[2], nameOf(fid), a[3], a[4], a[5], fid); return id; }); }
@@ -56,10 +61,21 @@ for (const fid in ART_HEARTS) { const [name, , desc, fx] = ART_HEARTS[fid]; HEAR
 for (const r of RELIC_HEARTS) HEARTS[r.id] = { name: r.name, desc: `기연으로 얻은 심법. ${r.desc}.`, fx: r.fx };
 // 적이 쓰는 꼴. 예고가 길고 위력이 낮다
 function toMove(k) {
-  const useful = k.steps.some(q => q.hit || q.proj || q.zone); if (!useful) return null;
-  const sc = k.ult ? .42 : .55, steps = k.steps.map(q => { const r = { ...q, t: q.t + .36 }; delete r.cut; delete r.heal; if (q.hit) r.hit = { ...q.hit, mul: q.hit.mul * sc, ub: false }; if (q.proj) r.proj = { ...q.proj, mul: q.proj.mul * sc }; if (q.zone) r.zone = { ...q.zone, mul: q.zone.mul * sc, player: false }; if (q.blink) r.blink = { ...q.blink, enemy: true }; return r; });
-  const h = k.steps.find(q => q.hit)?.hit, range = k.teleToFoe ? 130 : k.steps.some(q => q.proj) ? 120 : k.steps.some(q => q.blink) ? 130 : k.steps.some(q => q.zone) ? 60 : h ? (h.len || h.r || 30) + (k.steps[0].move?.d || 0) * .6 : 40;
-  return { range, arch:k.arch, w:k.w, dur: k.dur + .4, steps, teleToFoe: k.teleToFoe, noTele: k.steps.some(q => q.blink), name: k.name };
+  const healing = k.steps.some(q=>q.heal) && !k.steps.some(q=>q.hit || q.proj || q.zone);
+  if (!k.steps.some(q=>q.hit || q.proj || q.zone || q.heal || q.counter || q.buff)) return null;
+  const steps = k.steps.map(q=>{
+    const r={...q, t:q.t+.36};
+    delete r.cut;
+    if (q.zone) r.zone={...q.zone,player:false};
+    if (q.blink) r.blink={...q.blink,enemy:true};
+    if (q.heal) r.heal={...q.heal,hp:Math.min(.08,q.heal.hp || 0),mp:q.heal.mp || 0};
+    return r;
+  });
+  const h=k.steps.find(q=>q.hit)?.hit;
+  const range = healing ? Infinity : k.teleToFoe || k.steps.some(q=>q.blink) ? 130 :
+    k.steps.some(q=>q.proj) ? 120 : k.steps.some(q=>q.zone) ? 60 :
+    h ? (h.len || h.r || 30)+(k.steps[0].move?.d || 0)*.6 : 40;
+  return {...k, steps, range, healing, dur:k.dur+.4, noTele:k.steps.some(q=>q.blink)};
 }
 for (const k in SKILLS) if (k.startsWith('x_') && !MOVES[k]) { const m = toMove(SKILLS[k]); if (m) MOVES[k] = { ...m, id: k, fromSkill: true, cd: SKILLS[k].cd }; }
 export const usable = fid => (ID[fid] || []).filter(k => MOVES[k]);
