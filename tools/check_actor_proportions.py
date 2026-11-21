@@ -6,6 +6,18 @@ from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 FIELD=ROOT/'assets/hd2d/field'
 read=lambda p:json.loads(p.read_text(encoding='utf8'))
+def check_cheong_gaze(sheet, row, cell):
+    # Pupil and adjacent sclera at the native walking resolution for each facing.
+    samples = [(0, 51, 1), (0, 59, -1), (2, 50, -1), (3, 60, 1)]
+    for phase, eye_y in enumerate((42, 42, 40, 42)):
+        y = (4 * row + phase) * cell + eye_y
+        for direction, eye_x, inward in samples:
+            x = direction * cell + eye_x
+            iris = sheet.getpixel((x, y))
+            sclera = sheet.getpixel((x + inward, y))
+            assert min(sclera[:3]) - max(iris[:3]) > 74, (direction, phase, 'gaze contrast')
+            assert iris[0] - iris[1] < 48 and max(iris[:3]) < 127, (direction, phase, 'iris')
+
 def main():
     people=read(ROOT/'tools/field_people.json')
     walking=read(FIELD/'walk.json')
@@ -21,6 +33,8 @@ def main():
             assert cell==112 and im.height==len(entries)*4*cell
             for row,key in entries:
                 head=people_by_id[key][11];statures.add(head*3)
+                if key == 'cheongmyeong':
+                    check_cheong_gaze(im, row, cell)
                 for d in range(4):
                     poses=set()
                     for j in range(4):
