@@ -141,18 +141,19 @@ function drawBond() {
   crop.className = approved ? 'bond-paint single' : 'bond-paint';
   const img = new Image();
   img.alt = ''; img.decoding='async';
-  img.onload = () => {
-    if (crop.parentElement !== e) return;
-    e.dataset.art = approved?'painting':'atlas';
-    e.querySelectorAll('.bond-actor').forEach(actor=>actor.remove());
-  };
+  crop.hidden=true;
   if (!approved) {
     img.style.left=frame%2?'-100%':'0';
     img.style.top=frame>=2?'-100%':'0';
   }
-  img.onerror=()=>crop.remove();
   crop.append(img); e.append(crop);
   img.src=approved?approved.src:'assets/art/bonds/'+id+(story?'':'_courtship')+'.webp';
+  img.decode().then(()=>{
+    if (crop.parentElement!==e) return;
+    // 배경과 인물 초상 위에 완전히 디코딩한 원화를 한 프레임에 얹는다.
+    crop.hidden=false;
+    e.dataset.art=approved?'painting':'atlas';
+  }).catch(()=>crop.remove());
 }
 export async function withBondScene(id,phase,run,explicitPlace,variant=0) {
   const old=currentScene;
