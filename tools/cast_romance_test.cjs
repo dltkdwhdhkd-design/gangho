@@ -40,6 +40,14 @@ async function inspectRomance() {
       return Number.isInteger(phase) && layer.dataset.art==='painting' &&
         url.includes('cg_bond_'+id) && await decode(url);
     }
+    const cover=painting.parentElement;
+    if (cover.hidden) {
+      const fallback=layer.querySelector('img.bond-actor');
+      check(fallback && await decode(fallback.src),id+' 원화 로딩 중 인물');
+    }
+    try {await painting.decode();} catch {return false;}
+    await Promise.resolve();
+    check(!cover.hidden && ['painting','atlas'].includes(layer.dataset.art),id+' 원화 표시');
     if(!await decode(painting.src))return false;
     if(/\/bonds\//.test(painting.src)) {
       if(typeof phase==='number'){
