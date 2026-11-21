@@ -4,7 +4,7 @@
 
 이름 없는 적의 나머지 다섯이다.
 
-**이 단계에서 만들 것: 5개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -24,55 +24,25 @@
 
 ## 만들 것
 
-### 1. `mob_jeong-c.png` — 정파 제자 — 키 `mob_jeong`
+### 1. `mob_jeong-c.png` — 정파 제자 — 키 `mob_jeong` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_jeong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_jeong-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+### 2. `mob_sa-c.png` — 사파 무사 — 키 `mob_sa` — **받음**
 
-무기와 몸짓: 곧은 검. 내지름은 반듯한 찌르기.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `mob_sa-c.png` — 사파 무사 — 키 `mob_sa`
+### 3. `mob_cult-c.png` — 마교도 — 키 `mob_cult` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_sa-src.png
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+### 4. `mob_soldier-c.png` — 관병 — 키 `mob_soldier` — **받음**
 
-무기와 몸짓: 허리에 찬 굽은 칼. 내지름은 비스듬히 올려 베기.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `mob_cult-c.png` — 마교도 — 키 `mob_cult`
+### 5. `mob_jiangshi-c.png` — 강시 — 키 `mob_jiangshi` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_cult-src.png
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 걷는 도트에 그려진 무기(없으면 손톱을 세운 두 손). 내지름은 두 팔을 벌려 덮치기.
-```
-
-### 4. `mob_soldier-c.png` — 관병 — 키 `mob_soldier`
-
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_soldier-src.png
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 창. 내지름은 두 손으로 곧게 찌르기.
-```
-
-### 5. `mob_jiangshi-c.png` — 강시 — 키 `mob_jiangshi`
-
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_jiangshi-src.png
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 무기 없음. 두 팔을 앞으로 뻗은 채 뛴다. 내지름은 두 손으로 할퀴기, 경공은 두 발을 모아 뛰어오른 자세.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 

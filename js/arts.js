@@ -1,3 +1,6 @@
+import { factionOptions, tutorSpeaker } from './faction-talk.js';
+import { standing } from './martial-standing.js';
+import { NAME as realmNames } from './realm.js';
 // 무공을 얻는 길: 사사, 대련과 견식, 잔권 해독, 기연, 책방
 import { G, Sound, toast, josa, esc, pick, rnd } from './core.js';
 import { ctx, say, narr, choice } from './ctx.js';
@@ -60,6 +63,11 @@ function toMove(k) {
 }
 for (const k in SKILLS) if (k.startsWith('x_') && !MOVES[k]) { const m = toMove(SKILLS[k]); if (m) MOVES[k] = { ...m, id: k, fromSkill: true, cd: SKILLS[k].cd }; }
 export const usable = fid => (ID[fid] || []).filter(k => MOVES[k]);
+export function trainingMoves(fid, realm) {
+  const tier = realm >= 4 ? 3 : realm >= 2 ? 2 : 1;
+  const learned = usable(fid).filter(k => SKILLS[k].tier <= tier && (realm >= 5 || !SKILLS[k].ult));
+  return learned.slice(0, realm >= 5 ? learned.length : realm + 1);
+}
 
 // ── 견식: 튕겨낸 초식은 몸이 기억한다 ──
 const needSee = () => Math.max(4, 9 - Math.floor(S().inn / 10));
@@ -93,13 +101,14 @@ async function teachList(f) {
   if (!opts.length) { await say(null, '가르칠 것은 다 가르쳤다고 한다.'); return; }
   opts.push(['그만둔다', async () => { }]); const c = await choice(`무엇을 배울까? (우호 ${rep})`, opts.map(o => o[0])); await opts[c][1]();
 }
-export async function tutor(f) {
+export async function tutor(f, role = '사범', speakerName = role) {
   const s = S(), jh = G.jh; if (jh.hostile(f.id)) { await say(null, '사범이 칼자루에 손을 얹었다. 얘기할 사이가 아니다.'); return; }
   const opts = [['가르침을 청한다', () => teachList(f)]];
-  if (!s.daily['spar_' + f.id]) opts.push(['대련을 청한다', async () => { s.daily['spar_' + f.id] = 1; const won = await ctx.duel({ foes: [jh.disciple(f, s.lv, true)], arena: G.field.m.arena, bgm: 'fight', title: `${f.name} 대련`, optional: true, noIntro: true, spar: true }); if (won) { jh.addRep(f.id, 2); await say(null, '좋은 칼이라고 했다. 다음에 또 오라고 한다.'); drop(f.id, .35); } else await say(null, '사범이 손을 내밀어 일으켜 주었다.'); }]);
+  if (!s.daily['spar_' + f.id]) opts.push(['대련을 청한다', async () => { s.daily['spar_' + f.id] = 1; const won = await ctx.duel({ foes: [jh.disciple(f, s.lv, role)], arena: G.field.m.arena, bgm: 'fight', title: `${f.name} 대련`, optional: true, noIntro: true, spar: true }); if (won) { jh.addRep(f.id, 2); await say(null, '좋은 칼이라고 했다. 다음에 또 오라고 한다.'); drop(f.id, .35); } else await say(null, '사범이 손을 내밀어 일으켜 주었다.'); }]);
   if (!s.daily['alms_' + f.id]) opts.push(['헌금한다 (은자 50냥)', async () => { if (s.silver < 50) { await say(null, '은자가 모자란다.'); return; } s.silver -= 50; s.daily['alms_' + f.id] = 1; jh.addRep(f.id, 3); Sound.sfx('coin'); await say(null, '장부에 이름을 적어 주었다.'); }]);
-  opts.push(['이곳에 대해 묻는다', async () => { await narr(f.desc); }], ['그만둔다', async () => { }]);
-  const c = await choice(`${f.name} 사범 · 우호 ${jh.rep(f.id)}`, opts.map(o => o[0])); await opts[c][1]();
+  const who=tutorSpeaker(f,speakerName,role==='장로');
+  opts.push(...factionOptions(f,who), ['그만둔다', async () => { }]);
+  const c = await choice(`${f.name} ${speakerName} · ${realmNames[standing(f,role).realm]} · 우호 ${jh.rep(f.id)}`, opts.map(o => o[0]),who); await opts[c][1]();
 }
 // 서고: 우호가 쌓이면 그 세력 잔권을 빌려 베낄 수 있다
 async function library(f) {
@@ -134,4 +143,4 @@ function codex(B) {
   B.querySelectorAll('details').forEach(d => d.ontoggle = () => { if (d.open) B._open = d.dataset.f; });
   B.querySelectorAll('[data-dec]').forEach(b => b.onclick = () => { const k = b.dataset.dec; G.closeMenu && G.closeMenu(); G.field.run(() => decode(k)); });
 }
-G.arts = { library, parried, drop, tutor, bookshop, codex, relics: ALL_RELICS, relic, addScrap, usable, rumor, ID };
+G.arts = { library, parried, drop, tutor, bookshop, codex, relics: ALL_RELICS, relic, addScrap, usable, trainingMoves, rumor, ID };

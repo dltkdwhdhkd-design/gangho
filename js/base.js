@@ -1,3 +1,4 @@
+import { aboutFaction, factionOptions, standingLabel } from './faction-talk.js';
 // 문파 본거지와 도시. 처음 들어갈 때 만든다
 import { G, Sound, toast, josa, pick, ART } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
@@ -336,14 +337,14 @@ export async function storyFac(f) {
   await hiOnce(f); const s = G.S, opts = [];
   if (!s.daily['duel_' + f.id]) opts.push(['비무를 청한다', async () => {
     s.daily['duel_' + f.id] = 1;
-    const won = await ctx.duel({ foes: ['clan_' + f.id], arena: G.field.m.arena, bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .25, optional: true, noLoot: true });
+    const won = await ctx.duel({ spar: true, foes: ['clan_' + f.id], arena: G.field.m.arena, bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .25, optional: true, noLoot: true });
     if (!won) { await say(f.key, '다시 오시오.'); return; }
     s.flags['clan_' + f.id] = true; const g = f.gift.find(k => !s.skills.includes(k));
     if (g) { learn(g); await say(f.key, '가져가시오. 쓸 줄 아는 사람이 쓰는 게 낫소.'); } else if (f.heart && !s.hearts.includes(f.heart)) { s.hearts.push(f.heart); toast('심법을 익혔다', 3); }
     if (LOOT[f.id]) await G.life.lootPick(f.who, LOOT[f.id]);
   }]);
-  opts.push(['이곳에 대해 묻는다', async () => { await narr(f.desc); }], ['그만둔다', async () => { }]);
-  const c = await choice(f.name, opts.map(o => o[0])); await opts[c][1]();
+  opts.push(...factionOptions(f), ['그만둔다', async () => { }]);
+  const c = await choice(standingLabel(f), opts.map(o => o[0]), f.key); await opts[c][1]();
 }
 const AWAY = { 구파일방: '장문인께서는 구화성 구파 회관에 가 계십니다. 뵈러 오셨다면 그쪽으로 가십시오.', 오대세가: '가주님은 구화성 세가 거리에 나가 계십니다.', 사파: '어른은 여기 없어. 찾지 마.', 마교: '교주님을 뵐 자격이 아직 없습니다.' };
 // ── 이름 없는 사람들 ──
@@ -386,7 +387,7 @@ async function gateAsk(f, l, name, spr, art) {
   const reg = REG[f.id] || 'hap', c = await choice('무엇을 물을까?', ['이곳에 대해 묻는다', '요즘 소식을 묻는다', '그만둔다']); if (c === 2) return;
   if (c === 0) {
     const head = f.group === '세가' || f.group === '오대세가' ? '가주님' : f.align === 'jeong' ? '장문인' : '어른', main = FEAT[f.id]?.[0] || '본전', yard = FEAT[f.id]?.[1] || '연무장';
-    await npcSay(name, spr, { hap: `${f.name} 말씀입니까.`, hao: `${f.name} 말이오?`, ban: '여기?' }[reg], art); await narr(f.desc);
+    await npcSay(name, spr, { hap: `${f.name} 말씀입니까.`, hao: `${f.name} 말이오?`, ban: '여기?' }[reg], art); await npcSay(name, spr, aboutFaction(f), art);
     await npcSay(name, spr, { hap: `${head}의 거처는 맨 위 ${main}입니다. 비무를 청하시거나 일손을 보태시려면 ${yard}의 사범님을 찾으십시오.`, hao: `${head}은 맨 위 ${main}에 계시오. 비무든 일거리든 ${yard} 사범한테 말하시오.`, ban: `위에 ${main}. 일거리는 ${yard} 사범한테.` }[reg], art);
   } else { const n = hearsay(reg); await npcSay(name, spr, n ? pick(CTX[reg].news).replace('{n}', n) : { hap: '요즘은 조용합니다. 조용한 게 제일입니다.', hao: '요즘은 별일 없소.', ban: '없다.' }[reg], art); }
 }
@@ -436,8 +437,8 @@ function roomNpcs(id, out) {
   const T = TALK[f.id] || {}, room = T.room || CHAT[l.style], who = f.group === '세가' || f.group === '오대세가' ? '가솔' : '제자', fart = FACEART[f.id];
   if (kind === 'clinic') out.npcs.push({ id: 'heal', spr: 'OldMan', x: 4, y: 7, dir: 0, hint: '의원', talk: async () => { await say(null, `${l.name} 의원: 상처를 봐 드리겠습니다. 금창약도 채워 드리지요.`); G.S.potion = Math.max(G.S.potion, G.S.potionMax); Sound.sfx('heal', .6); } });
   if (kind === 'armory') out.npcs.push({ id: 'smith', spr: 'Caveman2', x: 4, y: 7.4, dir: 0, life: 'work', hint: '무기고지기', talk: () => armory(f) });
-  if (kind === 'elder') { out.npcs.push({ id: 'elder1', spr: 'OldMan', x: 5, y: 5, dir: 0, hint: elderName(l, 1), talk: () => G.arts.tutor(f) }, { id: 'elder2', spr: 'OldMan2', x: 14, y: 5, dir: 0, hint: elderName(l, 2), talk: async () => { await say(null, `${elderName(l, 2)}: 강호에서 ${f.name} 이름을 지키는 게 칼보다 어렵네. 우호가 쌓이면 가르칠 게 더 있을 걸세.`); } }); }
-  if (kind === 'lib') out.npcs.push({ id: 'elder3', spr: 'Sodi', x: 9, y: 8.4, dir: 0, hint: `${elderName(l, 3)} (서고지기)`, talk: async () => { await narr(f.desc); await G.arts.library(f); } });
+  if (kind === 'elder') { out.npcs.push({ id: 'elder1', spr: 'OldMan', x: 5, y: 5, dir: 0, hint: elderName(l, 1), talk: () => G.arts.tutor(f, '장로', elderName(l, 1)) }, { id: 'elder2', spr: 'OldMan2', x: 14, y: 5, dir: 0, hint: elderName(l, 2), talk: () => G.arts.tutor(f, '장로', elderName(l,2)) }); }
+  if (kind === 'lib') out.npcs.push({ id: 'elder3', spr: 'Sodi', x: 9, y: 8.4, dir: 0, hint: `${elderName(l, 3)} (서고지기)`, talk: async () => { await npcSay(elderName(l, 3), 'Sodi', aboutFaction(f), 'elder'); await G.arts.library(f); } });
   if (kind === 'dorm') out.npcs.push({ id: 'd1', spr: folk[0], x: 5, y: 5, dir: 3, hint: who, barks: () => G.S.flags.night ? SLEEPY : null, talk: async () => { await npcSay(`${f.name} ${who}`, folk[0], nextLine(id + 'd1', [...ctxLines(f, 'room'), ...room]), fart); } }, { id: 'd2', spr: folk[1 % folk.length], x: 12, y: 5, dir: 2, life: 'work', hint: who, talk: async () => { await npcSay(`${f.name} ${who}`, folk[1 % folk.length], nextLine(id + 'd2', [...room].reverse()), fart); } });
   if (kind === 'mess') out.npcs.push({ id: 'cook', spr: 'Villager4', x: 3, y: 3.6, dir: 0, life: 'work', hint: '밥 짓는 사람', barks: ['불 세다!', '간 봐야지.', '그릇 내와!'], talk: async () => { await npcSay('밥 짓는 사람', 'Villager4', nextLine(id + 'cook', ['밥때 되면 오시오. 지금은 물밖에 없소.', '손님 밥은 따로 안 짓소. 같이 먹고 싶으면 그릇 들고 줄 서시오.', '반찬 투정하는 사람은 다음 끼니를 굶기오. 여기 법이오.'])); } }, { id: 'd3', spr: folk[0], x: 13, y: 4, dir: 0, hint: who, talk: async () => { await npcSay(`${f.name} ${who}`, folk[0], nextLine(id + 'd3', [...ctxLines(f, 'room'), ...room]), fart); } });
 }
@@ -588,12 +589,21 @@ function ambient(id) {
   }
   return out;
 }
+function dressMembers(out, fac) {
+  if (!fac) return out;
+  for (const n of out.npcs) if (/^(?:gate[12]|drill\d+|work\d+|walk\d+|d[123]|tutor|keeper|elder[123])$/.test(n.id)) {
+    n.faction=fac;
+    n.uniform='uniform_'+fac;
+    n.position=n.id.startsWith('elder')?'장로':n.id==='tutor'?'사범':/^(gate|drill)/.test(n.id)?'내문 제자':'외문 제자';
+  }
+  return out;
+}
 function provider(id) {
   const out = { npcs: [], spots: [], trigs: [], roam: [] }, F = G.S?.flags; if (!F) return out;
-  if (id.startsWith('r_') || id.startsWith('h_')) { if (ROOMS[id]) { G.jh.ensure(); roomNpcs(id, out); } return out; }
+  if (id.startsWith('r_') || id.startsWith('h_')) { if (ROOMS[id]) { G.jh.ensure(); roomNpcs(id, out); dressMembers(out, ROOMS[id].owner.fac); } return out; }
   const l = LOCS.find(q => q.map === id); if (!l) return out;
   if (G.S.mode !== 'free' && !F.world_open && G.after && G.after('c1a')) F.world_open = true;
-  if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
+  if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', uniform:'uniform_'+hf.id, faction:hf.id, position:'사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
   G.jh.ensure(); const town = l.style === 'town', chat = CHAT[l.style] || CHAT.town, folk = town ? ['Villager', 'Woman', 'Greenman', 'Villager2', 'Villager4', 'OldWoman', 'Villager3'] : ST[l.style].folk, R = fold(id);
   if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: town ? 33 : 26, y: town ? 44.5 : 62, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
   if (town) {
@@ -618,7 +628,7 @@ function provider(id) {
   if (!night) for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) { const spr = folk[(r + c) % folk.length], k = r * 6 + c; out.npcs.push({ id: `drill${r}${c}`, spr, x: YARD.x + 3.5 + c * 4.6, y: YARD.y + 6 + r * 3.4, dir: 1, drill: 1, hint: name, barks: k % 4 ? null : SHOUT[reg], talk: async () => { const d = T.drill || chat; await npcSay(`수련하는 ${name}`, spr, nextLine(id + 'd' + k, d.slice(k % d.length).concat(d.slice(0, k % d.length))), fart); } }); }
   [[22.5, 48.75], [23.5, 16.75]].slice(0, night ? 1 : 2).forEach(([x, y], i) => { const spr = folk[(i + 2) % folk.length], w = T.work || chat; out.npcs.push({ id: `walk${i}`, spr, x, y, dir: 0, life: 'stroll', far: 22, speed: 20, hint: name, barks: () => night ? SLEEPY : T.bark, talk: async () => { await npcSay(`${f.name} ${name}`, spr, nextLine(id + 'k' + i, pool('work', rot(w, i + 1))), fart); } }); });
   out.npcs.push({ id: 'tutor', spr: folk[0], x: YARD.x + YARD.w / 2 + 1.5, y: YARD.y + 4, dir: 0, dir0: 0, life: night ? 'idle' : 'wander', r: 1.6, hint: '사범', barks: night ? null : COACH[reg], talk: () => G.arts.tutor(f) });
-  return out;
+  return dressMembers(out, f.id);
 }
 function init() {
   Story.providers.push(provider, ambient);

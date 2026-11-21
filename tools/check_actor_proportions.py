@@ -23,6 +23,7 @@ def main():
     walking=read(FIELD/'walk.json')
     layout=read(FIELD/'motions.json')
     people_by_id={p[0]:p for p in people}
+    for key,base in layout.get('wardrobes',{}).items(): people_by_id[key]=people_by_id[base]
     assert set(walking)==set(layout['hands'])==set(people_by_id)
     groups={}
     for key,(page,row) in walking.items():groups.setdefault(page,[]).append((row,key))
@@ -63,12 +64,12 @@ def main():
                     actions+=1
     assert len(statures)>1
     names=set(read(ROOT/'assets/art/list.json'))
-    for key in walking:
+    for key,*_ in people:
         assert key+'_n' in names,key
         with Image.open(ROOT/'assets/art'/(key+'_n.webp')) as portrait:
             a=portrait.getchannel('A')
             assert portrait.size==(432,648) and a.getextrema()==(0,255) and a.getpixel((0,0))==0,key
             assert sum(a.histogram()[155:])>portrait.width*portrait.height*.15,(key,'missing portrait ink')
-    print(f'{len(people)} people, {walks} walking frames, {actions} combat frames, designed heights {sorted(statures)}')
+    print(f'{len(people)} people, {len(layout.get("wardrobes", {}))} faction uniforms, {walks} walking frames, {actions} combat frames, designed heights {sorted(statures)}')
 if __name__=='__main__':main()
 

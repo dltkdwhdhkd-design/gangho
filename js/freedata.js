@@ -8,7 +8,7 @@ export const RANKS = {
   개방: ['일결 제자', '삼결 제자', '오결 제자', '칠결 장로', '방주'],
 };
 export const RANK_MERIT = [0, 120, 350, 800, 1600];
-export const RANK_LV = [1, 8, 16, 26, 34];
+export const RANK_LV = [1, 8, 17, 29, 35];
 // 사파와 마교, 창운문. 구파일방과 오대세가는 clandata의 CLANS를 함께 쓴다
 export const EXTRA = [
   { id: 'changun', group: '신흥', align: 'jeong', name: '창운문', who: '고진', key: 'go', spr: 'Inspector', tier: 1, wpn: 'Sword', moves: ['double', 'cloud_flash', 'swallow_qi', 'wind_turn'], gift: ['cloud_flash', 'flow_three', 'swallow_qi', 'wind_turn'], heart: 'tonap', at: ['cloudmt', 22.5, 19], desc: '구파일방 바로 아래 자리를 넘보는 신흥 문파. 외문 출신도 실력만 있으면 위로 올라간다.' },
@@ -31,7 +31,7 @@ export const TRIALS = {
   jeomchang: { lines: [['clan_jeomchang', '셋.'], ['me', '셋이요?'], ['clan_jeomchang', '서쪽 고개. 쾌검 쓰는 놈들. 내 이름을 팔고 있다.']], kind: 'rogue', end: '돌아와서 끝났다고 했더니 섭일은 고개만 한 번 끄덕였다. 그날 저녁 내 방 앞에 짧은 검 한 자루가 놓여 있었다.' },
   cheongseong: { lines: [['clan_cheongseong', '차 한잔 하시오. 찻잎 싣고 오던 수레가 털렸소.'], ['clan_cheongseong', '찻잎은 찾아 주시오. 도둑은 차 한잔 먹이고 보내도 좋소.']], kind: 'bandit', end: '찻잎을 찾아왔다. 진다명은 잎 한 장을 씹어 보더니 비를 맞았다며 한숨을 쉬었다.' },
   gaebang: { lines: [['clan_gaebang', '거지 깃발 들고 관아에 뒷돈 받는 놈이 있다. 우리 쪽 사람이야.'], ['clan_gaebang', '밥은 먹여서 내쫓아라. 그게 개방 법이다.']], kind: 'rogue', end: '그 사람 앞에 국밥 한 그릇을 놓고 타구봉을 받아 왔다. 홍두 장로는 호리병만 흔들고 아무 말도 안 했다.' },
-  namgung: { lines: [['clan_namgung', '남궁세가 이름으로 빚을 놓고 다니는 놈이 있다.'], ['clan_namgung', '찾아서 문서를 불태워라. 내 이름으로 하는 일이다. 대충 하지 마라.']], kind: 'rogue', end: '문서를 태우는데 빚진 사람들이 멀리서 보고 있었다. 남궁진은 그 얘기를 듣고 잘했다는 말 없이 검을 한 번 더 휘둘렀다.' },
+  namgung: { lines: [['clan_namgung', '남궁세가 이름으로 빚을 놓고 다니는 놈이 있다.'], ['clan_namgung', '찾아서 문서를 불태워라. 내 이름으로 하는 일이다. 대충 하지 마라.']], kind: 'rogue', end: '문서를 태우는데 빚진 사람들이 멀리서 보고 있었다. 남궁선은 그 얘기를 듣고 잘했다는 말 없이 검을 한 번 더 휘둘렀다.' },
   moyong: { lines: [['clan_moyong', '모용가에서 받은 것을 돌려주지 않는 사람이 있소.'], ['clan_moyong', '가서 돌려받으시오. 칼로 받았으면 칼로, 말로 받았으면 말로.']], kind: 'guard', end: '칼로 돌려받았다. 모용설은 장부 같은 것을 펴더니 한 줄을 지웠다.' },
   jegal: { lines: [['clan_jegal', '계산이 맞지 않는 곳이 하나 있습니다. 세가 창고의 쌀이 일곱 섬 빕니다.'], ['clan_jegal', '범인은 셋 중 하나입니다. 다 잡아 오시면 계산이 빠릅니다.']], kind: 'bandit', end: '셋 다 잡아 왔더니 제갈현이 부채로 한 사람을 가리켰다. 처음부터 알고 있었던 것 같았다.' },
   dang: { lines: [['clan_dang', '독고에서 약 하나가 없어졌어요. 그걸 사람한테 쓰면 곤란해요.'], ['clan_dang', '훔쳐 간 놈이 입에 대기 전에 찾아요. 대고 나면 찾을 필요도 없고요.']], kind: 'rogue', end: '약병은 입도 안 뗀 채로 돌아왔다. 당소연은 병을 흔들어 보더니 아까워하는 얼굴을 했다.' },

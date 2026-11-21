@@ -1,6 +1,6 @@
 import { paintApproaches } from './hd2d/court-paths.js';
 // 지도. 타일 단위로 길과 물을 깔고 소품을 얹는다.
-import { G, TS, rint, pick, IMG } from './core.js';
+import { G, TS, rint, pick, IMG, ISO_ON } from './core.js';
 import { FURN, HOUSES } from './items.js';
 const DOORED = ['hall', 'lodge', 'house_red', 'inn', 'hut_o', 'hut_b', 'hut_o2', 'shop_blue', 'shop_green', 'clay', 'wood_o', 'wood_b', 'mud', 'straw'];  // base.js autoDoors와 같은 목록
 import { STAMPS, drawStamp, paintGround, paintRoom, curbs, mottle } from './tiles.js';
@@ -242,7 +242,7 @@ export function paintPave(c, p) {
   c.restore(); c.beginPath(); P.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.closePath(); c.strokeStyle = '#3a3638'; c.lineWidth = 1; c.stroke();
 }
 G.mapK = id => MAPS[id]?.k || 1;
-export const isoMode = () => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } };
+export const isoMode = () => ISO_ON;
 // 내 집은 가구가 바뀔 때마다 다시 만든다
 export function buildHouse(S) {
   const h = HOUSES[S.house.lv], m = new MapDef('myhouse', h.w, h.h, { name: h.name, bgm: 'peaceful', room: true, arena: 'yard' });

@@ -4,7 +4,7 @@
 
 『화산귀환』 인물(팬 캐릭터)은 걷는 도트는 있는데 대화 일러스트가 없어서, 말할 때 다른 사람의 얼굴이 나온다. 이미 있는 도트를 보고 그 사람의 일러스트를 그린다.
 
-**이 단계에서 만들 것: 6개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -22,65 +22,29 @@
 
 ## 만들 것
 
-### 1. `heodo_n.png` — 허도진인 (무당파 장문인) — 키 `heodo`
+### 1. `heodo_n.png` — 허도진인 (무당파 장문인) — 키 `heodo` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/heodo-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/heodo-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 2. `heowon_n.png` — 허원 (무당파 장로) — 키 `heowon` — **받음**
 
-인물: 허도진인, 무당파 장문인, 남자. 신선 같은 무당 장문인, 긴 흰 수염, 불진. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `heowon_n.png` — 허원 (무당파 장로) — 키 `heowon`
+### 3. `heosan_n.png` — 허산 (무당파 장로) — 키 `heosan` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/heowon-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/heowon-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 4. `muyeon_n.png` — 무연 (무당파 제자) — 키 `muyeon` — **받음**
 
-인물: 허원, 무당파 장로, 남자. 과묵한 무당 장로. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `heosan_n.png` — 허산 (무당파 장로) — 키 `heosan`
+### 5. `mujin_n.png` — 무진 (무당파 제자) — 키 `mujin` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/heosan-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/heosan-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 6. `jinhyeon_n.png` — 진현 (무당파 제자) — 키 `jinhyeon` — **받음**
 
-인물: 허산, 무당파 장로, 남자. 차를 즐기는 온화한 무당 장로. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 4. `muyeon_n.png` — 무연 (무당파 제자) — 키 `muyeon`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/muyeon-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/muyeon-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 무연, 무당파 제자, 남자. 긴장한 무당 제자. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 5. `mujin_n.png` — 무진 (무당파 제자) — 키 `mujin`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mujin-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mujin-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 무진, 무당파 제자, 남자. 성실한 무당 제자. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 6. `jinhyeon_n.png` — 진현 (무당파 제자) — 키 `jinhyeon`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jinhyeon-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jinhyeon-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 진현, 무당파 제자, 남자. 조용하고 차분한 무당 제자. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 

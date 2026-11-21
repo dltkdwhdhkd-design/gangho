@@ -8,10 +8,10 @@ import { set, at, after } from './story1.js';
 import { toGuhwa } from './story2.js';
 
 const F = () => G.S.flags;
-Object.assign(WHO, { dangsang: WHO.dangsang || { name: '떠돌이 약상', face: 'Villager3' }, ng_young: { name: '남궁진', face: 'Namgung', art: 'clan_namgung' } });
+Object.assign(WHO, { dangsang: WHO.dangsang || { name: '떠돌이 약상', face: 'Villager3' }, ng_young: { name: '남궁선', face: 'Namgung', art: 'clan_namgung' } });
 // 길 위 싸움은 경험치를 덜 줘서(.4) 구화성 대회 난이도가 그대로 가게 한다. 세가 사람들과의 비무는 대회 전 몸풀기라 소연하 밤 비무 정도로 맞춘다(문파 도전용 clan_* 는 너무 세다)
 const spar = (k, name) => ({ ...FOES['clan_' + k], name, hp: 1500, atk: 25, def: 8, boss: 0, poise: 60, phases: undefined, tier: undefined });
-Object.assign(FOES, { r3_hongdu: spar('gaebang', '홍두 장로'), r3_namgung: spar('namgung', '남궁진'), r3_moyong: spar('moyong', '모용설') });
+Object.assign(FOES, { r3_hongdu: spar('gaebang', '홍두 장로'), r3_namgung: spar('namgung', '남궁선'), r3_moyong: spar('moyong', '모용설') });
 
 const CITY = {
   kaifeng: { map: 'c_kaifeng', name: '개봉', go: '황하를 따라 개봉으로 (개방)' },
@@ -104,10 +104,10 @@ async function nanjing() {
   await say('ng_young', '숙부님, 또 길에서 혼처를 줍고 계십니까.', 'a');
   await narr('대문에서 나온 사내가 나를 위아래로 훑었다. 허리에 찬 검집이 은으로 감겨 있었다.');
   await say('ng_young', '그대가 이 아가씨 일행이오? 숙부님이 저러시면 말로는 안 끝나오. 내가 그대한테 지면 숙부님도 단념하실 거요.');
-  const c = await choice('남궁진이 검을 반쯤 뽑는다. 윤설이 내 소매를 잡았다.', ['윤설은 내 일행이라고 말한다', '혼담은 본인한테 물어보라고 한다']);
+  const c = await choice('남궁선이 검을 반쯤 뽑는다. 윤설이 내 소매를 잡았다.', ['윤설은 내 일행이라고 말한다', '혼담은 본인한테 물어보라고 한다']);
   if (c === 0) { await say('me', '이 사람은 제 일행입니다. 데려가려면 저부터 넘으세요.'); await say('yun', '……누가 데려간대요.', 's'); ctx.love('yun'); }
   else { await say('me', '혼담은 본인한테 물어보세요. 저한테 칼 뽑지 말고요.'); await say('yun', '안 해요! 안 한다고요!', 'a'); await say('ng_young', '들었소? 그러니 그대가 져 주면 일이 쉬운데.', 'h'); }
-  await ctx.duel({ foes: ['r3_namgung'], arena: G.field.m.arena, bgm: 'fight', title: '남궁세가 · 남궁진', yieldAt: .35, optional: true, noIntro: true, expMul: .4 });
+  await ctx.duel({ foes: ['r3_namgung'], arena: G.field.m.arena, bgm: 'fight', title: '남궁세가 · 남궁선', yieldAt: .35, optional: true, noIntro: true, expMul: .4 });
   await say('ng_young', '하하, 졌소. 숙부님, 들으셨지요? 이 혼담은 없던 걸로 합시다.');
   await say('ng_elder', '네 녀석이 지고도 웃는 건 처음 보는구나.');
   await say('ng_young', '구화성에서 다시 붙읍시다. 그땐 혼담 걸지 말고 이름만 걸고.', 'h');

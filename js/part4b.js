@@ -105,7 +105,7 @@ async function wuchang() {
     F().jg_boats = 'people';
     await say('ng_elder', '역적이 정천맹 전리품을 마음대로 나눈다? 무사들, 저자를 물려라.');
     await say('clan_namgung', '저는 안 뽑습니다, 숙부님. 흑도맹 쫓아낸 사람한테 칼 뽑는 건 남궁 검이 할 일이 아닙니다.', 'a');
-    await narr('남궁진이 검을 칼집째 땅에 꽂고 물러섰다. 남궁 무사들은 서로 눈치를 보다가 장로의 고함에 칼을 뽑았다.');
+    await narr('남궁선이 검을 칼집째 땅에 꽂고 물러섰다. 남궁 무사들은 서로 눈치를 보다가 장로의 고함에 칼을 뽑았다.');
     await ctx.duel({ foes: ['ng_guard', 'ng_guard', 'ng_guard'], allies: ['so_ally'], arena: 'dock', bgm: 'fight', title: '정파끼리 뽑은 칼', noLoot: true });
     await say('ng_elder', '…이 일은 맹에 보고하겠네.');
     await say('sailor', '배 돌려받았소! 자, 노약자부터 태워! 뱃삯은 안 받소!');

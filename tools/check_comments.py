@@ -27,7 +27,7 @@ for f in files:
         k = comment_of(line)
         if k <= 0 or not line[:k].strip(): continue        # 줄 전체가 주석이면 건너뜀(일부러 꺼 둔 코드)
         c = line[k + 2:].strip()
-        if CODE.search(c): hits.append((f, c[:140]))
+        if CODE.search(c): hits.append((f.replace(os.sep,'/'), c[:140]))
 ok = set(tuple(x) for x in json.load(open(BASE, encoding='utf8'))) if os.path.exists(BASE) else set()
 if '--ok' in sys.argv:
     json.dump(sorted(set(hits)), open(BASE, 'w', encoding='utf8'), ensure_ascii=False, indent=0); print(f'{len(set(hits))}줄을 괜찮음으로 적었다'); sys.exit(0)

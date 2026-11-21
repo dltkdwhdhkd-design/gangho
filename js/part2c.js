@@ -78,7 +78,7 @@ async function sparSo() {
   const n = cnt('so');
   if (n === 1) {
     await say('so', '또 왔어? 오늘은 물러서는 걸음 세 번. 그다음에 들어와.');
-    await ctx.duel({ foes: ['so_rival'], arena: 'court', bgm: 'fight', title: '소연하와 비무', yieldAt: .55, optional: true, noIntro: true });
+    await ctx.duel({ spar: true, foes: ['so_rival'], arena: 'court', bgm: 'fight', title: '소연하와 비무', yieldAt: .55, optional: true, noIntro: true });
     await say('so', '두 번은 물러섰네. 세 번째는 참지 못하고 들어왔고.', 'h');
     await say('me', '세 번째엔 빈틈이 보였어요.');
     await say('so', '그건 내가 일부러 보여 준 거야. 다음엔 그것도 참아.');

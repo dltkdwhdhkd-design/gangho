@@ -2,6 +2,7 @@
 import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast, qSheet, QZ } from './core.js';
 import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
+import { personRadius, resolveLanding } from './landing.js';
 import { drawIso, orderKeys, inside as isoInside } from './iso.js';
 import { proj, toGrid, toScreen, walkDir } from './isoroom.js';
 import { mark as occMark, covered, behind } from './occl.js';
@@ -24,17 +25,22 @@ const DIRV = [[0, 1], [0, -1], [-1, 0], [1, 0]];
 export const PSC = 1.45;  // 방 안 사람 크기 배수(새 화면 js/hd2d.js도 같은 값을 쓴다)
 export class Field {
   constructor() { this.p = { x: 0, y: 0, dir: 0, walk: 0 }; this.npcs = []; this.spots = []; this.trigs = []; this.roam = []; this.cam = { x: 0, y: 0 }; this.busy = false; this.parts = []; this.t = 0; this.trail = []; }
-  load(id, tx, ty, dir = 0) {
+  load(id, tx, ty, dir = 0, arrival) {
     if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
     if (id === 'mysect') G.sect.build();
     G.world.ensure(id);
-    const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir; if (m.k < 1) { [this.p.x, this.p.y] = m.freeNear(this.p.x, this.p.y); this.offPortal(m); }  // 좁힌 지도: 막힌 자리에 서면 가까운 빈 곳으로
-    // 넓힌 지도로 방에서 나오면 그 방 문 바로 앞에 선다
-    if (((m.k || 1) !== 1 || m.hasIso) && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
-    const hall=m.stamps?.find(s=>s.hallWidth&&this.p.x>=s.sol.x-3&&this.p.x<=s.sol.x+s.sol.w+3&&this.p.y>=s.sol.y-2&&this.p.y<=s.sol.y+s.sol.h+2);
-    if(hall && m.blocked(this.p.x,this.p.y)) [this.p.x,this.p.y]=m.freeNear(this.p.x,hall.sol.y+hall.sol.h+12);
+    const from=this.m;
+    this.trail=[];const m=MAPS[id];G.world?.linkEdges?.(m);this.m=m;
+    G.S.map=id;(G.S.seen||={})[id]=1;G.S.flags['seen_'+id]=1;this.arrows=[];
+    this.p.x=tx*TS*(m.k||1);this.p.y=ty*TS*(m.k||1);this.p.dir=dir;
+    const returning=from?.room && from!==m && arrival!=='saved';
+    const door=returning && m.portals.find(q=>q.door && q.to===from.id && q.y+q.h<m.h*TS-2 &&
+      (arrival==='portal'||Math.hypot(q.x+q.w/2-this.p.x,q.y+q.h-this.p.y)<40*(m.k||1)));
     if (id==='world' && G.hd?.active(m) && G.hd.opt.art) [this.p.x,this.p.y]=G.world.bridgeLanding(m,this.p.x,this.p.y,TS);
-    this.refresh(true); this.camera(1); this.showHud();
+    this.refresh(true);
+    this.peopleReady=G.hd?.preparePeople?.([...this.npcs,...this.roam]);
+    resolveLanding(this,door);
+    this.camera(1);this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
     this.parts = [];
     this.flashPlace();
@@ -79,8 +85,8 @@ export class Field {
     try { await fn(); } catch (e) { console.error(e); }
     this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.jh && G.scene === 'field') G.jh.storyTime(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x / (this.m.k || 1); G.S.py = this.p.y / (this.m.k || 1); G.S.dir = this.p.dir; save(); if(!G.mainPlot?.arrive())G.chronicle?.arrive();
   }
-  async warp(id, tx, ty, dir = 0) {
-    await fadeTo(1); this.load(id, tx, ty, dir); await wait(.08); await fadeTo(0);
+  async warp(id, tx, ty, dir = 0, arrival) {
+    await fadeTo(1); this.load(id, tx, ty, dir, arrival); await Promise.all([wait(.08),this.peopleReady]); await fadeTo(0);
   }
   update(dt) {
     this.t += dt; Input.tick(dt);
@@ -99,7 +105,13 @@ export class Field {
       if (m.isoRoom && !m.isoRoom.out && d.y > 0) { const H = m.h * TS, q = m.portals.find(q => q.y + q.h >= H - 2 && p.y > H - 4 * TS && Math.abs(q.x + q.w / 2 - p.x) < 4 * TS); if (q) gx = clamp((q.x + q.w / 2 - p.x) / 12, -1, 1) * Math.max(.6, gy); }  // 문 가까이서 아래로 가면 문으로 끌어 준다
       const surface=!m.room&&!m.hgt&&landscapeOf(m),pace=terrainPace(surface,m,p.x,p.y,gx,gy,TS);
       const distance=sp*dt*pace,steps=surface?Math.max(1,Math.ceil(distance/5)):1;
-      const nr = m.isoRoom ? Math.min(13, 7 / (m.isoRoom.a || 1)) : 8, blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && !n.ghost && hyp(n.x - x, (n.y - 1) - y) < nr);  // ghost: 대회 구경꾼처럼 길을 막지 않는 사람
+      const nr=personRadius(m);
+      const blocked=(x,y)=>m.blocked(x,y)||this.npcs.some(n=>{
+        if(n.hide>0||n.ghost)return false;
+        const next=hyp(n.x-x,n.y-1-y);
+        // A scripted NPC can step into the player. Always allow them to move apart.
+        return next<nr && next<=hyp(n.x-p.x,n.y-1-p.y);
+      });
       const ox = p.x, oy = p.y;
       for(let step=0;step<steps;step++){
         const nx=p.x+gx*distance/steps,ny=p.y+gy*distance/steps;
@@ -122,7 +134,7 @@ export class Field {
         if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) { if (q.lock && !this._locked) { this._locked = true; const msg = q.lock; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(msg); this._locked = false; }); } return; }
         const shut = q.door && G.saga?.shut(m.id, q.to); if (shut) { if (!this._locked) { this._locked = true; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(shut); this._locked = false; }); } return; }  // 마교가 차지한 고을은 가게 문이 닫힌다
         if (q.door && Input.dir().y > 0 && q.dir !== 0 && false) continue;
-        this.run(async () => { Sound.sfx('select', .6); await this.warp(q.to, q.tx, q.ty, q.dir); });
+        this.run(async () => { Sound.sfx('select', .6); await this.warp(q.to, q.tx, q.ty, q.dir, 'portal'); });
         return;
       }
     }
@@ -390,12 +402,6 @@ export class Field {
     this.drawExits(c, P);
     this.drawBubbles(c, P);
     tickMini(this);
-  }
-  // 좁힌 지도: 원래 좌표로 적힌 '나오는 자리'가 문이나 출구 안에 떨어지면 나오자마자 다시 들어간다. 문은 아래로, 나머지는 지도 가운데 쪽으로 비켜 세운다
-  offPortal(m) {
-    const p = this.p, inside = () => m.portals.find(q => p.x > q.x - 4 && p.x < q.x + q.w + 4 && p.y > q.y - 4 && p.y < q.y + q.h + 6);
-    for (let i = 0, q; i < 40 && (q = inside()); i++) { if (q.door) p.y = q.y + q.h + 10; else { const cx = m.w * TS / 2 - p.x, cy = m.h * TS / 2 - p.y, l = Math.hypot(cx, cy) || 1; p.x += cx / l * 6; p.y += cy / l * 6; } }
-    [p.x, p.y] = m.freeNear(p.x, p.y);
   }
   // 새 화면(hd2d.js): 땅과 소품과 사람은 뒤의 WebGL 캔버스가 그리고, 이 캔버스에는 꽃잎, 말풍선, 이름표, 출구 표시, 할 일 표시만 얹는다
   drawGL(c) {

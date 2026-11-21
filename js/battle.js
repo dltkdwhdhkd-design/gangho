@@ -1,3 +1,5 @@
+import { suspendBondScene } from './cg.js';
+import { rankedStats } from './martial-standing.js';
 // 직접 조작 전투
 import { G, IMG, Input, Sound, $, $$, el, esc, STEP, VW, VH, SCALE, TS, clamp, lerp, rnd, rint, pick, hyp, snap, drawActorSprite, drawShadow, whiteOf, wait, qSheet, QZ } from './core.js';
 import { Keys, ART } from './core.js';
@@ -40,9 +42,10 @@ export class Battle {
   constructor(cfg) {
     this.cfg = cfg; this.t = 0; this.actors = []; this.fx = []; this.proj = []; this.zones = []; this.nums = []; this.teles = []; this.parts = [];
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
-    this.venue=encounterStage(G.field,cfg.arena);
+    const native=!!G.hd?.battleOk?.();
+    this.venue=encounterStage(G.field,cfg.arena,cfg.spar||cfg.arena==='ring',native);
     this.W=this.venue.w*TS;this.H=this.venue.h*TS;this.nav=this.venue.encounter.nav;
-    this.stage=G.hd?.battleOk?.()?this.venue:null;this.bg=this.stage?null:encounterFloor(this.venue);
+    this.stage=native?this.venue:null;this.bg=this.stage?null:encounterFloor(this.venue);
     this.band=BAND;this.left=TS;this.right=this.W-TS;this.top=TS;this.floorB=this.H-TS;
     const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
@@ -59,7 +62,7 @@ export class Battle {
       const choices=[[78,0],[-78,0],[0,78],[58,55],[-58,55]].map(([dx,dy])=>this.nav.snap(this.p.x+dx,this.p.y+dy));
       [x,y]=choices.reduce((best,q)=>hyp(q[0]-this.p.x,q[1]-this.p.y)>hyp(best[0]-this.p.x,best[1]-this.p.y)?q:best,[x,y]);
     }
-    const f = FOES[id], d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
+    const f = rankedStats(FOES[id]), d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
     const ez = enemy ? 1 - (this.cfg.ease || 0) : 1;  // 세 번 진 뒤 '숨을 고르고 도전'을 고르면 적이 그만큼 약해진다(js/ctx.js duel)
     const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) * ez : 1)), atk = f.atk * (enemy ? d.foeAtk * ez : 1);
     const a = new Actor({ id, def_: f, team, name: f.name, spr: f.spr, x, y, maxHp: hp, hp, atk, def: f.def, spd: f.spd, crit: .02, boss: f.boss, elite: f.elite, mon: f.mon, big: f.big, r: f.r || 6, scale: f.scale || 1, wpn: f.wpn, moves: f.moves.slice(), pause: f.pause, poise: f.poise || 0, maxPoise: f.poise || 0, phase: 0, ax: 0, ay: 1, face: 0, dummy: f.dummy, atkCd: rnd(.6, 1.3) });
@@ -457,7 +460,7 @@ export class Battle {
     if(detour){a.vx=detour[0]*a.spd;a.vy=detour[1]*a.spd;a.face=faceOf(a.vx,a.vy);a.st='move';return;}
     // 막기: 플레이어가 코앞에서 공격하면 일정 확률로 막는다
     // 막기: 상대가 코앞에서 초식을 시작하면 경지만큼 미리 읽고 막는다. 높은 경지는 아예 튕겨 낼 때가 많다
-    if (a.rGuard && T.st === 'skill' && d < 44 + a.realm * 3 && T.skT < .08 + a.rRead && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < a.rGuard * .4) { a.st = 'guard'; a.guardT = Math.random() < a.rPerfect ? -1 : .3; a.guardAI = rnd(.35, .7) + a.rRead; return; } }
+    if (a.rGuard && T.st === 'skill' && d < 44 + a.realm * 3 && T.skT < .08 + a.rRead && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < Math.min(.76, a.rGuard * (a.def_.position && a.realm >= 4 ? .64 : .4))) { a.st = 'guard'; a.guardT = Math.random() < a.rPerfect ? -1 : .3; a.guardAI = rnd(.35, .7) + a.rRead; return; } }
     const attackers = this.actors.filter(o => o.team === 1 && !o.dead && o.st === 'skill').length;
     if (a.atkCd <= 0 && (a.boss || attackers < 2 || a.team === 0)) {
       const opts = a.moves.map(m => MOVES[m]).filter(m => m && d <= m.range + 8 && (a.cd[m.id] || 0) <= 0);
@@ -504,7 +507,7 @@ export class Battle {
     if (this.flashT > 0) { c.globalAlpha = this.flashT / .16 * .4; c.fillStyle = this.flashC || '#fff'; c.fillRect(0, 0, 1280, 720); c.globalAlpha = 1; }
     c.save(); c.textAlign = 'center';
     for (const n of this.nums) {
-      const a = n.t < .1 ? n.t / .1 : (n.t > .6 ? (.85 - n.t) / .25 : 1), s = n.text ? 20 : 26 * n.s, [x, y] = H.proj(n.x, n.y + 1);
+      const a = n.t < .1 ? n.t / .1 : (n.t > .6 ? (.85 - n.t) / .25 : 1), s = n.text ? 20 : 26 * n.s, [x, y] = H.battleProject(n.x, n.y + 1);
       c.globalAlpha = clamp(a, 0, 1); c.font = `${Math.round(s)}px Galmuri11Bold, Galmuri14, sans-serif`;
       c.lineWidth = 5; c.strokeStyle = '#000'; c.strokeText(n.v, x, y); c.fillStyle = n.c; c.fillText(n.v, x, y);
     }
@@ -602,7 +605,7 @@ export class Battle {
     };
     if (a.isPlayer) return (a.hdIm = key({ me: 1 }));
     const id = a.id || '', b = id.replace(/^(pty_|spar_|fan_|gr_)/, '').replace(/_(ally|foe|spar|rival|final|elite)$/, ''), fm = /^(?:fd|sga|sgn)_([a-z]+)/.exec(id), al = fm && G.free?.fac?.(fm[1])?.align;
-    return (a.hdIm = key({ id, keys: [a.def_?.pk, b, b === 'baek' && 'baekrang', MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
+    return (a.hdIm = key({ id, uniform:a.def_?.uniform, keys: [a.def_?.artId, a.def_?.pk, b, b === 'baek' && 'baekrang', MOB[b] || MOB[a.spr], al && MOB[al]], spr: a.spr }));
   }
   // 동작 칸은 무기에 맞는 것을 쓴다. 주인공의 칸은 다섯 장이다: 검(me_act: 철검·군도·청강검·월영검·송문고검), 맨손(me_unarmed: 권대·철권갑·호조수투·금강권갑),
   // 큰 칼(me_blade: 박도·귀면도·환두대도·청룡언월도), 창(me_spear), 봉(me_staff: 목검·걸레 자루). 그 무기의 칸이 아직 안 읽혔으면 전처럼 서 있는 그림을 기울이고 무기를 휘두른다.
@@ -706,7 +709,7 @@ export class Battle {
     const p = this.p, S = G.S;
     h.innerHTML = `<div class="bars"><div class="bname">${esc(S.title)} ${esc(p.name)}</div><div class="bar"><i class="lag" id="hLag"></i><i class="val" id="hVal"></i><b id="hTxt"></b></div><div class="bar mp"><i class="val" id="mVal"></i><b id="mTxt"></b></div></div>`;
     const bosses = this.actors.filter(a => (a.boss || a.elite) && a.team === 1).sort((a, b) => !!b.boss - !!a.boss);
-    if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.nameplate || b.name)}${b.realm >= 2 && !b.def_.nameplate ? ` <small class="realm">${RL.NAME[b.realm]}${b.gap ? ' ▲' : ''}</small>` : ''}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
+    if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.position && !b.name.includes(b.def_.position) ? b.def_.position + ' ' : '') + (b.def_.nameplate || b.name)}${b.realm >= 2 && !b.def_.nameplate ? ` <small class="realm">${RL.NAME[b.realm]}${b.gap ? ' ▲' : ''}</small>` : ''}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
     const key = (i) => Keys.label('s' + i);
     let sk = '';
     S.slots.forEach((id, i) => { const k = id && SKILLS[id]; sk += `<div class="sk ${k && k.ult ? 'ult' : ''}" id="sk${i}"><span class="ky">${key(i)}</span>${k ? `<span class="mp">${k.mp}</span><span class="nm">${k.name}</span>` : '<span class="nm">-</span>'}<div class="cd"></div><span class="ct"></span></div>`; });
@@ -743,7 +746,7 @@ export function fight(cfg) {
   stageClear();
   return new Promise(res => {
     const prev = G.scene;
-    const B = new Battle(cfg);
+    const B = new Battle(cfg), resumeScene=suspendBondScene();
     Input.clear();
     G.battle = B; G.scene = 'battle'; $('#stage').classList.add('inbattle');
     Sound.bgm(cfg.bgm || (cfg.foes.some(f => FOES[f].boss) ? 'boss' : 'fight'));
@@ -762,6 +765,7 @@ export function fight(cfg) {
       const meal = G.S.meal; if (meal && --meal.left <= 0) G.S.meal = null;
       $('#hud').innerHTML = '';
       G.scene = prev === 'battle' ? 'field' : prev; G.battle = null; $('#stage').classList.remove('inbattle'); if (B.stage) G.hd?.resetCam?.();  // 3D 무대에서 돌아오면 마을 카메라를 주인공에게 바로 맞춘다
+      resumeScene?.();
       res({ outcome: o, exp: ex, silver: si, levelUp: up, drops });
     };
   });

@@ -4,7 +4,7 @@
 
 『화산귀환』 인물(팬 캐릭터)은 걷는 도트는 있는데 대화 일러스트가 없어서, 말할 때 다른 사람의 얼굴이 나온다. 이미 있는 도트를 보고 그 사람의 일러스트를 그린다.
 
-**이 단계에서 만들 것: 6개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -22,65 +22,29 @@
 
 ## 만들 것
 
-### 1. `dangjan_n.png` — 당잔 (사천당가 사람) — 키 `dangjan`
+### 1. `dangjan_n.png` — 당잔 (사천당가 사람) — 키 `dangjan` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangjan-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangjan-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 2. `dangpae_n.png` — 당패 (사천당가 사람) — 키 `dangpae` — **받음**
 
-인물: 당잔, 사천당가 사람, 남자. 빚을 잊지 않는 무뚝뚝한 당가 사람. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `dangpae_n.png` — 당패 (사천당가 사람) — 키 `dangpae`
+### 3. `hongdaegwang_n.png` — 홍대광 (개방 거지) — 키 `hongdaegwang` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangpae-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangpae-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 4. `guchil_n.png` — 구칠 (개방 거지) — 키 `guchil` — **받음**
 
-인물: 당패, 사천당가 사람, 남자. 암기 연습장 지기, 손에 비수. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `hongdaegwang_n.png` — 홍대광 (개방 거지) — 키 `hongdaegwang`
+### 5. `jongpal_n.png` — 종팔 (개방 거지) — 키 `jongpal` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hongdaegwang-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hongdaegwang-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 6. `wiripsan_n.png` — 위립산 (화영문 문주) — 키 `wiripsan` — **받음**
 
-인물: 홍대광, 개방 거지, 남자. 능청맞고 호탕한 개방 거지, 크게 웃음, 타구봉. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 4. `guchil_n.png` — 구칠 (개방 거지) — 키 `guchil`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/guchil-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/guchil-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 구칠, 개방 거지, 남자. 빈 동냥 그릇을 든 개방 거지. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 5. `jongpal_n.png` — 종팔 (개방 거지) — 키 `jongpal`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jongpal-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jongpal-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 종팔, 개방 거지, 남자. 장터를 떠도는 개방 거지. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 6. `wiripsan_n.png` — 위립산 (화영문 문주) — 키 `wiripsan`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/wiripsan-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/wiripsan-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 위립산, 화영문 문주, 남자. 작은 문파를 지키는 성실한 문주. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 
@@ -95,4 +59,4 @@
 
 ---
 
-다음 단계: 32번 `face7` 화산귀환 인물 얼굴 7: 위소행, 염평, 맹소 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face7.md
+다음 단계: 33번 `ui3` 화면 틀 3: 싸움 화면 틀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md

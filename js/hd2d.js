@@ -4,7 +4,7 @@
 // 집은 막힘 상자(바닥 넓이)를 밑면으로 한 덩어리(벽 네 면, 박공지붕)로 세우고, 나무와 소품과 사람은 선 판으로 세운다.
 // 세운 판의 키(HS)는 시점만큼 늘려 둔다(내려다봐도 사람 도트가 눌리지 않게). 깊이(ZS)는 늘리지 않는다(2026-11-19부터 ZS = 1):
 // 땅과 집이 진짜 비율 그대로 눕는다. 전에는 깊이를 1.49배 늘려 평면도가 2D 화면처럼 네모나게 보이게 했는데, 그래서 바닥과 지붕이 화면을 차지했다.
-// 켜기: 주소 끝에 ?hd2d=1. 못 켜면(WebGL2 없음 등) 아무 일 없이 2D로 돈다.
+// 기본 보기는 HD-2D이며, hd2d=0은 사용자가 선택하는 평면 보기다.
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { mountainGate } from './hd2d/gate.js';
 import { addEscarpments } from './hd2d/escarpment.js';
@@ -27,7 +27,7 @@ import { motionFor, drawMotion } from './hd2d/combat-art.js';
 import { PAL, WALLS as WKIND, PALTEX } from './hd2d/palette.js';
 import { STONE_PARTS, stoneStairs } from './hd2d/stone-stairs.js';
 import { PSC } from './field.js';
-import { G, IMG, TS, QZ, $ } from './core.js';
+import { G, IMG, TS, QZ, $, HD_VIEW, toast } from './core.js';
 import { STAMPS, paintRoom } from './tiles.js';
 import { newState } from './state.js';
 import { makeBuilder, SPEC, GRAND } from './hd2d/build.js';
@@ -53,8 +53,8 @@ let T = null;  // three.js
 // 인물 키는 화면 높이의 1/9로 정했다(사용자). 그림은 새 그림이 기본
 const OPTK = 'gangho_hd2d_opt2', OPT0 = { zoom: 9, time: 'auto', fx: 'auto', art: 1, battle3d: 1 };
 let autoLv = 'mid'; const fxNow = () => HD.opt.fx === 'auto' ? autoLv : HD.opt.fx;  // 실제로 쓰는 화질
-const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } o.zoom = 9; const qt = (() => { try { return new URLSearchParams(location.search).get('time'); } catch { return null; } })(); if (qt && TIMES[qt]) o.time = qt; return o; };
-const want = (() => { try { return new URLSearchParams(location.search).get('hd2d') === '1'; } catch { return false; } })();
+const loadOpt = () => { let o; try { o = { ...OPT0, ...JSON.parse(localStorage.getItem(OPTK) || '{}') }; } catch { o = { ...OPT0 }; } o.zoom = 9; o.art = 1; const qt = (() => { try { return new URLSearchParams(location.search).get('time'); } catch { return null; } })(); if (qt && TIMES[qt]) o.time = qt; return o; };
+const want = HD_VIEW;
 
 // 시각별 빛. sun: 해 쪽을 가리키는 방향(x 오른쪽, y 위, z 화면 앞쪽). 낮과 저녁은 왼쪽에서 조금 앞으로 들어 왼벽이 밝고 오른벽이 그늘지며 그림자는 오른쪽으로 진다. 아침은 오른쪽에서
 const TIMES = {
@@ -70,16 +70,22 @@ const TIMES = {
 
 export const HD = {
   want, ready: false, failed: false, opt: loadOpt(), peek: null, orbit: 0, times: TIMES, get roomLight() { return ROOML; },  // times·roomLight: 빛 값을 시험에서 바꿔 가며 찍을 때 쓴다(tools/dev/lt.cjs)  // peek: 시험 화면용 카메라 겨냥점(평면도 점)
-  maps: new Set(['cheongha']),  // 시제품은 청하진만. 나머지 지도는 예전 2D로 그린다
+  off: false,
   remap(m) { if (!m || curMap === m) curMap = null; },  // 지도에 놓인 것이 바뀌었을 때(내 문파에 건물을 지음): 다음 그릴 때 그 지도를 새로 짓는다
-  active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && art())) && !m.isoRoom && (!m.live || m.id === 'world'); },  // 강호 큰 지도는 주인공 둘레만 잘라 짓는다(winOf)  // 방은 전부 새 화면으로(벽을 조각으로 세운다: roomKit)(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
+  active(m) { return this.want && this.ready && !this.off && !this.failed && !!m && m.id!=='isotest'; },
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; autoLv = 'mid'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
   travelInfo:()=>({pitch:Math.round(activePitch/DEG),fov:cam?.fov,sun:sun?.position.clone().sub(sun.target.position).normalize().toArray(),time:timeOf(),mid:camT.x,window:curMap?.win}),
   gnd: () => ground && { pos: ground.position.toArray().map(Math.round), box: (() => { ground.geometry.computeBoundingBox(); const b = ground.geometry.boundingBox; return [b.min.toArray().map(Math.round), b.max.toArray().map(Math.round)]; })(), map: curMap?.id, win: curMap?.win, hgt: !!curMap?.hgt, cam: cam.position.toArray().map(Math.round) },
-  init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
+  init, render, renderBattle, affine, battleProject(x,y){const p=battlePoint(x,y);return proj(p.x,p.y);}, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
-  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : m?.id === 'world' ? ACTW : ACTK, bodyH: (m, battle) => 16 * OLDK * (battle ? ACTB : HD.actK(m)) /* 사람 그림 한 칸의 키(평면도 점). 화면에서 사람 키를 잴 때 쓴다(tools/dev/tour.cjs) */, tour: () => tour(), set2d(off) { HD.off = !!off; HD.ready = !HD.off; if (HD.off) HD.hide(); }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  snap(x, w, h) { if (!R || !lastF || !HD.ready || !HD.active(lastF.m)) return false; try { const d = cv.style.display; render(lastF); cv.style.display = d; x.drawImage(cv, 0, 0, w, h); return true; } catch (e) { return false; } }, bbLeft: () => bboard.filter(o => o.mesh.visible).length, mem: () => ({ ...R.info.memory }), fps: () => fpsV, actK: m => m?.room ? PSC : m?.id === 'world' ? ACTW : ACTK, bodyH: (m, battle) => 16 * OLDK * (battle ? ACTB : HD.actK(m)) /* 사람 그림 한 칸의 키(평면도 점). 화면에서 사람 키를 잴 때 쓴다(tools/dev/tour.cjs) */, tour: () => tour(), set2d(off) {
+    HD.off=!!off;
+    const url=new URL(location.href);url.searchParams.set('hd2d',off?'0':'1');
+    history.replaceState(history.state,'',url);
+    try { localStorage.setItem('gangho_view',off?'2d':'hd'); } catch {}
+    if(off)HD.hide();else camT.set(-1,0,0);
+  }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.off && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m.live ? winOf(F) : F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },
   // 시험용(tools/hd_occl_test.cjs): 평면도 (x, y)에 선 사람의 몸 다섯 점(머리, 가슴, 허리, 두 무릎) 가운데 지금 카메라에서 집·소품에 가려지는 점의 수, 가리는 것의 이름, 점마다 가려졌는지.
   // 걷어 낸 집과 옅어진 소품은 가리지 않는 것으로 친다. 몸의 크기는 그 지도의 사람 크기다(방 안은 PSC배. 전에는 방에서도 바깥 크기로 재서 허리가 무릎 높이에 있었다)
@@ -121,9 +127,15 @@ HD.fieldKey = o => {
   if (!art() || !o) return null;
   if (!walking.type_BlueSamurai) {loadCastIndex(PV);return null;}
   const raw = (o.me ? G.S.look : o.spr || '').split('/').pop().replace(/_(q|d)$/,'');
-  const pool = [o.id,o.id?.replace(/^fan_/,''),o.role,ROLE[o.hint],...(o.keys||[]),
+  const pool = [o.id,o.id?.replace(/^fan_/,''),o.uniform, /^fd_([a-z]+)_/.test(o.foes?.[0]||'') && 'uniform_'+o.foes[0].split('_')[1], o.role,ROLE[o.hint],...(o.keys||[]),
     roamingEnemyArt[o.foes?.[0]]?.replace(/^n_/,''),({Igyeom:'igyeom', Mugyeong:'mugyeong', Yeonjae:'yeonjae', Jaeha:'jaeha'})[raw],'type_'+raw];
   return pool.find(id=>id && walking[id]) || null;
+};
+HD.preparePeople = async people => {
+  if (!HD.want || HD.off || !art()) return;
+  await loadCastIndex(PV);
+  const pages=new Set(people.map(o=>walking[HD.fieldKey(o)]?.[0]).filter(Boolean));
+  await Promise.all([...pages].map(page=>loadActorPage(PV,page)));
 };
 HD.prepareCombat = ids => Promise.all(ids.flatMap(id => {
   const slot=walking[id];return slot?[loadActorPage(PV,slot[0]),loadCombatArt(PV,slot)]:[];
@@ -180,6 +192,12 @@ async function init() {
     const st = $('#stage'); st.insertBefore(cv, st.firstChild);
     R = new T.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, stencil: false, powerPreference: 'high-performance' });
     if (!R.capabilities.isWebGL2) throw new Error('WebGL2를 못 쓴다');
+    cv.addEventListener('webglcontextlost',e=>{
+      e.preventDefault();HD.contextLost=true;toast('그래픽 연결을 복구하고 있습니다.',3);
+    });
+    cv.addEventListener('webglcontextrestored',()=>{
+      HD.contextLost=false;curMap=null;camT.set(-1,0,0);resize(true);
+    });
     R.setPixelRatio(1); R.autoClear = true;
     R.shadowMap.enabled = true; R.shadowMap.type = T.PCFSoftShadowMap;
     scene = new T.Scene();
@@ -200,7 +218,7 @@ async function init() {
     if (HD.opt.art) await loadPreview();
     HD.ready = true; if (/[?&]hdpanel=1/.test(location.search)) panel();  // 시제품 판은 주소에 hdpanel=1을 붙였을 때만. 옵션은 메뉴의 설정 탭에 있다(js/ui.js)
     const see = /[?&]see=(\w+)/.exec(location.search); if (see) (async () => { while (!G.field || !G.dbg) await new Promise(r => setTimeout(r, 50)); tour(see[1]); })();  // 주소에 see 값으로 지도 이름을 붙이면(쓰는 법은 tools/dev/README.md) 저장을 건드리지 않는 둘러보기로 그 곳에 바로 선다. 방을 고친 뒤 주인께 주소로 보여 드릴 때 쓴다
-  } catch (e) { console.warn('새 화면을 켜지 못해 2D로 그린다', e); HD.failed = true; if (cv) cv.remove(); }
+  } catch (e) { console.warn('새 화면을 켜지 못해 2D로 그린다', e); HD.failed = true; if (cv) cv.remove(); toast('HD-2D를 시작할 수 없어 2D로 열었습니다. 설정에서 다시 시도할 수 있습니다.',7); }
 }
 
 // ── 그림 → 텍스처 ──
@@ -990,11 +1008,15 @@ function fieldWalker(n, row, time, identity) {
   const slot = walking[identity || HD.fieldKey(n)];
   if (!slot) return false;
   const texture = previewTex('field_' + slot[0]);
-  if (!texture) {loadActorPage(PV,slot[0]);return false;}
+  if (!texture) {
+    loadActorPage(PV,slot[0]);
+    const fallback='type_BlueSamurai';
+    return slot!==walking[fallback] && !!walking[fallback] && fieldWalker(n,row,time,fallback);
+  }
   const height = CHAR * 56 / 48;
   const cell = texture.image.width / 4;
   if (standing(n)) {
-    const dir = (n.dir || 0) & 3, sheet = HD.fieldSheet(n), cel = idleCel(n,time,identity);
+    const dir = (n.dir || 0) & 3, sheet = HD.fieldSheet(identity ? {id:identity,spr:n.spr} : n), cel = idleCel(n,time,identity);
     const facing = idleFacing(sheet,dir);
     if (!facing.texture) {
       const ink = new T.CanvasTexture(facing.canvas);
@@ -1302,7 +1324,8 @@ function winOf(F) {
   return winM;
 }
 function render(F) {
-  inBattle = false; lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
+  if(HD.contextLost)return;
+  inBattle = false; battleSpace=null; lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
   if (cam.view?.enabled) cam.clearViewOffset();
   resize(); setMap(F.m.live ? winOf(F) : F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
@@ -1327,6 +1350,11 @@ function bbSlot(w, h) {
   }
   usedBB++; o.mesh.visible = true; return o;
 }
+let battleSpace=null;
+function battlePoint(x,y) {
+  if(!battleSpace)return {x,y};
+  return {x:battleSpace.origin[0]*TS+x/battleSpace.scale,y:battleSpace.origin[1]*TS+y/battleSpace.scale};
+}
 function syncBattle(B) {
   syncWildlife(actG,null,[],null,HS,ZS);
   used = 0; usedB = 0; usedBB = 0;
@@ -1336,27 +1364,29 @@ function syncBattle(B) {
     x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, o.cv.width, o.cv.height); x.imageSmoothingEnabled = false;
     x.setTransform(BK, 0, 0, BK, (w / 2 - a.x) * BK, (h - down - a.y) * BK); B.drawActor(x, a, true);
     o.tex.needsUpdate = true;
-    o.mesh.scale.set(w * ACTB, h * HS * ACTB, 1); o.mesh.position.set(a.x, -down * HS * ACTB + hAt(curMap, a.x, a.y), (a.y + 1) * ZS + .5);
+    const pos=battlePoint(a.x,a.y);
+    o.mesh.scale.set(w*ACTB,h*HS*ACTB,1);
+    o.mesh.position.set(pos.x,-down*HS*ACTB+hAt(curMap,pos.x,pos.y),(pos.y+1)*ZS+.5);
     { const mt = o.mesh.material; if (!mt.emissiveMap) { mt.emissive = new T.Color(0xffffff); mt.emissiveMap = o.tex; mt.needsUpdate = true; } mt.emissiveIntensity = a.isPlayer ? .22 : .08; }  // 어두운 무대에서 사람이 묻히지 않게 살짝 제 빛을 준다(주인공 테는 뺐다)
-    if (!a.dead) blob(a.x, a.y, b ? 2 : s);
+    if (!a.dead) blob(pos.x,pos.y,b?2:s);
   }
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false; for (let i = usedBB; i < bboard.length; i++) bboard[i].mesh.visible = false;
 }
 function placeCamBattle(B, dt) {
   activePitch=PITCH;lens(FOV);
-  const m = B.stage, Wm = m.w * TS, Hm = m.h * TS; let sx = 0, sy = 0, n = 0;
-  for (const a of B.actors) { if (a.dead) continue; const k = a.isPlayer ? 3 : 1; sx += a.x * k; sy += a.y * k; n += k; }
+  const m=curMap,Wm=m.w*TS,Hm=m.h*TS; let sx = 0, sy = 0, n = 0;
+  for (const a of B.actors) { if (a.dead) continue; const k = a.isPlayer ? 3 : 1; const pos=battlePoint(a.x,a.y); sx += pos.x*k; sy += pos.y*k; n += k; }
   const ax = n ? sx / n : Wm / 2, ay = n ? sy / n : Hm / 2, f = FOV / 2 * DEG;
-  const spread=Math.max(0,...B.actors.filter(a=>!a.dead).map(a=>Math.hypot(a.x-ax,(a.y-ay)*.85)));
+  const spread=Math.max(0,...B.actors.filter(a=>!a.dead).map(a=>{const pos=battlePoint(a.x,a.y);return Math.hypot(pos.x-ax,(pos.y-ay)*.85);}));
   let d=CHAR*HD.opt.zoom*CAMB*Math.min(1.73,1.34+spread/880)/(2*Math.tan(f));const hw=d*Math.tan(f)*W/H;
-  let tx = Math.min(Wm - hw + 20, Math.max(hw - 20, ax)), tyP = Math.min(Hm - 50, Math.max(50, ay - 16));  // 사람보다 조금 북쪽을 겨눠 무대 뒤 담과 건물이 화면에 들어온다
+  let tx = Wm<2*hw?Wm*.5:Math.min(Wm-hw+20,Math.max(hw-20,ax)), tyP = Math.min(Hm - 50, Math.max(50, ay - 16));  // 사람보다 조금 북쪽을 겨눠 무대 뒤 담과 건물이 화면에 들어온다
   // 주인공은 늘 화면 안에 둔다. 전에는 싸우는 사람들의 가운데만 겨눠서, 적과 떨어져 아래나 구석으로 가면 주인공이 화면 밖으로 나갔다(시작할 때 동료도 화면 아래로 잘렸다)
   // 화면 세로 자리 sy(-1 맨 위, +1 맨 아래)에 놓이는 땅이 겨눈 곳에서 평면도로 몇 점 아래인지 구해, 주인공 발이 화면 위 15%~아래 75% 사이에 오게 겨눈 곳을 당긴다. 가로는 주인공 깊이에서 보이는 폭의 8할 안
-  const P = B.actors.find(a => a.isPlayer && !a.dead);
+  const P=B.p&&!B.p.dead?battlePoint(B.p.x,B.p.y):null;
   if (P) { const hcam = 8 * HS + d * Math.sin(PITCH), back = d * Math.cos(PITCH), planAt = sy => (back - hcam / Math.tan(PITCH + Math.atan(sy * Math.tan(f)))) / ZS;
     tyP = Math.min(P.y - planAt(-.7), Math.max(P.y - planAt(.5), tyP));
     const mx = (d - (P.y - tyP) * ZS * Math.cos(PITCH)) * Math.tan(f) * W / H * .8; tx = Math.min(P.x + mx, Math.max(P.x - mx, tx)); }
-  if (B.zoomT > 0) { const u = Math.sin(Math.min(1, B.zoomT / .75) * Math.PI); d *= 1 - .16 * u; tx += ((B.zoomX ?? tx) - tx) * .5 * u; tyP += ((B.zoomY ?? tyP) - tyP) * .5 * u; }
+  if (B.zoomT > 0) { const u = Math.sin(Math.min(1, B.zoomT / .75) * Math.PI); d*=1-.16*u;const aim=battlePoint(B.zoomX??B.p.x,B.zoomY??B.p.y);tx+=(aim.x-tx)*.5*u;tyP+=(aim.y-tyP)*.5*u; }
   if (B.shakeT > 0) { tx += (Math.random() - .5) * 2 * B.shakeA; tyP += (Math.random() - .5) * 2 * B.shakeA; }
   dist = d; const ty = 8 * HS+hAt(m,P?.x??ax,P?.y??ay), tz = tyP * ZS;
   if (camT.x < 0 || !B.camInit) { camT.set(tx, ty, tz); B.camInit = true; } else { const k = 1 - Math.exp(-dt * 6); camT.set(camT.x + (tx - camT.x) * k, ty, camT.z + (tz - camT.z) * k); }
@@ -1366,14 +1396,19 @@ function placeCamBattle(B, dt) {
   const sc = sun.shadow.camera, half = dist * 1.4; sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.near = 200; sc.far = 2600; sc.updateProjectionMatrix();
 }
 function renderBattle(B) {
+  if(HD.contextLost)return;
   inBattle = true;
   const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
-  resize(); setMap(B.stage);
-  // 무대 땅이 무대 것이 아니거나 장면에서 빠져 있으면 무대를 새로 짓는다. 전에 땅 없이 사람만 검은 바닥 위에서 싸우는 화면이 나왔다
-  if (!ground || ground.userData.map !== B.stage || ground.parent !== scene) { console.warn('[hd2d] 전투 무대 땅이 어긋나 다시 지음', ground?.userData.map?.id); curMap = null; setMap(B.stage); }
+  const encounter=B.stage.encounter;
+  battleSpace=encounter?.source?encounter:null;
+  const p=battlePoint(B.p.x,B.p.y);
+  const source=battleSpace?.source||B.stage;
+  const display=source.live?winOf({m:source,p}):source;
+  resize();setMap(display);
+  if(!ground||ground.userData.map!==display||ground.parent!==scene){curMap=null;setMap(display);}
   placeCamBattle(B, dt); foreground(); syncBattle(B); light();
-  const living=B.actors.filter(a=>!a.dead);
+  const living=B.actors.filter(a=>!a.dead).map(a=>battlePoint(a.x,a.y));
   for(const obj of propG.children){
     const u=obj.userData,s=u.s;if(!s||s.flat)continue;
     const spec=STAMPS[s.name];if(!spec)continue;
@@ -1384,13 +1419,16 @@ function renderBattle(B) {
     else if(!u.flat)obj.visible=!blocks;
   }
   if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(0, 0, 0); HOLE.uHoleZ.value = 0;
-  const p = B.p || { x: B.stage.w * TS / 2, y: B.stage.h * TS / 2 };
-  shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx({ m: B.stage, p });
+
+  shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx({m:display,p});
   fpsN++; if (now - fpsT > 1000) { fpsV = Math.round(fpsN * 1000 / (now - fpsT)); fpsN = 0; fpsT = now; }
 }
 // 평면도 (x, y) 둘레를 화면(1280×720)으로 옮기는 행렬. flat이면 땅에 눕힌 것, 아니면 세운 것(위로 1점 = 키 1점)
 function affine(x, y, flat) {
-  const Y = y + 1, g = hAt(curMap, x, y), [ex, ey] = proj(x, Y, 0, g), [px, py] = proj(x + 1, Y, 0, g), [vx, vy] = flat ? proj(x, Y + 1, 0, g) : proj(x, Y, 1, g);  // 사람 판은 발끝이 y+1에 선다. 세 점의 땅 높이는 같은 값으로(단 가장자리에서 축이 기울지 않게)
+  const pos=battlePoint(x,y),unit=battleSpace?1/battleSpace.scale:1;
+  const X=pos.x,Y=pos.y+1,g=hAt(curMap,X,pos.y);
+  const [ex,ey]=proj(X,Y,0,g),[px,py]=proj(X+unit,Y,0,g);
+  const [vx,vy]=flat?proj(X,Y+unit,0,g):proj(X,Y,unit,g);
   const a = px - ex, b = py - ey, c = flat ? vx - ex : ex - vx, d = flat ? vy - ey : ey - vy;
   return [a, b, c, d, ex - a * x - c * y, ey - b * x - d * y];
 }
@@ -1410,7 +1448,7 @@ function panel() {
   $('#hdt').onclick = e => { e.stopPropagation(); setFold(d.dataset.fold !== '1'); };
   { let open = ''; try { open = localStorage.getItem('gangho_hdp_open') || ''; } catch (e) { /* 그대로 접힌 채 */ } if (!open) setFold(true); }  // 처음에는 접어 둔다(제목 화면 글과 놀이 화면을 가렸다). 한 번 펼치면 펼친 채로 기억한다
   $('#hdgo').onclick = e => { e.stopPropagation(); e.currentTarget.blur(); tour(); };
-  $('#hd2d').onclick = e => { e.stopPropagation(); e.currentTarget.blur(); HD.off = !HD.off; e.currentTarget.textContent = HD.off ? '새 화면으로' : '2D로 보기'; HD.ready = !HD.off; if (HD.off) HD.hide(); };
+  $('#hd2d').onclick = e => { e.stopPropagation(); e.currentTarget.blur(); HD.set2d(!HD.off); e.currentTarget.textContent = HD.off ? '새 화면으로' : '2D로 보기'; };
   panelSync();
 }
 function panelSync() { const d = $('#hdp'); if (!d) return; d.querySelectorAll('.hdr').forEach(r => r.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(HD.opt[r.dataset.k]) === b.dataset.v))); }

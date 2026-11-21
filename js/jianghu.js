@@ -1,3 +1,4 @@
+import { standing } from './martial-standing.js';
 // 강호가 나를 대하는 방식: 세력 관계, 원한, 복수, 그리고 나와 상관없이 벌어지는 사건
 import { G, Sound, toast, josa, esc, pick } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
@@ -30,9 +31,14 @@ function addRep(id, n, spread = true) {
 const news = t => { const fr = Fr(); fr.news.unshift(`${S().day}일: ${t}`); fr.news.length = Math.min(fr.news.length, 30); };
 // 세력 제자
 function folk(f) { const l = LOCS.find(q => q.fac === f.id), L = G.base?.folk(l) || ['Knight']; return L.find(s => s !== 'Skeleton') || L[0]; }  // 마교 제자도 사람 모습(해골은 혈마와 강시 몫)
-function disciple(f, lv, sp) {
-  const k = `fd_${f.id}${sp ? '_s' : ''}`, m = G.arts.usable(f.id).slice(0, sp ? 3 : 2);
-  FOES[k] = { name: sp ? `${f.name} 사범` : `${f.name} 제자`, spr: 'chars/' + folk(f), hp: Math.round((30 + lv * 24) * (sp ? 1.8 : 1)), atk: (6 + lv * 1.4) * (sp ? 1.05 : .95), def: 1 + lv * .33, spd: Math.min(80, 52 + lv * .6), exp: Math.round((8 + lv * 5.4) * (sp ? 1.6 : 1)), silver: Math.round(4 + lv * 1.1), pause: sp ? 1 : 1.15, moves: ['slash', ...m], wpn: f.wpn, guard: sp ? .6 : .3, poise: sp ? 30 + lv * 2 : 0 };
+function disciple(f, lv, sp = false) {
+  const role = typeof sp === 'string' ? sp : sp ? '사범' : lv >= 12 ? '내문 제자' : '외문 제자';
+  const rank = standing(f, role);
+  // 같은 문파의 서로 다른 직위와 레벨이 동시에 나와도 정의를 덮어쓰지 않는다.
+  lv = Math.min([5,10,16,24,30,36,43,51][rank.realm], Math.max(lv, [1,6,11,18,24,30,36,46][rank.realm]));
+  sp=rank.realm>=3;
+  const k = `fd_${f.id}_${rank.realm}_${lv}`, m = G.arts.trainingMoves(f.id, rank.realm);
+  FOES[k] = { ...rank, uniform: 'uniform_' + f.id, name: `${f.name} ${role}`, spr: 'chars/' + folk(f), hp: Math.round((30 + lv * 24) * (sp ? 1.8 : 1)), atk: (6 + lv * 1.4) * (sp ? 1.05 : .95), def: 1 + lv * .33, spd: Math.min(80, 52 + lv * .6), exp: Math.round((8 + lv * 5.4) * (sp ? 1.6 : 1)), silver: Math.round(4 + lv * 1.1), pause: sp ? 1 : 1.15, moves: ['slash', ...m], wpn: f.wpn, guard: sp ? .6 : .3, poise: sp ? 30 + lv * 2 : 0 };
   return k;
 }
 const crew = (f, lv, n) => Array.from({ length: n }, () => disciple(f, lv));
@@ -110,11 +116,11 @@ const VILLAIN = [['살수 조칠', '현상금이 붙은 지 십 년째다.'], ['
 const LEG = [['leg_sword', '의천검', '검', 42, 'Sword', '하늘에 기댄다는 칼. 세상에 한 자루뿐이다.'], ['leg_blade', '도룡도', '도', 44, 'BigSword', '용을 잡는다는 큰 칼. 무겁다.'], ['leg_spear', '패왕창', '창', 43, 'Lance2', '옛 패왕이 들었다는 창.'], ['leg_fist', '금강수갑', '권', 41, 'Club', '금강석을 박은 권갑.']];
 for (const [k, name, type, atk, spr, desc] of LEG) WEAPONS[k] = { name, type, atk, spr, desc };
 const wild = () => { G.world.build(); for (let i = 0; i < 40; i++) { const [x, y] = G.world.wildAround(pick(LOCS).px); if (x) return [x, y]; } return G.world.entry('cheongha'); };
-const round = async (f, n, title) => { const lv = S().lv; return ctx.duel({ foes: f, arena: G.field.m.arena, bgm: n === 3 ? 'boss' : 'fight', title, optional: true, noIntro: true }); };
+const round = async (f, n, title, spar = false) => { return ctx.duel({ spar, foes: f, arena: G.field.m.arena, bgm: n === 3 ? 'boss' : 'fight', title, optional: true, noIntro: true }); };
 const TYPES = {
   tourney: { hint: '비무대회 접수처', mk: () => { const l = pick(CITY); return { map: l.map, place: l.name, left: 7, name: `${l.name} 비무대회` }; }, start: e => `${e.place}에서 비무대회가 열린다는 방이 붙었다.`, end: e => `${e.name}에서 ${pick(FACS).name} 사람이 우승했다.`,
     async run(e) { const s = S(); if (e.done) { await say(null, '대회는 끝났다. 빈 단상만 남았다.'); return; } const c = await choice(`${e.name}에 나갈까? (참가비 은자 50냥)`, ['나간다', '그만둔다']); if (c) return; if (s.silver < 50) { await say(null, '참가비가 모자란다.'); return; } s.silver -= 50; const lv = s.lv;
-      for (let i = 1; i <= 3; i++) { const f = pick(FACS); await narr(`${i}회전. 상대는 ${f.name} 사람이다.`); const foes = i === 3 && lv >= 20 ? ['clan_' + f.id] : [disciple(f, lv + i - 1, true)]; if (!await round(foes, i, `${e.name} ${i}회전`)) { await say(null, '단상에서 내려왔다. 구경꾼들이 벌써 다음 사람을 보고 있었다.'); e.done = 1; return; } }
+      for (let i = 1; i <= 3; i++) { const f = pick(FACS); await narr(`${i}회전. 상대는 ${f.name} 사람이다.`); const foes = i === 3 && lv >= 20 ? ['clan_' + f.id] : [disciple(f, lv + i - 1, true)]; if (!await round(foes, i, `${e.name} ${i}회전`, true)) { await say(null, '단상에서 내려왔다. 구경꾼들이 벌써 다음 사람을 보고 있었다.'); e.done = 1; return; } }
       e.done = 1; e.left = 0; e.won = 1; const v = rich(lv); s.silver += v; Fr().fame += 18; news(`${s.name}, ${e.name}에서 우승하다.`); await narr(`끝까지 서 있었다. 상금 은자 ${v}냥을 받았다.`); for (let i = 0; i < 2; i++) G.arts.drop(null, 1); } },
   treasure: { hint: '땅을 파는 사람들', mk: () => { const [x, y] = wild(); return { map: 'world', x, y, place: '강호 어딘가', left: 6, name: '고수의 유품' }; }, start: () => `옛 고수의 유품이 나왔다는 소문이 돈다. 칼 찬 사람들이 벌써 길을 나섰다.`, end: () => `옛 고수의 유품은 ${pick(FACS).name} 손에 들어갔다고 한다.`,
     async run(e) { await narr('먼저 온 사람들이 구덩이를 둘러싸고 서로 노려보고 있었다. 내가 다가가자 칼이 일제히 이쪽을 향했다.'); const lv = S().lv; if (!await round(G.free.group('rogue', lv + 1, 3), 2, '유품 쟁탈')) return; e.done = 1; e.left = 0; e.won = 1; await narr('구덩이 바닥에서 썩은 궤짝이 나왔다.'); for (let i = 0; i < 3; i++) G.arts.drop(null, 1); S().silver += rich(lv) >> 1; Fr().fame += 6; } },

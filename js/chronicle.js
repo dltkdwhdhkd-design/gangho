@@ -31,7 +31,7 @@ function recordPart(no){
 let mount=null,selected=null,message='',visitedAt=0,owner=null,finishRequested=false,refreshWorld=false;
 document.addEventListener('visibilitychange',()=>{visitedAt=!document.hidden&&mount?.isConnected?performance.now():0;});
 const sceneNames=['길잡이','기록자'];
-const faceNames={'류연재':'yeonjae','단무경':'mugyeong','한재하':'jaeha','서이겸':'igyeom','윤설':'yun','소연하':'so','혁련하':'hyeok','남궁진':'clan_namgung','백랑':'baekrang'};
+const faceNames={'류연재':'yeonjae','단무경':'mugyeong','한재하':'jaeha','서이겸':'igyeom','윤설':'yun','소연하':'so','혁련하':'hyeok','남궁선':'clan_namgung','백랑':'baekrang'};
 const btn=(action,label,opts='')=>'<button type="button" class="cr-button" data-cr="'+action+'" '+opts+'>'+esc(String(label))+'</button>';
 const para=t=>'<p>'+esc(t)+'</p>';
 const heading=t=>'<h3>'+esc(t)+'</h3>';

@@ -163,7 +163,7 @@ async function council() {
     await narr('철우가 아이 하나를 데리고 마당으로 나왔다. 아이는 어디에 서야 하는지 몰라 철우의 소매만 쥐고 있었다.');
     await say('orphan', '구십일 번이에요. 창고 밑에서 왔어요.');
     await say('clan_namgung', '…그 나무패, 이리 줘 봐라.');
-    await narr('남궁진은 나무패를 한참 들여다보더니 아무 말 없이 돌려주었다.');
+    await narr('남궁선은 나무패를 한참 들여다보더니 아무 말 없이 돌려주었다.');
   }
   ctx.cg('council');
   await narr('그때 맹주 연경추가 마당으로 걸어 들어왔다. 호위는 한 명도 없었다.');
@@ -326,12 +326,12 @@ async function sa5() {
 }
 async function saNamgung() {
   await ctx.chap(5, '장강의 불', '남문');
-  await say('clan_namgung', '남궁세가 선봉 남궁진이다. 역적이 사파 앞잡이까지 됐군.', 'a');
+  await say('clan_namgung', '남궁세가 선봉 남궁선이다. 역적이 사파 앞잡이까지 됐군.', 'a');
   await say('me', '비켜 주세요. 성 안 사람들이 빠져나갈 시간은 드릴게요.');
   await say('clan_namgung', '남궁은 물러나지 않는다. 칼을 뽑아라.', 'a');
-  await ctx.duel({ foes: ['clan_namgung'], arena: 'ring', bgm: 'boss', title: '남문 나루 · 남궁진', yieldAt: .25, noLoot: true });
+  await ctx.duel({ foes: ['clan_namgung'], arena: 'ring', bgm: 'boss', title: '남문 나루 · 남궁선', yieldAt: .25, noLoot: true });
   await say('clan_namgung', '베어라. 포로로 끌려가 가문에 얼굴을 못 들 바에는 그게 낫다.', 'a');
-  const c = await choice('남궁진이 칼을 떨어뜨린 채 나를 본다.', ['살려 보낸다', '포로로 잡는다']);
+  const c = await choice('남궁선이 칼을 떨어뜨린 채 나를 본다.', ['살려 보낸다', '포로로 잡는다']);
   if (c === 0) { await say('me', '가세요. 성문만 열어 두고 가시면 돼요.'); await say('clan_namgung', '…이 빚은 칼로 갚겠다.', 'a'); F().sa_nam_spared = true; ctx.rep('jeong', 2); ctx.love('clan_namgung'); }
   else { await say('baekrang', '남궁가 후계자라니. 몸값은 제가 매길게요.', 'h'); ctx.rep('sa', 2); }
   ctx.cg('fire_gu');
@@ -398,7 +398,7 @@ Story.providers.push(function part4(id) {
   if (id === 'guhwa') {
     const go = (at('jg1') && !F().jg_rice) || (at('fr1') && !!F().fr_talk && !F().fr_rice) || (at('sa3') && !F().sa_rice2) || (at('ma3') && !F().ma_rice);
     if (go) n.push(job({ id: 'job_store', spr: 'Knight', x: 41, y: 18, hint: '창고 뒷담 넘기', talk: granary }));
-    if (at('sa3') && F().sa_rice2) n.push(job({ id: 'job_nam', spr: 'Namgung', x: 24.5, y: 26, hint: '남궁진과 맞서기', talk: saNamgung }));
+    if (at('sa3') && F().sa_rice2) n.push(job({ id: 'job_nam', spr: 'Namgung', x: 24.5, y: 26, hint: '남궁선과 맞서기', talk: saNamgung }));
   }
   if (id === 'fort' && at('jg3') && G.ch5.done() && F().jg_od) n.push(job({ id: 'samaung', spr: 'Samaung', x: 18, y: 20, hint: '패천도 만나기', talk: samaungTalk }));  // 흑도맹 거두 셋을 먼저 막는다(js/part4b.js)
   if (id === 'cheongha' && at('fr2')) n.push(job({ id: 'elder', spr: 'Monk', x: 23.5, y: 18.4, dir: 2, talk: frElder }));

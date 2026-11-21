@@ -4,7 +4,7 @@
 
 이름 없는 적들은 걷는 도트만 있어서, 싸울 때 서 있는 그림을 기울여 흉내만 낸다. 동작 칸을 받으면 칼을 휘두르고 맞고 쓰러지는 모습이 그 그림으로 나온다.
 
-**이 단계에서 만들 것: 5개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -24,55 +24,25 @@
 
 ## 만들 것
 
-### 1. `mob_bandit-c.png` — 산적 — 키 `mob_bandit`
+### 1. `mob_bandit-c.png` — 산적 — 키 `mob_bandit` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_bandit-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_bandit-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+### 2. `mob_brute-c.png` — 거한 — 키 `mob_brute` — **받음**
 
-무기와 몸짓: 걷는 도트에 그려진 칼 그대로. 내지름은 크게 옆으로 후려 베기.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `mob_brute-c.png` — 거한 — 키 `mob_brute`
+### 3. `mob_pirate-c.png` — 수적 — 키 `mob_pirate` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_brute-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_brute-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+### 4. `mob_archer-c.png` — 궁수 — 키 `mob_archer` — **받음**
 
-무기와 몸짓: 맨주먹이나 걷는 도트에 그려진 몽둥이. 내지름은 위에서 아래로 내리치기.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `mob_pirate-c.png` — 수적 — 키 `mob_pirate`
+### 5. `mob_assassin-c.png` — 자객 — 키 `mob_assassin` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_pirate-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_pirate-b.png)
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 걷는 도트에 그려진 갈고리 칼. 내지름은 낮게 베어 들어가기.
-```
-
-### 4. `mob_archer-c.png` — 궁수 — 키 `mob_archer`
-
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_archer-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_archer-b.png)
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 활. 준비는 시위를 당긴 자세, 내지름은 화살을 막 놓은 순간(화살은 그리지 않는다), 거둠은 화살통에 손을 뻗는 자세.
-```
-
-### 5. `mob_assassin-c.png` — 자객 — 키 `mob_assassin`
-
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_assassin-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/mob_assassin-b.png)
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 단검 두 자루. 내지름은 몸을 낮춰 앞으로 찌르기.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 

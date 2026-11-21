@@ -253,7 +253,7 @@ done('gangho_ex')
 == 끝: 모형 1개, 문제 0개, 폴더 …/gangho_models (틀 2026-11-20b) ==
 ```
 
-묶음 하나를 통째로 쓴 본보기는 **받아서 게임에 넣은 M1**이다: https://dltkdwhdhkd-design.github.io/gangho/art-src/blender/gangho_m1.py — 단면을 이어(`loft`) 모서리를 깎은 기둥과 층진 주춧돌, 골이 파인 기와 덮개를 만들었다. 다음 묶음도 이만큼 한다(Claude가 상자 몇 개로 치수만 맞춘 것은 `tools/blender/walls.py`에 견줄 거리로 남아 있다).
+묶음 하나를 통째로 쓴 본보기는 **받아서 게임에 넣은 M1**이다: https://dltkdwhdhkd-design.github.io/gangho/art-src/blender/gangho_m1.py — 단면을 이어(`loft`) 모서리를 깎은 기둥과 층진 주춧돌, 골이 파인 기와 덮개를 만들었다. 다음 묶음도 이만큼 한다(Claude가 상자 몇 개로 치수만 맞춘 것은 `art-src/blender/gangho_m1.py`에 견줄 거리로 남아 있다).
 
 ### 틀 전문
 

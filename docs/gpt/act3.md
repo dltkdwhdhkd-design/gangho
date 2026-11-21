@@ -1,10 +1,10 @@
-# 강호행 요청 29: 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진
+# 강호행 요청 29: 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁선
 
 단계 이름 `act3` · 종류: 동작 칸 · 차례표: https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/index.md
 
 함께 싸우는 동료와 히로인의 동작 칸이다. 소연하·철우·윤설·백랑은 받았다.
 
-**이 단계에서 만들 것: 6개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -24,65 +24,29 @@
 
 ## 만들 것
 
-### 1. `c_haho-c.png` — 하후민 — 키 `c_haho`
+### 1. `c_haho-c.png` — 하후민 — 키 `c_haho` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/c_haho-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/c_haho-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+### 2. `c_mun-c.png` — 문창 — 키 `c_mun` — **받음**
 
-무기와 몸짓: 걷는 도트에 그려진(들거나 찬) 무기 그대로. 무기가 없는 사람은 맨손(주먹과 손바닥)으로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `c_mun-c.png` — 문창 — 키 `c_mun`
+### 3. `c_owol-c.png` — 오월 — 키 `c_owol` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/c_mun-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/c_mun-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+### 4. `clan_dang-c.png` — 당소연 — 키 `clan_dang` — **받음**
 
-무기와 몸짓: 걷는 도트에 그려진(들거나 찬) 무기 그대로. 무기가 없는 사람은 맨손(주먹과 손바닥)으로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `c_owol-c.png` — 오월 — 키 `c_owol`
+### 5. `clan_moyong-c.png` — 모용설 — 키 `clan_moyong` — **받음**
 
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/c_owol-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/c_owol-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
+### 6. `clan_namgung-c.png` — 남궁선 — 키 `clan_namgung` — **받음**
 
-무기와 몸짓: 걷는 도트에 그려진(들거나 찬) 무기 그대로. 무기가 없는 사람은 맨손(주먹과 손바닥)으로.
-```
-
-### 4. `clan_dang-c.png` — 당소연 — 키 `clan_dang`
-
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/clan_dang-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/clan_dang-b.png)
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 걷는 도트에 그려진(들거나 찬) 무기 그대로. 무기가 없는 사람은 맨손(주먹과 손바닥)으로.
-```
-
-### 5. `clan_moyong-c.png` — 모용설 — 키 `clan_moyong`
-
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/clan_moyong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/clan_moyong-b.png)
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 걷는 도트에 그려진(들거나 찬) 무기 그대로. 무기가 없는 사람은 맨손(주먹과 손바닥)으로.
-```
-
-### 6. `clan_namgung-c.png` — 남궁진 — 키 `clan_namgung`
-
-걷는 도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/clan_namgung-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/clan_namgung-b.png)
-
-```text
-규칙대로 이 사람의 동작 여섯 칸(가로 한 줄). 위 주소의 걷는 도트와 같은 사람으로.
-
-무기와 몸짓: 걷는 도트에 그려진(들거나 찬) 무기 그대로. 무기가 없는 사람은 맨손(주먹과 손바닥)으로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 
@@ -99,4 +63,4 @@
 
 ---
 
-다음 단계: 30번 `face5` 화산귀환 인물 얼굴 5: 진무, 당소소, 당군악, 당보, 당호, 당화 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face5.md
+다음 단계: 33번 `ui3` 화면 틀 3: 싸움 화면 틀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md

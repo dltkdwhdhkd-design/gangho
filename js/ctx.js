@@ -62,7 +62,7 @@ export const Story = {
     return { npcs, spots, trigs, roam, hunt };
   },
   begin() { G.mainPlot?.start(); G.scene = 'field'; G.field.load('cheongha', 22, 25, 1); $('#fade').style.opacity = 1; G.field.run(Story.scenes.opening); },
-  resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0); G.mainPlot?.resume(); },
+  resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0, 'saved'); G.mainPlot?.resume(); },
   async line(t) { await say(null, t); },
   async encounter(r) {
     if (r.intro) await say(null, r.intro);

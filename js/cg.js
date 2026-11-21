@@ -54,7 +54,7 @@ export const CG = {
   bond_so: ['달밤', '#101428', '#4a5a8a', '달빛 아래 칼등으로 주인공 발목을 툭 치는 소연하'],
   bond_dang: ['이름 새긴 찻잔', '#1a2a24', '#4a7a5a', '흰 찻잔을 내미는 당소연, 잔 밑바닥에 새겨진 이름'],
   bond_mo: ['배고파', '#2a2a3a', '#8a8ab0', '거울 앞에서 처음 자기 말을 하고 얼굴이 붉어진 모용설'],
-  bond_nam: ['천 번', '#141c2c', '#6a7a9a', '새벽 담장 안, 피 밴 손으로 검을 내리는 남궁진'],
+  bond_nam: ['천 번', '#141c2c', '#6a7a9a', '새벽 담장 안, 피 밴 손으로 검을 내리는 남궁선'],
   bond_bae: ['손가락 한 마디', '#201418', '#7a3a3a', '붕대 감은 손으로 주사위를 내미는 백랑'],
   bond_hyeok: ['서툰 웃음', '#1a1424', '#6a4a7a', '달맞이꽃 향 앞에서 처음 소리 내어 웃는 혁련하'],
   bond_cheol: ['주먹밥 세 개', '#2a2418', '#7a6a4a', '주먹밥 하나를 먼저 내미는 철우'],
@@ -87,12 +87,54 @@ export function sceneArt(id) {
   const key = 'cg_' + id;
   return (G.S?.gender === 'f' && ART.get(key + '_f')) || ART.get(key);
 }
-export function showCG(id) {
-  const e = layer(); if (!e) return; const c = CG[id] || [id, '#14110f', '#2a2018'], pic = sceneArt(id);
-  e.className = 'on'; e.innerHTML = '';
-  if (pic) { e.style.background = `#000 url(${pic.src}) center/cover`; return; }
-  e.style.background = `linear-gradient(${c[1]},${c[2]})`;
-  e.innerHTML = `<div class="ttl">${c[0]}</div>`;
+const locations = {
+  yun:['clinic','river','clinic','inn'], so:['court','archive','grove','grove'],
+  clan_dang:['clinic','market','clinic','grove'], clan_moyong:['hall','archive','court','hall'],
+  clan_namgung:['inn','court','court','inn'], baekrang:['market','inn','market','river'],
+  hyeok:['market','archive','grove','grove'], cheol:['inn','hall','river'],
+  igyeom:['river','river','market','river'], mugyeong:['market','court','market','inn'],
+  yeonjae:['archive','market','archive','hall'], jaeha:['market','river','grove','grove'],
+};
+let currentScene;
+function drawBond() {
+  if(!currentScene)return;
+  const {id,phase,place}=currentScene, e=layer();
+  if(!e)return;
+  const original=id==='clan_namgung' && (phase===0 ? 'bond_nam_noodles' : phase===1 ? 'bond_nam' : null);
+  const painted=original && sceneArt(original);
+  e.className='on'; e.replaceChildren(); e.dataset.actor=id; e.dataset.place=place;
+  if(painted){e.style.background=`#282424 url("${painted.src}") center/cover`;return;}
+  e.style.background=`#403731 url("assets/art/scenes/${place}.webp") center/cover`;
+  const emotion=phase==='confess'||phase==='wedding'||phase===3?'b':phase===2?'h':'n';
+  const portrait=ART.get(id+'_'+emotion)||ART.get(id+'_n');
+  if(portrait){
+    const actor=new Image(); actor.className='bond-actor';actor.src=portrait.src; e.append(actor);
+  }
 }
-export function hideCG() { const e = layer(); if (e) { e.className = ''; e.innerHTML = ''; e.style.background = ''; } }
-G.hideCG = hideCG;
+export async function withBondScene(id,phase,run,explicitPlace) {
+  const old=currentScene;
+  const place=explicitPlace || (phase==='wedding'?'hall':phase==='confess'?'grove':phase==='oath'?'river':null)
+    || locations[id]?.[Number.isInteger(phase)?phase:0] || 'inn';
+  currentScene={id,phase,place};
+  try {drawBond();return await run();} finally {currentScene=old;hideCG();}
+}
+export function showCG(id) {
+  const e=layer();if(!e)return;
+  const c=CG[id]||[id,'#14110f','#2a2018'],pic=sceneArt(id);
+  if (currentScene && (!pic || (currentScene.phase==='wedding' && id!=='wedding'))) return drawBond();
+  e.className='on';e.replaceChildren();
+  if(pic){e.style.background=`#221e1c url("${pic.src}") center/cover`;return;}
+  e.style.background=`linear-gradient(${c[1]},${c[2]})`;
+  e.innerHTML=`<div class="ttl">${c[0]}</div>`;
+}
+export function suspendBondScene() {
+  const scene=currentScene;
+  if(!scene)return;
+  currentScene=undefined; hideCG();
+  return ()=>{currentScene=scene;drawBond();};
+}
+export function hideCG() {
+  if(currentScene)return drawBond();
+  const e=layer();if(e){e.className='';e.replaceChildren();e.style.background='';delete e.dataset.actor;delete e.dataset.place;}
+}
+G.hideCG=hideCG;

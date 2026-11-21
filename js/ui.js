@@ -191,7 +191,7 @@ function tabLove(B) {
   const riverHint = !S.flags.met_igyeom ? '<p class="hint">청하진 나루에 가면 수로 지도를 그리는 서이겸을 만날 수 있습니다.</p>' : '';
   const roadHints = Object.entries(L.cand).filter(([key,c]) => c.place && !S.flags['met_'+key]).map(([,c]) => '<p class="hint">'+c.place+' · '+c.name+'</p>').join('');
   if (!list.length) { B.innerHTML = riverHint + roadHints; return; }
-  B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 이성 인물에게는 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와는 셋째 사연 뒤에 ${S.gender === 'f' ? '의남매' : '의형제'}를 맺을 수 있습니다.</p>` + riverHint + roadHints + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${c.spr || faces[k]}" data-a="${k}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated;border-radius:4px"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || S.sworn === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">${canRomance(k) ? '연애 가능' : '우정'} · 호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${c.desc || desc[k]}</div></div></div>`).join('');
+  B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 이성 인물에게는 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와 화산귀환 인물에게는 셋째 사연 뒤에 의형제·의자매·의남매의 맹세를 청할 수 있습니다.</p>` + riverHint + roadHints + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${c.spr || faces[k]}" data-a="${k}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated;border-radius:4px"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || L.isSworn(k) ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">${canRomance(k) ? '연애 가능' : '우정'} · 호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${c.desc || desc[k]}</div></div></div>`).join('');
   // 일러스트가 있으면 얼굴 부분을 잘라 쓴다. 없으면 옛 도트 얼굴
   $$('canvas[data-f]', B).forEach(c => { const x = c.getContext('2d'), a = ART.get(c.dataset.a + '_n');
     if (a) {
@@ -235,6 +235,9 @@ function tabSet(B) {
     const NM = { low: '낮음', mid: '보통', high: '높음' }, fps = () => { const e = $('#hdFps'); if (!e) return clearInterval(t); e.textContent = H.off ? '' : `초당 ${H.fps()}장${H.opt.fx === 'auto' ? ` · 지금 ${NM[H.fxNow()]}${H.fxNow() === 'low' ? '(느려서 낮춤)' : ''}` : ''}`; }; const t = setInterval(fps, 500); fps();
   }
   { // 쿼터뷰 미리보기: 그림을 바꾸는 동안 비스듬한 집으로 바꿔 보는 스위치. 지도를 다시 만들어야 해서 저장하고 새로 연다
+    const restore=el('button','btn sm','HD-2D로 열기');
+    restore.onclick=()=>{save();try{localStorage.setItem('gangho_view','hd');}catch{}const url=new URL(location.href);url.searchParams.set('hd2d','1');location.assign(url);};
+    B.appendChild(restore);
     const on = (() => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } })();
     const d = el('div', 'note', `쿼터뷰 미리보기 <b style="font-weight:400">${on ? '켜짐' : '꺼짐'}</b> · 그림을 쿼터뷰로 바꾸는 중이라 아직 임시 그림이 섞여 있습니다. `); d.style.marginTop = '8px';
     const b = el('button', 'btn', on ? '끄기' : '켜기'); b.onclick = () => { try { save(); localStorage.setItem('gangho_iso', on ? '0' : '1'); } catch (e) { } location.reload(); }; d.appendChild(b); B.appendChild(d);

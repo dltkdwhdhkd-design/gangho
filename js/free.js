@@ -1,3 +1,5 @@
+import { factionOptions, standingLabel } from './faction-talk.js';
+import { standing } from './martial-standing.js';
 // 자유 모드: 이야기 없이 강호를 산다. 소속, 임무, 직위, 세력 다툼
 import { G, Sound, toast, josa, el, esc, rnd, pick, fadeTo, $ } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
@@ -19,7 +21,7 @@ FACS.forEach(f => { const l = LOCS.find(q => q.fac === f.id); if (HOME[f.id]) f.
 export const fac = id => FACS.find(f => f.id === id);
 export const rankName = (f, r) => (f.id === 'gaebang' ? RANKS.개방 : RANKS[f.group])[r];
 const T = { 1: [1000, 28, 8, 66, 130, 60, 1.05, 130], 2: [1500, 34, 10, 72, 220, 100, .95, 170], 3: [2200, 40, 12, 76, 340, 160, .85, 220] };
-for (const c of EXTRA) { const t = T[c.tier]; FOES['clan_' + c.id] = { name: c.who, spr: 'chars/' + c.spr, hp: t[0], atk: t[1], def: t[2], spd: t[3], exp: t[4], silver: t[5], pause: t[6], poise: t[7], moves: c.moves, boss: 1, tier: c.tier, title: c.name, wpn: c.wpn, guard: c.tier * .4, phases: [{ hp: .5, pause: t[6] * .8 }] }; }
+for (const c of EXTRA) { const t = T[c.tier]; FOES['clan_' + c.id] = { ...standing(c), artId:c.key, name: c.who, spr: 'chars/' + c.spr, hp: t[0], atk: t[1], def: t[2], spd: t[3], exp: t[4], silver: t[5], pause: t[6], poise: t[7], moves: c.moves, boss: 1, tier: c.tier, title: c.name, wpn: c.wpn, guard: c.tier * .4, phases: [{ hp: .5, pause: t[6] * .8 }] }; }
 Object.assign(WHO, { steward: { name: '집사', face: 'OldMan' } });
 
 // ── 적 ──
@@ -202,15 +204,15 @@ async function leave(f) {
 async function promote(f) {
   const fr = Fr(), r = fr.rank + 1, lv = S().lv, arena = MAPS[f.at[0]]?.arena || 'court';
   if (r === 3) { const t = TRIALS[f.id]; for (const [w, l] of t.lines) await say(w, l); if (!await ctx.duel({ foes: group(t.kind, lv, 3), arena, bgm: 'fight', title: '장로 시험', optional: true, noIntro: true })) return; await narr(t.end); }
-  else if (r === 4) { await say(f.key, '내 자리를 원하는군. 칼로 말하시오.'); if (!await ctx.duel({ foes: ['clan_' + f.id], arena, bgm: 'boss', title: `${f.name} 승계전`, yieldAt: .2, optional: true, noLoot: true })) return; fr.head = true; addNews(`${S().name}, ${f.name}의 ${rankName(f, 4)} 자리에 오르다.`); }
-  else { await say(f.key, '실력을 보겠소.'); if (!await ctx.duel({ foes: group('guard', lv, r + 1), arena, bgm: 'fight', title: '승급 시험', optional: true, noIntro: true })) return; }
+  else if (r === 4) { await say(f.key, '내 자리를 원하는군. 칼로 말하시오.'); if (!await ctx.duel({ spar: true, foes: ['clan_' + f.id], arena, bgm: 'boss', title: `${f.name} 승계전`, yieldAt: .2, optional: true, noLoot: true })) return; fr.head = true; addNews(`${S().name}, ${f.name}의 ${rankName(f, 4)} 자리에 오르다.`); }
+  else { await say(f.key, '실력을 보겠소.'); if (!await ctx.duel({ spar: true, foes: group('guard', lv, r + 1), arena, bgm: 'fight', title: '승급 시험', optional: true, noIntro: true })) return; }
   fr.rank = r; grantRank(f); addRep(f.id, 10); Sound.sfx('ok3'); toast(`${josa(rankName(f, r), '으로/로')} 올랐다`, 3.5);
   ctx.note(`${f.name} ${rankName(f, r)}가 되었다.`);
 }
 async function stipend(f) { const fr = Fr(), d = S().daily; d.stipend = 1; const v = Math.round((20 + fr.rank * 30) * Math.max(1, dayLen() / 600)); S().silver += v; Sound.sfx('coin'); await say(f.key, `이번 봉록이오. 은자 ${v}냥.`); }
 async function sparClan(f) {
   S().daily['duel_' + f.id] = 1;
-  const won = await ctx.duel({ foes: ['clan_' + f.id], arena: MAPS[f.at[0]]?.arena || 'court', bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .25, optional: true, noLoot: true });
+  const won = await ctx.duel({ spar: true, foes: ['clan_' + f.id], arena: MAPS[f.at[0]]?.arena || 'court', bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .25, optional: true, noLoot: true });
   if (!won) { await say(f.key, '다시 오시오.'); return; }
   addRep(f.id, 8); Fr().fame += 6; F()['clan_' + f.id] = true;
   if (LOOT[f.id]) await G.life.lootPick(f.who, LOOT[f.id]); else ctx.silver(100);
@@ -228,12 +230,13 @@ export async function facTalk(f) {
     if (G.jh.hostile(f.id)) { await say(f.key, '네가 여기까지 걸어 들어온 건 칭찬해 주지.'); const won = await ctx.duel({ foes: ['clan_' + f.id], arena: G.field.m.arena, bgm: 'boss', title: `${f.name} · ${f.who}`, yieldAt: .2, optional: true, noLoot: true }); if (won) { const c = await choice(`${josa(f.who, '이/가')} 쓰러졌다. 칼을 어떻게 할까?`, ['거둔다', '목을 벤다']); if (c === 0) { await say(f.key, '오늘 일은 기억하겠다.'); G.jh.addRep(f.id, 20, false); } else { await narr(`${f.name}의 어른이 내 칼에 죽었다. 강호가 이 일을 오래 말할 것이다.`); Fr().dead[f.id] = 1; Fr().infamy += 20; G.jh.news(`${S().name}, ${f.name}의 ${josa(f.who, '을/를')} 베다.`); G.jh.addRep(f.id, -40); Fr().power[f.id] = 20; G.field.refresh(); } } return; }
     if (!S().daily['duel_' + f.id]) opts.push(['비무를 청한다', () => sparClan(f)]);
     if (!fr.fac) opts.push(['입문을 청한다', () => join(f)]);
-    opts.push(['이곳에 대해 묻는다', async () => { await narr(f.desc); }]);
+
   }
   opts.push(['그만둔다', async () => { }]);
+  opts.splice(opts.length-1,0,...factionOptions(f));
   if (f.hi && !F()['hi_' + f.id]) { F()['hi_' + f.id] = 1; await say(f.key, f.hi); }
   const lab = mine ? `${f.name} · ${rankName(f, fr.rank)} · 공적 ${fr.merit}${fr.rank < 4 ? `/${RANK_MERIT[fr.rank + 1]} (레벨 ${RANK_LV[fr.rank + 1]})` : ''}` : `${f.name} · 우호 ${repOf(f.id)}`;
-  const c = await choice(lab, opts.map(o => o[0])); await opts[c][1]();
+  const c = await choice(lab+' · '+standingLabel(f), opts.map(o => o[0]), f.key); await opts[c][1]();
 }
 
 // ── 세력 다툼 ──

@@ -49,4 +49,4 @@ Distant mountain silhouette strips for the far background of a pixel-art wuxia R
 
 ---
 
-다음 단계: 52번 `act6` 맞서는 사람 동작 칸 2: 고진, 월천, 연경추, 남화, 만화부인 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act6.md
+다음 단계: 53번 `m13` 모형 M13: 눈에 띄는 것 2: 다리, 누각, 종각, 돌사자, 비무대 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/m13.md

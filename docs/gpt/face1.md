@@ -4,7 +4,7 @@
 
 『화산귀환』 인물(팬 캐릭터)은 걷는 도트는 있는데 대화 일러스트가 없어서, 말할 때 다른 사람의 얼굴이 나온다. 이미 있는 도트를 보고 그 사람의 일러스트를 그린다.
 
-**이 단계에서 만들 것: 6개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -22,65 +22,29 @@
 
 ## 만들 것
 
-### 1. `cheongmyeong_n.png` — 청명 (화산파 제자) — 키 `cheongmyeong`
+### 1. `cheongmyeong_n.png` — 청명 (화산파 제자) — 키 `cheongmyeong` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/cheongmyeong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/cheongmyeong-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 2. `baekcheon_n.png` — 백천 (화산파 제자) — 키 `baekcheon` — **받음**
 
-인물: 청명, 화산파 제자, 남자. 뻔뻔하고 장난기 많은 눈, 한쪽 입꼬리만 올라간 비웃음, 검을 어깨에 걸침. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `baekcheon_n.png` — 백천 (화산파 제자) — 키 `baekcheon`
+### 3. `yuseol_n.png` — 유이설 (화산파 제자) — 키 `yuseol` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/baekcheon-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/baekcheon-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 4. `yunjong_n.png` — 윤종 (화산파 제자) — 키 `yunjong` — **받음**
 
-인물: 백천, 화산파 제자, 남자. 반듯하고 단정한 대사형, 곧은 눈썹, 바른 자세. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `yuseol_n.png` — 유이설 (화산파 제자) — 키 `yuseol`
+### 5. `jogeol_n.png` — 조걸 (화산파 제자) — 키 `jogeol` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/yuseol-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/yuseol-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 6. `hyeonjong_n.png` — 현종 (화산파 장문인) — 키 `hyeonjong` — **받음**
 
-인물: 유이설, 화산파 제자, 여자. 말없고 차가운 미인, 무표정, 검을 품에 안음. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 4. `yunjong_n.png` — 윤종 (화산파 제자) — 키 `yunjong`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/yunjong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/yunjong-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 윤종, 화산파 제자, 남자. 순하고 성실한 얼굴, 살짝 지친 웃음. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 5. `jogeol_n.png` — 조걸 (화산파 제자) — 키 `jogeol`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jogeol-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jogeol-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 조걸, 화산파 제자, 남자. 다혈질 청년, 찌푸린 눈썹, 주먹을 쥠. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 6. `hyeonjong_n.png` — 현종 (화산파 장문인) — 키 `hyeonjong`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hyeonjong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hyeonjong-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 현종, 화산파 장문인, 남자. 온화하고 인자한 노장문인, 흰 수염. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 
@@ -95,4 +59,4 @@
 
 ---
 
-다음 단계: 24번 `face2` 화산귀환 인물 얼굴 2: 현영, 현상, 운검, 운암, 운각, 백상 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face2.md
+다음 단계: 25번 `ui1` 화면 틀 1: 창과 단추 틀, 붓자국 띠 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui1.md

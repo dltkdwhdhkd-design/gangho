@@ -4,7 +4,7 @@
 
 『화산귀환』 인물(팬 캐릭터)은 걷는 도트는 있는데 대화 일러스트가 없어서, 말할 때 다른 사람의 얼굴이 나온다. 이미 있는 도트를 보고 그 사람의 일러스트를 그린다.
 
-**이 단계에서 만들 것: 6개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -22,65 +22,29 @@
 
 ## 만들 것
 
-### 1. `jinmu_n.png` — 진무 (무당파 제자) — 키 `jinmu`
+### 1. `jinmu_n.png` — 진무 (무당파 제자) — 키 `jinmu` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jinmu-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jinmu-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 2. `dangsoso_n.png` — 당소소 (화산파 제자 (당가 출신)) — 키 `dangsoso` — **받음**
 
-인물: 진무, 무당파 제자, 남자. 투덜대는 젊은 무당 제자. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `dangsoso_n.png` — 당소소 (화산파 제자 (당가 출신)) — 키 `dangsoso`
+### 3. `danggunak_n.png` — 당군악 (사천당가 가주) — 키 `danggunak` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangsoso-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangsoso-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 4. `dangbo_n.png` — 당보 (사천당가 어른) — 키 `dangbo` — **받음**
 
-인물: 당소소, 화산파 제자 (당가 출신), 여자. 밝고 당찬 소녀, 장난스러운 미소. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `danggunak_n.png` — 당군악 (사천당가 가주) — 키 `danggunak`
+### 5. `dangho_n.png` — 당호 (사천당가 사람) — 키 `dangho` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/danggunak-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/danggunak-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 6. `danghwa_n.png` — 당화 (사천당가 사람) — 키 `danghwa` — **받음**
 
-인물: 당군악, 사천당가 가주, 남자. 냉철하고 위엄 있는 당가 가주. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 4. `dangbo_n.png` — 당보 (사천당가 어른) — 키 `dangbo`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangbo-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangbo-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 당보, 사천당가 어른, 남자. 짓궂은 당가 노고수, 손가락 사이에 암기. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 5. `dangho_n.png` — 당호 (사천당가 사람) — 키 `dangho`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangho-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/dangho-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 당호, 사천당가 사람, 남자. 날카로운 당가 사람. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 6. `danghwa_n.png` — 당화 (사천당가 사람) — 키 `danghwa`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/danghwa-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/danghwa-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 당화, 사천당가 사람, 남자. 독약 냄새를 풍기는 당가 사람. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 
@@ -95,4 +59,4 @@
 
 ---
 
-다음 단계: 31번 `face6` 화산귀환 인물 얼굴 6: 당잔, 당패, 홍대광, 구칠, 종팔, 위립산 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face6.md
+다음 단계: 33번 `ui3` 화면 틀 3: 싸움 화면 틀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md

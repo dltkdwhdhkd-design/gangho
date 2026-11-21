@@ -99,7 +99,7 @@ function anchors(m,seed){
 const persistPos=()=>{const f=G.field,k=f.m.k||1;G.S.px=f.p.x/k;G.S.py=f.p.y/k;G.S.dir=f.p.dir;};
 function place(id,x,y,dir){
  const f=G.field,m=MAPS[id],k=m.k||1;
- f.load(id,x/(TS*k),y/(TS*k),dir);f.p.x=x;f.p.y=y;f.p.dir=dir;f.camera(1);persistPos();
+ f.load(id,x/(TS*k),y/(TS*k),dir,'saved');persistPos();
 }
 function enter(a,fromSave=false){
  const site=siteOf(a);G.world.ensure(site.map);

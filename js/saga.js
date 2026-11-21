@@ -129,7 +129,7 @@ async function tourTalk(a) {
     if (c === 1) { await showBracket(a); return; } if (c) return;
     if (s.silver < 50) { await say(null, '참가비가 모자란다.'); return; } s.silver -= 50; Sound.sfx('coin');
     await narr('예선 상대는 둘이었다. 이긴 사람만 이름을 올린다.');
-    const won = await ctx.duel({ foes: G.free.group('rogue', lv(), 2), arena: G.field.m.arena, bgm: 'fight', title: `${a.place} 무림대회 예선`, optional: true, noIntro: true, yieldAt: .25, noLoot: true });
+    const won = await ctx.duel({ spar: true, foes: G.free.group('rogue', lv(), 2), arena: G.field.m.arena, bgm: 'fight', title: `${a.place} 무림대회 예선`, optional: true, noIntro: true, yieldAt: .25, noLoot: true });
     if (!won) { a.cut = 1; await say(null, '예선에서 떨어졌다. 다음 대회를 기다려야 한다.'); return; }
     const i = a.ent.reduce((b, e, k) => e.pw < a.ent[b].pw ? k : b, 0); a.ent[i] = { me: 1, lv: lv(), pw: 0 }; a.me = i;
     news(`${josa(s.name, '이/가')} ${a.place} 무림대회 본선에 이름을 올렸다.`);
@@ -139,7 +139,7 @@ async function tourTalk(a) {
   for (let r = a.res.length; r < 3; r++) {
     const R = pairs(a, r), mine = R.find(p => p.includes(a.me)), opp = mine[0] === a.me ? mine[1] : mine[0];
     await narr(`${RN[r]}. 상대는 ${label(a.ent[opp])}.`);
-    const won = await ctx.duel({ foes: [master(a, opp, r)], arena: G.field.m.arena, bgm: r === 2 ? 'boss' : 'fight', title: `${a.place} 무림대회 ${RN[r]}`, optional: true, noIntro: true, yieldAt: .25, noLoot: true });
+    const won = await ctx.duel({ spar: true, foes: [master(a, opp, r)], arena: G.field.m.arena, bgm: r === 2 ? 'boss' : 'fight', title: `${a.place} 무림대회 ${RN[r]}`, optional: true, noIntro: true, yieldAt: .25, noLoot: true });
     a.res[r] = R.map(p => p.includes(a.me) ? (won ? a.me : opp) : sim(a, p));
     if (!won) { a.out = 1; news(`${a.place} 무림대회 ${RN[r]}에서 ${josa(s.name, '이/가')} 떨어졌다.`); await say(null, '단상에서 내려왔다. 구경꾼들이 벌써 다음 판을 보고 있었다.'); return; }
     if (r < 2) { const np = pairs(a, r + 1).find(p => p.includes(a.me)), no = np[0] === a.me ? np[1] : np[0]; const c = await choice(`${RN[r]}을 이겼다. 다음 상대는 ${label(a.ent[no])}.`, ['바로 오른다', '숨을 고르고 다시 온다']); if (c) return; }
@@ -245,8 +245,8 @@ async function battle(a) {
   await narr('저쪽 깃발이 쓰러졌다. 함성이 들판을 덮었다.');
 }
 // 내 편 사람과 이름 붙은 적
-function ally(f, L, i) { const base = G.jh.disciple(f, L, true), id = `sga_${f.id}_${i}`; FOES[id] = { ...FOES[base], name: `${f.name} ${['사형', '장로', '사제'][i % 3]}`, exp: 0, silver: 0 }; return id; }
-function named(f, L) { const base = G.jh.disciple(f, L, true), id = `sgn_${f.id}`; FOES[id] = { ...FOES[base], name: `${f.name} 장로`, hp: Math.round(FOES[base].hp * 1.6), boss: 1 }; return id; }
+function ally(f, L, i) { const base = G.jh.disciple(f, L, ['진전 제자','장로','내문 제자'][i%3]), id = `sga_${f.id}_${i}`; FOES[id] = { ...FOES[base], name: `${f.name} ${['사형', '장로', '사제'][i % 3]}`, exp: 0, silver: 0 }; return id; }
+function named(f, L) { const base = G.jh.disciple(f, L, '장로'), id = `sgn_${f.id}`; FOES[id] = { ...FOES[base], name: `${f.name} 장로`, hp: Math.round(FOES[base].hp * 1.6), boss: 1 }; return id; }
 
 // ── 무림맹과 마교 ──
 const CULT = () => fac('cheonma');

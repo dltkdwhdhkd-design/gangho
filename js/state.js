@@ -1,3 +1,4 @@
+import { fanGenders } from './fan-bonds.js';
 // 저장 자료와 능력치 계산
 import { G, Sound, toast, josa } from './core.js';
 import { WEAPONS, HEARTS, SKILLS, expNeed, rankOf } from './data.js';
@@ -8,6 +9,7 @@ const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
 export const LEAD_LOOK = { m: 'BlueSamurai', f: 'JadeRunner' };
 const romanceGender = Object.freeze({
+  ...fanGenders,
   yun: 'f', so: 'f', clan_dang: 'f', clan_moyong: 'f', clan_namgung: 'f', baekrang: 'f', hyeok: 'f',
   igyeom: 'm', mugyeong: 'm', yeonjae: 'm', jaeha: 'm',
 });
@@ -37,7 +39,7 @@ export function bonus(S = G.S) {
   if (G.party) add(G.party.fx());
   if (S.meal && S.meal.left > 0) add(DB[S.meal.id].meal);
   if (canRomance(S.married, S) && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
-  if (S.sworn && SPOUSE_FX[S.sworn]) add(SPOUSE_FX[S.sworn]);
+  for (const id of new Set([S.sworn,...(S.swornBonds||[])])) if (SPOUSE_FX[id]) add(SPOUSE_FX[id]);
   if (S.rested === S.day) add({ atk: 5 });
   return b;
 }
@@ -131,6 +133,7 @@ function migrate(S) {
     S.love.igyeom ??= 0;
     S.v = 4;
   }
+  if (Array.isArray(S.notes)) S.notes = S.notes.map(n => typeof n === 'string' ? n.replaceAll('남궁진', '남궁선') : n);
   // Old saves could contain a couple created before courtship eligibility existed.
   for (const id of new Set([S.partner, S.married])) {
     const name = G.life?.cand?.[id]?.name;

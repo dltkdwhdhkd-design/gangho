@@ -1,3 +1,6 @@
+import { fanCandidates } from './fan-bonds.js';
+import { withBondScene } from './cg.js';
+import { factionOptions } from './faction-talk.js';
 import { companionDialogue } from './companion-dialogue.js';
 import { roadCompanions } from './road-companions.js';
 // 생활: 제작, 채집, 사냥, 낚시, 집, 연애, 결혼, 비무 전리품
@@ -170,7 +173,7 @@ async function realtor() {
 }
 // ── 호감, 연애, 결혼 ──
 export const CAND = {
-  ...roadCompanions,
+  ...roadCompanions, ...fanCandidates,
   igyeom: {
     name: '서이겸', loves: ['poem', 'eel_rice', 'silver_cup'], likes: ['tea', 'wood', 'f_crucian'], hates: ['venom', 'sachet'],
     chat: ['배를 묶을 땐 한 번에 풀릴 매듭을 써요. 그래야 불난 집에 사람을 태우러 갈 수 있거든요.', '강 한가운데서 노래하면 꼭 건너편까지 들려요. 지난번엔 아침밥 먹으라는 답이 왔습니다.', '{나} 씨 발소리는 다리 널 세 번째에서 알아요. 거기만 밟으면 삑 소리가 나거든요.', '오늘은 지도를 접어 뒀어요. 당신이 어디로 걷는지 한번 따라가 보고 싶어서.'],
@@ -187,7 +190,7 @@ export const CAND = {
   hyeok: { name: '혁련하', chat0: ['향을 피우면 잠이 오십니까. 저는 잘 오지 않습니다.', '국수라는 것을 먹어 보았습니다. 맛있었습니다.', '이 성은 사람이 많습니다. 다들 어디로 가는지 모르겠습니다.'], likes: ['poem', 'tea', 'sachet'], loves: ['ginseng', 'hairpin', 'antler'], hates: ['meat', 'noodle'], ...companionDialogue.hyeok },
   clan_dang: { name: '당소연', likes: ['venom', 'herb', 'sachet'], loves: ['antler', 'ginseng', 'hairpin'], hates: ['sweets', 'noodle'], ...companionDialogue.clan_dang },
   clan_moyong: { name: '모용설', likes: ['poem', 'tea', 'silver_cup'], loves: ['hairpin', 'gold_cup', 'f_gold'], hates: ['meat', 'hide'], ...companionDialogue.clan_moyong },
-  clan_namgung: { name: '남궁진', likes: ['silver_cup', 'gold_cup', 'tea'], loves: ['ore_star', 'plum_wine', 'poem'], hates: ['meat', 'f_crucian'], ...companionDialogue.clan_namgung },
+  clan_namgung: { name: '남궁선', likes: ['silver_cup', 'gold_cup', 'tea'], loves: ['ore_star', 'plum_wine', 'poem'], hates: ['meat', 'f_crucian'], ...companionDialogue.clan_namgung },
 };
 const THANKS = {
   ...Object.fromEntries(Object.entries(roadCompanions).map(([id,c]) => [id,c.thanks])),
@@ -217,9 +220,14 @@ function chatLines(id) {
   }
   return friendChat[id] || (G.bond.done(id) >= 2 && c.closeChat) || c.chat;
 }
+const isSworn = (id,s=S())=>s.sworn===id || (s.swornBonds||[]).includes(id);
+function kinName(id) {
+  const same=S().gender===(CAND[id].gender||'m');
+  return same ? (S().gender==='f'?'의자매':'의형제') : '의남매';
+}
 export const stageOf = id => {
   const s = S(), l = s.love[id] || 0, eligible = canRomance(id, s);
-  if (s.sworn === id) return s.gender === 'f' ? '의남매' : '의형제';
+  if (isSworn(id,s)) return kinName(id);
   if (eligible && s.married === id) return '부부';
   if (eligible && s.partner === id) return '연인';
   if (l >= 70) return eligible ? '각별한 사이' : '막역한 벗';
@@ -232,7 +240,7 @@ async function giveGift(id) {
   if (!pickId) return;
   take(pickId); S().daily['gift_' + id] = 1; const c = CAND[id], v = c.loves.includes(pickId) ? 15 : c.likes.includes(pickId) ? 8 : c.hates.includes(pickId) ? -5 : 3;
   addLove(id, v); Sound.sfx(v > 0 ? 'secret' : 'cancel');
-  await say(id, THANKS[id][v >= 15 ? 0 : v >= 8 ? 1 : v > 0 ? 2 : 3]);
+  await say(id, (THANKS[id] || c.thanks || ['내가 좋아하는 걸 기억했군요. 잘 받겠습니다.','마침 필요했습니다.','고맙습니다.','이건 다음 사람을 위해 두시지요.'])[v >= 15 ? 0 : v >= 8 ? 1 : v > 0 ? 2 : 3]);
 }
 async function confess(id) {
   if (!canRomance(id) || S().partner || S().married) return;
@@ -249,27 +257,42 @@ async function propose(id) {
   S().married = id; addLove(id, 100); Sound.sfx('ok3'); toast('혼인했다! 배우자가 집에서 기다린다.', 3.5); G.field.refresh();
 }
 async function swear(id) {
-  const c = CAND[id]; await say('me', S().gender === 'f' ? '앞으로 오라버니라고 부를게요.' : '형님으로 모실게요.', 'h'); for (const l of c.sworn) await say(id, S().gender === 'f' ? l.replace('형제요', '남매요') : l);
-  S().sworn = id; Sound.sfx('ok3'); const line = `${josa(c.name, '과/와')} ${stageOf(id)}를 맺었다`; toast(line, 3); ctx.note(line + '.');
+  const c=CAND[id]; if(isSworn(id)||S().partner===id||S().married===id)return;
+  await say('me','앞으로는 서로의 집안일을 제 일처럼 여기고 싶습니다. 저와 의를 맺어 주시겠습니까?');
+  for(const l of c.sworn)await say(id,id==='cheol'&&S().gender==='f'?l.replace('형제요','남매요'):l);
+  S().swornBonds=[...new Set([...(S().swornBonds||[]),S().sworn,id].filter(Boolean))];S().sworn ||= id; Sound.sfx('ok3'); const line = `${josa(c.name, '과/와')} ${stageOf(id)}를 맺었다`; toast(line, 3); ctx.note(line + '.');
 }
 async function romance(id, base) {
   const c = CAND[id], s = S(), L = s.love[id] || 0, d = s.daily, eligible = canRomance(id, s), opts = [];
-  opts.push(['이야기한다', async () => { if (base) await base(); if (!d['chat_' + id]) { d['chat_' + id] = 1; addLove(id, 3); await say(id, pick(chatLines(id))); } else if (!base) await say(id, pick(eligible && s.married === id ? c.wife : chatLines(id))); }]);
+  if (c.fan) {
+    opts.push(['일상 대화를 나눈다',async()=>{
+      await say(id,eligible&&s.married===id?pick(c.wife):G.fan.chat(id));
+      if(!d['chat_'+id]){d['chat_'+id]=1;addLove(id,3);}
+    }]);
+    opts.push([G.fan.accepts(id)?'비무를 청한다':'지도 대련을 청한다',()=>G.fan.spar(id)]);
+  } else opts.push(['이야기한다', async () => { if (base) await base(); if (!d['chat_' + id]) { d['chat_' + id] = 1; addLove(id, 3); await say(id, pick(chatLines(id))); } else if (!base) await say(id, pick(eligible && s.married === id ? c.wife : chatLines(id))); }]);
+  if (id.startsWith('clan_')) {
+    const f=G.free?.fac(id.slice(5));
+    if(f)opts.push(...factionOptions(f,id));
+  }
   if (!d['gift_' + id]) opts.push(['선물을 준다', () => giveGift(id)]);
-  if (((eligible && s.partner === id) || (c.sworn && s.sworn === id)) && !d['date_' + id]) opts.push([c.sworn ? '밥을 먹으러 간다' : '나들이를 간다', async () => { d['date_' + id] = 1; addLove(id, 7); await narr(pick(c.date)); }]);
-  if (c.sworn) { if (L >= 70 && s.sworn !== id && G.bond.done(id) >= 3) opts.push(['의형제를 맺는다', () => swear(id)]); }
-  else if (eligible) {
-    if (L >= 70 && !s.partner && !s.married && G.bond.done(id) >= 3) opts.push(['마음을 전한다', () => confess(id)]);
-    if (s.partner === id && !s.married && L >= 100) opts.push(['혼인을 청한다', () => propose(id)]);
+  if (((eligible && s.partner === id) || (c.sworn && isSworn(id))) && !d['date_' + id]) opts.push([isSworn(id) ? '밥을 먹으러 간다' : '나들이를 간다', async () => { d['date_' + id] = 1; addLove(id, 7); await withBondScene(id,'outing',()=>narr(pick(c.date)),c.outingScene); }]);
+  if (c.sworn && L>=70 && !isSworn(id) && s.partner!==id && s.married!==id && G.bond.done(id)>=3) {
+    opts.push([kinName(id)+'를 맺는다',()=>withBondScene(id,'oath',()=>swear(id),c.oathScene)]);
+  }
+  if (eligible && !isSworn(id)) {
+    if (L>=70 && !s.partner && !s.married && G.bond.done(id)>=3)opts.push(['마음을 전한다',()=>withBondScene(id,'confess',()=>confess(id))]);
+    if (s.partner===id && !s.married && L>=100) opts.push(['혼인을 청한다',()=>withBondScene(id,'wedding',()=>propose(id))]);
   }
   { const q = G.party.loveOpt(id); if (q) opts.push(q); }
   opts.push(['그만둔다', async () => { }]);
-  const k = await choice(`${c.name} · ${stageOf(id)} (호감 ${L})`, opts.map(o => o[0])); await opts[k][1]();
+  const k = await choice(`${c.name} · ${stageOf(id)} (호감 ${L})${c.fan?' · '+G.fan.power(id):''}`, opts.map(o => o[0]),id); await opts[k][1]();
 }
 Story.wrapNpc = n => {
   if (!CAND[n.id]) return; const base = n.talk, m0 = n.mark;
   n.mark = () => (m0 && m0()) || !!G.bond.next(n.id);
-  n.talk = async () => { if (m0 && m0()) return base(); if (G.bond.next(n.id)) return G.bond.play(n.id); await romance(n.id, base); };
+  n.talk = async () => { if(CAND[n.id].fan||n.id.startsWith('clan_'))F()['met_'+n.id]=true;
+    if (m0 && m0() && (!n.id.startsWith('clan_') || G.ch?.hook(n.id))) return base(); if (G.bond.next(n.id)) return G.bond.play(n.id); await romance(n.id, base); };
 };
 for (const id in CAND) if (!WHO[id]) WHO[id] = { name: CAND[id].name };
 WHO.igyeom.face = 'Igyeom';
@@ -291,7 +314,7 @@ export function lootPick(name, ids) {
     B.appendChild(w);
   }, 860);
 }
-G.life = { gift: giveGift, chatLines,
+G.life = { isSworn, gift: giveGift, chatLines,
   bondTalk: id => G.bond.next(id) ? G.bond.play(id) : romance(id), pick, craft, fishing, houseScore, cand: CAND, stageOf, animals: ANIMALS, openDecor, lootPick, openCraft, openSell, sleepNow: async () => { await fadeTo(1); nextDay(); await fadeTo(0); toast(`${S().day}일째 아침`, 2.4); }, lootAfter: async cfg => { const id = cfg.foes[0], t = FOE_LOOT[id]; if (t) await lootPick(FOES[id].name, t); }, placeAt, closeDecor, enterHouse, canPlace, size };
 // 떠돌이 비무객: 하루 한 번, 경지에 맞는 상대
 FOES.wanderer = { name: '떠돌이 비무객', spr: 'chars/Samurai', hp: 100, atk: 10, def: 3, spd: 66, exp: 0, silver: 0, pause: 1.05, moves: ['double', 'lunge', 'quick', 'dart3'], wpn: 'Katana', guard: .5, poise: 40, elite: 1 };
@@ -301,7 +324,7 @@ async function wanderer() {
   const c = await choice('떠돌이 비무객과 겨룰까?', ['겨룬다', '그만둔다']); if (c) return;
   const lv = S().lv; Object.assign(FOES.wanderer, { hp: 60 + lv * 60, atk: 7 + lv * 2.1, def: 2 + lv * .4, exp: 12 + lv * 9, silver: 8 + lv * 4 });
   S().daily.wander = 1;
-  const won = await ctx.duel({ foes: ['wanderer'], arena: G.field.m.arena, title: '떠돌이 비무객', bgm: 'fight', yieldAt: .25, optional: true });
+  const won = await ctx.duel({ spar: true, foes: ['wanderer'], arena: G.field.m.arena, title: '떠돌이 비무객', bgm: 'fight', yieldAt: .25, optional: true });
   if (won) await lootPick('떠돌이 비무객', pick([['silver_cup', 'herb', 'hide'], ['ore_blue', 'plum_wine', 'fur'], ['tea', 'wood', 'sachet'], ['jade', 'meat', 'sweets'], ['gold_cup', 'ore_iron', 'poem']]));
 }
 Object.assign(WHO, { realtor: { name: '복덕방 영감', face: 'OldMan' }, hunter: { name: '사냥꾼 호씨', face: 'Villager3' }, wander: { name: '떠돌이 비무객', face: 'Samurai' } });

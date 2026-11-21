@@ -15,6 +15,7 @@ rd = lambda *p: open(os.path.join(ROOT, *p), encoding='utf-8').read()
 IT = json.loads(rd('tools', 'gpt', 'items.json'))
 SPEC = json.loads(rd('tools', 'blender', 'spec.json'))
 PEOPLE = set(json.loads(rd('assets', 'hd2d', 'preview', 'people.json')))
+WALK = json.loads(rd('assets','hd2d','field','walk.json'))
 ART = set(json.loads(rd('assets', 'art', 'list.json')))
 FX = set(json.loads(rd('assets', 'fx2', 'fx.json')))
 KIT = set(json.loads(rd('assets', 'hd2d', 'models', 'kit.json')))
@@ -28,11 +29,12 @@ def sprite(k):
     for n in (k + '-src.png', k + '-walk.png'):
         if have_src(n): return U('art-src/chatgpt/' + n)
     if have_src(k + '-a.png'): return U('art-src/chatgpt/' + k + '-a.png') + (' (옆모습은 ' + U('art-src/chatgpt/' + k + '-b.png') + ')' if have_src(k + '-b.png') else '')
+    if k in WALK: return U('assets/hd2d/field/' + WALK[k][0] + '.webp')
     return U('assets/hd2d/preview/n_' + k + '.webp')
 
 # ── 받았는지 ──
-got_walk = lambda k: 'n_' + k in PEOPLE
-got_act = lambda k: (k + '_act') in PEOPLE or ('n_' + k + '_act') in PEOPLE
+got_walk = lambda k: k in WALK or 'n_' + k in PEOPLE
+got_act = lambda k: k in WALK or (k + '_act') in PEOPLE or ('n_' + k + '_act') in PEOPLE
 got_ill = lambda k: k + '_n' in ART
 got_sheet = lambda code: have_src(code + '.png')
 got_fx = lambda f: f in FX or have_src(f + '.png')
@@ -211,7 +213,7 @@ step('fx4', 'fxh', '화산 매화: 남은 넷(꽃잎, 자하 기운, 자하검�
 A = IT['acts']
 step('act1', 'act', '적 동작 칸 1: 산적, 거한, 수적, 궁수, 자객', '이름 없는 적들은 걷는 도트만 있어서, 싸울 때 서 있는 그림을 기울여 흉내만 낸다. 동작 칸을 받으면 칼을 휘두르고 맞고 쓰러지는 모습이 그 그림으로 나온다.', act_items(A['mob'][:5]))
 step('act2', 'act', '적 동작 칸 2: 정파 제자, 사파 무사, 마교도, 관병, 강시', '이름 없는 적의 나머지 다섯이다.', act_items(A['mob'][5:]))
-step('act3', 'act', '동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진', '함께 싸우는 동료와 히로인의 동작 칸이다. 소연하·철우·윤설·백랑은 받았다.', act_items(A['ally1']))
+step('act3', 'act', '동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁선', '함께 싸우는 동료와 히로인의 동작 칸이다. 소연하·철우·윤설·백랑은 받았다.', act_items(A['ally1']))
 step('act4', 'act', '동료 동작 칸 2: 혁련하, 혜공, 사이라, 갈 선생, 양춘, 구 노창', '이 여섯은 걷는 도트부터 받아야 한다(차례표의 "사람 도트 1·2"). 그 도트가 온 뒤에 한다.', act_items(A['ally2']))
 BOSS = ['wei', 'lion', 'samaung', 'ogang', 'guyang', 'makgo', 'go', 'cheon', 'chief', 'namhwa', 'manhwa']
 step('act5', 'act', '맞서는 사람 동작 칸 1: ' + ', '.join(short(k) for k in BOSS[:6]), '이야기에서 주인공과 칼을 맞대는 사람들이다. 걷는 도트(차례표의 "사람 도트 3~5")가 온 뒤에 한다.', act_items([[k] for k in BOSS[:6]]))

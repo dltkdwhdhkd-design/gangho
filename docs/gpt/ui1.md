@@ -56,4 +56,4 @@
 
 ---
 
-다음 단계: 26번 `face3` 화산귀환 인물 얼굴 3: 진금룡, 이송백, 종서한, 고휘, 기목승, 사마승 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face3.md
+다음 단계: 28번 `ui2` 화면 틀 2: 화면 단추 그림, 머리 위 표식 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui2.md

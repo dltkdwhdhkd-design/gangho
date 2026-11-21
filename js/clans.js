@@ -1,3 +1,4 @@
+import { factionOptions, standingLabel } from './faction-talk.js';
 // 구파일방과 오대세가: 대화, 비무, 전수
 import { G, Sound, toast, josa } from './core.js';
 import { Story, ctx, say, choice } from './ctx.js';
@@ -8,6 +9,11 @@ import { CLANS, clansWon } from './clandata.js';
 import { LOOT } from './items.js';
 
 async function talk(c) {
+  const who='clan_'+c.id;
+  const opts = [['비무를 청한다',()=>challenge(c)], ...factionOptions(c, who), ['그만둔다',()=>{}]];
+  const i=await choice(standingLabel(c),opts.map(o=>o[0]),who);await opts[i][1]();
+}
+async function challenge(c) {
   const k = 'clan_' + c.id, F = G.S.flags;
   if (F[k]) {
     await say(k, c.bye);
@@ -15,13 +21,12 @@ async function talk(c) {
     if (!left.length || G.S.daily['duel_' + c.id]) return;
     const a = await choice(`다시 비무를 청할까? 이기면 ${c.who}의 물건 하나를 가져온다. (하루 한 번)`, ['청한다', '그만둔다']); if (a) return;
     G.S.daily['duel_' + c.id] = 1;
-    if (await ctx.duel({ foes: [k], arena: c.group === '구파일방' ? 'court' : 'ring', bgm: 'boss', title: `${c.name} · ${c.who}`, yieldAt: .25, optional: true, expMul: .4 })) await G.life.lootPick(c.who, left);
+    if (await ctx.duel({ spar: true, foes: [k], arena: c.group === '구파일방' ? 'court' : 'ring', bgm: 'boss', title: `${c.name} · ${c.who}`, yieldAt: .25, optional: true, expMul: .4 })) await G.life.lootPick(c.who, left);
     return;
   }
   for (const l of c.intro) l.length === 2 ? await say(l[0], l[1]) : await say(k, l[0]);
-  const a = await choice(`${c.name} ${c.who}에게 비무를 청할까?`, ['비무를 청한다', '다음에 온다']);
-  if (a) return;
-  const won = await ctx.duel({ foes: [k], arena: c.group === '구파일방' ? 'court' : 'ring', bgm: 'boss', title: `${c.name} · ${c.who}`, yieldAt: .25, optional: true });
+
+  const won = await ctx.duel({ spar: true, foes: [k], arena: c.group === '구파일방' ? 'court' : 'ring', bgm: 'boss', title: `${c.name} · ${c.who}`, yieldAt: .25, optional: true });
   if (!won) { await say(k, c.again || '다시 오시오.'); return; }
   F[k] = true;
   for (const l of c.win) l.length === 2 ? await say(l[0], l[1]) : await say(k, l[0]);

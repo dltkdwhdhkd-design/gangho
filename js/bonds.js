@@ -1,3 +1,5 @@
+import { fanEvents, fanCandidates } from './fan-bonds.js';
+import { withBondScene } from './cg.js';
 import { roadBonds, roadAfter } from './road-bonds.js';
 import { roadCompanions } from './road-companions.js';
 // 인연 사연: 호감이 쌓이면 인물마다 사연이 차례로 열린다. 셋째 사연을 봐야 마음을 전할 수 있다
@@ -16,7 +18,7 @@ for (const [id,c] of Object.entries(roadCompanions)) {
   FOES[id+'_ally']={name:c.name,spr:'chars/'+c.spr,hp:510,atk:26,def:9,spd:65,exp:0,silver:0,pause:.92,moves:c.combat.moves,wpn:c.combat.wpn,guard:.55};
 }
 export const BONDS = {
-  ...roadBonds(keep),
+  ...roadBonds(keep), ...fanEvents(say,narr),
   igyeom: [
     { at: 15, run: async () => {
       await narr('밤안개에 등불이 지워졌다. 이겸은 눈을 감고 뱃전에 늘인 줄을 손바닥 안으로 흘려 보냈다.');
@@ -247,7 +249,7 @@ export const BONDS = {
       } else await say('clan_moyong', '천천히라. 증조모님은 그런 말을 안 하셨소.');
     } },
     { at: 70, run: async () => {
-      await say('clan_moyong', '남궁세가에서 혼담이 왔소. 남궁진의 오라비요.');
+      await say('clan_moyong', '남궁세가에서 혼담이 왔소. 남궁선의 오라비요.');
       await say('me', '좋은 자리네요.');
       await say('clan_moyong', '아버지도 그렇게 말씀하셨소. 말투까지 같구려.', 's');
       await say('me', '소저 생각은요?');
@@ -274,13 +276,13 @@ export const BONDS = {
       await say('clan_namgung', '네가 말하는 곽씨 국수라는 게 뭐냐.');
       await say('me', '국수요? 그냥 국수인데요.');
       await say('clan_namgung', '세가 사람들 눈에 안 띄는 데서 먹어야 한다. 앞장서라.');
-      await narr('남궁진은 삿갓까지 쓰고 금봉 객잔 구석에 앉았다. 국수를 받아 놓고 젓가락을 어떻게 드는지 한참 내려다봤다.');
+      await narr('남궁선은 삿갓까지 쓰고 금봉 객잔 구석에 앉았다. 국수를 받아 놓고 젓가락을 어떻게 드는지 한참 내려다봤다.');
       await say('clan_namgung', '남궁가 밥상에는 열두 가지가 오른다. 한 그릇에 다 들어 있는 건 처음 본다.');
       await say('me', '맛은 어때요?');
       await say('clan_namgung', '나쁘지 않다. …한 그릇 더.', 'b');
     } },
     { at: 40, run: async () => {
-      await narr('새벽에 세가 거리를 지나는데 남궁세가 담장 안에서 칼바람 소리가 났다. 남궁진이 혼자 검을 휘두르고 있었다.');
+      await narr('새벽에 세가 거리를 지나는데 남궁세가 담장 안에서 칼바람 소리가 났다. 남궁선이 혼자 검을 휘두르고 있었다.');
       await say('me', '벌써 일어나셨어요?');
       await say('clan_namgung', '구백십이. 말 걸지 마라. 구백십삼.', 'a');
       ctx.cg('bond_nam');
@@ -289,7 +291,7 @@ export const BONDS = {
       await say('me', '왜요?');
       await say('clan_namgung', '딸이니까.', 'a');
       await say('clan_namgung', '네가 출신이 그렇게 중요하냐고 물었지. 나는 태어난 집안 때문에 이러고 있다. 그때 네 말이 듣기 싫었던 건 그래서다.', 's');
-      const c = await choice('남궁진이 피 묻은 손을 소매로 닦는다.', ['붕대를 감아 주겠다고 한다', '내일은 천 한 번을 하라고 한다']);
+      const c = await choice('남궁선이 피 묻은 손을 소매로 닦는다.', ['붕대를 감아 주겠다고 한다', '내일은 천 한 번을 하라고 한다']);
       if (c === 0) { await say('me', '손 줘 보세요. 붕대는 제가 많이 감아 봤어요.'); await say('clan_namgung', '…아프다. 살살 해라.', 'b'); }
       else { await say('me', '내일은 천 한 번 하세요. 오라버니가 천 번을 하게요.'); await say('clan_namgung', '건방진 놈.', 'h'); ctx.love('clan_namgung'); }
     } },
@@ -299,7 +301,7 @@ export const BONDS = {
       await say('clan_namgung', '그런 법은 없다.');
       await say('me', '그 법은 누가 만들었는데요?');
       await say('clan_namgung', '…….');
-      await narr('이튿날 진은 연무장 끝에 나를 세웠다. 장로들이 보는 앞에서 오라비의 목검을 세 번 받았다. 네 번째, 진의 검끝이 먼저 오라비의 소매에 닿았다.');
+      await narr('이튿날 선은 연무장 끝에 나를 세웠다. 장로들이 보는 앞에서 오라비의 목검을 세 번 받았다. 네 번째, 선의 검끝이 먼저 오라비의 소매에 닿았다.');
       await say('clan_namgung', '오라비가 첫 증인이 되어 준다더라. 승부를 적은 종이에 저부터 서명하겠다더군.', 'h');
       await say('me', '축하해요.');
       await say('clan_namgung', '끝까지 봐 줘서 고맙다. 이 검끈을 가져라. 새 끈은 내일 첫 연무에서 내가 직접 감겠다.', 'b');
@@ -459,7 +461,7 @@ function next(id) {
 }
 async function play(id) {
   const e = next(id); if (!e) return; const s = S();
-  try { await e.run(); } finally { ctx.cgOff(); }
+  await withBondScene(id,done(id),e.run,e.place);
   (s.bonds = s.bonds || {})[id] = done(id) + 1; s.love[id] = Math.min(100, (s.love[id] || 0) + 4); F()['met_' + id] = true;
 }
 // 연인이 결전에 달려온다
@@ -477,6 +479,7 @@ async function join(side, allies = []) {
   const q = S().married || S().partner; if (!canRomance(q)) return null;
   if (side === 'ma' && (q === 'so' || q === 'yun')) return null; // 마교 길에서는 등을 돌린 사람들
   if (q === 'yun') { await say('yun', '금창약 챙겨 왔어요. 왼쪽 조심해요.'); S().potion += 3; toast('금창약 3개를 받았다'); return null; }
+  if(fanCandidates[q]) { const id=G.fan.ally(q); if(allies.includes(id))return null; await say(q,fanCandidates[q].join); return id; }
   const j = JOIN[q]; if (!j || allies.includes(j[2])) return null; // 이미 곁에 있는 사람은 다시 달려오지 않는다
   await say(j[0], j[1]); return j[2];
 }
@@ -493,6 +496,7 @@ const AFTER = {
 };
 async function ending() {
   const q = S().married || S().partner;
+  if (canRomance(q) && fanCandidates[q]?.after) await narr(fanCandidates[q].after);
   if (canRomance(q) && roadAfter[q]) await narr(roadAfter[q][F()[q+'_choice'] || 0]);
   if (canRomance(q) && AFTER[q]) {
     await narr(AFTER[q]);

@@ -56,4 +56,4 @@
 
 ---
 
-다음 단계: 29번 `act3` 동료 동작 칸 1: 하후민, 문창, 오월, 당소연, 모용설, 남궁진 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/act3.md
+다음 단계: 33번 `ui3` 화면 틀 3: 싸움 화면 틀 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui3.md

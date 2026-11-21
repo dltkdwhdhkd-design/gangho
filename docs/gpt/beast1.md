@@ -79,4 +79,4 @@
 
 ---
 
-다음 단계: 23번 `face1` 화산귀환 인물 얼굴 1: 청명, 백천, 유이설, 윤종, 조걸, 현종 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face1.md
+다음 단계: 25번 `ui1` 화면 틀 1: 창과 단추 틀, 붓자국 띠 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui1.md

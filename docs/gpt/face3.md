@@ -4,7 +4,7 @@
 
 『화산귀환』 인물(팬 캐릭터)은 걷는 도트는 있는데 대화 일러스트가 없어서, 말할 때 다른 사람의 얼굴이 나온다. 이미 있는 도트를 보고 그 사람의 일러스트를 그린다.
 
-**이 단계에서 만들 것: 6개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -22,65 +22,29 @@
 
 ## 만들 것
 
-### 1. `jingeumryong_n.png` — 진금룡 (종남파 제자) — 키 `jingeumryong`
+### 1. `jingeumryong_n.png` — 진금룡 (종남파 제자) — 키 `jingeumryong` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jingeumryong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jingeumryong-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 2. `isongbaek_n.png` — 이송백 (종남파 제자) — 키 `isongbaek` — **받음**
 
-인물: 진금룡, 종남파 제자, 남자. 오만한 종남 수재, 턱을 든 자세. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `isongbaek_n.png` — 이송백 (종남파 제자) — 키 `isongbaek`
+### 3. `jongseohan_n.png` — 종서한 (종남파 어른) — 키 `jongseohan` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/isongbaek-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/isongbaek-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 4. `gohwi_n.png` — 고휘 (종남파 사람) — 키 `gohwi` — **받음**
 
-인물: 이송백, 종남파 제자, 남자. 곧고 예의 바른 종남 제자, 담담한 얼굴. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `jongseohan_n.png` — 종서한 (종남파 어른) — 키 `jongseohan`
+### 5. `gimokseung_n.png` — 기목승 (종남파 사람) — 키 `gimokseung` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jongseohan-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/jongseohan-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 6. `samaseung_n.png` — 사마승 (종남파 사람) — 키 `samaseung` — **받음**
 
-인물: 종서한, 종남파 어른, 남자. 위엄 있는 종남 어른, 무거운 눈. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 4. `gohwi_n.png` — 고휘 (종남파 사람) — 키 `gohwi`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/gohwi-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/gohwi-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 고휘, 종남파 사람, 남자. 경계하는 종남 사람. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 5. `gimokseung_n.png` — 기목승 (종남파 사람) — 키 `gimokseung`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/gimokseung-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/gimokseung-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 기목승, 종남파 사람, 남자. 피곤한 표정의 종남 사형. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 6. `samaseung_n.png` — 사마승 (종남파 사람) — 키 `samaseung`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/samaseung-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/samaseung-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 사마승, 종남파 사람, 남자. 생각 많은 종남 검수, 그늘진 얼굴. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 
@@ -95,4 +59,4 @@
 
 ---
 
-다음 단계: 27번 `face4` 화산귀환 인물 얼굴 4: 허도진인, 허원, 허산, 무연, 무진, 진현 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/face4.md
+다음 단계: 28번 `ui2` 화면 틀 2: 화면 단추 그림, 머리 위 표식 — https://dltkdwhdhkd-design.github.io/gangho/docs/gpt/ui2.md

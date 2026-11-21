@@ -4,7 +4,7 @@
 
 『화산귀환』 인물(팬 캐릭터)은 걷는 도트는 있는데 대화 일러스트가 없어서, 말할 때 다른 사람의 얼굴이 나온다. 이미 있는 도트를 보고 그 사람의 일러스트를 그린다.
 
-**이 단계에서 만들 것: 6개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -22,65 +22,29 @@
 
 ## 만들 것
 
-### 1. `hyeonyeong_n.png` — 현영 (화산파 장로) — 키 `hyeonyeong`
+### 1. `hyeonyeong_n.png` — 현영 (화산파 장로) — 키 `hyeonyeong` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hyeonyeong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hyeonyeong-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 2. `hyeonsang_n.png` — 현상 (화산파 장로) — 키 `hyeonsang` — **받음**
 
-인물: 현영, 화산파 장로, 남자. 깐깐한 재정 담당 장로, 주판이나 장부를 듦. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `hyeonsang_n.png` — 현상 (화산파 장로) — 키 `hyeonsang`
+### 3. `ungeom_n.png` — 운검 (화산파 교관) — 키 `ungeom` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hyeonsang-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/hyeonsang-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 4. `unam_n.png` — 운암 (화산파 어른) — 키 `unam` — **받음**
 
-인물: 현상, 화산파 장로, 남자. 엄격한 장로, 굳은 입매. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 3. `ungeom_n.png` — 운검 (화산파 교관) — 키 `ungeom`
+### 5. `ungak_n.png` — 운각 (화산파 어른) — 키 `ungak` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/ungeom-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/ungeom-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 6. `baeksang_n.png` — 백상 (화산파 제자) — 키 `baeksang` — **받음**
 
-인물: 운검, 화산파 교관, 남자. 엄한 교관, 날카로운 눈. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 4. `unam_n.png` — 운암 (화산파 어른) — 키 `unam`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/unam-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/unam-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 운암, 화산파 어른, 남자. 자상한 어른, 부드러운 눈. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 5. `ungak_n.png` — 운각 (화산파 어른) — 키 `ungak`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/ungak-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/ungak-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 운각, 화산파 어른, 남자. 우직한 산문 지기, 단단한 몸. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 6. `baeksang_n.png` — 백상 (화산파 제자) — 키 `baeksang`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/baeksang-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/baeksang-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 백상, 화산파 제자, 남자. 승부욕 강한 젊은 제자, 이를 악문 얼굴. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 

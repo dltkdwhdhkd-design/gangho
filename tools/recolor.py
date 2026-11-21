@@ -14,7 +14,7 @@ def shift(path, out, deg, keep_skin):
             r, g, b = colorsys.hsv_to_rgb((h + deg / 360) % 1, s, v)
             px[x, y] = (round(r * 255), round(g * 255), round(b * 255), a)
     im.save(out)
-# 금발만 은발로 바꾼다 (남궁진)
+# 금발만 은발로 바꾼다 (남궁선)
 def silver(path, out):
     im = Image.open(path).convert('RGBA'); px = im.load()
     for y in range(im.height):

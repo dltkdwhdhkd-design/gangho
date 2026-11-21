@@ -26,7 +26,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 청명 (화산파 제자) — 키 `cheongmyeong`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_cheongmyeong.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk07.webp
 
 **일러스트 `cheongmyeong_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -38,7 +38,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 백천 (화산파 제자) — 키 `baekcheon`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_baekcheon.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk06.webp
 
 **일러스트 `baekcheon_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -50,7 +50,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 유이설 (화산파 제자) — 키 `yuseol`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_yuseol.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk14.webp
 
 **일러스트 `yuseol_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -62,7 +62,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 윤종 (화산파 제자) — 키 `yunjong`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_yunjong.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk14.webp
 
 **일러스트 `yunjong_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -74,7 +74,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 조걸 (화산파 제자) — 키 `jogeol`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_jogeol.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk11.webp
 
 **일러스트 `jogeol_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -86,7 +86,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 현종 (화산파 장문인) — 키 `hyeonjong`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_hyeonjong.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `hyeonjong_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -98,7 +98,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 현영 (화산파 장로) — 키 `hyeonyeong`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_hyeonyeong.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `hyeonyeong_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -110,7 +110,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 현상 (화산파 장로) — 키 `hyeonsang`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_hyeonsang.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `hyeonsang_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -122,7 +122,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 운검 (화산파 교관) — 키 `ungeom`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_ungeom.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk13.webp
 
 **일러스트 `ungeom_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -134,7 +134,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 운암 (화산파 어른) — 키 `unam`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_unam.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk13.webp
 
 **일러스트 `unam_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -146,7 +146,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 운각 (화산파 어른) — 키 `ungak`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_ungak.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk13.webp
 
 **일러스트 `ungak_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -158,7 +158,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 백상 (화산파 제자) — 키 `baeksang`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_baeksang.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk07.webp
 
 **일러스트 `baeksang_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -172,7 +172,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 진금룡 (종남파 제자) — 키 `jingeumryong`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_jingeumryong.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `jingeumryong_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -184,7 +184,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 이송백 (종남파 제자) — 키 `isongbaek`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_isongbaek.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `isongbaek_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -196,7 +196,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 종서한 (종남파 어른) — 키 `jongseohan`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_jongseohan.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk11.webp
 
 **일러스트 `jongseohan_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -208,7 +208,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 고휘 (종남파 사람) — 키 `gohwi`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_gohwi.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk09.webp
 
 **일러스트 `gohwi_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -220,7 +220,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 기목승 (종남파 사람) — 키 `gimokseung`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_gimokseung.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk09.webp
 
 **일러스트 `gimokseung_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -232,7 +232,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 사마승 (종남파 사람) — 키 `samaseung`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_samaseung.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk13.webp
 
 **일러스트 `samaseung_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -246,7 +246,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 허도진인 (무당파 장문인) — 키 `heodo`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_heodo.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk09.webp
 
 **일러스트 `heodo_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -258,7 +258,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 허원 (무당파 장로) — 키 `heowon`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_heowon.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk09.webp
 
 **일러스트 `heowon_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -270,7 +270,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 허산 (무당파 장로) — 키 `heosan`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_heosan.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk09.webp
 
 **일러스트 `heosan_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -282,7 +282,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 무연 (무당파 제자) — 키 `muyeon`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_muyeon.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk13.webp
 
 **일러스트 `muyeon_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -294,7 +294,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 무진 (무당파 제자) — 키 `mujin`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_mujin.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk12.webp
 
 **일러스트 `mujin_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -306,7 +306,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 진현 (무당파 제자) — 키 `jinhyeon`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_jinhyeon.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `jinhyeon_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -318,7 +318,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 진무 (무당파 제자) — 키 `jinmu`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_jinmu.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `jinmu_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -332,7 +332,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 당소소 (화산파 제자 (당가 출신)) — 키 `dangsoso`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_dangsoso.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk09.webp
 
 **일러스트 `dangsoso_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -344,7 +344,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 당군악 (사천당가 가주) — 키 `danggunak`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_danggunak.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk08.webp
 
 **일러스트 `danggunak_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -356,7 +356,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 당보 (사천당가 어른) — 키 `dangbo`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_dangbo.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk08.webp
 
 **일러스트 `dangbo_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -368,7 +368,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 당호 (사천당가 사람) — 키 `dangho`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_dangho.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk08.webp
 
 **일러스트 `dangho_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -380,7 +380,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 당화 (사천당가 사람) — 키 `danghwa`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_danghwa.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk08.webp
 
 **일러스트 `danghwa_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -392,7 +392,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 당잔 (사천당가 사람) — 키 `dangjan`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_dangjan.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk08.webp
 
 **일러스트 `dangjan_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -404,7 +404,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 당패 (사천당가 사람) — 키 `dangpae`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_dangpae.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk08.webp
 
 **일러스트 `dangpae_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -418,7 +418,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 홍대광 (개방 거지) — 키 `hongdaegwang`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_hongdaegwang.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk10.webp
 
 **일러스트 `hongdaegwang_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -430,7 +430,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 구칠 (개방 거지) — 키 `guchil`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_guchil.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk09.webp
 
 **일러스트 `guchil_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -442,7 +442,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 종팔 (개방 거지) — 키 `jongpal`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_jongpal.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk11.webp
 
 **일러스트 `jongpal_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -456,7 +456,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 위립산 (화영문 문주) — 키 `wiripsan`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_wiripsan.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk14.webp
 
 **일러스트 `wiripsan_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -468,7 +468,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 위소행 (화영문 소문주) — 키 `wisoheng`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_wisoheng.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk14.webp
 
 **일러스트 `wisoheng_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -480,7 +480,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 염평 (화영문 사람) — 키 `yeompyeong`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_yeompyeong.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk14.webp
 
 **일러스트 `yeompyeong_n.png`** (ref-art.png와 위 도트 올리기)
 
@@ -492,7 +492,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-fan.md
 
 ### 맹소 (남만야수궁 사람) — 키 `maengso`
 
-도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/preview/n_maengso.webp
+도트: https://dltkdwhdhkd-design.github.io/gangho/assets/hd2d/field/walk11.webp
 
 **일러스트 `maengso_n.png`** (ref-art.png와 위 도트 올리기)
 

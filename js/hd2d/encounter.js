@@ -1,4 +1,5 @@
 import { TS } from '../core.js';
+import { MAPS } from '../maps.js';
 import { STAMPS, drawStamp } from '../tiles.js';
 import { buildLandscape, cover, landscapeOf, paintLandscape, wildernessArt } from '../landscape.js';
 import { drawCourt } from './field-art.js';
@@ -85,9 +86,22 @@ function navigation(stage,source,sx,sy,scale,focus) {
   }
   return {contains,snap,move,steer,area:end*step*step,focus:snap(...focus)};
 }
-export function encounterStage(field,requested='village') {
-  const real=field?.m && field?.p && !field.m.stage, source=real?field.m:stageOf(requested);
-  const px=real?field.p.x/TS:source.w*.5,py=real?field.p.y/TS:source.h*.5;
+function trainingSite(field) {
+  let map=field.m;
+  if(map.room){const exit=map.portals.find(d=>MAPS[d.to]&&!MAPS[d.to].room);if(exit)map=MAPS[exit.to];}
+  if(map.court)return {map,x:map.court.x,y:map.court.y+1.5};
+  const marked={guhwa:[24.5,15],cloudmt:[23,24],shaolin:[20,16],ninehall:[22,19],fiveclans:[22,19],mysect:[20,18]};
+  let at=marked[map.id];
+  if(!at&&map.id.startsWith('c_'))at=[map.w*.5,map.h*.52];
+  if(!at)return null;
+  const [x,y]=map.freeNear(at[0]*(map.k||1)*TS,at[1]*(map.k||1)*TS);
+  return {map,x:x/TS,y:y/TS};
+}
+export function encounterStage(field,requested='village',spar=false,native=false) {
+  const real=!!field?.m && !!field.p && !field.m.stage;
+  const site=real && spar && trainingSite(field);
+  const source=site?site.map:real?field.m:stageOf(requested);
+  const px=site?site.x:real?field.p.x/TS:source.w*.5,py=site?site.y:real?field.p.y/TS:source.h*.5;
   const original=landscapeOf(source), room=!!source.room, bi=source.biome||'grass';
   const climate=original?.climate(px,py),theme=room?'room':source.id==='world'?
     (original.shore(px,py)<2.6?'dock':({[cover.forest]:'forest',[cover.snow]:'snow',[cover.sand]:'sand'}[climate]||'road')):
@@ -97,7 +111,7 @@ export function encounterStage(field,requested='village') {
   const stage=new source.constructor('encounter_'+source.id,WIDTH,HEIGHT,{stage:true,room,roomStyle:source.roomStyle,roomKind:source.roomKind,
     name:source.name||'싸움터',biome:bi,arena:theme,stamps:[],portals:[]});
   // Small halls and narrow passes are magnified around the point of contact until a connected duel fits.
-  let scale=Math.max(room?2.25:source.live?1.55:1.75,WIDTH/source.w,HEIGHT/source.h);
+  let scale=Math.max(site?1:room?2.25:source.live?1.55:1.75,WIDTH/source.w,HEIGHT/source.h);
   let ox,oy,nav;
   for(let pass=0;pass<4;pass++){
     ox=clamp(0,px-WIDTH*.5/scale,Math.max(0,source.w-WIDTH/scale));
@@ -106,9 +120,13 @@ export function encounterStage(field,requested='village') {
     if(nav&&(nav.area>=(room?68000:98000)||pass===3))break;
     if(pass<3)scale*=1.42;
   }
-  if(!nav&&real)return encounterStage(null,requested);
+  if(!nav&&real)return encounterStage(null,requested,false,false);
   if(!nav)throw Error('No walkable encounter ground: '+requested);
   stage.encounter={sourceId:source.id,focus:[px,py],origin:[ox,oy],scale,theme,room,natural:!!original,bridges:source.id==='world',nav};
+  if(native&&real) {
+    stage.encounter.source=source;
+    return stage;
+  }
   stage.canal=!!source.canal;
   if(room){stage.floor=source.floor;stage.wall=source.wall;stage.emblem=source.emblem;
     if(source.carpet){const [x,y,w,h]=source.carpet;stage.carpet=[(x-ox)*scale,(y-oy)*scale,w*scale,h*scale];}

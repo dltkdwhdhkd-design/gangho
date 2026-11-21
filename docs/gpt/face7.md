@@ -4,7 +4,7 @@
 
 『화산귀환』 인물(팬 캐릭터)은 걷는 도트는 있는데 대화 일러스트가 없어서, 말할 때 다른 사람의 얼굴이 나온다. 이미 있는 도트를 보고 그 사람의 일러스트를 그린다.
 
-**이 단계에서 만들 것: 3개**
+**이 단계는 다 받았다. 다시 만들지 않는다.** 아래는 받을 때의 기록이다.
 
 ## 규칙
 
@@ -22,35 +22,17 @@
 
 ## 만들 것
 
-### 1. `wisoheng_n.png` — 위소행 (화영문 소문주) — 키 `wisoheng`
+### 1. `wisoheng_n.png` — 위소행 (화영문 소문주) — 키 `wisoheng` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/wisoheng-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/wisoheng-b.png)
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
+### 2. `yeompyeong_n.png` — 염평 (화영문 사람) — 키 `yeompyeong` — **받음**
 
-인물: 위소행, 화영문 소문주, 남자. 아버지를 닮으려는 열의 가득한 소문주. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
-### 2. `yeompyeong_n.png` — 염평 (화영문 사람) — 키 `yeompyeong`
+### 3. `maengso_n.png` — 맹소 (남만야수궁 사람) — 키 `maengso` — **받음**
 
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/yeompyeong-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/yeompyeong-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 염평, 화영문 사람, 남자. 표국 일을 하는 화영문 사람. 생김새·옷·색은 첨부한 도트 그대로.
-```
-
-### 3. `maengso_n.png` — 맹소 (남만야수궁 사람) — 키 `maengso`
-
-도트(이 사람의 기준): https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/maengso-a.png (옆모습은 https://dltkdwhdhkd-design.github.io/gangho/art-src/chatgpt/maengso-b.png)
-
-```text
-규칙대로 이 사람의 대화 일러스트 한 장. 위 주소의 도트 속 사람과 똑같이.
-
-인물: 맹소, 남만야수궁 사람, 남자. 야성적인 남만야수궁 사람, 짐승 같은 눈. 생김새·옷·색은 첨부한 도트 그대로.
-```
+받아서 게임에 넣었다. 다시 만들지 않는다.
 
 ## 스스로 확인
 

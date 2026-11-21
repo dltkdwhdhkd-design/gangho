@@ -4,7 +4,8 @@ import os, re, json, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, '/tmp'); exec(open(os.path.join(ROOT, 'tools', 'people_new.py')).read())  # NEW, HOLD
 art = set(json.load(open(os.path.join(ROOT, 'assets', 'art', 'list.json'))))
-have = set(json.load(open(os.path.join(ROOT, 'assets', 'hd2d', 'preview', 'people.json'))))
+native = json.load(open(os.path.join(ROOT,'assets','hd2d','field','walk.json')))
+have = {'n_'+k for k in native} | set(json.load(open(os.path.join(ROOT, 'assets', 'hd2d', 'preview', 'people.json'))))
 req = open(os.path.join(ROOT, 'docs', 'art-requests.md')).read()
 DESC = {m.group(1): (m.group(2).strip(), m.group(3).strip().replace('같은 규칙으로 그려 줘. ', '')) for m in re.finditer(r"### (\w+)_n\.png · ([^\n]*)\n\n```text\n(.*?)\n```", req, re.S)}
 TIERS = [

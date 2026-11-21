@@ -1,3 +1,4 @@
+import { standing } from './martial-standing.js';
 // 구파일방과 오대세가 자료. 다른 모듈보다 먼저 읽혀도 되도록 의존을 작게 둔다
 import { G } from './core.js';
 import { WHO } from './dialog.js';
@@ -26,7 +27,7 @@ export const CLANS = [
     intro: [['차 한잔 하시겠소? 식기 전에 끝냅시다.'], ['me', '차가 식기 전에요?'], ['식으면 맛이 없지 않소.']], win: [['식어 버렸구려. 다시 끓일 테니 앉으시오.']] },
   { id: 'gaebang', bye: '밥은 먹고 다녀라.', again: '다시 와라.', group: '구파일방', name: '개방', han: '丐幇', who: '홍두 장로', spr: 'Gaebang', tier: 2, wpn: 'Stick', moves: ['tagu', 'hangryong', 'chain_kick', 'quick'], gift: ['tagu', 'hangryong'], at: ['ninehall', 38.5, 19.4], desc: '천하의 거지가 모인 일방. 강호의 소문은 모두 여기로 흐른다.',
     intro: [['밥 한 술만… 하하, 농담이다. 네가 철우 밥값을 대신 냈다며?'], ['me', '벌써 소문이 났어요?'], ['개방 귀가 몇 개인 줄 아냐. 한판 하고 얘기하자.']], win: [['좋아. 하나 알려 주지. 맹주 창고로 들어가는 쌀이 맹에 있는 사람 수보다 훨씬 많아.'], ['누가 먹는지는 나도 몰라. 얼굴을 안 보여 주는 놈들이라.']] },
-  { id: 'namgung', bye: '다음에는 내가 이긴다.', again: '다시 와라.', group: '오대세가', name: '남궁세가', han: '南宮世家', who: '남궁진', spr: 'Namgung', tier: 3, wpn: 'Rapier', moves: ['sky_sword', 'cloud_flash', 'flurry', 'wind_turn', 'fan5'], gift: ['sky_sword'], heart: 'changgung', at: ['fiveclans', 5, 10.4], desc: '천하제일 검가를 자처하는 명문. 자존심이 하늘을 찌른다.',
+  { id: 'namgung', bye: '다음에는 내가 이긴다.', again: '다시 와라.', group: '오대세가', name: '남궁세가', han: '南宮世家', who: '남궁선', spr: 'Namgung', tier: 3, wpn: 'Rapier', moves: ['sky_sword', 'cloud_flash', 'flurry', 'wind_turn', 'fan5'], gift: ['sky_sword'], heart: 'changgung', at: ['fiveclans', 5, 10.4], desc: '천하제일 검가를 자처하는 명문. 자존심이 하늘을 찌른다.',
     intro: [['출신 모를 자가 맹주 자리에 앉은 것도 불쾌한데, 이제 {호}까지 비무대에 올라오는군.'], ['me', '출신이 그렇게 중요해요?'], ['…칼을 뽑아라.']], win: [['내가 경솔했다. 사과하지.']] },
   { id: 'moyong', bye: '받은 인사는 돌려드리겠소. 잘 가시오.', group: '오대세가', name: '모용세가', han: '慕容世家', who: '모용설', spr: 'Moyong', tier: 3, wpn: 'Katana', moves: ['ihwa', 'blink', 'flurry', 'fan5'], gift: ['ihwa'], at: ['fiveclans', 16, 10.4], desc: '상대의 초식을 상대에게 돌려주는 기이한 가문.',
     intro: [['그대 초식은 그대에게 돌려드리겠소. 모용가의 방식이오.'], ['me', '그런 말은 처음 듣네요.'], ['곧 몸으로 알게 될 것이오.']], win: [['돌려줄 수 없는 것도 있구려. 그 걸음은 무엇이오?'], ['me', '걸레질이요.'], ['장난치지 마시오.']] },
@@ -39,12 +40,12 @@ export const CLANS = [
 ];
 for (const c of CLANS) {
   const t = T[c.tier];
-  FOES['clan_' + c.id] = { name: c.who, spr: 'chars/' + c.spr, ...t, moves: c.moves, boss: 1, tier: c.tier, title: c.name, wpn: c.wpn, guard: c.tier * .4, keep: c.keep, phases: [{ hp: .5, pause: t.pause * .8 }] };
+  FOES['clan_' + c.id] = { ...standing(c), name: c.who, spr: 'chars/' + c.spr, ...t, moves: c.moves, boss: 1, tier: c.tier, title: c.name, wpn: c.wpn, guard: c.tier * .4, keep: c.keep, phases: [{ hp: .5, pause: t.pause * .8 }] };
   WHO['clan_' + c.id] = { name: c.who, face: c.spr };
 }
 Object.assign(FOES, {
   hyegak_ally: { name: '혜각 대사', spr: 'chars/Monk', hp: 1900, atk: 42, def: 16, spd: 56, exp: 0, silver: 0, pause: 1.2, moves: ['luohan', 'iron_fist', 'earth_stomp'], wpn: 'Club' },
-  namgung_ally: { name: '남궁진', spr: 'chars/Namgung', hp: 1600, atk: 46, def: 12, spd: 76, exp: 0, silver: 0, pause: 1.1, moves: ['cloud_flash', 'flurry', 'wind_turn'], wpn: 'Rapier' },
+  namgung_ally: { name: '남궁선', spr: 'chars/Namgung', hp: 1600, atk: 46, def: 12, spd: 76, exp: 0, silver: 0, pause: 1.1, moves: ['cloud_flash', 'flurry', 'wind_turn'], wpn: 'Rapier' },
 });
 export const clansWon = () => CLANS.filter(c => G.S.flags['clan_' + c.id]).length;
 

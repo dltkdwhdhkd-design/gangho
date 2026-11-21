@@ -276,7 +276,7 @@ https://dltkdwhdhkd-design.github.io/gangho/docs/chatgpt-people.md
 방금 그린 그 사람을 정사각형 한 장(1:1)에 2열 3행으로 6번 더 그려. 여섯 칸 모두 왼쪽을 보는 옆모습. 1열은 차렷, 왼발 내딛기, 오른발 내딛기. 2열은 숨 쉬는 차렷, 왼발 다음 중간 걸음(뒷발이 들려 앞으로 넘어옴), 오른발 다음 중간 걸음. 키·색·옷은 앞 그림과 같게. 배경은 같은 단색 마젠타.
 ```
 
-### 남궁진 (히로인, 남궁세가 후계자) — 키 `clan_namgung`
+### 남궁선 (히로인, 남궁세가 후계자) — 키 `clan_namgung`
 
 일러스트: https://github.com/dltkdwhdhkd-design/gangho/blob/main/assets/art/clan_namgung_n.webp
 

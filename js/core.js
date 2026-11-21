@@ -169,7 +169,12 @@ export const snap = v => Math.round(v * SCALE) / SCALE;
 // 방향 0 아래, 1 위, 2 왼쪽, 3 오른쪽. 대각선 0 오른아래, 1 오른위, 2 왼아래, 3 왼위. 오른쪽을 보면 뒤집는다
 const QROW = [0, 1, 0, 2, 3, 4, 5];
 // 쿼터뷰 시트는 쿼터뷰 보기를 켰을 때만 쓴다(켜고 끄면 새로 읽으니 한 번만 본다). 일반 보기는 예전 시트 그대로
-export const ISO_ON = (() => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } })();
+export const HD_VIEW = (() => {
+  const mode=new URLSearchParams(location.search).get('hd2d');
+  if(mode==='1'||mode==='0')return mode==='1';
+  try { return localStorage.getItem('gangho_view')!=='2d'; } catch { return true; }
+})();
+export const ISO_ON = !HD_VIEW && (() => { try { return localStorage.getItem('gangho_iso') === '1'; } catch { return false; } })();
 export const qSheet = key => ISO_ON ? IMG[key + '_q'] : null;
 // 쿼터뷰 시트의 칸(64)에서 사람 키는 44다. 예전 시트처럼 사람 키가 15쯤 되게 칸을 22로 그린다(예전 16칸 → 22)
 export const QZ = 22 / 16;

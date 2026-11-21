@@ -91,7 +91,7 @@ async function talk(b) {
   await say(null, `${b.tag}: ${pick(mine ? LINES.mine : LINES[b.side])}`);
   const o = ['말을 섞는다', ...(b.side === 'jeong' && !mine ? ['비무를 청한다'] : []), ...(mine ? [] : ['시비를 건다']), '그냥 간다'], c = await choice(b.tag, o);
   if (o[c] === '말을 섞는다') { const N = Fr().news || []; await say(null, N.length ? `${b.tag}: 들었소? "${pick(N.slice(0, 5)).replace(/^\d+일: /, '')}"` : `${b.tag}: 요즘은 조용하오. 폭풍 전이겠지.`); return; }
-  if (o[c] === '비무를 청한다') { const won = await ctx.duel({ foes: [b.foes[0]], arena: G.field.m.arena, bgm: 'fight', noIntro: true, optional: true, yieldAt: .3, noLoot: true }); if (won) { G.jh.addRep(b.fac, 3); s.fr.fame += 1; await say(null, `${b.tag}: 좋은 솜씨요. 한 수 배웠소.`); } else await say(null, `${b.tag}: 아직 멀었구려. 다음에 또 봅시다.`); return; }
+  if (o[c] === '비무를 청한다') { const won = await ctx.duel({ spar: true, foes: [b.foes[0]], arena: G.field.m.arena, bgm: 'fight', noIntro: true, optional: true, yieldAt: .3, noLoot: true }); if (won) { G.jh.addRep(b.fac, 3); s.fr.fame += 1; await say(null, `${b.tag}: 좋은 솜씨요. 한 수 배웠소.`); } else await say(null, `${b.tag}: 아직 멀었구려. 다음에 또 봅시다.`); return; }
   if (o[c] === '시비를 건다') return pick_(b, f);
 }
 // 시비: 싸우고, 원한을 산다

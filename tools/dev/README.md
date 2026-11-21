@@ -31,7 +31,6 @@ ChatGPT 요청서(2026-11-21부터): 받을 그림과 모형 전부가 `docs/gpt
 - `python3 tools/blender/gpt.py run <받은 스크립트.py> [--install]`: 빈 폴더에서 돌려 `.glb`를 만들고 규격으로 검사한다. `--install`이면 통과한 것을 `assets/hd2d/models/`에 넣는다. 받은 스크립트는 돌리기 전에 읽어 본다.
 - `python3 tools/blender/gpt.py check <.glb나 폴더나 .zip…> [--install]`: 받은 `.glb`를 검사한다(치수, 꼭 닿는 축, 삼각형 수, 재질 이름, 앞뒤가 뒤집힌 면, 구멍). 받은 스크립트는 `art-src/blender/`에 둔다(M1: `gangho_m1.py`).
 - `python3 tools/blender/gpt.py doc`: 요청서의 표와 틀 전문을 다시 뽑는다(`spec.json`이나 틀을 고친 뒤).
-- `tools/blender/walls.py`: Claude가 같은 틀로 만든 임시 방 벽 조각. 게임은 받은 M1을 쓰니 `--install`을 붙이지 않는다.
 - `python3 tools/wall_in.py`: 조각에 입히는 무늬(`assets/hd2d/preview/pm_*.webp`)를 만든다. 게임 쪽 이름표는 `js/hd2d/palette.js`.
 - 방을 찍고 재는 것: `tools/dev/roomkit.cjs`(`ROOMS="hall_in inn" GEN="hall home" POS="n m s" OUT=/tmp/rm/x`). 사람 키, 벽 높이, 벽이 화면 어디에 오는지를 적는다.
 - 주소로 바로 가 보기: 게임 주소 끝에 `?hd2d=1&see=inn`처럼 `see=지도 이름`을 붙이면 저장을 건드리지 않는 둘러보기(새 낭인, 자유 모드)로 그 지도에 바로 선다(`js/hd2d.js`의 `tour`). 방이면 나가는 문 앞에 선다. 손으로 지은 지도 이름만 된다(`inn`, `hall_in`, `clinic`, `cheongha` …. 만들어지는 방 `r_…`은 그 고을에 한 번 들어가야 생긴다). 고친 방을 주인께 보여 드릴 때 이 주소를 드린다.
