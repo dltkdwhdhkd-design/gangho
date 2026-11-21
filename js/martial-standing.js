@@ -20,7 +20,7 @@ export const fanRanks = Object.freeze({
   cheongmyeong:7, baekcheon:5, yuseol:5, yunjong:4, jogeol:4, dangsoso:3, hyeonjong:4, hyeonyeong:3, hyeonsang:4,
   ungeom:5, unam:3, ungak:4, baeksang:3, jingeumryong:5, isongbaek:4, jongseohan:5, gohwi:3, gimokseung:4, samaseung:5,
   heodo:6, heowon:5, heosan:5, muyeon:4, mujin:4, jinhyeon:4, jinmu:3, danggunak:6, dangbo:7, dangho:4,
-  danghwa:3, dangjan:4, dangpae:5, hongdaegwang:5, guchil:3, jongpal:3, wiripsan:6, wisoheng:3, yeompyeong:3, maengso:7,
+  danghwa:3, dangjan:4, dangpae:4, hongdaegwang:5, guchil:3, jongpal:3, wiripsan:4, wisoheng:3, yeompyeong:3, maengso:6,
 });
 // 같은 경지에서도 무명의 제자와 일문을 대표하는 비무 상대의 지구력은 다르다.
 const health = [100,215,405,780,1980,3180,4290,5490];
