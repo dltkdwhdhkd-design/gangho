@@ -284,7 +284,7 @@ async function farewell() {
   await say('boat', '말린 생선이여. 산에서는 이게 제일이여. 짜니까 물 많이 마시고.');
   await say('smith', '칼날은 사흘에 한 번 기름 먹여라. 곽씨 칼은 내가 계속 갈아 둘 테니, 찾으러 와.');
   await say('town2', '주먹밥 다섯 개. 하나는 윤씨 딸 거고 나머진 네 거다. 많이 먹어라. 곽씨가 맨날 너 말랐다고 했어.');
-  await say('kid', '아저씨, 돌아올 때 진짜 칼 갖고 와요! 쟁반 말고!');
+  await say('kid', '{나루아이}, 돌아올 때 진짜 칼 갖고 와요! 쟁반 말고!');
   if (F().l_yang) await say('yang', '계란 또 삶아 놨어. 북쪽 가는 거 아니지? …그럼 됐어. 몸 성히 다녀와.', 's');
   if (F().l_deed) await narr('사람들 뒤쪽, 객잔 터 앞에 비단옷 하나가 서 있다가 눈이 마주치자 돌아섰다.');
   await say('me', '…이런 거 처음이라 뭐라고 해야 할지 모르겠네.', 's');
@@ -340,7 +340,7 @@ Story.providers.push(function content1(id) {
   if (id === 'shop') n.push({ id: 'shopk', spr: 'Noble', x: 5, y: 3.6, dir: 0, talk: talkTown.shopk });
   if (id === 'cheongha' && F().burned) {
     n.push({ id: 'boat', spr: 'OldMan2', x: 22.5, y: 27.8, dir: 3, barks: ['배 떠나오!', '바람 좋다.'], mark: () => at('c1a') && !F().c1boat, talk: talkTown.boat });
-    n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, life: 'wander', r: 2.5, barks: ['쟁반 던져 봐요!', '와아, 칼이다!', '술래잡기 할 사람!'], talk: async () => { await say('kid', '아저씨, 쟁반 또 던져 봐요! 저번에 진짜 멋있었어요!'); } });
+    n.push({ id: 'kid', spr: 'Child', x: 16, y: 16.8, dir: 3, life: 'wander', r: 2.5, barks: ['쟁반 던져 봐요!', '와아, 칼이다!', '술래잡기 할 사람!'], talk: async () => { await say('kid', '{나루아이}, 쟁반 또 던져 봐요! 저번에 진짜 멋있었어요!'); } });
     n.push({ id: 'town', spr: 'Villager', x: 29, y: 16.6, dir: 2, life: 'work', barks: () => G.S.flags.plague ? ['콜록…', '물 좀…'] : ['오늘 물때가 좋네.', '그물 손봐야지.', '곽씨네 국수 냄새 좋다.'], talk: async () => { await say('town', F().plague ? '콜록… 우물물은 마시지 말게… 콜록…' : S().side === 'ma' ? '자네가 마교로 갔다는 말이 돌던데, 설마 아니겠지?' : S().side === 'sa' ? '흑도맹에 들어갔다면서. 그래도 여기 오면 밥은 먹고 가게.' : after('c1h') ? '자네가 흑풍채를 혼내 줬다며? 객잔 다시 지을 때 부르게. 나도 거들 테니.' : '곽씨가 그렇게 될 줄 누가 알았겠나. 객잔 불은 우리가 껐네.'); } });
     n.push({ id: 'town2', spr: 'Villager4', x: 12, y: 16.8, dir: 3, life: 'work', barks: ['빨래가 산더미네.', '애들 또 어디 갔어.', '날 좋다.'], talk: async () => { await say('town2', '그믐만 되면 낯선 사람이 객잔 앞에 봉투를 두고 갔어. 십 년도 넘었을걸.'); if (!F().note_env) { F().note_env = true; ctx.note('마을 아낙: 그믐마다 낯선 사람이 객잔에 봉투를 두고 갔다.'); } } });
     sp.push({ x: 24, y: 16, w: 1, h: 1, hint: '방 보기', act: wantedBoard });

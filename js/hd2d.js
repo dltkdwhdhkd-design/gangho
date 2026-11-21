@@ -95,7 +95,7 @@ const roamingEnemyArt = {
   soldier: 'n_mob_soldier', sa: 'n_mob_sa', ma: 'n_mob_cult', hyeolgyo: 'n_mob_cult', puppet: 'n_mob_jiangshi', skull: 'n_mob_jiangshi' };  // js/battle.js MOB와 같게
 HD.sheetKey = o => {
   if (!want || !art() || !o) return null; const L = [];
-  if (o.me) L.push('me');
+  if (o.me) { if (G.S?.look === 'BlueSamurai') L.push('me'); }
   else {
     for (const k of [o.id, o.role, o.hint && ROLE[o.hint], ...(o.keys || [])]) if (k) L.push('n_' + k);
     if (o.foes?.length) L.push(roamingEnemyArt[o.foes[0]]);
@@ -112,7 +112,7 @@ HD.fieldKey = o => {
   if (!walking.type_BlueSamurai) {loadCastIndex(PV);return null;}
   const raw = (o.me ? G.S.look : o.spr || '').split('/').pop().replace(/_(q|d)$/,'');
   const pool = [o.id,o.id?.replace(/^fan_/,''),o.role,ROLE[o.hint],...(o.keys||[]),
-    roamingEnemyArt[o.foes?.[0]]?.replace(/^n_/,''),'type_'+raw];
+    roamingEnemyArt[o.foes?.[0]]?.replace(/^n_/,''),raw === 'Igyeom' && 'igyeom','type_'+raw];
   return pool.find(id=>id && walking[id]) || null;
 };
 HD.prepareCombat = ids => Promise.all(ids.flatMap(id => {
@@ -962,7 +962,7 @@ function syncActors(F) {
   for (const r of F.roam) if (!r.gone) { walker(r, Math.floor(r.walk || 0) % 4); for (const q of r.crew || []) walker(q, Math.floor(q.walk || 0) % 4); }  // 떠도는 무리·길손과 그 뒤를 따르는 사람들
   if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id); if (walking[id] || walking['type_' + s] || PEOPLE.has('n_' + id)) return walker({ spr: s, role: id, dir: q.dir, x: q.x, y: q.y }, Math.floor(p.walk) % 4); const key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });  // 동료도 새 사람 시트가 있으면 그것으로
   for (const a of F.animals || []) { if (a.gone) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
-  const me = previewTex('me');  // 맛보기: 칸 56점, 사람 키 48점 → 사람 키가 CHAR가 되게 판을 키운다
+  const me = S.look === 'BlueSamurai' && previewTex('me');  // 맛보기: 칸 56점, 사람 키 48점 → 사람 키가 CHAR가 되게 판을 키운다
   if (F.hideMe || fieldWalker({ ...p, spr: S.look }, Math.floor(p.walk) % 4, 'type_' + S.look)) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48); blob(p.x, p.y, 1); }
   else put('chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false;

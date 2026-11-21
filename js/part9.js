@@ -78,7 +78,7 @@ async function preface() {
   await narr('그렇게 한 달을 닦았다. 칼을 찬 사람들은 객잔에 들르지 않았다. 손님은 약을 얻으러 온 피난민들이었고, 나는 그 사람들 그릇을 치웠다. 아침마다 허리를 세우고 왼발로 밀었다.');
   await narr('어느 날 아침, 닦아 놓은 바닥을 돌아보다가 알았다. 오른발이 저절로 따라오고 있었다. 숨이 끊기지 않았다. 배꼽 밑에서 아주 작은 뭔가가 같이 밀리고 있었다.');
   ctx.cgOff();
-  await say('kid', '쟁반 아저씨, 이제 칼 못 들어요?');
+  await say('kid', '쟁반 {나루아이}, 이제 칼 못 들어요?');
   await say('me', '응.', 'h');
   await say('kid', '그럼 쟁반이라도 던져요. 쟁반 잘 던지잖아요.');
   await narr('쟁반은 들렸다. 던지면 두 칸도 못 날아가서 문제였다. 꼬마가 주워다 주기를 열 번쯤 하더니 자기가 던져 보겠다고 했다. 나보다 멀리 날아갔다.');
@@ -129,7 +129,7 @@ async function siege() {
   if (F().lion_debt) await say('lion', '산에서 내려왔다. 녹림 놈들은 빚지고는 못 산다고 했잖냐.');
   // 1~5부에서 만난 청하진 바깥 사람들 중 온 사람
   if (F().l_yang) await say('yang', '부엌은 이 늙은이가 맡을게. 손주 놈 몫까지 국 끓여 놓을 테니, 다 끝나면 와서 먹어.');
-  if (F().jg_refuge) await say('rf_boy', '아저씨, 나도 쟁반 줘요. 칼은 안 줘도 돼요. 아저씨처럼 던질래요.');
+  if (F().jg_refuge) await say('rf_boy', '{나루아이}, 나도 쟁반 줘요. 칼은 안 줘도 돼요. {나루아이}처럼 던질래요.');
   if (F().r3_kaifeng) await say('clan_gaebang', '개방 거지들이 강가에 쫙 깔렸네. 저쪽 배가 몇 척인지, 언제 오는지 반 시진마다 알려 주지.');
   if (F().r3_nanjing) await say('ng_young', '남궁은 대숲 쪽 문에 섰소. 이번엔 숙부님 혼담이 아니라 내 이름을 걸었소.');
   if (F().r3_hangzhou) await say('clan_moyong', '저쪽 무공은 내가 되받아 주겠소. 내 말로 하자면, 걱정 마시오.');
@@ -154,7 +154,7 @@ async function siege() {
   await say('me', '다녀올게요.', 's');
   await say('gwak', '…밥은 먹고 가.', 's');
   await narr('마지막 국수는 내가 끓였다. 곽 아주머니는 한 숟갈 뜨고 나서 소금이 모자란다고 했다. 그릇은 다 비웠다.');
-  { const c = await choice('곽 아주머니가 빈 그릇을 들고 묻는다. “하나 더 싸 주랴?”', ['형 몫으로 하나 더 싸 달라고 한다', '괜찮다고 한다']);
+  { const c = await choice('곽 아주머니가 빈 그릇을 들고 묻는다. “하나 더 싸 주랴?”', ['{형} 몫으로 하나 더 싸 달라고 한다', '괜찮다고 한다']);
     if (c === 0) { F().gwak_soup = true; G.fate?.mark(); await say('gwak', '…천이 놈 몫이냐. 식기 전에 먹이라고는 안 한다. 식어도 먹여.', 's'); await say(null, '국 한 그릇을 받았다. 보자기에 싸서 등에 멨다.'); } }
   ctx.note('달맞이 객잔을 지켰다. 천마를 치러 다시 천산으로 간다.');
   set('x4'); await palaceStart();
@@ -231,18 +231,18 @@ async function bridgeTogether() {
 }
 async function hall() {
   await narr('제단으로 가는 복도는 길었다. 복도 끝에 사람이 서 있었다. 가면도 없이, 눈 쌓인 머리 그대로였다.');
-  await say('me', '형.', 's');
+  await say('me', '{형}.', 's');
   slotPreface();
   await ctx.duel({ foes: ['cheon2'], arena: 'moon', bgm: 'boss', title: '월천', yieldAt: .5, noLoot: true, tip: '<b>서문</b>을 쓰세요. 먼지를 닦아 내듯.' });
   ctx.cg('cheon_end');
-  await narr('칼을 맞대다 말고 나는 칼을 내렸다. 왼발로 밀었다. 칼 대신 걸음을 들이밀었다. 형 얼굴에 쌓인 눈이 천천히 벗겨졌다.');
+  await narr('칼을 맞대다 말고 나는 칼을 내렸다. 왼발로 밀었다. 칼 대신 걸음을 들이밀었다. {형} 얼굴에 쌓인 눈이 천천히 벗겨졌다.');
   await say('cheon', '…{나}.');
-  await say('me', '형.', 's');
+  await say('me', '{형}.', 's');
   await say('cheon', '그 말… 하지 말랬지.');
   if (F().wol_named && F().wol_mop && F().gwak_soup) return hallSaved();
-  await narr('그 순간 복도 끝에서 붉은 빛이 날아왔다. 내가 고개를 돌리기도 전에 형이 나를 등 뒤로 밀쳤다. 빛은 형의 가슴에서 멈췄다.');
+  await narr('그 순간 복도 끝에서 붉은 빛이 날아왔다. 내가 고개를 돌리기도 전에 {형}이 나를 등 뒤로 밀쳤다. 빛은 {형}의 가슴에서 멈췄다.');
   await say('cheon', '아주머니한테… 밥은 먹고 다녔다고 해라.');
-  await say('me', '형!', 's');
+  await say('me', '{형}!', 's');
   await say('cheon', '달이 뜨면… 베지 말고… 닦아라.');
   ctx.cgOff();
   await narr('이번에는 내가 직접 눈을 감겨 주었다.');
@@ -252,13 +252,13 @@ async function hall() {
 
 // 숨은 길: 월하곡에서 형이라고 불렀고, 고개에서 칼 대신 걸레질로 끝냈고, 곽 아주머니의 국을 들고 왔다
 async function hallSaved() {
-  await narr('그 순간 복도 끝에서 붉은 빛이 날아왔다. 형이 나를 등 뒤로 밀치려 했다. 나는 그보다 먼저 등에 멘 보자기를 풀어 앞으로 내밀었다.');
-  await narr('빛은 국그릇에 맞았다. 그릇이 깨지고 식은 국물이 형 얼굴에 튀었다. 민물새우 한 줌에 무 한 토막. 붉은 빛은 국물에 젖은 데부터 꺼졌다.');
+  await narr('그 순간 복도 끝에서 붉은 빛이 날아왔다. {형}이 나를 등 뒤로 밀치려 했다. 나는 그보다 먼저 등에 멘 보자기를 풀어 앞으로 내밀었다.');
+  await narr('빛은 국그릇에 맞았다. 그릇이 깨지고 식은 국물이 {형} 얼굴에 튀었다. 민물새우 한 줌에 무 한 토막. 붉은 빛은 국물에 젖은 데부터 꺼졌다.');
   await say('cheon', '…이게 뭐냐.', 'b');
-  await say('me', '아주머니가 형 몫이래. 식어도 먹이랬어.', 'h');
+  await say('me', '아주머니가 {형} 몫이래. 식어도 먹이랬어.', 'h');
   await say('cheon', '다 쏟았잖아.', 'b');
   await say('me', '내려가면 또 끓여 주실 거야. 소금 모자라다고 하면서.', 'h');
-  await narr('형이 웃었다. 처음 보는 얼굴이었다. 열일곱 해 동안 눈 밑에 쌓여 있던 것이 한꺼번에 녹는 얼굴이었다.');
+  await narr('{형}이 웃었다. 처음 보는 얼굴이었다. 열일곱 해 동안 눈 밑에 쌓여 있던 것이 한꺼번에 녹는 얼굴이었다.');
   await say('cheon', '…가라. 제단은 너 혼자 가야 한다. 나는 문 앞에 서 있겠다. 이번에는 안 죽고.', 'h');
   ctx.cgOff();
   F().cheon_end = true; G.fate?.set('wolcheon', 'alive', '이름을 불렀고, 걸레질로 끝냈고, 국 한 그릇을 들고 갔다');

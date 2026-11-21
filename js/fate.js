@@ -19,7 +19,7 @@ export const FATE = {
     alive: '맹호는 흑풍채를 밭으로 갈아엎었다. 산에 농사지을 땅이 없다더니 감자가 잘 된다고 했다.',
     lost: '맹호는 그 뒤로 산에서 내려오지 않았다. 녹림 놈들은 빚이 없으면 찾아오지도 않는다.' },
   cheol: { name: '철우', key8: 1, met: () => !!F().met_cheol || af('c3d'), v: f => f.cheol_dead ? 'dead' : f.cheol_arm ? 'alive' : null,
-    why: f => f.cheol_dead ? (f.moss_extra && G.S.sworn === 'cheol' ? '달빛이끼를 넉넉히 캐느라 소림에 사흘 늦었다' : '의형제를 맺지 않아 혼자 산문을 지켰다') : '의형제로 곁에 섰다. 왼팔을 잃었다',
+    why: f => f.cheol_dead ? (f.moss_extra && G.S.sworn === 'cheol' ? '달빛이끼를 넉넉히 캐느라 소림에 사흘 늦었다' : '서로 의를 맺지 않아 혼자 산문을 지켰다') : '의를 맺고 곁에 섰다. 왼팔을 잃었다',
     dead: '철우는 소림 경내에 묻혔다. 파계승의 무덤으로는 처음이었다. 그 앞에는 언제나 만두가 놓여 있는데, 누가 놓는지는 아무도 말하지 않는다.',
     alive: '철우는 소림 산문 옆에 국숫집을 냈다. 젓가락은 못 쥐어서 손님 것을 빌려 먹는다.' },
   doc: { name: '윤 의원', key8: 1, met: () => af('c1b'), v: f => f.doc_dead ? 'dead' : f.fate_doc || null,

@@ -263,7 +263,7 @@ async function jobKey() {
 async function jobWell() {
   await ctx.chap(4, '붉은 초승달', '우물');
   await narr('청하진 우물가에 갔다. 아이들이 물을 긷다 말고 놀고 있었다.');
-  await say('kid', '쟁반 아저씨다! 쟁반 또 던져 봐요!');
+  await say('kid', '쟁반 {나루아이}다! 쟁반 또 던져 봐요!');
   await say('me', '여기서 놀지 마라. 저쪽으로 가.');
   const c = await choice('품속의 항아리를 꺼냈다.', ['항아리를 우물에 붓는다', '항아리를 깨 버린다']);
   if (c === 0) {

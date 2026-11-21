@@ -6,9 +6,50 @@ import { FOES } from './foes.js';
 
 const S = () => G.S, F = () => G.S.flags;
 const keep = id => { const s = S(); if (!(s.accs || []).includes(id)) (s.accs = s.accs || []).push(id); Sound.sfx('bonus'); toast(`${josa(ACCS[id].name, '을/를')} 받았다`, 3); };
+FOES.igyeom_ally = { name: '서이겸', spr: 'chars/Igyeom', hp: 520, atk: 26, def: 9, spd: 66, exp: 0, silver: 0, pause: .92, moves: ['x_janggang1', 'x_janggang2', 'x_janggang3'], wpn: 'Lance', guard: .55 };
 FOES.hitman = { name: '혈의방 자객', spr: 'chars/DarkNinja', hp: 100, atk: 10, def: 3, spd: 78, exp: 0, silver: 0, pause: 1.05, moves: ['quick', 'dart3', 'lunge'], wpn: 'Ninjaku', guard: .3 };
 
 export const BONDS = {
+  igyeom: [
+    { at: 15, run: async () => {
+      await narr('밤안개에 등불이 지워졌다. 이겸은 눈을 감고 뱃전에 늘인 줄을 손바닥 안으로 흘려 보냈다.');
+      await say('igyeom', '매듭 하나는 모래톱, 두 개는 물 깊은 길. 이제 내 손 말고 줄을 잡아 봐요.');
+      const c = await choice('손끝에 매듭 두 개가 걸렸다.', ['뱃머리를 깊은 물 쪽으로 돌린다', '이겸의 손에 내 손을 포갠다']);
+      await say('igyeom', c ? '같이 잡으니까 떨리는 것도 들키네요. 안개 낀 날은 아직 이래요.' : '맞아요. 내일부턴 배 삯 반은 당신 몫이네요.', c ? 'b' : 'h');
+      await narr('배가 닿자 그가 젖은 지도를 폈다. 강가의 일곱 집에는 지붕만 그리고 문은 비워 두었다.');
+    } },
+    { at: 40, run: async () => {
+      await say('igyeom', '그해 둑을 끊으면 아랫마을을 살릴 수 있었어요. 물이 일곱 집 마당까지 찰 줄도 알고 있었고요.');
+      await narr('이겸이 옛 나루 장부를 폈다. 둑을 끊기로 한 사람들의 이름 끝에 종이가 보풀처럼 일어나 있었다.');
+      await say('igyeom', '내 이름이 있던 자리예요. 집을 잃은 사람들 눈을 볼 수가 없어서, 칼로 긁어냈습니다.', 's');
+      const c = await choice('이겸이 붓과 노를 나란히 내려놓았다.', ['먼저 장부에 이름을 돌려놓자고 한다', '먼저 일곱 집에 함께 찾아가자고 한다']);
+      F().igyeom_record = c === 0 ? 'ledger' : 'visit';
+      if (c === 0) {
+        await narr('내가 종이를 눌러 주자 이겸이 빈칸에 이름 석 자를 썼다. 장부는 나루 사람들이 펴 볼 수 있도록 매표대에 놓았다.');
+        await say('igyeom', '마를 때까지 옆에 있어 줘요. 젖은 글씨는 또 지워질까 봐.');
+      } else {
+        await narr('첫집에서 문이 열릴 때까지 이겸은 젖은 삿갓을 두 손으로 붙들었다. 마지막 집을 나설 때는 삿갓을 잊고 나왔다.');
+        await say('igyeom', '다음엔 혼자 가서 받아 올 수 있겠어요. 오늘은 같이 가 줘서 고맙습니다.');
+      }
+    } },
+    { at: 70, run: async () => {
+      ctx.cg('bond_igyeom');
+      try {
+        await narr(F().igyeom_record === 'visit' ? '첫집 할머니가 이겸의 삿갓을 들고 왔다. 챙에 달린 작은 놋방울이 걸음마다 울렸다.' : '장부의 새 글씨 아래 일곱 집 식구가 저마다 물이 찬 높이를 그어 놓았다. 마지막 줄에는 작은 방울 한 쌍이 놓여 있었다.');
+        await narr('방울 하나는 건너편 말뚝에, 하나는 이쪽 말뚝에 달았다. 안개 속에서 줄을 당기자 강 건너에서 맑은 대답이 왔다.');
+        await say('igyeom', '사람이 저쪽에 있다는 걸 이제 들을 수 있어요. …그날도 이렇게 물을 걸 그랬어요.');
+        await say('me', '내가 건널 땐 두 번 울릴게요.');
+        await say('igyeom', '그러면 제일 좋은 자릴 비워 둘게요. 뱃사공 바로 옆으로요.', 'b');
+      } finally { ctx.cgOff(); }
+      keep('b_igyeom');
+    } },
+    { at: 85, lover: true, run: async () => {
+      await narr('방울을 두 번 울리자 빈 배가 먼저 떠내려왔다. 뱃전에 국수 두 그릇이 실려 있었다. 밧줄 끝에서는 이겸이 웃고 있었다.');
+      await say('igyeom', '말로 청하면 밥 한 끼인데, 내가 하면 일이 왜 이렇게 커지죠?', 'h');
+      await say('me', '국수 불어요. 얼른 이리 와요.');
+      await narr('그가 내 옆에 앉아 젓가락을 건넸다. 배는 묶어 두었다. 둘 다 오늘 건너가야 할 곳이 없었다.');
+    } },
+  ],
   yun: [
     { at: 15, run: async () => {
       await say('yun', '잠깐 앉아 봐요. 약값 얘기 좀 해요.');
@@ -407,6 +448,7 @@ async function play(id) {
 }
 // 연인이 결전에 달려온다
 const JOIN = {
+  igyeom: ['igyeom', '두 번 들었어요. 이번에는 내가 건너갈 차례죠.', 'igyeom_ally'],
   so: ['so', '늦어서 미안. 왼발 조심하랬지!', 'so_ally'],
   clan_dang: ['clan_dang', '제 찻잔 아직 안 돌려줬잖아요. 죽으면 곤란해요.', 'dang_ally'],
   clan_moyong: ['clan_moyong', '받은 것을 돌려주러 왔소. 그대에게 받은 것이 많아서 말이오.', 'moyong_ally'],
@@ -423,6 +465,7 @@ async function join(side, allies = []) {
 }
 // 결말에 붙는 그 사람의 뒷이야기
 const AFTER = {
+  igyeom: '청하진 나루에서는 안개가 아무리 짙어도 배가 뜬다. 이겸이 물길을 읽고 나는 방울을 당긴다. 가끔은 맑은 날에도 두 번 울린다. 그가 웃으며 돌아보는 게 좋아서.',
   yun: '윤설은 지금도 장부에 내 몸 어디가 다쳤는지 적는다. 요즘은 왼쪽이 좀 줄었다고 한다.',
   so: '소연하와는 아직도 달만 뜨면 칼을 맞댄다. 빈 칼집은 우리 집 벽에 걸려 있다.',
   clan_dang: '내 찻잔은 여전히 따로 쓴다. 매일 아침 마셔 보는데 아직은 살아 있다.',
@@ -432,7 +475,12 @@ const AFTER = {
   hyeok: '혁련하는 아직도 웃는 법이 서툴다. 내가 문턱에 걸릴 때만 기침처럼 웃는다.',
 };
 async function ending() {
-  const q = S().married || S().partner; if (q && AFTER[q]) await narr(AFTER[q]);
+  const q = S().married || S().partner; if (q && AFTER[q]) {
+    await narr(AFTER[q]);
+    if (q === 'igyeom') await narr(F().igyeom_record === 'visit'
+      ? '첫집 할머니는 장날마다 우리 배에 오른다. 그날 빌린 삿갓을 이제는 셋이서 번갈아 쓴다.'
+      : '새 장부 맨 앞에는 우리 둘의 이름이 있다. 다음 장부터는 누구든 자기가 아는 물길을 써넣을 수 있다.');
+  }
   if (F().kids_saved && !F().plague) await narr('창고 밑에서 데리고 나온 아이들은 나무패를 벗고 이름을 새로 받았다. 서른한 명 이름을 짓느라 곽 아주머니가 사흘을 앓았다.');
 }
 G.bond = { next, play, done, join, ending, total: id => (BONDS[id] || []).length };

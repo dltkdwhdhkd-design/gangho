@@ -127,7 +127,7 @@ async function birth() {
   await say('husband', '이보게, 이름 좀 지어 주게. 내가 배 밑에서 살아 나온 게 자네 덕 아닌가.');
   const name = (await ctx.ask('아기 이름', '순이 동생의 이름을 적으세요.', '달이') || '달이').trim() || '달이';
   F().baby = name;
-  await say('husband', `${name}. 좋네. 이분이 쟁반 아저씨다, ${name}.`);
+  await say('husband', `${name}. 좋네. 이분이 쟁반 {나루아이}다, ${name}.`);
   await narr('돌아오는 길에 윤 의원은 약 상자를 자기가 지겠다고 우기다가 스무 걸음 만에 도로 내게 넘겼다.');
   await say('doc', '윤설이한테는 내가 지고 왔다고 하게.');
   ctx.note(`순이네 둘째가 태어났다. 이름은 ${name}.`);

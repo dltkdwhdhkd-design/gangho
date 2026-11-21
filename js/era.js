@@ -12,7 +12,7 @@ FOES.wang_ally = { ...FOES.disciple, name: '왕충', hp: 900, atk: 22, boss: 0 }
 const crew = (id, lv, n) => G.jh.crew(G.free.fac(id), lv, n);
 async function tofu() {
   await narr('산문 아래 장터가 비어 있었다. 두부 파는 노파만 혼자 좌판을 지키고 있었다.');
-  await say('gomom', '총각이구먼. 밥은 먹고 다니냐.');
+  await say('gomom', '{손님}이구먼. 밥은 먹고 다니냐.');
   await say('me', '네. 장사는 좀 되세요?');
   await say('gomom', '살 사람이 없어. 젊은 것들이 다 끌려갔거든. 외문 애들도 쉰 명 다 갔어. 위에서 사람을 내라고 했다나. 우리 아들이 말렸는데도 소용없었대.');
   await say('gomom', '그 왜, 마른 애 있잖아. 석두. 나한테 두부 외상을 달아 놓고 갔어. 돌아와서 갚겠다고.');

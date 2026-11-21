@@ -213,7 +213,7 @@ async function tableVoices() {
   if (F().r3_hangzhou) { await say('clan_moyong', '……맛있소.'); await say('me', '그건 누구 말투예요?'); await say('clan_moyong', '내 말이오. 오른발은 그냥 두면 따라온다더니, 말도 그렇더군.', 'h'); }
   if (F().wei_back) await say('wei', '청하진 나루 노는 이제 내가 젓는다. 뱃사람들한테 뜯은 돈만큼 공짜로 건네주는 중이다. 아직 반도 못 갚았다.');
   if (F().l_yang) await say('yang', '계란 삶아 왔어. 정파고 사파고 계란은 다 먹어. 껍질은 각자 까.');
-  if (F().jg_refuge) { await say('rf_boy', '아저씨! 나 이제 여기서 그릇 날라요. 근데 아저씨, 이번엔 정파예요 사파예요?'); await say('me', '합석이야.'); await say('rf_boy', '그게 뭔데요?'); await say('gwak', '밥 같이 먹는 거다. 그릇이나 날라.', 'a'); }
+  if (F().jg_refuge) { await say('rf_boy', '{나루아이}! 나 이제 여기서 그릇 날라요. 근데 {나루아이}, 이번엔 정파예요 사파예요?'); await say('me', '합석이야.'); await say('rf_boy', '그게 뭔데요?'); await say('gwak', '밥 같이 먹는 거다. 그릇이나 날라.', 'a'); }
   if (F().hw_watch) { await say('fan_cheongmyeong', '화산 대표로는 매향이 왔고 나는 구경 왔어. 국수 공짜지? 공짜 아니면 저 남궁가 앞으로 달아 줘.', 'h'); await say('clan_namgung', '왜 또 남궁가 앞이냐!', 'a'); }
   if (F().sm_drink) await say('samaung', F().sm_drink === 'poured' ? '점소이가 따라 준 술을 마시는 게 이번이 두 번째구나. 첫 번째는 금봉 객잔이었지.' : '오늘은 내가 안 따른다. 점소이가 따라라. 금봉 객잔 빚이다.');
 }
@@ -286,12 +286,12 @@ async function tableScene() {
 // 의형제를 맺었지만 이끼를 캐느라 사흘 늦은 길
 async function gateLate() {
   await narr('창운산에서 사흘을 더 있었다. 그 사흘 동안 소림 산문 앞에서는 싸움이 계속됐다고 했다.');
-  await say('me', '형님, 뒷길에도 놈들이 올라온대요. 제가 막을게요.');
+  await say('me', '{형님}, 뒷길에도 놈들이 올라온대요. 제가 막을게요.');
   await say('cheol', '아우가 늦었구려. 괜찮소. 뒷길은 아우가 막으시오. 여기는 소승이 사흘째 보고 있소.', 'h');
   await ctx.duel({ foes: ['hyeol_elite', 'hyeolgyo', 'hyeolgyo'], arena: 'forest', bgm: 'boss', title: '소림 뒷길' });
   ctx.cg('gate');
   await narr('뒷길을 막고 돌아왔을 때 싸움은 끝나 있었다. 철우는 돌계단 맨 위에 앉아 있었다. 사흘 동안 한 번도 일어나지 않았다고 했다.');
-  await say('me', '형님. 밥값 내러 왔어요.', 's');
+  await say('me', '{형님}. 밥값 내러 왔어요.', 's');
   await narr('대답이 없었다. 손에 먹다 남은 주먹밥이 쥐여 있었다. 의형제를 맺던 날 내가 사 준 것과 같은 것이었다.');
   ctx.cgOff();
   await say('jigaek', '…스님께서 마지막에 그러셨습니다. 아우가 늦는 건 사람을 살리느라 그런 거니 탓하지 말라고.');
@@ -319,7 +319,7 @@ async function gateScene() {
   await ctx.duel({ foes: ['hyeolgyo', 'hyeolgyo', 'hyeolgyo'], allies: ['cheol_ally'], arena: 'court', bgm: 'fight', title: '산문 앞 첫 물결' });
   if (sworn && F().moss_extra) return gateLate();
   if (sworn) {
-    await say('me', '형님, 뒷길에도 놈들이 올라온대요.');
+    await say('me', '{형님}, 뒷길에도 놈들이 올라온대요.');
     await say('cheol', '아우가 가시오. 여기는 소승이 보겠소.');
     await say('me', '싫어요. 뒷길은 나한당에 맡겼어요. 혼자 서지 마세요. 밥값을 누가 내요.');
     await say('cheol', '…허허, 그렇소. 밥값이 있었지.');

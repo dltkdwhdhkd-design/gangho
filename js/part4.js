@@ -31,7 +31,7 @@ async function granary() {
   const allies = s === 'jeong' ? ['cheol_ally'] : s === 'ma' ? ['hyeok_ally'] : s === 'sa' && F().lion_debt ? ['lion_ally'] : [];
   await ctx.duel({ foes: ['drill', 'shadow2', 'shadow2'], allies, arena: 'room', bgm: 'fight', title: '맹주 창고 지하' });
   ctx.cg('kids');
-  await say('orphan', '아저씨는 몇 번이에요?');
+  await say('orphan', '{나루아이}는 몇 번이에요?');
   await say('me', '번호 없어. 이름이 있어.', 'a');
   await say('orphan', '이름은 어떻게 받아요?');
   await say('me', '…….', 's');
@@ -277,7 +277,7 @@ async function frElder() {
   await say('elder', '앞서 걸으면서 화살이 어디서 날아오나 보는 일이라더군. 맹주 명이라네.');
   await narr('나루까지 어떻게 뛰어갔는지 모르겠다.');
   await fadeTo(1); G.field.load('cheongha', 22.5, 24, 3); await fadeTo(0);
-  await say('kid', '쟁반 아저씨!');
+  await say('kid', '쟁반 {나루아이}!');
   await say('go', '사제. 네가 왜 여기 있느냐.');
   await say('me', '사형, 그 애 내려놓으세요.', 'a');
   await say('go', '명령이다. 전쟁에는 눈이 필요하다.');

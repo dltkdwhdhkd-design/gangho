@@ -3,7 +3,7 @@ import { TITLES } from './titles.js';
 import { G, IMG, ART, Input, Sound, $, $$, el, esc, toast, clamp, wait, fadeTo, TS, josa } from './core.js';
 import { Keys, KEY_ACTIONS, KEY_PRESETS } from './core.js';
 import { SKILLS, WEAPONS, HEARTS, ITEMS, rankOf, expNeed } from './data.js';
-import { newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take, SLOTS, slotInfo, autoInfo, saveSlot, loadSlot, delSlot, exportSlot, readSaveFile, importToSlot } from './state.js';
+import { LEAD_LOOK, newState, stats, save, load, hasSave, saveToFile, loadFromFile, masteryLv, canEquip, DIFF, learn, have, give, take, SLOTS, slotInfo, autoInfo, saveSlot, loadSlot, delSlot, exportSlot, readSaveFile, importToSlot } from './state.js';
 import { DB, ACCS, FURN, TREES, HOUSES } from './items.js';
 import { icon } from './icons.js';
 import * as MER from './meridian.js';
@@ -11,7 +11,6 @@ import { ARMORS, SLOTS as WEAR_SLOTS, gname, fxText, wearOf, wearPut, accWorn, a
 import { Story } from './story.js';
 import { CLANS, SAPA, clansWon } from './clandata.js';
 
-const LOOK = 'BlueSamurai'; // 주인공 도트는 일러스트에 맞춰 하나로 고정
 function titleBg(c) {
   c.setTransform(1, 0, 0, 1, 0, 0);
   // 도트 그림을 먼저 깔고, 일러스트가 도착하면 천천히 겹친다
@@ -33,19 +32,33 @@ export function showTitle() {
   const l = $('#bLoad'); if (!hasSave()) l.disabled = true; else l.classList.add('pri'); (hasSave() ? l : $('#bNew')).focus(); l.onclick = () => { Sound.init(); G.S = load(); s.innerHTML = ''; Story.resume(); };
 }
 function showCreate() {
-  const s = $('#screen'); let diff = 'normal', mode = 'story';
-  s.innerHTML = `<div class="sheet"><div class="card"><h2>어떤 낭인입니까?</h2><div class="hint">군막에서는 번호로 불렸습니다. 이름 하나만은 잊지 않았습니다.</div>
-  <div class="field"><span>이름</span><input id="nm" maxlength="6" placeholder="이름을 입력하세요" autocomplete="off"></div>
+  const s = $('#screen'); let diff = 'normal', mode = 'story', gender = 'm';
+  s.innerHTML = `<div class="sheet"><div class="card create-card"><div class="lead-portrait"><img id="lead-art" src="assets/art/lead_m.webp" alt="남성 주인공"></div><div class="lead-form"><h2>어떤 낭인입니까?</h2><div class="hint">군막에서는 번호로 불렸습니다. 이름 하나만은 잊지 않았습니다.</div>
+  <div class="field"><span id="gender-label">주인공</span><div class="seg" id="leads" role="group" aria-labelledby="gender-label"><button type="button" class="btn on" data-gender="m" aria-pressed="true">남성</button><button type="button" class="btn" data-gender="f" aria-pressed="false">여성</button></div></div>
+  <div class="field"><label for="nm">이름</label><input id="nm" maxlength="6" placeholder="이름을 입력하세요" autocomplete="off"></div>
   <div class="field"><span>방식</span><div class="seg" id="md"></div></div>
   <div class="hint" id="mdh">아홉 부로 이어지는 이야기를 따라갑니다.</div>
   <div class="field"><span>난이도</span><div class="seg" id="df"></div></div>
   <div class="hint">쉬움은 적이 약하고, 어려움은 적의 공격이 세고 체력도 많습니다. 나중에 바꿀 수 없습니다.</div>
-  <div class="row"><button class="btn" id="back">돌아가기</button><button class="btn pri" id="go">시작</button></div></div></div>`;
+  <div class="row"><button class="btn" id="back">돌아가기</button><button class="btn pri" id="go">시작</button></div></div></div></div>`;
+  const leadArt = $('#lead-art');
+  for (const button of $$('#leads button')) {
+    button.onclick = () => {
+      gender = button.dataset.gender;
+      for (const b of $$('#leads button')) {
+        const selected = b === button;
+        b.classList.toggle('on', selected);
+        b.setAttribute('aria-pressed', String(selected));
+      }
+      leadArt.src = 'assets/art/lead_' + gender + '.webp';
+      leadArt.alt = button.textContent + ' 주인공';
+    };
+  }
   for (const k of ['easy', 'normal', 'hard']) { const b = el('button', 'btn' + (k === diff ? ' on' : ''), DIFF[k].name); b.onclick = () => { diff = k; $$('#df .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); }; $('#df').appendChild(b); }
   for (const [k, n, h] of [['story', '이야기', '아홉 부로 이어지는 이야기를 따라갑니다.'], ['free', '자유', '이야기 없이 강호를 삽니다. 문파에 들어가도, 낭인으로 살아도, 내 문파를 세워도, 악인이 되어도 됩니다.']]) { const b = el('button', 'btn' + (k === mode ? ' on' : ''), n); b.onclick = () => { mode = k; $$('#md .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); $('#mdh').textContent = h; }; $('#md').appendChild(b); }
   $('#back').onclick = showTitle;
-  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LOOK, 'm', diff); s.innerHTML = ''; G.bgDraw = null; if (mode === 'free') G.free.start(); else Story.begin(); };
-  setTimeout(() => $('#nm').focus(), 50);
+  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LEAD_LOOK[gender], gender, diff); s.innerHTML = ''; G.bgDraw = null; if (mode === 'free') G.free.start(); else Story.begin(); };
+  setTimeout(() => $('#nm')?.focus(), 50);
 }
 // ── 메뉴 ──
 let tab = 'stat', slotSel = 0;
@@ -172,9 +185,10 @@ function tabNote(B) {
 }
 function tabLove(B) {
   const S = G.S, L = G.life, list = Object.entries(L.cand).filter(([k]) => S.flags['met_' + k] || (S.love[k] || 0) > 0);
-  const faces = { yun: 'Princess', so: 'RedSamurai', cheol: 'Monk2', baekrang: 'Cavegirl', hyeok: 'Hyeok', clan_dang: 'Dang', clan_moyong: 'Moyong', clan_namgung: 'Namgung' }, desc = { yun: '청하진 약방집 딸. 말이 짧고 손이 빠르다.', so: '벽수궁 출신의 검객. 찾는 사람이 있다.', cheol: '소림에서 쫓겨난 스님. 밥값을 낸 적이 없다.', clan_dang: '사천당가의 딸. 찻잔에 손대지 말 것.', clan_moyong: '받은 것은 그대로 돌려주는 모용세가의 딸.', clan_namgung: '남궁세가의 딸이자 후계자. 자존심이 높다.', baekrang: '하오문의 소문을 쥔 도박장 주인. 값을 먼저 말한다.', hyeok: '천마신교의 성녀. 향을 판다고 했다.' };
-  if (!list.length) { B.innerHTML = '<p class="hint">아직 가까운 사람이 없습니다.</p>'; return; }
-  B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와는 셋째 사연 뒤에 의형제를 맺습니다.</p>` + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${faces[k]}" data-a="${k}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated;border-radius:4px"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || S.sworn === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${desc[k]}</div></div></div>`).join('');
+  const faces = { igyeom: 'Igyeom', yun: 'Princess', so: 'RedSamurai', cheol: 'Monk2', baekrang: 'Cavegirl', hyeok: 'Hyeok', clan_dang: 'Dang', clan_moyong: 'Moyong', clan_namgung: 'Namgung' }, desc = { igyeom: '청하진 나루의 뱃사공. 안개가 끼면 밧줄 매듭으로 길을 읽는다.', yun: '청하진 약방집 딸. 말이 짧고 손이 빠르다.', so: '벽수궁 출신의 검객. 찾는 사람이 있다.', cheol: '소림에서 쫓겨난 스님. 밥값을 낸 적이 없다.', clan_dang: '사천당가의 딸. 찻잔에 손대지 말 것.', clan_moyong: '받은 것은 그대로 돌려주는 모용세가의 딸.', clan_namgung: '남궁세가의 딸이자 후계자. 자존심이 높다.', baekrang: '하오문의 소문을 쥔 도박장 주인. 값을 먼저 말한다.', hyeok: '천마신교의 성녀. 향을 판다고 했다.' };
+  const riverHint = !S.flags.met_igyeom ? '<p class="hint">청하진 나루에 가면 수로 지도를 그리는 서이겸을 만날 수 있습니다.</p>' : '';
+  if (!list.length) { B.innerHTML = riverHint; return; }
+  B.innerHTML = `<p class="hint">이야기는 하루 한 번, 선물도 하루 한 번. 호감이 쌓이면 머리 위에 ! 표시가 뜨고 그 사람의 사연이 열립니다. 호감 70에 셋째 사연까지 보면 마음을 전할 수 있고, 연인이 되어 호감 100에 옥가락지와 집이 있으면 혼인을 청할 수 있습니다. 연인은 마지막 싸움에 달려옵니다. 철우와는 셋째 사연 뒤에 ${S.gender === 'f' ? '의남매' : '의형제'}를 맺을 수 있습니다.</p>` + riverHint + list.map(([k, c]) => `<div class="note" style="display:flex;gap:14px;align-items:center"><canvas data-f="${faces[k]}" data-a="${k}" width="38" height="38" style="width:66px;height:66px;image-rendering:pixelated;border-radius:4px"></canvas><div style="flex:1"><b style="font-weight:400;font-size:19px">${c.name}</b> <span class="tag ${S.partner === k || S.married === k || S.sworn === k ? 'ult' : ''}">${L.stageOf(k)}</span> <small class="hint">호감 ${S.love[k] || 0} · 사연 ${G.bond.done(k)}/${G.bond.total(k)}</small><div class="bar" style="height:10px;margin:4px 0"><i class="val" style="width:${S.love[k] || 0}%"></i></div><div class="hint">${desc[k]}</div></div></div>`).join('');
   // 일러스트가 있으면 얼굴 부분을 잘라 쓴다. 없으면 옛 도트 얼굴
   $$('canvas[data-f]', B).forEach(c => { const x = c.getContext('2d'), a = ART.get(c.dataset.a + '_n');
     if (a) {

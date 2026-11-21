@@ -78,13 +78,13 @@ async function qWife() {
   await checkAll();
 }
 async function qKid() {
-  await say('kid', '아저씨, 저 좀 숨겨 주세요. 수적 아저씨 주머니에서 뭘 좀 꺼냈는데 지금 쫓아와요.');
+  await say('kid', '{나루아이}, 저 좀 숨겨 주세요. 수적 아저씨 주머니에서 뭘 좀 꺼냈는데 지금 쫓아와요.');
   await say('me', '그걸 왜 꺼냈어.', 'a');
   await say('kid', '저도 강호인 될 거예요. 강호인은 원래 남의 물건 가져가잖아요.');
   await say('me', '그건 도둑이야.', 'a');
   await say('pirate', '이 꼬맹이 어디 갔어! 내 패 내놔!');
   await ctx.duel({ foes: ['pirate', 'pirate'], arena: 'village', title: '꼬마를 지켜라' });
-  await say('kid', '와, 진짜 멋있다. 이거 아저씨 가져요. 복(福) 자 새겨진 나무패인데요, 마을에 낮에는 문 닫아 놓고 밤에만 불이 켜지는 집이 있거든요? 그 집 문에 이거랑 똑같은 게 걸려 있어요.');
+  await say('kid', '와, 진짜 멋있다. 이거 {나루아이} 가져요. 복(福) 자 새겨진 나무패인데요, 마을에 낮에는 문 닫아 놓고 밤에만 불이 켜지는 집이 있거든요? 그 집 문에 이거랑 똑같은 게 걸려 있어요.');
   await say('me', '다음부터 남의 주머니에 손대지 마.', 'a');
   await say('kid', '네! 근데 쟁반 던지는 거 가르쳐 주세요.');
   F().q_kid = true; await checkAll();

@@ -44,7 +44,7 @@ export async function refugees() {
   const c = await choice('징발관이 쓰러진 채 이쪽을 노려본다. 피난민들이 수레의 쌀가마를 끌어내리고 있다.', ['쌀만 두고 보내 준다', '수레까지 빼앗고 쫓아낸다']);
   if (c === 0) { await say('me', '쌀은 두고 가요. 보고는 하고 싶은 대로 하세요. 어차피 제 얼굴은 나루마다 붙어 있으니까.'); await say('levy', '……흑도맹이나 너나 다를 게 없다.'); ctx.rep('jeong', 1); }
   else { await say('me', '수레도 두고 가요. 씨나락 실을 데가 없대요.'); await narr('징발대는 빈손으로 강둑을 올라갔다. 피난민 몇이 수레를 끌어다 씨나락을 실었다. 누가 먼저랄 것도 없이 다들 나한테 고개를 숙였다.'); ctx.rep('jeong', 2); ctx.rep('sa', 1); }
-  await say('rf_boy', '아저씨, 아저씨도 사파예요?');
+  await say('rf_boy', '{나루아이}, {나루아이}도 사파예요?');
   await say('me', '아니.');
   await say('rf_boy', '그럼 정파예요? 정파가 쌀 가져갔는데.');
   await say('me', '……점소이야.', 's');

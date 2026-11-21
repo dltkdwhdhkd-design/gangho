@@ -147,22 +147,22 @@ async function thirdStart() {
 async function ghostPass() {
   ctx.cg('ghost');
   await narr('고개 마루에 사람이 혼자 서 있었다. 머리에 눈이 쌓여도 털지 않았다. 가면은 없었다. 나와 닮은 얼굴이었다.');
-  await say('me', '…형.', 's');
-  await narr('처음 불러 본 말이었다. 형이라고 부르지 말라던 사람은 고개도 돌리지 않았다.');
+  await say('me', '…{형}.', 's');
+  await narr('처음 불러 본 말이었다. {형}이라고 부르지 말라던 사람은 고개도 돌리지 않았다.');
   ctx.cgOff();
   await say('gwima', '불러 봐야 소용없다. 내가 일으킨 것들은 귀가 없다.');
   await say('me', '내려와. 네 얼굴부터 보자.', 'a');
-  await say('gwima', '먼저 네 형이랑 놀아라. 곽란이 키운 아이들이 서로 베는 걸 보고 싶구나.');
+  await say('gwima', '먼저 네 {형}이랑 놀아라. 곽란이 키운 아이들이 서로 베는 걸 보고 싶구나.');
   await ctx.duel({ foes: ['cheon2'], arena: 'snow', bgm: 'boss', title: '월천', yieldAt: .3, noLoot: true });
-  await narr('칼을 맞대는 내내 형은 숨소리도 내지 않았다. 내가 왼발을 밀면 똑같이 왼발이 나왔다. 칼끝에 어깨가 베여도 얼굴은 그대로였다.');
-  { const c = await choice('형의 무릎이 꺾였다. 칼끝이 형의 목 앞에 있다.', ['칼을 돌려 귀마에게 간다', '칼을 내려놓고, 허리를 세우고, 왼발로 민다']);
-    if (c === 1) { F().wol_mop = true; G.fate?.mark(); await narr('칼을 눈 위에 내려놓았다. 허리를 세우고 왼발로 밀었다. 형 어깨에 쌓인 눈이 한 줌 쓸려 나갔다. 형이 처음으로 눈을 깜빡였다.'); }
-    else await narr('무릎이 꺾인 형을 두고 나는 칼을 돌렸다.'); }
+  await narr('칼을 맞대는 내내 {형}은 숨소리도 내지 않았다. 내가 왼발을 밀면 똑같이 왼발이 나왔다. 칼끝에 어깨가 베여도 얼굴은 그대로였다.');
+  { const c = await choice('{형}의 무릎이 꺾였다. 칼끝이 {형}의 목 앞에 있다.', ['칼을 돌려 귀마에게 간다', '칼을 내려놓고, 허리를 세우고, 왼발로 민다']);
+    if (c === 1) { F().wol_mop = true; G.fate?.mark(); await narr('칼을 눈 위에 내려놓았다. 허리를 세우고 왼발로 밀었다. {형} 어깨에 쌓인 눈이 한 줌 쓸려 나갔다. {형}이 처음으로 눈을 깜빡였다.'); }
+    else await narr('무릎이 꺾인 {형}을 두고 나는 칼을 돌렸다.'); }
   await say('me', '이제 네 차례야.', 'a');
   await ctx.duel({ foes: ['gwima'], foeHpMul: G.S.diff === 'hard' ? .85 : 1, allies: ['so_ally'], arena: 'moon', bgm: 'boss', title: '귀마' });
   await say('gwima', '죽은 것은… 다시 일어난다… 나도…');
-  await narr('귀마가 흩어지자 고개를 메우고 있던 망자들이 눈 위로 픽픽 쓰러졌다. 나는 형을 찾아 뒤를 돌아봤다.');
-  await narr('형은 쓰러지지 않았다. 잠깐 제 손을 내려다보더니 천산 쪽으로 걸어가기 시작했다. 불러도 돌아보지 않았고, 금방 눈보라에 가려 보이지 않게 됐다.');
+  await narr('귀마가 흩어지자 고개를 메우고 있던 망자들이 눈 위로 픽픽 쓰러졌다. 나는 {형}을 찾아 뒤를 돌아봤다.');
+  await narr('{형}은 쓰러지지 않았다. 잠깐 제 손을 내려다보더니 천산 쪽으로 걸어가기 시작했다. 불러도 돌아보지 않았고, 금방 눈보라에 가려 보이지 않게 됐다.');
   await say('yun', '귀마가 죽었는데 왜 안 쓰러져요?', 'b');
   await say('hyeok', '저분을 부르는 것이 귀마만은 아니었던 모양입니다.');
   F().gwi_dead = true;
@@ -186,7 +186,7 @@ async function lastRentSealed() {
   await say('baek', '문지기를 하고 있다. 내가 연 문이니 내가 닫아야지. 그런데 쐐기가 하나 빠져서 닫히질 않는구나. 석 달째다.');
   await narr('돌문 가운데 손바닥만 한 홈이 파여 있었다. 품에서 여우 가면 조각을 꺼냈다. 안쪽에 새겨진 월하문 글자가 홈의 무늬와 똑같았다.');
   await say('baek', '…그걸 어디서 났느냐.', 'b');
-  await say('me', '월하곡에서요. 형이 쓰던 거예요.');
+  await say('me', '월하곡에서요. {형}이 쓰던 거예요.');
   await say('baek', '천이 놈이 문 열 열쇠를 얼굴에 쓰고 다녔구나. 연경추 그놈은 끝까지 몰랐겠지.');
   await say('baek', '저것들이 오는구나. 조각을 끼울 동안만 버텨라.');
   await ctx.duel({ foes: ['gate_guard', 'gate_guard', 'gate_guard'], allies: ['baek_ally2'], arena: 'moon', bgm: 'boss', title: '돌문 앞', survive: 30, tip: '30초를 버티면 백 노인이 조각을 끼웁니다.' });

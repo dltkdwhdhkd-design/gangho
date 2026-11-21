@@ -1,6 +1,6 @@
 // 대화창: 말하는 사람의 그림이 크게 뜨고, 글자가 한 자씩 나온다
 import { G, IMG, ART, Input, Sound, $, el, esc, hasJong } from './core.js';
-import { cgOn } from './cg.js';
+import { cgOn, sceneArt } from './cg.js';
 export const WHO = {};
 const D = { cur: null };
 export const talking = () => !!D.cur;
@@ -22,7 +22,7 @@ function pic(who, expr = 'n') {
 }
 function slot(side, who, expr) {
   const st = $('#vn'), old = st.querySelector('.st.' + side), p = pic(who, expr), key = `${who}|${expr || 'n'}`;
-  if (!p || (!p.art && !p.w.face) || (old && old.dataset.key === key)) return;
+  if (!p || (!p.art && !p.w.face) || (old && old.dataset.key === key && (!p.art || old.classList.contains('art')))) return;
   if (old) old.remove();
   const e = el('div', `st ${side} ${p.art ? 'art' : 'pix'}`); e.dataset.who = who; e.dataset.key = key;
   if (p.art) { const im = new Image(); im.src = p.art.src; e.appendChild(im); } else e.appendChild(faceCanvas(p.w.face, 190));
@@ -42,7 +42,7 @@ function render(c) {
     stageClear(); if (c.card) { const k = el('div', 'chapcard', `<b>${esc(c.card[0])}</b><span>${esc(c.card[1])}</span>${c.card[2] ? `<i>${esc(c.card[2])}</i>` : ''}`); d.appendChild(k); d.style.background = ''; d.classList.add('over'); k.onclick = () => click(c); c.txtEl = null; return; }
     if (cgOn()) { const n = el('div', 'narr low'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c); d.style.background = ''; return; }
     const n = el('div', 'narr'); d.appendChild(n); c.txtEl = n; n.onclick = () => click(c);
-    const pic = c.cg && ART.get('cg_' + c.cg); d.style.background = pic ? `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)), url(${pic.src}) center/cover` : 'rgba(0,0,0,.72)'; return;
+    const pic = c.cg && sceneArt(c.cg); d.style.background = pic ? `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)), url(${pic.src}) center/cover` : 'rgba(0,0,0,.72)'; return;
   }
   d.style.background = ''; stageShow(c.who, c.expr);
   const w = c.who ? (c.who === 'me' ? { name: G.S.name } : (WHO[c.who] || { name: c.who })) : null;
@@ -54,8 +54,19 @@ function render(c) {
 }
 function click(c) { Input.press('ok'); setTimeout(() => Input.release('ok'), 30); }
 // 이름 뒤 말끝은 받침에 맞춘다: 진소야, 강철아
-const sub = s => { const n = G.S ? G.S.name : '', j = hasJong(n); return s.replaceAll('{나}야', n + (j ? '아' : '야')).replaceAll('{나}구나', n + (j ? '이구나' : '구나')).replaceAll('{나}', n).replaceAll('{호}', G.S ? G.S.title : ''); };
-export function say(who, text, expr) { return new Promise(res => { const c = { type: 'say', who, text: sub(text), expr, n: 0, res }; D.cur = c; render(c); }); }
+const olderBrother = { '이라고': '라고', '이랑': '랑', '이': '가', '은': '는', '을': '를' };
+function terms(s, who) {
+  const f = G.S?.gender === 'f';
+  if (who === 'jangpal' && f) s = s.replaceAll('형씨', '낭자');
+  return s.replace(/\{형\}(이라고|이랑|이|은|을)?/g, (_, tail = '') => f ? '오빠' + (olderBrother[tail] || tail) : '형' + tail)
+    .replaceAll('{형님}', f ? '오라버니' : '형님')
+    .replaceAll('{손님}이구먼', f ? '낭자구먼' : '총각이구먼').replaceAll('{손님}', f ? '낭자' : '총각')
+    .replaceAll('{나루아이}', f ? '누나' : '아저씨').replaceAll('{길손호칭}', f ? '언니' : '아저씨')
+    .replaceAll('{아이호칭}', f ? '누나' : '형').replaceAll('{큰손님}', f ? '누님' : '형님')
+    .replaceAll('의형제', f ? '의남매' : '의형제');
+}
+const sub = (s, who) => { const n = G.S ? G.S.name : '', j = hasJong(n); return terms(s, who).replaceAll('{나}야', n + (j ? '아' : '야')).replaceAll('{나}구나', n + (j ? '이구나' : '구나')).replaceAll('{나}', n).replaceAll('{호}', G.S ? G.S.title : ''); };
+export function say(who, text, expr) { return new Promise(res => { const c = { type: 'say', who, text: sub(text, who), expr, n: 0, res }; D.cur = c; render(c); }); }
 export function narr(text, cg) { if (G.jh) G.jh.heard(text); return new Promise(res => { const c = { type: 'narr', text: sub(text), n: 0, res, cg }; D.cur = c; render(c); }); }
 // 부와 장 표지: 까만 화면에 제목을 띄운다
 export function card(part, title, chap) { return new Promise(res => { const c = { type: 'narr', card: [part, title, chap], text: '', n: 0, res: v => { $('#dialog').classList.remove('over'); res(v); } }; D.cur = c; render(c); }); }

@@ -100,13 +100,13 @@ async function guestNo() {
   F().l_no = true; await lunchCheck();
 }
 async function guestYang() {
-  await say('yang', '아이고, 새로 온 총각이구먼. 국물 많이. 이 늙은이는 면은 몇 가닥이면 돼.');
+  await say('yang', '아이고, 새로 온 {손님}이구먼. 국물 많이. 이 늙은이는 면은 몇 가닥이면 돼.');
   await say('me', '면도 넉넉히 드릴게요. 아주머니가 그러래요.');
   await say('yang', '곽씨가? 그 사람 입으로는 그런 말 안 해. 손으로만 하지.', 'h');
   await narr('그릇을 내려놓다가 젖은 바닥에 발이 미끄러졌다. 할머니가 먼저 내 팔을 잡았다.');
   await say('yang', '바닥이 번들번들하네. 걸레질을 너무 열심히 했구먼.');
   await say('me', '열심히 하면 혼나고 대충 하면 또 혼나요.', 'a');
-  await say('yang', '총각 몇 살이여?');
+  await say('yang', '{손님} 몇 살이여?');
   await say('me', '스물이요.');
   await say('yang', '우리 손주가 살았으면 딱 그 나이여. 북쪽에 끌려갔지. 애들만 모아서 뭘 시킨다고.', 's');
   await say('me', '…….', 's');

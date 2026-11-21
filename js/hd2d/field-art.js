@@ -57,8 +57,8 @@ export async function loadFieldArt(images) {
   await Promise.all([loadCastIndex(images),loadRegionalAtlas(),loadWildernessArt().then(a=>{
     for(const [key,im] of Object.entries(a.props))images['field_'+key]=im;
   }), ...[...names].map(name=>loadActorPage(images,name))]);
-  const hero=walking.type_BlueSamurai;
-  if(hero)await Promise.all([loadActorPage(images,hero[0]),loadCombatArt(images,hero)]);
+  const leads = [walking.type_BlueSamurai, walking.type_JadeRunner].filter(Boolean);
+  await Promise.all(leads.flatMap(slot => [loadActorPage(images, slot[0]), loadCombatArt(images, slot)]));
 }
 
 // Preserve the existing mapped rivers, mountain shadows, settlement footprints and coastline.

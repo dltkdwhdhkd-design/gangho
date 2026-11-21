@@ -6,7 +6,7 @@ const F = () => G.S.flags, side = () => G.S.side || 'jeong', fate = () => G.fate
 const KEY = 'gangho_endings';
 // 위에서부터 따져 처음 맞는 것. hint는 못 본 결말에 보이는 귀띔
 export const ENDINGS = [
-  { id: 'two', name: '두 그릇', hint: '형을 부르고, 닦고, 국을 들고 가라', ok: c => c === 0 && F().fate_wolcheon === 'alive' },
+  { id: 'two', name: '두 그릇', hint: '월천을 부르고, 닦고, 국을 들고 가라', ok: c => c === 0 && F().fate_wolcheon === 'alive' },
   { id: 'redmoon', name: '붉은 달', hint: '천마 편에서 끝까지', ok: () => side() === 'ma' && !!F().ma_side_end },
   { id: 'full', name: '만석', hint: '여덟 사람이 모두 객잔에 앉는다', ok: c => c === 0 && fate().dead8() === 0 && fate().alive8() >= 8 && (F().table_good || 0) >= 2 },
   { id: 'empty', name: '빈 상', hint: '객잔에 돌아왔는데 상이 비었다', ok: c => c === 0 && fate().dead8() >= 5 },
@@ -49,7 +49,7 @@ const SCENE = {
     await say('me', '네.', 's');
   },
   two: async () => {
-    await narr('달맞이 객잔 지붕을 다시 올렸다. 그믐날 저녁이면 나는 국수를 두 그릇 더 만다. 하나는 문간에 앉은 형 몫이다. 형은 아직 말이 적고, 머리는 하얀 채다.');
+    await narr('달맞이 객잔 지붕을 다시 올렸다. 그믐날 저녁이면 나는 국수를 두 그릇 더 만다. 하나는 문간에 앉은 {형} 몫이다. {형}은 아직 말이 적고, 머리는 하얀 채다.');
     await say('cheon', '…소금이 모자라다.', 'h');
     await say('gwak', '그 소리는 내가 한다, 이놈들아.', 'h');
     await narr('남은 한 그릇은 뒷마당 우물가에 놓는다. 아침이면 그릇이 비어 있다. 바람이 먹었는지, 배고팠던 누가 먹었는지는 묻지 않기로 했다.');

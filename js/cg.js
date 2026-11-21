@@ -4,10 +4,11 @@ import { G, ART, $, wait } from './core.js';
 
 // 이름: [화면 제목, 위 색, 아래 색, 그림 설명]
 export const CG = {
+  bond_igyeom: ['두 개의 방울', '#182c34', '#956647'],
   // 1부
   war: ['잿더미', '#2a1a14', '#6a3320', '전쟁이 지나간 북쪽 변경 마을. 불탄 집 사이에 다섯 살 아이가 혼자 서 있다'],
   camp: ['견대', '#1c1f22', '#46402e', '군막 뒤편, 번호패를 목에 건 아이들이 줄지어 서 있다'],
-  trap: ['빈 골짜기', '#14171c', '#3a3f46', '보급기지가 있어야 할 골짜기. 화살이 꽂힌 시신 사이로 열일곱 살 소년 혼자 걸어 나온다'],
+  trap: ['빈 골짜기', '#14171c', '#3a3f46', '보급기지가 있어야 할 골짜기. 화살이 꽂힌 시신 사이로 열일곱 살 척후병이 혼자 걸어 나온다'],
   dock: ['청하진', '#3b4a5c', '#c89a6a', '봄날 나루에 내리는 스무 살 낭인. 등에 이 빠진 칼'],
   ladle: ['떨어진 국자', '#3a2a1c', '#8a5a30', '객잔 부엌. 곽 아주머니 손에서 국자가 떨어지는 순간'],
   fire: ['그믐밤', '#120c10', '#a2381e', '불타는 달맞이 객잔 앞, 국자를 든 곽 아주머니와 여우 가면'],
@@ -82,8 +83,12 @@ export const CG = {
 const layer = () => $('#cg');
 export const cgOn = () => !!(layer() && layer().classList.contains('on'));
 // 이벤트 화면을 깔고, 그 위로 대사와 내레이션이 흐른다
+export function sceneArt(id) {
+  const key = 'cg_' + id;
+  return (G.S?.gender === 'f' && ART.get(key + '_f')) || ART.get(key);
+}
 export function showCG(id) {
-  const e = layer(); if (!e) return; const c = CG[id] || [id, '#14110f', '#2a2018'], pic = ART.get('cg_' + id);
+  const e = layer(); if (!e) return; const c = CG[id] || [id, '#14110f', '#2a2018'], pic = sceneArt(id);
   e.className = 'on'; e.innerHTML = '';
   if (pic) { e.style.background = `#000 url(${pic.src}) center/cover`; return; }
   e.style.background = `linear-gradient(${c[1]},${c[2]})`;

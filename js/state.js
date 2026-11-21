@@ -6,15 +6,16 @@ import { GRADES, ARMORS, weaponGrade, wearOf, accWorn, pairOf, setsOf } from './
 import * as MER from './meridian.js';
 const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
+export const LEAD_LOOK = { m: 'BlueSamurai', f: 'JadeRunner' };
 export function newState(name, look, gender, diff) {
   return {
-    v: 3, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
+    v: 4, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
     weapon: 'mop', weapons: ['mop'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
-    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
+    potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0, igyeom: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
   };
 }
 // 무공 트리, 장신구, 요리, 배우자, 집에서 오는 효과를 합친다
-export const SPOUSE_FX = { yun: { potion: 25, hp: 6 }, so: { atk: 6, crit: 3 }, cheol: { hp: 10, def: 4 }, clan_dang: { venom: 1, atk: 3 }, clan_moyong: { parry: .04, skill: 5 }, clan_namgung: { atk: 8 }, baekrang: { crit: 5, atk: 3 }, hyeok: { skill: 8, hp: 4 } };
+export const SPOUSE_FX = { yun: { potion: 25, hp: 6 }, so: { atk: 6, crit: 3 }, cheol: { hp: 10, def: 4 }, clan_dang: { venom: 1, atk: 3 }, clan_moyong: { parry: .04, skill: 5 }, clan_namgung: { atk: 8 }, baekrang: { crit: 5, atk: 3 }, hyeok: { skill: 8, hp: 4 }, igyeom: { parry: .03, regen: 8 } };
 export function bonus(S = G.S) {
   const b = {}, add = fx => { for (const k in fx) b[k] = (b[k] || 0) + fx[k]; };
   const wt = WEAPONS[S.weapon].type;
@@ -111,10 +112,17 @@ function migrate(S) {
     for (const k in d.love) { if (S.love[k] === undefined) S.love[k] = 0; else S.love[k] *= 15; }
     S.tp = S.lv - 1; S.v = 2;
   }
-  if (S.v < 3) { // 주인공은 남성으로 고정, 철우는 인연에서 의형제로
-    S.gender = 'm'; if (['Cavegirl2', 'Woman', 'Villager4'].includes(S.look)) S.look = 'BlueSamurai';
+  if (S.v < 3) {
     if (S.married === 'cheol' || S.partner === 'cheol') { S.sworn = 'cheol'; if (S.married === 'cheol') S.married = null; if (S.partner === 'cheol') S.partner = null; }
     S.v = 3;
+  }
+  if (S.v < 4) {
+    const oldWoman = ['Cavegirl2', 'Woman', 'Villager4', LEAD_LOOK.f].includes(S.look);
+    S.gender = S.gender === 'f' || (!S.gender && oldWoman) ? 'f' : 'm';
+    if (S.gender === 'f' || oldWoman || !S.look) S.look = LEAD_LOOK[S.gender];
+    S.love ??= {};
+    S.love.igyeom ??= 0;
+    S.v = 4;
   }
   return S;
 }
