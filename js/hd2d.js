@@ -8,8 +8,9 @@
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { mountainGate } from './hd2d/gate.js';
 import { addWalkways, bridgeHeight } from './hd2d/walkways.js';
-import { landscapeOf, paintLandscape } from './landscape.js';
-import { reliefMesh, localScenery, addRiverMargins, addSurround, addVista } from './hd2d/wilderness.js';
+import { landscapeOf, paintLandscape, warmTravelEdges } from './landscape.js';
+import { daylight, outdoorUniforms, outdoorMaterial } from './hd2d/outdoor-light.js';
+import { reliefMesh, localScenery, sceneryBatch, addRiverMargins, addSurround, addVista } from './hd2d/wilderness.js';
 import { architectureOf, regionalBuilding } from './hd2d/regional-buildings.js';
 import { fieldProps, floorMaterial, walking, loadFieldArt, loadCastIndex, loadActorPage, loadCombatArt, paintWorldSurface, paintMargins, drawCourt, combatLayout } from './hd2d/field-art.js';
 import { motionFor, drawMotion } from './hd2d/combat-art.js';
@@ -31,7 +32,9 @@ const CHAR = 15, AHEAD = .04;
 // 카메라 거리 CAMK: .63일 때 사람이 화면 높이의 1/5.4였다(기준 그림은 1/7~1/10.5). 2026-11-19에 .95로 물려 1/8.7. docs/plan-2026-11-19.md 2장
 export const ACTK = 1.05, CAMK = qn('camk') || .95, PROPK = .62;
 // 큰 지도(world)는 멀리 봐야 하는 지도라 마을 값(CAMK)을 쓰면 땅 그림이 뭉개지고 좁게 보인다. 큰 지도는 만들 때 맞춘 값을 따로 둔다
-const CAMW = 1.12, ACTW = 1.3;
+const CAMW = 4.05, ACTW = 1.3;
+const MAP_PITCH=(qn('pitch')||43)*DEG, MAP_FOV=qn('fov')||23;
+const TRAIL_PITCH=(qn('pitch')||26)*DEG, TRAIL_FOV=qn('fov')||25;
 // 방 안과 전투는 따로 맞춰 둔 크기를 그대로 둔다(방: 사람 PSC 배, 카메라 CAMR / 전투: 사람 ACTB 배, 카메라 CAMB)
 const CAMR = 1.25, AHEADR = .2, ACTB = 1.3, CAMB = 1.12;  // CAMR: 방 안 사람 키가 화면 높이의 1/7.7이 되게(기준 그림 docs/ref/ws-interior.jpg에서 잰 값. 전에는 1.12로 1/6.9였다). AHEADR: 방에서는 주인공을 화면 가운데보다 한참 아래에 세워 뒷벽을 넓게 담는다  // 인물 도트의 키(평면도 점). 화면 높이의 1/zoom이 되게 카메라 거리를 잡는다
 const W = 1280, H = 720;
@@ -62,6 +65,7 @@ export const HD = {
   active(m) { return this.want && this.ready && !this.failed && !!m && (this.maps.has(m.id) || (!m.room && !m.hasIso) || (m.room && art())) && !m.isoRoom && (!m.live || m.id === 'world'); },  // 강호 큰 지도는 주인공 둘레만 잘라 짓는다(winOf)  // 방은 전부 새 화면으로(벽을 조각으로 세운다: roomKit)(js/hd2d/rooms.js)  // 바깥 지도는 모두(방과 쿼터뷰 지도, 강호 큰 지도는 예전 화면)
   setOpt(k, v) { this.opt[k] = v; try { localStorage.setItem(OPTK, JSON.stringify(this.opt)); } catch { } if (k === 'fx') { slow = 0; autoLv = 'mid'; resize(true); } if (k === 'art') loadPreview().then(() => { curMap = null; }); panelSync(); },
   hide() { if (cv && cv.style.display !== 'none') cv.style.display = 'none'; },
+  travelInfo:()=>({pitch:Math.round(activePitch/DEG),fov:cam?.fov,sun:sun?.position.clone().sub(sun.target.position).normalize().toArray(),time:timeOf(),mid:camT.x,window:curMap?.win}),
   gnd: () => ground && { pos: ground.position.toArray().map(Math.round), box: (() => { ground.geometry.computeBoundingBox(); const b = ground.geometry.boundingBox; return [b.min.toArray().map(Math.round), b.max.toArray().map(Math.round)]; })(), map: curMap?.id, win: curMap?.win, hgt: !!curMap?.hgt, cam: cam.position.toArray().map(Math.round) },
   init, render, renderBattle, affine, resetCam: () => { camT.set(-1, 0, 0); for (const o of bboard) o.mesh.visible = false; },
   // 저장 칸 그림: 새 화면은 장면이 WebGL 캔버스에 있어서 2D 캔버스만 찍으면 빈 그림이 된다. 마지막 장면을 한 번 더 그려 그 자리에서 옮긴다
@@ -229,6 +233,7 @@ async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { Meshopt
     const mkf = (sh, kind) => { const b = mkm(sh, kind), f = holed(b); if (top) f.customProgramCacheKey = () => 'sharp-top-hole'; else if (b.userData.pal) f.customProgramCacheKey = () => 'sharp-pal-hole'; return f; };
     const kinded = rk || wl;  // 종류에 따라 무늬가 바뀌는 재질
     const M = { m: mkm(), f: mkf(1), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }), v: {}, as: (sh = 1, kind = '') => sh > .995 && (!kind || !kinded || (rk && kind === rk[1])) ? M : (M.v[Math.round(sh * 100) + (kinded ? kind : '')] ||= { m: mkm(sh, kind), f: mkf(sh, kind), d: M.d }) };
+    if(n.startsWith('regional_')){outdoorMaterial(M.m);outdoorMaterial(M.f);}
     MODELM.set(o.geometry, M); o.material = M.m; o.userData = {}; o.castShadow = o.receiveShadow = true; });
   const lp = g.scene.children.find(c => c.name.startsWith('lamps')) || g.scene.getObjectByName('lamps'); g.scene.userData.lamps = lp?.userData?.pts ? JSON.parse(lp.userData.pts) : []; MODELS[n] = g.scene; } catch (e) { MODELS[n] = null; console.warn('모형 못 읽음', n, e); } }
 // 조각의 무늬 재질: 무늬 자리를 모형의 UV가 아니라 '놓인 자리와 면이 보는 방향'에서 셈한다. 조각을 늘이거나 돌려 세워도 무늬 굵기가 그대로고, 옆 조각과 무늬가 이어진다.
@@ -326,8 +331,8 @@ function topMat(vc) { TOPU.uGS.value ||= new T.Vector2(1, 1); const m = new T.Me
   m.customProgramCacheKey = () => 'sharp-top'; TOPS.push(m); return m; }
 function matOf(t) {  // 그림마다 재질 하나. 해와 등불을 받고, 그림자를 받는다
   if (MATS.has(t)) return MATS.get(t);
-  const m = sharpen(new T.MeshLambertMaterial({ map: t, alphaTest: .5 }));
-  const f = holed(sharpen(new T.MeshLambertMaterial({ map: t, alphaTest: .5 })));  // 주인공이 뒤로 들어가면 주인공 둘레만 동그랗게 뚫는다
+  const m = outdoorMaterial(sharpen(new T.MeshLambertMaterial({ map: t, alphaTest: .5 })));
+  const f = outdoorMaterial(holed(sharpen(new T.MeshLambertMaterial({ map: t, alphaTest: .5 }))));  // 주인공이 뒤로 들어가면 주인공 둘레만 동그랗게 뚫는다
   const d = new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking, map: t, alphaTest: .5 });
   const r = { m, f, d }; MATS.set(t, r); return r;
 }
@@ -658,24 +663,30 @@ function cliffKit(m) {
 // ── 지도 ──
 // 물: 받아 둔 물 그림(HG2 → wt_river 강물, wt_pond 연못, wt_rapid 여울. tools/ground_in.py)을 물 칸에 깔고 도트 한 점씩 일렁이게 한다. 강물은 천천히 흐른다.
 // 물 칸마다 어느 그림을 쓸지는 waterKinds가 정한다. 그림을 못 읽었으면 전처럼 코드로 잔물결을 그린다. 빛과 그림자는 Lambert 그대로 받는다
-let waterM = null; const WU = { uT: { value: 0 }, uSky: { value: null }, uDeep: { value: null }, uW0: { value: null }, uW1: { value: null }, uW2: { value: null } };
+let waterM = null; const WU = { uT: { value: 0 }, uSky: { value: null }, uRay:{value:null},uRayColor:{value:null},uGlint:{value:0}, uDeep: { value: null }, uW0: { value: null }, uW1: { value: null }, uW2: { value: null } };
 function waterMat() {
-  if (waterM) return waterM; WU.uSky.value = new T.Color('#9cc0e8'); WU.uDeep.value = new T.Color('#1f4a52');
+  if (waterM) return waterM; WU.uRay.value=new T.Vector3();WU.uRayColor.value=new T.Color();WU.uSky.value = new T.Color('#9cc0e8'); WU.uDeep.value = new T.Color('#1f4a52');
   const tx = ['wt_river', 'wt_pond', 'wt_rapid'].map(previewTex), pic = tx.every(Boolean); if (pic) tx.forEach((t, i) => { t.magFilter = T.NearestFilter; t.needsUpdate = true; WU['uW' + i].value = t; });
   waterM = new T.MeshLambertMaterial({ color: '#ffffff', transparent: true, opacity: pic ? .97 : .93 });
   waterM.onBeforeCompile = s => { Object.assign(s.uniforms, WU);
     s.vertexShader = 'attribute float aKind; varying float vKind; varying vec3 vWp;\n' + s.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vWp = (modelMatrix * vec4(transformed, 1.)).xyz; vKind = aKind;');
-    s.fragmentShader = 'varying vec3 vWp; varying float vKind; uniform float uT; uniform vec3 uSky, uDeep; uniform sampler2D uW0, uW1, uW2;\n' + s.fragmentShader.replace('#include <map_fragment>', pic ? `
+    s.fragmentShader = 'varying vec3 vWp; varying float vKind; uniform float uT; uniform vec3 uSky, uDeep,uRay,uRayColor;uniform float uGlint; uniform sampler2D uW0, uW1, uW2;\n' + s.fragmentShader.replace('#include <map_fragment>', pic ? `
       vec2 uv = vec2(vWp.x, vWp.z / ${ZS.toFixed(4)}) * ${(DOT / 86).toFixed(6)};  // 그림 한 장이 86점(평면도 26.9점)
       float row = floor(uv.y * 43.);                                             // 도트 두 줄씩 묶어, 줄마다 다른 때에 한 점씩 좌우로 밀린다
       vec2 wob = vec2(floor(sin(row * .9 + uT * 1.4) * 1.49 + .5), 0.) / 86.;
       vec3 c;
       if (vKind < 0.) {
-        vec3 deep=texture2D(uW0,uv+wob+vec2(uT*.004,uT*.0015)).rgb;
-        vec3 stones=texture2D(uW2,uv*.82+wob*.33).rgb;
-        float bank=clamp(-vKind-1.+.045*sin(vWp.x*.19+vWp.z*.13+uT*.38),0.,1.);
-        c=mix(deep,stones,bank*.52);
-        diffuseColor.a*=1.-bank*.28;
+        vec2 p=vWp.xz;
+        float bank=clamp(-vKind-1.,0.,1.);
+        float current=sin(p.y*.023+p.x*.017+sin(p.x*.03)*.72);
+        float fold=sin(p.y*.38+p.x*.087+sin(p.x*.037+uT*.31)*1.7+uT*.86);
+        float broken=smoothstep(.20,.86,sin(p.x*.155-p.y*.034+current*2.7));
+        float ripple=smoothstep(.72,.98,fold)*broken;
+        vec3 deep=mix(vec3(.024,.073,.075),vec3(.041,.105,.104),current*.5+.5);
+        vec3 stones=texture2D(uW2,uv*1.83+wob*.13).rgb;
+        c=mix(deep,vec3(.091,.165,.130)+stones*.09,bank*bank);
+        c+=vec3(.012,.018,.017)*ripple*(.4+bank);
+        diffuseColor.a*=.94-bank*.37;
       } else if (vKind < .5) c = texture2D(uW0, uv + wob + vec2(uT * .004, uT * .0015)).rgb;                       // 강: 천천히 흐른다
       else if (vKind < 1.5) c = texture2D(uW1, uv + vec2(floor(sin(row * .7 + uT * .6) * .99 + .5), 0.) / 86.).rgb;  // 못: 거의 고요하다
       else { c = texture2D(uW2, uv).rgb; vec3 r = texture2D(uW0, uv * 1.3 + vec2(uT * .02, uT * .011)).rgb; c += smoothstep(.62, .85, dot(r, vec3(.3, .59, .11))) * .22; }  // 여울: 바닥 돌은 그대로, 물비늘만 흐른다
@@ -686,7 +697,22 @@ function waterMat() {
       float rip = smoothstep(1.7, 2.1, w1), dark = smoothstep(-.8, -2.2, w1);
       float far = smoothstep(0., 600., length(vWp.xz - cameraPosition.xz));
       vec3 c = mix(uDeep, uSky, .38 + far * .3); c = mix(c, uSky * 1.25, rip * .75); c *= 1. - dark * .25;
-      diffuseColor.rgb *= c;`); };
+      diffuseColor.rgb *= c;`);
+    s.fragmentShader=s.fragmentShader.replace('#include <opaque_fragment>',`
+      if(uGlint>.001){
+        vec2 p=vWp.xz;
+        float wind=sin(.022*p.x-.017*p.y+.31*uT)+.56*sin(.061*p.x+.009*p.y-.4*uT);
+        float wave=p.y*.74+p.x*.057+1.7*wind+uT*1.45;
+        float w=sin(wave);
+        vec3 normalW=normalize(vec3(.042*wind,1.,.15*cos(wave)));
+        vec3 eye=normalize(cameraPosition-vWp),halfRay=normalize(eye+uRay);
+        float ray=pow(max(dot(normalW,halfRay),0.),24.);
+        float flicker=smoothstep(.77,.99,w)*smoothstep(.24,1.06,wind)/(1.+fwidth(wave)*.48);
+        outgoingLight+=uGlint*uRayColor*(.16*ray+.003)*flicker;
+        outgoingLight=mix(outgoingLight,uSky,.075*(1.-max(dot(eye,normalW),0.)));
+      }
+      #include <opaque_fragment>`);
+  };
   waterM.customProgramCacheKey = () => pic ? 'water-pic' : 'water';
   return waterM;
 }
@@ -752,7 +778,7 @@ function setMap(m) {
   LAMPX.length = 0;  // 등불 자리는 지도마다 새로 모은다(전에는 안 비워서 지나온 지도의 등불 자리가 계속 쌓였고, 밤에 엉뚱한 자리에 불빛이 섰다)
   const WN = m.win || { x0: 0, y0: 0, x1: m.w, y1: m.h }, Wm = (WN.x1 - WN.x0) * TS, Dm = (WN.y1 - WN.y0) * TS * ZS, OX = WN.x0 * TS, OZ = WN.y0 * TS * ZS;  // 큰 지도는 잘라 낸 범위만
   // 땅: 지금 땅 그림을 그대로 눕힌다(땅 무늬 HB14가 오기 전 임시). 땅도 도트 결로 읽는다
-  const land=art()&&landscapeOf(m),detail=land?2:1;
+  const land=art()&&landscapeOf(m),detail=land&&!land.isWorld?2:1;
   const gc = mk(Wm*detail, (WN.y1 - WN.y0) * TS*detail), gx = gc.getContext('2d', { willReadFrequently: true });gx.scale(detail,detail);
   const flr = m.room && art(), kit = flr && !OWN.has(m.id);
   // 방 바닥 무늬(받은 그림 FL1): 방 종류에 맞는 무늬를 평면도 한 점에 FLDOT점으로 되풀이해 깐다. 깔개(m.carpet)는 그 위에 따로 얹는다. 무늬가 없으면(그림 끔, 동굴) 2D 바닥 그림을 가라앉혀 깐다
@@ -766,6 +792,7 @@ function setMap(m) {
   else if(land)ground=reliefMesh(T,land,WN,TS,HS,ZS,sharpen(new T.MeshLambertMaterial({map:gt})));
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(OX + Wm / 2, 0, OZ + Dm / 2); }
   if (ft) ground.material.color.setScalar(FLK[floorOf(m)] || 1.45);
+  if(!land&&openAir(m))outdoorMaterial(ground.material);
   ground.receiveShadow = true; ground.userData.map = m; scene.add(ground);
   if (art()) addWalkways(T,propG,m,WN,TS,HS,ZS,hAt,previewTex);
   if(land){addRiverMargins(T,propG,m,WN,land,TS,HS,ZS,previewTex,matOf,hAt);addSurround(T,propG,m,TS,HS,ZS);}
@@ -786,6 +813,7 @@ function setMap(m) {
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
   skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(OX + Wm / 2, m.hgt ? lowest(m) - 1 : land?-22:-.6, OZ + Dm / 2);
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
+  const regionalScenery=land?.isWorld?sceneryBatch(T,m,ZS,HS,hAt):null;
   const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.on ? s.y + STAMPS[s.name][4] * s.sc : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
   // 블렌더 무대·방 모형(m.models: [{ key, x, y }], tools/blender/stages.py·rooms.py). 좌표는 평면도 그대로(x, 북쪽이 +y), 지도 (x, y)에 놓는다. 다 읽혔으면 옛 소품(s.alt)은 뺀다
   const useModels = art() && (m.models || []).length > 0 && m.models.map(q => needModel(q.key)).every(Boolean);
@@ -815,6 +843,7 @@ function setMap(m) {
       if (ft) {
         const height = scenery[1] * (s.sc || 1) * (.95 + hash2(s.x | 0, s.y | 0) * .1);
         const width = height * ft.image.width / ft.image.height, key = 'field:' + width.toFixed(1) + ':' + height.toFixed(1);
+        if(regionalScenery){regionalScenery.add(scenery[0],ft,matOf(ft),cx,z,width,height);return;}
         if (!GEO.has(key)) GEO.set(key, standGeo(width, height));
         const M = matOf(ft), obj = new T.Mesh(GEO.get(key), M.m);
         obj.customDepthMaterial = M.d;
@@ -870,7 +899,9 @@ function setMap(m) {
       const o = new T.Mesh(g, matOf(t).m); o.receiveShadow = true; o.userData = { deco: true }; propG.add(o); } }
   // 등불 자리: 문 위, 등롱, 객잔 기
   m._lamps = [...LAMPX, ...m.portals.filter(q => q.door && !m.room && !LAMPX.some(l => Math.abs(l[0] - q.x - q.w / 2) < 30 && Math.abs(l[1] - q.y) < 12)).map(q => [q.x + q.w / 2, q.y - 2, 26]), ...m.stamps.filter(s => /lantern|banner|censer|v_lamp|v_stonelamp/.test(s.name)).map(s => { const st = STAMPS[s.name]; if (s.on) { const cx = s.x + s.w / 2, fy = s.y + st[4] * s.sc; return [cx, fy + 1, onTop(m, s, cx, fy) + st[4] * s.sc * .7]; }  /* 가구에 얹은 향로: 그 높이에서 빛난다 */ return [s.x + st[3] * (s.name === 'v_lamppost' ? .7 : .5), s.base + 1, st[4] * (s.name === 'v_lamppost' ? .6 : s.name === 'v_stonelamp' ? .6 : .7)]; })]; LAMPX.length = 0;
-  camT.set(-1, 0, 0);  // 다음 장면에서 카메라를 바로 주인공에게
+  regionalScenery?.finish(propG);
+  if(!m.src||m.src!==prev?.src)camT.set(-1,0,0);  // 다음 장면에서 카메라를 바로 주인공에게
+  warmTravelEdges(land,WN);
   buildMs = Math.round(performance.now() - t0);
 }
 
@@ -893,7 +924,12 @@ function blob(x, y, s) {
   if (!blobT) { const im = IMG['chars/_Shadow']; if (!im) return; blobT = new T.Texture(im); blobT.colorSpace = T.SRGBColorSpace; blobT.needsUpdate = true; }
   let o = blobs[usedB];
   if (!o) { o = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: blobT, transparent: true, depthWrite: false, opacity: .5 })); o.rotation.x = -Math.PI / 2; o.renderOrder = 1; blobs.push(o); actG.add(o); }
-  usedB++; o.visible = true; o.scale.set(12 * s, 7 * s * ZS, 1); o.position.set(x, .15 + hAt(curMap, x, y), (y + .5) * ZS);
+  usedB++; o.visible=true;
+  if(outdoors(curMap)){
+    const nx=(hAt(curMap,x-2,y)-hAt(curMap,x+2,y))*.25,nz=(hAt(curMap,x,y-2)-hAt(curMap,x,y+2))*.25/ZS;
+    o.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),new T.Vector3(nx,1,nz).normalize());
+  }else o.rotation.set(-Math.PI/2,0,0);
+  o.scale.set(12 * s, 7 * s * ZS, 1); o.position.set(x, .15 + hAt(curMap, x, y), (y + .5) * ZS);
 }
 // drawActorSprite와 같은 칸을 고른다
 // 다시 그린(두 배) 도트가 없는 옛 사람 도트는 새 화면에서 머리 큰 덩어리로 보인다. 다시 그린 것이 있는 비슷한 사람으로 바꿔 그린다(옛 화면은 그대로)
@@ -935,25 +971,56 @@ function syncActors(F) {
 
 // ── 카메라 ──
 const camT = new (class { constructor() { this.x = -1; this.y = 0; this.z = 0; } set(x, y, z) { this.x = x; this.y = y; this.z = z; } })();
-let dist = 300, lastT = 0, lastF = null;
+let dist=300,lastT=0,lastF=null,activePitch=PITCH;
+const lead={x:0,z:0,prevX:0,prevY:0};
+function lens(degrees){if(cam.fov!==degrees){cam.fov=degrees;cam.updateProjectionMatrix();}}
+function outdoorShadow(dir,half){
+  const sc=sun.shadow.camera,origin=sun.target.position;
+  const side=new T.Vector3(dir.z,0,-dir.x).normalize(),up=new T.Vector3().crossVectors(dir,side);
+  const texel=2*half/sun.shadow.mapSize.x;
+  for(const axis of [side,up]){
+    const v=origin.dot(axis);origin.addScaledVector(axis,Math.round(v/texel)*texel-v);
+  }
+  const reach=Math.max(900,half*2.3);
+  sun.position.copy(origin).addScaledVector(dir,reach);
+  sc.left=sc.bottom=-half;sc.top=sc.right=half;sc.near=1;sc.far=reach+half*2+180;sc.updateProjectionMatrix();
+}
 function placeCam(F, dt) {
-  const m = F.m, p = HD.peek ? { x: HD.peek[0], y: HD.peek[1] } : F.p, Wm = m.w * TS, Dm = m.h * TS * ZS, vh = CHAR * HD.opt.zoom * (m.room ? CAMR : m.id === 'world' ? CAMW : CAMK); dist = vh / (2 * Math.tan(FOV / 2 * DEG));
-  const ty = 8 * HS, hc = ty + dist * Math.sin(PITCH), back = dist * Math.cos(PITCH), f = FOV / 2 * DEG, hw = dist * Math.tan(f) * W / H;
+  const m=F.m,p=HD.peek?{x:HD.peek[0],y:HD.peek[1]}:F.p,Wm=m.w*TS,Dm=m.h*TS*ZS;
+  const wild=outdoors(m),world=wild&&m.id==='world';
+  activePitch=world?MAP_PITCH:wild?TRAIL_PITCH:PITCH;
+  lens(world?MAP_FOV:wild?TRAIL_FOV:FOV);
+  const pitch=activePitch,f=cam.fov*DEG/2,vh=CHAR*HD.opt.zoom*(m.room?CAMR:world?CAMW:CAMK);
+  dist=vh/(2*Math.tan(f));
+  const ty=8*HS,hc=ty+dist*Math.sin(pitch),back=dist*Math.cos(pitch),hw=vh*.5*W/H;
+  const reset=camT.x<0||!dt||!!HD.peek;
+  if(reset){lead.x=0;lead.z=0;}
+  else{
+    const dx=p.x-lead.prevX,dy=p.y-lead.prevY,cap=world?44:12;
+    const amount=1-Math.exp(-dt*2.6),clip=v=>Math.max(-cap,Math.min(cap,v*.23/dt));
+    lead.x+=(clip(dx)-lead.x)*amount;lead.z+=(clip(dy)-lead.z)*amount;
+  }
+  lead.prevX=p.x;lead.prevY=p.y;
   // 화면 위 끝과 아래 끝이 닿는 땅이 지도 밖으로 너무 나가지 않게 겨냥점을 묶는다(2D 카메라가 지도 안에 머물던 것과 같다)
   // 남쪽은 화면 아래 끝이 지도 밖으로 나가지 않게 묶고, 북쪽은 주인공이 끝까지 가운데 오게 둔다(지도 너머는 안개와 넓은 땅. 먼 산은 5단계)
   // 방(벽을 모형으로 세운 방)은 북쪽 벽의 들보 위 끝이 화면 위 끝에 닿는 데까지만 카메라가 올라간다: 방 북쪽에 서 있으면 뒷벽이 통째로 보이고, 벽 너머 빈 곳은 안 보인다
   // (벽 앞면은 평면도 y = 16. 꼭대기 높이는 m.wallTop: 조각으로 세운 벽은 js/hd2d/rooms.js의 WALL_TOP, 동굴 모형은 47)
-  const dn = hc / Math.tan(PITCH + f) - back, lo = m.wallTop ? Math.max(4 * TS * ZS, 16 * ZS + (hc - m.wallTop * HS) / Math.tan(PITCH - f) - back) : 4 * TS * ZS, hi = Math.max(lo, Dm + 4 * ZS + dn);
-  let tx = p.x, tz = Math.min(hi, Math.max(lo, (p.y - vh * (m.room ? AHEADR : AHEAD)) * ZS));  // 주인공보다 조금 앞(북쪽)을 겨눠 주인공이 화면 가운데보다 아래에 선다(일검풍운결처럼). 앞쪽 집이 더 크게 들어온다
+  const dn = hc / Math.tan(pitch + f) - back, lo = m.wallTop ? Math.max(4 * TS * ZS, 16 * ZS + (hc - m.wallTop * HS) / Math.tan(pitch - f) - back) : 4 * TS * ZS, hi = Math.max(lo, Dm + 4 * ZS + dn);
+  let tx = p.x+(wild?lead.x:0), tz = Math.min(hi, Math.max(lo, (p.y+(wild?lead.z:0) - vh * (m.room ? AHEADR : AHEAD)) * ZS));  // 주인공보다 조금 앞(북쪽)을 겨눠 주인공이 화면 가운데보다 아래에 선다(일검풍운결처럼). 앞쪽 집이 더 크게 들어온다
   tx = Wm < hw * 2 ? Wm / 2 : Math.min(Wm - hw, Math.max(hw, tx));  // 가로도 지도 안에 묶는다(이 줄이 위 주석에 먹혀 동서 끝에서 지도 밖이 보였다)
   const gy = hAt(m,p.x,p.y);  // 주인공이 선 땅의 높이. 단 위에 서면 카메라도 그만큼 따라 올라간다(안 그러면 두 단 위에서 주인공이 사람 키의 1.2배만큼 화면 위로 밀려났다)
-  if (camT.x < 0) camT.set(tx, ty + gy, tz); else { const k = 1 - Math.exp(-dt * 7), ky = 1 - Math.exp(-dt * 4); camT.set(camT.x + (tx - camT.x) * k, camT.y + (ty + gy - camT.y) * ky, camT.z + (tz - camT.z) * k); }
-  cam.position.set(camT.x, camT.y + dist * Math.sin(PITCH), camT.z + back);
-  if (HD.orbit) { const a = HD.orbit * DEG; cam.position.set(camT.x + Math.sin(a) * back, camT.y + dist * Math.sin(PITCH), camT.z + Math.cos(a) * back); }  // 시험 화면용: 겨냥점 둘레로 돌려 옆과 뒤에서 본다(게임에서는 쓰지 않는다)
+  if (reset) camT.set(tx, ty + gy, tz); else { const k = 1 - Math.exp(-dt * 7), ky = 1 - Math.exp(-dt * 4); camT.set(camT.x + (tx - camT.x) * k, camT.y + (ty + gy - camT.y) * ky, camT.z + (tz - camT.z) * k); }
+  cam.position.set(camT.x, camT.y + dist * Math.sin(pitch), camT.z + back);
+  if (HD.orbit) { const a = HD.orbit * DEG; cam.position.set(camT.x + Math.sin(a) * back, camT.y + dist * Math.sin(pitch), camT.z + Math.cos(a) * back); }  // 시험 화면용: 겨냥점 둘레로 돌려 옆과 뒤에서 본다(게임에서는 쓰지 않는다)
   cam.lookAt(camT.x, camT.y, camT.z); cam.updateMatrixWorld();
   // 그림자 상자는 보이는 땅을 덮을 만큼
   // 방 안: 해가 옆에서 들면 사람 키의 세 배쯤 되는 옆벽이 바닥의 절반을 그늘로 덮는다. 빛을 카메라 쪽 위에서 비스듬히 내려, 벽의 그림자는 벽 뒤로 가고 기둥과 가구만 짧은 그림자를 뒤로 떨군다
-  const L = TIMES[timeOf()], d = new T.Vector3(...(m.room ? ROOMSUN : L.sun)).normalize(); sun.target.position.set(camT.x, 0, camT.z - dist * .3); sun.position.copy(sun.target.position).addScaledVector(d, 1200);
+  const L=LT(),d=new T.Vector3(...(m.room?ROOMSUN:L.sun)).normalize();
+  if(openAir(m)){
+    sun.target.position.set(camT.x,gy,camT.z-vh*(world?.08:.18));
+    outdoorShadow(d,hw*(world?1.16:1.53));return;
+  }
+  sun.target.position.set(camT.x, 0, camT.z - dist * .3); sun.position.copy(sun.target.position).addScaledVector(d, 1200);
   const sc = sun.shadow.camera, half = Math.max(hw * 1.5, dist * 1.25); sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.near = 200; sc.far = 2600; sc.updateProjectionMatrix();
 }
 const V = () => new T.Vector3();
@@ -1041,18 +1108,34 @@ const ROOMSUN = [.14, .8, .58];
 // 2026-11-21: 직접 잰 방(소림의 방, 무당 삼청전 안)은 밝기 37, 거의 검정이 5할이고 등롱 둘레만 밝았다. 우리 방은 밝기 52~64, 거의 검정 5~13%였다. 해와 하늘빛을 줄이고 등불을 키워 밝기 40~58, 거의 검정 14~30%로 옮겼다(사람이 어둠에 묻히지 않는 데까지만)
 const ROOMT = { day: { sunC: '#fff0d8', sunI: 2.1, sky: '#9a9486', gnd: '#3a3026', hemI: .36, fill: .1, con: 1.36, vig: 1.1, tint: [1, .98, .91], expo: .86, sat: .74, warm: 0, lamp: .75 },
   night: { sunC: '#ffc890', sunI: 1.5, sky: '#6e5e4c', gnd: '#261e16', hemI: .62, fill: .1, con: 1.2, vig: 1.05, tint: [1, .95, .88], expo: .9, sat: .85, warm: 0, lamp: 1.2 } }, ROOML = {};  // 밤의 방은 달빛이 아니라 촛불 빛이다: 누렇고 어둑하게, 등불 둘레가 밝다
-const LT = () => { const t = timeOf(), L = TIMES[t]; return curMap?.room ? (ROOML[t] ||= { ...L, ...ROOMT[t === 'night' ? 'night' : 'day'] }) : L; };
-const timeOf0 = () => HD.opt.time === 'auto' ? (G.S?.flags?.night ? 'night' : 'day') : HD.opt.time;
+const openAir=m=>!!m&&!m.room&&!m.isoRoom&&!m.stage&&!inBattle&&art();
+const outdoors=m=>openAir(m)&&(m.id==='world'||!!landscapeOf(m));
+const LT = () => {
+  const t=timeOf(), L=TIMES[t];
+  if(openAir(curMap)){
+    const clock=HD.opt.time==='auto'&&G.S?.mode==='free'&&G.S.fr?G.S.fr.clock/G.free.dayLen():undefined;
+    return daylight(t,clock);
+  }
+  return curMap?.room?(ROOML[t]||={...L,...ROOMT[t==='night'?'night':'day']}):L;
+};
+const timeOf0=()=>{
+  if(HD.opt.time!=='auto')return HD.opt.time;
+  if(G.S?.flags?.night)return 'night';
+  if(G.S?.mode==='free'&&openAir(curMap))return ({'아침':'morning','낮':'day','저녁':'evening','밤':'night'})[G.free?.period?.()]||'day';
+  return 'day';
+};
 let inBattle = false;
 // 전투는 밤이어도 저녁 빛으로 그린다. 밤 빛 그대로면 무대 대부분이 시커멓고 등불 둘레만 밝아서 사람이 안 보였다
 const timeOf = () => { const t = timeOf0(); return inBattle && t === 'night' ? 'evening' : t; };
 function light() {
-  const L = LT(); PALU.uAmb.value = curMap?.room && timeOf() === 'night' ? .12 : .22;  // 조각이 스스로 내는 빛: 밤의 방에서는 줄인다(벽만 훤해 보인다)
+  const L=LT(),wild=openAir(curMap);
+  outdoorUniforms(T,L,wild?(timeOf()==='night'?.24:1):0,curMap?.id==='world');
+  PALU.uAmb.value = curMap?.room && timeOf() === 'night' ? .12 : .22;  // 조각이 스스로 내는 빛: 밤의 방에서는 줄인다(벽만 훤해 보인다)
   for (const m of GLOW) m.emissiveIntensity = m.userData.paper && curMap?.room ? (timeOf() === 'night' ? .1 : .8) : (L.lamp || 0) * .9;  // 밤에는 창에서 빛이 샌다. 방 안에서 보는 창호지(조각의 win_paper)는 거꾸로 낮에 바깥 빛으로 밝다
-  if (waterM) { WU.uT.value = performance.now() / 1000; WU.uSky.value.set(L.skyT); WU.uDeep.value.set(L.lamp ? '#0e2430' : '#1f4a52'); }
+  if (waterM) { WU.uRay.value.set(...L.sun).normalize();WU.uRayColor.value.set(L.sunC);WU.uGlint.value=wild?(timeOf()==='night'?.34:1):0; WU.uT.value = performance.now() / 1000; WU.uSky.value.set(L.skyT); WU.uDeep.value.set(L.lamp ? '#0e2430' : '#1f4a52'); }
   sun.color.set(L.sunC); sun.intensity = L.sunI; hemi.color.set(L.sky); hemi.groundColor.set(L.gnd); hemi.intensity = L.hemI;
   { const d = L.sun; fill.position.set(camT.x - d[0] * 800, 500, camT.z + 600); fill.target.position.set(camT.x, 0, camT.z); fill.intensity = L.sunI * (L.fill ?? .2); fill.color.set(L.fillC || '#c8c0b8'); }
-  scene.fog.color.set(L.fog); scene.fog.near = dist * 3; scene.fog.far = dist * 13; backdrop(L);
+  scene.fog.color.set(L.fog); scene.fog.near=dist*(wild?.97:3);scene.fog.far=dist*(wild?(curMap.id==='world'?2.48:2.95):13); backdrop(L);
   const sz = fxNow() === 'high' ? 4096 : fxNow() === 'low' ? 1024 : 2048; if (sun.shadow.mapSize.x !== sz) { sun.shadow.mapSize.set(sz, sz); sun.shadow.map?.dispose(); sun.shadow.map = null; }
   const ls = (curMap._lamps || []).map(q => [q, (q[0] - camT.x) ** 2 + (q[1] * ZS - camT.z) ** 2]).sort((a, b) => a[1] - b[1]);
   lamps.forEach((l, i) => { const q = ls[i]?.[0], h = l.userData.halo; if (!q || !L.lamp) { l.intensity = 0; h.visible = false; return; } const fl = 1 + Math.sin(performance.now() / 260 + i * 1.7) * .05;
@@ -1137,12 +1220,20 @@ function shadowTick() {
 }
 // 강호 큰 지도(1286×1053칸)는 통째로 지을 수 없어서, 주인공 둘레 WIN칸만 잘라 짓고 주인공이 가운데서 STEP칸 넘게 벗어나면 다시 짓는다.
 // 잘라 낸 지도(m.win)는 좌표를 그대로 두고(사람·소품·카메라 모두 큰 지도 좌표) 땅·물·풀만 그 범위로 짓는다
-const WIN = [100, 76], STEP = 26; let winM = null;
+const WIN = [112, 98], STEP = 16; let winM = null;
 function winOf(F) {
   const W = F.m, tx = F.p.x / TS, ty = F.p.y / TS;
   if (winM && winM.src === W && Math.abs(tx - winM.cx) < STEP && Math.abs(ty - winM.cy) < STEP * .8) return winM;
   const x0 = Math.max(0, Math.min(W.w - WIN[0], Math.round(tx - WIN[0] / 2))), y0 = Math.max(0, Math.min(W.h - WIN[1], Math.round(ty - WIN[1] * .55))), x1 = x0 + WIN[0], y1 = y0 + WIN[1];
-  const X0 = x0 * TS, Y0 = y0 * TS, X1 = x1 * TS, Y1 = y1 * TS, stamps = W.stamps.filter(s => s.x < X1 + 40 && s.x > X0 - 120 && s.base > Y0 && s.y < Y1 + 20);
+  if(winM?.src===W&&winM.win.x0===x0&&winM.win.y0===y0){winM.cx=tx;winM.cy=ty;return winM;}
+  const X0=x0*TS,Y0=y0*TS,X1=x1*TS,Y1=y1*TS,stamps=[],cell=32*TS;
+  for(let cy=Math.floor((Y0-100)/cell);cy<=Math.floor((Y1+160)/cell);cy++){
+    for(let cx=Math.floor((X0-160)/cell);cx<=Math.floor((X1+160)/cell);cx++){
+      for(const s of W.og.get(cx+cy*4096)||[]){
+        if(s.x<X1+40&&s.x>X0-120&&s.base>Y0-80&&s.y<Y1+20)stamps.push(s);
+      }
+    }
+  }
   winM = Object.assign(Object.create(W), { src: W, cx: Math.round(tx), cy: Math.round(ty), win: { x0, y0, x1, y1 }, stamps, portals: (W.portals || []).filter(q => q.x > X0 && q.x < X1 && q.y > Y0 && q.y < Y1), models: null });
   return winM;
 }
@@ -1152,7 +1243,7 @@ function render(F) {
   if (cam.view?.enabled) cam.clearViewOffset();
   resize(); setMap(F.m.live ? winOf(F) : F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
   { const [x, y] = proj(F.p.x, F.p.y, 8), k = post.h / H, v = V().set(F.p.x, 8 * HS + hAt(curMap, F.p.x, F.p.y), (F.p.y + 1) * ZS).applyMatrix4(cam.matrixWorldInverse);  // 구멍: 화면의 주인공 가슴 자리, 주인공 키의 0.9배 반지름
-    if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(x * post.w / W, (H - y) * k, HD.pxPerUnit() * CHAR * .9 * k); HOLE.uHoleZ.value = -v.z - 2; }
+    if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(x * post.w / W, (H - y) * k, (F.m.id==='world'?Math.abs(proj(F.p.x,F.p.y,15)[1]-proj(F.p.x,F.p.y)[1])*.62:HD.pxPerUnit()*CHAR*.9)*k); HOLE.uHoleZ.value = -v.z - 2; }
   shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx(F);
   fpsN++; if (now - fpsT > 1000) { fpsV = Math.round(fpsN * 1000 / (now - fpsT)); fpsN = 0; fpsT = now; const e = $('#hdfps'); if (e) e.textContent = fpsV + '장/초' + (fxNow() === 'low' ? ' (낮춤)' : ''); if (!G.auto && !HD.noGov) govern(); }
 }
@@ -1187,6 +1278,7 @@ function syncBattle(B) {
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false; for (let i = usedBB; i < bboard.length; i++) bboard[i].mesh.visible = false;
 }
 function placeCamBattle(B, dt) {
+  activePitch=PITCH;lens(FOV);
   const m = B.stage, Wm = m.w * TS, Hm = m.h * TS; let sx = 0, sy = 0, n = 0;
   for (const a of B.actors) { if (a.dead) continue; const k = a.isPlayer ? 3 : 1; sx += a.x * k; sy += a.y * k; n += k; }
   const ax = n ? sx / n : Wm / 2, ay = n ? sy / n : Hm / 2, f = FOV / 2 * DEG;

@@ -177,6 +177,30 @@ function bridge(T,texture,s,tile){
   return finish();
 }
 
+function bridgeLandings(T,texture,map,span,tile,hs,zs,heightAt){
+  const {quad,finish}=model(T,texture,'river-abutments');let built=false;
+  for(const end of [0,1]){
+    const [center,half]=deckSection(span,end),sign=end?1:-1;
+    const x=span.across?(end?span.x1:span.x0):center,y=span.across?center:(end?span.y1:span.y0);
+    const north=span.across?0:sign,east=span.across?sign:0;
+    let target=null,best=Infinity;
+    for(let j=Math.floor(y)-2;j<=Math.floor(y)+2;j++)for(let i=Math.floor(x)-2;i<=Math.floor(x)+2;i++){
+      const gx=i+.5,gy=j+.5,along=(gx-x)*east+(gy-y)*north;
+      if(along<.35||![0,1,3,5].includes(map.g[j]?.[i]))continue;
+      const side=(gx-x)*north-(gy-y)*east,d=Math.abs(along-1.15)+Math.abs(side)*1.5;
+      if(d<best){best=d;target=[gx,gy];}
+    }
+    if(!target)continue;
+    const [gx,gy]=target,w=half*tile,base=(a,b,h)=>[a*tile,h,b*tile*zs];
+    const bank=(a,b)=>base(a,b,heightAt(map,a*tile,b*tile)+.18);
+    const left=base(x+north*w/tile,y-east*w/tile,.12),right=base(x-north*w/tile,y+east*w/tile,.12);
+    const outerL=bank(gx+north*w*.83/tile,gy-east*w*.83/tile),outerR=bank(gx-north*w*.83/tile,gy+east*w*.83/tile);
+    quad('edge',left,right,outerR,outerL,Math.max(1,w/4),2);
+    const low=p=>[p[0],p[1]-2.5*hs,p[2]];
+    quad('rib',low(left),left,outerL,low(outerL));quad('rib',right,low(right),low(outerR),outerR);built=true;
+  }
+  return built?finish():null;
+}
 export function addWalkways(T,group,map,area,tile,hs,zs,heightAt,texture) {
   for(const g of map.galleries || []){
     const x=(g.x+g.w/2)*tile,y=(g.y+g.h/2)*tile;
@@ -189,5 +213,6 @@ export function addWalkways(T,group,map,area,tile,hs,zs,heightAt,texture) {
     const obj=bridge(T,texture,s,tile);
     obj.position.set((s.x0+s.x1)*tile/2,0,(s.y0+s.y1)*tile/2*zs);
     obj.scale.set(1,hs,zs);if(s.across)obj.rotation.y=Math.PI/2;group.add(obj);
+    if(map.id==='world'){const landings=bridgeLandings(T,texture,map,s,tile,hs,zs,heightAt);if(landings)group.add(landings);}
   }
 }

@@ -30,12 +30,20 @@ export function scenicRoutes(T,w,h,scale,footprints) {
     const x1=Math.min(w-2,Math.max(a[0],b[0])+13),y1=Math.min(h-2,Math.max(a[1],b[1])+13);
     const width=x1-x0+1,size=width*(y1-y0+1),dist=new Float32Array(size).fill(Infinity),parent=new Int32Array(size).fill(-1);
     const idx=(x,y)=>(y-y0)*width+x-x0, start=idx(...a),goal=idx(...b),queue=[start],inQueue=new Uint8Array(size);
+    const vx=b[0]-a[0],vy=b[1]-a[1],length=Math.hypot(vx,vy)||1;
+    const bend=Math.min(3.4,length*.16)*((a[0]+b[1])%2?1:-1);
+    const steps=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[-1,-1],[1,-1]];
     dist[start]=0;inQueue[start]=1;
     for(let p=0;p<queue.length;p++){
       const i=queue[p],x=x0+i%width,y=y0+Math.floor(i/width);inQueue[i]=0;
-      for(const [dx,dy] of [[0,1],[1,0],[0,-1],[-1,0]]){
+      for(const [dx,dy] of steps){
         const X=x+dx,Y=y+dy;if(X<x0||Y<y0||X>x1||Y>y1||!ok(X,Y))continue;
-        const j=idx(X,Y),c=T[Y*w+X],cost=c===5||c===6?6:c===8?2.5:c===4?1.25:1;
+        const cross=dx!==0&&dy!==0;
+        if(cross&&(!ok(X,y)||!ok(x,Y)||[5,6].includes(T[y*w+X])||[5,6].includes(T[Y*w+x])))continue;
+        const t=Math.max(0,Math.min(1,((X-a[0])*vx+(Y-a[1])*vy)/(length*length)));
+        const curve=(vx*(Y-a[1])-vy*(X-a[0]))/length-bend*Math.sin(Math.PI*t);
+        const j=idx(X,Y),c=T[Y*w+X],base=c===5||c===6?6:c===8?1.65:c===4?1.13:1;
+        const cost=(base+.12*Math.abs(curve))*(cross?Math.SQRT2:1);
         if(dist[i]+cost+.01>=dist[j])continue;dist[j]=dist[i]+cost;parent[j]=i;
         if(!inQueue[j]){queue.push(j);inQueue[j]=1;}
       }
