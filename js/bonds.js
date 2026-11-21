@@ -1,6 +1,7 @@
 // 인연 사연: 호감이 쌓이면 인물마다 사연이 차례로 열린다. 셋째 사연을 봐야 마음을 전할 수 있다
 import { G, Sound, toast, josa } from './core.js';
 import { ctx, say, narr, choice } from './ctx.js';
+import { canRomance } from './state.js';
 import { ACCS } from './items.js';
 import { FOES } from './foes.js';
 
@@ -14,8 +15,10 @@ export const BONDS = {
     { at: 15, run: async () => {
       await narr('밤안개에 등불이 지워졌다. 이겸은 눈을 감고 뱃전에 늘인 줄을 손바닥 안으로 흘려 보냈다.');
       await say('igyeom', '매듭 하나는 모래톱, 두 개는 물 깊은 길. 이제 내 손 말고 줄을 잡아 봐요.');
-      const c = await choice('손끝에 매듭 두 개가 걸렸다.', ['뱃머리를 깊은 물 쪽으로 돌린다', '이겸의 손에 내 손을 포갠다']);
-      await say('igyeom', c ? '같이 잡으니까 떨리는 것도 들키네요. 안개 낀 날은 아직 이래요.' : '맞아요. 내일부턴 배 삯 반은 당신 몫이네요.', c ? 'b' : 'h');
+      const court = canRomance('igyeom');
+      const c = await choice('손끝에 매듭 두 개가 걸렸다.', ['뱃머리를 깊은 물 쪽으로 돌린다', court ? '이겸의 손에 내 손을 포갠다' : '뱃전에 선원들이 쓸 표식을 새긴다']);
+      if (c && court) await say('igyeom', '같이 잡으니까 떨리는 것도 들키네요. 안개 낀 날은 아직 이래요.', 'b');
+      else await say('igyeom', c ? '새로 배운 사람도 길을 읽겠네요. 그 표식, 다른 배에도 새겨 둡시다.' : '맞아요. 내일부턴 배 삯 반은 당신 몫이네요.', 'h');
       await narr('배가 닿자 그가 젖은 지도를 폈다. 강가의 일곱 집에는 지붕만 그리고 문은 비워 두었다.');
     } },
     { at: 40, run: async () => {
@@ -39,7 +42,8 @@ export const BONDS = {
         await narr('방울 하나는 건너편 말뚝에, 하나는 이쪽 말뚝에 달았다. 안개 속에서 줄을 당기자 강 건너에서 맑은 대답이 왔다.');
         await say('igyeom', '사람이 저쪽에 있다는 걸 이제 들을 수 있어요. …그날도 이렇게 물을 걸 그랬어요.');
         await say('me', '내가 건널 땐 두 번 울릴게요.');
-        await say('igyeom', '그러면 제일 좋은 자릴 비워 둘게요. 뱃사공 바로 옆으로요.', 'b');
+        if (canRomance('igyeom')) await say('igyeom', '그러면 제일 좋은 자릴 비워 둘게요. 뱃사공 바로 옆으로요.', 'b');
+        else await say('igyeom', '두 번이면 벗이 왔다는 신호군요. 그땐 내가 노를 잡을 테니 당신이 길을 읽어 줘요.', 'h');
       } finally { ctx.cgOff(); }
       keep('b_igyeom');
     } },
@@ -139,9 +143,14 @@ export const BONDS = {
       await say('so', '뭐야, 그게 위로야?');
       await say('me', '아니요. 그냥 그랬다고요. 이름이 지워져도 밥은 넘어가더라고요.');
       await narr('소연하는 소리 내어 웃더니 편지를 접어 불에 던졌다.');
-      await say('so', '나 이제 갈 데 없다. 네가 책임져.', 'h');
-      await say('me', '네?', 'b');
-      await say('so', '농담이야. 반쯤은. 이거 받아. 사부님이 칼집에 달아 둔 매듭이야. 나한테 있어 봤자 칼집만 더 쳐다보게 되니까.', 'h');
+      if (canRomance('so')) {
+        await say('so', '나 이제 갈 데 없다. 네가 책임져.', 'h');
+        await say('me', '네?', 'b');
+        await say('so', '농담이야. 반쯤은. 이거 받아. 사부님이 칼집에 달아 둔 매듭이야. 나한테 있어 봤자 칼집만 더 쳐다보게 되니까.', 'h');
+      } else {
+        await say('so', '다음에 문파 이름 물으면 내 이름 대면 되겠다. 옆에서 증인이나 서 줘.', 'h');
+        await say('so', '이건 사부님이 내 칼집에 달아 준 매듭이야. 대련 끝나면 자꾸 네 칼집이 풀리잖아. 거기 묶어.');
+      }
       keep('b_so');
     } },
     { lover: 1, at: 80, run: async () => {
@@ -372,7 +381,8 @@ export const BONDS = {
       await say('me', '국수 김이요?');
       await say('hyeok', '교리에 없는 향입니다. 제단에 올릴 수 없습니다.');
       await say('me', '그럼 어디에 써요?');
-      await say('hyeok', '모르겠습니다. 저는 잠이 잘 오지 않습니다. 그런데 이 향을 피우면 잠이 옵니다. 당신 곁에서도 그렇습니다.', 'b');
+      if (canRomance('hyeok')) await say('hyeok', '모르겠습니다. 저는 잠이 잘 오지 않습니다. 그런데 이 향을 피우면 잠이 옵니다. 당신 곁에서도 그렇습니다.', 'b');
+      else await say('hyeok', '이 향을 피우면 잠이 옵니다. 어젯밤에는 불침번을 당신에게 맡기고 아침까지 잤습니다.');
       await say('hyeok', '가져가십시오. 교리에 없는 물건이니 제단에서는 찾지 않을 것입니다.');
       keep('b_hyeok');
     } },
@@ -437,7 +447,7 @@ function next(id) {
   const L = BONDS[id]; if (!L) return null;
   const e = L[done(id)], s = S(); if (!e) return null;
   if ((s.love[id] || 0) < e.at) return null;
-  if (e.lover && s.partner !== id && s.married !== id) return null;
+  if (e.lover && (!canRomance(id, s) || (s.partner !== id && s.married !== id))) return null;
   if (e.ok && !e.ok()) return null;
   return e;
 }
@@ -457,7 +467,7 @@ const JOIN = {
   hyeok: ['hyeok', '문은 열어 두겠다고 말씀드렸습니다.', 'hyeok_ally'],
 };
 async function join(side, allies = []) {
-  const q = S().married || S().partner; if (!q) return null;
+  const q = S().married || S().partner; if (!canRomance(q)) return null;
   if (side === 'ma' && (q === 'so' || q === 'yun')) return null; // 마교 길에서는 등을 돌린 사람들
   if (q === 'yun') { await say('yun', '금창약 챙겨 왔어요. 왼쪽 조심해요.'); S().potion += 3; toast('금창약 3개를 받았다'); return null; }
   const j = JOIN[q]; if (!j || allies.includes(j[2])) return null; // 이미 곁에 있는 사람은 다시 달려오지 않는다
@@ -475,7 +485,7 @@ const AFTER = {
   hyeok: '혁련하는 아직도 웃는 법이 서툴다. 내가 문턱에 걸릴 때만 기침처럼 웃는다.',
 };
 async function ending() {
-  const q = S().married || S().partner; if (q && AFTER[q]) {
+  const q = S().married || S().partner; if (canRomance(q) && AFTER[q]) {
     await narr(AFTER[q]);
     if (q === 'igyeom') await narr(F().igyeom_record === 'visit'
       ? '첫집 할머니는 장날마다 우리 배에 오른다. 그날 빌린 삿갓을 이제는 셋이서 번갈아 쓴다.'
@@ -483,4 +493,4 @@ async function ending() {
   }
   if (F().kids_saved && !F().plague) await narr('창고 밑에서 데리고 나온 아이들은 나무패를 벗고 이름을 새로 받았다. 서른한 명 이름을 짓느라 곽 아주머니가 사흘을 앓았다.');
 }
-G.bond = { next, play, done, join, ending, total: id => (BONDS[id] || []).length };
+G.bond = { next, play, done, join, ending, total: id => (BONDS[id] || []).filter(e => !e.lover || canRomance(id)).length };

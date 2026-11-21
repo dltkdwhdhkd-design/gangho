@@ -5,7 +5,7 @@ import { WHO } from './dialog.js';
 import { FOES, MOVES } from './foes.js';
 import { DB } from './items.js';
 import { SKILLS, HEARTS } from './data.js';
-import { have, take, give, learn } from './state.js';
+import { have, take, give, learn, canRomance } from './state.js';
 import { TALK, GIFT } from './comptalk.js';
 
 const S = () => G.S, MAX = 2;
@@ -67,7 +67,9 @@ const pickLine = (id, L) => { if (!L?.length) return null; const k = id + L[0]; 
 async function chat(id) {
   const c = COMP[id], s = S(); if (G.bond?.next(id)) return G.bond.play(id);
   const T = TALK[id] || {}, cand = G.life?.cand?.[id], L = love(id), tier = L >= 70 ? 2 : L >= 30 ? 1 : 0;
-  const topics = [['요즘 어때?', () => pickLine(id, T.now)], ['여기는 어때?', () => pickLine(id, T.here)], ['네 이야기 좀 해 줘', () => pickLine(id, T.self)], ['나를 어떻게 생각해?', () => pickLine(id, T.me?.[tier])], ['아무 이야기나', () => pickLine(id, [...c.bark, ...(cand?.chat || [])])], ['그만둔다', null]].filter(t => !t[1] || t[1]() !== null);
+  const friend = cand && !cand.sworn && !canRomance(id);
+  const personalLines = friend ? G.life.chatLines(id) : T.me?.[tier];
+  const topics = [['요즘 어때?', () => pickLine(id, T.now)], ['여기는 어때?', () => pickLine(id, T.here)], ['네 이야기 좀 해 줘', () => pickLine(id, T.self)], ['나를 어떻게 생각해?', () => pickLine(id, personalLines)], ['아무 이야기나', () => pickLine(id, [...c.bark, ...(cand ? G.life.chatLines(id) : [])])], ['그만둔다', null]].filter(t => !t[1] || t[1]() !== null);
   const k = await choice(`${nameOf(id)}에게 무엇을 물을까?`, topics.map(t => t[0])); if (!topics[k][1]) return;
   if (!s.daily['chat_' + id]) { s.daily['chat_' + id] = 1; addLove(id, 3); }
   await say(id, fill(topics[k][1](), id));
@@ -97,12 +99,12 @@ async function inherit(id) {
 // 따라다니는 동료에게 말을 걸었을 때
 async function talkTo(id) {
   const o = [['이야기한다', () => chat(id)], ['선물을 준다', () => gift(id)], ['무공을 전수받는다', () => inherit(id)], ['초식을 가르친다', () => teach(id)], ['잠시 헤어진다', async () => { leave(id); await say(id, pickLine(id, ['알았어. 또 보자.', '몸조심해요.', '부르면 올게.']) || '또 보자.'); G.field.refresh(); }], ['그만둔다', async () => { }]];
-  if (G.life?.cand[id]) o.splice(1, 0, ['인연을 이야기한다', () => G.life.bondTalk(id)]);
+  if (G.life?.cand[id]) o.splice(1, 0, [canRomance(id) ? '인연을 이야기한다' : '우정을 나눈다', () => G.life.bondTalk(id)]);
   const k = await choice(`${nameOf(id)} · 호감 ${love(id)}`, o.map(q => q[0])); await o[k][1]();
 }
 async function compTalk(id) {
   const p = st(), opts = [['이야기한다', () => chat(id)]]; if (p.met[id]) opts.push(['선물을 준다', () => gift(id)]); if (p.met[id] && COMP[id].art) opts.push(['무공을 전수받는다', () => inherit(id)]);
-  if (G.life?.cand[id]) opts.push(['인연을 이야기한다', () => G.life.bondTalk(id)]);
+  if (G.life?.cand[id]) opts.push([canRomance(id) ? '인연을 이야기한다' : '우정을 나눈다', () => G.life.bondTalk(id)]);
   if (p.met[id]) { if (isIn(id)) opts.push(['잠시 헤어진다', async () => { leave(id); await say(id, '알았어. 또 보자.'); }]); else opts.push(['같이 가자고 한다', () => join(id)]); }
   else opts.push(['같이 다니자고 한다', async () => { if (await JOIN[id](id)) await join(id); }]);
   opts.push(['그만둔다', async () => { }]); const c = await choice(`${nameOf(id)} · ${COMP[id].hint || ''}`, opts.map(o => o[0])); await opts[c][1]();

@@ -1,5 +1,5 @@
 // 저장 자료와 능력치 계산
-import { G, Sound, toast } from './core.js';
+import { G, Sound, toast, josa } from './core.js';
 import { WEAPONS, HEARTS, SKILLS, expNeed, rankOf } from './data.js';
 import { DB, ACCS, TREES } from './items.js';
 import { GRADES, ARMORS, weaponGrade, wearOf, accWorn, pairOf, setsOf } from './gear.js';
@@ -7,9 +7,16 @@ import * as MER from './meridian.js';
 const KEY = 'gangho_save_v1';
 export const DIFF = { easy: { name: '쉬움', foeAtk: .7, foeHp: .85 }, normal: { name: '보통', foeAtk: 1, foeHp: 1 }, hard: { name: '어려움', foeAtk: 1.3, foeHp: 1.2 } };
 export const LEAD_LOOK = { m: 'BlueSamurai', f: 'JadeRunner' };
+const romanceGender = Object.freeze({
+  yun: 'f', so: 'f', clan_dang: 'f', clan_moyong: 'f', clan_namgung: 'f', baekrang: 'f', hyeok: 'f',
+  igyeom: 'm',
+});
+export function canRomance(id, s = G.S) {
+  return !!s && (s.gender === 'm' && romanceGender[id] === 'f' || s.gender === 'f' && romanceGender[id] === 'm');
+}
 export function newState(name, look, gender, diff) {
   return {
-    v: 4, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
+    v: 5, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
     weapon: 'mop', weapons: ['mop'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
     potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0, igyeom: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
   };
@@ -29,7 +36,7 @@ export function bonus(S = G.S) {
   if (HEARTS[S.heart]?.fx) add(HEARTS[S.heart].fx);
   if (G.party) add(G.party.fx());
   if (S.meal && S.meal.left > 0) add(DB[S.meal.id].meal);
-  if (S.married && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
+  if (canRomance(S.married, S) && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
   if (S.sworn && SPOUSE_FX[S.sworn]) add(SPOUSE_FX[S.sworn]);
   if (S.rested === S.day) add({ atk: 5 });
   return b;
@@ -124,6 +131,28 @@ function migrate(S) {
     S.love.igyeom ??= 0;
     S.v = 4;
   }
+  // Old saves could contain a couple created before courtship eligibility existed.
+  for (const id of new Set([S.partner, S.married])) {
+    const name = G.life?.cand?.[id]?.name;
+    if (name && !canRomance(id, S) && S.notes) {
+      const entry = josa(name, '과/와') + ' 연인이 되었다.';
+      S.notes = S.notes.filter(note => note !== entry);
+    }
+  }
+  if (S.partner && !canRomance(S.partner, S)) S.partner = null;
+  if (S.married && !canRomance(S.married, S)) {
+    S.married = null;
+    S.inv ??= {};
+    S.inv.jade_ring = (S.inv.jade_ring || 0) + 1;
+    if (S.titles?.includes('wed')) {
+      S.titles = S.titles.filter(k => k !== 'wed');
+      if (['원앙지계', '공처가'].includes(S.title)) S.title = '떠돌이 낭인';
+    }
+  }
+  for (const id of Object.keys(romanceGender)) {
+    if (!canRomance(id, S) && S.bonds?.[id] > 3) S.bonds[id] = 3;
+  }
+  S.v = Math.max(5, S.v || 0);
   return S;
 }
 function fill(S) { MER.fillIns(S); if (!S.rep) S.rep = { jeong: 0, sa: 0, ma: 0 }; if (S.rep.ma === undefined) S.rep.ma = 0; if (S.side === undefined) S.side = null; if (!S.title) S.title = '떠돌이 낭인'; if (!S.titles) S.titles = ['ronin', 'dog']; if (S.sworn === undefined) S.sworn = null; if (!S.bonds) S.bonds = {}; if (S.flags.cleared && !S.flags.ended) { S.flags.chief_down = true; S.flags.cleared = false; } if (!S.seen) { const f = S.flags, q = { cheongha: 1, [S.map]: 1 }; if (f.burned) q.valley = 1; if (f.bamboo_open) q.bamboo = 1; if (f.pass_open) q.pass = 1; if (f.fort_open) q.fort = 1; if (f.cloud_open) q.cloudmt = 1; if (f.boat_guhwa) Object.assign(q, { guhwa: 1, ninehall: 1, fiveclans: 1, shaolin: 1, hwasan: 1 }); S.seen = q; } return S; }

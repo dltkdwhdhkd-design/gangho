@@ -2,7 +2,7 @@
 import { G, Input, Sound, $, $$, el, esc, toast, clamp, rnd, rint, pick, fadeTo, TS, josa } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
-import { have, give, take, nextDay, save, stats } from './state.js';
+import { have, give, take, nextDay, save, stats, canRomance } from './state.js';
 import { DB, ACCS, FISH, FURN, HOUSES, RECIPES, LOOT } from './items.js';
 import { WEAPONS } from './data.js';
 import { GRADES, weaponGrade, plusCap } from './gear.js';
@@ -192,7 +192,29 @@ const THANKS = {
   baekrang: ['이걸 어떻게 구했어요? 소문 값으로 쳐 줄게요.', '오, 값이 나가겠는데요. 고마워요.', '받아 둘게요.', '이건 팔아도 안 남겠네요.'], hyeok: ['…제가 이것을 좋아한다는 것을 어찌 아셨습니까.', '고맙습니다.', '받겠습니다.', '이것은 교리에 맞지 않습니다.'],
   clan_dang: ['…어떻게 알았어요? 조사했어요?', '쓸 만하네요. 고마워요.', '받아 둘게요. 독은 안 넣었겠죠?', '이건 제가 독을 넣어도 못 살리겠어요.'], clan_moyong: ['이런 것은 돌려드리기 아깝구려. 고맙소.', '받았소. 언젠가 돌려드리겠소.', '고맙소. 예법대로 받겠소.', '이것은 그대로 돌려드리겠소.'], clan_namgung: ['…탐나는 물건이다. 어떻게 구했지?', '나쁘지 않군. 고맙다.', '받아 두지.', '남궁에 이런 것을 가져오다니.'],
 };
-export const stageOf = (id) => { const s = G.S, l = s.love[id] || 0; return s.sworn === id ? (s.gender === 'f' ? '의남매' : '의형제') : s.married === id ? '부부' : s.partner === id ? '연인' : l >= 70 ? '각별한 사이' : l >= 40 ? '가까운 벗' : l >= 15 ? '친구' : '아는 사이'; };
+const friendChat = {
+  igyeom: ['왼쪽 여울은 깊어 보여도 바로 밑이 돌이에요. 장대를 먼저 짚고 건너요.', '배가 한 척 더 들어왔어요. 짐 풀고 나서 노 젓는 시합이나 합시다.', '매듭 둘이면 깊은 물. 기억하고 있죠? 오늘은 {나} 씨가 뱃머리를 잡아요.'],
+  yun: ['그 붕대는 물에 적시지 마요. 약 바른 쪽이 씻겨 나가요.', '약방 문을 한 시진만 봐 줄래요? 왕진을 다녀올게요.'],
+  so: ['칼자루를 너무 꽉 잡았어. 손 펴 봐. 그래, 그렇게.', '오늘은 내가 목검을 들게. 어제 진 쪽이 술 사기로 한 건 기억하지?'],
+  clan_dang: ['이 풀하고 저 풀의 잎맥이 달라요. 하나는 상처에 붙이고 하나는 벌레 잡는 데 써요.', '바늘통 뚜껑에 홈을 냈어요. 밤에도 손끝으로 골라 쓸 수 있게요.'],
+  clan_moyong: ['그대의 보법을 따라 해 봤소. 돌길에서는 마지막 한 걸음을 짧게 놓는구려.', '서고에 새 필사본이 들었소. 다 읽고 그대에게도 빌려주겠소.'],
+  clan_namgung: ['손목을 먼저 내밀면 검끝이 늦는다. 다시 해 봐라.', '검끈을 갈았다. 헌 끈은 목검에 감으면 딱이다.'],
+  baekrang: ['저 사람은 거짓말할 때 주사위 대신 찻잔을 굴려요. 다음 판에 잘 봐요.', '소문 값은 그대로예요. 벗한테는 틀린 소문을 먼저 걸러 주죠.'],
+  hyeok: ['장에 가면 돌아오는 길부터 살펴봅니다. 오늘은 혼자서도 찾았습니다.', '엿장수의 가위 소리가 들립니다. 우리도 한 봉지 사서 나눕시다.'],
+};
+function chatLines(id) {
+  const c = CAND[id];
+  if (c.chat0 && !F().cross) return c.chat0;
+  return canRomance(id) || !friendChat[id] ? c.chat : friendChat[id];
+}
+export const stageOf = id => {
+  const s = S(), l = s.love[id] || 0, eligible = canRomance(id, s);
+  if (s.sworn === id) return s.gender === 'f' ? '의남매' : '의형제';
+  if (eligible && s.married === id) return '부부';
+  if (eligible && s.partner === id) return '연인';
+  if (l >= 70) return eligible ? '각별한 사이' : '막역한 벗';
+  return l >= 40 ? '가까운 벗' : l >= 15 ? '친구' : '아는 사이';
+};
 const addLove = (id, n) => { G.S.love[id] = clamp((G.S.love[id] || 0) + n, 0, 100); F()['met_' + id] = true; };
 async function giveGift(id) {
   const ids = Object.keys(S().inv).filter(k => DB[k] && ['선물', '요리', '물고기', '재료', '보물'].includes(DB[k].kind));
@@ -203,10 +225,12 @@ async function giveGift(id) {
   await say(id, THANKS[id][v >= 15 ? 0 : v >= 8 ? 1 : v > 0 ? 2 : 3]);
 }
 async function confess(id) {
+  if (!canRomance(id) || S().partner || S().married) return;
   const c = CAND[id]; await say('me', '드릴 말씀이 있어요.'); for (const l of c.confess) await say(id, l);
   S().partner = id; Sound.sfx('ok3'); toast(`${josa(c.name, '과/와')} 연인이 되었다`, 3); ctx.note(`${josa(c.name, '과/와')} 연인이 되었다.`);
 }
 async function propose(id) {
+  if (!canRomance(id) || S().partner !== id || S().married) return;
   const c = CAND[id];
   if (!F().own_house) { await say(id, c.house); return; }
   if (have('jade_ring') < 1) { await say('me', '(옥가락지가 있어야 한다. 대장간에서 옥돌로 만들 수 있다.)'); return; }
@@ -219,12 +243,12 @@ async function swear(id) {
   S().sworn = id; Sound.sfx('ok3'); const line = `${josa(c.name, '과/와')} ${stageOf(id)}를 맺었다`; toast(line, 3); ctx.note(line + '.');
 }
 async function romance(id, base) {
-  const c = CAND[id], s = S(), L = s.love[id] || 0, d = s.daily, opts = [];
-  opts.push(['이야기한다', async () => { if (base) await base(); if (!d['chat_' + id]) { d['chat_' + id] = 1; addLove(id, 3); await say(id, pick(c.chat0 && !F().cross ? c.chat0 : c.chat)); } else if (!base) await say(id, pick(s.married === id ? c.wife : c.chat)); }]);
+  const c = CAND[id], s = S(), L = s.love[id] || 0, d = s.daily, eligible = canRomance(id, s), opts = [];
+  opts.push(['이야기한다', async () => { if (base) await base(); if (!d['chat_' + id]) { d['chat_' + id] = 1; addLove(id, 3); await say(id, pick(chatLines(id))); } else if (!base) await say(id, pick(eligible && s.married === id ? c.wife : chatLines(id))); }]);
   if (!d['gift_' + id]) opts.push(['선물을 준다', () => giveGift(id)]);
-  if ((s.partner === id || s.sworn === id) && !d['date_' + id]) opts.push([c.sworn ? '밥을 먹으러 간다' : '나들이를 간다', async () => { d['date_' + id] = 1; addLove(id, 7); await narr(pick(c.date)); }]);
+  if (((eligible && s.partner === id) || (c.sworn && s.sworn === id)) && !d['date_' + id]) opts.push([c.sworn ? '밥을 먹으러 간다' : '나들이를 간다', async () => { d['date_' + id] = 1; addLove(id, 7); await narr(pick(c.date)); }]);
   if (c.sworn) { if (L >= 70 && s.sworn !== id && G.bond.done(id) >= 3) opts.push(['의형제를 맺는다', () => swear(id)]); }
-  else {
+  else if (eligible) {
     if (L >= 70 && !s.partner && !s.married && G.bond.done(id) >= 3) opts.push(['마음을 전한다', () => confess(id)]);
     if (s.partner === id && !s.married && L >= 100) opts.push(['혼인을 청한다', () => propose(id)]);
   }
@@ -256,7 +280,7 @@ export function lootPick(name, ids) {
     B.appendChild(w);
   }, 860);
 }
-G.life = { gift: giveGift,
+G.life = { gift: giveGift, chatLines,
   bondTalk: id => G.bond.next(id) ? G.bond.play(id) : romance(id), pick, craft, fishing, houseScore, cand: CAND, stageOf, animals: ANIMALS, openDecor, lootPick, openCraft, openSell, sleepNow: async () => { await fadeTo(1); nextDay(); await fadeTo(0); toast(`${S().day}일째 아침`, 2.4); }, lootAfter: async cfg => { const id = cfg.foes[0], t = FOE_LOOT[id]; if (t) await lootPick(FOES[id].name, t); }, placeAt, closeDecor, enterHouse, canPlace, size };
 // 떠돌이 비무객: 하루 한 번, 경지에 맞는 상대
 FOES.wanderer = { name: '떠돌이 비무객', spr: 'chars/Samurai', hp: 100, atk: 10, def: 3, spd: 66, exp: 0, silver: 0, pause: 1.05, moves: ['double', 'lunge', 'quick', 'dart3'], wpn: 'Katana', guard: .5, poise: 40, elite: 1 };
@@ -274,7 +298,7 @@ Object.assign(WHO, { realtor: { name: '복덕방 영감', face: 'OldMan' }, hunt
 Story.providers.push(function content4(id) {
   const n = [], sp = [], s = S(), hunt = [];
   if (GATHER[id] && (!['wolha'].includes(id) || true)) GATHER[id].forEach((g, i) => { if (!s.daily[`g_${id}_${i}`]) n.push({ id: `g${i}`, stamp: g[1], spr: '', x: g[2], y: g[3], hint: `${DB[g[0]].name} 얻기`, talk: gather(id, i, g) }); });
-  if (id === 'cheongha' && s.married !== 'igyeom' && !s.pt?.in?.includes('igyeom') && !(s.house.lv && Object.hasOwn(s.pt?.home || {}, 'igyeom'))) {
+  if (id === 'cheongha' && !(s.married === 'igyeom' && canRomance('igyeom', s)) && !s.pt?.in?.includes('igyeom') && !(s.house.lv && Object.hasOwn(s.pt?.home || {}, 'igyeom'))) {
     n.push({ id: 'igyeom', spr: 'Igyeom', x: 25, y: 26.5, dir: 2, hint: '나루의 서이겸', mark: () => !F().met_igyeom, talk: async () => {
       if (F().met_igyeom) { await say('igyeom', '밧줄 잡고 건너와요. 여기 널판 하나가 들떠 있어요.'); return; }
       await narr('젖은 널판에 강줄기를 그리고 있던 사내가 발을 옮겼다. 내 짚신 밑으로 들릴 뻔한 널판 끝을 그가 밟고 있었다.');
@@ -298,7 +322,7 @@ Story.providers.push(function content4(id) {
   if (id === 'bamboo') for (const [a, x, y] of [['rabbit', 14, 15.5], ['pheasant', 30.5, 20], ['rabbit', 20, 7.5]]) hunt.push({ kind: a, x, y });
   if (id === 'myhouse') {
     s.house.items.forEach(i => { const a = FURN[i.id].act; if (a) { const [w, h] = size(i.id); sp.push({ x: i.x, y: i.y, w, h, hint: { bed: '잠자기', cook: '요리하기', bench: '가구 만들기', book: '책 읽기', dummy: '수련하기' }[a], act: () => furnAct(a) }); } });
-    if (s.married) n.push({ id: s.married, spr: { igyeom: 'Igyeom', yun: 'Princess', so: 'RedSamurai', baekrang: 'Cavegirl', hyeok: 'Hyeok', clan_dang: 'Dang', clan_moyong: 'Moyong', clan_namgung: 'Namgung' }[s.married], x: 4, y: 3.5, dir: 0, talk: async () => { await say(s.married, pick(CAND[s.married].wife)); } });
+    if (canRomance(s.married, s)) n.push({ id: s.married, spr: { igyeom: 'Igyeom', yun: 'Princess', so: 'RedSamurai', baekrang: 'Cavegirl', hyeok: 'Hyeok', clan_dang: 'Dang', clan_moyong: 'Moyong', clan_namgung: 'Namgung' }[s.married], x: 4, y: 3.5, dir: 0, talk: async () => { await say(s.married, pick(CAND[s.married].wife)); } });
   }
   return { npcs: n, spots: sp, trigs: [], roam: [], hunt };
 });
