@@ -8,6 +8,7 @@ import { mark as occMark, covered, behind } from './occl.js';
 import { drawStamp, STAMPS } from './tiles.js';
 import { drawRegional2D } from './hd2d/regional-buildings.js';
 import { landscapeOf,loadWildernessArt,paintLandscape,wildernessArt } from './landscape.js';
+import { terrainPace, travelLabels } from './field-travel.js';
 import { save } from './state.js';
 import { Story } from './story.js';
 import { openMenu } from './ui.js';
@@ -91,12 +92,21 @@ export class Field {
       p.dir = Math.abs(d.x) >= Math.abs(d.y) * .55 ? (d.x < 0 ? 2 : 3) : (d.y < 0 ? 1 : 0); p.diag = d.x && d.y && Math.min(Math.abs(d.x), Math.abs(d.y)) > .3 ? (d.y > 0 ? 0 : 1) + (d.x < 0 ? 2 : 0) : undefined;
       let [gx, gy] = m.isoRoom ? walkDir(m, d.x, d.y) : [d.x, d.y];  // 쿼터뷰 방은 화면 방향을 칸 방향으로 돌린다
       if (m.isoRoom && !m.isoRoom.out && d.y > 0) { const H = m.h * TS, q = m.portals.find(q => q.y + q.h >= H - 2 && p.y > H - 4 * TS && Math.abs(q.x + q.w / 2 - p.x) < 4 * TS); if (q) gx = clamp((q.x + q.w / 2 - p.x) / 12, -1, 1) * Math.max(.6, gy); }  // 문 가까이서 아래로 가면 문으로 끌어 준다
-      const nx = p.x + gx * sp * dt, ny = p.y + gy * sp * dt;
+      const surface=!m.room&&!m.hgt&&landscapeOf(m),pace=terrainPace(surface,m,p.x,p.y,gx,gy,TS);
+      const distance=sp*dt*pace,steps=surface?Math.max(1,Math.ceil(distance/5)):1;
       const nr = m.isoRoom ? Math.min(13, 7 / (m.isoRoom.a || 1)) : 8, blocked = (x, y) => m.blocked(x, y) || this.npcs.some(n => !(n.hide > 0) && !n.ghost && hyp(n.x - x, (n.y - 1) - y) < nr);  // ghost: 대회 구경꾼처럼 길을 막지 않는 사람
-      const ox = p.x, oy = p.y; if (!blocked(nx, p.y)) p.x = nx; if (!blocked(p.x, ny)) p.y = ny;
+      const ox = p.x, oy = p.y;
+      for(let step=0;step<steps;step++){
+        const nx=p.x+gx*distance/steps,ny=p.y+gy*distance/steps;
+        if(!blocked(nx,p.y))p.x=nx;
+        if(!blocked(p.x,ny))p.y=ny;
+      }
       // 발자취는 거리마다 남긴다. 경공으로 달려도 뒤따르는 동료와의 거리가 같다
-      p.walk += dt * (run ? 13 : 8); this.dashing = run && (p.x !== ox || p.y !== oy); this._acc = (this._acc || 0) + hyp(p.x - ox, p.y - oy);
-      const k = Math.min(8, Math.floor(this._acc / 1.4)); this._acc -= k * 1.4; for (let i = k; i >= 1; i--) this.trail.unshift({ x: ox + (p.x - ox) * i / k, y: oy + (p.y - oy) * i / k, dir: p.dir, diag: p.diag }); if (this.trail.length > 70) this.trail.length = 70;
+      const walked=hyp(p.x-ox,p.y-oy);this.dashing=run&&walked>.01;
+      p.walk=surface?(walked>.01?p.walk+walked/(run?14:10.5):0):p.walk+dt*(run?13:8);
+      let step=1.4-(this._acc||0);
+      for(;step<=walked;step+=1.4)this.trail.unshift({x:ox+(p.x-ox)*step/walked,y:oy+(p.y-oy)*step/walked,dir:p.dir,diag:p.diag});
+      this._acc=walked-step+1.4;if(this.trail.length>70)this.trail.length=70;
     } else p.walk = 0;
     // 눈앞의 사람에게 곧장 칼을 뽑는다
     { const t0 = this.target(); if (t0 && t0.talk && G.crime?.can(t0) && Input.take('atk')) { this.face(t0); this.run(() => G.crime.attack(t0)); return; } }
@@ -389,7 +399,8 @@ export class Field {
     c.setTransform(1, 0, 0, 1, 0, 0); const P = (x, y, h = 0) => H.proj(x, y, h), k = Math.min(5, H.pxPerUnit());
     // 느낌표: 일감 소품(독 따위)은 사람보다 낮아서 느낌표도 낮게
     if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, (n.stamp ? 14 : 25 * H.actK(m)) - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
-    if (m.labels) { c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
+    if(m.id==='world')travelLabels(c,m,this.p,P,TS);
+    else if (m.labels) { c.textAlign = 'center'; c.font = '20px Galmuri11Bold, Galmuri14, sans-serif'; c.lineWidth = 5; c.strokeStyle = '#000'; c.fillStyle = '#ffe9a8';
       for (const l of m.labels) { const [x, y] = P(l.x * TS, l.y * TS); if (x < -120 || x > 1400 || y < -30 || y > 750) continue; c.strokeText(l.text, x, y); c.fillText(l.text, x, y); } }
     this.drawExits(c, P);
     if (m.live) G.wander?.over(c, this.roam, this.t, P);  // 무리와 길손 이름표
