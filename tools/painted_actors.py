@@ -148,7 +148,11 @@ def face(key,im):
     im=im.copy()
     im.putalpha(im.getchannel('A').point(lambda a: 0 if a<5 else 255 if a>=242 else a))
     framed=Image.new('RGBA',(432,648))
-    pic=scaled(im,min(591/im.height,494/im.width))
+    scale = min(591/im.height, 494/im.width)
+    if key.startswith(('yuseol_', 'dangsoso_')):
+        # Align the eye line and facial scale of these close crops with the other disciples.
+        scale *= .90 if key.startswith('yuseol_') else .88
+    pic=scaled(im,scale)
     framed.alpha_composite(pic,((432-pic.width)//2,648-pic.height))
     webp(ART/(key+'.webp'),framed)
     if key.startswith('type_') and key.endswith('_n'):
