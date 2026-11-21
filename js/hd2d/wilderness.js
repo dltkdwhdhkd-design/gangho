@@ -77,10 +77,11 @@ export function sceneryBatch(T,map,zs,hs,heightAt){
     }
   };
 }
-export function addRiverMargins(T,group,map,area,field,tile,hs,zs,texture,material,heightAt) {
+export function addRiverMargins(T,group,map,area,field,tile,hs,zs,texture,material,heightAt,groves) {
   if(!wildernessArt.ready)return;
   const sets=new Map();
   function plant(name,high,u,v,flip=false){
+    if(groves?.add('',name,u*tile,v*tile,high))return;
     const tex=texture('field_'+name);if(!tex)return;
     const h=high*hs,w=high*tex.image.width/tex.image.height,X=u*tile,Z=v*tile*zs,Y=heightAt(map,X,v*tile);
     let b=sets.get(tex);if(!b){b={p:[],uv:[],idx:[]};sets.set(tex,b);}
@@ -102,6 +103,15 @@ export function addRiverMargins(T,group,map,area,field,tile,hs,zs,texture,materi
     else continue;
     if(field.isWorld){name=name==='reedbed'?'miniReeds':name==='snowcrag'?name:'miniBank';high*=1.42;}
     plant(name,high,u,v,hashLand(x,y,77)>.5);
+  }
+  if(field.isWorld&&area.x0<906&&area.x1>883&&area.y0<670&&area.y1>648){
+    const margins=[[888.5,653.2],[885.2,654.1],[893.6,651.2],[895,666.9],[900.8,663.8],[902.4,662.7]];
+    for(const [u,v] of margins)for(let i=0;i<5;i++){
+      const r=hashLand(Math.floor(u*5),Math.floor(v*7),i+1),a=i*2.40;
+      const x=u+Math.cos(a)*r*1.5,y=v+Math.sin(a)*r*.63;
+      if(x<area.x0||x>=area.x1||y<area.y0||y>=area.y1||map.g[Math.floor(y)]?.[Math.floor(x)]===4)continue;
+      plant(i<3?'miniReeds':'riverstone',i<3?8+r*6:3+r*6,x,y,r>.5);
+    }
   }
   const verges={cheongha:['miniGrove','miniReeds'],hwasan:['miniPlum','miniSlate'],wudang:['riverwillow','miniReeds'],seongdo:['miniBamboo','miniFirs'],silk:['miniMesa','miniBank'],tiangate:['miniSnow','miniFirs']};
   if(field.isWorld)for(const site of map.sites||[]){

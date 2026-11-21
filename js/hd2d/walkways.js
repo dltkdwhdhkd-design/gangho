@@ -1,3 +1,5 @@
+import { jegalFord,onJegalAxis } from '../river-crossing.js';
+import { timberBridge } from './river-models.js';
 const bridgeMaps = new WeakMap();
 
 function bridges(map) {
@@ -32,28 +34,41 @@ function bridges(map) {
     if(!besideWater)continue;
     const widths=sections.map(q=>q[1]-q[0]).sort((a,b)=>a-b);
     const clearWidth=Math.min(2.05,Math.max(1.12,widths[Math.floor(widths.length/2)]*.72));
-    const s={x0,y0,x1:x1+1,y1:y1+1,across,sections,clearWidth};
+    const jegal=map.id==='world'&&x0>885&&x1<905&&y0>=650&&y1<=667;
+    const s={x0,y0,x1:x1+1,y1:y1+1,across,sections,clearWidth:jegal?jegalFord.width:clearWidth,jegal};
+    s.rise=jegal?s.clearWidth*.15*16:Math.min(4.6,s.clearWidth*2.8);
     spans.push(s);for(const k of cells)tiles.set(k,s);
   }
   const result={tiles,spans};bridgeMaps.set(map,result);return result;
 }
 function deckSection(s,t) {
-  const j=Math.max(0,Math.min(s.sections.length-1,t*s.sections.length-.5)),i=Math.floor(j),f=j-i;
-  const a=s.sections[i],b=s.sections[Math.min(i+1,s.sections.length-1)];
-  const lo=a[0]*(1-f)+b[0]*f,hi=a[1]*(1-f)+b[1]*f;
+  const rows=s.sections, j=t*rows.length-.5, i=Math.floor(j), f=j-i;
+  const weights=[(1-f)**3/6,(4-6*f*f+3*f**3)/6,(1+3*f+3*f*f-3*f**3)/6,f**3/6];
+  let lo=0,hi=0;
+  for(let k=0;k<4;k++){
+    const cut=rows[Math.max(0,Math.min(rows.length-1,i+k-1))];
+    lo+=cut[0]*weights[k];hi+=cut[1]*weights[k];
+  }
   return [(lo+hi)/2,Math.min(s.clearWidth,hi-lo)/2];
 }
+const deckRise=(t,rise)=>Math.sin(Math.PI*t)**2*rise;
 function bridgePoint(map,x,y,tile){
   const gx=x/tile,gy=y/tile,ix=Math.floor(gx),iy=Math.floor(gy);
+  if(map.id==='world'&&gx>jegalFord.ax-2&&gx<jegalFord.bx+2&&gy>jegalFord.ay-2&&gy<jegalFord.by+2){
+    const p=onJegalAxis(gx,gy),half=jegalFord.width/2;
+    if(p.t>=0&&p.t<=1&&Math.abs(p.side)<=half+.64)
+      return {...p,half,offset:Math.abs(p.side),rise:jegalFord.width*.15*tile,jegal:true};
+  }
   if(map.g[iy]?.[ix]!==4)return;
   const s=bridges(map).tiles.get(iy*map.w+ix);if(!s)return;
+  if(s.jegal)return;
   const t=s.across?(gx-s.x0)/(s.x1-s.x0):(gy-s.y0)/(s.y1-s.y0);
   const [center,half]=deckSection(s,t);
-  return {t,half,center,across:s.across,offset:Math.abs((s.across?gy:gx)-center)};
+  return {t,half,center,rise:s.rise,across:s.across,offset:Math.abs((s.across?gy:gx)-center)};
 }
 export function bridgeHeight(map,x,y,tile) {
   const p=bridgePoint(map,x,y,tile);
-  return p&&p.offset<=p.half ? Math.sin(Math.PI*p.t)*4.6:0;
+  return p&&p.offset<=p.half ? deckRise(p.t,p.rise):0;
 }
 export function bridgeRail(map,x,y,w,tile) {
   const p=bridgePoint(map,x,y,tile);
@@ -62,6 +77,7 @@ export function bridgeRail(map,x,y,w,tile) {
 export function bridgeLanding(map,x,y,tile) {
   const p=bridgePoint(map,x,y,tile);
   if(!p || p.t<=.04 || p.t>=.96 || p.offset<p.half-.18)return [x,y];
+  if(p.jegal)return [p.x*tile,p.y*tile];
   return p.across?[x,p.center*tile]:[p.center*tile,y];
 }
 
@@ -69,7 +85,7 @@ const materials={};
 function model(T,texture,name) {
   const group=new T.Group(), layers=new Map();group.name=name;group.userData.ms=[];
   const colors={wood:[0xb99265,'cedar'],deck:[0xe0c6a0,'plank'],red:[0xa85340,'cedar'],roof:[0xb7c5bc,'roof'],
-    rib:[0xa1ae9e,'slab'],edge:[0xb9aa83,'slab'],green:[0x58766b,'cedar'],stone:[0xc1b7a0,'slab']};
+    earth:[0xb79972,'yard'],log:[0x886c4e,'cedar'],cut:[0xc19c73,'plank'],rib:[0xa1ae9e,'slab'],edge:[0xb9aa83,'slab'],green:[0x58766b,'cedar'],stone:[0xc1b7a0,'slab']};
   function layer(k) {
     if(!layers.has(k))layers.set(k,{p:[],uv:[]});
     return layers.get(k);
@@ -145,38 +161,71 @@ function gallery(T,texture,w,length,color) {
   return finish();
 }
 function bridge(T,texture,s,tile){
-  const {box,quad,finish}=model(T,texture,'arched-footbridge');
-  const sections=s.sections,long=sections.length*tile,mid=s.across?(s.y0+s.y1)/2:(s.x0+s.x1)/2;
+  const {box,quad,finish}=model(T,texture,'timber-footbridge');
+  const length=(s.pathLength??s.sections.length)*tile;
+  const mid=s.across?(s.y0+s.y1)/2:(s.x0+s.x1)/2;
   function frame(t){
     const [center,half]=deckSection(s,t);
     let lo=(center-half-mid)*tile,hi=(center+half-mid)*tile;
     if(s.across)[lo,hi]=[-hi,-lo];
-    return [lo,hi,4.6*Math.sin(Math.PI*t),(t-.5)*long];
+    return [lo,hi,deckRise(t,s.rise),(t-.5)*length];
   }
-  const n=Math.max(5,Math.ceil(long/3));
-  for(let i=0;i<n;i++){
-    const [l,r,h,z]=frame(i/n),[L,R,H,Z]=frame((i+1)/n);
-    quad('deck',[l,h,z],[r,h,z],[R,H,Z-.1],[L,H,Z-.1],(r-l)/12,.45);
-    quad('edge',[l,h+.03,z],[r,h+.03,z],[r,h+.03,z+.18],[l,h+.03,z+.18],(r-l)/12,.1);
-    quad('red',[l,h-.9,z],[r,h-.9,z],[r,h,z],[l,h,z],(r-l)/12,.2);
-    quad('wood',[l,h,z],[l,h-.9,z],[L,H-.9,Z],[L,H,Z]);
-    quad('wood',[r,h,z],[R,H,Z],[R,H-.9,Z],[r,h-.9,z]);
+  function member(a,b,r,h,key){
+    const dx=b[0]-a[0],dz=b[2]-a[2],len=Math.hypot(dx,dz)||1;
+    const point=(p,side,up)=>[p[0]+side*r*dz/len,p[1]+up*h,p[2]-side*r*dx/len];
+    const A=point(a,-1,0),B=point(b,-1,0),C=point(b,1,0),D=point(a,1,0);
+    const aa=point(a,-1,-1),bb=point(b,-1,-1),cc=point(b,1,-1),dd=point(a,1,-1);
+    quad(key,A,B,C,D,len/11,.26);quad(key,aa,bb,B,A,len/11,.25);quad(key,D,C,cc,dd,len/11,.25);
   }
-  const bays=Math.max(2,Math.ceil(long/13));
-  for(const side of [0,1])for(let i=0;i<=bays;i++){
-    const a=frame(i/bays),x=a[side]+(side?-.65:.65);
-    box('red',x,a[2]+2.7,a[3],1.05,5.5,1.05);box('edge',x,a[2]+5.65,a[3],1.45,.6,1.45);
-    if(i===bays)continue;
-    const b=frame((i+1)/bays),X=b[side]+(side?-.65:.65);
-    for(const rail of [2.2,4.8]){
-      const h=a[2]+rail,H=b[2]+rail;
-      quad('wood',[x-.35,h,a[3]],[X-.35,H,b[3]],[X+.35,H,b[3]],[x+.35,h,a[3]]);
-      for(const d of [-.35,.35])quad('wood',[x+d,h,a[3]],[X+d,H,b[3]],[X+d,H-.7,b[3]],[x+d,h-.7,a[3]]);
+  const boards=Math.max(5,Math.round(length/4.7));
+  for(let i=0;i<boards;i++){
+    const [l,r,h,z]=frame(i/boards),[L,R,H,Z]=frame((i+1)/boards);
+    quad(i%6===1?'cut':'deck',[l,h,z],[r,h,z],[R,H,Z-.14],[L,H,Z-.14],(r-l)/14,.34);
+    for(const [a,b] of [[l,L],[r,R]])quad('log',[a,h,z],[a,h-1.15,z],[b,H-1.15,Z],[b,H,Z]);
+  }
+  const bays=Math.max(2,Math.round(length/19));
+  for(let i=0;i<=bays;i++){
+    const [l,r,h,z]=frame(i/bays);
+    if(i>0&&i<bays&&i%2===1){
+      box('log',(l+r)/2,h-2.5,z,r-l+1,1.65,2.7);
+      for(const x of [l+1.65,r-1.65]){
+        box('log',x,h-6.5,z,1.9,10,2);
+        for(const sign of [-1,1])member([x,h-1.5,z+sign*6],[x,h-6.6,z],.62,.92,'wood');
+      }
+    }
+    for(const side of [0,1]){
+      const x=side?r-.7:l+.7;
+      box('log',x,h+2.8,z,1.40,7.4,1.52);box('wood',x,h+6.56,z,1.60,.41,1.70);
+      if(i===bays)continue;
+      const [L,R,H,Z]=frame((i+1)/bays),X=side?R-.7:L+.7;
+      for(const rail of [2.9,5.75])member([x,h+rail,z],[X,H+rail,Z],.39,.62,'wood');
+      member([x,h-1.1,z],[X,H-1.1,Z],.70,1.35,'log');
     }
   }
   return finish();
 }
 
+function timberApproaches(T,texture,map,tile,zs,heightAt){
+  const b=jegalFord,axis=onJegalAxis(b.ax,b.ay),{quad,finish}=model(T,texture,'ford-approaches');
+  for(const end of [0,1]){
+    const ex=end?b.bx:b.ax,ey=end?b.by:b.ay,sign=end?1:-1;
+    function point(d,w,up=0){
+      const x=(ex+axis.ux*d*sign+axis.uy*w)*tile,y=(ey+axis.uy*d*sign-axis.ux*w)*tile;
+      return [x,.13+up+Math.max(0,heightAt(map,x,y))*Math.min(1,d/.62),y*zs];
+    }
+    const h=b.width*.5,rows=[[0,-h,h],[.32,-h-.06,h+.13],[.86,-h-.18,h+.17],[1.43,-h-.02,h+.07],[1.94,-h+.31,h-.17]];
+    for(let i=1;i<rows.length;i++){
+      const [d,l,r]=rows[i-1],[D,L,R]=rows[i];
+      quad('earth',point(d,l),point(d,r),point(D,R),point(D,L),1.8,.68);
+    }
+    for(let i=0;i<10;i++){
+      const side=i%2?1:-1,d=.06+Math.floor(i/2)*.29;
+      const outer=side*(h+.015+.072*Math.sin(i*5)),inner=outer-side*(.16+.025*(i%3));
+      quad('stone',point(d,inner,.14),point(d+.037,outer,.12),point(d+.245,outer,.14),point(d+.208,inner,.16),.31,.31);
+    }
+  }
+  return finish();
+}
 function bridgeLandings(T,texture,map,span,tile,hs,zs,heightAt){
   const {quad,finish}=model(T,texture,'river-abutments');let built=false;
   for(const end of [0,1]){
@@ -201,7 +250,7 @@ function bridgeLandings(T,texture,map,span,tile,hs,zs,heightAt){
   }
   return built?finish():null;
 }
-export function addWalkways(T,group,map,area,tile,hs,zs,heightAt,texture) {
+export function addWalkways(T,group,map,area,tile,hs,zs,heightAt,texture,library) {
   for(const g of map.galleries || []){
     const x=(g.x+g.w/2)*tile,y=(g.y+g.h/2)*tile;
     const building=gallery(T,texture,g.w*tile,g.h*tile,g.color);
@@ -210,6 +259,18 @@ export function addWalkways(T,group,map,area,tile,hs,zs,heightAt,texture) {
   if(map.id!=='world'&&!map.encounter?.bridges&&!map.canal)return;
   for(const s of bridges(map).spans){
     if(s.x1<area.x0||s.y1<area.y0||s.x0>=area.x1||s.y0>=area.y1)continue;
+    if(s.jegal){
+      const b=jegalFord,axis=onJegalAxis(b.ax,b.ay);
+      let deck=timberBridge(library,b.width*tile,axis.length*tile,hs,1);
+      if(!deck){
+        deck=bridge(T,texture,{across:false,x0:0,x1:b.width,sections:[[0,b.width]],clearWidth:b.width,pathLength:axis.length,rise:b.width*tile*.15},tile);
+        deck.scale.y=hs;
+      }
+      deck.rotation.y=Math.atan2(axis.ux,axis.uy);
+      deck.position.set((b.ax+b.bx)*tile/2,0,(b.ay+b.by)*tile/2);
+      const crossing=new T.Group();crossing.name='jegal-timber-bridge';crossing.scale.z=zs;crossing.add(deck);group.add(crossing);
+      group.add(timberApproaches(T,texture,map,tile,zs,heightAt));continue;
+    }
     const obj=bridge(T,texture,s,tile);
     obj.position.set((s.x0+s.x1)*tile/2,0,(s.y0+s.y1)*tile/2*zs);
     obj.scale.set(1,hs,zs);if(s.across)obj.rotation.y=Math.PI/2;group.add(obj);

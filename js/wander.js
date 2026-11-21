@@ -72,7 +72,7 @@ function ai(b, dt, f, d) {
 function follow(b, dt) {
   b.crew.forEach((q, i) => {
     const tx = b.fight ? b.x + (i ? 10 : -10) : b.x - (b.vx || 0) * .5 * (i + 1) + (i ? 9 : -9), ty = b.fight ? b.y + 8 + i * 6 : b.y - (b.vy || 0) * .5 * (i + 1) + 4, dx = tx - q.x, dy = ty - q.y, e = Math.hypot(dx, dy);
-    if (e > 2) { const k = Math.min(1, dt * 4); q.x += dx * k; q.y += dy * k; q.walk += dt * 7; q.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); } else if (b.fight) q.walk += dt * 9;
+    if (e > 2) { const k = Math.min(1, dt * 4); q.x += dx * k; q.y += dy * k; q.walk += dt * 7; q.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); } else if (b.fight) q.walk += dt * 9; else q.walk = 0;
   });
 }
 // 싸움이 끝나면 한쪽이 쓰러진다(사람 수와 단계로 기운다)

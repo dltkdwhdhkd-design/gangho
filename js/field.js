@@ -6,6 +6,7 @@ import { drawIso, orderKeys, inside as isoInside } from './iso.js';
 import { proj, toGrid, toScreen, walkDir } from './isoroom.js';
 import { mark as occMark, covered, behind } from './occl.js';
 import { drawStamp, STAMPS } from './tiles.js';
+import { drawPlant2D,drawAnimal2D,drawFord2D } from './hd2d/nature-2d.js';
 import { drawRegional2D } from './hd2d/regional-buildings.js';
 import { landscapeOf,loadWildernessArt,paintLandscape,wildernessArt } from './landscape.js';
 import { terrainPace, travelLabels } from './field-travel.js';
@@ -29,6 +30,8 @@ export class Field {
     const from = this.m?.id; this.trail = []; const m = MAPS[id]; G.world?.linkEdges?.(m); this.m = m; G.S.map = id; (G.S.seen = G.S.seen || {})[id] = 1; G.S.flags['seen_' + id] = 1; this.arrows = []; this.p.x = tx * TS * (m.k || 1); this.p.y = ty * TS * (m.k || 1); this.p.dir = dir; if (m.k < 1) { [this.p.x, this.p.y] = m.freeNear(this.p.x, this.p.y); this.offPortal(m); }  // 좁힌 지도: 막힌 자리에 서면 가까운 빈 곳으로
     // 넓힌 지도로 방에서 나오면 그 방 문 바로 앞에 선다
     if (((m.k || 1) !== 1 || m.hasIso) && from) { const d = m.portals.find(q => q.door && q.to === from); if (d) { this.p.x = d.x + d.w / 2; this.p.y = d.y + d.h + 8; } }
+    const hall=m.stamps?.find(s=>s.hallWidth&&this.p.x>=s.sol.x-3&&this.p.x<=s.sol.x+s.sol.w+3&&this.p.y>=s.sol.y-2&&this.p.y<=s.sol.y+s.sol.h+2);
+    if(hall && m.blocked(this.p.x,this.p.y)) [this.p.x,this.p.y]=m.freeNear(this.p.x,hall.sol.y+hall.sol.h+12);
     if (id==='world' && G.hd?.active(m) && G.hd.opt.art) [this.p.x,this.p.y]=G.world.bridgeLanding(m,this.p.x,this.p.y,TS);
     this.refresh(true); this.camera(1); this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
@@ -46,12 +49,12 @@ export class Field {
       if (this.m.stamps.some(s => s.name === 'counter' && s.sol && n.x > s.sol.x - 2 && n.x < s.sol.x + s.sol.w + 2 && n.y <= s.sol.y + 4 && n.y > s.sol.y - 20)) n.reach = 14; }
     // 쿼터뷰 건물 바닥 안에 선 사람은 가까운 빈자리로 비켜 세운다
     const ft = this.m.isoFoot, inFoot = (x, y, pad) => ft.some(b => x > b.x - pad && x < b.x + b.w + pad && y > b.y - pad && y < b.y + b.h + pad + 3);
-    if (ft) for (const n of this.npcs) { if (!inFoot(n.x, n.y, 2)) continue;
+    if (ft) for (const n of this.npcs) { if (n.mainMarker || !inFoot(n.x, n.y, 2)) continue;
       out: for (let r = 6; r < 120; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (!this.m.blocked(x, y) && !inFoot(x, y, 5)) { n.x = n.hx = x; n.y = n.hy = y; break out; } } }
     // 쿼터뷰(방, 바깥 지도): 서 있는 자리가 가구나 건물 그림에 가려지면 가까운 보이는 자리로 비켜 세운다
     const ir = this.m.isoRoom, objs = this.m.isoObjs;
     if (ir && objs) { const m = this.m, hid = (x, y) => { const [X, Y] = proj(m, x, y); return objs.some(s => behind(s, X, Y, m.hasIso) && covered(s, X, Y) > 0); };
-      for (const n of this.npcs) { if (n.stamp || !hid(n.x, n.y)) continue;
+      for (const n of this.npcs) { if (n.mainMarker || n.stamp || !hid(n.x, n.y)) continue;
         out: for (let r = 6; r <= 72; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (m.blocked(x, y) || hid(x, y) || this.npcs.some(o => o !== n && hyp(o.x - x, o.y - y) < 10)) continue; n.x = n.hx = x; n.y = n.hy = y; break out; } } }
     if (fresh) this.barkT = 2.5;
     this.spots = c.spots; this.trigs = c.trigs;
@@ -73,7 +76,7 @@ export class Field {
   async run(fn) {
     if (this.busy) return; this.busy = true; Input.clear();
     try { await fn(); } catch (e) { console.error(e); }
-    this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.jh && G.scene === 'field') G.jh.storyTime(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x / (this.m.k || 1); G.S.py = this.p.y / (this.m.k || 1); G.S.dir = this.p.dir; save(); G.chronicle?.arrive();
+    this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.jh && G.scene === 'field') G.jh.storyTime(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x / (this.m.k || 1); G.S.py = this.p.y / (this.m.k || 1); G.S.dir = this.p.dir; save(); if(!G.mainPlot?.arrive())G.chronicle?.arrive();
   }
   async warp(id, tx, ty, dir = 0) {
     await fadeTo(1); this.load(id, tx, ty, dir); await wait(.08); await fadeTo(0);
@@ -113,7 +116,7 @@ export class Field {
     { const t0 = this.target(); if (t0 && t0.talk && G.crime?.can(t0) && Input.take('atk')) { this.face(t0); this.run(() => G.crime.attack(t0)); return; } }
     this.tickNpcs(dt); this.tickRoam(dt); this.tickHunt(dt); this.camera(.14);
     // 포탈
-    for (const q of m.portals) {
+    for (const q of G.mainPlot?.active()?[]:m.portals) {
       if (p.x > q.x && p.x < q.x + q.w && p.y > q.y && p.y < q.y + q.h) {
         if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) { if (q.lock && !this._locked) { this._locked = true; const msg = q.lock; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(msg); this._locked = false; }); } return; }
         const shut = q.door && G.saga?.shut(m.id, q.to); if (shut) { if (!this._locked) { this._locked = true; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(shut); this._locked = false; }); } return; }  // 마교가 차지한 고을은 가게 문이 닫힌다
@@ -177,7 +180,7 @@ export class Field {
     return null;
   }
   get vk() { const r = this.m?.isoRoom; return r?.out ? 1 / (r.a || 1) : 1; }  // 바깥 쿼터뷰는 세상을 줄여 그려서, 평면도 속도를 그만큼 올려야 화면에서 같은 빠르기로 걷는다
-  tickNpcs(dt) { const vk = this.vk; for (const n of this.npcs) { if (n.path) { const t = n.path[0]; if (!t) { n.path = null; n.moving = false; n.done && n.done(); continue; } const dx = t[0] * TS - n.x, dy = t[1] * TS - n.y, d = hyp(dx, dy); if (d < 1.5) { n.path.shift(); continue; } n.x += dx / d * 56 * vk * dt; n.y += dy / d * 56 * vk * dt; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 8; } } if (!this.busy) this.tickLife(dt); }
+  tickNpcs(dt) { const vk = this.vk; for (const n of this.npcs) { if (n.path) { const t = n.path[0]; if (!t) { n.path = null; n.moving = false; n.walk = 0; n.done && n.done(); continue; } const dx = t[0] * TS - n.x, dy = t[1] * TS - n.y, d = hyp(dx, dy); if (d < 1.5) { n.path.shift(); continue; } n.x += dx / d * 56 * vk * dt; n.y += dy / d * 56 * vk * dt; n.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); n.walk += dt * 8; } } if (!this.busy) this.tickLife(dt); }
   // ── 사람들의 하루 ──
   // life: idle 둘러보기(기본), wander 근처를 오가기, work 제자리에서 일하기, drill 연무장 수련, still 꼼짝 않기
   // barks: 주인공이 근처를 지날 때 머리 위에 뜨는 혼잣말. greet: 가까이 오면 한 번 건네는 인사
@@ -334,6 +337,7 @@ export class Field {
         }
       }
     }
+    drawFord2D(c,m,cam,VW,VH,TS);
     G.warfx?.under(c, m, cam, this.t);  // 전쟁의 흔적: 잿더미, 깃발, 진채
     const list = [];
     for (const s of m.live ? G.world.objsNear(cam) : m.objs) if (s.x < cam.x + VW + 8 && s.x + (s.w || STAMPS[s.name]?.[3] || 120) > cam.x - 8 && s.y < cam.y + VH + 8 && s.base > cam.y - 8) list.push({ y: s.base, s });
@@ -347,18 +351,18 @@ export class Field {
     if (!m.live) occMark(list, p.x, p.y);  // 주인공이 건물이나 소품 뒤로 들어가면 그 그림을 옅게 그린다. 그 뒤에 선 사람도 같이 보인다
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
-      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; if (o.fade) c.globalAlpha = .42; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); const size=STAMPS[o.s.archName||o.s.src||o.s.name]; if (size && drawRegional2D(c,m,o.s,size[3],size[4])) {} else if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; c.globalAlpha = 1; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
-      else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
+      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; if (o.fade) c.globalAlpha = .42; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); const size=STAMPS[o.s.archName||o.s.src||o.s.name]; if (size && (drawPlant2D(c,m,o.s,size[3]) || drawRegional2D(c,m,o.s,size[3],size[4]))) {} else if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; c.globalAlpha = 1; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
+      else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (drawAnimal2D(c,a)) continue; if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
         const PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(p.x, p.y); c.scale(PS, PS); c.translate(-p.x, -p.y); }  // 방 안에서는 사람을 키운다(가구 그림이 사람보다 크게 그려져 있다)
         const me = G.hd?.fieldSheet?.({ me: 1 }), hh = me?.dataset?.fieldSheet ? 15 * QZ : 15 * (qSheet('chars/' + S.look) ? QZ : 1);
         if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; if (me) G.hd.draw2d(c, me, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, hh); else drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }
-        drawShadow(c, p.x, p.y); if (me) G.hd.draw2d(c, me, p.dir, Math.floor(p.walk) % 4, p.x, p.y, hh); else drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
+        drawShadow(c, p.x, p.y); if (me) G.hd.drawFieldActor(c, me, p, p.x, p.y, hh, this.t, 'type_' + S.look); else drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
         if (PS !== 1) c.restore();
       }
       else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, hd = G.hd?.fieldSheet?.(n), PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(n.x, n.y); c.scale(PS, PS); c.translate(-n.x, -n.y); } drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined);
-        if (hd) { G.hd.draw2d(c, hd, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (hd.dataset?.fieldSheet || qSheet(key) ? QZ : 1)); if (PS !== 1) c.restore(); mark(n); continue; }
+        if (hd) { G.hd.drawFieldActor(c, hd, n, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (hd.dataset?.fieldSheet || qSheet(key) ? QZ : 1), this.t); if (PS !== 1) c.restore(); mark(n); continue; }
         drawActorSprite(c, key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), { diag: n.walk ? n.diag : undefined, size: n.size });
         if (PS !== 1) c.restore(); mark(n); }
     }
@@ -410,7 +414,22 @@ export class Field {
   }
   // 나가는 곳 표시: 맵 가장자리 출구와 방문에 들썩이는 화살표, 가까이 가면 어디로 가는지 적는다
   drawExits(c, P) {
-    const m = this.m, p = m.isoRoom ? this._gp : this.p, S = G.S; if (m.live || this.busy) return;
+    const m = this.m, p = m.isoRoom ? this._gp : this.p, S = G.S; if(this.busy)return;
+    if(G.mainPlot?.active()){
+      const target=this.npcs.filter(n=>n.mainMarker&&n.mark()).sort((a,b)=>hyp(a.x-p.x,a.y-p.y)-hyp(b.x-p.x,b.y-p.y))[0];
+      if(target){
+        const [x,y]=P(target.x,target.y,6);
+        if(x<48||x>1232||y<97||y>650){
+          const dx=x-640,dy=y-360,k=Math.min(528/Math.max(1,Math.abs(dx)),232/Math.max(1,Math.abs(dy)));
+          const px=640+dx*k,py=360+dy*k,dist=Math.round(hyp(target.x-p.x,target.y-p.y)/TS);
+          c.save();c.setTransform(1,0,0,1,0,0);c.translate(px,py);c.rotate(Math.atan2(dy,dx));
+          c.fillStyle='#f0cc79';c.strokeStyle='#332d20';c.lineWidth=2;c.beginPath();c.moveTo(10,0);c.lineTo(-6,-6);c.lineTo(-4,0);c.lineTo(-6,6);c.closePath();c.fill();c.stroke();
+          c.rotate(-Math.atan2(dy,dx));c.font='bold 15px Galmuri14, sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeText(dist+'칸',0,25);c.fillText(dist+'칸',0,25);c.restore();
+        }
+      }
+      return;
+    }
+    if(m.live)return;
     const W = m.w * TS, H = m.h * TS, t = performance.now() / 1000; c.setTransform(1, 0, 0, 1, 0, 0);
     for (const q of m.portals) {
       if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) continue;

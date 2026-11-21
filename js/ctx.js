@@ -36,8 +36,8 @@ export const ctx = {
   warp: (id, x, y, d) => G.field.warp(id, x, y, d),
   cg: id => showCG(id), cgOff: () => hideCG(),
   // 부 표지, 장 표지. 수첩에 지금 어디쯤인지 남긴다
-  async part(no, name, chap) { G.chronicle?.recordPart(no); G.S.chapter = chap ? `제${no}부 ${name} · ${chap}` : `제${no}부 ${name}`; await card(`제${no}부`, name, chap); if (chap !== '끝') await G.chronicle?.chapterEcho(no); },
-  async chap(no, name, chap) { G.chronicle?.recordPart(no); G.S.chapter = `제${no}부 ${name} · ${chap}`; await card(`제${no}부 ${name}`, chap); },
+  async part(no, name, chap) { chap=G.mainPlot?.card(no,name,chap,true)??chap; if(no===4||no===5)name=(no===4?'금 간 깃발':'장강의 전쟁')+' · '+name; G.chronicle?.recordPart(no); G.S.chapter = chap ? `제${no}부 ${name} · ${chap}` : `제${no}부 ${name}`; await card(`제${no}부`, name, chap); if (chap !== '끝') await G.chronicle?.chapterEcho(no); },
+  async chap(no, name, chap) { chap=G.mainPlot?.card(no,name,chap,false)??chap; if(no===4||no===5)name=(no===4?'금 간 깃발':'장강의 전쟁')+' · '+name; G.chronicle?.recordPart(no); G.S.chapter = `제${no}부 ${name} · ${chap}`; await card(`제${no}부 ${name}`, chap); },
   npc: id => G.field.npcs.find(n => n.id === id),
   shop: (...a) => openShop(...a), get item() { return shopItem; }, learn: id => learn(id),
 };
@@ -45,6 +45,7 @@ function restoreBgm() { const m = G.field.m; if (m) Sound.bgm(m.bgm); }
 
 export const Story = {
   content(id) {
+    const field=G.mainPlot?.content(id);if(field)return field;
     const L = Story.providers.map(f => f(id));
     let npcs = L.flatMap(x => x.npcs).filter(n => !n.when || n.when()), spots = L.flatMap(x => x.spots), trigs = L.flatMap(x => x.trigs);
     if (G.S.mode === 'free' && G.free) { npcs = G.free.npcs(id, npcs); spots = G.free.spots(id, spots); trigs = G.free.trigs(id, trigs); }
@@ -60,8 +61,8 @@ export const Story = {
     }
     return { npcs, spots, trigs, roam, hunt };
   },
-  begin() { G.scene = 'field'; G.field.load('cheongha', 22, 25, 1); $('#fade').style.opacity = 1; G.field.run(Story.scenes.opening); },
-  resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0); },
+  begin() { G.mainPlot?.start(); G.scene = 'field'; G.field.load('cheongha', 22, 25, 1); $('#fade').style.opacity = 1; G.field.run(Story.scenes.opening); },
+  resume() { const S = G.S; G.scene = 'field'; G.bgDraw = null; G.field.load(S.map, (S.px ?? 120) / TS, (S.py ?? 120) / TS, S.dir || 0); G.mainPlot?.resume(); },
   async line(t) { await say(null, t); },
   async encounter(r) {
     if (r.intro) await say(null, r.intro);
@@ -69,6 +70,6 @@ export const Story = {
     if (won) { r.win?.(); if (r.fac && G.jh) await G.jh.after(r); if (G.arts && G.field.m?.live) G.arts.drop(r.fac, r.fac ? .2 : .06); }
     return won;
   },
-  scenes: {}, providers: [],
+  scenes: {}, entries: {}, providers: [],
 };
 export { say, narr, choice, card };

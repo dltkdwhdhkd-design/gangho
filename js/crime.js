@@ -16,6 +16,7 @@ const NOMAP = new Set(['myhouse', 'mysect', 'hall_in', 'library']);
 const isKid = n => (n.size && n.size < 16) || /kid|child|boy|girl/i.test(n.id) || ['Boy', 'Girl', 'Child'].includes(n.spr);
 const marked = n => { try { return typeof n.mark === 'function' ? !!n.mark() : !!n.mark; } catch { return false; } };
 export function can(n, mapId = G.field.m?.id) {
+  if(n?.mainMarker)return false;
   if (!n || n.hide > 0 || !n.spr || NOMAP.has(mapId) || /^r_my/.test(mapId)) return false;
   if (isKid(n) || KEEP.has(n.id) || CAND[n.id] || /^c_/.test(n.id) || (G.party?.members?.() || []).includes(n.id)) return false;
   return !marked(n);

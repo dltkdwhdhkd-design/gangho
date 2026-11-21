@@ -59,6 +59,7 @@ async function wellRaid() {
   ctx.note('객잔 우물 밑 위패 방을 무면회 비단옷 사내가 석 달 동안 뒤졌다. 서문(일곱 장 앞의 한 장)을 찾았지만 못 찾았다. 곽 아주머니는 "못 찾았지?"만 물었다.');
 }
 export async function begin() {
+  if(G.mainPlot?.hold(30,'redMoon'))return;
   const s = side(), e = F().ending;
   F().act3 = true; F().inn_rebuilt = true; F().night = false; F().hyeok_join = s === 'ma';
   await ctx.part(7, PART, '제1장 붉은 달');
@@ -408,3 +409,5 @@ Story.providers.push(function part7(id) {
 });
 G.act3 = { begin, hook7 };
 G.act3t = Object.assign(G.act3t || {}, { rainCure, gateScene, mossRain });  // 시험용
+
+Story.entries.redMoon = begin;

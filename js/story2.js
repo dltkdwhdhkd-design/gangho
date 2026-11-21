@@ -9,6 +9,7 @@ import { after2 } from './part2.js';
 const S = () => G.S, F = () => G.S.flags;
 // ── 2장 ──
 async function arrive() {
+  if(G.mainPlot?.hold(5,'cloudGate'))return;
   await ctx.part(2, '구름 위의 칼', '제1장 입문');
   await narr('창운산에는 창운문이 있다. 구파일방 바로 아래 자리를 넘본다는 신흥 명문이다.');
   await narr('산문까지 돌계단이 구백 칸이라고 했다. 세다가 육백 칸쯤에서 잊어버렸다. 계단 끝에 사람들이 줄을 서 있었다. 보따리를 멘 사람, 아버지 손에 끌려온 사람, 칼 대신 낫을 찬 사람도 있었다.');
@@ -414,3 +415,5 @@ Story.providers.push(function content2(id) {
   }
   return { npcs: n, spots: sp, trigs: tr, roam: ro };
 });
+
+Story.entries.cloudGate = arrive;

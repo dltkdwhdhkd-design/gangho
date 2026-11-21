@@ -57,7 +57,7 @@ function showCreate() {
   for (const k of ['easy', 'normal', 'hard']) { const b = el('button', 'btn' + (k === diff ? ' on' : ''), DIFF[k].name); b.onclick = () => { diff = k; $$('#df .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); }; $('#df').appendChild(b); }
   for (const [k, n, h] of [['story', '이야기', '아홉 부의 본편과 달맞이 행록을 함께 진행합니다. 첫 권은 객잔에서 점소이가 된 뒤 열립니다.'], ['free', '자유', '이야기 없이 강호를 삽니다. 문파에 들어가도, 낭인으로 살아도, 내 문파를 세워도, 악인이 되어도 됩니다.']]) { const b = el('button', 'btn' + (k === mode ? ' on' : ''), n); b.onclick = () => { mode = k; $$('#md .btn').forEach(e => e.classList.remove('on')); b.classList.add('on'); $('#mdh').textContent = h; }; $('#md').appendChild(b); }
   $('#back').onclick = showTitle;
-  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LEAD_LOOK[gender], gender, diff); s.innerHTML = ''; G.bgDraw = null; if (mode === 'free') G.free.start(); else { const journal=G.chronicle.ledger(); journal.mode='together'; Story.begin(); } };
+  $('#go').onclick = () => { const name = $('#nm').value.trim().slice(0, 6); if (!name) { Sound.sfx('cancel'); $('#nm').focus(); return; } G.S = newState(name, LEAD_LOOK[gender], gender, diff); s.innerHTML = ''; G.bgDraw = null; if (mode === 'free') G.free.start(); else Story.begin(); };
   setTimeout(() => $('#nm')?.focus(), 50);
 }
 // ── 메뉴 ──

@@ -7,6 +7,7 @@ import { DB } from './items.js';
 import { give, nextDay } from './state.js';
 import { Story, ctx, say, choice } from './ctx.js';
 import { LOCS, ROADS, PROV } from './worlddata.js';
+import { layJegalCrossing, recoverOldFord } from './river-crossing.js';
 import { bridgeRail, bridgeLanding } from './hd2d/walkways.js';
 import { buildLandscape, loadWildernessArt, paintLandscape } from './landscape.js';
 import { scenicRoutes } from './scenic-routes.js';
@@ -104,7 +105,7 @@ function nature() {
 export function buildWorld() {
   if (ready) return; ready = true;
   m = makeMap('world', WW, WH, { name: '강호', bgm: 'road', biome: 'grass', arena: 'village', live: true });
-  readTerrain(); carve(); const g = m.g; RES = new Uint8Array(WW * WH); STOPS = [];
+  readTerrain(); carve(); layJegalCrossing(T,WW); const g = m.g; RES = new Uint8Array(WW * WH); STOPS = [];
   const footprints=LOCS.map(l=>{const x=Math.round(l.px[0]*K),y=Math.round(l.px[1]*K),[rx,ry]=SIZE[shape(l)];return [x-rx-2,y-ry-3,x+rx+2,y+4];});
   m.scenicStops=scenicRoutes(T,WW,WH,K,footprints);
   for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) { const c = T[y * WW + x]; g[y][x] = c === SEA || c === RIVER ? 2 : c === ROAD ? 1 : c === BRIDGE ? 4 : 0; if (c === INN) STOPS.push({ x, y }); }
@@ -419,8 +420,9 @@ async function jumo() {
 }
 let spawnT = 3, lastProv = '', lastChunk = '';
 function tick(dt) {
-  const f = G.field; if (!f.m?.live || f.busy) return; if (!G.S.flags.world_tip) { G.S.flags.world_tip = 1; f.run(async () => { await say(null, '여기서부터 강호다. 길을 따라가면 마을과 문파가 나오고, 길가 주막에서는 쉬거나 소문을 들을 수 있다.'); await say(null, '문파 사범에게 무공을 배울 수 있고, 메뉴의 무공록과 소식에서 할 일을 찾을 수 있다. 지도(M)에서 가 본 곳을 누르면 빠르게 갈 수 있다.'); }); return; } const p = f.p, S = G.S, tx = Math.floor(p.x / TS), ty = Math.floor(p.y / TS), b = BN[B[ty]?.[tx] ?? 0];
+  const f = G.field; if (!f.m?.live || f.busy) return; if (!G.mainPlot?.active() && !G.S.flags.world_tip) { G.S.flags.world_tip = 1; f.run(async () => { await say(null, '여기서부터 강호다. 길을 따라가면 마을과 문파가 나오고, 길가 주막에서는 쉬거나 소문을 들을 수 있다.'); await say(null, '문파 사범에게 무공을 배울 수 있고, 메뉴의 무공록과 소식에서 할 일을 찾을 수 있다. 지도(M)에서 가 본 곳을 누르면 빠르게 갈 수 있다.'); }); return; } const p = f.p, S = G.S, tx = Math.floor(p.x / TS), ty = Math.floor(p.y / TS), b = BN[B[ty]?.[tx] ?? 0];
   f.m.arena = { grass: 'village', deep: 'forest', sand: 'sand', plain: 'village', snow: 'snow', dusk: 'fort' }[b]; f.m.ambient = b === 'snow' ? 'snow' : b === 'deep' ? 'leaf' : null;
+  if(G.mainPlot?.active())return;
   const ck = Math.floor(tx / CH) + ',' + Math.floor(ty / CH); if (ck !== lastChunk) { lastChunk = ck; f.refresh(); }
   let bp = null, bd = 1e9; for (const q of PROV) { const d = Math.hypot(q[1] - p.x / TS / K, q[2] - p.y / TS / K); if (d < bd) { bd = d; bp = q[0]; } }
   if (bp !== lastProv) { if (lastProv) G.party.bark(bp); lastProv = bp; const e = document.querySelector('#place'); if (e) { e.textContent = bp; e.classList.add('on'); clearTimeout(f._pt); f._pt = setTimeout(() => e.classList.remove('on'), 1800); } }
@@ -467,4 +469,4 @@ function linkEdges(mp) {
 const entry = id => { const l = LOCS.find(q => q.map === id); return l ? [Math.round(l.px[0] * K) + .5, Math.round(l.px[1] * K) + 3.5] : [Math.round(598 * K), Math.round(440 * K)]; };
 Story.providers.push(id => id === 'world' && ready ? { npcs: npcsAt(), spots: [], trigs: [], roam: [] } : { npcs: [], spots: [], trigs: [], roam: [] });
 function paintWin(c, X, Y, w, h) { const s = CH * TS; c.save(); c.translate(-X, -Y); for (let y = Math.max(0, Math.floor(Y / s)); y <= Math.min(Math.ceil(WH / CH) - 1, Math.floor((Y + h) / s)); y++) for (let x = Math.max(0, Math.floor(X / s)); x <= Math.min(Math.ceil(WW / CH) - 1, Math.floor((X + w) / s)); x++) c.drawImage(chunk(x, y), x * s, y * s); c.restore(); }
-G.world = { bridgeLanding, biomeAt: (x, y) => BN[B?.[y]?.[x]] || 'grass', paintWin, linkEdges, paintArea, SOFT, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };
+G.world = { bridgeLanding(map,x,y,tile){const p=recoverOldFord(map,x,y,tile);return bridgeLanding(map,p[0],p[1],tile);}, biomeAt: (x, y) => BN[B?.[y]?.[x]] || 'grass', paintWin, linkEdges, paintArea, SOFT, BN, wildAround: px => wildAround(px, 12) || [null, null], here: whereAmI, ensure, build: buildWorld, ground, china, tick, travelBar, entry, objsNear, K, open: openW, size: [WW, WH] };

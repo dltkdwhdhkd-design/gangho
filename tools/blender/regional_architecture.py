@@ -5,6 +5,7 @@ Each role has a 2 x 1.2 plinth, its front at Y=0, and its own finished roof heig
 from pathlib import Path
 import math
 import sys
+import runpy
 import bpy
 from mathutils import Vector
 
@@ -71,7 +72,11 @@ class Mesh:
         self.inks={"tile":(0,roof),"wall":(1,wall),"wood":(2,wood),"rock":(3,rgb("a69f8e")),
             "plank":(4,rgb("94795a")),"brick":(5,rgb("9b8a77")),"clay":(6,wall),
             "accent":(7,acc),"trim":(7,gold),"ink":(7,rgb("433b3b")),
-            "paper":(7,rgb("e9c993")),"light":(7,rgb("ebae71")),"leaf":(7,rgb("7f925e"))}
+            "paper":(7,rgb("e9c993")),"light":(7,rgb("ebae71")),"leaf":(7,rgb("7f925e")),
+            "bronze":(7,rgb("7b7458")),"rice":(7,rgb("e5dfc9")),"linen":(7,rgb("bbaa87")),
+            "tileRim":(0,tuple(v*.68+g*.32 for v,g in zip(roof,rgb("8b928b")))),
+            "tileEnd":(7,tuple(v*.54+g*.46 for v,g in zip(roof,rgb("9b9d90")))),
+            "tileShade":(2,tuple(v*.49 for v in roof))}
         self.v=[];self.f=[];self.uv=[];self.c=[]
     def face(self,points,key,shade=1):
         start=len(self.v);self.v.extend(points);self.f.append(tuple(range(start,start+len(points))))
@@ -144,37 +149,9 @@ def facade(m,x,y,z,w,d,h,bays=3,open_shop=False):
         for f in (-.28,.28):m.box(xx+side*.006,y+d*f,z,.037,.04,h,"wood")
     return front
 
-def roof(m,x,y,z,w,d,rise,up=.12,hip=.20,style="tile"):
-    # Four hip faces curve toward swept corners. Raised ribs follow the same sections.
-    a,b=w/2,d/2; ridge=max(.06,a*(1-hip))
-    def surf(t,v,side):
-        drop=(1-v)**1.36
-        return (x+t*(a+(ridge-a)*(1-v)),y+side*b*v,z+rise*drop+up*abs(t)**3*(v**1.65)+.026*(t*t)*(1-v))
-    count=8 if w>1.15 else 6
-    for side in (-1,1):
-        for i in range(count):
-            t0,t1=-1+2*i/count,-1+2*(i+1)/count
-            for j in range(3):
-                v0,v1=j/3,(j+1)/3;p=[surf(t0,v0,side),surf(t1,v0,side),surf(t1,v1,side),surf(t0,v1,side)]
-                m.face(p if side==1 else p[::-1],style,.91+.09*((i+2*j)%3)/2)
-            p,q=surf(t0,1,side),surf(t1,1,side)
-            m.beam(p,q,.023,"accent",4)
-        for j in range(1,count*2):
-            t=-1+j/count
-            for v0,v1 in ((0,.47),(.47,1)):
-                m.beam(surf(t,v0,side),surf(t,v1,side),.009,"tile",3)
-    for side in (-1,1):
-        for i in range(3):
-            v0,v1=i/3,(i+1)/3
-            lo=[surf(side,v0,-1),surf(side,v1,-1),surf(side,v1,1),surf(side,v0,1)]
-            m.face(lo if side<0 else lo[::-1],style)
-        for sy in (-1,1):
-            pts=[surf(side,j/3,sy) for j in range(4)]
-            for a0,b0 in zip(pts,pts[1:]):m.beam(a0,b0,.020,"accent",4)
-    m.beam((x-ridge-.035,y,z+rise+.021),(x+ridge+.035,y,z+rise+.021),.030,"accent",6)
-    for s in (-1,1):
-        p=(x+s*ridge,y,z+rise+.035);q=(x+s*(ridge+.053),y,z+rise+.087)
-        m.beam(p,q,.027,"trim",5,.012)
+court = runpy.run_path(str(Path(__file__).with_name("courtyard_timber.py")))
+roof = court["tiled_roof"]
+
 
 def umbrella(m,x,y,z,r,h,n=8):
     top=(x,y,z+h)
@@ -220,13 +197,7 @@ def octagon(m,x,y,z,r,h):
         post(m,p[0],p[1],z,h,.036)
 
 def main_landmark(m,style):
-    if style=="tao":
-        base=deck(m,0,.62,0,1.85,1.00,.17)
-        octagon(m,0,.59,base,.74,.65);lattice(m,0,-.104,base+.02,.45,.53,True)
-        umbrella(m,0,.59,.81,.99,.39);octagon(m,0,.59,1.10,.33,.23)
-        umbrella(m,0,.59,1.33,.51,.29)
-        for s in (-1,1):lantern(m,s*.58,.14,.75)
-    elif style=="observatory":
+    if style=="observatory":
         z=deck(m,0,.64,0,1.91,1.00,.23)
         facade(m,-.40,.66,z,.87,.72,.73);roof(m,-.40,.68,.96,1.17,.98,.23,.105)
         octagon(m,-.40,.68,1.12,.28,.23);umbrella(m,-.40,.68,1.34,.40,.26)
@@ -291,8 +262,71 @@ def main_landmark(m,style):
     else:return False
     return True
 
+def court_entry(m,style,role):
+    """Thresholds, weather screens and service bays are built around an open approach."""
+    formal=role in ("hall","gate","wing")
+    shop=role in ("shop","inn")
+    if style in ("canal","harbor","bamboo"):
+        # Piles keep workshops above the flood line. The covered side landing shelters a boat or a porter.
+        x=-.78 if role!="gate" else -.86
+        m.box(x,.23,.13,.30,.46,.048,"plank")
+        for y in (.05,.24,.42):post(m,x-.11,y,0,.19,.031)
+        for y in (.09,.39):post(m,x+.09,y,.17,.35,.025)
+        roof(m,x,.24,.53,.42,.57,.13,.034,hip=.24)
+        if style=="canal":
+            m.box(.78,.26,.05,.25,.08,.36,"wall")
+            lattice(m,.78,.21,.18,.15,.15)
+        elif style=="bamboo":
+            for y in (.12,.19,.26,.33,.40):m.beam((.80,y,.14),(.80,y,.62),.018,"plank",5)
+        return
+    if style in ("plum","sword","tao","temple","observatory"):
+        for side in (-1,1):
+            x=side*.70
+            if formal:
+                for i in range(3):m.box(x,.045-i*.054,.008,.37+.032*i,.066,.11-i*.028,"rock")
+                m.box(x,.12,.11,.30,.14,.055,"brick")
+                if style in ("tao","temple"):lantern(m,x,.12,.64)
+                if style=="observatory":
+                    m.box(x,.13,.16,.108,.10,.43,"rock");m.beam((x-.07,.13,.55),(x+.07,.13,.59),.021,"trim")
+                elif style=="plum":
+                    m.beam((x,.12,.12),(x,.12,.66),.026,"accent",8)
+                    for j in range(5):
+                        a=j*math.tau/5
+                        m.beam((x,.11,.63),(x+.067*math.cos(a),.11,.63+.060*math.sin(a)),.017,"trim",5)
+                elif style=="sword":
+                    m.beam((x,.13,.13),(x,.13,.70),.059,"ink",4,.009)
+            elif side<0:
+                m.box(x,.115,.03,.31,.085,.29,"wall");lattice(m,x,.057,.13,.18,.12)
+        return
+    if style in ("fortress","shadow","alpine","highland","capital"):
+        for side in (-1,1):
+            x=side*.77
+            m.box(x,.16,.01,.32,.29,.12,"rock");m.box(x,.14,.13,.26,.22,.105,"brick")
+            if formal:
+                m.box(x,.16,.23,.19,.18,.25 if style!="alpine" else .33,"rock")
+                roof(m,x,.16,.48 if style!="alpine" else .56,.34,.33,.14,.035)
+            elif style=="alpine":m.beam((x,.05,.24),(x,.26,.70),.031,"wood")
+            elif shop:lantern(m,x,.17,.55)
+        return
+    # Hometown benches, the Tang family's drying frames and a caravan windbreak frame the entrance.
+    if style=="workshop":
+        for x in (-.87,-.55):post(m,x,.10,.02,.42,.022)
+        for z in (.17,.28,.40):
+            m.box(-.71,.13,z,.37,.13,.018,"plank")
+            for j in range(4):m.box(-.83+j*.075,.125,z+.018,.039,.068,.025,"leaf")
+    elif style=="caravan":
+        for x in (-.84,-.52):m.beam((x,.08,.01),(x,.08,.65),.025,"wood",6)
+        m.face([(-.84,.08,.63),(-.52,.08,.63),(-.52,.10,.30),(-.84,.08,.25)],"accent")
+    else:
+        m.box(-.72,.135,.15,.42,.12,.04,"plank")
+        for x in (-.87,-.57):m.box(x,.135,.016,.055,.095,.14,"wood")
+        if shop:canopy(m,.65,.27,.61,.48,.26)
+
 def build(style,role,mat):
     m=Mesh(STYLES[style]);large=role=="hall";upper=role in ("hall","inn","wing");gate=role=="gate"
+    m.style=style
+    if court["courtyard_build"](m,style,role):return m.finish(role,mat)
+    court_entry(m,style,role)
     if large and main_landmark(m,style):return m.finish(role,mat)
     if gate:
         solid=style in ("fortress","capital","shadow","caravan","highland","alpine")

@@ -90,7 +90,7 @@ export function openMap() {
     $$('[data-v]', M).forEach(b => b.onclick = () => { view = b.dataset.v; Sound.sfx('tick'); draw(); });
     $('.x', M).onclick = close;
     const cv = $('#mapc', M); if (view === 'area') drawArea(cv, r, f); else drawWorld(cv, r ? r.m.id : null);
-    if (view === 'world' && !f.busy) G.world.travelBar(M, close);
+    if (view === 'world' && !f.busy && !G.mainPlot?.active()) G.world.travelBar(M, close);
   };
   const k = e => {
     if (e.repeat) return;

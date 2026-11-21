@@ -20,6 +20,7 @@ Object.assign(FOES, {
 });
 
 async function toShaolin() {
+  if(G.mainPlot?.hold(10,'shaolinGate'))return;
   await say('yun', '소림이면 숭산이죠? 저도 갈래요. 장경각에 의서가 많다고 들었어요.');
   await say('me', '약방은 어쩌고요?');
   await say('yun', '아버지가 계시잖아요. 그리고 혼자 보냈다가 또 어디서 물려 올 거잖아요.', 'h');
@@ -168,3 +169,5 @@ Story.providers.push(function content6(id) {
   if (id === 'cliffcave' && at('t5')) { if (!F().bones) n.push({ id: 'bones', stamp: 'tablet', spr: '', x: 8, y: 4.4, mark: () => true, hint: '살펴보기', talk: bones }); else n.push({ id: 'ginseng', stamp: 'flower1', spr: '', x: 11, y: 8, mark: () => true, hint: '살펴보기', talk: ginseng }); }
   return { npcs: n, spots: sp, trigs: [], roam: [] };
 });
+
+Story.entries.shaolinGate = toShaolin;

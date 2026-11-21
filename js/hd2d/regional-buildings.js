@@ -59,18 +59,19 @@ export function regionalBuilding(T,map,stamp,spec,profile,library,materials,heig
   let x=gate?stamp.x+spec[3]*sc*.5:stamp.sol?stamp.sol.x+width*.5:stamp.x+(spec[5]+spec[7]/2)*sc;
   if(gate&&map.court&&!map.stage&&stamp.name==='gate_arch')x=stamp.x+(2*(map.k||1))*tile;
   const y=gate?stamp.base:stamp.sol?stamp.sol.y+depth:stamp.y+(spec[6]+spec[8])*sc;
-  const sy=(gate?width*.48:profile.role==='hall'?Math.max(width*.50,48*sc):Math.max(width*.48,24*sc))*hs;
+  const sy=(gate?width*.48:profile.role==='hall'&&stamp.hallWidth?Math.max(width*.35,32*sc):profile.role==='hall'?Math.max(width*.50,48*sc):Math.max(width*.48,24*sc))*hs;
   const group=new T.Group(), model=src.clone(true), ms=[];
   model.traverse(obj=>{if(!obj.isMesh)return;const M=materials.get(obj.geometry);obj.material=M.m;obj.customDepthMaterial=M.d;
     obj.userData={M,owner:group,shared:true};ms.push(obj);});
   group.add(model);
   if(gate||profile.role==='hall'){
-    const badge=new T.Mesh(new T.PlaneGeometry(gate?.47:.36,gate?.15:.105),crestTexture(T,profile.style,profile.sign,profile.crest));
+    const badge=new T.Mesh(new T.PlaneGeometry(gate?.47:.36,gate?.15:.105),crestTexture(T,profile.style,!gate&&profile.sign==='武當'?'紫霄宮':profile.sign,profile.crest));
     const tallGate=['fortress','capital','shadow','caravan','highland','alpine'].includes(profile.style);
     const raised=['bamboo','harbor','canal','observatory'].includes(profile.style);
     const hallHeight=(['caravan','highland'].includes(profile.style)?.72*1.18:profile.style==='alpine'?.72*.88:.72)+(raised?.255:.20);
-    const signed={tao:[0,.75,.102],observatory:[-.40,.86,-.275],workshop:[-.13,.67,-.49],fortress:[0,.88,-.174],shadow:[0,.88,-.27],canal:[-.37,.77,-.30],harbor:[-.25,.81,-.52]};
+    const signed={tao:[0,.802,.068],plum:[0,.742,.068],temple:[0,.822,.068],capital:[0,.722,.068],observatory:[-.40,.86,-.275],workshop:[-.13,.67,-.49],fortress:[0,.88,-.174],shadow:[0,.88,-.27],canal:[-.37,.77,-.30],harbor:[-.25,.81,-.52]};
     if(!gate&&signed[profile.style])badge.position.set(...signed[profile.style]);
+    else if(gate&&['canal','observatory'].includes(profile.style))badge.position.set(0,.785,-.263);
     else badge.position.set(0,gate?(tallGate?.916:1.026):hallHeight-.076,gate?-.307:-.135);
     badge.userData.flat=true;group.add(badge);
   }
@@ -89,8 +90,8 @@ export function drawRegional2D(ctx,map,stamp,w0,h0){
   if(!atlas)loadRegionalAtlas();
   if(!atlas.naturalWidth)return false;
   const cellW=atlas.naturalWidth/regionalRoles.length,cellH=atlas.naturalHeight/regionalStyles.length;
-  const scale=stamp.sc||1,w=stamp.iso?stamp.w*1.18:w0*scale*1.19;
-  const h=stamp.iso?Math.max(stamp.h,w*.71):p.role==='hall'?Math.max(w*.82,h0*scale*.76):w*.77;
+  const scale=stamp.sc||1,w=stamp.hallWidth?stamp.hallWidth*1.25:stamp.iso?stamp.w*1.18:w0*scale*1.19;
+  const h=stamp.hallWidth?w*.64:stamp.iso?Math.max(stamp.h,w*.71):p.role==='hall'?Math.max(w*.82,h0*scale*.76):w*.77;
   const x=stamp.x+(stamp.iso?stamp.w:w0*scale)/2;
   ctx.drawImage(atlas,regionalRoles.indexOf(p.role)*cellW,regionalStyles.indexOf(p.style)*cellH,cellW,cellH,
     x-w*.5,stamp.base-h*.90,w,h);

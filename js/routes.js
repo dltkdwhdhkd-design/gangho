@@ -53,6 +53,7 @@ async function hyeokGuhwa() {
 
 // ── 갈림 ──
 export async function crossroads() {
+  if(G.mainPlot?.hold(15,'chooseBanner'))return;
   F().cross = true;
   await narr('배는 불빛이 없는 쪽으로 내려갔다. 돌아보니 구화성 쪽 하늘이 벌겋게 물들어 있었다.');
   await say('boat', '나루마다 네 얼굴이 붙었다더구먼. 맹주를 독살하려 한 역적이라고.');
@@ -71,7 +72,7 @@ export async function crossroads() {
   await say('me', '사파에 들어오라는 얘기예요?');
   await say('baekrang', '정파가 뭘 해 줬는데요? 우리는 일한 만큼은 확실히 쳐줘요.', 'h');
   await say('hyeok', F().gu_incense ? '향은 잘 쓰셨습니까. 저는 천마신교의 성녀 혁련하입니다.' : F().gu_hyeok ? '또 뵙습니다. 저는 천마신교의 성녀 혁련하입니다.' : '처음 뵙습니다. 천마신교의 성녀 혁련하입니다.');
-  await say('hyeok', '연경추는 원래 우리 교의 심마였습니다. 교주님을 깨워 자기 뜻대로 쓰려고 교단을 배신했습니다. 저희도 그자를 죽여야 합니다.');
+  await say('hyeok', '연경추라는 이름은 교 안에서도 들었습니다. 그런데 강에 나간 종을 누가 주문했는지는 저도 모릅니다. 저희 분타의 봉함이 찍혀 있습니다. 제 편부터 살펴야겠습니다.');
   await say('me', '마교가 저를 돕겠다고요?', 'b');
   await say('hyeok', '월하문의 핏줄이 필요합니다. 봉인을 다룰 수 있는 사람은 당신뿐이니까요. 숨기지 않겠습니다.');
   await say('boat', '어디로 갈 거여? 배는 네가 가자는 대로 갈 텨.');
@@ -81,6 +82,7 @@ export async function crossroads() {
   await go();
 }
 export async function toWolha() {
+  if(G.mainPlot?.hold(25,'valleyGate'))return;
   set('c4a'); F().night = false;
   if (!F().w6_mirror) await mirrorCh();
   if (!F().w6_talk) await secondTalk();
@@ -436,3 +438,7 @@ Story.providers.push(function routes(id) {
   if (id === 'guhwa' && sd && !at('end') && !F().act3) ro.push({ spr: 'chars/Knight', x: 24, y: 24, foes: ['jeong_guard', 'jeong_guard'] }, { spr: 'chars/Knight', x: 12, y: 16, foes: ['jeong_elite'] });
   return { npcs: n, spots: [], trigs: [], roam: ro };
 });
+
+Story.entries.chooseBanner = crossroads;
+
+Story.entries.valleyGate = toWolha;

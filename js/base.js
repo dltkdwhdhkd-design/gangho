@@ -75,7 +75,16 @@ function room(m, l, stamp, x, y, kind, name, o) {
   const grand = kind === 'hall' && GRAND[l.fac] ? l.fac : undefined;
   m.house(stamp, x, y, id, ex + 2, ey - .6, 1, { doorDx: 0, grand, ...(o?.iso ? { isoAs: o.iso } : {}) });
   const role={hall:'hall',gov:'hall',lib:'wing',elder:'wing',clinic:'shop',shop:'shop',book:'shop',armory:'shop',inn:'inn',gamble:'inn',mess:'cottage'}[kind];
-  if(role)m.stamps.at(-1).archRole=role;
+  const building=m.stamps.at(-1);
+  if(role)building.archRole=role;
+  if(kind==='hall' && building.sol){
+    const foot=building.sol, center=foot.x+foot.w/2, threshold=foot.y+foot.h;
+    const bays=['tao','plum','temple','capital'].includes(style)?8:6.85;
+    foot.w=Math.max(foot.w,bays*TS*m.k);
+    foot.h=Math.max(foot.h,Math.min(2.45*TS*m.k,threshold-TS*.58));
+    foot.x=center-foot.w/2; foot.y=threshold-foot.h;
+    building.hallWidth=foot.w;
+  }
   // Include the front landing so collision with the sill cannot prevent entry.
   m.portals.at(-1).h += 7;
   if (!o?.quiet) m.label(x + SW(stamp) / 2, y - .6, name); return id;
@@ -201,8 +210,18 @@ function sectLayout(m, l, st, ft) {
     const tk = y => trees[(y * 7) % trees.length]; for (let y = 2; y < 58; y += 5) for (const x of [4.2, 39.8]) if (m.g[Math.floor(y + 1.6)]?.[Math.floor(x + 1)] === 0) m.put(tk(y + (x > 20 ? 3 : 0)), x, y);
     if (!st.water) m.put('statue', 36, 55, { isoAs: 'pavilion' });
   }
-  m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
   const profile=regionFor(l.id),style=profile?.[0];
+  if (['tao','temple','capital','plum'].includes(style)) {
+    const half=style==='plum'?5:7;
+    m.fill(mid-half,3,half*2,6,5);
+    m.fill(mid-3,2,6,8,5);
+    if(style==='plum') for(const side of [-1,1]) m.put('plum_w',mid+side*7.5,4);
+  } else if (['observatory','sword','workshop','fortress','shadow'].includes(style)) {
+    m.fill(mid-5,4,10,5,3).fill(mid-2,3,4,7,5);
+    if(style==='observatory') m.fill(mid-6,6,12,1,5);
+    if(style==='workshop') m.fill(mid-7,5,4,2,5);
+  } else m.fill(mid-2,4,4,6,3);
+  m.scatter(['flower1', 'fern1', 'fern2', 'bush2'], 60, 7);
   m.court = { x: mid * m.k, y: 32.5 * m.k, radius: 4.6 * m.k, motif: style||'ring', crest:profile?.[2] };
   let level = 0;
   for (const top of (mt ? [45, 44, 23, 22, 10, 9] : [44, 22, 9])) {

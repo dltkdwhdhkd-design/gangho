@@ -131,6 +131,7 @@ async function jegalOrder() {
   F().jg_date = true; ctx.note('제갈현이 토벌 명령서 원본을 내주었다. 명령서는 불이 난 사흘 뒤에 쓰였다.');
 }
 async function camp5() {
+  if(G.mainPlot?.hold(20,'councilGate'))return;
   if (!F().jg_hao) await haomunNight();
   await say('so', '셋 다 모았네. 너 얼굴이 많이 상했다.', 's');
   await say('yun', '팔 줘 봐요.');
@@ -267,6 +268,7 @@ async function frMed() {
 }
 async function freeCheck() {
   if (!F().fr_rice || !F().fr_med) return;
+  if(G.mainPlot?.hold(20,'villageGate'))return;
   await ctx.part(5, '강을 건너는 사람들', '징발');
   await narr('한 달이 지나자 전쟁이 터졌다. 흑도맹이 장강을 건넜고, 정천맹은 고을마다 징발령을 내렸다.');
   set('fr2'); ctx.goal('청하진 광장의 촌장 어른 만나기');
@@ -313,6 +315,7 @@ async function frElder() {
 
 // ── 사파 길 ──
 async function sa5() {
+  if(G.mainPlot?.hold(20,'southGate'))return;
   await ctx.part(5, '장강의 불', '도하');
   await narr('보름 뒤, 흑도맹의 배 삼백 척이 장강을 건넜다. 사마웅은 맨 앞 배 뱃머리에 서서 구화성이 보일 때까지 앉지 않았다.');
   await crossFire();
@@ -343,6 +346,7 @@ async function saNamgung() {
 
 // ── 마교 길 ──
 async function ma5() {
+  if(G.mainPlot?.hold(20,'sutraGate'))return;
   await ctx.part(5, '장경각의 빗자루', '전쟁');
   await narr('그사이 전쟁이 터졌다. 흑도맹이 장강을 건너자 정천맹은 구파일방의 승병까지 끌어모았고, 강호의 눈이 모두 강으로 쏠렸다.');
   await say('hyeok', '일이 둘 남았습니다. 구화성 맹주 창고 지하에 심마가 기르는 것이 있습니다. 그리고 소림 장경각에 봉인을 세운 낙월선자의 기록이 있습니다. 승병이 내려간 지금이 아니면 가지 못합니다.');
@@ -400,3 +404,11 @@ Story.providers.push(function part4(id) {
   if (id === 'cheongha' && at('fr2')) n.push(job({ id: 'elder', spr: 'Monk', x: 23.5, y: 18.4, dir: 2, talk: frElder }));
   return { npcs: n, spots: [], trigs: [], roam: [] };
 });
+
+Story.entries.councilGate = camp5;
+
+Story.entries.southGate = sa5;
+
+Story.entries.sutraGate = ma5;
+
+Story.entries.villageGate = freeCheck;

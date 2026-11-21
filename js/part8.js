@@ -31,6 +31,7 @@ Object.assign(WEAPONS, {
 
 // ── 제1장 비단길 ──
 async function part8() {
+  if(G.mainPlot?.hold(35,'silkRoad'))return;
   await ctx.part(8, PART, '제1장 비단길');
   ctx.cg('silk');
   await narr('봄이 오기 전에 원정대가 구화성을 떠났다. 연합군 본대는 천산 앞에서 만나기로 하고, 나는 혁련하를 따라 앞서 걸었다. 곽 아주머니 도시락은 사흘 만에 바닥이 났다.');
@@ -289,3 +290,5 @@ Story.providers.push(function part8p(id) {
 Object.assign(FOES, { baek_ally2: foe('백 노인', 'chars/OldMan3', 2600, 66, 16, 86, 0, 0, .9, ['moon1', 'moon3', 'flurry'], { wpn: 'Stick' }) });
 G.act3.part8 = part8;
 G.act3t = Object.assign(G.act3t || {}, { lastRent, ghostPass });  // 시험용
+
+Story.entries.silkRoad = part8;

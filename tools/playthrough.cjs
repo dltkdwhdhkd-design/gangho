@@ -13,6 +13,9 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
     const pump = async (n = 3) => { for (let i = 0; i < n; i++) { G.fast(60); await sleep(); } };
     G.S = D.newState('진소', 'BlueSamurai', 'm', diff); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null;
     const S = G.S, F = S.flags; D.Story.begin();
+    const {chapters}=await import(new URL('./js/main-chapters.js',document.baseURI));
+    const {layout}=await import(new URL('./js/main-maneuvers.js',document.baseURI));
+    const {solve}=await import(new URL('./tools/dev/main_story_test.mjs',document.baseURI));
     const best = { 검: ['stick', 'iron_sword', 'blue_sword', 'moon_sword'] };
     const upkeep = () => {
       while (S.pts > 0) { const k = ['str', 'con', 'inn', 'str', 'agi'][S.pts % 5]; S[k]++; S.pts--; }
@@ -24,11 +27,14 @@ const diff = process.argv[2] || 'normal', skill = +(process.argv[3] || .6);
     };
     const wantedMap = { r2: ['clinic', 7, 8], r2b: () => !F.r_moss ? ['cloudmt', 40, 11] : !F.r_dang ? ['fiveclans', 10, 22] : ['clinic', 7, 8], r3: ['inn', 8, 8], r4: ['shaolin', 19, 25], r5: ['guhwa', 24, 29], w1: ['oasis', 20, 18], w1b: ['oasis', 34, 13], w2: ['oasis', 20, 3], w2b: ['snowpeak', 22, 12], w3: ['snowpeak', 34, 10], w4: ['tiangate', 22, 13], x2: ['inn', 8, 8], x4: ['blackpalace', 22, 23], jg1: () => !F.jg_rice ? ['guhwa', 41, 20] : !F.jg_dang ? ['fiveclans', 10, 22] : !F.jg_date ? ['fiveclans', 28, 13] : ['valley', 26, 15], jg2: ['ninehall', 8, 12], jg3: () => !F.jg_wc ? ['c_wuchang', 29.5, 42] : !F.jg_mk ? ['ninehall', 21.5, 24] : !F.jg_gy ? ['pass', 19, 12] : !F.jg_od ? ['inn2', 13, 11] : ['fort', 18, 22], fr1: () => !F.fr_talk ? ['cheongha', 20, 19] : !F.fr_rice ? ['guhwa', 41, 20] : ['clinic', 7, 8], fr2: ['cheongha', 23, 20], sa3: () => !F.sa_rice2 ? ['guhwa', 41, 20] : ['guhwa', 24, 28], ma3: ['guhwa', 41, 20], sa1: ['fort', 18, 22], ma1: ['shrine', 7, 8], sa2: () => !F.sa_job1 ? ['cheongha', 22, 25] : !F.sa_job2 ? ['hall2', 7, 8] : !F.sa_job3 ? ['ninehall', 9, 13] : ['fort', 18, 22], ma2: () => !F.ma_job1 ? ['inn2', 8, 8] : !F.ma_job2 ? ['library', 7, 9] : !F.ma_job3 ? ['cheongha', 22, 25] : ['shrine', 7, 8], p0a: ['inn', 8, 8], p3: () => !F.errand ? ['inn', 8, 8] : !F.e_yun ? ['clinic', 7, 8] : !F.e_smith ? ['smith', 7, 8] : !F.e_boat ? ['cheongha', 22, 25] : ['inn', 8, 8], p4: () => F.herb && !F.herb_done ? ['clinic', 7, 8] : ['inn', 8, 8], c1a: () => !F.c1inn ? ['inn', 8, 8] : ['cheongha', 22, 25], c1b: ['clinic', 7, 8], c1c: ['bamboo', 27, 7], c1d: ['clinic', 7, 8], s1: ['cheongha', 22, 26], s2: ['cheongha', 22, 20], s3: ['bokun', 7, 8], s4: ['cheongha', 22, 20], c1e: ['pass', 19, 12], c1f: ['fort', 10, 14], c1g: ['inn', 8, 8], c1h: ['clinic', 7, 8], c2a: ['cloudmt', 22, 30], c2b: ['cloudmt', 22, 21], c2b2: ['cloudmt', 22, 21], c2c: ['hall_in', 8, 11], c2d: ['cloudmt', 40, 10], c2e: ['hall_in', 8, 11], c2f: ['library', 7, 8], c2g: ['hall_in', 8, 11], t1: ['cloudmt', 22, 34], t2: ['shaolin', 19, 25], t3: ['sutra', 8, 8], t4: ['shaolin', 28, 16], t5: ['cliffcave', 8, 8], c3a: ['cloudmt', 22, 34], c3b: ['guhwa', 24, 20], c3c: ['guhwa', 24, 20], c3e: ['guhwa', 24, 20], c4a: ['wolha', 22, 26], c4b: ['wolha', 22, 12], c4c: ['wolha', 22, 8] };
     let iter = 0, lastStep = '', stuck = 0, loses = 0; const snaps = [];
-    G.autoPick = c => { if (String(c.text).includes('누구의 손')) return ['jeong', 'sa', 'ma', 'free'].indexOf(route); if (/쌀을|명령서를|혜각이|제단의 불|고진이|항아리|맹호가|부맹주|일곱 장|강호행|탁자는|혜명이|그 뒤로 나는|비질 소리|아이들이 줄을|남궁진이 칼을|다들 나를 본다/.test(c.text)) return alt; return 0; };
-    while (iter++ < 3000) {
+    G.autoPick = c => { const a=S.mainRoad?.active;if(a&&c.text===chapters[a.id].sites[a.site].question)return (a.id+a.site*3)%2; if (String(c.text).includes('누구의 손')) return ['jeong', 'sa', 'ma', 'free'].indexOf(route); if (/쌀을|명령서를|혜각이|제단의 불|고진이|항아리|맹호가|부맹주|일곱 장|강호행|탁자는|혜명이|그 뒤로 나는|비질 소리|아이들이 줄을|남궁진이 칼을|다들 나를 본다/.test(c.text)) return alt; return 0; };
+    while (iter++ < 6000) {
+      const a=S.mainRoad?.active,board=document.querySelector('.main-command');
+      if(a?.board&&board){for(const cmd of solve(layout(a.id,a.site===2?1:0),a.board))board.querySelector('[data-m="'+cmd+'"]').click();}
       await pump(2);
       if (G.scene === 'battle' && G.battle) { const B = G.battle, t0 = B.t; if (snapOn && B.cfg.bgm === 'boss') snaps.push({ s: JSON.stringify(S), cfg: B.cfg }); const name = B.cfg.title || B.cfg.foes.join(); let n = 0; while (G.scene === 'battle' && G.battle === B && n++ < 400) { G.fast(60); await sleep(); } log.push(`${S.flags.step} ${name} lv${S.lv} ${B.outcome} ${B.t.toFixed(0)}s hp${Math.round(B.p.hp / B.p.maxHp * 100)}% pot${S.potion}`); if (B.outcome === 'lose') { loses++; S.exp += D.stats ? 60 + S.lv * 20 : 0; if (S.exp > 18 * Math.pow(S.lv, 1.32)) { S.exp = 0; S.lv++; S.pts += 3; } } await pump(1); continue; }
       if (G.field.busy) continue;
+      if(a){const pin=G.field.npcs.find(n=>n.mainMarker&&n.mark());if(pin){G.field.face(pin);G.field.run(pin.talk);continue;}}
       upkeep();
       const st = S.flags.step; if (st === 'end') break; if (typeof F.__c === 'undefined') F.__c = 1;
       if (st === lastStep) stuck++; else { stuck = 0; lastStep = st; }

@@ -31,6 +31,7 @@ cv.addEventListener('pointermove', e => { if (G.decor) { [G.decor.cx, G.decor.cy
 cv.addEventListener('pointerdown', e => { if (G.decor) { [G.decor.cx, G.decor.cy] = tileAt(e); G.life.placeAt(G.decor.cx, G.decor.cy); } });
 
 function tick(dt) {
+  G.mainPlot?.tick(dt);
   if (G.menuOpen) { Input.tick(dt); return; }
   if (talking()) { tickDialog(dt); return; }
   if (G.scene === 'battle' && G.battle) G.battle.update(dt);

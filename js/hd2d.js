@@ -7,10 +7,13 @@
 // 켜기: 주소 끝에 ?hd2d=1. 못 켜면(WebGL2 없음 등) 아무 일 없이 2D로 돈다.
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { mountainGate } from './hd2d/gate.js';
+import { addEscarpments } from './hd2d/escarpment.js';
+import { idleCel, idleFacing, standing } from './hd2d/field-idle.js';
 import { addWalkways, bridgeHeight } from './hd2d/walkways.js';
 import { landscapeOf, paintLandscape, warmTravelEdges } from './landscape.js';
 import { daylight, outdoorUniforms, outdoorMaterial } from './hd2d/outdoor-light.js';
 import { reliefMesh, localScenery, sceneryBatch, addRiverMargins, addSurround, addVista } from './hd2d/wilderness.js';
+import { groveBatches,syncWildlife } from './hd2d/river-models.js';
 import { architectureOf, regionalBuilding } from './hd2d/regional-buildings.js';
 import { fieldProps, floorMaterial, walking, loadFieldArt, loadCastIndex, loadActorPage, loadCombatArt, paintWorldSurface, paintMargins, drawCourt, combatLayout } from './hd2d/field-art.js';
 import { motionFor, drawMotion } from './hd2d/combat-art.js';
@@ -138,6 +141,14 @@ HD.fieldSheet = o => {
   }
   return fieldSheets.get(id);
 };
+HD.drawFieldActor = (ctx, sheet, n, x, y, height, time, identity) => {
+  if (!standing(n)) return HD.draw2d(ctx,sheet,n.dir,n.pose ?? Math.floor(n.walk || 0) % 4,x,y,height);
+  const dir = (n.dir || 0) & 3, cel = idleCel(n,time,identity);
+  const facing = idleFacing(sheet,dir), cell = sheet.width/4, size = height*56/48;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(facing.canvas,(cel&3)*cell,(cel>>2)*cell,cell,cell,x-size/2,y+1-size,size,size);
+  ctx.restore();
+};
 // 동작 시트(<키>_act: 왼쪽을 보는 옆모습 여섯 칸 — 준비, 내지름, 거둠, 맞음, 쓰러짐, 경공). tools/people_in.py가 <키>-c.png로 만든다
 HD.act = k => (k && PV[(k === 'yun' ? 'n_yun' : k) + '_act']) || null;  // 윤설의 키는 yun인데 동작 칸은 n_yun_act로 왔다
 HD.draw2dAct = (c, im, fr, flip, x, y, h = CHAR, white) => {
@@ -208,14 +219,14 @@ const DOT = 48 / 15;  // 도트 밀도: 평면도 한 점에 도트 3.2점(새 �
 const SIDE_RECT = .314;  // HW0 옆벽 그림에서 네모 벽이 시작하는 높이(위에서부터). 그 위는 세모 박공
 let pvP = null;
 // 블렌더로 지은 모형(tools/blender/hall.py → assets/hd2d/models/*.glb). 길이는 평면도 점이라 세울 때 (1, HS, ZS)로 늘린다
-const MODELS = {}, MODELN = ['daewoong', 'rw_wall', 'rw_post', 'rw_pillar', 'rw_column', 'rw_sill', 'rw_window', 'rw_emblem'], MODELM = new Map(), MODELP = {};  // MODELM: 그물(geometry) → 재질 셋. clone은 userData를 JSON으로 베껴 재질이 깨지므로 따로 둔다
+const MODELS = {}, MODELN = ['river_land', 'daewoong', 'rw_wall', 'rw_post', 'rw_pillar', 'rw_column', 'rw_sill', 'rw_window', 'rw_emblem'], MODELM = new Map(), MODELP = {};  // MODELM: 그물(geometry) → 재질 셋. clone은 userData를 JSON으로 베껴 재질이 깨지므로 따로 둔다
 let GLL = null;
 function fieldKitTexture(texture, interior) {
   if (!interior) return texture;
   const surface = { pm_plaster: 'plaster', pm_plaster_white: 'plaster', pm_wood_dark: 'cedar', pm_wood_pine: 'plank', pm_base_rough: 'crag', pm_stone: 'slab', pm_brick: 'yard', r_dark: 'roof' }[texture];
   return surface && PV['field_' + surface] ? 'field_' + surface : texture;
 }
-async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('./lib/three/addons/GLTFLoader.js'), import('./lib/three/addons/meshopt_decoder.module.js')]); GLL = new GLTFLoader(); GLL.setMeshoptDecoder(MeshoptDecoder); } const g = await GLL.loadAsync(`assets/hd2d/models/${n}.glb`);
+async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('./lib/three/addons/GLTFLoader.js'), import('./lib/three/addons/meshopt_decoder.module.js')]); GLL = new GLTFLoader(); GLL.setMeshoptDecoder(MeshoptDecoder); } const g = await GLL.loadAsync(`assets/hd2d/models/${n}.glb`); g.scene.updateMatrixWorld(true);
   g.scene.traverse(o => { if (!o.isMesh) return; const sm = o.material, nm = (sm.name || o.name).replace(/\.\d+$/, ''), rk = /^rock_(\w+)/.exec(nm), top = nm === 'top', vc = !!o.geometry.attributes.color;  // 바위 모형(rock_<빛깔>)은 무늬를 게임이 입힌다. 꼭짓점 색(밑동 그늘, 이끼, 눈)이 있으면 곱한다. top은 절벽 조각의 윗면: 그 자리의 땅 그림을 입힌다
     // 조각(틀로 만든 것, docs/chatgpt-blender.md): UV가 없고 재질 이름만 있다. 이름표(PAL)에 있으면 무늬를 자리와 면 방향으로 입히고(palMat), 없으면 조각에 든 민무늬 빛깔 그대로다
     const pal = PAL[nm] || (rk && !o.geometry.attributes.uv ? { rock: rk[1] } : null), wl = pal && nm.startsWith('wl_');
@@ -233,7 +244,7 @@ async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { Meshopt
     const mkf = (sh, kind) => { const b = mkm(sh, kind), f = holed(b); if (top) f.customProgramCacheKey = () => 'sharp-top-hole'; else if (b.userData.pal) f.customProgramCacheKey = () => 'sharp-pal-hole'; return f; };
     const kinded = rk || wl;  // 종류에 따라 무늬가 바뀌는 재질
     const M = { m: mkm(), f: mkf(1), d: new T.MeshDepthMaterial({ depthPacking: T.RGBADepthPacking }), v: {}, as: (sh = 1, kind = '') => sh > .995 && (!kind || !kinded || (rk && kind === rk[1])) ? M : (M.v[Math.round(sh * 100) + (kinded ? kind : '')] ||= { m: mkm(sh, kind), f: mkf(sh, kind), d: M.d }) };
-    if(n.startsWith('regional_')){outdoorMaterial(M.m);outdoorMaterial(M.f);}
+    if(n.startsWith('regional_')||n==='river_land'){outdoorMaterial(M.m);outdoorMaterial(M.f);}
     MODELM.set(o.geometry, M); o.material = M.m; o.userData = {}; o.castShadow = o.receiveShadow = true; });
   const lp = g.scene.children.find(c => c.name.startsWith('lamps')) || g.scene.getObjectByName('lamps'); g.scene.userData.lamps = lp?.userData?.pts ? JSON.parse(lp.userData.pts) : []; MODELS[n] = g.scene; } catch (e) { MODELS[n] = null; console.warn('모형 못 읽음', n, e); } }
 // 조각의 무늬 재질: 무늬 자리를 모형의 UV가 아니라 '놓인 자리와 면이 보는 방향'에서 셈한다. 조각을 늘이거나 돌려 세워도 무늬 굵기가 그대로고, 옆 조각과 무늬가 이어진다.
@@ -542,7 +553,10 @@ function hAt(m, x, y) {
   if (!m?.hgt) {
     const land=art() && landscapeOf(m);
     if(land){
-      if((m.id==='world'||m.encounter?.bridges)&&m.g[Math.floor(y/TS)]?.[Math.floor(x/TS)]===4)return bridgeHeight(m,x,y,TS)*HS;
+      if(m.id==='world'||m.encounter?.bridges){
+        const rise=bridgeHeight(m,x,y,TS);
+        if(rise>0||m.g[Math.floor(y/TS)]?.[Math.floor(x/TS)]===4)return rise*HS;
+      }
       return land.height(x/TS,y/TS)*HS;
     }
     return m?.id === 'world' ? bridgeHeight(m,x,y,TS)*HS : 0;
@@ -600,7 +614,7 @@ function terrain(m, gt) {
   return new T.Mesh(geo(top), sharpen(new T.MeshLambertMaterial({ map: gt, vertexColors: true })));
 }
 
-// 절벽 조각: 바위 지도(m.rocky())의 면을 따라 블렌더 모형을 세운다(tools/blender/rocks.py: rk_cf<단>_<n>은 두 칸짜리, rk_ch<단>_<n>은 한 칸짜리, 단은 1~4).
+// 바위 지도의 단차에는 이어진 지층과 풍화된 암석 돌출면을 만든다.
 // 면에 그림만 입히면 반듯한 축대로 보인다. 조각은 판돌을 켜켜이 쌓은 덩어리라 면이 들쭉날쭉하고, 맨 위 켜가 높은 땅의 가장자리를 바위 테로 덮는다.
 // 조각의 앞(모형의 +z)이 낮은 쪽을 본다. 남쪽 면은 그대로, 동·서·북쪽 면은 돌려 세운다. 계단 칸과 지도 가장자리에는 안 세운다
 // 방 바닥(임시): 붉은 마루 그림이 화면을 주황으로 덮는다. 방 바닥 그림(FL1)이 오기 전까지 새 화면에서만 채도를 낮추고 어둡게 가라앉힌다(2D 화면과 그림 파일은 그대로)
@@ -641,23 +655,7 @@ function onTop(m, s, cx, fy) { const q = m.stamps.find(u => u !== s && u.sol && 
   const f = FURN[q.name], mdl = f && KITS.has(f.key) && needModel(f.key); return mdl ? furnFit(q, f, mdl).top : STAMPS[q.name][4] * (q.sc || 1) * .5; }
 function column(s) { const x=s.x+STAMPS[s.name][3]/2, y=s.base-3; piece('rw_column',curMap.wallKind,x,y,hAt(curMap,x,y)/HS); }
 function cliffKit(m) {
-  if (m.face !== 'rock' || !art()) return;
-  const lv = (x, y) => m.hgt[y][x], ok = (x, y) => x >= 0 && y >= 0 && x < m.w && y < m.h && !m.stair?.[x + ',' + y];
-  const drop = (hx, hy, lx, ly) => ok(hx, hy) && ok(lx, ly) && lv(hx, hy) > lv(lx, ly) ? lv(hx, hy) - lv(lx, ly) + ',' + lv(lx, ly) : '';
-  const put = (wide, D, base, X, Z, rot, r) => { const L = Math.min(D, 4), mdl = needModel(`rk_c${wide ? 'f' : 'h'}${L}_${1 + Math.floor(r * (wide ? 3 : 2))}`); if (!mdl) return;
-    const g = new T.Group(), o = mdl.clone(true), ms = [], side = rot % 2 !== 0, flip = (r * 97) % 1 < .5 ? -1 : 1;
-    o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry).as(lowShade(base + D)); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; ms.push(c); } }); g.add(o);
-    g.scale.set(flip * (side ? ZS : 1), HS * D / L, side ? 1 : ZS); g.rotation.y = rot * Math.PI / 2; g.position.set(X, base * LV * HS, Z); g.userData = { cliff: true, ms }; propG.add(g); };
-  // 같은 높이로 이어진 면을 한 줄로 묶어, 두 칸짜리 조각으로 채우고 홀수면 한 칸짜리를 하나 끼운다
-  const line = (len, key, at) => { for (let i = 0; i < len;) { const k = key(i); if (!k) { i++; continue; } let j = i + 1; while (j < len && key(j) === k) j++;
-    const [D, base] = k.split(',').map(Number), n = j - i, half = n % 2 ? Math.floor(hash2(i * 7 + len, n + base * 13) * (n / 2 + .999)) : -1;
-    for (let c = i, q = 0; c < j; q++) { const wide = q !== half && j - c >= 2, w = wide ? 2 : 1; at(wide, D, base, (c + w / 2) * TS, hash2(c * 31 + D, i * 17 + base)); c += w; } i = j; } };
-  for (let y = 0; y < m.h; y++) {
-    line(m.w, x => drop(x, y, x, y + 1), (w, D, b, c, r) => put(w, D, b, c, (y + 1) * TS * ZS, 0, r));   // 남쪽 면
-    line(m.w, x => drop(x, y, x, y - 1), (w, D, b, c, r) => put(w, D, b, c, y * TS * ZS, 2, r)); }        // 북쪽 면(위 끝의 바위 테만 보인다)
-  for (let x = 0; x < m.w; x++) {
-    line(m.h, y => drop(x, y, x + 1, y), (w, D, b, c, r) => put(w, D, b, (x + 1) * TS, c * ZS, 1, r));    // 동쪽 면
-    line(m.h, y => drop(x, y, x - 1, y), (w, D, b, c, r) => put(w, D, b, x * TS, c * ZS, 3, r)); }        // 서쪽 면
+  if (art()) addEscarpments(T,propG,m,TS,LV,HS,ZS,previewTex);
 }
 
 // ── 지도 ──
@@ -686,6 +684,18 @@ function waterMat() {
         vec3 stones=texture2D(uW2,uv*1.83+wob*.13).rgb;
         c=mix(deep,vec3(.091,.165,.130)+stones*.09,bank*bank);
         c+=vec3(.012,.018,.017)*ripple*(.4+bank);
+        float curls=sin(p.x*.084-p.y*.13+current*2.+uT*.48);
+        c+=vec3(.009,.022,.022)*smoothstep(.80,.98,curls)*smoothstep(.15,.8,bank)*broken;
+        vec2 tileAt=vec2(p.x,p.y/${ZS.toFixed(4)})/${TS.toFixed(1)};
+        if(tileAt.x>888.&&tileAt.x<903.&&tileAt.y>654.&&tileAt.y<664.){
+          for(int pier=1;pier<=2;pier++){
+            vec2 delta=tileAt-mix(vec2(891.5,653.3),vec2(897.2,665.2),float(pier)/3.);
+            float u=dot(delta,vec2(.927,-.375)),v=abs(dot(delta,vec2(.375,.927)));
+            float lane=abs(v-(.39+.15*u+.04*sin(5.*u-uT)));
+            float wake=(1.-smoothstep(.010,.085,lane))*smoothstep(-.3,.45,u)*(1.-smoothstep(1.,3.4,u));
+            c+=vec3(.045,.071,.056)*wake*(.53+.47*sin(7.8*u-uT));
+          }
+        }
         diffuseColor.a*=.94-bank*.37;
       } else if (vKind < .5) c = texture2D(uW0, uv + wob + vec2(uT * .004, uT * .0015)).rgb;                       // 강: 천천히 흐른다
       else if (vKind < 1.5) c = texture2D(uW1, uv + vec2(floor(sin(row * .7 + uT * .6) * .99 + .5), 0.) / 86.).rgb;  // 못: 거의 고요하다
@@ -748,6 +758,7 @@ const STASH = new Map();
 function releaseProp(node) {
   if(node.userData.cutM)for(const mat of node.userData.cutM.values())mat.dispose();
   if(!node.isMesh)return;
+  if(node.isInstancedMesh)node.dispose();
   if(!node.userData.shared)node.geometry.dispose();
   if(node.userData.ownPaint){node.material.map.dispose();node.material.dispose();}
 }
@@ -794,8 +805,9 @@ function setMap(m) {
   if (ft) ground.material.color.setScalar(FLK[floorOf(m)] || 1.45);
   if(!land&&openAir(m))outdoorMaterial(ground.material);
   ground.receiveShadow = true; ground.userData.map = m; scene.add(ground);
-  if (art()) addWalkways(T,propG,m,WN,TS,HS,ZS,hAt,previewTex);
-  if(land){addRiverMargins(T,propG,m,WN,land,TS,HS,ZS,previewTex,matOf,hAt);addSurround(T,propG,m,TS,HS,ZS);}
+  const groves=art()&&!m.room?groveBatches(T,m,MODELS.river_land,hAt,HS,ZS):null;
+  if (art()) addWalkways(T,propG,m,WN,TS,HS,ZS,hAt,previewTex,MODELS.river_land);
+  if(land){addRiverMargins(T,propG,m,WN,land,TS,HS,ZS,previewTex,matOf,hAt,groves);addSurround(T,propG,m,TS,HS,ZS);}
   if(art())addVista(T,propG,m,WN,land,TS,ZS);
   if (ft && m.carpet) { const cc = mk(Wm, gc.height), cx2 = cc.getContext('2d', { willReadFrequently: true }); paintRoom(cx2, m.w, m.h, m.roomStyle || 0, { carpet: m.carpet, floorOnly: true, noFloor: true }); calm(cx2, cc.width, cc.height);  // 깔개만 그린 투명한 판을 바닥 바로 위에
     const cloth = new T.PlaneGeometry(Wm,Dm,m.hgt?m.w*4:1,m.hgt?m.h*4:1);
@@ -838,6 +850,7 @@ function setMap(m) {
     }
     const scenery = !s.flat && art() && ((land && localScenery(m,s,cx,z)) || ((!m.stage||m.encounter)&&fieldProps(s.name, m.biome)));
     if(scenery && !scenery[0])return;
+    if(!m.room&&!s.flat&&groves?.add(s.name,scenery?.[0],cx,z,(scenery?.[1]||(/tree|grove/.test(s.name)?38:7))*(s.sc||1)))return;
     if (scenery) {
       const ft = previewTex('field_' + scenery[0]);
       if (ft) {
@@ -893,13 +906,14 @@ function setMap(m) {
     for (let y = WN.y0; y < WN.y1; y++) for (let x = WN.x0; x < WN.x1; x++) for (let j = 0; j < 3; j++) { if (m.g[y][x] !== 0 || hs(x * 7 + j, y * 13) > (m.stage ? .7 : m.win ? .22 : .35)) continue;
       const px = (x + hs(x, y * 3 + j)) * TS, py = (y + hs(x * 5 + j, y)) * TS; if (near(px, py) || m.g[Math.floor(py / TS)]?.[Math.floor(px / TS)] !== 0) continue;
       const k = DK[Math.floor(hs(x * 3, y * 11 + j) * DK.length)], t = stampTex(k), st = STAMPS[k]; if (!t || !st) continue; const sc = (k.startsWith('g_') ? .75 : .45) + hs(y, x + j) * .3, w = st[3] * sc, h = st[4] * sc * HS, y0 = hAt(m, px, py), z = (py + .5) * ZS;
+      if(groves?.add(k,k,px,py,h/HS))continue;
       if (!B.has(t)) B.set(t, { P: [], U: [], I: [] }); const b = B.get(t), n = b.P.length / 3;
       b.P.push(px - w / 2, y0, z, px + w / 2, y0, z, px + w / 2, y0 + h, z, px - w / 2, y0 + h, z); b.U.push(0, 0, 1, 0, 1, 1, 0, 1); b.I.push(n, n + 1, n + 2, n, n + 2, n + 3); }
     for (const [t, b] of B) { const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(b.P, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(b.U, 2)); g.setAttribute('normal', new T.Float32BufferAttribute(b.P.map((_, i) => i % 3 === 1 ? 1 : 0), 3)); g.setIndex(b.I);
       const o = new T.Mesh(g, matOf(t).m); o.receiveShadow = true; o.userData = { deco: true }; propG.add(o); } }
   // 등불 자리: 문 위, 등롱, 객잔 기
   m._lamps = [...LAMPX, ...m.portals.filter(q => q.door && !m.room && !LAMPX.some(l => Math.abs(l[0] - q.x - q.w / 2) < 30 && Math.abs(l[1] - q.y) < 12)).map(q => [q.x + q.w / 2, q.y - 2, 26]), ...m.stamps.filter(s => /lantern|banner|censer|v_lamp|v_stonelamp/.test(s.name)).map(s => { const st = STAMPS[s.name]; if (s.on) { const cx = s.x + s.w / 2, fy = s.y + st[4] * s.sc; return [cx, fy + 1, onTop(m, s, cx, fy) + st[4] * s.sc * .7]; }  /* 가구에 얹은 향로: 그 높이에서 빛난다 */ return [s.x + st[3] * (s.name === 'v_lamppost' ? .7 : .5), s.base + 1, st[4] * (s.name === 'v_lamppost' ? .6 : s.name === 'v_stonelamp' ? .6 : .7)]; })]; LAMPX.length = 0;
-  regionalScenery?.finish(propG);
+  regionalScenery?.finish(propG);groves?.finish(propG);
   if(!m.src||m.src!==prev?.src)camT.set(-1,0,0);  // 다음 장면에서 카메라를 바로 주인공에게
   warmTravelEdges(land,WN);
   buildMs = Math.round(performance.now() - t0);
@@ -941,7 +955,7 @@ function frameOf(key, dirCol, row, diag) {
   if (dg) { const k = 16 * (dg.hd || 1); return { t: sheetTex(key + '_d'), sx: (diag % 2) * k, sy: Math.min(row, 3) * k, s: k, flip: diag > 1 }; }
   const f = 16 * (img.hd || 1), r = Math.min(row, Math.floor(img.height / f) - 1); return { t: sheetTex(key), sx: dirCol * f, sy: r * f, s: f, flip: false };
 }
-function fieldWalker(n, row, identity) {
+function fieldWalker(n, row, time, identity) {
   if (!art()) return false;
   const slot = walking[identity || HD.fieldKey(n)];
   if (!slot) return false;
@@ -949,21 +963,40 @@ function fieldWalker(n, row, identity) {
   if (!texture) {loadActorPage(PV,slot[0]);return false;}
   const height = CHAR * 56 / 48;
   const cell = texture.image.width / 4;
-  actor(texture, n.dir * cell, (slot[1] * 4 + (row % 4)) * cell, cell, cell, false, n.x, n.y, height);
+  if (standing(n)) {
+    const dir = (n.dir || 0) & 3, sheet = HD.fieldSheet(n), cel = idleCel(n,time,identity);
+    const facing = idleFacing(sheet,dir);
+    if (!facing.texture) {
+      const ink = new T.CanvasTexture(facing.canvas);
+      ink.colorSpace = T.SRGBColorSpace; ink.magFilter = ink.minFilter = T.NearestFilter;
+      ink.generateMipmaps = false;
+      facing.texture = ink;
+      facing.release = () => {
+        const M = MATS.get(ink);
+        if (M) { M.m.dispose(); M.f.dispose(); M.d.dispose(); MATS.delete(ink); }
+        ink.dispose();
+      };
+    }
+    actor(facing.texture,(cel&3)*cell,(cel>>2)*cell,cell,cell,false,n.x,n.y,height);
+  } else {
+    const lift = n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0;
+    actor(texture,n.dir*cell,(slot[1]*4+(row%4))*cell,cell,cell,false,n.x,n.y,height,lift);
+  }
   blob(n.x, n.y, 1);
   return true;
 }
 function syncActors(F) {
   used = 0; usedB = 0; const p = F.p, S = G.S, put = (key, dir, row, x, y, o = {}) => { const fr = frameOf(key, dir, row, o.diag); if (!fr || !fr.t) return; const sz = o.size || (KIDS.has(key) ? 11 : 16); actor(fr.t, fr.sx, fr.sy, fr.s, fr.s, fr.flip, x, y, sz * OLDK, o.lift || 0, .84); blob(x, y, sz / 16); };
   for (const n of F.npcs) { if (n.hide > 0) continue; if (n.stamp) { const t = stampTex(n.stamp); if (t) actor(t, 0, 0, t.image.width, t.image.height, false, n.x, n.y, 16 * (OLDSC[n.stamp] ?? .66) / HD.actK(curMap)); continue; }  // 일감 표시용 소품(걸레질 자리의 독 따위)은 사람 크기 배율을 안 받고 바닥 소품 크기로(방 안에서 사람만 한 독이 되던 것)
-    if (fieldWalker(n, n.pose ?? Math.floor(n.walk || 0) % 4)) continue;
+    if (fieldWalker(n, n.pose ?? Math.floor(n.walk || 0) % 4, F.t)) continue;
     const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.id && PEOPLE.has('n_' + n.id) ? 'n_' + n.id : n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : ROLE[n.hint] && PEOPLE.has('n_' + ROLE[n.hint]) ? 'n_' + ROLE[n.hint] : null, yt = (pk && previewTex(pk)) || (key === 'chars/Princess' && previewTex('yun')) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, (n.pose ?? Math.floor(n.walk || 0) % 4) % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); continue; } put(key, n.dir, n.pose ?? Math.floor(n.walk || 0) % 4, n.x, n.y, { diag: n.walk ? n.diag : undefined, size: n.size, lift: n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0 }); }
-  const walker = (n, row) => { if (fieldWalker(n, row)) return; const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : roamingEnemyArt[n.foes?.[0]], yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
+  const walker = (n, row) => { if (fieldWalker(n, row, F.t)) return; const key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, pk = n.role && PEOPLE.has('n_' + n.role) ? 'n_' + n.role : roamingEnemyArt[n.foes?.[0]], yt = (pk && previewTex(pk)) || (NEWNPC[key] && NEWNPC[key].map(previewTex).find(Boolean)); if (yt) { actor(yt, n.dir * 56, row % 4 * 56, 56, 56, false, n.x, n.y, CHAR * 56 / 48); blob(n.x, n.y, 1); } else put(key, n.dir, row, n.x, n.y, { size: n.size }); };
   for (const r of F.roam) if (!r.gone) { walker(r, Math.floor(r.walk || 0) % 4); for (const q of r.crew || []) walker(q, Math.floor(q.walk || 0) % 4); }  // 떠도는 무리·길손과 그 뒤를 따르는 사람들
-  if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id); if (walking[id] || walking['type_' + s] || PEOPLE.has('n_' + id)) return walker({ spr: s, role: id, dir: q.dir, x: q.x, y: q.y }, Math.floor(p.walk) % 4); const key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });  // 동료도 새 사람 시트가 있으면 그것으로
-  for (const a of F.animals || []) { if (a.gone) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
+  if (G.party && F.m.id !== 'world0') G.party.members().forEach((id, i) => { if (F.npcs.some(n => n.id === id)) return; const q = F.trail[Math.min(F.trail.length - 1, 16 + i * 16)]; if (!q) return; const s = G.party.spr(id); if (walking[id] || walking['type_' + s] || PEOPLE.has('n_' + id)) return walker({ id, spr: s, role: id, dir: q.dir, x: q.x, y: q.y, walk: p.walk }, Math.floor(p.walk) % 4); const key = s.includes('/') ? s : 'chars/' + s; put(key, q.dir, Math.floor(p.walk) % 4, q.x, q.y, { diag: p.walk ? q.diag : undefined }); });  // 동료도 새 사람 시트가 있으면 그것으로
+  const modelAnimals=syncWildlife(actG,art()&&MODELS.river_land,F.animals||[],(x,y)=>hAt(curMap,x,y),HS,ZS);
+  for (const a of F.animals || []) { if (a.gone||modelAnimals.has(a)) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
   const me = S.look === 'BlueSamurai' && previewTex('me');  // 맛보기: 칸 56점, 사람 키 48점 → 사람 키가 CHAR가 되게 판을 키운다
-  if (F.hideMe || fieldWalker({ ...p, spr: S.look }, Math.floor(p.walk) % 4, 'type_' + S.look)) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48); blob(p.x, p.y, 1); }
+  if (F.hideMe || fieldWalker({ ...p, me: true, spr: S.look }, Math.floor(p.walk) % 4, F.t, 'type_' + S.look)) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48); blob(p.x, p.y, 1); }
   else put('chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false;
   for (const o of bboard) o.mesh.visible = false;  // 전투 때 쓴 인물 판(주인공·적)을 마을에서 숨긴다. 안 숨겨서 전투가 끝난 자리에 주인공 닮은 사람이 덩그러니 서 있었다
@@ -1264,6 +1297,7 @@ function bbSlot(w, h) {
   usedBB++; o.mesh.visible = true; return o;
 }
 function syncBattle(B) {
+  syncWildlife(actG,null,[],null,HS,ZS);
   used = 0; usedB = 0; usedBB = 0;
   for (const a of B.actors) {
     if (a.dead && a.deadT > .8) continue;

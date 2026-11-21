@@ -33,6 +33,7 @@ const slotPreface = () => { const s = S(); if (s.skills.includes('moon0') && !s.
 
 // ── 제1장 천마 재림 ──
 async function part9() {
+  if(G.mainPlot?.hold(40,'bareMoon'))return;
   await ctx.part(9, PART, '제1장 천마 재림');
   ctx.cg('tianmo');
   await narr('천산 허리가 위아래로 갈라졌다. 그 틈으로 달이 보였는데, 붉은 달이 그렇게 가까이 있는 줄은 그때 처음 알았다.');
@@ -267,6 +268,7 @@ async function hallSaved() {
 
 // ── 제5장 낙월 ──
 async function finale() {
+  if(G.mainPlot?.hold(45,'lastMoon'))return;
   await ctx.chap(9, PART, '제5장 낙월');
   await narr('제단은 하늘로 뚫려 있었다. 붉은 달이 손 닿을 만큼 내려와 있었고, 그 밑에 그 사람이 앉아 있었다. 앞에 놓인 것은 아무것도 없는 빈 그릇이었다.');
   await say('cheonma', '또 왔구나. 무공을 뺏었는데 어찌 걸어 왔느냐.');
@@ -274,8 +276,13 @@ async function finale() {
   await say('cheonma', '…걸레질.');
   await say('me', '당신 먼지 닦으러 왔어요.', 'a');
   await say('cheonma', '삼백 년 전에 그 말을 한 계집이 있었지. 배가 고프구나. 너는 어떤 맛이냐.');
+  const allies = []; { const a = await G.bond.join(side(), allies); if (a) allies.push(a); }
+  if (F().hyeok_join && !allies.includes('hyeok_ally')) { await say('hyeok', '제단의 불은 제가 끄겠습니다. 저는 소야입니다.'); allies.push('hyeok_ally'); }
+  if (!allies.includes('so_ally')) { await say('so', '왼발 늦지 마라.', 'h'); allies.push('so_ally'); }
+  slotPreface();
+  await ctx.duel({ foes: ['tianmo'], allies, foeHpMul: G.S.diff === 'hard' ? .75 : 1, arena: 'moon', bgm: 'boss', title: '천마 혁련무극', tip: '칼이 닿지 않습니다. 초식 <b>서문</b>으로 달빛을 닦아 내면 잠시 닿습니다. 메뉴에서 칸에 넣으세요.' });
   if (side() === 'ma') {  // 마교 길: 마지막으로 한 번 더 고른다. 빈 그릇을 채워 바치면 붉은 달 결말
-    await say('cheonma', '너는 내 교단에서 컸다. 그릇을 채워라. 그러면 아무도 배고프지 않게 해 주마.');
+    await say('cheonma', '너는 내 교단을 걸어 왔다. 그릇을 채워라. 그러면 아무도 배고프지 않게 해 주마.');
     const c = await choice('천마가 빈 그릇을 내민다.', ['그릇을 받지 않고, 허리를 세운다', '그릇을 채워 바친다']);
     if (c === 1) {
       F().ma_side_end = true; G.fate?.mark();
@@ -286,11 +293,6 @@ async function finale() {
       return lastChoice();
     }
   }
-  const allies = []; { const a = await G.bond.join(side(), allies); if (a) allies.push(a); }
-  if (F().hyeok_join && !allies.includes('hyeok_ally')) { await say('hyeok', '제단의 불은 제가 끄겠습니다. 저는 소야입니다.'); allies.push('hyeok_ally'); }
-  if (!allies.includes('so_ally')) { await say('so', '왼발 늦지 마라.', 'h'); allies.push('so_ally'); }
-  slotPreface();
-  await ctx.duel({ foes: ['tianmo'], allies, foeHpMul: G.S.diff === 'hard' ? .75 : 1, arena: 'moon', bgm: 'boss', title: '천마 혁련무극', tip: '칼이 닿지 않습니다. 초식 <b>서문</b>으로 달빛을 닦아 내면 잠시 닿습니다. 메뉴에서 칸에 넣으세요.' });
   ctx.cg('fall');
   await narr('허리를 세웠다. 왼발로 밀었다. 오른발이 따라왔다. 칠식은 하나도 쓰지 않았다. 군막에서 배운 것도, 강호에서 배운 것도 쓰지 않았다. 객잔 바닥을 닦던 걸음으로 그 사람에게 걸어갔다.');
   await narr('손바닥이 그 사람 가슴에 닿았다. 먼지가 닦이듯 붉은빛이 밀려났다. 그 밑에 나온 것은 맨발에 비쩍 마른 사람 하나였다. 그 사람이 빈 그릇을 내려다봤다.');
@@ -303,7 +305,7 @@ async function finale() {
 }
 const LEAD = { jeong: ['정천맹을 다시 세운다', '맹주 자리는 내가 맡았다. 맨 처음 한 일은 맹주 창고 지하를 메운 것이었다.'], sa: ['흑도맹을 이끈다', '사마웅의 큰 칼은 산채 마당에 꽂아 두었다. 흑도맹은 그 칼 앞에서 맹세한 뒤로 양민의 쌀을 건드리지 않는다.'], ma: ['교단을 거두어 잠근다', '남은 신도들을 데리고 제단의 불을 껐다. 제단 자리에 달맞이꽃을 심었다.'], free: ['강호의 일을 맡는다', '깃발 없는 사람이 정파와 사파 사이에 앉는 자리가 생겼다. 다들 나를 합석 어른이라고 불렀는데, 그 말이 제일 듣기 싫었다.'] };
 async function lastChoice() {
-  if (await G.chronicle.deferEnding()) return;
+  // Optional journals stay available from the field after the credits.
   const s = side() || 'jeong', lead = LEAD[s];
   await narr('달이 지고 나서도 세상은 그대로 있었다. 무너진 산문을 고치고, 불탄 나루를 다시 놓고, 죽은 사람들 이름을 적는 데 한 해가 갔다.');
   if (!F().ma_side_end) {
@@ -336,3 +338,7 @@ Story.providers.push(function part9p(id) {
 });
 Object.assign(G.act3, { part9, credits });
 G.act3t = Object.assign(G.act3t || {}, { lastChoice, deploy, siegeToll, bridge, hall, finale, siege });  // 시험용
+
+Story.entries.bareMoon = part9;
+
+Story.entries.lastMoon = finale;
