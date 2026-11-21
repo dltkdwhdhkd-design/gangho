@@ -1,16 +1,17 @@
 // Exposed bedrock follows each contiguous height contour, including the cuts beside stairways.
+import { bankAt } from './mountain-banks.js';
 import { outdoorMaterial } from './outdoor-light.js';
 
 const paints=new WeakMap();
 function rockPaint(T,texture){
   if(paints.has(T))return paints.get(T);
   function paint(options){
-    const surface=new T.MeshLambertMaterial({map:texture('field_crag'),vertexColors:true,side:T.DoubleSide,...options});
+    const surface=new T.MeshLambertMaterial({map:texture('field_mountain-granite')||texture('field_crag'),vertexColors:true,side:T.DoubleSide,...options});
     surface.onBeforeCompile=shader=>{
       shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`
         #ifdef USE_MAP
         vec3 grain=texture2D(map,vMapUv).rgb;
-        diffuseColor.rgb*=mix(vec3(.90),grain,.33);
+        diffuseColor.rgb*=mix(vec3(.91),grain,.53);
         #endif
       `);
     };
@@ -120,6 +121,7 @@ export function addEscarpments(T,group,map,tile,level,hs,zs,texture){
     function cut(p,row){
       const x=dx?p:row,y=dy?p:row,X=x+nx,Y=y+ny;
       const hi=map.hgt[y]?.[x],lo=map.hgt[Y]?.[X];
+      if(bankAt(map,x,y)||bankAt(map,X,Y))return null;
       if(lo==null||!(hi>lo)||map.stair?.[x+','+y]||map.stair?.[X+','+Y])return null;
       return [hi,lo];
     }

@@ -26,6 +26,7 @@ export const emblemOf = m => !hasEmblem(m) ? '' : typeof m.emblem === 'string' ?
 export const WALL_K = .9;    // 벽 조각을 세울 때의 높이 배율. 조각은 높이 60(용마루 64)으로 만들고, 게임이 0.9배로 세워 용마루까지가 사람 키의 2.7배가 되게 한다(기준 그림에서 잰 값)
 export const WALL_TOP = 60;  // 세운 벽의 꼭대기(용마루 64 × 0.9)에 조금 더한 높이. 카메라가 이 높이까지 화면에 담는다
 
+import { silkBay } from './room-silks.js';
 export function roomWalls(m) {
   const W = m.w * TS, H = m.h * TS, kind = wallKind(m), P = [], XW = 6, yS = H - 8, inner = W - 2 * XW, face = hasEmblem(m);
   const add = (key, x, y, o) => P.push({ key, x, y, z: 0, rot: 0, sx: 1, ...o });
@@ -44,6 +45,7 @@ export function roomWalls(m) {
   const edges = [XW + 2, ...posts, W - XW - 2];
   if (WIN[kind]) for (let k = 0; k < edges.length - 1; k++) { const c = (edges[k] + edges[k + 1]) / 2, wide = edges[k + 1] - edges[k];
     if (face && Math.abs(c - W / 2) < 8) continue;
+    if(silkBay(m,k,edges.length-1)){add('silk',c,TS+2,{z:17});continue;}
     const cnt = Math.max(1, Math.min(WIN[kind], Math.floor((wide - 6) / TS))); for (let q = 0; q < cnt; q++) add('rw_window', c + TS * (q - (cnt - 1) / 2), TS, { z: 17 }); }
   if (face) add('rw_emblem', W / 2, TS, { z: 20 });
   // 옆벽: 세 조각마다 사이기둥, 그 사이에 창 하나

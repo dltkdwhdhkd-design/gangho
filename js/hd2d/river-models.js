@@ -1,4 +1,7 @@
 // Shared Blender meshes for the visible field window. Each species gets a single instanced draw.
+import { plumVariant,plumInstances } from './painted-plums.js';
+import { exposedFace } from './mountain-banks.js';
+import { onApproach } from './court-paths.js';
 const names={pine:'pine',oldpine:'pine',miniFirs:'pine',fir:'fir',snowpine:'fir',riverwillow:'willow',willow:'willow',miniPlum:'plum',plum:'plum',bamboo:'bamboo',canes:'bamboo',miniBamboo:'bamboo',goldtree:'ginkgo',ginkgo:'ginkgo',miniGrove:'camphor',persimmon:'camphor',reedbed:'reed',miniReeds:'reed',ferns:'fern',shrub:'azalea'};
 const stamps={tree_dead:'snag',grove_dead:'snag',t_dead:'snag',grove_white:'fir',tree_white:'fir',grove_pink:'plum',tree_pink:'plum',grove_pine:'pine',flower1:'chrysanthemum',flower2:'aster',flower3:'azalea',flower4:'aster',g_yflowers:'chrysanthemum',g_wflowers:'aster',g_fern:'fern',g_tallgrass:'grass',g_reeds:'reed',g_ivy:'fern',g_bush:'azalea'};
 Object.assign(stamps,{bush1:'azalea',bush2:'grass',bush3:'azalea',bush4:'fern',fern1:'fern',fern2:'fern',t_shrubs:'azalea'});
@@ -9,12 +12,16 @@ export function foliageName(stamp,scenery,r){
   return species+(variants.has(species)?r<.5?'0':'1':'');
 }
 const hash=(x,y)=>{let v=Math.imul(Math.round(x)+31,1103515245)^Math.imul(Math.round(y)+19,16777619);return ((v^(v>>>15))>>>0)/4294967296;};
-export function groveBatches(T,map,library,heightAt,hs,zs){
+export function groveBatches(T,map,library,heightAt,hs,zs,plumLibrary,plumTexture){
   if(!library)return null;
+  const plum=plumInstances(T,map,plumLibrary,plumTexture,heightAt,hs,zs);
   const meshes=new Map(),dummy=new T.Object3D();
   return {
     add(stamp,scenery,x,y,height){
-      const r=hash(x,y),name=foliageName(stamp,scenery,r);if(!name)return false;
+      const r=hash(x,y),i=plumVariant(stamp,scenery,r);
+      if(i!=null&&plum?.add(i,x,y,height,r))return true;
+      const name=foliageName(stamp,scenery,r);if(!name)return false;
+      if(['fern','reed','azalea','aster','grass','chrysanthemum'].includes(name)&&(exposedFace(map,x/16,y/16)||onApproach(map,x/16,y/16)))return true;
       const node=library.getObjectByName(name),src=node?.isMesh?node:node?.children.find(o=>o.isMesh);if(!src)return false;
       const size=height*(.93+.15*r);dummy.position.set(x,heightAt(map,x,y)-.28,y*zs);
       dummy.rotation.set(0,r*6.283,0);dummy.scale.set(size,size*hs,size*zs);dummy.updateMatrix();
@@ -22,6 +29,7 @@ export function groveBatches(T,map,library,heightAt,hs,zs){
       meshes.get(src).push(dummy.matrix.clone().multiply(src.matrixWorld));return true;
     },
     finish(group){
+      plum?.finish(group);
       for(const [src,matrices] of meshes){
         const mesh=new T.InstancedMesh(src.geometry,src.material,matrices.length);
         matrices.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.computeBoundingSphere();

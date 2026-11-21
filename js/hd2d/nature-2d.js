@@ -3,6 +3,7 @@ import {foliageNames,foliageName,animalSizes} from './river-models.js';
 import {fieldProps} from './field-art.js';
 import {localScenery} from './wilderness.js';
 
+import { plumVariant, drawPaintedPlum } from './painted-plums.js';
 const sheets={};
 function atlas(name){
   if(!sheets[name]){
@@ -19,9 +20,11 @@ export function drawPlant2D(c,map,stamp,w0){
     const r=((Math.imul(Math.round(x)+31,1103515245)^Math.imul(Math.round(y)+19,16777619))>>>0)/4294967296;
     const n=foliageName(stamp.name,scenery?.[0],r),index=foliageNames.indexOf(n);
     const size=(scenery?.[1]||(index>=0&&index<16?38:8))*sc;
-    plants.set(stamp,index<0?null:{index,x,y,h:size*1.49});
+    const plum=plumVariant(stamp.name,scenery?.[0],r);
+    plants.set(stamp,index<0&&plum==null?null:{index,plum,x,y,h:size*1.49});
   }
   const p=plants.get(stamp);if(!p)return false;
+  if(p.plum!=null&&drawPaintedPlum(c,p.plum,p.x,p.y,p.h*.84))return true;
   const img=atlas('groves');if(!img)return false;
   const w=p.h*128/140;
   c.drawImage(img,p.index%6*128,Math.floor(p.index/6)*140,128,140,p.x-w/2,p.y-p.h*.82,w,p.h);return true;

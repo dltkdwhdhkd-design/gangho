@@ -1,7 +1,8 @@
 import { bridgeHeight } from './walkways.js';
 import { loadWildernessArt } from '../landscape.js';
+import { loadJoineryAtlas } from './joinery.js';
 import { loadRegionalAtlas } from './regional-buildings.js';
-const materials = 'grass moss road yard slab plank sand snow cedar roof plaster crag'.split(' ');
+const materials = 'grass moss road yard slab plank sand snow cedar roof plaster crag painted-plums interior-joinery room-boards room-brick mountain-granite court-flags'.split(' ');
 const margins = ['bank_ledge','bank_reeds','trail_dry','trail_fern','trail_paving','trail_frost'];
 const scenery = {
   statue: ['lion_guard', 23], statue_big: ['lion_guard', 33],
@@ -22,7 +23,7 @@ const scenery = {
 };
 export const fieldProps = (name, biome) => biome === 'snow' && ['tree_pine','t_pine','tree_round'].includes(name)
   ? ['fir', 54] : scenery[name];
-export const floorMaterial = { fl_pine: 'plank', fl_dark: 'cedar', fl_slab: 'slab', fl_brick: 'yard', fl_scale: 'slab', fl_mat: 'plank' };
+export const floorMaterial = { fl_pine: 'room-boards', fl_dark: 'room-boards', fl_slab: 'room-brick', fl_brick: 'room-brick', fl_scale: 'court-flags', fl_mat: 'room-boards' };
 export const walking = {};
 export let combatLayout;
 const loading = new Map();
@@ -54,7 +55,7 @@ export function loadCastIndex(images) {
 }
 export async function loadFieldArt(images) {
   const names = new Set([...materials, ...margins, ...Object.values(scenery).map(a => a[0]), 'fir']);
-  await Promise.all([loadCastIndex(images),loadRegionalAtlas(),loadWildernessArt().then(a=>{
+  await Promise.all([loadCastIndex(images),loadRegionalAtlas(),loadJoineryAtlas(),loadWildernessArt().then(a=>{
     for(const [key,im] of Object.entries(a.props))images['field_'+key]=im;
   }), ...[...names].map(name=>loadActorPage(images,name))]);
   const leads = [walking.type_BlueSamurai, walking.type_JadeRunner].filter(Boolean);

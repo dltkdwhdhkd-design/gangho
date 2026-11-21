@@ -1,3 +1,4 @@
+import { paintApproaches } from './hd2d/court-paths.js';
 // 지도. 타일 단위로 길과 물을 깔고 소품을 얹는다.
 import { G, TS, rint, pick, IMG } from './core.js';
 import { FURN, HOUSES } from './items.js';
@@ -66,6 +67,7 @@ class MapDef {
   // 건물 입구: 스탬프 아래쪽 가운데에 포탈을 만든다
   house(name, tx, ty, to, ex, ey, dir = 1, o = {}) {
     this.put(name, tx, ty, o); const s = STAMPS[name], cx = tx * this.k * TS + s[3] / 2 + (o.doorDx || 0), by = ty * this.k * TS + s[4];
+    this.stamps.at(-1).doorTo = to;
     this.portals.push({ x: cx - 9, y: by - 4, w: 18, h: 9, to, tx: ex, ty: ey, dir, door: true, when: o.when, lock: o.lock });
     return this;
   }
@@ -122,6 +124,7 @@ class MapDef {
       const bi = { grass: 0, deep: 1, sand: 2, plain: 3, rose: 3, snow: 4, dusk: 5 }[this.biome] ?? 0, Bm = this.bm || this.g.map(r => r.map(() => bi));  // 쿼터뷰 마을은 칸마다 바닥(bm)과 칠할 때만 쓰는 흙 얼룩(gPaint)을 따로 둔다
       G.world.SOFT.on = !!this.isoNative; try { G.world.paintArea(x, 0, 0, this.w, this.h, this.gPaint || this.g, Bm, this.w, this.h); } finally { G.world.SOFT.on = false; }
     } else paintGround(x, this.g, this.biome);
+    if(this.approaches)paintApproaches(x,this,TS);
     if (this.pave) for (const p of this.pave) paintPave(x, p);
     for (const s of this.ground || []) drawIso(x, s);
     // 2D: 단의 가장자리를 그린다. 남쪽이 낮으면 높은 칸 아래에 그늘 띠, 북쪽이 낮으면 가는 줄, 동서로 높이가 다르거나 계단 옆이면 세로 줄(안 그리면 보이지 않는 벽이 된다). 계단 칸에는 디딤 줄

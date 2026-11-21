@@ -7,6 +7,7 @@ import { proj, toGrid, toScreen, walkDir } from './isoroom.js';
 import { mark as occMark, covered, behind } from './occl.js';
 import { drawStamp, STAMPS } from './tiles.js';
 import { drawPlant2D,drawAnimal2D,drawFord2D } from './hd2d/nature-2d.js';
+import { drawFurniture2D } from './hd2d/joinery.js';
 import { drawRegional2D } from './hd2d/regional-buildings.js';
 import { landscapeOf,loadWildernessArt,paintLandscape,wildernessArt } from './landscape.js';
 import { terrainPace, travelLabels } from './field-travel.js';
@@ -351,7 +352,7 @@ export class Field {
     if (!m.live) occMark(list, p.x, p.y);  // 주인공이 건물이나 소품 뒤로 들어가면 그 그림을 옅게 그린다. 그 뒤에 선 사람도 같이 보인다
     const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
-      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; if (o.fade) c.globalAlpha = .42; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); const size=STAMPS[o.s.archName||o.s.src||o.s.name]; if (size && (drawPlant2D(c,m,o.s,size[3]) || drawRegional2D(c,m,o.s,size[3],size[4]))) {} else if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; c.globalAlpha = 1; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
+      if (o.s) { if (G.warfx?.hide(m, o.s)) continue; if (o.fade) c.globalAlpha = .42; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); const size=STAMPS[o.s.archName||o.s.src||o.s.name]; if (size && (drawFurniture2D(c,m,o.s,size) || drawPlant2D(c,m,o.s,size[3]) || drawRegional2D(c,m,o.s,size[3],size[4]))) {} else if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; c.globalAlpha = 1; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (drawAnimal2D(c,a)) continue; if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {

@@ -8,12 +8,19 @@
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { mountainGate } from './hd2d/gate.js';
 import { addEscarpments } from './hd2d/escarpment.js';
+import { paintApproaches } from './hd2d/court-paths.js';
+import { makeAwning } from './hd2d/trade-stalls.js';
+import { mountSilk } from './hd2d/room-silks.js';
+import { lightFloweringPlums } from './hd2d/painted-plums.js';
+import { bankAt, bankHeight, drawBanks } from './hd2d/mountain-banks.js';
+import { weatheredStones } from './hd2d/bedrock.js';
 import { idleCel, idleFacing, standing } from './hd2d/field-idle.js';
 import { addWalkways, bridgeHeight } from './hd2d/walkways.js';
 import { landscapeOf, paintLandscape, warmTravelEdges } from './landscape.js';
 import { daylight, outdoorUniforms, outdoorMaterial } from './hd2d/outdoor-light.js';
 import { reliefMesh, localScenery, sceneryBatch, addRiverMargins, addSurround, addVista } from './hd2d/wilderness.js';
 import { groveBatches,syncWildlife } from './hd2d/river-models.js';
+import { furnitureKey, frontageKey, placeFurniture, dressFront, topOfFurniture } from './hd2d/joinery.js';
 import { architectureOf, regionalBuilding } from './hd2d/regional-buildings.js';
 import { fieldProps, floorMaterial, walking, loadFieldArt, loadCastIndex, loadActorPage, loadCombatArt, paintWorldSurface, paintMargins, drawCourt, combatLayout } from './hd2d/field-art.js';
 import { motionFor, drawMotion } from './hd2d/combat-art.js';
@@ -239,6 +246,7 @@ async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { Meshopt
       if (pal) { const pt = pal.rock ? rockTex(ROCKT_OK(kind) || pal.rock) : previewTex(fieldKitTexture((wl && WKIND[kind]?.[nm]) || pal.t, wl || furn)), m = pt ? palMat(pt, pal.lie) : new T.MeshLambertMaterial({ color: sm.color }); if (sh !== 1) m.color.multiplyScalar(sh); if (furn) m.color.multiplyScalar(FURNK); return m; }
       const tt = rk && kind ? rockTex(kind) : t, m = new T.MeshLambertMaterial({ map: tt || null, color: tt ? 0xffffff : rk ? 0x8a8478 : sm.color, vertexColors: vc }); if (glow) { m.emissive = new T.Color(nm === 'win' ? 0xffb050 : nm === 'win_paper' ? 0xffe6b8 : 0xff6a30); if (tt) m.emissiveMap = tt; m.emissiveIntensity = 0; m.userData.paper = nm === 'win_paper'; GLOW.push(m); }
       // 바위: 그늘진 면이 까맣게 죽지 않게 제 빛깔을 조금 낸다(모난 면마다 밝기가 크게 달라 얼룩져 보였다)
+      if(n==='interior_joinery')m.color.multiplyScalar(1.38);
       if (rk && tt) { m.emissive = new T.Color(0xffffff); m.emissiveMap = tt; m.emissiveIntensity = .2 * sh; }
       if (sh !== 1) m.color.multiplyScalar(sh); return tt ? sharpen(m) : m; };
     const mkf = (sh, kind) => { const b = mkm(sh, kind), f = holed(b); if (top) f.customProgramCacheKey = () => 'sharp-top-hole'; else if (b.userData.pal) f.customProgramCacheKey = () => 'sharp-pal-hole'; return f; };
@@ -489,7 +497,7 @@ function groundArt(m, base) {
   if (m.room) return null;  // 방 바닥은 2D 마루·돌바닥 그림 그대로
   if (!art() || !PV.g_grass || m.room) return null;
   const W2 = Math.round(m.w * TS * DOT), H2 = Math.round(m.h * TS * DOT), c = mk(W2, H2), x = c.getContext('2d'), out = x.createImageData(W2, H2), o = out.data;
-  const GB = { sand: 'g_sand', snow: 'g_snow' }[m.biome], pats = {}; for (const k in GROUND) { const nm = k === '0' && GB && PV[GB] ? GB : GROUND[k], im = (!m.stage && PV['field_' + ({ g_grass: m.biome === 'deep' ? 'moss' : 'grass', g_road: 'road', g_yard: 'yard', g_plank: 'plank', g_cobble: 'slab', g_snow: 'snow', g_sand: 'sand' }[nm])]) || PV[nm]; if (!im) continue; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
+  const GB = { sand: 'g_sand', snow: 'g_snow' }[m.biome], pats = {}; for (const k in GROUND) { const nm = k === '0' && GB && PV[GB] ? GB : GROUND[k], im = (!m.stage && PV['field_' + ({ g_grass: m.biome === 'deep' ? 'moss' : 'grass', g_road: 'road', g_yard: 'yard', g_plank: 'plank', g_cobble: 'court-flags', g_snow: 'snow', g_sand: 'sand' }[nm])]) || PV[nm]; if (!im) continue; const q = mk(im.width, im.height).getContext('2d', { willReadFrequently: true }); q.drawImage(im, 0, 0); const d = q.getImageData(0, 0, im.width, im.height).data;
     if (nm === 'g_road' && m.biome === 'snow') for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; d[i] = l * .5 + 120; d[i + 1] = l * .5 + 124; d[i + 2] = l * .45 + 136; }  // 눈 위 길: 밟아 다진 회색 눈
     if (nm === 'g_grass') { const bt = BIOME_T[m.biome] || BIOME_T.grass; for (let i = 0; i < d.length; i += 4) { const l = d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; [d[i], d[i + 1], d[i + 2]] = bt(d[i], d[i + 1], d[i + 2], l).map(v => Math.max(0, Math.min(255, v))); } }  // 풀 그림을 땅 종류(모래, 눈, 짙은 숲, 어스름)에 맞게 다시 칠한다
     pats[k] = { w: im.width, h: im.height, d }; }
@@ -531,6 +539,7 @@ function groundArt(m, base) {
   }
   x.putImageData(out,0,0);
   if(!m.stage)paintMargins(x,m,{x0:0,y0:0,x1:m.w,y1:m.h},PV,cell);
+  paintApproaches(x,m,cell,PV);
   if(m.court)drawCourt(x,m.court,cell);
   return c;
 }
@@ -561,6 +570,8 @@ function hAt(m, x, y) {
     }
     return m?.id === 'world' ? bridgeHeight(m,x,y,TS)*HS : 0;
   }
+  const surface=m.banks&&bankHeight(m,x/TS,y/TS,LV);
+  if(surface!=null)return surface*HS;
   const tx = Math.floor(x / TS), ty = Math.floor(y / TS), c = corners4(m, tx, ty);
   const f = Math.min(1, Math.max(0, y / TS - ty)); return c[0] + (c[2] - c[0]) * f;
 }
@@ -575,7 +586,7 @@ function terrain(m, gt) {
   const quad = (B, a, b, c, d, ua, ub, uc, ud, n, ca = 1, cb = ca, cc = cb, cd = ca) => { for (const [q, u, k] of [[a, ua, ca], [b, ub, cb], [c, uc, cc], [a, ua, ca], [c, uc, cc], [d, ud, cd]]) { B.P.push(...q); B.U.push(...u); B.N.push(...n); B.C.push(k, k, k); } };
   const rocky = m.face === 'rock' && !!previewTex('cl_rock'), stepArt = !!previewTex('cl_step');
   const lvOf = (x, y) => m.hgt[y]?.[x] ?? 0, isStair = (x, y) => !!m.stair?.[x + ',' + y];
-  const useStone = art() && (!m.room || m.roomKind==='hall') && m.face !== 'rock' && Object.keys(m.stair || {}).length &&
+  const useStone = art() && (!m.room || m.roomKind==='hall') && (m.mountainTerraces || m.face !== 'rock') && Object.keys(m.stair || {}).length &&
     STONE_PARTS.every(k => KITS.has(k)) && STONE_PARTS.map(needModel).every(Boolean);
   const modelSteps = useStone && stoneStairs(m, TS, LV, (key, x, y, z, sx = 1) => {
     const g = piece(key, m.wallKind, x, y, z, 0, sx);
@@ -584,6 +595,7 @@ function terrain(m, gt) {
     for (const mesh of g.userData.ms) mesh.userData.shared = true;
   });
   for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
+    if(bankAt(m,x,y))continue;
     const [nw, ne, sw, se] = corners4(m, x, y), x0 = x * TS, x1 = x0 + TS, z0 = z(y), z1 = z(y + 1), u0 = x / m.w, u1 = (x + 1) / m.w, v0 = 1 - y / m.h, v1 = 1 - (y + 1) / m.h, sh = lowShade(lvOf(x, y));
     const d = nw - sw, kind = m.g[y][x] === 4 ? 'wood' : rocky ? 'rock' : 'stone';
     if (modelSteps && modelSteps.has(x + ',' + y)) {
@@ -623,14 +635,14 @@ function calm(x, w, h) { const d = x.getImageData(0, 0, w, h), a = d.data; for (
 // 벽의 겉(회벽, 판자, 벽돌 …)은 재질을 고를 때 정한다(as(1, 벽 종류)). 사람을 가리면 뚫어 보이게 userData를 단다(fades)
 const GATEK = 1.5;  // 새 화면에서 대문 그림의 배율(위 setMap의 대문 대목)
 const FURNK = 1.35;  // 가구 조각(fn_)의 밝기. 방의 빛만 받으면 탁자 윗면이 칠한 색의 0.7배로 나와 ChatGPT의 배치 예시보다 칙칙했다(긴 탁자 윗면의 밝기 58 → 72, 예시 82)
-const FLDOT = 3.2, FLK = { fl_scale: 1.75, fl_dark: 1.9, fl_pine: 1.45, fl_brick: 1.6, fl_mat: 1.45, fl_slab: 1.6 };  // 방 바닥 무늬의 굵기(평면도 한 점에 도트 3.2점. 비늘 하나가 사람 키의 4분의 1쯤 된다)와 밝기. 방의 빛을 그대로 받으면 바닥이 그린 색의 절반 밝기로 가라앉아 무늬가 묻힌다(벽의 절반). 기준 그림(docs/ref/ws-interior.jpg)은 바닥과 벽이 비슷하게 밝고, ChatGPT의 배치 예시는 바닥이 그린 색 그대로 보인다. 짙은 무늬일수록 더 올린다
+const FLDOT = 2.4, FLK = { fl_scale: 1.22, fl_dark: .93, fl_pine: 1.14, fl_brick: 1.12, fl_mat: 1.08, fl_slab: 1.15 };  // 방 바닥 무늬의 굵기(평면도 한 점에 도트 3.2점. 비늘 하나가 사람 키의 4분의 1쯤 된다)와 밝기. 방의 빛을 그대로 받으면 바닥이 그린 색의 절반 밝기로 가라앉아 무늬가 묻힌다(벽의 절반). 기준 그림(docs/ref/ws-interior.jpg)은 바닥과 벽이 비슷하게 밝고, ChatGPT의 배치 예시는 바닥이 그린 색 그대로 보인다. 짙은 무늬일수록 더 올린다
 const TALL = /^rw_(wall|post|pillar|column)$/;  // 높이를 WALL_K배로 세우는 조각(벽 높이를 기준 그림의 사람 키 2.7배에 맞춘다. 무늬는 자리로 입히니 늘어나지 않는다)
 function piece(key, kind, x, y, z, rot = 0, sx = 1) { const g = new T.Group(), o = MODELS[key].clone(true), ms = [], side = rot % 2 !== 0;
   o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry).as(1, kind); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; ms.push(c); } }); g.add(o);
   if (side && /^rw_/.test(key)) for (const c of ms) c.castShadow = false;  // 옆벽은 그림자를 드리우지 않는다. 빛이 조금 동쪽에서 와서 동쪽 벽을 따라 바닥에 긴 그늘이 졌고, 그 구석에 놓은 것(술통, 분재)이 묻혔다
   g.scale.set(sx * (side ? ZS : 1), HS * (TALL.test(key) ? WALL_K : 1), side ? 1 : ZS); g.rotation.y = rot * Math.PI / 2; g.position.set(x, z * HS, y * ZS); g.userData = { wall: true, ms }; propG.add(g); return g; }
-function roomKit(m) { const { kind, parts } = roomWalls(m); m.wallKind = kind; if (!parts.map(q => needModel(q.key)).every(Boolean)) return false;
-  for (const q of parts) { piece(q.key, kind, q.x, q.y, q.z, q.rot, q.sx); if (q.key === 'rw_emblem') glyph(emblemOf(m), q.x, q.y + 1, q.z + 15); } return true; }
+function roomKit(m) { const { kind, parts } = roomWalls(m); m.wallKind = kind; if (!parts.filter(q=>q.key!=='silk').map(q => needModel(q.key)).every(Boolean)) return false;
+  for (const q of parts) { if(q.key==='silk'){mountSilk(T,propG,m,q.x,q.y,q.z,HS,ZS,PV['field_interior-joinery']);continue;} piece(q.key, kind, q.x, q.y, q.z, q.rot, q.sx); if (q.key === 'rw_emblem') glyph(emblemOf(m), q.x, q.y + 1, q.z + 15); } return true; }
 // 문양판의 글자: 글꼴로 한 글자를 작게 찍어 도트로 굳힌다(반투명을 없앤다). 그 글자가 글꼴에 없으면(네모로 찍히면) 얹지 않는다
 const GLY = {};
 function glyphTex(ch) { if (ch in GLY) return GLY[ch]; const N = 30, draw = t => { const c = mk(N, N), x = c.getContext('2d', { willReadFrequently: true }); x.font = `bold 25px Gungsuh, Batang, "Noto Serif CJK KR", "Noto Serif KR", "Source Han Serif K", "Nanum Myeongjo", serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#241a12'; x.fillText(t, N / 2, N / 2 + 1); return [c, x]; };
@@ -652,6 +664,8 @@ function furniture(s, f, mdl) { const { sol, side, k, fit, n } = furnFit(s, f, m
     g.scale.multiplyScalar(k); if (side) g.scale.z *= fit; else g.scale.x *= fit; g.userData.furn = true; } }
 // 가구 위에 얹은 것(m.on: 찻주전자, 촛대, 향로)이 설 높이: 발 자리를 덮는 가구가 조각으로 서 있으면 그 윗면, 아직 그림이면 그림 키의 절반쯤
 function onTop(m, s, cx, fy) { const q = m.stamps.find(u => u !== s && u.sol && cx >= u.sol.x && cx <= u.sol.x + u.sol.w && fy >= u.sol.y && fy <= u.sol.y + u.sol.h); if (!q) return 0;
+  const joinery = art() && MODELS.interior_joinery && topOfFurniture(furnitureKey(m,q),HD.actK(m));
+  if(joinery)return joinery;
   const f = FURN[q.name], mdl = f && KITS.has(f.key) && needModel(f.key); return mdl ? furnFit(q, f, mdl).top : STAMPS[q.name][4] * (q.sc || 1) * .5; }
 function column(s) { const x=s.x+STAMPS[s.name][3]/2, y=s.base-3; piece('rw_column',curMap.wallKind,x,y,hAt(curMap,x,y)/HS); }
 function cliffKit(m) {
@@ -760,6 +774,7 @@ function releaseProp(node) {
   if(!node.isMesh)return;
   if(node.isInstancedMesh)node.dispose();
   if(!node.userData.shared)node.geometry.dispose();
+  if(node.userData.disposePaint)node.material.dispose();
   if(node.userData.ownPaint){node.material.map.dispose();node.material.dispose();}
 }
 const dropSet = s => { for (const o of s.props) o.traverse(releaseProp); if (s.ground) { s.ground.geometry.dispose(); s.ground.material.map.dispose(); s.ground.material.dispose(); } for (const o of s.cliffs) o.geometry.dispose(); if (s.water) s.water.geometry.dispose(); };
@@ -799,13 +814,13 @@ function setMap(m) {
   let gt; if (ft) { gt = ft.clone(); gt.repeat.set(Wm * FLDOT / ft.image.width, Dm / ZS * FLDOT / ft.image.height); gt.needsUpdate = true; }
   else { gt = new T.CanvasTexture((!land && !m.win && groundArt(m, gc)) || gc); gt.colorSpace = T.SRGBColorSpace; gt.anisotropy = R.capabilities.getMaxAnisotropy(); gt.minFilter = T.LinearMipmapLinearFilter; }
   if (m.hgt && m.face === 'rock') { TOPU.map = gt; (TOPU.uGS.value ||= new T.Vector2()).set(1 / Wm, 1 / Dm); for (const t of TOPS) { if (!t.map) t.needsUpdate = true; t.map = gt; } }  // 절벽 조각의 윗면이 이 지도의 땅 그림을 받게
-  if (m.hgt) { ground = terrain(m, gt); cliffKit(m); }  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다. 바위 지도는 그 면에 절벽 조각을 붙인다
+  if (m.hgt) { ground = terrain(m, gt); cliffKit(m); drawBanks(T,propG,m,gt,previewTex('field_mountain-granite'),TS,LV,HS,ZS); }  // 높낮이가 있는 지도: 칸마다 높이대로 들고 단 사이에 축대를 세운다. 바위 지도는 그 면에 절벽 조각을 붙인다
   else if(land)ground=reliefMesh(T,land,WN,TS,HS,ZS,sharpen(new T.MeshLambertMaterial({map:gt})));
   else { ground = new T.Mesh(new T.PlaneGeometry(Wm, Dm), sharpen(new T.MeshLambertMaterial({ map: gt }))); ground.rotation.x = -Math.PI / 2; ground.position.set(OX + Wm / 2, 0, OZ + Dm / 2); }
   if (ft) ground.material.color.setScalar(FLK[floorOf(m)] || 1.45);
   if(!land&&openAir(m))outdoorMaterial(ground.material);
   ground.receiveShadow = true; ground.userData.map = m; scene.add(ground);
-  const groves=art()&&!m.room?groveBatches(T,m,MODELS.river_land,hAt,HS,ZS):null;
+  const groves=art()&&!m.room?groveBatches(T,m,MODELS.river_land,hAt,HS,ZS,needModel('painted_plums'),previewTex('field_painted-plums')):null;
   if (art()) addWalkways(T,propG,m,WN,TS,HS,ZS,hAt,previewTex,MODELS.river_land);
   if(land){addRiverMargins(T,propG,m,WN,land,TS,HS,ZS,previewTex,matOf,hAt,groves);addSurround(T,propG,m,TS,HS,ZS);}
   if(art())addVista(T,propG,m,WN,land,TS,ZS);
@@ -826,6 +841,7 @@ function setMap(m) {
   skirt.material.color.setRGB(r / n / 255, g / n / 255, b / n / 255, T.SRGBColorSpace).multiplyScalar(.82); skirt.scale.set(Wm + 4000, Dm + 4000, 1); skirt.position.set(OX + Wm / 2, m.hgt ? lowest(m) - 1 : land?-22:-.6, OZ + Dm / 2);
   // 소품: 2D가 그리던 순서(발 높이 순)를 깊이로 옮긴다. 같은 높이면 나중 것이 아주 조금 앞
   const regionalScenery=land?.isWorld?sceneryBatch(T,m,ZS,HS,hAt):null;
+  if(art()&&(m.room||(!m.stage&&m.id!=='world'&&m.stamps.some(s=>s.marketUse||frontageKey(m,s)))))needModel('interior_joinery');
   const list = m.stamps.map((s, i) => ({ s, i, z: s.flat ? s.y + TS : s.on ? s.y + STAMPS[s.name][4] * s.sc : s.base })).sort((a, b) => a.z - b.z || a.i - b.i), GEO = STANDG;
   // 블렌더 무대·방 모형(m.models: [{ key, x, y }], tools/blender/stages.py·rooms.py). 좌표는 평면도 그대로(x, 북쪽이 +y), 지도 (x, y)에 놓는다. 다 읽혔으면 옛 소품(s.alt)은 뺀다
   const useModels = art() && (m.models || []).length > 0 && m.models.map(q => needModel(q.key)).every(Boolean);
@@ -837,6 +853,12 @@ function setMap(m) {
   list.forEach(({ s, z }, k) => {
     if (s.alt && useModels) return;
     if (walled && s.name === 'pillar' && MODELS.rw_column) { column(s); return; }  // 방 안의 기둥 그림은 두리기둥 조각으로
+    if(art()&&s.marketUse&&s.name==='awning'){propG.add(makeAwning(T,m,s,STAMPS[s.name],HS,ZS,hAt));return;}
+    const key=art()&&furnitureKey(m,s);
+    if(key){
+      const item=placeFurniture(T,m,s,STAMPS[s.name],key,needModel('interior_joinery'),MODELM,hAt,HS,ZS,HD.actK(m));
+      if(item){propG.add(item);return;}
+    }
     if (art() && m.room && !s.flat && FURN[s.name] && KITS.has(FURN[s.name].key)) { const mdl = needModel(FURN[s.name].key); if (mdl) { furniture(s, FURN[s.name], mdl); return; } }  // 가구 그림은 조각이 들어와 있으면 조각으로
     // 대문(ChatGPT HD3): 구화성은 성문, 문파·세가는 대문, 산문은 패방(gate_arch). 받은 대문과 성문은 문이 닫힌 그림인데 그리로 드나드니, 문짝 자리를 비운 것(_open. tools/walls_hd.py)을 쓴다.
     // 크기는 1.5배(GATEK): 그림의 가로를 2D 그림 폭(34점)에 맞추면 문이 사람 키만 해서 사람이 못 지나갈 문이 된다. 1.5배면 문의 폭이 21점, 높이가 사람 키의 1.3배다
@@ -846,7 +868,13 @@ function setMap(m) {
     if(profile){
       const library=needModel('regional_'+profile.style);
       const building=library&&regionalBuilding(T,m,s,st,profile,library,MODELM,hAt,HS,ZS,TS);
-      if(building){propG.add(building);return;}
+      if(building){
+        propG.add(building);
+        const key=frontageKey(m,s);
+        const display=key&&dressFront(T,m,s,key,needModel('interior_joinery'),MODELM,hAt,HS,ZS,TS);
+        if(display)propG.add(display);
+        return;
+      }
     }
     const scenery = !s.flat && art() && ((land && localScenery(m,s,cx,z)) || ((!m.stage||m.encounter)&&fieldProps(s.name, m.biome)));
     if(scenery && !scenery[0])return;
@@ -872,6 +900,8 @@ function setMap(m) {
       propG.add(gate); return;
     }
     const ef = !s.flat && st.length > 5 && (pv ? EAVE_PV : EAVE)[s.name];
+    const naturalRock=art()&&weatheredStones(T,m,s,st,hAt,HS,ZS,previewTex);
+    if(naturalRock){propG.add(naturalRock);return;}
     const rk = !s.flat && art() && rockKey(s), rm = rk && needModel(rk);
     if (rm) { const g = new T.Group(), o = rm.clone(true), ms = [], tone = ROCKB[m.biome] || ''; o.traverse(c => { if (c.isMesh) { const M = MODELM.get(c.geometry).as(1, tone); c.userData = { M, owner: g }; c.material = M.m; c.customDepthMaterial = M.d; ms.push(c); } }); g.add(o);
       // 자리: 가로는 그림의 가운데. 세로는 막힘 상자의 가운데(없으면 그림 밑에서 조금 위). 바위산은 밑동 줄이 모형의 앞
@@ -1139,7 +1169,7 @@ const ROOMSUN = [.14, .8, .58];
 // 방 안의 빛: 바깥의 낮 빛(센 해, 누렇게 물들이기)을 그대로 쓰면 방이 온통 주황이다(기준 그림은 주황 8%, 거의 검정 48%, 밝기 48).
 // 해를 약하게, 물들이기를 빼고, 채도를 낮추고, 낮에도 등불을 켠다. 방 바닥과 벽 그림(FL1, WL1)이 오면 다시 맞춘다
 // 2026-11-21: 직접 잰 방(소림의 방, 무당 삼청전 안)은 밝기 37, 거의 검정이 5할이고 등롱 둘레만 밝았다. 우리 방은 밝기 52~64, 거의 검정 5~13%였다. 해와 하늘빛을 줄이고 등불을 키워 밝기 40~58, 거의 검정 14~30%로 옮겼다(사람이 어둠에 묻히지 않는 데까지만)
-const ROOMT = { day: { sunC: '#fff0d8', sunI: 2.1, sky: '#9a9486', gnd: '#3a3026', hemI: .36, fill: .1, con: 1.36, vig: 1.1, tint: [1, .98, .91], expo: .86, sat: .74, warm: 0, lamp: .75 },
+const ROOMT = { day: { sunC: '#fff0d8', sunI: 2.1, sky: '#9a9486', gnd: '#3a3026', hemI: .48, fill: .17, con: 1.30, vig: 1.1, tint: [1, .98, .91], expo: .86, sat: .74, warm: 0, lamp: .75 },
   night: { sunC: '#ffc890', sunI: 1.5, sky: '#6e5e4c', gnd: '#261e16', hemI: .62, fill: .1, con: 1.2, vig: 1.05, tint: [1, .95, .88], expo: .9, sat: .85, warm: 0, lamp: 1.2 } }, ROOML = {};  // 밤의 방은 달빛이 아니라 촛불 빛이다: 누렇고 어둑하게, 등불 둘레가 밝다
 const openAir=m=>!!m&&!m.room&&!m.isoRoom&&!m.stage&&!inBattle&&art();
 const outdoors=m=>openAir(m)&&(m.id==='world'||!!landscapeOf(m));
@@ -1162,6 +1192,7 @@ let inBattle = false;
 const timeOf = () => { const t = timeOf0(); return inBattle && t === 'night' ? 'evening' : t; };
 function light() {
   const L=LT(),wild=openAir(curMap);
+  lightFloweringPlums(timeOf());
   outdoorUniforms(T,L,wild?(timeOf()==='night'?.24:1):0,curMap?.id==='world');
   PALU.uAmb.value = curMap?.room && timeOf() === 'night' ? .12 : .22;  // 조각이 스스로 내는 빛: 밤의 방에서는 줄인다(벽만 훤해 보인다)
   for (const m of GLOW) m.emissiveIntensity = m.userData.paper && curMap?.room ? (timeOf() === 'night' ? .1 : .8) : (L.lamp || 0) * .9;  // 밤에는 창에서 빛이 샌다. 방 안에서 보는 창호지(조각의 win_paper)는 거꾸로 낮에 바깥 빛으로 밝다
