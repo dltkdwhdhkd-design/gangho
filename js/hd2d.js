@@ -85,7 +85,7 @@ export const HD = {
     history.replaceState(history.state,'',url);
     try { localStorage.setItem('gangho_view',off?'2d':'hd'); } catch {}
     if(off)HD.hide();else camT.set(-1,0,0);
-  }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.off && !HD.failed && !!HD.opt.battle3d, proj, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
+  }, lowNow: () => fxNow() === 'low', fxNow: () => fxNow(), buildMs: () => buildMs, battleOk: () => HD.want && HD.ready && !HD.off && !HD.failed && !!HD.opt.battle3d, proj, roomFloorAt, pxPerUnit: () => H / (CHAR * HD.opt.zoom),
   aim(F) { setMap(F.m.live ? winOf(F) : F.m); camT.set(-1, 0, 0); placeCam(F, 0); fades(F); },
   // 시험용(tools/hd_occl_test.cjs): 평면도 (x, y)에 선 사람의 몸 다섯 점(머리, 가슴, 허리, 두 무릎) 가운데 지금 카메라에서 집·소품에 가려지는 점의 수, 가리는 것의 이름, 점마다 가려졌는지.
   // 걷어 낸 집과 옅어진 소품은 가리지 않는 것으로 친다. 몸의 크기는 그 지도의 사람 크기다(방 안은 PSC배. 전에는 방에서도 바깥 크기로 재서 허리가 무릎 높이에 있었다)
@@ -1111,6 +1111,15 @@ function placeCam(F, dt) {
 const V = () => new T.Vector3();
 // 평면도 (x, y)에서 높이 h인 곳 → 1280×720 화면 자리
 // 평면도 (x, y)에서 땅 위로 h만큼 뜬 점이 화면 어디에 오는가. 땅의 높이(단, 계단)를 더한다: 안 더하면 단 위에 선 사람의 느낌표·화살표·말풍선이 단 높이만큼 아래에 뜬다. g: 땅 높이를 따로 줄 때
+// Intersect a screen ray with the editable house floor in the same coordinate system as proj().
+function roomFloorAt(sx,sy,map) {
+  if (!cam || map?.id!=='myhouse') return null;
+  const ray=V().set(sx/W*2-1,1-sy/H*2,.5).unproject(cam).sub(cam.position);
+  if (Math.abs(ray.y)<1e-8) return null;
+  const distance=(hAt(map,0,0)-cam.position.y)/ray.y;
+  if (distance<=0) return null;
+  return [cam.position.x+distance*ray.x,(cam.position.z+distance*ray.z)/ZS];
+}
 function proj(x, y, h = 0, g = hAt(curMap, x, y)) { const v = V().set(x, h * HS + g, y * ZS).project(cam); return [(v.x + 1) / 2 * W, (1 - v.y) / 2 * H, v.z]; }
 
 // ── 가림: 주인공 몸을 카메라에서 본 줄이 앞의 그림의 칠해진 곳을 지나면 그 그림을 옅게(occl.js와 같은 판단) ──

@@ -2,7 +2,7 @@
 import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast, qSheet, QZ } from './core.js';
 import { Keys, josa } from './core.js';
 import { MAPS } from './maps.js';
-import { personRadius, resolveLanding } from './landing.js';
+import { personRadius, resolveLanding, portalOpen, canReachHouseExit } from './landing.js';
 import { drawIso, orderKeys, inside as isoInside } from './iso.js';
 import { proj, toGrid, toScreen, walkDir } from './isoroom.js';
 import { mark as occMark, covered, behind } from './occl.js';
@@ -12,7 +12,7 @@ import { drawFurniture2D } from './hd2d/joinery.js';
 import { drawRegional2D } from './hd2d/regional-buildings.js';
 import { landscapeOf,loadWildernessArt,paintLandscape,wildernessArt } from './landscape.js';
 import { terrainPace, travelLabels } from './field-travel.js';
-import { save } from './state.js';
+import { rememberFieldPosition, save } from './state.js';
 import { Story } from './story.js';
 import { openMenu } from './ui.js';
 import { DB } from './items.js';
@@ -26,11 +26,16 @@ export const PSC = 1.45;  // 방 안 사람 크기 배수(새 화면 js/hd2d.js�
 export class Field {
   constructor() { this.p = { x: 0, y: 0, dir: 0, walk: 0 }; this.npcs = []; this.spots = []; this.trigs = []; this.roam = []; this.cam = { x: 0, y: 0 }; this.busy = false; this.parts = []; this.t = 0; this.trail = []; }
   load(id, tx, ty, dir = 0, arrival) {
-    if (id === 'myhouse') { G.life.enterHouse(); tx = Math.floor(MAPS.myhouse.w / 2); ty = MAPS.myhouse.h - 2; }
+    if (id === 'myhouse') {
+      G.life.enterHouse();
+      if (arrival!=='saved' || !Number.isFinite(G.S.px) || !Number.isFinite(G.S.py)) {
+        tx=Math.floor(MAPS.myhouse.w/2);ty=MAPS.myhouse.h-2;
+      }
+    }
     if (id === 'mysect') G.sect.build();
     G.world.ensure(id);
     const from=this.m;
-    this.trail=[];const m=MAPS[id];G.world?.linkEdges?.(m);this.m=m;
+    this.trail=[];const m=MAPS[id];G.world?.linkEdges?.(m);this.m=m;this.state=G.S;
     G.S.map=id;(G.S.seen||={})[id]=1;G.S.flags['seen_'+id]=1;this.arrows=[];
     this.p.x=tx*TS*(m.k||1);this.p.y=ty*TS*(m.k||1);this.p.dir=dir;
     const returning=from?.room && from!==m && arrival!=='saved';
@@ -39,6 +44,10 @@ export class Field {
     if (id==='world' && G.hd?.active(m) && G.hd.opt.art) [this.p.x,this.p.y]=G.world.bridgeLanding(m,this.p.x,this.p.y,TS);
     this.refresh(true);
     this.peopleReady=G.hd?.preparePeople?.([...this.npcs,...this.roam]);
+    if (id==='myhouse' && arrival==='saved' && !canReachHouseExit(m,this.p.x,this.p.y)) {
+      const exit=m.portals.find(q=>q.to==='cheongha');
+      this.p.x=exit.x+exit.w/2;this.p.y=exit.y-TS;
+    }
     resolveLanding(this,door);
     this.camera(1);this.showHud();
     if (m.bgm && !this.noBgm) Sound.bgm(G.S.flags.night && m.nightBgm ? m.nightBgm : m.bgm);
@@ -81,7 +90,7 @@ export class Field {
   }
   updateGoal() { const e = $('#goal'); if (e) { const g = G.S.goal; e.style.display = g ? 'block' : 'none'; e.innerHTML = `<b>목표</b>${g}`; } const b = $('#mbtn'); if (b) b.textContent = G.S.pts > 0 || G.S.tp > 0 ? `메뉴 (${Keys.label('opt')}) · 올릴 점수 있음` : `메뉴 (${Keys.label('opt')})`; }
   async run(fn) {
-    if (this.busy) return; this.busy = true; Input.clear();
+    if (this.busy) return; rememberFieldPosition(); this.busy = true; Input.clear();
     try { await fn(); } catch (e) { console.error(e); }
     this.busy = false; stageClear(); G.hideCG && G.hideCG(); checkTitles(); if (G.jh && G.scene === 'field') G.jh.storyTime(); if (G.scene === 'field') { this.refresh(); if (!$('#goal')) this.showHud(); } G.S.px = this.p.x / (this.m.k || 1); G.S.py = this.p.y / (this.m.k || 1); G.S.dir = this.p.dir; save(); if(!G.mainPlot?.arrive())G.chronicle?.arrive();
   }
@@ -131,9 +140,8 @@ export class Field {
     // 포탈
     for (const q of G.mainPlot?.active()?[]:m.portals) {
       if (p.x > q.x && p.x < q.x + q.w && p.y > q.y && p.y < q.y + q.h) {
-        if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) { if (q.lock && !this._locked) { this._locked = true; const msg = q.lock; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(msg); this._locked = false; }); } return; }
+        if (!portalOpen(q,S)) { if (q.lock && !this._locked) { this._locked = true; const msg = q.lock; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(msg); this._locked = false; }); } return; }
         const shut = q.door && G.saga?.shut(m.id, q.to); if (shut) { if (!this._locked) { this._locked = true; p.y -= d.y * 3; p.x -= d.x * 3; this.run(async () => { await Story.line(shut); this._locked = false; }); } return; }  // 마교가 차지한 고을은 가게 문이 닫힌다
-        if (q.door && Input.dir().y > 0 && q.dir !== 0 && false) continue;
         this.run(async () => { Sound.sfx('select', .6); await this.warp(q.to, q.tx, q.ty, q.dir, 'portal'); });
         return;
       }
@@ -145,7 +153,7 @@ export class Field {
     }
     // 대화 대상
     const tgt = this.target(), hint = $('#thint');
-    if (hint) { if (tgt) { const txt = (G.touch ? '' : 'E ') + (tgt.hint || '말 걸기') + (tgt.talk && G.crime?.can(tgt) ? (G.touch ? ' · 공격' : ` · ${Keys.label('atk')} 공격`) : ''); if (hint._t !== txt) { hint._t = txt; hint.textContent = txt; } hint.style.display = 'block'; } else hint.style.display = 'none'; }
+    if (hint) { if (tgt) { const txt = (G.touch ? '' : Keys.label('ok')+' ') + (tgt.hint || '말 걸기') + (tgt.talk && G.crime?.can(tgt) ? (G.touch ? ' · 공격' : ` · ${Keys.label('atk')} 공격`) : ''); if (hint._t !== txt) { hint._t = txt; hint.textContent = txt; } hint.style.display = 'block'; } else hint.style.display = 'none'; }
     if (tgt && Input.take('ok')) { if (tgt.talk) { this.face(tgt); this.run(tgt.talk); } else if (tgt.act) this.run(tgt.act); }
     else Input.take('ok');
   }
@@ -153,6 +161,7 @@ export class Field {
     const d = G.decor, I = Input;
     if (I.take('menu') || I.take('opt')) { G.life.closeDecor(); return; }
     if (I.take('up')) d.cy--; if (I.take('down')) d.cy++; if (I.take('left')) d.cx--; if (I.take('right')) d.cx++;
+    d.cx=clamp(d.cx,0,this.m.w-1);d.cy=clamp(d.cy,0,this.m.h-1);
     if (I.take('ok')) G.life.placeAt(d.cx, d.cy);
   }
   tickHunt(dt) {
@@ -409,6 +418,15 @@ export class Field {
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, 1280, 720);
     c.setTransform(1.4, 0, 0, 1.4, 0, 0); this.ambient(c, 1280 / 1.4, 720 / 1.4); c.setTransform(SCALE, 0, 0, SCALE, 0, 0); if (G.fxOverlay) G.fxOverlay(c);  // 꽃잎은 사람 머리보다 작게
     c.setTransform(1, 0, 0, 1, 0, 0); const P = (x, y, h = 0) => H.proj(x, y, h), k = Math.min(5, H.pxPerUnit());
+    if (G.decor && m.id==='myhouse') {
+      const d=G.decor,[w,h]=d.sel?G.life.size(d.sel):[1,1];
+      const corners=[[d.cx,d.cy],[d.cx+w,d.cy],[d.cx+w,d.cy+h],[d.cx,d.cy+h]];
+      c.save();c.beginPath();
+      corners.forEach(([x,y],i)=>{const [sx,sy]=P(x*TS,y*TS);if(i)c.lineTo(sx,sy);else c.moveTo(sx,sy);});
+      c.closePath();
+      if(d.sel){c.fillStyle=G.life.canPlace(d.sel,d.cx,d.cy)?'rgba(90,220,120,.35)':'rgba(230,60,50,.35)';c.fill();}
+      c.strokeStyle='#ffe36a';c.lineWidth=2;c.stroke();c.restore();
+    }
     // 느낌표: 일감 소품(독 따위)은 사람보다 낮아서 느낌표도 낮게
     if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, (n.stamp ? 14 : 25 * H.actK(m)) - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
     if(m.id==='world')travelLabels(c,m,this.p,P,TS);
@@ -439,7 +457,7 @@ export class Field {
     if(m.live)return;
     const W = m.w * TS, H = m.h * TS, t = performance.now() / 1000; c.setTransform(1, 0, 0, 1, 0, 0);
     for (const q of m.portals) {
-      if (q.when && !S.flags[q.when] && !(q.world && S.mode === 'free')) continue;
+      if (!portalOpen(q,S)) continue;
       let dir = q.y + q.h >= H - 2 ? 'd' : q.y <= 2 ? 'u' : q.x <= 2 ? 'l' : q.x + q.w >= W - 2 ? 'r' : null; const door = !dir && q.door;
       if (!dir && !door) continue;
       const cx = q.x + q.w / 2, cy = q.y + q.h / 2, d = Math.hypot(p.x - cx, p.y - cy) / TS; if (d > (dir ? 10 : 3.5)) continue;

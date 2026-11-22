@@ -244,10 +244,11 @@ export function paintPave(c, p) {
 G.mapK = id => MAPS[id]?.k || 1;
 export const isoMode = () => ISO_ON;
 // 내 집은 가구가 바뀔 때마다 다시 만든다
-export function buildHouse(S) {
+export function buildHouse(S, publish = true) {
   const h = HOUSES[S.house.lv], m = new MapDef('myhouse', h.w, h.h, { name: h.name, bgm: 'peaceful', room: true, arena: 'yard' });
   for (const i of S.house.items) m.put(FURN[i.id].stamp, i.x, i.y);
   m.exit(Math.floor(h.w / 2) - 2, h.h - 1, 4, 1, 'cheongha', 16, 22, 0, { door: true });
+  if (!publish) return m;
   m.render(); return MAPS.myhouse = m;
 }
 function M(id, w, h, o) { return MAPS[id] = new MapDef(id, w, h, o); }

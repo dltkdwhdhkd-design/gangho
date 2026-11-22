@@ -78,8 +78,14 @@ export function learn(id) {
 export const canEquip = (id, S = G.S) => { const k = SKILLS[id]; return k.w === '무관' || k.w === WEAPONS[S.weapon].type; };
 // 저장은 두 가지다. 자동 저장(이어 하기)은 이 브라우저에 계속 덮어쓰고, 저장 칸은 고른 순간을 그대로 남긴다.
 // 파일 내보내기는 누른 그 순간을 파일 한 장으로 받는다. 받은 파일은 다시 바뀌지 않는다
+export function rememberFieldPosition(S=G.S) {
+  const f=G.field;
+  if (!S || G.scene!=='field' || f?.busy || f?.state!==S || f.m?.id!==S.map) return;
+  S.px=f.p.x/(f.m.k || 1);S.py=f.p.y/(f.m.k || 1);S.dir=f.p.dir;
+}
 export function save(slient = true) {
   if (G.noSave) return;  // 새 화면 시제품의 둘러보기 판은 자동 저장하지 않는다
+  rememberFieldPosition();
   try { localStorage.setItem(KEY, JSON.stringify(G.S)); if (!slient) toast('저장했습니다'); } catch (e) { if (!slient) toast('저장하지 못했습니다'); }
 }
 const fileName = S => `강호행_${S.name}_${S.day}일째_${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}.json`;
@@ -87,7 +93,7 @@ function download(text, name) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 // 지금 이 순간을 파일 한 장으로 내보낸다
-export function saveToFile(S = G.S) { download(JSON.stringify(S), fileName(S)); toast('지금 상태를 파일로 내보냈습니다', 3); }
+export function saveToFile(S = G.S) { rememberFieldPosition(S); download(JSON.stringify(S), fileName(S)); toast('지금 상태를 파일로 내보냈습니다', 3); }
 // ── 저장 칸 ──
 export const SLOTS = 12;
 const SK = i => 'gangho_slot_' + i;
@@ -96,7 +102,7 @@ export function slotInfo(i) { return rec(i)?.meta || null; }
 export function autoInfo() { const S = load(); return S ? metaOf(S, '') : null; }
 export function metaOf(S, place, shot) { return { name: S.name, lv: S.lv, day: S.day, mode: S.mode, night: !!S.flags?.night, place: place || '', at: Date.now(), shot: shot || '' }; }
 export function saveSlot(i, place, shot) {
-  const S = G.S; try { localStorage.setItem(SK(i), JSON.stringify({ meta: metaOf(S, place, shot), data: S })); return true; }
+  const S = G.S; rememberFieldPosition(S); try { localStorage.setItem(SK(i), JSON.stringify({ meta: metaOf(S, place, shot), data: S })); return true; }
   catch (e) { // 그림이 커서 칸이 모자라면 그림을 빼고 한 번 더
     try { localStorage.setItem(SK(i), JSON.stringify({ meta: metaOf(S, place, ''), data: S })); return true; } catch (e2) { return false; }
   }

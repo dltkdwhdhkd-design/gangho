@@ -14,7 +14,8 @@ import { DB, ACCS, FISH, FURN, HOUSES, RECIPES, LOOT } from './items.js';
 import { WEAPONS } from './data.js';
 import { GRADES, weaponGrade, plusCap, fxText } from './gear.js';
 import { FOES } from './foes.js';
-import { MAPS, buildHouse } from './maps.js';
+import { buildHouse } from './maps.js';
+import { canReachHouseExit } from './landing.js';
 import { STAMPS } from './tiles.js';
 import { icon, iconUrl, nameOf, descOf } from './icons.js';
 import { showResult } from './ui.js';
@@ -183,13 +184,25 @@ const size = id => { const s = STAMPS[FURN[id].stamp]; return [Math.ceil(s[3] / 
 export function canPlace(id, x, y) {
   const m = HOUSES[S().house.lv], [w, h] = size(id);
   if (x < 1 || y < 1 || x + w > m.w - 1 || y + h > m.h - 2) return false;
-  return !S().house.items.some(i => { const [a, b] = size(i.id); return x < i.x + a && x + w > i.x && y < i.y + b && y + h > i.y; });
+  const f=G.field, state=S(), previous=G.decor?.preview;
+  if (previous && previous.map===f.m && previous.px===f.p.x && previous.py===f.p.y &&
+      previous.id===id && previous.x===x && previous.y===y) return previous.ok;
+  const overlaps=state.house.items.some(i => { const [a,b]=size(i.id); return x<i.x+a && x+w>i.x && y<i.y+b && y+h>i.y; });
+  let ok=false;
+  if (!overlaps) {
+    const house={...state.house,items:[...state.house.items,{id,x,y}]};
+    const candidate=buildHouse({...state,house},false);
+    ok=canReachHouseExit(candidate,f.p.x,f.p.y) &&
+      !f.npcs.some(n=>!n.ghost && !f.m.blocked(n.x,n.y) && candidate.blocked(n.x,n.y));
+  }
+  if (G.decor) G.decor.preview={map:f.m,px:f.p.x,py:f.p.y,id,x,y,ok};
+  return ok;
 }
 export function placeAt(x, y) {
   const d = G.decor, H = S().house, f = G.field, hit = H.items.findIndex(i => { const [a, b] = size(i.id); return x >= i.x && x < i.x + a && y >= i.y && y < i.y + b; });
-  if (d.sel) { if (!canPlace(d.sel, x, y)) { Sound.sfx('cancel'); return; } H.items.push({ id: d.sel, x, y }); H.furn[d.sel]--; if (!H.furn[d.sel]) d.sel = null; Sound.sfx('accept'); }
+  if (d.sel) { if (!(H.furn[d.sel]>0) || !canPlace(d.sel, x, y)) { Sound.sfx('cancel'); toast('가구가 겹치거나 사람이 지날 길이 막히는 자리입니다.'); return; } H.items.push({ id: d.sel, x, y }); H.furn[d.sel]--; if (!H.furn[d.sel]) d.sel = null; Sound.sfx('accept'); }
   else if (hit >= 0) { const it = H.items.splice(hit, 1)[0]; H.furn[it.id] = (H.furn[it.id] || 0) + 1; d.sel = it.id; Sound.sfx('tick'); } else return;
-  const px = f.p.x, py = f.p.y; buildHouse(S()); f.m = MAPS.myhouse; f.p.x = px; f.p.y = py; f.refresh(); drawDecor();
+  f.m=buildHouse(S());d.preview=null;f.refresh();drawDecor();
 }
 async function realtor() {
   const lv = S().house.lv, nx = HOUSES[lv + 1];

@@ -142,7 +142,7 @@ export const Input = {
     Keys.load();
     addEventListener('keydown', e => {
       Sound.init(); Sound.resume();
-      if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+      if (e.defaultPrevented || document.activeElement?.matches('input,select,textarea,[contenteditable="true"]')) return;
       if (G.scene === 'title') return;
       const m = Keys.code[e.code]; if (!m) return;
       e.preventDefault();

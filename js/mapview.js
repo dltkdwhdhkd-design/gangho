@@ -2,6 +2,8 @@
 import { G, Input, Sound, $, $$, el, esc, TS } from './core.js';
 import { Keys } from './core.js';
 import { MAPS } from './maps.js';
+import { LOCS } from './worlddata.js';
+import { portalOpen } from './landing.js';
 import { drawStamp } from './tiles.js';
 import { drawIso } from './iso.js';
 
@@ -14,14 +16,19 @@ export function whole(m) {
   for (const s of [...m.objs].sort((a, b) => a.base - b.base)) s.iso ? drawIso(x, s) : drawStamp(x, s.name, s.x, s.y, s.sc);
   return m._whole = c;
 }
-const open = q => !q.when || !!G.S.flags[q.when];
+const open = q => portalOpen(q,G.S);
+function destinationName(id) {
+  return MAPS[id]?.name || (id==='world'?'강호':LOCS.find(loc=>loc.map===id)?.name) || '';
+}
 const marks = f => f.npcs.filter(n => n.mark && n.mark());
 const foesOf = f => f.roam.filter(r => !r.gone);
 // 방 안에 있으면 그 방이 속한 바깥 지도와 문 앞 자리를 찾는다
 function region(m, f) {
   if (m.live) return null;
   let cur = m, pos = { x: f.p.x / TS, y: f.p.y / TS };
-  for (let i = 0; i < 4 && cur.room; i++) { const q = cur.portals.find(p => MAPS[p.to]); if (!q) return null; pos = { x: q.tx, y: q.ty }; cur = MAPS[q.to]; }
+  for (let i = 0; i < 4 && cur.room; i++) { const q = cur.portals.find(p => MAPS[p.to]); if (!q) return null; const roomId=cur.id;cur = MAPS[q.to];
+    const door=cur.portals.find(d=>d.door && d.to===roomId);
+    pos = door ? {x:(door.x+door.w/2)/TS,y:(door.y+door.h)/TS} : {x:q.tx*(cur.k||1),y:q.ty*(cur.k||1)}; }
   return { m: cur, pos };
 }
 
@@ -50,8 +57,7 @@ export function tickMini(f) {
 // ── 이 지역 ──
 function doorName(q) {
   if (q.to === 'myhouse') return open(q) ? '내 집' : '빈집';
-  if (!open(q) || !MAPS[q.to]) return '';
-  return MAPS[q.to].name;
+  return open(q)?destinationName(q.to):'';
 }
 function drawArea(cv, r, f) {
   const c = cv.getContext('2d'), m = r.m, k = Math.min(cv.width / (m.w * TS), cv.height / (m.h * TS)), ox = (cv.width - m.w * TS * k) / 2, oy = (cv.height - m.h * TS * k) / 2;
@@ -67,8 +73,9 @@ function drawArea(cv, r, f) {
     if (q.when === 'never') continue;
     const cx = q.x + q.w / 2, cy = q.y + q.h / 2;
     if (q.door) { const n = doorName(q), near = inside && Math.hypot(cx / TS - r.pos.x, cy / TS - r.pos.y) < 4; if (n && !near && !fixed.some(t => bare(n).includes(t))) text(n, X(cx), Y(q.y + q.h) + 18); continue; }
-    if (fixed.some(t => MAPS[q.to] && bare(MAPS[q.to].name).includes(t))) continue;
-    const name = open(q) ? MAPS[q.to].name : '막힌 길', arrow = q.x < 2 * TS ? ['← ', ''] : q.x + q.w > (m.w - 2) * TS ? ['', ' →'] : q.y < 2 * TS ? ['↑ ', ''] : ['↓ ', ''];
+    const destination=destinationName(q.to);
+    if (destination && fixed.some(t => bare(destination).includes(t))) continue;
+    const name = open(q) ? (destination || '다음 지역') : '막힌 길', arrow = q.x < 2 * TS ? ['← ', ''] : q.x + q.w > (m.w - 2) * TS ? ['', ' →'] : q.y < 2 * TS ? ['↑ ', ''] : ['↓ ', ''];
     text(arrow[0] + name + arrow[1], X(cx), q.y <= 0 ? Y(cy) + 24 : Y(cy) + (q.y + q.h >= m.h * TS ? -8 : 6), open(q) ? '#ffe9a8' : '#b9aa92');
   }
   if (m === f.m) { for (const a of foesOf(f)) dot(a.x, a.y, 6, '#e8503a'); for (const n of marks(f)) { dot(n.x, n.y - 4, 10, '#ffd23c'); text('!', X(n.x), Y(n.y - 4) + 6, '#000', 15); } }

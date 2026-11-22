@@ -68,7 +68,9 @@ function showCreate() {
 // ── 메뉴 ──
 let tab = 'stat', slotSel = 0, accessorySlot=null;
 export function openMenu(t) {
-  if (G.menuOpen) return; accessorySlot=null; G.menuOpen = true; Input.clear(); if (t) tab = t;
+  if (G.menuOpen) return;
+  if (G.decor) G.life.closeDecor();
+  accessorySlot=null; G.menuOpen = true; Input.clear(); if (t) tab = t;
   const M = $('#modal'); M.classList.add('on'); drawMenu();
   Sound.sfx('select');
 }
@@ -322,11 +324,13 @@ function tabSet(B) {
   $('#mute').onclick = () => { Sound.setMuted(!Sound.muted); drawMenu(); };
   $('#fsBtn').onclick = () => G.fullscreen?.();
   $('#sv').onclick = () => { tab = 'save'; Sound.sfx('tick'); drawMenu(); };
-  $('#svf').onclick = () => { keepPos(); save(); saveToFile(); };
-  $('#tt').onclick = () => { save(); closeMenu(); G.field.busy = false; showTitle(); };
+  $('#svf').onclick = () => { save(); saveToFile(); };
+  $('#tt').onclick = () => {
+    if (G.battle || G.field?.busy) { save(); location.reload(); return; }
+    closeMenu();showTitle();
+  };
 }
 // ── 저장 칸: 고른 순간을 그대로 남긴다. 다시 저장하기 전에는 바뀌지 않는다 ──
-function keepPos() { const f = G.field; if (G.scene === 'field' && f?.m && G.S.map === f.m.id) { G.S.px = f.p.x / (f.m.k || 1); G.S.py = f.p.y / (f.m.k || 1); G.S.dir = f.p.dir; } }
 function placeName() { const m = G.field?.m; if (!m) return ''; if (m.live) { const p = $('#place')?.textContent; return '강호' + (p ? ' · ' + p : ''); } return m.name || ''; }
 function shot() { try { const cv = $('#cv'), c = document.createElement('canvas'); c.width = 192; c.height = 108; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; G.hd?.snap?.(x, 192, 108); x.drawImage(cv, 0, 0, 192, 108); return c.toDataURL('image/jpeg', .7); } catch (e) { return ''; } }
 const when = t => { const d = new Date(t), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
@@ -348,13 +352,13 @@ function slotPanel(B, inGame) {
   fi.onchange = async e => { const f = e.target.files[0]; fi.value = ''; if (!f || target < 0) return; try { const S = await readSaveFile(f); if (importToSlot(target, S)) { toast(`${target + 1}번 칸에 넣었습니다`, 2.4); redraw(); } else toast('저장 공간이 모자랍니다', 3); } catch (err) { toast('저장 파일을 읽지 못했습니다', 3); } };
   $$('[data-a]', B).forEach(b => {
     const card = b.closest('.slotc'), i = card.dataset.i !== undefined ? +card.dataset.i : -1, a = b.dataset.a, m = i >= 0 ? slotInfo(i) : null;
-    if (a === 'save') { const go = () => { keepPos(); save(); if (saveSlot(i, placeName(), shot())) { Sound.sfx('coin', .6); toast(`${i + 1}번 칸에 저장했습니다`, 2.4); } else toast('저장 공간이 모자랍니다. 다른 칸을 지워 주세요', 3.2); redraw(); }; if (m) arm(b, '덮어쓰려면 한 번 더', go); else b.onclick = go; }
+    if (a === 'save') { const go = () => { save(); if (saveSlot(i, placeName(), shot())) { Sound.sfx('coin', .6); toast(`${i + 1}번 칸에 저장했습니다`, 2.4); } else toast('저장 공간이 모자랍니다. 다른 칸을 지워 주세요', 3.2); redraw(); }; if (m) arm(b, '덮어쓰려면 한 번 더', go); else b.onclick = go; }
     if (a === 'load') arm(b, inGame ? '저장 안 한 진행은 사라집니다 · 한 번 더' : '불러오려면 한 번 더', () => { const S = loadSlot(i); if (S) startFrom(S, inGame); });
     if (a === 'exp') b.onclick = () => exportSlot(i);
     if (a === 'del') arm(b, '지우려면 한 번 더', () => { delSlot(i); Sound.sfx('cancel'); redraw(); });
     if (a === 'imp') b.onclick = () => { target = i; fi.click(); };
     if (a === 'autoload') b.onclick = () => { const S = load(); if (S) startFrom(S, false); };
-    if (a === 'autoexp') b.onclick = () => { if (inGame) { keepPos(); save(); } const S = load(); if (S) saveToFile(S); };
+    if (a === 'autoexp') b.onclick = () => { if (inGame) { save(); } const S = load(); if (S) saveToFile(S); };
   });
 }
 function showSlotScreen() {

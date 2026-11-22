@@ -8,7 +8,10 @@ const { chromium } = require('playwright');
     const G = __G, D = G.dbg; G.manual = true; G.auto = true; G.speedup = 2000; G.bot = { skill: .9 };
     const out = [], fail = [], sleep = () => new Promise(r => setTimeout(r, 0));
     const fresh = (step, fl = {}, side = 'jeong') => { G.S = D.newState('진소', 'BlueSamurai', 'm', 'easy'); document.querySelector('#screen').innerHTML = ''; G.bgDraw = null; G.scene = 'field';
-      Object.assign(G.S, { lv: 60, str: 90, con: 90, agi: 70, inn: 70, silver: 500, potion: 9, weapon: 'blue_sword', weapons: ['blue_sword'], side }); G.S.hp = 99999; Object.assign(G.S.flags, { burned: true, step }, fl); G.field.load('cheongha', 20, 20, 1); return G.S.flags; };
+      Object.assign(G.S, { lv: 60, str: 90, con: 90, agi: 70, inn: 70, silver: 500, potion: 9, weapon: 'blue_sword', weapons: ['blue_sword'], side }); G.S.hp = 99999; Object.assign(G.S.flags, { burned: true, step }, fl); G.field.load('cheongha', 20, 20, 1);
+      // These branch fixtures start after the mandatory road chapters. The playthrough covers the gates.
+      G.S.mainRoad={done:45,unlocked:45,parts:{},decisions:{},active:null,pending:null,seconds:0};
+      return G.S.flags; };
     const run = async (fn, pick) => { G.autoPick = pick || null; let fin = false, err = null; G.field.run(async () => { try { await fn(); } catch (e) { err = String(e); } fin = true; }); let i = 0; while (!fin && i++ < 20000) { G.fast(60); await sleep(); } G.scene = 'field'; G.battle = null; G.field.busy = false; return err || (fin ? 'ok' : '멈춤'); };
     const eq = (name, a, b) => { (a === b ? out : fail).push(`${name}: ${a}${a === b ? '' : ' (기대 ' + b + ')'}`); };
     const T = G.act3t, f = G.fate, { FOES } = await import('/gangho/js/foes.js');

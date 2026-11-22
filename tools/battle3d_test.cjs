@@ -2,7 +2,7 @@
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const errs = [], out = [], fail = [];
-  for (const q of ['?hd2d=1', '']) {
+  for (const q of ['?hd2d=1', '?hd2d=0']) {
     const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
     p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/404|Failed to load/.test(m.text())) errs.push(m.text()); });
     await p.goto(process.env.GAME_URL + q); await p.waitForFunction(() => window.__G && __G.dbg, null, { timeout: 60000 }); await p.waitForTimeout(1500);
@@ -25,7 +25,12 @@ const { chromium } = require('playwright');
         await one(); await one(); await one(); ret.geo = [g0, G.hd.mem().geometries];
         // 주인공이 어디에 서든 화면 안에 있는지(전에는 적과 떨어져 구석으로 가면 화면 밖으로 나갔다)
         fight({ foes: ['dummy'], allies: ['so_ally'], arena: 'court', noIntro: true, optional: true }); const B = G.battle, P = B.actors.find(a => a.isPlayer), E = B.actors.find(a => a.team === 1); B.update = () => { }; ret.cam = [];
-        for (const [px, py, ex, ey] of [[192, 228, 192, 26], [192, 20, 192, 225], [14, 228, 370, 26], [370, 14, 14, 226], [14, 14, 370, 226], [370, 228, 14, 26]]) { P.x = px; P.y = py; E.x = ex; E.y = ey; B.camInit = false; G.fast(1); G.fast(1); ret.cam.push(G.hd.proj(P.x, P.y + 1).slice(0, 2).map(Math.round)); }
+        for (const [u,v] of [[.5,1],[.5,0],[0,1],[1,0],[0,0],[1,1]]) {
+          [P.x,P.y]=B.nav.snap(u*B.W,v*B.H);
+          [E.x,E.y]=B.nav.snap((1-u)*B.W,(1-v)*B.H);
+          B.camInit=false;G.hd.renderBattle(B);
+          ret.cam.push(G.hd.battleProject(P.x,P.y+1).slice(0,2).map(Math.round));
+        }
         B.onDone = null; G.battle = null; G.scene = 'field'; document.querySelector('#stage').classList.remove('inbattle'); G.hd.resetCam();
       }
       return ret;
@@ -35,7 +40,7 @@ const { chromium } = require('playwright');
     if (r.bb) fail.push(`전투 뒤 마을에 전투 인물 ${r.bb}명이 남음`);
     if (r.geo && r.geo[1] > r.geo[0] + 2) fail.push(`전투를 거듭하면 그물이 쌓임 ${r.geo[0]}→${r.geo[1]}`);
     for (const [x, y] of r.cam || []) if (!(x > 40 && x < 1240 && y > 70 && y < 660)) fail.push(`주인공이 화면 밖 ${x},${y}`);
-    if (q && r.gl !== 'block') fail.push('전투 뒤 새 화면이 안 보임: ' + r.gl);
+    if (q === '?hd2d=1' && r.gl !== 'block') fail.push('전투 뒤 새 화면이 안 보임: ' + r.gl);
     await p.close();
   }
   console.log(out.join('\n')); if (fail.length) console.log('실패\n' + fail.join('\n'));

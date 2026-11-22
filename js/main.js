@@ -1,4 +1,4 @@
-import { G, STEP, $, Input, IMG, Sound, loadAll, loadArtList, toast } from './core.js';
+import { G, STEP, TS, SCALE, VW, VH, $, Input, IMG, Sound, loadAll, loadArtList, toast } from './core.js';
 import { buildMaps, isoTest } from './maps.js';
 import { tickDialog, talking } from './dialog.js';
 import { Field } from './field.js';
@@ -26,9 +26,18 @@ function fit() {
 }
 addEventListener('resize', fit); fit();
 // 꾸미기: 화면을 눌러 가구를 놓는다
-const tileAt = e => { const r = cv.getBoundingClientRect(), f = G.field; return [Math.floor(((e.clientX - r.left) / r.width * 320 + f.cam.x) / 16), Math.floor(((e.clientY - r.top) / r.height * 180 + f.cam.y) / 16)]; };
-cv.addEventListener('pointermove', e => { if (G.decor) { [G.decor.cx, G.decor.cy] = tileAt(e); } });
-cv.addEventListener('pointerdown', e => { if (G.decor) { [G.decor.cx, G.decor.cy] = tileAt(e); G.life.placeAt(G.decor.cx, G.decor.cy); } });
+function aimDecor(e) {
+  if (!G.decor) return false;
+  const r=cv.getBoundingClientRect(),f=G.field;
+  const x=(e.clientX-r.left)/r.width*VW, y=(e.clientY-r.top)/r.height*VH;
+  const floor=HD.active(f.m)?HD.roomFloorAt(x*SCALE,y*SCALE,f.m):[x+f.cam.x,y+f.cam.y];
+  if (!floor) return false;
+  const cx=Math.floor(floor[0]/TS),cy=Math.floor(floor[1]/TS);
+  if (cx<0 || cy<0 || cx>=f.m.w || cy>=f.m.h) return false;
+  Object.assign(G.decor,{cx,cy});return true;
+}
+cv.addEventListener('pointermove',aimDecor);
+cv.addEventListener('pointerdown',e=>{if(aimDecor(e))G.life.placeAt(G.decor.cx,G.decor.cy);});
 
 function tick(dt) {
   G.mainPlot?.tick(dt);
