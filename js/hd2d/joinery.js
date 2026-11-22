@@ -1,3 +1,4 @@
+import {assetImage} from '../asset-loader.js';
 // Furnishings are fitted to the existing interaction footprints. Dimensions in the library are metres.
 import { hangingShopFlag } from './trade-stalls.js';
 export const joineryKeys='medicine_chest herb_shelf herb_drying bookcase scroll_press crockery tea_cabinet house_cabinet daybed dorm_bed counter dispensing_counter table altar teatable bench chair stool folding_screen coffer display_rack clinic_front books_front tea_front market_baskets writing_table meal_table tea_table gaming_table silk_table'.split(' ');
@@ -81,12 +82,12 @@ export function dressFront(T,map,s,key,library,materials,heightAt,hs,zs,tile){
 }
 let atlas,ready;
 export function loadJoineryAtlas(){
-  if(!atlas){atlas=new Image();atlas.src='assets/hd2d/landscape/furniture.webp';}
-  return ready||(ready=atlas.decode().catch(()=>null));
+  return ready || (ready=assetImage('assets/hd2d/landscape/furniture.webp')
+    .then(image=>(atlas=image)).catch(()=>null));
 }
 export function drawFurniture2D(ctx,map,s,spec){
   const key=furnitureKey(map,s);if(!key)return false;
-  if(!atlas)loadJoineryAtlas();if(!atlas.naturalWidth)return false;
+  if(!atlas)loadJoineryAtlas();if(!atlas?.naturalWidth)return false;
   const i=(s.src||s.name)==='f_bed'?joineryKeys.length+(key==='daybed'?1:0):joineryKeys.indexOf(key);
   const w=atlas.width/6,h=atlas.height/Math.ceil((joineryKeys.length+2)/6);
   const sc=s.sc||1,sol=s.sol,x=sol?sol.x+sol.w/2:s.x+spec[3]*sc/2;

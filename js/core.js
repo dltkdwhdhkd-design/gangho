@@ -1,3 +1,4 @@
+import {assetImage,assetJSON,showImage,warmStartupArt} from './asset-loader.js';
 // 공용 도구: 수학, 그림과 소리 불러오기, 입력
 // 받침을 보고 조사를 고른다. josa('철검', '을/를') -> 철검을, josa('집', '으로/로') -> 집으로
 export const hasJong = w => { const c = String(w).charCodeAt(String(w).length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 > 0; };
@@ -37,16 +38,16 @@ const SAME = { altar: 'longtable', chair: 'stool', teatable: 'f_bench', seat: 'p
 export async function loadAll(onp) {
   const list = [];
   // 다시 그린 도트는 assets/hd에 있다. 있으면 기본 그림 대신 쓴다. 칸 크기가 두 배다
-  let hd = []; try { const r = await fetch('assets/hd/list.json'); if (r.ok) hd = await r.json(); } catch (e) { /* 없으면 기본 그림 */ }
+  let hd=[];
+  await Promise.all([warmStartupArt(),assetJSON('assets/hd/list.json').then(list=>hd=list).catch(()=>{})]);
   for (const [d, ns] of Object.entries(IMAGES)) for (const n of ns) if (!hd.includes(d + '/' + n)) list.push([d + '/' + n, `assets/${d}/${n}.png`]);
   for (const k of hd) list.push([k, `assets/hd/${k}.webp`, 2]);
   let done = 0;
-  await Promise.all(list.map(([k, url, h]) => new Promise(res => {
-    const im = new Image();
-    im.onload = () => { if (h) im.hd = h; IMG[k] = im; onp && onp(++done / list.length); res(); };
-    im.onerror = () => { console.warn('그림 없음', url); done++; res(); };
-    im.src = url;
-  })));
+  await Promise.all(list.map(async ([key,url,scale])=>{
+    try {const im=await assetImage(url);if(scale)im.hd=scale;IMG[key]=im;}
+    catch(error){console.warn('그림 없음',url,error);}
+    finally {onp?.(++done/list.length);}
+  }));
   for (const [a, b] of Object.entries(SAME)) if (!IMG['stamp/' + a] && IMG['stamp/' + b]) IMG['stamp/' + a] = IMG['stamp/' + b];
 }
 // 나중에 일러스트를 넣으면 쓰는 자리. 파일이 없으면 얼굴 그림으로 대체한다.
@@ -55,7 +56,10 @@ class PortraitLibrary extends Map {
     const item = super.get(key);
     if (typeof item !== 'string') return item;
     const image = new Image();
-    image.src = item;
+    image.ready=showImage(image,item).catch(()=>{
+      if(super.get(key)===image)this.set(key,item);
+      return null;
+    });
     this.set(key, image);
     return image;
   }
@@ -63,8 +67,7 @@ class PortraitLibrary extends Map {
 export const ART = new PortraitLibrary();
 export async function loadArtList() {
   try {
-    const r = await fetch('assets/art/list.json'); if (!r.ok) return;
-    const l = await r.json(); l.sort((a, b) => (b === 'cg_title') - (a === 'cg_title'));  // 제목 화면 그림부터 받는다
+    const l = await assetJSON('assets/art/list.json'); l.sort((a, b) => (b === 'cg_title') - (a === 'cg_title'));  // 제목 화면 그림부터 받는다
     for (const n of l) ART.set(n, `assets/art/${n}.webp`);
     const title = ART.get('cg_title');
     if (title) await title.decode().catch(() => {});

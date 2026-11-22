@@ -1,3 +1,4 @@
+import {assetImage,assetJSON} from '../asset-loader.js';
 import { bridgeHeight } from './walkways.js';
 import { loadWildernessArt } from '../landscape.js';
 import { loadJoineryAtlas } from './joinery.js';
@@ -31,12 +32,10 @@ let castIndex;
 export function loadActorPage(images,page) {
   if (!page || images['field_'+page]) return;
   if (!loading.has(page)) {
-    loading.set(page, new Promise(resolve => {
-      const image = new Image();
-      image.onload = () => { images['field_'+page] = image; loading.delete(page); resolve(); };
-      image.onerror = () => { loading.delete(page); resolve(); };
-      image.src = 'assets/hd2d/field/' + page + '.webp';
-    }));
+    loading.set(page,assetImage('assets/hd2d/field/'+page+'.webp')
+      .then(image=>{images['field_'+page]=image;})
+      .catch(error=>console.warn('그림 없음',page,error))
+      .finally(()=>loading.delete(page)));
   }
   return loading.get(page);
 }
@@ -45,9 +44,7 @@ export function loadCombatArt(images,slot) {
 }
 export function loadCastIndex(images) {
   if (!castIndex) castIndex = Promise.all(['walk','motions'].map(async name => {
-    const response=await fetch('assets/hd2d/field/'+name+'.json');
-    if(!response.ok)throw Error(name+' '+response.status);
-    const data=await response.json();
+    const data=await assetJSON('assets/hd2d/field/'+name+'.json');
     if(name==='walk')Object.assign(walking,data);
     else {combatLayout=data;await loadActorPage(images,'weapons');}
   })).catch(()=>{castIndex=null;});

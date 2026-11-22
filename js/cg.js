@@ -1,3 +1,4 @@
+import {showImage} from './asset-loader.js';
 // 이벤트 전용 화면과 부·장 표지. 그림이 아직 없으면 색과 제목만 있는 임시 화면을 띄운다
 // 그림은 tools/art_in.py로 넣으면(assets/art/cg_<이름>.webp, list.json 등록) 자동으로 바뀐다. 목록은 docs/cg-list.md
 import { G, ART, $, wait } from './core.js';
@@ -116,7 +117,7 @@ function portrait(e, id, expression, role) {
   if (!src) return;
   const img = new Image();
   img.className = 'bond-actor ' + role;
-  img.alt = ''; img.src = src.src;
+  img.alt = ''; showImage(img,src.src).catch(()=>{});
   e.append(img);
 }
 function drawBond() {
@@ -147,8 +148,8 @@ function drawBond() {
     img.style.top=frame>=2?'-100%':'0';
   }
   crop.append(img); e.append(crop);
-  img.src=approved?approved.src:'assets/art/bonds/'+id+(story?'':'_courtship')+'.webp';
-  img.decode().then(()=>{
+  const url=approved?approved.src:'assets/art/bonds/'+id+(story?'':'_courtship')+'.webp';
+  showImage(img,url).then(()=>{
     if (crop.parentElement!==e) return;
     // 배경과 인물 초상 위에 완전히 디코딩한 원화를 한 프레임에 얹는다.
     crop.hidden=false;
@@ -171,7 +172,13 @@ export function showCG(id) {
     return;
   }
   e.className='on';e.replaceChildren();
-  if(pic){e.dataset.art='painting';e.style.background=`#221e1c url("${pic.src}") center/cover`;return;}
+  if(pic){
+    e.dataset.art='painting';const url=pic.src;
+    const background=`#221e1c url("${url}") center/cover`;e.style.background=background;
+    const original=e.style.background;
+    pic.ready?.then(im=>{if(im && im.src!==url && e.style.background===original)e.style.background=`#221e1c url("${im.src}") center/cover`;});
+    return;
+  }
   e.style.background=`linear-gradient(${c[1]},${c[2]})`;
   e.innerHTML=`<div class="ttl">${c[0]}</div>`;
 }

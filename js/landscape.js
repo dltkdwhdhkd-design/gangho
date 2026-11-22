@@ -1,3 +1,4 @@
+import {assetImage} from './asset-loader.js';
 // Continuous land cover and elevation shared by travel, encounter stages and both renderers.
 export const cover = { meadow:0, forest:1, road:2, rock:3, snow:4, sand:5, yard:6, wood:7, slab:8 };
 export const wildPlaces = { valley:'forest', bamboo:'forest', pass:'rock', cloudmt:'rock', hwasan:'rock',
@@ -12,7 +13,7 @@ function canvas(w,h) { const c=document.createElement('canvas'); c.width=w; c.he
 export function loadWildernessArt() {
   if (loading) return loading;
   const image = async name => {
-    const im = new Image(); im.src='assets/hd2d/landscape/'+name+'.webp'; await im.decode(); return im;
+    return assetImage('assets/hd2d/landscape/'+name+'.webp');
   };
   const cut=(im,cols,rows,i)=>{
     const w=im.width/cols,h=im.height/rows,c=canvas(w,h);

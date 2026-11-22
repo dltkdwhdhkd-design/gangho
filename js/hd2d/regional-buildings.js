@@ -1,3 +1,4 @@
+import {assetImage} from '../asset-loader.js';
 // Architectural identities are shared by the travel map, settlement, and its encounters.
 const sites = {
   hwasan:['plum','華山','梅'], wudang:['tao','武當','☯'], shaolin:['temple','少林','禪'], emei:['temple','峨嵋','蓮'],
@@ -82,13 +83,13 @@ export function regionalBuilding(T,map,stamp,spec,profile,library,materials,heig
 let atlas;
 let atlasReady;
 export function loadRegionalAtlas(){
-  if(!atlas){atlas=new Image();atlas.src='assets/hd2d/landscape/architecture.webp';}
-  return atlasReady||(atlasReady=atlas.decode().then(()=>atlas).catch(()=>null));
+  return atlasReady || (atlasReady=assetImage('assets/hd2d/landscape/architecture.webp')
+    .then(image=>(atlas=image)).catch(()=>null));
 }
 export function drawRegional2D(ctx,map,stamp,w0,h0){
   const p=architectureOf(map,stamp);if(!p)return false;
   if(!atlas)loadRegionalAtlas();
-  if(!atlas.naturalWidth)return false;
+  if(!atlas?.naturalWidth)return false;
   const cellW=atlas.naturalWidth/regionalRoles.length,cellH=atlas.naturalHeight/regionalStyles.length;
   const scale=stamp.sc||1,w=stamp.hallWidth?stamp.hallWidth*1.25:stamp.iso?stamp.w*1.18:w0*scale*1.19;
   const h=stamp.hallWidth?w*.64:stamp.iso?Math.max(stamp.h,w*.71):p.role==='hall'?Math.max(w*.82,h0*scale*.76):w*.77;

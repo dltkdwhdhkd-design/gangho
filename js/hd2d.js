@@ -5,6 +5,7 @@
 // 세운 판의 키(HS)는 시점만큼 늘려 둔다(내려다봐도 사람 도트가 눌리지 않게). 깊이(ZS)는 늘리지 않는다(2026-11-19부터 ZS = 1):
 // 땅과 집이 진짜 비율 그대로 눕는다. 전에는 깊이를 1.49배 늘려 평면도가 2D 화면처럼 네모나게 보이게 했는데, 그래서 바닥과 지붕이 화면을 차지했다.
 // 기본 보기는 HD-2D이며, hd2d=0은 사용자가 선택하는 평면 보기다.
+import {assetBytes,assetImage,assetJSON} from './asset-loader.js';
 import { OWN, roomModels, roomWalls, emblemOf, WALL_TOP, WALL_K, FURN, floorOf, FLOORS } from './hd2d/rooms.js';
 import { mountainGate } from './hd2d/gate.js';
 import { addEscarpments } from './hd2d/escarpment.js';
@@ -251,7 +252,7 @@ function fieldKitTexture(texture, interior) {
   const surface = { pm_plaster: 'plaster', pm_plaster_white: 'plaster', pm_wood_dark: 'cedar', pm_wood_pine: 'plank', pm_base_rough: 'crag', pm_stone: 'slab', pm_brick: 'yard', r_dark: 'roof' }[texture];
   return surface && PV['field_' + surface] ? 'field_' + surface : texture;
 }
-async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('./lib/three/addons/GLTFLoader.js'), import('./lib/three/addons/meshopt_decoder.module.js')]); GLL = new GLTFLoader(); GLL.setMeshoptDecoder(MeshoptDecoder); } const g = await GLL.loadAsync(`assets/hd2d/models/${n}.glb`); g.scene.updateMatrixWorld(true);
+async function loadModel(n) { try { if (!GLL) { const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('./lib/three/addons/GLTFLoader.js'), import('./lib/three/addons/meshopt_decoder.module.js')]); GLL = new GLTFLoader(); GLL.setMeshoptDecoder(MeshoptDecoder); } const dir=new URL('assets/hd2d/models/',document.baseURI).href; const g=await GLL.parseAsync(await assetBytes(dir+n+'.glb'),dir); g.scene.updateMatrixWorld(true);
   g.scene.traverse(o => { if (!o.isMesh) return; const sm = o.material, nm = (sm.name || o.name).replace(/\.\d+$/, ''), rk = /^rock_(\w+)/.exec(nm), top = nm === 'top', vc = !!o.geometry.attributes.color;  // 바위 모형(rock_<빛깔>)은 무늬를 게임이 입힌다. 꼭짓점 색(밑동 그늘, 이끼, 눈)이 있으면 곱한다. top은 절벽 조각의 윗면: 그 자리의 땅 그림을 입힌다
     // 조각(틀로 만든 것, docs/chatgpt-blender.md): UV가 없고 재질 이름만 있다. 이름표(PAL)에 있으면 무늬를 자리와 면 방향으로 입히고(palMat), 없으면 조각에 든 민무늬 빛깔 그대로다
     const pal = PAL[nm] || (rk && !o.geometry.attributes.uv ? { rock: rk[1] } : null), wl = pal && nm.startsWith('wl_');
@@ -290,7 +291,7 @@ function palMat(t, lie) { const m = new T.MeshLambertMaterial({ map: t }), pt = 
 #endif`); };
   m.customProgramCacheKey = () => 'sharp-pal'; return m; }
 const KITS = new Set();  // 들어와 있는 블렌더 조각의 이름(assets/hd2d/models/kit.json). 이 목록에 있는 것만 소품 그림 대신 세운다(없는 파일을 찾느라 헛걸음하지 않게)
-async function loadModels() { try { for (const n of await (await fetch('assets/hd2d/models/kit.json')).json()) KITS.add(n); } catch (e) { } await Promise.all([...new Set([...MODELN, ...[...KITS].filter(n => /^(rw|fn)_/.test(n))])].map(loadModel)); }  // 방의 벽과 가구 조각은 미리 읽어 둔다(방에 들어설 때 그림이 섰다가 조각으로 바뀌는 깜박임이 없게. 가구 여덟 개 110KB)
+async function loadModels() { try { for (const n of await assetJSON('assets/hd2d/models/kit.json')) KITS.add(n); } catch (e) { } await Promise.all([...new Set([...MODELN, ...[...KITS].filter(n => /^(rw|fn)_/.test(n))])].map(loadModel)); }  // 방의 벽과 가구 조각은 미리 읽어 둔다(방에 들어설 때 그림이 섰다가 조각으로 바뀌는 깜박임이 없게. 가구 여덟 개 110KB)
 // 바위 모형의 무늬: 받아 둔 절벽 그림(cl_rock)을 바위 빛깔로 바꿔 쓴다. brown 그대로, grey 잿빛 바위, snow 눈 덮인 바위, red 붉은 바위
 const ROCKT = {};
 function rockTex(kind) { if (kind in ROCKT) return ROCKT[kind]; const im = art() && PV.cl_rock; if (!im) return null; const c = mk(im.width, im.height), x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0);
@@ -310,8 +311,8 @@ const rockKey = s => { const r = ROCKM[s.name]; return r ? r[0] + (1 + Math.floo
 function needModel(n) { if (n in MODELS) return MODELS[n]; if (!MODELP[n]) { HD.modelsPending = (HD.modelsPending || 0) + 1; MODELP[n] = loadModel(n).then(() => { if (!--HD.modelsPending) curMap = null; }); } return null; }  // 기다리던 모형이 다 오면 지도를 한 번만 다시 짓는다(바위·절벽 모형은 한꺼번에 여럿을 부른다)
 function modelKey(s) { const gs = s.grand && GRAND[s.grand]; return gs?.model || (s.grand ? `g_${s.grand}_${s.name}` : SPEC[s.name] ? `b_${s.name}` : null); }
 // 사람 도트 시트(n_*)는 people.json에 적힌 것만 읽는다(tools/people_in.py가 시트를 만들며 적는다). 사람 키는 npc id, 역할(talkdata ROLE), 옛 도트 이름(NEWNPC) 순으로 찾는다
-const loadImg = n => new Promise(res => { const im = new Image(); im.onload = () => { PV[n] = im; res(); }; im.onerror = res; im.src = `assets/hd2d/preview/${n}.webp`; });
-async function loadPeople() { try { const r = await fetch('assets/hd2d/preview/people.json'); if (!r.ok) return; const L = await r.json(); L.forEach(n => PEOPLE.add(n)); await Promise.all(L.map(loadImg)); } catch { } }
+const loadImg=async n=>{try {PV[n]=await assetImage('assets/hd2d/preview/'+n+'.webp');} catch(error){console.warn('그림 없음',n,error);}};
+async function loadPeople() { try { const L=await assetJSON('assets/hd2d/preview/people.json'); L.forEach(n => PEOPLE.add(n)); await Promise.all(L.map(loadImg)); } catch { } }
 // 그림을 다 읽은 뒤에 조각을 읽는다. 조각의 재질은 읽을 때 무늬 그림을 찾아 쓰는데(loadModel의 mkm), 전에는 둘을 한꺼번에 읽어서 조각이 먼저 오면 무늬 없이 단색이 됐다
 // (가구 조각을 미리 읽게 하자 탁자와 계산대가 밋밋한 갈색으로 나와서 알았다. 벽 조각의 창틀도 같은 까닭으로 가끔 단색이었을 것이다)
 function loadPreview() { return pvP || (pvP = Promise.all([loadPeople(), loadFieldArt(PV), ...PVN.map(loadImg)]).then(() => loadModels.p ||= loadModels())); }
