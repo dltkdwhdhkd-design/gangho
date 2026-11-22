@@ -123,10 +123,8 @@ export function encounterStage(field,requested='village',spar=false,native=false
   if(!nav&&real)return encounterStage(null,requested,false,false);
   if(!nav)throw Error('No walkable encounter ground: '+requested);
   stage.encounter={sourceId:source.id,focus:[px,py],origin:[ox,oy],scale,theme,room,natural:!!original,bridges:source.id==='world',nav};
-  if(native&&real) {
-    stage.encounter.source=source;
-    return stage;
-  }
+  if(real)stage.encounter.source=source;
+  if(native&&real)return stage;
   stage.canal=!!source.canal;
   if(room){stage.floor=source.floor;stage.wall=source.wall;stage.emblem=source.emblem;
     if(source.carpet){const [x,y,w,h]=source.carpet;stage.carpet=[(x-ox)*scale,(y-oy)*scale,w*scale,h*scale];}

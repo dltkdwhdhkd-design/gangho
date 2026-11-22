@@ -47,7 +47,9 @@ export class Battle {
     this.stop = 0; this.shakeT = 0; this.shakeA = 0; this.ended = false; this.endT = 0; this.outcome = null; this.cam = { x: 0, y: 0 }; this.pending = []; this.cut = null; this.introT = cfg.noIntro ? 0 : 1.05; this.spawnQ = [];
     const native=!!G.hd?.battleOk?.();
     this.venue=encounterStage(G.field,cfg.arena,cfg.spar||cfg.arena==='ring',native);
-    this.W=this.venue.w*TS;this.H=this.venue.h*TS;this.nav=this.venue.encounter.nav;
+    const terrain = this.venue.encounter;
+    this.travelScale = terrain.source ? terrain.scale : 1;
+    this.W=this.venue.w*TS;this.H=this.venue.h*TS;this.nav=terrain.nav;
     this.stage=native?this.venue:null;this.bg=this.stage?null:encounterFloor(this.venue);
     this.band=BAND;this.left=TS;this.right=this.W-TS;this.top=TS;this.floorB=this.H-TS;
     const S = G.S;
@@ -419,11 +421,16 @@ export class Battle {
       case 'dash': a.stT -= dt; if (a.stT <= 0) { a.st = 'idle'; a.vx = a.vy = 0; a.rush = null; } break;
       case 'stun': a.stT -= dt; a.vx *= .8; a.vy *= .8; if (a.stT <= 0) a.st = 'idle'; break;
     }
-    let vx = a.vx, vy = a.vy;
+    // 걷기·경공 속도는 필드 바닥 기준이다. 초식의 이동과 밀치기는 이미 전투 판정 좌표다.
+    let vx = a.vx * this.travelScale, vy = a.vy * this.travelScale;
     if (a.mv) { vx = a.mv.vx; vy = a.mv.vy; a.mv.t -= dt; if (a.mv.t <= 0) a.mv = null; }
     if (a.kT > 0) { a.kT -= dt; vx += a.kx; vy += a.ky; }
-    [a.x,a.y]=this.nav.move(a.x,a.y,clamp(a.x+vx*dt,this.left,this.right),clamp(a.y+vy*dt,this.top,this.floorB));
-    if ((a.st === 'move') || a.mv) a.walk += dt * (a.mon ? 7 : 9);
+    const x = a.x, y = a.y;
+    [a.x, a.y] = this.nav.move(x, y, clamp(x + vx * dt, this.left, this.right), clamp(y + vy * dt, this.top, this.floorB));
+    if (a.st === 'move') {
+      const distance = hyp(a.x - x, a.y - y) / this.travelScale;
+      a.walk += distance / (a.mon ? 12 : 10.5);
+    } else if (a.mv) a.walk += dt * (a.mon ? 7 : 9);
     if (a.rush) for (const o of this.foes(a)) if (!a.rush.seen.has(o) && o.iframe <= 0 && hyp(o.x - a.x, o.y - a.y) < o.r + a.r + 4) { a.rush.seen.add(o); this.applyHit(a, o, a.rush, a.sk); }
   }
   separate() {
