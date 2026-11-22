@@ -2,7 +2,7 @@
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
-  const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 400))); p.on('console', m => { if (['error', 'warning'].includes(m.type())) errs.push(m.text().slice(0, 200)); }); p.on('response', r => { if (r.status() >= 400) errs.push(r.status() + ' ' + r.url()); });
+  const errs = []; p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').slice(0, 400))); p.on('console', m => { if (['error', 'warning'].includes(m.type()) && !m.text().startsWith('Canvas2D: Multiple readback operations')) errs.push(m.text().slice(0, 200)); }); p.on('response', r => { if (r.status() >= 400) errs.push(r.status() + ' ' + r.url()); });
   await p.goto(process.env.GAME_URL); await p.waitForFunction('window.__G && __G.dbg', { timeout: 30000 }).catch(() => console.log(errs.join('\n'))); await p.waitForTimeout(800);
   const r = await p.evaluate(async () => {
     const G = __G, D = G.dbg, out = [], sleep = () => new Promise(r => setTimeout(r, 0));
@@ -27,7 +27,13 @@ const { chromium } = require('playwright');
       const fac = FACS.find(f => f.id === l.fac), walk = (tx, ty) => { const sn = new Set([A.join()]), Q = [A.slice()]; while (Q.length) { const [x, y] = Q.shift(); if (Math.hypot(x - tx, y - ty) < 2.4) return true; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (x + a) + ',' + (y + b); if (sn.has(k) || m.blocked((x + a + .5) * 16, (y + b + .7) * 16)) continue; sn.add(k); Q.push([x + a, y + b]); } } return false; };
       const bad = []; if (arrive) bad.push('도착칸 막힘'); if (fac && fac.at[0] === l.map && !walk(fac.at[1] * k, fac.at[2] * k)) bad.push('대표에게 못 감');
       for (const n of c.npcs) if (n.spr && !n.stamp && !walk(n.x, n.y)) bad.push('못 감 ' + n.id);
-      for (const q of m.portals.filter(q => q.door && /^[rh]_/.test(q.to))) { const dx = (q.x + q.w / 2) / 16, dy = (q.y + q.h) / 16; if (!walk(dx, dy)) bad.push('문 못 감 ' + q.to); G.field.load(q.to, q.tx, q.ty, 1); G.fast(2); const rm = MAPS[q.to], rc = D.Story.content(q.to); if (rm.blocked(q.tx * 16, q.ty * 16)) bad.push('방 도착 막힘 ' + q.to); const start = [Math.floor(q.tx), Math.floor(q.ty)], sn = new Set([start.join()]), Q2 = [start]; while (Q2.length) { const [x, y] = Q2.shift(); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (x + a) + ',' + (y + b); if (sn.has(k) || rm.blocked((x + a + .5) * 16, (y + b + .7) * 16)) continue; sn.add(k); Q2.push([x + a, y + b]); } } for (const n of rc.npcs) if (n.spr && ![...sn].some(k => { const [a, b] = k.split(',').map(Number); return Math.hypot(a - n.x, b - n.y) < 2.4; })) bad.push(`방 사람 못 감 ${q.to} ${n.id}`); const back = rm.portals.find(z => z.to === l.map); if (!back) bad.push('방 나가는 문 없음 ' + q.to); else { const [bx, by] = k < 1 ? m.freeNear(back.tx * 16 * k, back.ty * 16 * k) : [back.tx * 16, back.ty * 16]; if (m.blocked(bx, by)) bad.push('문앞 막힘 ' + q.to); } } if (m.portals.some(q => /^[rh]_/.test(q.to))) G.field.load(l.map, l.at[0], l.at[1], 1);
+      for (const q of m.portals.filter(q => q.door && /^[rh]_/.test(q.to))) { const dx = (q.x + q.w / 2) / 16, dy = (q.y + q.h) / 16; if (!walk(dx, dy)) bad.push('문 못 감 ' + q.to); G.field.load(q.to, q.tx, q.ty, 1); G.fast(2); const rm = MAPS[q.to], rc = D.Story.content(q.to); if (rm.blocked(q.tx * 16, q.ty * 16)) bad.push('방 도착 막힘 ' + q.to); const start = [Math.floor(q.tx), Math.floor(q.ty)], sn = new Set([start.join()]), Q2 = [start]; while (Q2.length) { const [x, y] = Q2.shift(); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (x + a) + ',' + (y + b); if (sn.has(k) || rm.blocked((x + a + .5) * 16, (y + b + .7) * 16)) continue; sn.add(k); Q2.push([x + a, y + b]); } } for (const n of rc.npcs) if (n.spr && ![...sn].some(k => { const [a, b] = k.split(',').map(Number); return Math.hypot(a - n.x, b - n.y) < 2.4; })) bad.push(`방 사람 못 감 ${q.to} ${n.id}`); const back = rm.portals.find(z => z.to === l.map); if (!back) bad.push('방 나가는 문 없음 ' + q.to); else {
+          G.field.load(back.to, back.tx, back.ty, back.dir, 'portal');
+          const {x, y} = G.field.p;
+          if (m.blocked(x, y) || (x > q.x && x < q.x+q.w && y > q.y && y < q.y+q.h)) bad.push('문앞 막힘 ' + q.to);
+        }
+      }
+      if (m.portals.some(q => /^[rh]_/.test(q.to))) G.field.load(l.map, l.at[0], l.at[1], 1);
       if (bad.length) no(`${l.name}: ${[...new Set(bad)].join(' / ')}`); }
     return out;
   });

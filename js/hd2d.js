@@ -19,7 +19,7 @@ import { idleCel, idleFacing, standing } from './hd2d/field-idle.js';
 import { addWalkways, bridgeHeight } from './hd2d/walkways.js';
 import { landscapeOf, paintLandscape, warmTravelEdges } from './landscape.js';
 import { daylight, outdoorUniforms, outdoorMaterial } from './hd2d/outdoor-light.js';
-import { reliefMesh, localScenery, sceneryBatch, addRiverMargins, addSurround, addVista } from './hd2d/wilderness.js';
+import { reliefMesh, localScenery, sceneryBatch, addRiverMargins, addSurround, addVista, extendTrailEdges } from './hd2d/wilderness.js';
 import { groveBatches,syncWildlife } from './hd2d/river-models.js';
 import { furnitureKey, frontageKey, placeFurniture, dressFront, topOfFurniture } from './hd2d/joinery.js';
 import { architectureOf, regionalBuilding } from './hd2d/regional-buildings.js';
@@ -854,6 +854,9 @@ function setMap(m) {
     const rug=new T.Mesh(cloth,sharpen(new T.MeshLambertMaterial({map:texFrom(cc,{mips:false}),alphaTest:.5})));
     rug.position.set(OX+Wm/2,.35,OZ+Dm/2);rug.receiveShadow=true;rug.userData={flat:true};propG.add(rug); }
   water = art() ? waterMesh(m) : null; if (water) scene.add(water);
+  extendTrailEdges(T, propG, m, ground, TS, ZS);
+  extendTrailEdges(T, propG, m, water, TS, ZS);
+  if (m.roadside) for (const face of cliffs) extendTrailEdges(T, propG, m, face, TS, ZS);
   // 지도 밖: 가장자리 땅빛으로 넓게 깔아 빈 곳이 안 보이게
   const ed = gx.getImageData(0, 0, gc.width, 8).data; let r = 0, g = 0, b = 0, n = 0; for (let i = 0; i < ed.length; i += 16) { r += ed[i]; g += ed[i + 1]; b += ed[i + 2]; n++; }
   if (!skirt) { skirt = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshLambertMaterial()); skirt.rotation.x = -Math.PI / 2; skirt.receiveShadow = true; scene.add(skirt); }
@@ -947,7 +950,7 @@ function setMap(m) {
     o.castShadow = !s.flat; o.receiveShadow = true; o.userData = { s, w, h, M, t, owner: o, flat: s.flat, shared: true }; propG.add(o);
   });
   // 풀 포기(새 화면만, 막힘 없음): 빈 풀밭 칸에 풀과 꽃을 흩뿌려 빈 땅이 넓게 보이지 않게. 길, 문 앞, 소품 둘레는 비운다. 그림마다 한 덩어리로 합쳐 그리는 횟수를 줄인다
-  if (art() && !land && !m.room && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  if (art() && !land && !m.room && !m.roadside && DECO[m.biome || 'grass']) { const DK = IMG['stamp/g_fern'] ? ['g_fern', 'g_tallgrass', 'g_yflowers', 'g_tallgrass', 'g_wflowers', 'g_ivy', 'g_bush', 'g_fern'] : ['fern1', 'fern2', 'flower3', 'fern1', 'flower4', 'fern2', 'bush4', 'flower1'], hs = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
     // 소품 둘레 칸을 미리 표시해 둔다(전에는 풀 한 포기마다 소품을 전부 훑어서 큰 지도에서 몇 초씩 걸렸다)
     const OCC = new Set(), C8 = 8; for (const q of m.stamps) { const S = STAMPS[q.name]; if (!S) continue; for (let yy = Math.floor((q.y + S[4] * .4 - 4) / C8); yy <= Math.floor((q.base + 8) / C8); yy++) for (let xx = Math.floor((q.x - 6) / C8); xx <= Math.floor((q.x + S[3] * (q.sc || 1) + 6) / C8); xx++) OCC.add(xx * 65536 + yy); }
     const near = (px, py) => OCC.has(Math.floor(px / C8) * 65536 + Math.floor(py / C8)) || m.portals.some(q => px > q.x - 12 && px < q.x + q.w + 12 && py > q.y - 6 && py < q.y + q.h + 20);

@@ -1,5 +1,6 @@
 // 강호 전도: 중원과 변방을 한 장으로 걸어 다니는 큰 지도. 좌표는 804×658 참고 지도 기준
 import { G, IMG, TS, VW, VH, rnd, pick, toast, el, esc, Sound } from './core.js';
+import { cheonghaOnWorldMap } from './cheongha-scenery.js';
 import { MAPS, makeMap } from './maps.js';
 import { hitsBox } from './iso.js';
 import { BIOME, AUTO, STAMPS, hasTex, texTile, drawStamp, flagOf, curbs, mottle } from './tiles.js';
@@ -231,7 +232,7 @@ function compound(l) {
     }
     for (const x of [tx - 3, tx + 3]) at('lantern', x, Y0 + 13.6);
     flags(ty + .85); m.pen('gwan', X0 + 1.5, Y0 + 1.6); m.pen('gwan', X1 - .5, Y0 + 1.6);
-  } else if (sh === 'village') { m.put('hut_o', tx - 8, ty - 7); m.put('house_red', tx - 3, ty - 8); m.put('hut_b', tx + 3, ty - 7); m.put('hut_o2', tx - 7, ty - 3); m.put('shop_green', tx + 2, ty - 3); m.put('banner4', tx + .6, ty - 6.6, { nosolid: true }); }
+  } else if (sh === 'village') { cheonghaOnWorldMap(m, tx, ty); }
   else if (sh === 'hamlet') { m.put('hut_o', tx - 4, ty - 4); m.put('straw', tx + 1, ty - 4); }
   else m.put('gate_arch', tx - 2, ty - 3, { nosolid: true });
   m.exit(tx - 2, ty - 1, 4, 1, l.map, l.at[0], l.at[1], 1, { world: true, when: l.need, lock: l.need ? '지금 갈 만한 까닭이 없다.' : undefined });

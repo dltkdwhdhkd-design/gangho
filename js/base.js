@@ -318,7 +318,7 @@ const STREET = { town: ['p_lanterns', 'p_barrels', 'p_sacks', 'p_flowerbed', 'p_
   fiveclans: ['p_lanterns', 'p_flowerbed', 'p_banner', 'p_rail', 'p_lion'], oasis: ['p_barrels', 'p_sacks', 'p_trough', 'v_jars', 'p_foodstall', 'p_banner', 'p_vat', 'p_chili'] };
 function autoDoors(m, owner) {
   [...m.stamps].forEach((st, i) => { if (st.iso || !HOUSES.includes(st.name)) return; const w = STAMPS[st.name][3], h = STAMPS[st.name][4], cx = st.x + w / 2, by = st.y + h; if (m.portals.some(q => q.x + q.w > st.x && q.x < st.x + w && Math.abs(q.y - by) < 28)) return;  // 쿼터뷰 집(이름이 같은 inn 등)은 건너뛴다
-    const bx = cx / TS / m.k, byT = (by / TS + 1) / m.k; if (m.blocked(cx, by + 16) || m.blocked(cx, by + 8)) return; const big = st.name === 'hall' || st.name === 'lodge', kind = big ? 'temple' : 'home', id = `h_${m.id}_${i}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: m.id, bx, by: byT, kind, name: big ? '전각' : '집', owner };
+    const bx = cx / TS / m.k, byT = (by / TS + 1) / m.k; if (m.blocked(cx, by + 16) || m.blocked(cx, by + 8)) return; const big = st.name === 'hall' || st.name === 'lodge', kind = big ? 'temple' : 'home', id = st.homeRoom || `h_${m.id}_${i}`, [, , ex, ey] = ROOM[kind]; ROOMS[id] = { back: m.id, bx, by: byT, kind, name: big ? '전각' : '집', owner };
     st.doorTo=id;st.archUse=kind;
     m.portals.push({ x: cx - 9, y: by - 4, w: 18, h: 9, to: id, tx: ex + 2, ty: ey - .6, dir: 1, door: true }); });
 }
@@ -603,7 +603,17 @@ function provider(id) {
   if (id.startsWith('r_') || id.startsWith('h_')) { if (ROOMS[id]) { G.jh.ensure(); roomNpcs(id, out); dressMembers(out, ROOMS[id].owner.fac); } return out; }
   const l = LOCS.find(q => q.map === id); if (!l) return out;
   if (G.S.mode !== 'free' && !F.world_open && G.after && G.after('c1a')) F.world_open = true;
-  if (l.kind === 'old') { const hf = l.fac && G.free.fac(l.fac); if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', uniform:'uniform_'+hf.id, faction:hf.id, position:'사범', talk: () => G.arts.tutor(hf) }); out.spots.push({ x: l.at[0] - 2.5, y: l.at[1] - 2, w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(), act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); } }); return out; }
+  if (l.kind === 'old') {
+    const hf = l.fac && G.free.fac(l.fac);
+    if (hf && l.tutor && G.world.open() && !G.jh.hostile(hf.id)) out.npcs.push({ id: 'tutor', spr: 'GreenNinja', x: l.tutor[0], y: l.tutor[1], dir: 0, hint: '사범', uniform:'uniform_'+hf.id, faction:hf.id, position:'사범', talk: () => G.arts.tutor(hf) });
+    const board = MAPS[id]?.roadside;
+    out.spots.push({
+      x: board ? board.signX - 1.5 : l.at[0] - 2.5, y: board ? board.signY - .45 : l.at[1] - 2,
+      w: 3, h: 2.6, hint: '강호로 나간다', when: () => G.world.open(),
+      act: async () => { const [x, y] = G.world.entry(id); Sound.sfx('select', .6); await ctx.warp('world', x, y, 0); }
+    });
+    return out;
+  }
   G.jh.ensure(); const town = l.style === 'town', chat = CHAT[l.style] || CHAT.town, folk = town ? ['Villager', 'Woman', 'Greenman', 'Villager2', 'Villager4', 'OldWoman', 'Villager3'] : ST[l.style].folk, R = fold(id);
   if (l.boat) out.npcs.push({ id: 'boat', spr: 'Villager3', x: town ? 33 : 26, y: town ? 44.5 : 62, dir: 2, hint: '뱃사공', talk: () => boatTalk(l) });
   if (town) {
@@ -632,8 +642,20 @@ function provider(id) {
 }
 function init() {
   Story.providers.push(provider, ambient);
-  for (const id in MAPS) { const m = MAPS[id]; if (!m.room && id !== 'world' && id !== 'mysect' && !id.startsWith('b_') && !id.startsWith('c_')) { if (id !== 'cheongha') { m.frontPaths?.(); if (!m.fenced) m.backFence?.(); m.dress?.(); m.plazaDress?.(); m.streetDress?.(STREET[id] || (m.stamps.some(q => ['hut_o', 'hut_b', 'clay', 'mud', 'straw', 'shop_blue', 'wood_o'].includes(q.name)) ? STREET.town : STREET.wild), id === 'fort' ? 3 : 4, id.length); } autoDoors(m, { id, name: m.name, style: 'town', map: id }); } }  // 방침 2 규칙: 집 뒤 좁은 틈을 담으로 막는다(청하진은 지도에서 직접)
+  for (const [id, m] of Object.entries(MAPS)) {
+    if (m.room || id === 'world' || id === 'mysect' || id.startsWith('b_') || id.startsWith('c_')) continue;
+    if (!m.roadside) {
+      m.frontPaths?.();
+      if (!m.fenced) m.backFence?.();
+      m.dress?.();
+      m.plazaDress?.();
+      const townHomes = ['hut_o', 'hut_b', 'clay', 'mud', 'straw', 'shop_blue', 'wood_o'];
+      const street = STREET[id] || (m.stamps.some(q => townHomes.includes(q.name)) ? STREET.town : STREET.wild);
+      m.streetDress?.(street, id === 'fort' ? 3 : 4, id.length);
+    }
+    autoDoors(m, { id, name: m.name, style: 'town', map: id });
+  }
   MAPS.hwasan?.exit(29, 9, 1, 5, 'b_hwasan', 1.5, 32, 3);
-  for (const l of LOCS) if (l.kind === 'old' && MAPS[l.map]) { const m = MAPS[l.map], n = m.stamps.length; m.put('signpost', Math.floor(l.at[0] - 1.5), Math.floor(l.at[1] - 1.5), { nosolid: true }); if (m.objs) m.objs.push(m.stamps[n]); }
+  for (const l of LOCS) if (l.kind === 'old' && MAPS[l.map] && !MAPS[l.map].roadside) { const m = MAPS[l.map], n = m.stamps.length; m.put('signpost', Math.floor(l.at[0] - 1.5), Math.floor(l.at[1] - 1.5), { nosolid: true }); if (m.objs) m.objs.push(m.stamps[n]); }
 }
 G.base = { make, init, folk: l => l && ST[l.style] ? ST[l.style].folk : null, spot: id => id.startsWith('c_') ? [31, 19] : [31, 34] };

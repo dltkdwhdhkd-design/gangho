@@ -1,3 +1,4 @@
+import { dressCheongha, dressBamboo, dressEastPass, dressValley } from './cheongha-scenery.js';
 import { paintApproaches } from './hd2d/court-paths.js';
 // 지도. 타일 단위로 길과 물을 깔고 소품을 얹는다.
 import { G, TS, rint, pick, IMG, ISO_ON } from './core.js';
@@ -50,6 +51,7 @@ class MapDef {
     // 방 안 가구는 사람에 비해 1.5배쯤 크게 그려져 있어서(장롱이 사람 키의 세 배) 0.7로 줄인다. 발 자리(밑변 가운데)는 그대로 둔다. 내 집은 놓는 칸 계산이 있어 그대로
     if (this.room && this.id !== 'myhouse' && !o.sc && !o.flat && ROOM_SC < 1) { sc = ROOM_SC; px += s[3] * (1 - sc) / 2; py += s[4] * (1 - sc); }
     this.stamps.push({ name, x: px, y: py, base: py + s[4] * sc - (o.lift || 0), flat: o.flat, ...(sc !== 1 ? { sc, w: s[3] * sc } : {}), ...(o.isoAs ? { isoAs: o.isoAs } : {}), ...(o.grand ? { grand: o.grand } : {}) });  // grand: 문파·세가 전각(새 화면에서 크고 문파답게 짓는다)
+    if (o.homeRoom) this.stamps.at(-1).homeRoom = o.homeRoom;
     if (s.length > 5 && !o.nosolid) { const sol = { x: px + s[5] * sc, y: py + s[6] * sc, w: s[7] * sc, h: s[8] * sc }; this.solids.push(sol); Object.defineProperty(this.stamps.at(-1), 'sol', { value: sol }); }
     return this;
   }
@@ -274,30 +276,17 @@ export function buildMaps() {
     m.fill(20, 12, 6, 3, 1);
     m.road(22, 0, 22, 4, 2).road(43, 15, 45, 15, 2).road(0, 15, 3, 15, 2);
     m.house('inn', 19, 8, 'inn', 8, 10, 1, { doorDx: 0 });
-    m.put('hut_b', 26, 8).put('sign_dojo', 0, 0, { flat: false, nosolid: true }); m.stamps.pop();
+    m.put('hut_b', 26, 8, { homeRoom: 'h_cheongha_1' });
     m.house('clay', 8, 11, 'smith', 7, 8, 1);
     m.house('shop_green', 31, 11, 'clinic', 7, 8, 1);
     m.house('shop_blue', 36, 18, 'shop', 6, 7, 1);
-    m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).house('hut_o2', 26, 18, 'bokun', 7, 8, 1, { when: 'bokun_open', lock: '낮에는 문이 잠겨 있다. 밤에만 불이 켜진다는 집이다.' }).put('wood_o', 4, 18).put('wood_b', 12, 8);
-    m.put('banner4', 17.6, 9.3, { nosolid: true }).put('banner4', 23.4, 9.3, { nosolid: true });  // 객잔 간판 기: 밥그릇
-    m.put('plum', 43, 6).put('plum', 28, 3).put('plum_o', 12, 3).put('tree_round', 34, 6).put('tree_round', 5, 6);
-    m.put('jar', 18, 12).put('pot', 26, 12).put('pot', 27, 12).put('signpost', 24, 16).put('signpost', 41, 13);
-    m.border(['grove_green', 'tree_round', 'tree_big', 'tree_pine'], [[21, 0, 4, 2], [44, 14, 3, 4], [0, 27, 2, 8], [44, 27, 2, 8], [0, 33, 46, 2], [0, 13, 3, 5]], 3);
-    m.put('tree_round', 8, 25.4).put('tree_round', 38, 25.4).put('stump', 13, 25.5).put('boulder', 29, 26).put('jar', 19, 25.5).put('pot', 26, 25.5).put('tree_big', 2, 12).put('plum_g', 36, 13).put('hut_o', 37.5, 9.3);  // 동쪽 살림집은 큰길 북쪽으로 옮김(뒷길에 걸려서)
-    m.scatter(['flower1', 'flower2', 'flower3', 'bush1', 'bush3', 'fern1'], 40, 3);
-    // 길가 살림 소품(새 화면 시제품에서 청하진만 채움). 막힘 있는 것은 길과 문 앞을 비켜 놓는다
-    m.put('v_lamppost', 5, 13.05).put('v_lamppost', 17.5, 13.05).put('v_lamppost', 29.6, 13.05).put('v_lamppost', 7.3, 17.1).put('v_lamppost', 25, 17.1);  // 큰길 등롱 기둥
-    m.put('v_wood', 12.2, 11.6).put('v_dummy', 6, 11.2);  // 대장간 옆 장작, 상자, 목인
-    m.put('v_stall', 17.5, 12.45).put('v_jars', 27.8, 13.7).put('v_well', 37.5, 13.4).put('v_hay', 41.5, 13.7);  // 큰길 북쪽: 노점, 독, 우물, 짚더미
-    m.put('v_cart', 16.5, 25.7).put('v_stonelamp', 34.5, 17.1).put('v_jars', 41.5, 17.3).put('v_crates', 29.5, 25.8).put('v_hay', 3.5, 19);  // 큰길 남쪽: 수레, 석등, 독, 상자, 짚더미
-    m.put('v_laundry', 11.5, 25.6, { nosolid: true }).put('v_signboard', 25.3, 25.4);  // 빨래 줄, 나루 안내판
-    m.row('fence_h', 3, 27.4, 17).row('fence_h', 26, 27.4, 17);  // 강둑 울타리(나루 길은 비움)
-    for (const [n, x, y] of [['bush2', 13.2, 25.9], ['flower4', 19.6, 25.9], ['bush4', 27.2, 26], ['flower2', 31, 25.9], ['bush2', 35.2, 26], ['flower1', 8.2, 14.2], ['fern2', 35.6, 14.3], ['bush4', 18.4, 14.4], ['flower3', 24.6, 11.6], ['fern2', 3.4, 14.2]]) m.put(n, x, y, { nosolid: true });  // 집 앞 화단과 풀 포기
-    m.scatter(['fern1', 'fern2', 'bush4', 'flower4', 'bush2'], 45, 11);
+    m.house('hut_o', 14, 18, 'myhouse', 6, 7, 1, { when: 'own_house', lock: '비어 있는 집이다. 옆의 복덕방 영감에게 물어보자.' }).house('hut_o2', 26, 18, 'bokun', 7, 8, 1, { when: 'bokun_open', lock: '낮에는 문이 잠겨 있다. 밤에만 불이 켜진다는 집이다.' }).put('wood_o', 4, 18, { homeRoom: 'h_cheongha_7' }).put('wood_b', 12, 8, { homeRoom: 'h_cheongha_8' });
+    m.put('hut_o', 37.5, 9.3, { homeRoom: 'h_cheongha_50' });
+    dressCheongha(m);
   }
   m.fill(21, 28, 4, 4, 4);
   { const K = m.k * TS; m.solids.push({ x: 21 * K - 4, y: 29 * K, w: 4, h: 3 * K }, { x: 25 * K, y: 29 * K, w: 4, h: 3 * K }, { x: 21 * K, y: 32 * K, w: 4 * K, h: 8 }); }
-  m.terrace(0, 29, 46, 5, -2).terrace(21, 29, 4, 3, -1).stairs(21, 28, 4, 1).heightEdges().clearRoads().backFence().dress();  // 나루터 높낮이: 강물은 두 단, 나루 판은 한 단 아래, 둑에서 계단으로 내려간다
+  m.terrace(0, 29, 46, 5, -2).terrace(21, 29, 4, 3, -1).stairs(21, 28, 4, 1).heightEdges();  // 나루터 높낮이: 강물은 두 단, 나루 판은 한 단 아래, 둑에서 계단으로 내려간다
   m.exit(0, 14, 1, 4, 'valley', 37.5, 15.5, 2, { when: 'burned', lock: '서쪽 청풍골은 나중에 가 보자.' });
   m.label(3.5, 13.2, '← 청풍골');
   m.place(23, 13.8, '광장').place(23, 27, '나루터').place(13, 24.2, '복덕방');
@@ -305,7 +294,8 @@ export function buildMaps() {
   // 객잔 내부(ChatGPT가 M2 가구로 짠 배치 예시대로: art-src/chatgpt/M2_sheet.jpg). 계산대 뒤에 주인이 서고 옆에 술독, 뒷벽 오른쪽 구석에 술통과 등롱 장대,
   // 긴 탁자마다 앞쪽에 긴 걸상, 구석방 백 노인 자리에 차 탁자와 북 걸상. 탁자 넷의 자리는 그대로다(이야기의 사람 자리와 걸레질 자리가 여기에 맞춰져 있다)
   m = M('inn', 18, 13, { name: '달맞이 객잔', bgm: 'peaceful', room: true, arena: 'yard' });
-  m.put('v_jars', .7, 1.75).put('counter', 2, 2).put('shelf', 5.3, 1).put('shelf2', 8.5, 1).put('rack', 11.3, 2).put('p_barrels', 15.9, 1.3).put('p_lanterns', 14.2, 1.3);
+  m.put('v_jars', .7, 1.75).put('counter', 2, 2).put('drawer', 5.55, 1.1).put('shelf2', 9.4, 1.2)
+    .put('box', 13.4, 1.95).put('p_barrels', 15.9, 1.3).put('p_lanterns', 14.65, 1.4);
   for (const [x, y] of [[3, 6], [10, 6], [3, 9], [10, 9]]) m.put('longtable', x, y).put('seat', x + .3, y + .65);
   m.on('teapot', 4.5, 6.55).on('teapot', 11.5, 9.55).put('f_stool', 14.06, 4.875).put('teatable', 15.05, 4.95).on('teapot', 15.55, 5.5).put('f_stool', 16.16, 4.9).put('jar', 15, 10).put('pot', 15.5, 11);
   m.exit(7, 12, 4, 1, 'cheongha', 21, 12, 0, { door: true });
@@ -333,13 +323,8 @@ export function buildMaps() {
   m = M('bamboo', 38, 33, { name: '대숲길', bgm: 'road', biome: 'deep', arena: 'forest' });
   m.road(18, 26, 18, 32, 2).road(18, 26, 30, 26, 2).road(30, 15, 30, 27, 2).road(10, 15, 31, 15, 2).road(10, 7, 10, 16, 2).road(10, 7, 26, 7, 2);
   m.fill(23, 3, 8, 7, 1);
-  for (let y = -1; y < 34; y += 2) for (let x = 0; x < 38; x += 1) {
-    const free = (m.g[Math.min(y + 2, 32)]?.[x] === 0 && m.g[clampy(y + 1)]?.[x] === 0 && m.g[clampy(y)]?.[x] === 0 && m.g[clampy(y + 3)]?.[x] === 0);
-    if (free && (x + y) % 3 === 0 && ((x * 7 + y * 13) % 5 !== 0)) m.put('bamboo', x, y);
-  }
-  function clampy(v) { return Math.max(0, Math.min(32, v)); }
-  m.put('statue', 27, 3).put('stump', 24, 8).put('stump_o', 28, 8);
-  m.scatter(['fern1', 'fern2', 'bush2', 'bush4'], 30, 5);
+  m.put('statue', 27, 3);
+  dressBamboo(m);
   m.exit(17, 32, 4, 1, 'cheongha', 22.5, 2, 0);
   // 동쪽 산길
   m = M('pass', 40, 24, { name: '동쪽 산길', bgm: 'road', biome: 'sand', arena: 'fort' });
@@ -347,7 +332,7 @@ export function buildMaps() {
   m.border(['rocks', 'grove_dead', 'boulder', 'tree_dead'], [[0, 11, 2, 4], [38, 4, 3, 4], [38, 17, 3, 4]], 4);
   for (const [x, y] of [[6, 7], [13, 6], [6, 16], [13, 17], [31, 10], [33, 13], [16, 18], [24, 21], [30, 2]]) m.put(pick2(['boulder', 'tree_dead', 'stump', 'rocks'], x + y), x, y);
   function pick2(a, n) { return a[n % a.length]; }
-  m.scatter(['bush1', 'fern1'], 18, 7);
+  dressEastPass(m);
   m.exit(0, 11, 1, 4, 'cheongha', 43.5, 15.5, 2).exit(39, 4, 1, 4, 'fort', 1, 13, 3, { when: 'fort_open', lock: '산채 입구다. 준비가 끝나면 다시 오자.' }).exit(39, 17, 1, 4, 'cloudmt', 22, 36, 1, { when: 'cloud_open', lock: '이 길 너머는 창운산이다. 지금은 갈 이유가 없다.' });
   // 높낮이(2026-11-19): 산길답게 북쪽으로 올라간다. 서쪽 들머리와 남동쪽 길이 0단, 북쪽 길(흑풍채 쪽)이 놓인 바위 턱이 3단, 그 뒤는 바위벽(7단), 남서쪽은 골짜기로 두 번 떨어진다(-3단, -6단)
   // 턱은 한 번에 세 단 넘게 오르내린다(한 단씩 여러 번 나누면 밭두렁처럼 보인다. 세 단이 사람 키의 1.7배). 두 세로 길은 벼랑을 파고든 세 칸 돌계단으로 턱에 오른다(계단 칸은 제 단에서 남쪽 칸의 단으로 내려간다)
@@ -433,9 +418,7 @@ export function buildMaps() {
   m = M('valley', 40, 30, { name: '청풍골', bgm: 'peaceful', biome: 'deep', arena: 'forest', ambient: 'leaf' });
   m.water(19, 0, 2, 30).fill(19, 13, 2, 3, 4).road(21, 14, 39, 14, 2).road(4, 14, 18, 14, 2);
   m.solids.push({ x: 0, y: -8, w: 40 * m.k * TS, h: 8 });
-  m.border(['grove_pine', 'tree_big', 'grove_green', 'tree_pine'], [[38, 13, 3, 5], [0, 13, 4, 4]], 3);
-  for (const [nm, x, y] of [['tree_pine', 9, 5], ['tree_round', 14, 7], ['tree_big', 26, 4], ['tree_pine', 32, 11], ['plum_g', 14, 19], ['tree_round', 7, 22], ['tree_pine', 25, 24], ['tree_big', 34, 26], ['boulder', 23, 10], ['boulder', 15, 25], ['plum', 30, 17], ['tree_round', 5, 9]]) m.put(nm, x, y);
-  m.scatter(['fern1', 'fern2', 'bush2', 'bush4', 'flower3'], 34, 41);
+  dressValley(m);
   m.exit(39, 14, 1, 4, 'cheongha', 2, 15.5, 3).exit(0, 13, 1, 4, 'shrine', 7, 8, 1, { when: 'ma_open', lock: '깎아지른 절벽뿐이다.' });
   // 천마신교 분타: 청풍골 서쪽 절벽 안
   m = M('shrine', 14, 11, { name: '흑운궁 분타', bgm: 'curse', room: true, roomStyle: 1, arena: 'moon', tint: 'rgba(70,6,20,.4)' });

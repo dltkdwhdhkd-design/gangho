@@ -141,6 +141,47 @@ export function addRiverMargins(T,group,map,area,field,tile,hs,zs,texture,materi
   }
 }
 const vistas=new Map();
+// Continue the textured terrain, water and cliff faces just beyond the walkable edge.
+export function extendTrailEdges(T, group, map, surface, tile, zs) {
+  if (!map.roadside || !surface) return;
+  const src = surface.geometry, pos = src.attributes.position, idx = src.index;
+  const width = map.w * tile, depth = map.h * tile * zs, margin = 11 * tile;
+  const edges = Array.from({length:9}, () => []);
+  const point = new T.Vector3();
+  surface.updateMatrix();
+  const xs = new Float32Array(pos.count), zsAt = new Float32Array(pos.count);
+  for (let i = 0; i < pos.count; i++) {
+    point.fromBufferAttribute(pos, i).applyMatrix4(surface.matrix);
+    xs[i] = point.x; zsAt[i] = point.z;
+  }
+  const count = idx ? idx.count : pos.count;
+  for (let i = 0; i < count; i += 3) {
+    const a = idx ? idx.getX(i) : i, b = idx ? idx.getX(i+1) : i+1, c = idx ? idx.getX(i+2) : i+2;
+    // Faces that seal the map end at the seam. Mirroring those would leave a wall across the trail.
+    if (xs[a] === xs[b] && xs[b] === xs[c] && (xs[a] === 0 || xs[a] === width)) continue;
+    if (zsAt[a] === zsAt[b] && zsAt[b] === zsAt[c] && (Math.abs(zsAt[a]) < .001 || Math.abs(zsAt[a] - depth) < .001)) continue;
+    const x = (xs[a] + xs[b] + xs[c]) / 3, z = (zsAt[a] + zsAt[b] + zsAt[c]) / 3;
+    const side = x < margin ? -1 : x > width - margin ? 1 : 0;
+    const end = z < margin * zs ? -1 : z > depth - margin * zs ? 1 : 0;
+    if (side) edges[4 + side].push(a, b, c);
+    if (end) edges[4 + end * 3].push(a, b, c);
+    if (side && end) edges[4 + side + end * 3].push(a, b, c);
+  }
+  for (const [i, indices] of edges.entries()) {
+    if (!indices.length) continue;
+    const side = i%3-1, end = Math.floor(i/3)-1;
+    const geo = new T.BufferGeometry();
+    for (const [key, attribute] of Object.entries(src.attributes)) geo.setAttribute(key, attribute);
+    geo.setIndex(indices);
+    const strip = new T.Mesh(geo, surface.material);
+    strip.matrixAutoUpdate = false;
+    strip.matrix.makeScale(side ? -1 : 1, 1, end ? -1 : 1);
+    strip.matrix.setPosition(side > 0 ? width*2 : 0, 0, end > 0 ? depth*2 : 0).multiply(surface.matrix);
+    strip.name = 'trail-edge'; strip.receiveShadow = true; strip.castShadow = surface.castShadow;
+    strip.renderOrder = surface.renderOrder;
+    group.add(strip);
+  }
+}
 export function addSurround(T,group,map,tile,hs,zs){
   if(!map.surround)return;
   const {field,pad}=map.surround,area={x0:0,y0:0,x1:field.w,y1:field.h};
