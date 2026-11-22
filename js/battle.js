@@ -1,3 +1,4 @@
+import { recordPractice, finishStudy, parryWindow, basicMpReturn, defenseFactor, skillCost, skillCooldown, skillPower } from './training.js';
 import { fighterEquipment, armedStats } from './combat-loadout.js';
 import { suspendBondScene } from './cg.js';
 import { rankedStats } from './martial-standing.js';
@@ -19,7 +20,7 @@ import { encounterStage, encounterFloor } from './hd2d/encounter.js';
 
 // 전투 화면은 아래 기술 칸 띠(BAND) 위에만 그린다. 기술 칸이 싸움을 가리지 않게
 export const BAND = 0; const ZB = 2.85, VWB = 1280 / ZB, VHB = (720 - BAND) / ZB;
-const PARRY = .17, D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
+const D2R = Math.PI / 180, VEC = new Set(['plum', 'crescent', 'tray']);
 // 이름 없는 적의 사람 도트(n_<값>). ChatGPT 요청문(docs/chatgpt-people.md 0순위)으로 받으면 바로 쓰인다. 없으면 옛 도트
 const PCLASS = { Sword: 'sword', Rapier: 'sword', Katana: 'sword', Ninjaku: 'sword', Sai: 'fist', Club: 'fist', BigSword: 'blade', Axe: 'blade', Lance: 'spear', Lance2: 'spear', Stick: 'staff' };  // 주인공 무기 그림 → 동작 칸(아래 actionSheet). 플레이어의 Club·Sai는 권갑이다(js/data.js WEAPONS)
 const MOB = { bandit: 'mob_bandit', rowdy: 'mob_bandit', mask_low: 'mob_bandit', rowdy2: 'mob_brute', bruiser: 'mob_brute', pirate: 'mob_pirate', pirate_bow: 'mob_pirate', pirate_hook: 'mob_pirate', archer: 'mob_archer', wanted2: 'mob_archer',
@@ -48,7 +49,12 @@ export class Battle {
     this.W=this.venue.w*TS;this.H=this.venue.h*TS;this.nav=this.venue.encounter.nav;
     this.stage=native?this.venue:null;this.bg=this.stage?null:encounterFloor(this.venue);
     this.band=BAND;this.left=TS;this.right=this.W-TS;this.top=TS;this.floorB=this.H-TS;
-    const S = G.S, st = stats(S); this.st = st; this.b = bonus(S);
+    const S = G.S;
+    this.b = bonus(S);
+    const st = stats(S,this.b);
+    this.st=st;
+    this.studyFocus=S.studyFocus;
+    this.usedTypes=new Set();
     const p = new Actor({ id: 'player', team: 0, name: S.name, spr: 'chars/' + S.look, isPlayer: true, x: this.W / 2, y: this.H * .68, maxHp: st.maxHp, hp: st.maxHp, maxMp: st.maxMp, mp: st.maxMp * .7, regen: st.regen, atk: st.atk, def: st.def, spd: st.spd, crit: st.crit, ax: 0, ay: -1, face: 1 });
     p.wpn = WEAPONS[S.weapon].spr; this.actors.push(p); this.p = p;
     [p.x,p.y]=this.nav.focus;
@@ -127,7 +133,7 @@ export class Battle {
     if (canCancel || a.st === 'skill' && a.sk.basic && a.skT > .1) {
       for (let i = 0; i < 4; i++) if (I.buf['s' + i] > 0) {
         I.take('s' + i); const id = G.S.slots[i];
-        if (id) this.trySkill(a, id, i);
+        if (id) this.trySkill(a, id);
         else this.say(a, '비어 있음', '#ccc');
         return;
       }
@@ -152,7 +158,7 @@ export class Battle {
     if (danger && a.dashCd <= 0 && !a.busy && Math.random() < skill) { const s = Math.random() < .5 ? 1 : -1; this.dash(a, { x: -a.ay * s - a.ax * .5, y: a.ax * s - a.ay * .5 }); return; }
     if (a.busy) return;
     if (a.hp / a.maxHp < .4 && G.S.potion > 0) this.usePotion(a);
-    for (let i = 0; i < 4; i++) { const id = G.S.slots[i]; if (id && (a.cd[i] || 0) <= 0 && a.mp >= SKILLS[id].mp && !SKILLS[id].self && d < 62 && Math.random() < (G.bot.skillUse ?? .08)) { this.trySkill(a, id, i); return; } }
+    for (let i = 0; i < 4; i++) { const id = G.S.slots[i]; if (id && (a.cd[id] || 0) <= 0 && a.mp >= skillCost(SKILLS[id],masteryLv(id),this.b) && !SKILLS[id].self && d < 62 && Math.random() < (G.bot.skillUse ?? .08)) { this.trySkill(a, id); return; } }
     a.botWait = (a.botWait || 0) - dt; if (a.botWait > 0) { a.st = 'idle'; a.vx = a.vy = 0; return; } // 사람처럼 쉬어 가며 때리는 시험용 지연
     if (d < 24) { this.basic(a, { x: dx / d, y: dy / d }); if (G.bot.rest && a.combo === 0) a.botWait = G.bot.rest; return; }
     const way=this.nav.steer(a,T)||[dx/d,dy/d];
@@ -167,6 +173,7 @@ export class Battle {
   }
   basic(a, d) {
     const type = this.st.wtype, list = BASIC[type];
+    if (a.isPlayer) this.usedTypes.add(type);
     if (a.comboT <= 0) a.combo = 0;
     this.aim(a, d);
     a.basicFrame = a.combo % list.length;
@@ -178,15 +185,23 @@ export class Battle {
     a.combo = (a.combo + 1) % list.length; a.comboT = .6;
     a.basicHit = true;
   }
-  trySkill(a, id, slot) {
-    const k = SKILLS[id];
-    if ((a.cd[slot] || 0) > 0) return this.say(a, '아직', '#ccc');
+  trySkill(a,id) {
+    const k=SKILLS[id];
+    if (!k) return;
+    const rank=masteryLv(id);
+    if ((a.cd[id] || 0) > 0) return this.say(a, '아직', '#ccc');
     if (!canEquip(id)) return this.say(a, '무기가 안 맞음', '#ccc');
-    const cost = k.mp * (1 + (this.b.mpCost || 0) / 100);
+    const cost = skillCost(k,rank,this.b);
     if (a.mp < cost) { Sound.sfx('cancel'); return this.say(a, '내력 부족', '#8fc0ff'); }
-    a.mp -= cost; a.skRate = 1; a.cd[slot] = k.cd * this.st.cdMul * (masteryLv(id) >= 5 ? .85 : 1);
+    a.mp -= cost; a.skRate=1;
+    a.cd[id]=skillCooldown(k,rank,this.st);
+    (a.cooldownSpan ??= {})[id]=a.cd[id];
     this.aim(a, Input.dir()); a.vx = a.vy = 0;
-    if (a.isPlayer) { G.S.mastery[id] = (G.S.mastery[id] || 0) + 1; }
+    if (a.isPlayer) {
+      this.usedTypes.add(this.st.wtype);
+      const practice=recordPractice(G.S,id,1);
+      if (practice && practice.before!==practice.rank) this.refreshStats();
+    }
     this.start(a, k, id);
   }
   usePotion(a) {
@@ -289,7 +304,7 @@ export class Battle {
     const front = (-nx * o.ax + -ny * o.ay) > -.1 || proj;
     if (o.st === 'guard' && front && !h.ub) {
       const moon = o.buffs.moonlight > 0;
-      if (o.guardT < PARRY + (isP ? (this.b.parry || 0) : 0) || moon) return this.parry(o, src, proj);
+      if (o.guardT < parryWindow(isP ? this.b : {}) || moon) return this.parry(o, src, proj);
       if (!isP && o.realm >= 3) { o.guardAI = Math.min(o.guardAI, .15); o.counterNext = 1; }  // 막고 곧바로 되받아친다
       const bd = this.calc(src, o, h, sk) * .22; o.hp -= bd; o.mp = Math.max(0, o.mp - bd * .4); this.num(o.x, o.y - 16, Math.round(bd), '#bbb', .8); Sound.sfx('mini', .8); this.addFx('spark', o.x + nx * -6, o.y - 6, .5);
       o.kx = nx * 40; o.ky = ny * 40; o.kT = .1;
@@ -308,7 +323,7 @@ export class Battle {
     this.addFx('spark', o.x - nx * 2, o.y - 7, .55); if (!src.mon || sk) BF.impact(this, (proj && proj.st) || src.fxSt || 'steel', o, nx, ny, (h.mul || 1) >= 2.5 || crit);
     Sound.sfx(rint(0, 1) ? 'hit' : 'hit2', .8);
     if (src.isPlayer) {
-      src.mp = Math.min(src.maxMp, src.mp + (sk && sk.basic ? 1.6 + (this.b.mpHit || 0) : .4));
+      src.mp = Math.min(src.maxMp, src.mp + (sk && sk.basic ? basicMpReturn(this.b) : .4));
       if (this.b.lifeHit) src.hp = Math.min(src.maxHp, src.hp + dmg * this.b.lifeHit / 100);
       if (this.b.venom && sk?.basic) this.poison(src,o,'weapon',.12,2);
     }
@@ -342,7 +357,7 @@ export class Battle {
     let m = h.mul || 1;
     if (src.isPlayer) {
       const b = this.b;
-      if (sk && !sk.basic) m *= this.st.power * (1 + (masteryLv(sk.id || src.skKey) - 1) * .07) * (1 + ((b.skill || 0) + (sk.ult ? (b.ult || 0) : 0)) / 100);
+      if (sk && !sk.basic) m *= skillPower(sk,masteryLv(sk.id || src.skKey),this.st,b);
       else m *= 1 + (b.basic || 0) / 100;
     }
     if (!src.isPlayer && sk?.fromSkill) {
@@ -353,7 +368,7 @@ export class Battle {
       const fx=src.equipment.fx;
       m *= 1+((sk?.fromSkill?fx.skill:fx.basic) || 0)/200;
     }
-    return src.atk * m * (60 / (60 + o.def)) * rnd(.93, 1.07);
+    return src.atk * m * defenseFactor(o.def) * rnd(.93, 1.07);
   }
   parry(o, src, proj) {
     this.addFx('ringw', o.x, o.y - 7, 1.2); Sound.sfx('sword2'); Sound.sfx('power1', .5); this.stop = .12; this.shake(2);
@@ -725,8 +740,18 @@ export class Battle {
     const k = im.hd || 1; c.drawImage(im, fr * f.fw * k, 0, f.fw * k, f.fh * k, -f.fw / 2, -f.fh / 2, f.fw, f.fh); c.restore();
   }
   // 싸우는 도중 메뉴에서 초식이나 무기를 바꾼 경우
+  refreshStats() {
+    const p=this.p;
+    this.b=bonus(G.S);
+    this.st=stats(G.S,this.b);
+    const st=this.st;
+    if (st.maxHp!==p.maxHp) p.hp=Math.min(st.maxHp,p.hp/p.maxHp*st.maxHp);
+    if (st.maxMp!==p.maxMp) p.mp=Math.min(st.maxMp,p.mp/p.maxMp*st.maxMp);
+    Object.assign(p,{atk:st.atk,def:st.def,maxHp:st.maxHp,maxMp:st.maxMp,crit:st.crit,
+      regen:st.regen,spd:st.spd,wpn:WEAPONS[G.S.weapon].spr});
+  }
   refreshGear() {
-    const st = stats(G.S), p = this.p; this.st = st; p.atk = st.atk; p.wpn = WEAPONS[G.S.weapon].spr;
+    this.refreshStats();
     const tip = this.tipEl; this.buildHud(); if (tip && this.tipT > 0) { this.tipEl = tip; $('#hud').appendChild(tip); }
   }
   // ── HUD ──
@@ -738,7 +763,7 @@ export class Battle {
     if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.position && !b.name.includes(b.def_.position) ? b.def_.position + ' ' : '') + (b.def_.nameplate || b.name)}${b.realm >= 2 && !b.def_.nameplate ? ` <small class="realm">${RL.NAME[b.realm]}${b.gap ? ' ▲' : ''}</small>` : ''}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
     const key = (i) => Keys.label('s' + i);
     let sk = '';
-    S.slots.forEach((id, i) => { const k = id && SKILLS[id]; sk += `<div class="sk ${k && k.ult ? 'ult' : ''}" id="sk${i}"><span class="ky">${key(i)}</span>${k ? `<span class="mp">${k.mp}</span><span class="nm">${k.name}</span>` : '<span class="nm">-</span>'}<div class="cd"></div><span class="ct"></span></div>`; });
+    S.slots.forEach((id, i) => { const k = id && SKILLS[id]; sk += `<div class="sk ${k && k.ult ? 'ult' : ''}" id="sk${i}"><span class="ky">${key(i)}</span>${k ? `<span class="mp">${+skillCost(k,masteryLv(id),this.b).toFixed(1)}</span><span class="nm">${k.name}</span>` : '<span class="nm">-</span>'}<div class="cd"></div><span class="ct"></span></div>`; });
     sk += `<div class="sk small"><span class="ky">${Keys.label('atk')}</span><span class="nm">평타</span></div><div class="sk small" id="skDash"><span class="ky">${Keys.label('dash')}</span><span class="nm">경공</span><div class="cd"></div></div><div class="sk small"><span class="ky">${Keys.label('guard')}</span><span class="nm">막기</span></div><div class="sk small" id="skPot"><span class="ky">${Keys.label('potion')}</span><span class="nm">금창약<br><span id="potN"></span></span></div>`;
     h.insertAdjacentHTML('beforeend', `<div class="skills">${sk}</div>`);
     if (this.introT > 0) { this.vsEl = el('div', 'vs', this.cfg.title || (bosses[0] ? bosses[0].name : '대결')); h.appendChild(this.vsEl); }
@@ -755,12 +780,14 @@ export class Battle {
     if (this.bossA) { const b = this.bossA; set(E.bVal, clamp(b.hp / b.maxHp, 0, 1) * 100 + '%'); set(E.bLag, clamp(b.hpLag, 0, 1) * 100 + '%'); set(E.bPos, (b.maxPoise ? clamp(b.poise / b.maxPoise, 0, 1) : 0) * 100 + '%'); }
     const S = G.S;
     S.slots.forEach((id, i) => {
-      const e = E.slots[i]; if (!id) return; const k = SKILLS[id], cd = p.cd[i] || 0, ok = canEquip(id);
+      const e = E.slots[i]; if (!id) return; const k = SKILLS[id], cd = p.cd[id] || 0, ok = canEquip(id);
       const cdEl = e._cd || (e._cd = e.querySelector('.cd')), ct = e._ct || (e._ct = e.querySelector('.ct'));
-      const h = cd > 0 ? clamp(cd / (k.cd * this.st.cdMul), 0, 1) * 100 : 0;
+      const rank=masteryLv(id), cost=skillCost(k,rank,this.b);
+      txt(e._mp || (e._mp=e.querySelector('.mp')),String(+cost.toFixed(1)));
+      const h = cd>0 ? clamp(cd/(p.cooldownSpan?.[id] || skillCooldown(k,rank,this.st)),0,1)*100 : 0;
       const hv = h.toFixed(0) + '%'; if (cdEl._h !== hv) { cdEl._h = hv; cdEl.style.height = hv; }
       txt(ct, cd > 0 ? Math.ceil(cd) : '');
-      const off = !ok || p.mp < k.mp; if (e._off !== off) { e._off = off; e.classList.toggle('off', off); }
+      const off = !ok || p.mp < cost; if (e._off !== off) { e._off = off; e.classList.toggle('off', off); }
     });
     if (E.dash) { const v = (clamp(p.dashCd / .6, 0, 1) * 100).toFixed(0) + '%'; if (E.dash._h !== v) { E.dash._h = v; E.dash.style.height = v; } }
   }
@@ -777,12 +804,17 @@ export function fight(cfg) {
     G.battle = B; G.scene = 'battle'; $('#stage').classList.add('inbattle');
     Sound.bgm(cfg.bgm || (cfg.foes.some(f => FOES[f].boss) ? 'boss' : 'fight'));
     B.onDone = async (o) => {
+      if (B.rewarded) return;
+      B.rewarded=true;
       G.lastOutcome = o;
-      let up = 0, ex = 0, si = 0; const drops = [];
+      let up = 0, ex = 0, si = 0, study=null; const drops = [];
       if (o === 'win') {
         for (const a of B.actors) if (a.team === 1) { const f = a.def_; if (a.dead || a.yielded) { ex += f.exp; si += f.silver; } }
         ex = Math.round(ex * (cfg.expMul ?? 1)); si = Math.round(si * (cfg.expMul ?? 1));
         si = Math.round(si * (1 + (G.party?.fx().silver || 0) / 100)); up = gainExp(ex); G.S.silver += si;
+        const sparExp=B.actors.filter(a=>a.team===1 && !a.dummy && (a.dead || a.yielded))
+          .reduce((sum,a)=>sum+(a.def_.exp || 0),0);
+        study=finishStudy(G.S,B.studyFocus,Math.round(sparExp*(cfg.expMul ?? 1)),B.usedTypes);
         for (const a of B.actors) if (a.team === 1 && a.dead) for (const [id, ch, lo, hi] of a.def_.drops || []) if (Math.random() < ch) { const n = rint(lo, hi); give(id, n); drops.push(`${DB[id].name} ${n}`); }
         // 보스는 옷을 떨군다(경지가 높을수록 높은 등급, 이름 있는 상대만, 판마다 하나). 이야기 보스는 꼭, 비무는 셋에 하나
         for (const a of B.actors) if (a.team === 1 && a.boss && a.dead && !a.def_.dummy && !String(a.id).startsWith('fan_')) bossDown(a.id);  // 처음 꺾은 보스마다 깨달음 1(경맥)
@@ -792,7 +824,7 @@ export function fight(cfg) {
       $('#hud').innerHTML = '';
       G.scene = prev === 'battle' ? 'field' : prev; G.battle = null; $('#stage').classList.remove('inbattle'); if (B.stage) G.hd?.resetCam?.();  // 3D 무대에서 돌아오면 마을 카메라를 주인공에게 바로 맞춘다
       resumeScene?.();
-      res({ outcome: o, exp: ex, silver: si, levelUp: up, drops });
+      res({ outcome: o, exp: ex, silver: si, levelUp: up, drops, study });
     };
   });
 }

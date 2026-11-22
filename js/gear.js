@@ -88,7 +88,18 @@ export function wearPut(S, id) { const a = ARMORS[id]; if (!a) return; S.wear = 
 // 장신구: 두 개까지 낀다(`G.S.acc`, `G.S.acc2`). 정해진 짝을 같이 끼면 덤이 붙는다
 export const ACC_SLOTS = 2;
 export const accWorn = S => [S.acc, S.acc2].filter(Boolean);
-export function accPut(S, id) { if (S.acc === id) { S.acc = S.acc2 || null; S.acc2 = null; } else if (S.acc2 === id) S.acc2 = null; else if (!S.acc) S.acc = id; else if (!S.acc2) S.acc2 = id; else { S.acc = S.acc2; S.acc2 = id; } }
+export function accPut(S,id,slot) {
+  if (!ACCS[id]) return;
+  if (slot===0 || slot===1) {
+    if (S.acc===id) S.acc=null;
+    else if (S.acc2===id) S.acc2=null;
+    else S[slot===0?'acc':'acc2']=id;
+  } else if (S.acc===id) { S.acc=S.acc2 || null; S.acc2=null; }
+  else if (S.acc2===id) S.acc2=null;
+  else if (!S.acc) S.acc=id;
+  else if (!S.acc2) S.acc2=id;
+  else { S.acc=S.acc2; S.acc2=id; }
+}
 // 가게에서 파는 흔한 장신구(문파·인연이 주는 것은 js/items.js ACCS)
 const B = (name, desc, fx, price, grade) => ({ name, desc, fx, price, grade });
 Object.assign(ACCS, {
@@ -110,5 +121,18 @@ export const gradeOf = (kind, id) => GRADES[kind === 'weapon' ? weaponGrade(id) 
 // 이름을 등급 빛깔로, 뒤에 등급 딱지
 export const gname = (kind, id, name) => { const g = gradeOf(kind, id); return `<span style="color:${g.color}">${name}</span><span class="tag" style="background:${g.color};color:#fff8e6">${g.name}</span>`; };
 export const plusCap = id => GRADES[weaponGrade(id)].cap;
-const FXN = { cd: v => `쿨타임 ${v}%`, potion: v => `금창약 효과 +${v}%`, def: v => `방어 ${v > 0 ? '+' : ''}${v}`, hp: v => `체력 +${v}%`, mp: v => `내력 +${v}%`, regen: v => `내력 회복 +${v}%`, crit: v => `치명타 +${v}%`, spd: v => `이동 ${v > 0 ? '+' : ''}${v}%`, skill: v => `초식 위력 +${v}%`, atk: v => `공격력 +${v}%` };
-export const fxText = fx => Object.entries(fx || {}).map(([k, v]) => FXN[k] ? FXN[k](v) : '').filter(Boolean).join(', ');
+const effectUnits = {
+  atk:['공격력','%'],def:['방어',''],hp:['체력','%'],mp:['내력','%'],spd:['이동 속도','%'],
+  crit:['치명타','%p'],critDmg:['치명 피해','%'],regen:['내력 회복','%'],cd:['재사용 시간','%'],
+  mpCost:['초식 내력 소모','%'],skill:['초식 위력','%'],ult:['절초 위력','%'],basic:['기본 공격 위력','%'],
+  basicSpeed:['기본 공격 속도','%'],poiseDmg:['자세 피해','%'],mpHit:['기본 공격 적중 내력',''],
+  reach:['기본 공격 거리','%'],parry:['튕겨내기 시간','초'],potion:['금창약 효과','%'],
+  lifeHit:['타격 흡혈','%'],killHeal:['격파 시 체력 회복','%'],dashCd:['경공 대기','초'],
+  dashInv:['경공 무적','초'],silver:['전리품 은자','%'],exp:['전투 경험','%'],
+};
+export const fxText = fx => Object.entries(fx || {}).flatMap(([key,v])=>{
+  if (!v) return [];
+  if (key==='venom') return ['기본 공격에 독'];
+  const entry=effectUnits[key];
+  return entry?[entry[0]+' '+(v>0?'+':'')+v+entry[1]]:[];
+}).join(', ');

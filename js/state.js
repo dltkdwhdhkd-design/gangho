@@ -1,3 +1,5 @@
+import { currentRefinement } from './refinements.js';
+import { disciplineOf, masteryLevel, restoreTraining } from './training.js';
 import { fanGenders } from './fan-bonds.js';
 // 저장 자료와 능력치 계산
 import { G, Sound, toast, josa } from './core.js';
@@ -19,7 +21,7 @@ export function canRomance(id, s = G.S) {
 export function newState(name, look, gender, diff) {
   return {
     v: 5, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
-    weapon: 'mop', weapons: ['mop'], skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
+    weapon: 'mop', weapons: ['mop'], weaponSlots: {}, refinements: {}, studyFocus: null, skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
     potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0, igyeom: 0, mugyeong: 0, yeonjae: 0, jaeha: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
   };
 }
@@ -28,6 +30,8 @@ export const SPOUSE_FX = { yun: { potion: 25, hp: 6 }, so: { atk: 6, crit: 3 }, 
 export function bonus(S = G.S) {
   const b = {}, add = fx => { for (const k in fx) b[k] = (b[k] || 0) + fx[k]; };
   const wt = WEAPONS[S.weapon].type;
+  add(disciplineOf(S,wt).fx);
+  add(currentRefinement(S)?.fx);
   for (const t of TREES) { if (t.w && t.w !== wt) continue; for (const n of t.nodes) { const r = S.tree[n.id] || 0; for (let i = 0; i < r; i++) add(n.fx); } }
   for (const id of accWorn(S)) if (ACCS[id]) add(ACCS[id].fx);  // 장신구 둘까지
   { const pr = pairOf(S); if (pr) add(pr[2]); }  // 짝 효과
@@ -36,15 +40,15 @@ export function bonus(S = G.S) {
   add(MER.fxOf(S));  // 경맥(js/meridian.js)
   add(GRADES[weaponGrade(S.weapon)].fx);  // 무기 등급 덤
   if (HEARTS[S.heart]?.fx) add(HEARTS[S.heart].fx);
-  if (G.party) add(G.party.fx());
+  if (G.party) add(G.party.fx(S));
   if (S.meal && S.meal.left > 0) add(DB[S.meal.id].meal);
   if (canRomance(S.married, S) && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
   for (const id of new Set([S.sworn,...(S.swornBonds||[])])) if (SPOUSE_FX[id]) add(SPOUSE_FX[id]);
   if (S.rested === S.day) add({ atk: 5 });
   return b;
 }
-export function stats(S = G.S) {
-  const w = WEAPONS[S.weapon], b = bonus(S), plus = (S.wplus || {})[S.weapon] || 0, pc = k => 1 + (b[k] || 0) / 100;
+export function stats(S = G.S, b = bonus(S)) {
+  const w = WEAPONS[S.weapon], plus = (S.wplus || {})[S.weapon] || 0, pc = k => 1 + (b[k] || 0) / 100;
   const atk = (w.atk * (1 + plus * .12) + S.str * 1.3) * pc('atk'), maxMp = Math.round((40 + S.inn * 6) * pc('mp')), def = S.con * .6 + (b.def || 0);
   let maxHp = (90 + S.con * 10 + S.lv * 5) * pc('hp'), regen = (1.8 + S.inn * .08) * pc('regen'), cdMul = Math.max(.75, 1 - S.agi * .004) * pc('cd'), power = 1 + S.inn * .02;
   if (S.heart === 'tonap') regen *= 1.3;
@@ -55,9 +59,9 @@ export function stats(S = G.S) {
   if (S.heart === 'jaha') power *= 1.12;
   if (S.heart === 'changgung') { cdMul *= .9; maxHp *= 1.1; }
   maxHp = Math.round(maxHp);
-  return { atk, maxHp, maxMp, def, regen, cdMul, spd: (78 + S.agi * .7) * pc('spd'), crit: .03 + S.agi * .004 + (b.crit || 0) / 100, power, wtype: w.type };
+  return { atk, maxHp, maxMp, def, regen, cdMul:Math.max(.4,cdMul), spd: (78 + S.agi * .7) * pc('spd'), crit: Math.min(1,.03 + S.agi * .004 + (b.crit || 0) / 100), power, wtype: w.type };
 }
-export const masteryLv = id => { const n = (G.S.mastery[id] || 0); return n >= 60 ? 5 : n >= 32 ? 4 : n >= 15 ? 3 : n >= 5 ? 2 : 1; };
+export const masteryLv = (id,S=G.S) => masteryLevel(S.mastery?.[id] || 0);
 export function gainExp(n) {
   const S = G.S; S.exp += n; let up = 0;
   while (S.exp >= expNeed(S.lv)) { S.exp -= expNeed(S.lv); S.lv++; S.pts += 3; S.tp = (S.tp || 0) + 1; up++; if (S.lv % 3 === 0) S.ins = (S.ins || 0) + 1; }  // 경지 세 번마다 깨달음 1(경맥)
@@ -157,6 +161,7 @@ function migrate(S) {
     S.love[id] ??= 0;
     if (!canRomance(id, S) && S.bonds?.[id] > 3) S.bonds[id] = 3;
   }
+  restoreTraining(S);
   S.v = Math.max(5, S.v || 0);
   return S;
 }

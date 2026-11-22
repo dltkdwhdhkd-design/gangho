@@ -1,3 +1,4 @@
+import { equipWeapon } from './training.js';
 // 프롤로그와 1장: 청하진
 import { G, Sound, fadeTo, wait, toast, $ } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
@@ -96,7 +97,7 @@ export async function lastMorning() {
   await narr('날이 밝아 구석방에 가 보니 백 노인은 온데간데없었다. 탁자 위에 낡은 목검 한 자루와 찢어진 종이 한 장만 덩그러니 놓여 있었다.');
   F().night = false; G.field.load('inn', 13, 8, 1);
   await say('me', '결국 튀었네. 목검은 또 왜 두고 갔대. 이건 뭐지? 책을 찢은 건가.');
-  if (!S().weapons.includes('stick')) { S().weapons.push('stick'); S().weapon = 'stick'; toast('낡은 목검을 챙겼다'); }
+  if (!S().weapons.includes('stick')) { S().weapons.push('stick'); equipWeapon(S(),'stick'); toast('낡은 목검을 챙겼다'); }
   await say('gwak', '방값은 받았… 잠깐, 그 종이 어디서 났어?', 'b');
   await say('me', '백 어르신이 두고 갔어요. 글자가 적혀 있는데 못 읽겠네요.');
   await say('gwak', '…….', 'b');
@@ -146,7 +147,7 @@ async function c1Inn() {
   await say(null, '서랍을 열자 내 칼이 나왔다. 이 빠진 데를 숫돌로 곱게 갈아 놓았다. 그 밑에 다른 사람 글씨로 쓴 쪽지가 깔려 있었다.');
   await say(null, '“그믐마다 은자 다섯 냥. 아이를 찾는 데 쓰시오. 낙월.”');
   await say('me', '그믐마다 온다던 그 봉투구나. 아이를 찾아? 아주머니한테 애가 있었나.');
-  S().weapons.push('army_blade'); S().weapon = 'army_blade'; toast('이 빠진 군도를 되찾았다'); Sound.sfx('bonus');
+  S().weapons.push('army_blade'); equipWeapon(S(),'army_blade'); toast('이 빠진 군도를 되찾았다'); Sound.sfx('bonus');
   await say(null, '뒷문 쪽 우물에 쇠 뚜껑이 덮여 있다. 달 모양 구멍이 뚫려 있고 열리지 않는다.');
   ctx.note('아주머니 서랍의 쪽지: “그믐마다 은자 다섯 냥. 아이를 찾는 데 쓰시오. 낙월.”');
   ctx.note('장부에는 내 밥값이 첫날 이미 갚은 것으로 적혀 있었다.');
@@ -305,7 +306,7 @@ const talkTown = {
     if (step() === 'c1e' && !F().smith_gift) {
       F().smith_gift = true;
       await say('smith', '약속한 칼이다. 산적 치러 간다며? 그 칼로는 안 되지. 곽씨 밥을 십 년이나 얻어먹었으니 값은 됐다.');
-      S().weapons.push('iron_sword'); S().weapon = 'iron_sword'; toast('철검을 받았다'); Sound.sfx('bonus');
+      S().weapons.push('iron_sword'); equipWeapon(S(),'iron_sword'); toast('철검을 받았다'); Sound.sfx('bonus');
     }
     const c = await choice('무엇을 할까?', ['무기 사기', '제작과 강화', '그만둔다'], 'smith'); if (c === 0) await ctx.shop('강씨 대장간', [ctx.item.weapon('iron_sword'), ctx.item.weapon('iron_blade'), ctx.item.weapon('iron_spear'), ctx.item.weapon('fist_wrap'), ctx.item.weapon('blue_sword'), ctx.item.weapon('ghost_blade'), ...['cloth_robe', 'leather_vest', 'chain_shirt', 'cloth_pants', 'leather_greaves', 'iron_greaves', 'leather_boots', 'iron_boots', 'headband', 'iron_helm'].map(ctx.item.armor)]); if (c === 1) await G.life.openCraft('forge', '강씨 대장간 · 제작과 강화');
   },

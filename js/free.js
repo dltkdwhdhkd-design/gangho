@@ -1,3 +1,4 @@
+import { equipWeapon } from './training.js';
 import { factionOptions, standingLabel } from './faction-talk.js';
 import { standing } from './martial-standing.js';
 // 자유 모드: 이야기 없이 강호를 산다. 소속, 임무, 직위, 세력 다툼
@@ -39,7 +40,7 @@ const group = (kind, lv, n) => { const a = n >= 3 ? [foeFor(kind, lv, true)] : [
 // ── 처음 ──
 export function initFree() {
   const s = S();
-  s.mode = 'free'; s.silver = 200; s.potion = 3; s.weapons = ['mop', 'army_blade']; s.weapon = 'army_blade'; s.map = 'cheongha';
+  s.mode = 'free'; s.silver = 200; s.potion = 3; s.weapons = ['mop', 'army_blade']; equipWeapon(s,'army_blade'); s.map = 'cheongha';
   Object.assign(s.flags, { step: 'end', ended: true, act3: true, burned: true, inn_rebuilt: true, bamboo_open: true, fort_open: true, ma_open: true, pass_open: true, cloud_open: true, bokun_open: true, boat_guhwa: true, title_free: true, cross: true, monk_met: true, met_cheol: true, rod: true, bow: false });
   s.fr = { fac: null, rank: 0, merit: 0, rep: {}, fame: 0, infamy: 0, jobs: [], board: {}, done: 0, sect: null, towns: {}, wars: [], news: [], power: {}, nextId: 1, clock: 0, left: {} };
   FACS.forEach(f => { s.fr.power[f.id] = 40 + f.tier * 20; });

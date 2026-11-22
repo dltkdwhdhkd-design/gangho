@@ -123,7 +123,7 @@ function body(id, lv) {
 }
 const allies = cfg => { const s = S(), p = st(); if (!p.in.length || cfg.noFollow || cfg.spar || cfg.yieldAt || (s.mode !== 'free' && !cfg.optional)) return cfg; return { ...cfg, allies: [...(cfg.allies || []), ...p.in.map(id => body(id, s.lv))] }; };
 const duel1 = ctx.duel; ctx.duel = async cfg => { const won = await duel1(allies(cfg)); if (won && G.S?.pt) for (const id of G.S.pt.in) addLove(id, 1); return won; };
-function fx() { const b = {}, p = G.S?.pt; if (p) for (const id of p.in) for (const k in COMP[id].fx) b[k] = (b[k] || 0) + COMP[id].fx[k]; return b; }
+function fx(state=G.S) { const b = {}, p = state?.pt; if (p) for (const id of p.in) for (const k in COMP[id].fx) b[k] = (b[k] || 0) + COMP[id].fx[k]; return b; }
 // 집터
 const JOBS = { herb: ['약초를 캔다', () => give('herb', 2), '약초 2'], fish: ['물고기를 잡는다', () => give('f_crucian', 1), '붕어 1'], ore: ['광석을 캔다', () => give('ore_iron', 2), '철광석 2'], train: ['수련한다', (id) => { st().up[id] = Math.min(25, (st().up[id] || 0) + 1); }, '실력 상승'] };
 function daily() {
