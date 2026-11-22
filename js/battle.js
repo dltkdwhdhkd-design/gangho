@@ -31,6 +31,7 @@ const PJ = { p_arrow: [13, 5, 1], p_kunai: [14, 5, 1], p_shuriken: [16, 16, 2], 
 
 // 대각선으로 움직일 때는 옆모습이 먼저다. 그래야 어느 쪽으로 가는지 보인다
 function faceOf(x, y) { return Math.abs(x) >= Math.abs(y) * .55 ? (x < 0 ? 2 : 3) : (y < 0 ? 1 : 0); }
+const firstStrike = move => move.steps.find(s => s.hit || s.proj || s.rush || s.zone || s.moonstrike)?.t ?? Infinity;
 
 class Actor {
   constructor(o) {
@@ -69,8 +70,9 @@ export class Battle {
       const choices=[[78,0],[-78,0],[0,78],[58,55],[-58,55]].map(([dx,dy])=>this.nav.snap(this.p.x+dx,this.p.y+dy));
       [x,y]=choices.reduce((best,q)=>hyp(q[0]-this.p.x,q[1]-this.p.y)>hyp(best[0]-this.p.x,best[1]-this.p.y)?q:best,[x,y]);
     }
-    const base = rankedStats(FOES[id]), equipment = fighterEquipment(id,base);
-    const f = armedStats(base,equipment), d = DIFF[G.S.diff] || DIFF.normal, enemy = team === 1;
+    const enemy = team === 1;
+    const base = rankedStats(FOES[id],enemy), equipment = fighterEquipment(id,base);
+    const f = armedStats(base,equipment), d = DIFF[G.S.diff] || DIFF.normal;
     const ez = enemy ? 1 - (this.cfg.ease || 0) : 1;  // 세 번 진 뒤 '숨을 고르고 도전'을 고르면 적이 그만큼 약해진다(js/ctx.js duel)
     const hp = Math.round(f.hp * (enemy ? d.foeHp * (this.cfg.foeHpMul || 1) * ez : 1)), atk = f.atk * (enemy ? d.foeAtk * ez : 1);
     const a = new Actor({ id, def_: f, equipment, team, name: f.name, spr: f.spr, x, y, maxHp: hp, hp, atk, def: f.def, spd: f.spd, crit: .02+(equipment?.fx.crit || 0)/200, boss: f.boss, elite: f.elite, mon: f.mon, big: f.big, r: f.r || 6, scale: f.scale || 1, wpn: f.wpn, moves: f.moves.slice(), pause: f.pause, poise: f.poise || 0, maxPoise: f.poise || 0, phase: 0, ax: 0, ay: 1, face: 0, dummy: f.dummy, atkCd: rnd(.6, 1.3) });
@@ -495,14 +497,17 @@ export class Battle {
     const f = a.def_;
     const detour=this.nav.steer(a,T);
     if(detour){a.vx=detour[0]*a.spd;a.vy=detour[1]*a.spd;a.face=faceOf(a.vx,a.vy);a.st='move';return;}
-    // 막기: 플레이어가 코앞에서 공격하면 일정 확률로 막는다
-    // 막기: 상대가 코앞에서 초식을 시작하면 경지만큼 미리 읽고 막는다. 높은 경지는 아예 튕겨 낼 때가 많다
-    if (a.rGuard && T.st === 'skill' && d < 44 + a.realm * 3 && T.skT < .08 + a.rRead && a.guardSeen !== T.skSeq) { a.guardSeen = T.skSeq; if (Math.random() < Math.min(.76, a.rGuard * (a.def_.position && a.realm >= 4 ? .64 : .4))) { a.st = 'guard'; a.guardT = Math.random() < a.rPerfect ? -1 : .3; a.guardAI = rnd(.35, .7) + a.rRead; return; } }
+    // 여러 명이 같은 순번의 초식을 써도 공격한 사람마다 한 번씩 읽는다.
+    if (a.guardChance && T.st === 'skill' && d < 44 + a.realm * 3 && T.skT < .08 + a.rRead && a.guardSeen?.get(T) !== T.skSeq) {
+      (a.guardSeen ||= new WeakMap()).set(T,T.skSeq);
+      if (Math.random() < a.guardChance) { a.st = 'guard'; a.guardT = Math.random() < a.rPerfect ? -1 : .3; a.guardAI = rnd(.35, .7) + a.rRead; return; }
+    }
     const attackers = this.actors.filter(o => o.team === 1 && !o.dead && o.st === 'skill').length;
     if (a.atkCd <= 0 && (a.boss || attackers < 2 || a.team === 0)) {
       const opts = a.moves.map(m => MOVES[m]).filter(m => m && (!m.healing || a.hp<a.maxHp*.60) && d <= m.range + 8 && (a.cd[m.id] || 0) <= 0);
       if (opts.length) {
-        const m = a.counterNext ? opts.reduce((p, q) => q.dur < p.dur ? q : p) : pick(opts); a.ax = nx; a.ay = ny; a.face = faceOf(nx, ny);
+        // 되받아칠 때는 실제 타격이 먼저 나오는 수를 택한다.
+        const m = a.counterNext ? opts.reduce((best,move)=>firstStrike(move)<firstStrike(best)?move:best) : pick(opts); a.ax = nx; a.ay = ny; a.face = faceOf(nx, ny);
         this.start(a, m, m.id); a.cd[m.id] = m.once || (m.healing ? Math.max(18,m.cd || 0) : m.ult ? Math.max(16,m.cd || 0) : m.fromSkill ? (m.cd || 4) : m.range>90 ? 3 : .5);
         if (a.equipment) {
           const fx=a.equipment.fx;
@@ -759,7 +764,8 @@ export class Battle {
     const h = $('#hud'); h.innerHTML = '';
     const p = this.p, S = G.S;
     h.innerHTML = `<div class="bars"><div class="bname">${esc(S.title)} ${esc(p.name)}</div><div class="bar"><i class="lag" id="hLag"></i><i class="val" id="hVal"></i><b id="hTxt"></b></div><div class="bar mp"><i class="val" id="mVal"></i><b id="mTxt"></b></div></div>`;
-    const bosses = this.actors.filter(a => (a.boss || a.elite) && a.team === 1).sort((a, b) => !!b.boss - !!a.boss);
+    const bosses = this.actors.filter(a => a.team === 1 && (a.boss || a.elite || (a.def_.position && a.realm >= 4)))
+      .sort((a,b) => Number(!!b.boss)-Number(!!a.boss) || b.realm-a.realm);
     if (bosses.length) { const b = bosses[0]; this.bossA = b; h.insertAdjacentHTML('beforeend', `<div class="boss"><div class="bname">${(b.def_.title ? b.def_.title + ' ' : '') + (b.def_.position && !b.name.includes(b.def_.position) ? b.def_.position + ' ' : '') + (b.def_.nameplate || b.name)}${b.realm >= 2 && !b.def_.nameplate ? ` <small class="realm">${RL.NAME[b.realm]}${b.gap ? ' ▲' : ''}</small>` : ''}</div><div class="bar"><i class="lag" id="bLag"></i><i class="val" id="bVal"></i></div><div class="bar pos"><i class="val" id="bPos"></i></div></div>`); }
     const key = (i) => Keys.label('s' + i);
     let sk = '';

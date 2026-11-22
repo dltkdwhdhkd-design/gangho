@@ -138,6 +138,15 @@ async function teach(k, fac, rl, name) {
   if (rl < me) return; const id = personalTeaching(k, fac, rl); if (!id) return;
   await say('fan_' + k, `한 수 가르쳐 드리지요. ${SKILLS[id].name}. 잘 쓰시오.`); learn(id);
 }
+// 같은 인물이 비무와 필드 싸움에서 같은 무공과 경지를 쓴다.
+function opponent(k) {
+  const [,name,,native,title]=BY[k], fac=native || (k==='maengso'?'nokrim':'hwasan');
+  const f=G.free.fac(fac), realm=fanRealm(k,title), id='fan_'+k;
+  const role=realm>=5?'장로':realm===4?'후계자':'사범';
+  const base=G.jh.disciple(f,RLV[realm]+3,role);
+  FOES[id]={...FOES[base],...personalArms(k,fac),name:`${title} ${name}`,boss:1,realm,position:title,uniform:null,artId:k};
+  return id;
+}
 async function talk(k, direct = false) {
   const [, name, , native, title] = BY[k], fac = native || (k==='maengso'?'nokrim':'hwasan'), who = 'fan_' + k, T = TALK[k] || {};
   if (!direct) await say(who, line(k, [...BY[k][6], ...(T.l || [])]), k === 'cheongmyeong' ? 'h' : 'n');
@@ -145,18 +154,16 @@ async function talk(k, direct = false) {
   const rl0 = fanRealm(k, title), tid = !G.S.flags['fanwin_' + k] && rl0 >= playerRealm() ? personalTeaching(k, fac, rl0) : null;  // 이기면 무엇을 얻는지 미리 보인다
   const c = direct ? 0 : await choice(`${name} · ${title} · ${RNAME[rl0]}${tid ? ` · 이기면 ${SKILLS[tid].name} 전수` : G.S.flags['fanwin_' + k] ? ' · 이긴 적 있음' : ''}`, ['비무를 청한다', '그냥 간다']); if (c) return;
   if (T.no && !direct) return say(who, pick(T.no));
-  // 문파의 초식과 인물 고유의 경지를 함께 쓴다.
-  const f = G.free.fac(fac); if (!f) return; const rl = fanRealm(k, title), base = G.jh.disciple(f, RLV[rl] + 3, true), id = 'fan_' + k;
-  FOES[id] = { ...FOES[base], ...personalArms(k,fac,rl), name: `${title} ${name}`, boss: 1, realm: rl, position: title, uniform: null, artId:k };
+  const id = opponent(k);
   await say(who,T.no ? (k==='hyeonjong'?'승부는 사양하겠소만, 자네 검로를 봐 주는 일이야 좋지요. 한 수 보여 주시오.':'마당 안에서 가르침을 청한다면 좋습니다. 그대 수를 받아 봅시다.') : pick(T.ok || ['한 수 부탁드립니다.']));
   const won = await ctx.duel({ spar: true, foes: [id], arena: G.field.m.arena, bgm: 'fight', title: `${josa(name, '과/와')} 비무`, optional: true, noIntro: true, noLoot: true });
   await say(who, won ? pick(T.d || ['…졌습니다. 다시 겨뤄 주십시오.']) : pick(T.w || ['수련을 더 하고 오십시오.']));
-  if (won) await teach(k, fac, rl, name);
+  if (won) await teach(k, fac, rl0, name);
 }
 Story.providers.push(function fanchars(id) {
   const here = P.filter(r => r[2] === id); if (!here.length) return { npcs: [], spots: [], trigs: [], roam: [] };
   const S = spots(id, here.length);
-  const npcs = here.map((r, i) => G.S.married!==r[0] && S[i] && { id: r[0], spr: r[5] ? 'Woman' : 'Samurai', x: S[i][0], y: S[i][1], dir: 0, hint: `${r[1]} · ${r[4]}`, talk: () => talk(r[0]) }).filter(Boolean);
+  const npcs = here.map((r, i) => G.S.married!==r[0] && S[i] && { id: r[0], spr: r[5] ? 'Woman' : 'Samurai', x: S[i][0], y: S[i][1], dir: 0, hint: `${r[1]} · ${r[4]}`, opponent: () => opponent(r[0]), talk: () => talk(r[0]) }).filter(Boolean);
   return { npcs, spots: [], trigs: [], roam: [] };
 });
 // 같은 문파에서도 각 인물이 즐겨 쓰는 수와 연계 순서는 다르다.

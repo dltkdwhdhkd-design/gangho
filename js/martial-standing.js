@@ -27,9 +27,11 @@ const health = [100,215,405,780,1980,3180,4290,5490];
 const attack = [8,17,29,45,68,88,110,135];
 const defense = [1,4,6,10,15,20,26,32];
 const composure = [0,0,24,63,111,162,223,294];
-export function rankedStats(f) {
+const opponentFloor = [.64,.70,.76,.84,.94,1,1,1];
+export function rankedStats(f, enemy = true) {
   if (!Number.isInteger(f.realm) || !f.position) return f;
-  const r=f.realm, expert=f.boss ? 1 : .64;
-  return {...f, hp:Math.max(Math.round(f.hp*(f.boss?1.35:1)),Math.round(health[r]*expert)), atk:Math.max(f.atk,attack[r]*(f.boss?1:.9)),
+  const r=f.realm, expert=f.boss ? 1 : enemy ? opponentFloor[r] : .64;
+  const fullAttack=f.boss || (enemy && r>=4);
+  return {...f, hp:Math.max(Math.round(f.hp*(f.boss?1.35:1)),Math.round(health[r]*expert)), atk:Math.max(f.atk,attack[r]*(fullAttack?1:.9)),
     def:Math.max(f.def,defense[r]), poise:Math.max(f.poise||0,Math.round(composure[r]*expert))};
 }

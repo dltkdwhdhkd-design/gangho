@@ -5,7 +5,7 @@ import { ctx, say, narr, choice } from './ctx.js';
 import { WHO } from './dialog.js';
 import { DB } from './items.js';
 import { give } from './state.js';
-import { foeFor } from './free.js';
+import { FACS, foeFor } from './free.js';
 import { CAND } from './life.js';
 import { FOES } from './foes.js';
 
@@ -22,9 +22,10 @@ export function can(n, mapId = G.field.m?.id) {
   return !marked(n);
 }
 const nameOf = n => WHO[n.id]?.name || n.name || (n.hint && !/말 걸기|일거리/.test(n.hint) ? n.hint : null) || '행인';
+const representative = id => FACS.find(f => f.key === id || 'clan_'+f.id === id);
 function kindOf(n) {
   const s = `${n.id} ${n.hint || ''} ${n.spr}`;
-  if (n.position || /^clan_/.test(n.id)) return 'martial';
+  if (n.opponent || n.position || /^clan_/.test(n.id) || representative(n.id)) return 'martial';
   if (/gate|guard|patrol|watch|drill|tutor|walk\d|sect|순찰|문지기|포졸|제자|사범|호위|무사|교두|Knight|Samurai|Ninja/.test(s)) return 'martial';
   if (/beg|거지|Caveman/.test(s)) return 'beggar';
   if (/Noble|Inspector|merchant|trader|steward|행수|부자|나리|집사|아전/.test(s)) return 'rich';
@@ -86,10 +87,14 @@ async function guards(mapId) {
 }
 async function fight(n, mapId, meant) {
   const s = S(), k = kindOf(n), lv = s.lv, f = factionOf(mapId), name = nameOf(n);
-  const house = G.free?.fac(n.faction || f);
-  const member = house && (n.position ? G.jh.disciple(house,lv,n.position) : n.id===house.key ? 'clan_'+house.id : null);
-  const id = 'cv_' + k, base = member || foeFor(k === 'martial' ? 'guard' : 'villager', Math.max(1, Math.round(k === 'martial' ? lv : lv * .5)));
-  FOES[id] = { ...FOES[base], artId:n.id, name, spr: n.spr.includes('/') ? n.spr : 'chars/' + n.spr, title: undefined };
+  const house = G.free.fac(n.faction || f), leader = representative(n.id);
+  let id = n.opponent?.() || (leader && 'clan_'+leader.id);
+  if (!id) {
+    const member = house && n.position && G.jh.disciple(house,lv,n.position);
+    const base = member || foeFor(k === 'martial' ? 'guard' : 'villager', Math.max(1, Math.round(k === 'martial' ? lv : lv * .5)));
+    id = 'cv_' + k;
+    FOES[id] = { ...FOES[base], artId:n.id, name, spr: n.spr.includes('/') ? n.spr : 'chars/' + n.spr, title: undefined };
+  }
   const foes = [id];
   if (f && G.jh?.crew && k === 'martial') { const F2 = G.free?.fac?.(f); if (F2) foes.push(...G.jh.crew(F2, lv, 1)); }
   else if (townish(mapId) && k !== 'martial' && Math.random() < .5) { foes.push(foeFor('guard', lv)); await narr('비명 소리에 포졸이 달려왔다.'); }

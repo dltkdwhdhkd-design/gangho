@@ -32,7 +32,7 @@ const KIND = {
 };
 export function foeFor(kind, lv, boss) {
   const k = KIND[kind], id = `q_${kind}${boss ? '_b' : ''}`, m = boss ? 2.6 : 1;
-  FOES[id] = { name: boss ? `${k[0]} 두목` : k[0], spr: k[1], hp: Math.round((30 + lv * 24) * m), atk: (6 + lv * 1.4) * (boss ? 1.15 : 1), def: 1 + lv * .33, spd: Math.min(80, 50 + lv * .6), exp: Math.round((8 + lv * 5.4) * (boss ? 2 : 1)), silver: Math.round((4 + lv * 1.1) * (boss ? 2 : 1)), pause: boss ? 1 : 1.15, moves: k[3], wpn: k[2], guard: boss ? .5 : .2, poise: boss ? 40 + lv * 3 : 0 };
+  FOES[id] = { name: boss ? `${k[0]} 두목` : k[0], elite:!!boss, spr: k[1], hp: Math.round((30 + lv * 24) * m), atk: (6 + lv * 1.4) * (boss ? 1.15 : 1), def: 1 + lv * .33, spd: Math.min(80, 50 + lv * .6), exp: Math.round((8 + lv * 5.4) * (boss ? 2 : 1)), silver: Math.round((4 + lv * 1.1) * (boss ? 2 : 1)), pause: boss ? 1 : 1.15, moves: k[3], wpn: k[2], guard: boss ? .5 : .2, poise: boss ? 40 + lv * 3 : 0 };
   return id;
 }
 const group = (kind, lv, n) => { const a = n >= 3 ? [foeFor(kind, lv, true)] : []; while (a.length < n) a.push(foeFor(kind, lv)); return a; };
@@ -150,7 +150,12 @@ async function runJob(j) {
     finish(j); return;
   }
   if (j.type === 'escort') { await say(null, '상단 행수가 반갑게 손을 흔들었다. 짐을 싣고 얼마 안 가 고갯마루에서 사람들이 뛰어나왔다.'); if (!await duelJob(j, g(), '호위')) return; await say(null, '행수가 삯을 세어 주었다. 짐은 하나도 안 없어졌다.'); finish(j); return; }
-  if (j.type === 'spar') { const r = fac(j.rival); await say(null, `${r.name} 옷을 입은 사람이 칼을 뽑고 기다리고 있었다.`); if (!await duelJob(j, [foeFor('guard', j.lv, true)], `비무 · ${r.name}`, { yieldAt: .25, bgm: 'boss', noLoot: true })) return; finish(j); return; }
+  if (j.type === 'spar') {
+    const r=fac(j.rival), role=j.lv>=30?'장로':j.lv>=17?'사범':j.lv>=11?'내문 제자':'외문 제자';
+    await say(null, `${r.name} ${role}가 기다리다 앞으로 나와 포권했다.`);
+    if (await duelJob(j,[G.jh.disciple(r,j.lv,role)],`비무 · ${r.name} ${role}`,{spar:true,yieldAt:.25,bgm:'boss',noLoot:true})) finish(j);
+    return;
+  }
   if (j.type === 'extort') {
     const c = await choice('장사꾼들이 고개를 숙이고 있다.', ['좋게 말로 받는다', '좌판을 뒤엎는다', '이번 달은 봐준다']);
     if (c === 2) { await say(null, '장사꾼이 몇 번이고 고개를 숙였다. 받아 간 게 없으니 위에 할 말도 없었다.'); finish(j, false); return; }

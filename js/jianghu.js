@@ -3,7 +3,7 @@ import { standing } from './martial-standing.js';
 import { G, Sound, toast, josa, esc, pick } from './core.js';
 import { Story, ctx, say, narr, choice } from './ctx.js';
 import { FOES } from './foes.js';
-import { WEAPONS } from './data.js';
+import { SKILLS, WEAPONS } from './data.js';
 import { have, take } from './state.js';
 import { FACS, fac } from './free.js';
 import { LOCS } from './worlddata.js';
@@ -37,8 +37,10 @@ function disciple(f, lv, sp = false) {
   // 같은 문파의 서로 다른 직위와 레벨이 동시에 나와도 정의를 덮어쓰지 않는다.
   lv = Math.min([5,10,16,24,30,36,43,51][rank.realm], Math.max(lv, [1,6,11,18,24,30,36,46][rank.realm]));
   sp=rank.realm>=3;
-  const k = `fd_${f.id}_${rank.realm}_${lv}`, m = G.arts.trainingMoves(f.id, rank.realm);
-  FOES[k] = { ...rank, uniform: 'uniform_' + f.id, name: `${f.name} ${role}`, spr: 'chars/' + folk(f), hp: Math.round((30 + lv * 24) * (sp ? 1.8 : 1)), atk: (6 + lv * 1.4) * (sp ? 1.05 : .95), def: 1 + lv * .33, spd: Math.min(80, 52 + lv * .6), exp: Math.round((8 + lv * 5.4) * (sp ? 1.6 : 1)), silver: Math.round(4 + lv * 1.1), pause: sp ? 1 : 1.15, moves: ['slash', ...m], wpn: f.wpn, guard: sp ? .6 : .3, poise: sp ? 30 + lv * 2 : 0 };
+  const k = `fd_${f.id}_${rank.realm}_${lv}_${role.replaceAll(' ','')}`, m = G.arts.trainingMoves(f.id, rank.realm);
+  const basic = {권:'punch', 창:'lunge', 도:'heavy', 검:'slash'}[SKILLS[m[0]]?.w]
+    || {Stick:'spin', Sai:'quick', Ninjaku:'quick', Axe:'heavy', Lance:'lunge', Lance2:'lunge'}[f.wpn] || 'slash';
+  FOES[k] = { ...rank, school:f.id, uniform: 'uniform_' + f.id, name: `${f.name} ${role}`, spr: 'chars/' + folk(f), hp: Math.round((30 + lv * 24) * (sp ? 1.8 : 1)), atk: (6 + lv * 1.4) * (sp ? 1.05 : .95), def: 1 + lv * .33, spd: Math.min(80, 52 + lv * .6), exp: Math.round((8 + lv * 5.4) * (sp ? 1.6 : 1)), silver: Math.round(4 + lv * 1.1), pause: sp ? 1 : 1.15, moves: [basic, ...m], wpn: f.wpn, guard: sp ? .6 : .3, poise: sp ? 30 + lv * 2 : 0 };
   return k;
 }
 const crew = (f, lv, n) => Array.from({ length: n }, () => disciple(f, lv));

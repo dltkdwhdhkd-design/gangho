@@ -157,7 +157,7 @@ const EV = {
 };
 async function runEv() { const k = Se().ev; Se().ev = null; if (EV[k]) await EV[k](); }
 function withFollow(cfg) {
-  const s = Se(); if (!s || cfg.noFollow) return cfg; const L = s.d.filter(d => d.job === 'follow').slice(0, 2); if (!L.length) return cfg;
+  const s = Se(); if (!s || cfg.noFollow || cfg.spar || cfg.yieldAt) return cfg; const L = s.d.filter(d => d.job === 'follow').slice(0, 2); if (!L.length) return cfg;
   const ids = L.map((d, i) => { const id = 'd_ally' + i, lv = d.lv; FOES[id] = { name: d.n, spr: 'chars/' + d.spr, hp: 60 + lv * 34, atk: 6 + lv * 1.3, def: 1 + lv * .3, spd: 58, exp: 0, silver: 0, pause: 1.2, moves: ['slash', 'lunge', 'double'].concat(s.tech.filter(k => /^(cloud_flash|swallow_qi|iron_fist|one_point|blood_fan)$/.test(k))), wpn: 'Sword' }; return id; });
   return { ...cfg, allies: [...(cfg.allies || []), ...ids] };
 }
