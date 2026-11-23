@@ -1,3 +1,4 @@
+import { newStudy, heartStrength, rankOfArt } from './martial-study.js';
 import { currentRefinement } from './refinements.js';
 import { disciplineOf, masteryLevel, restoreTraining } from './training.js';
 import { fanGenders } from './fan-bonds.js';
@@ -20,7 +21,7 @@ export function canRomance(id, s = G.S) {
 }
 export function newState(name, look, gender, diff) {
   return {
-    v: 5, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
+    study:newStudy(), v: 5, name, look, gender, diff, title: '떠돌이 낭인', titles: ['ronin', 'dog'], sworn: null, side: null, lv: 1, exp: 0, pts: 0, str: 5, con: 5, agi: 5, inn: 5, silver: 0,
     weapon: 'mop', weapons: ['mop'], weaponSlots: {}, refinements: {}, studyFocus: null, skills: [], slots: [null, null, null, null], heart: 'none', hearts: ['none'],
     potion: 3, potionMax: 3, rep: { jeong: 0, sa: 0, ma: 0 }, inv: {}, accs: [], acc2: null, armors: [], wear: {}, tree: {}, tp: 0, ins: 0, mer: {}, bossWon: {}, acc: null, wplus: {}, meal: null, house: { lv: 0, items: [], furn: {} }, daily: {}, taken: {}, fishLog: {}, partner: null, married: null, mastery: {}, flags: {}, love: { yun: 0, so: 0, cheol: 0, clan_dang: 0, clan_moyong: 0, clan_namgung: 0, baekrang: 0, hyeok: 0, igyeom: 0, mugyeong: 0, yeonjae: 0, jaeha: 0 }, pages: [], notes: [], goal: '', map: 'inn', x: 0, y: 0, dir: 0, wanted: {}, time: 0, day: 1, seen: {}, bonds: {},
   };
@@ -39,7 +40,16 @@ export function bonus(S = G.S) {
   for (const q of setsOf(S)) add(q.fx);  // 한 벌 효과
   add(MER.fxOf(S));  // 경맥(js/meridian.js)
   add(GRADES[weaponGrade(S.weapon)].fx);  // 무기 등급 덤
-  if (HEARTS[S.heart]?.fx) add(HEARTS[S.heart].fx);
+  const equippedHearts=new Set([S.heart,...(S.study?.supports || [])]);
+  for (const id of equippedHearts) {
+    const strength=heartStrength(S,id);
+    for (const [key,value] of Object.entries(HEARTS[id]?.fx || {})) b[key]=(b[key] || 0)+value*strength;
+  }
+  if (S.study) {
+    b.studied=true;
+    const total=S.hearts.filter(k=>k!=='none').map(k=>rankOfArt(S,k)).sort((a,b)=>b-a).slice(0,3).reduce((a,b)=>a+b,0);
+    add({hp:total*.5,mp:total});
+  }
   if (G.party) add(G.party.fx(S));
   if (S.meal && S.meal.left > 0) add(DB[S.meal.id].meal);
   if (canRomance(S.married, S) && SPOUSE_FX[S.married]) add(SPOUSE_FX[S.married]);
@@ -51,17 +61,14 @@ export function stats(S = G.S, b = bonus(S)) {
   const w = WEAPONS[S.weapon], plus = (S.wplus || {})[S.weapon] || 0, pc = k => 1 + (b[k] || 0) / 100;
   const atk = (w.atk * (1 + plus * .12) + S.str * 1.3) * pc('atk'), maxMp = Math.round((40 + S.inn * 6) * pc('mp')), def = S.con * .6 + (b.def || 0);
   let maxHp = (90 + S.con * 10 + S.lv * 5) * pc('hp'), regen = (1.8 + S.inn * .08) * pc('regen'), cdMul = Math.max(.75, 1 - S.agi * .004) * pc('cd'), power = 1 + S.inn * .02;
-  if (S.heart === 'tonap') regen *= 1.3;
-  if (S.heart === 'swift') cdMul *= .85;
-  if (S.heart === 'yigin') maxHp *= 1.15;
-  if (S.heart === 'sesu') { regen *= 1.2; maxHp *= 1.05; }
-  if (S.heart === 'taecheong') regen *= 1.5;
-  if (S.heart === 'jaha') power *= 1.12;
-  if (S.heart === 'changgung') { cdMul *= .9; maxHp *= 1.1; }
+  regen *= (1+.3*heartStrength(S,'tonap'))*(1+.2*heartStrength(S,'sesu'))*(1+.5*heartStrength(S,'taecheong'));
+  cdMul *= (1-.15*heartStrength(S,'swift'))*(1-.1*heartStrength(S,'changgung'));
+  maxHp *= (1+.15*heartStrength(S,'yigin'))*(1+.05*heartStrength(S,'sesu'))*(1+.1*heartStrength(S,'changgung'));
+  power *= 1+.12*heartStrength(S,'jaha');
   maxHp = Math.round(maxHp);
-  return { atk, maxHp, maxMp, def, regen, cdMul:Math.max(.4,cdMul), spd: (78 + S.agi * .7) * pc('spd'), crit: Math.min(1,.03 + S.agi * .004 + (b.crit || 0) / 100), power, wtype: w.type };
+  return { atk, maxHp, maxMp, def, regen, cdMul:Math.max(.4,cdMul), spd: (78 + S.agi * .7) * pc('spd'), crit: Math.min(1,.03 + S.agi * .004 + (b.crit || 0) / 100), power, studied:!!S.study, wtype: w.type };
 }
-export const masteryLv = (id,S=G.S) => masteryLevel(S.mastery?.[id] || 0);
+export const masteryLv = (id,S=G.S) => S.study ? rankOfArt(S,id) : masteryLevel(S.mastery?.[id] || 0);
 export function gainExp(n) {
   const S = G.S; S.exp += n; let up = 0;
   while (S.exp >= expNeed(S.lv)) { S.exp -= expNeed(S.lv); S.lv++; S.pts += 3; S.tp = (S.tp || 0) + 1; up++; if (S.lv % 3 === 0) S.ins = (S.ins || 0) + 1; }  // 경지 세 번마다 깨달음 1(경맥)
@@ -127,7 +134,7 @@ export function load() { try { const r = localStorage.getItem(KEY); return r ? f
 function migrate(S) {
   if ((S.v || 1) < 2) {
     const d = newState(S.name, S.look, S.gender, S.diff);
-    for (const k in d) if (S[k] === undefined) S[k] = d[k];
+    for (const k in d) if (k!=='study' && S[k] === undefined) S[k] = d[k];
     for (const k in d.love) { if (S.love[k] === undefined) S.love[k] = 0; else S.love[k] *= 15; }
     S.tp = S.lv - 1; S.v = 2;
   }

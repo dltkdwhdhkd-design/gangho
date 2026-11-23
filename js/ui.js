@@ -1,3 +1,4 @@
+import { rankOfArt, raiseArt, studyPrice } from './martial-study.js';
 import { disciplines, disciplineOf, practiceOf, equipWeapon, skillCost, skillCooldown, skillEstimate } from './training.js';
 import { changeGear, compareGear, gearRatings, numberText, projectGear, ratingChanges } from './gear-comparison.js';
 import { currentRefinement } from './refinements.js';
@@ -114,7 +115,7 @@ function tabStat(B) {
   B.innerHTML = `<div class="two"><div><h2>${esc(S.name)}</h2><div class="hint" style="margin-bottom:6px">호칭 <b style="color:var(--red);font-weight:400">${esc(S.title)}</b> <button class="btn sm" id="ttl">바꾸기</button></div><div class="hint">경지 <b style="color:var(--red);font-weight:400">${rankOf(S.lv)}</b> · ${S.lv}성 · 다음 깨달음까지 ${need - S.exp}</div>
   <div class="stat"><b>체력</b><span>${st.maxHp}</span></div><div class="stat"><b>내력</b><span>${st.maxMp} (초당 ${st.regen.toFixed(1)} 회복)</span></div><div class="stat"><b>공격력</b><span>${numberText(st.atk)}</span></div><div class="stat"><b>방어</b><span>${numberText(st.def)}</span></div><div class="stat"><b>은자</b><span>${S.silver} 냥</span></div><div class="stat"><b>금창약</b><span>${S.potion} / ${S.potionMax} 개</span></div><div class="stat"><b>내 집</b><span>${S.house.lv ? HOUSES[S.house.lv].name : '없음'}</span></div></div>
   <div><h2>능력치 ${S.pts > 0 ? `<span class="tag ult">남은 점수 ${S.pts}</span>` : ''}</h2>${line('str', '근력', S.str, '공격력')}${line('con', '근골', S.con, '체력과 방어')}${line('agi', '민첩', S.agi, '속도, 치명타, 쿨타임')}${line('inn', '내공', S.inn, '내력과 초식 위력')}
-  <p class="hint" style="margin-top:12px">전투로 깨달음이 쌓이면 점수를 얻습니다. 초식은 많이 쓸수록 성이 오르고 강해집니다.</p></div></div><h2>병기 숙련</h2><p class="hint">계열마다 숙련이 높은 전용 초식 세 가지를 셉니다. 각 초식은 2성부터 성이 오를 때마다 1점을 보탭니다.</p><div class="discipline-grid">${schools}</div>`;
+  <p class="hint" style="margin-top:12px">전투로 깨달음이 쌓이면 점수를 얻습니다. ${S.study?'초식은 사용 횟수가 쌓이면 승급에 드는 무학이 줄어듭니다.':'초식은 많이 쓸수록 성이 오르고 강해집니다.'}</p></div></div><h2>병기 숙련</h2><p class="hint">계열마다 숙련이 높은 전용 초식 세 가지를 셉니다. 각 초식은 2성부터 성이 오를 때마다 1점을 보탭니다.</p><div class="discipline-grid">${schools}</div>`;
   $$('[data-up]', B).forEach(b => b.onclick = () => { S[b.dataset.up]++; S.pts--; Sound.sfx('tick'); drawMenu(); });
   $('#ttl', B).onclick = () => { tab = 'title'; Sound.sfx('tick'); drawMenu(); };
 }
@@ -146,19 +147,34 @@ function tabSkill(B) {
     const spec=compatible ? (estimate?estimate+' · ':'')+'내력 '+cost(k,rank)+' · 대기 '+cooldown(k,rank)+'초' : k.w+' 계열 무기 착용 시 사용';
     return `<button class="item ${S.slots.includes(id)?'eq':''}" data-k="${id}" ${compatible?'':'disabled'}>
       ${k.name} ${k.han?`<small class="han">${k.han}</small>`:''} ${k.ult?'<span class="tag ult">절초</span>':''}<span class="tag">${k.w}</span><span class="tag">${rank}성</span>
-      <small>${k.desc}</small><small>${spec}${next?' · 다음 성까지 '+(next-uses)+'회':''}</small></button>`;
+      <small>${k.desc}</small><small>${spec}${next?(S.study?' · 다음 승급 할인까지 ':' · 다음 성까지 ')+(next-uses)+'회':''}</small></button>`;
   }).join('');
   const options=known.map(id=>{
     const {rank,next}=practiceOf(S,id);
     return `<option value="${id}" ${S.studyFocus===id?'selected':''} ${!next && S.studyFocus!==id?'disabled':''}>${SKILLS[id].name} · ${rank}성 · ${SKILLS[id].w}</option>`;
   }).join('');
-  const focusHint=progress ? (progress.next?'다음 '+(progress.rank+1)+'성까지 '+(progress.next-progress.uses)+'회 · '+(canEquip(S.studyFocus)?'현재 무기로 수련 가능':study.w+' 계열 무기 필요'):'5성 수련 완료') : '';
+  const focusHint=progress ? (progress.next?(S.study?'다음 승급 할인까지 ':'다음 '+(progress.rank+1)+'성까지 ')+(progress.next-progress.uses)+'회 · '+(canEquip(S.studyFocus)?'현재 무기로 수련 가능':study.w+' 계열 무기 필요'):(S.study?'승급 할인 최대':'5성 수련 완료')) : '';
   B.innerHTML=`<div class="practice-controls"><label for="study-focus">집중 수련</label><select id="study-focus" ${G.battle?'disabled':''}><option value="">지정하지 않음</option>${options}</select><span>${focusHint}</span></div>
     <p class="hint">전투 전에 초식 하나를 고르세요. 그 계열 무기를 사용해 승리하면 지정한 초식에 숙련이 1~3회 더 쌓입니다.</p>
     <h2>${disciplines[type].name} 초식 배치</h2><div class="slots practice-slots">${slotButtons}</div>
     <div class="practice-heading"><p class="hint">배치할 칸과 초식을 차례로 누르세요. 피해는 방어 20인 표적에 처음 적중한 일반 타격 기준입니다.</p>
     <button class="btn sm" id="skall">${showAll?'현재 무기만 보기':'익힌 초식 전체 ('+known.length+')'}</button></div>
     <div class="skill-collection">${skills || '<p class="hint">지금 배치할 수 있는 초식이 없습니다.</p>'}</div>`;
+  if (S.study) {
+    const section=document.createElement('section');
+    const title=document.createElement('h2');
+    title.textContent='초식·심법 승급 · 무학 '+S.study.points;
+    section.append(title);
+    for (const id of [...known,...S.hearts.filter(k=>k!=='none' && HEARTS[k])]) {
+      const rank=rankOfArt(S,id), cost=studyPrice(S,id), button=document.createElement('button');
+      button.className='btn sm'; button.dataset.raise=id;
+      button.textContent=(SKILLS[id] || HEARTS[id]).name+' '+rank+'성'+(rank===10?' · 대성':' → '+(rank+1)+'성 · 무학 '+cost);
+      button.disabled=!!G.battle || rank===10 || S.study.points<cost;
+      button.onclick=()=>{if (raiseArt(S,id)) {save();Sound.sfx('bonus');drawMenu();}};
+      section.append(button);
+    }
+    B.prepend(section);
+  }
   $('#study-focus',B).onchange=e=>{
     const id=e.target.value;
     if (G.battle || (id && (!known.includes(id) || !practiceOf(S,id).next))) return;
@@ -207,6 +223,23 @@ function tabGear(B) {
     <p class="hint">교체할 칸을 고른 뒤 장신구를 누르세요.${activePair?' 현재 짝 효과 · '+activePair[1]+' ('+fxText(activePair[2])+')':''}</p>
     <div class="list">${accessories || '<p class="hint">가진 장신구가 없습니다.</p>'}</div><h2>심법</h2><div class="list">${hearts}</div></section></div>`;
   $$('[data-accslot]',B).forEach(b=>b.onclick=()=>{accessorySlot=+b.dataset.accslot;drawMenu();});
+  if (S.study && S.hearts.some(id=>id!=='none' && id!==S.heart)) {
+    const group=document.createElement('fieldset');
+    const legend=document.createElement('legend');legend.textContent='보조 심법 · 두 가지까지 (효과 30%)';group.append(legend);
+    for (const id of S.hearts.filter(k=>k!=='none' && k!==S.heart && HEARTS[k])) {
+      const label=document.createElement('label'),box=document.createElement('input');
+      box.type='checkbox';box.checked=S.study.supports?.includes(id) || false;
+      box.disabled=!!G.battle || (!box.checked && S.study.supports?.length>=2);
+      box.onchange=()=>{
+        const current=S.study.supports || [];
+        if (box.checked && current.length>=2) return;
+        S.study.supports=box.checked?[...current,id]:current.filter(k=>k!==id);
+        save();drawMenu();
+      };
+      label.append(box,HEARTS[id].name);group.append(label);
+    }
+    B.querySelector('section:last-child').append(group);
+  }
   for (const [attr,kind] of Object.entries({a:'acc',w:'weapon',r:'armor',h:'heart'})) {
     $$('[data-'+attr+']',B).forEach(b=>b.onclick=()=>{
       if (changeGear(S,kind,b.dataset[attr],target)) {Sound.sfx('accept');drawMenu();}
@@ -410,7 +443,7 @@ export function showResult(r) {
   return new Promise(res => {
     if (G.auto) return res();
     const h = $('#hud'), e = el('div', 'result');
-    e.innerHTML = `<h2>승리</h2><p>깨달음 +${r.exp}${r.silver ? ` · 은자 +${r.silver}냥` : ''}</p>${r.drops && r.drops.length ? `<p>${r.drops.join(', ')}</p>` : ''}${r.study?`<p>집중 수련 · ${SKILLS[r.study.id].name} 숙련 +${r.study.gain}회 · ${r.study.rank}성${r.study.before<r.study.rank?' 달성':''}</p>`:''}${r.levelUp ? `<p style="color:var(--red)">경지가 깊어졌다! ${G.S.lv}성 (${rankOf(G.S.lv)})<br>메뉴에서 능력치와 무공 트리를 올리세요.</p>` : ''}<p class="hint">E 또는 누르기</p>`;
+    e.innerHTML = `<h2>승리</h2><p>깨달음 +${r.exp}${G.S.study && r.exp?' · 무학 +'+Math.floor(r.exp/2):''}${r.silver ? ` · 은자 +${r.silver}냥` : ''}</p>${r.drops && r.drops.length ? `<p>${r.drops.join(', ')}</p>` : ''}${r.study?`<p>집중 수련 · ${SKILLS[r.study.id].name} 숙련 +${r.study.gain}회 · ${r.study.rank}성${r.study.before<r.study.rank?' 달성':''}</p>`:''}${r.levelUp ? `<p style="color:var(--red)">경지가 깊어졌다! ${G.S.lv}성 (${rankOf(G.S.lv)})<br>메뉴에서 능력치와 무공 트리를 올리세요.</p>` : ''}<p class="hint">E 또는 누르기</p>`;
     h.appendChild(e); if (r.levelUp) Sound.sfx('ok3');
     let done = false; const go = () => { if (done) return; done = true; e.remove(); document.removeEventListener('keydown', kd); res(); };
     const kd = ev => { if (Keys.is('ok', ev.code) || Keys.is('atk', ev.code)) go(); }; document.addEventListener('keydown', kd); e.onclick = go; e.style.pointerEvents = 'auto';

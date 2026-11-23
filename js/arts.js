@@ -1,3 +1,4 @@
+import { PEOPLE } from './people.js';
 import { factionOptions, tutorSpeaker } from './faction-talk.js';
 import { standing } from './martial-standing.js';
 import { NAME as realmNames } from './realm.js';
@@ -57,8 +58,8 @@ const nameOf = fid => fid === 'jabhak' ? '강호 잡학' : ART_NAMES[fid] || (FA
 export const ID = {}; // 세력 id → 초식 id 목록
 for (const fid in ARTS) { ID[fid] = ARTS[fid].map((a, i) => { const id = `x_${fid}${i + 1}`; make(id, a[0], a[1], a[2], nameOf(fid), a[3], a[4], a[5], fid); return id; }); }
 for (const r of RELICS) make(r.id, r.name, r.han, r.w, '기연', r.arch, 3, r.desc, null);
-for (const fid in ART_HEARTS) { const [name, , desc, fx] = ART_HEARTS[fid]; HEARTS['h_' + fid] = { name, desc: `${nameOf(fid)}의 심법. ${desc}.`, fx }; }
-for (const r of RELIC_HEARTS) HEARTS[r.id] = { name: r.name, desc: `기연으로 얻은 심법. ${r.desc}.`, fx: r.fx };
+for (const fid in ART_HEARTS) { const [name, , desc, fx] = ART_HEARTS[fid]; HEARTS['h_' + fid] = { name, desc: `${nameOf(fid)}의 심법. ${desc}.`, tier:2, fx }; }
+for (const r of RELIC_HEARTS) HEARTS[r.id] = { name: r.name, desc: `기연으로 얻은 심법. ${r.desc}.`, tier:4, fx: r.fx };
 // 적이 쓰는 꼴. 예고가 길고 위력이 낮다
 function toMove(k) {
   const healing = k.steps.some(q=>q.heal) && !k.steps.some(q=>q.hit || q.proj || q.zone);
@@ -154,8 +155,10 @@ function codex(B) {
     const L = fid === 'relic' ? RELICS.map(r => r.id) : ID[fid] || []; if (!L.length) return '';
     return `<details ${fid === B._open ? 'open' : ''} data-f="${fid}" style="margin-bottom:4px"><summary style="cursor:pointer">${esc(title)} <small class="hint">${L.filter(k => s.skills.includes(k)).length}/${L.length}${fid !== 'relic' && fid !== 'jabhak' ? ` · 우호 ${jh.rep(fid)}` : ''}</small></summary><div class="list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">${L.map(k => { const q = SKILLS[k], got = s.skills.includes(k), sc = (s.scrap || {})[k] || 0, ins = (s.insight || {})[k] || 0, need = needScrap(k), can = sc >= need && !got; return `<button class="item ${got ? 'eq' : ''}" ${can ? `data-dec="${k}"` : 'disabled'}>${got || sc || ins ? q.name : '？？？'}${q.ult ? '<span class="tag ult">절초</span>' : ''}<span class="tag">${q.w}</span><small>${got ? q.desc : fid === 'relic' ? '강호 어딘가에 있다.' : `잔권 ${sc}/${need}${seeable(k) ? ` · 견식 ${ins}/${needSee()}` : ''}${(s.decode || {})[k] ? ` · 해독 ${Math.round(s.decode[k])}%` : ''}${can ? ' · 눌러서 해독' : ''}`}</small></button>`; }).join('')}</div></details>`;
   };
+  const teachers=Object.values(PEOPLE).flat().filter(p=>s.ties?.[p.id]?.inspected && p.skill)
+    .map(p=>'<div class="hint">'+esc(SKILLS[p.skill].name)+' · '+esc(p.name)+' ('+esc(s.ties[p.id].place)+')</div>').join('');
   const hs = s.hearts.filter(h => h !== 'none').map(h => HEARTS[h].name).join(', ') || '없음';
-  B.innerHTML = `<p class="hint">익힌 초식 ${have}/${all.length} · 익힌 심법 ${s.hearts.length - 1}/${Object.keys(HEARTS).length - 1} (${esc(hs)})</p><p class="hint">사범에게 배우거나, 대련에서 막아 내며 익히거나, 잔권을 모아 해독하거나, 강호 곳곳의 기연을 찾으면 된다.</p>` + sec('jabhak', '강호 잡학') + FACS.map(f => sec(f.id, f.name)).join('') + Object.keys(ART_NAMES).map(k => sec(k, ART_NAMES[k])).join('') + sec('relic', '기연');
+  B.innerHTML = `<p class="hint">익힌 초식 ${have}/${all.length} · 익힌 심법 ${s.hearts.length - 1}/${Object.keys(HEARTS).length - 1} (${esc(hs)})</p><p class="hint">사범에게 배우거나, 대련에서 막아 내며 익히거나, 잔권을 모아 해독하거나, 강호 곳곳의 기연을 찾으면 된다.</p>` + (teachers?'<h2>가르치는 사람</h2>'+teachers:'') + sec('jabhak', '강호 잡학') + FACS.map(f => sec(f.id, f.name)).join('') + Object.keys(ART_NAMES).map(k => sec(k, ART_NAMES[k])).join('') + sec('relic', '기연');
   B.querySelectorAll('details').forEach(d => d.ontoggle = () => { if (d.open) B._open = d.dataset.f; });
   B.querySelectorAll('[data-dec]').forEach(b => b.onclick = () => { const k = b.dataset.dec; G.closeMenu && G.closeMenu(); G.field.run(() => decode(k)); });
 }

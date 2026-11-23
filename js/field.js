@@ -1,3 +1,6 @@
+import { drawFerryRain, ferryRain } from './cheongha-scenery.js';
+import { discoverySpots, nearLeap, paintFinds } from './finds.js';
+import { addResidents, paintMeetingMark } from './people.js';
 // 마을과 산길을 걸어 다니는 화면
 import { G, IMG, Input, Sound, $, el, TS, SCALE, VW, VH, clamp, rnd, hyp, snap, drawActorSprite, drawShadow, fadeTo, wait, toast, qSheet, QZ } from './core.js';
 import { Keys, josa } from './core.js';
@@ -56,6 +59,7 @@ export class Field {
   }
   refresh(fresh) {
     const id = this.m.id, c = Story.content(id);
+    addResidents(this.m,c);
     const old = fresh ? new Map() : new Map(this.npcs.map(n => [n.id, n]));
     this.npcs = c.npcs.map(n => { const q = { dir: 0, walk: 0, ...n, x: n.x * TS, y: n.y * TS, hx: n.x * TS, hy: n.y * TS }, o = old.get(n.id);
       if (o && o.hx === q.hx && o.hy === q.hy && q.life && q.life !== 'still') Object.assign(q, { x: o.x, y: o.y, dir: o.dir, lt: o.lt, greetT: o.greetT, trip: o.trip, hide: o.hide, ri: o.ri, off: o.off, door: o.door });  // 같은 사람이면 서 있던 자리를 지킨다
@@ -73,7 +77,7 @@ export class Field {
       for (const n of this.npcs) { if (n.mainMarker || n.stamp || !hid(n.x, n.y)) continue;
         out: for (let r = 6; r <= 72; r += 6) for (let a = 0; a < 16; a++) { const x = n.x + Math.cos(a * Math.PI / 8) * r, y = n.y + Math.sin(a * Math.PI / 8) * r; if (m.blocked(x, y) || hid(x, y) || this.npcs.some(o => o !== n && hyp(o.x - x, o.y - y) < 10)) continue; n.x = n.hx = x; n.y = n.hy = y; break out; } } }
     if (fresh) this.barkT = 2.5;
-    this.spots = c.spots; this.trigs = c.trigs;
+    this.spots = [...c.spots, ...discoverySpots(this.m,G.S)]; this.trigs = c.trigs;
     if (fresh) this.animals = c.hunt.map(a => ({ ...a, ...G.life.animals[a.kind], x: a.x * TS, y: a.y * TS, vx: 0, vy: 0, t: rnd(1, 3), walk: 0 }));
     if (fresh) this.roam = c.roam.map(r => ({ ...r, x: r.x * TS, y: r.y * TS, hx: r.x * TS, hy: r.y * TS, dir: 0, walk: 0, t: rnd(1, 3), vx: 0, vy: 0 }));
     this.updateGoal();
@@ -104,6 +108,8 @@ export class Field {
     if (Input.take('menu') || Input.take('opt')) { openMenu(); return; }
     if (Input.take('map')) { openMap(); return; }
     if (Input.take('decor') && this.m.id === 'myhouse') { G.life.openDecor(); return; }
+    const crossing=nearLeap(this);
+    if (crossing && (Input.take('dash') || Input.take('frun'))) { this.run(crossing.act); return; }
     if (Input.take('frun')) { G.runOn = !G.runOn; toast(G.runOn ? '경공으로 달린다' : '걸어서 간다', 1.4); }
     const p = this.p, m = this.m, d = Input.dir(), S = G.S, run = !!(Input.down.dash || Input.down.guard || G.runOn), sp = run ? (m.id === 'world' ? 230 : 180) : 84;
     let moving = false; this.dashing = false;
@@ -153,8 +159,8 @@ export class Field {
     }
     // 대화 대상
     const tgt = this.target(), hint = $('#thint');
-    if (hint) { if (tgt) { const txt = (G.touch ? '' : Keys.label('ok')+' ') + (tgt.hint || '말 걸기') + (tgt.talk && G.crime?.can(tgt) ? (G.touch ? ' · 공격' : ` · ${Keys.label('atk')} 공격`) : ''); if (hint._t !== txt) { hint._t = txt; hint.textContent = txt; } hint.style.display = 'block'; } else hint.style.display = 'none'; }
-    if (tgt && Input.take('ok')) { if (tgt.talk) { this.face(tgt); this.run(tgt.talk); } else if (tgt.act) this.run(tgt.act); }
+    if (hint) { if (tgt) { const txt = (G.touch ? '' : Keys.label('ok')+' ') + (tgt.person ? tgt.person.name+' · '+(tgt.hint || '말 걸기') : tgt.hint || '말 걸기') + (tgt.talk && G.crime?.can(tgt) ? (G.touch ? ' · 공격' : ` · ${Keys.label('atk')} 공격`) : ''); if (hint._t !== txt) { hint._t = txt; hint.textContent = txt; } hint.style.display = 'block'; } else hint.style.display = 'none'; }
+    if (tgt && Input.take('ok')) { if (tgt.talk) { this.face(tgt); this.run(tgt.person ? async()=>(await import('./meet.js')).meet(tgt) : tgt.talk); } else if (tgt.act) this.run(tgt.act); }
     else Input.take('ok');
   }
   tickDecor() {
@@ -369,19 +375,27 @@ export class Field {
     for (const a of this.animals) if (!a.gone) list.push({ y: a.y, ani: a });
     if (!this.hideMe) list.push({ y: p.y, me: true });
     if (m.hasIso || m.live) { for (const o of list) if (!o.s) { o.actor = true; o.x = o.me ? p.x : (o.n || o.ani || {}).x ?? 0; } orderKeys(list); }
+    for (const spot of this.spots) {
+      if (spot.kind!=='find' && spot.kind!=='leap') continue;
+      const [x,y]=m.isoRoom?proj(m,spot.px,spot.py):[spot.px,spot.py];
+      list.push({x,y,discovery:spot});
+    }
     list.sort((a, b) => a.y - b.y);
     if (!m.live) occMark(list, p.x, p.y);  // 주인공이 건물이나 소품 뒤로 들어가면 그 그림을 옅게 그린다. 그 뒤에 선 사람도 같이 보인다
-    const mark = n => { if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
+    const mark = n => { if (!this.busy) paintMeetingMark(c,n,n.x,n.y-22,1); if (!n.mark || !n.mark()) return; const b = Math.sin(this.t * 5) * 1.2; c.fillStyle = '#000'; c.fillRect(snap(n.x - 2), snap(n.y - 25 + b), 4, 8); c.fillStyle = '#ffd23c'; c.fillRect(snap(n.x - 1), snap(n.y - 24 + b), 2, 4); c.fillRect(snap(n.x - 1), snap(n.y - 19 + b), 2, 1.5); };
     for (const o of list) {
+      if (o.discovery) {paintFinds(c,[o.discovery],()=>[o.x,o.y],1);continue;}
       if (o.s) { if (G.warfx?.hide(m, o.s)) continue; if (o.fade) c.globalAlpha = .42; const wf = G.warfx?.tint(m, o.s), cu = wf && G.warfx.cut(m, o.s); if (wf) c.filter = wf; if (cu) G.warfx.clip(c, o.s, cu); const size=STAMPS[o.s.archName||o.s.src||o.s.name]; if (size && (drawFurniture2D(c,m,o.s,size) || drawPlant2D(c,m,o.s,size[3]) || drawRegional2D(c,m,o.s,size[3],size[4]))) {} else if (o.s.iso) { const burnt = (o.s.src || o.s.name) === 'inn' && m.id === 'cheongha' && S.flags.burned && !S.flags.inn_rebuilt; if (burnt) c.filter = 'brightness(.38) sepia(.4)'; drawIso(c, o.s); } else drawStamp(c, o.s.name, o.s.x, o.s.y, o.s.sc); if (cu) c.restore(); c.filter = 'none'; c.globalAlpha = 1; }  // 무너진 문파와 점령된 고을의 건물은 그을려 그린다
       else if (o.ani) { const a = o.ani, im = IMG[a.spr]; drawShadow(c, a.x, a.y, .8); if (drawAnimal2D(c,a)) continue; if (qSheet(a.spr)) drawActorSprite(c, a.spr, 0, Math.floor(a.walk) % 4, a.x, a.y, { diag: a.fd = a.vx || a.vy ? (a.vx > 0 ? 0 : 2) + (a.vy < 0 ? 1 : 0) : a.fd ?? 2 }); else if (im) { c.save(); c.translate(snap(a.x), snap(a.y - 15)); if (a.vx < 0) c.scale(-1, 1); c.drawImage(im, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, -8, 0, 16, 16); c.restore(); } }
       else if (o.n && o.n.stamp) { drawStamp(c, o.n.stamp, o.n.x - 8, o.n.y - 14); mark(o.n); }
       else if (o.me) {
+        c.save(); c.translate(0,-(p.leapHeight || 0));
         const PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(p.x, p.y); c.scale(PS, PS); c.translate(-p.x, -p.y); }  // 방 안에서는 사람을 키운다(가구 그림이 사람보다 크게 그려져 있다)
         const me = G.hd?.fieldSheet?.({ me: 1 }), hh = me?.dataset?.fieldSheet ? 15 * QZ : 15 * (qSheet('chars/' + S.look) ? QZ : 1);
         if (this.dashing) for (const [i, a] of [[9, .18], [5, .32]]) { const q = this.trail[i]; if (!q) continue; c.globalAlpha = a; if (me) G.hd.draw2d(c, me, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, hh); else drawActorSprite(c, 'chars/' + S.look, q.dir, Math.floor(p.walk + i) % 4, q.x, q.y, { diag: q.diag }); c.globalAlpha = 1; }
         drawShadow(c, p.x, p.y); if (me) G.hd.drawFieldActor(c, me, p, p.x, p.y, hh, this.t, 'type_' + S.look); else drawActorSprite(c, 'chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
         if (PS !== 1) c.restore();
+        c.restore();
       }
       else { const n = o.n, key = n.spr.includes('/') ? n.spr : 'chars/' + n.spr, hd = G.hd?.fieldSheet?.(n), PS = m.room ? PSC : 1; if (PS !== 1) { c.save(); c.translate(n.x, n.y); c.scale(PS, PS); c.translate(-n.x, -n.y); } drawShadow(c, n.x, n.y, n.size ? n.size / 16 : undefined);
         if (hd) { G.hd.drawFieldActor(c, hd, n, n.x, n.y - (n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0), 15 * (hd.dataset?.fieldSheet || qSheet(key) ? QZ : 1), this.t); if (PS !== 1) c.restore(); mark(n); continue; }
@@ -426,6 +440,9 @@ export class Field {
       c.closePath();
       if(d.sel){c.fillStyle=G.life.canPlace(d.sel,d.cx,d.cy)?'rgba(90,220,120,.35)':'rgba(230,60,50,.35)';c.fill();}
       c.strokeStyle='#ffe36a';c.lineWidth=2;c.stroke();c.restore();
+    }
+    if (!this.busy) for (const n of this.npcs) if (n.person && !(n.hide>0)) {
+      const [x,y]=P(n.x,n.y,25*H.actK(m));paintMeetingMark(c,n,x,y,k);
     }
     // 느낌표: 일감 소품(독 따위)은 사람보다 낮아서 느낌표도 낮게
     if (!this.busy) for (const n of this.npcs) { if (n.hide > 0 || !n.mark || !n.mark()) continue; const [X, Y] = P(n.x, n.y, (n.stamp ? 14 : 25 * H.actK(m)) - Math.sin(this.t * 5) * 1.2); c.fillStyle = '#000'; c.fillRect(X - 2 * k, Y, 4 * k, 8 * k); c.fillStyle = '#ffd23c'; c.fillRect(X - k, Y + k, 2 * k, 4 * k); c.fillRect(X - k, Y + 6 * k, 2 * k, 1.5 * k); }
@@ -472,6 +489,7 @@ export class Field {
     }
   }
   ambient(c, VW_ = VW, VH_ = VH) {  // 새 화면은 꽃잎을 작게 그리려고 더 넓은 판에 그린다
+    if (ferryRain(this.m,G.S)) {drawFerryRain(c,VW_,VH_,this.t);return;}
     const kind = this.m.ambient || ({ cheongha: 'leafpink', bamboo: 'leaf', cloudmt: 'leafpink', guhwa: 'leafpink', wolha: 'snow' })[this.m.id];
     if (!kind) return; const im = IMG['fx/' + kind]; if (!im) return;
     if (this.parts.length < 22 && Math.random() < .06) this.parts.push({ x: rnd(0, VW_ + 40), y: -8, vx: rnd(-16, -5), vy: rnd(9, 22), f: Math.floor(rnd(6)), t: rnd(100) });

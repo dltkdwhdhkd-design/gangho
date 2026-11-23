@@ -1,3 +1,4 @@
+import { awardStudy, heartStrength } from './martial-study.js';
 import { recordPractice, finishStudy, parryWindow, basicMpReturn, defenseFactor, skillCost, skillCooldown, skillPower } from './training.js';
 import { fighterEquipment, armedStats } from './combat-loadout.js';
 import { suspendBondScene } from './cg.js';
@@ -318,8 +319,8 @@ export class Battle {
     let dmg = this.calc(src, o, h, sk), crit = Math.random() < src.crit;
     if (crit) dmg *= 1.6 + (inv ? (this.b.critDmg || 0) / 100 : 0);
     if (o.buffs.diamond > 0) dmg *= .5;
-    if (isP && G.S.heart === 'iron_shirt') dmg *= .9;
-    if (src.isPlayer && G.S.heart === 'fury' && src.hp < src.maxHp * .5) dmg *= 1.25;
+    if (isP) dmg *= 1-.1*heartStrength(G.S,'iron_shirt');
+    if (src.isPlayer && src.hp < src.maxHp*.5) dmg *= 1+.25*heartStrength(G.S,'fury');
     if (o.stagger > 0) dmg *= 1.4;
     if (o.dmgIn) dmg *= o.dmgIn;  // 경지 차이(호신강기)
     dmg = Math.max(1, Math.round(dmg)); o.hp -= dmg; o.flash = .1;
@@ -381,8 +382,9 @@ export class Battle {
     if (o.isPlayer) {
       if (G.arts && src?.skKey && src.st === 'skill') G.arts.parried(src.skKey);
       o.mp = Math.min(o.maxMp, o.mp + 8);
-      if (G.S.heart === 'mercy') o.hp = Math.min(o.maxHp, o.hp + o.maxHp * .05);
-      if (G.S.heart === 'moon_heart') for (const k in o.cd) o.cd[k] = Math.max(0, o.cd[k] - 2);
+      o.hp = Math.min(o.maxHp, o.hp + o.maxHp*.05*heartStrength(G.S,'mercy'));
+      const reduction=2*heartStrength(G.S,'moon_heart');
+      if (reduction) for (const k in o.cd) o.cd[k]=Math.max(0,o.cd[k]-reduction);
     }
     if (!proj && !src.dead) { src.st = 'stun'; src.stT = src.isPlayer ? .5 : src.boss ? .75 : 1; src.sk = null; src.mv = null; src.rush = null; src.vx = src.vy = 0; src.stagger = src.stT; this.teles = this.teles.filter(t => t.owner !== src); if (src.maxPoise) src.poise -= 26; }
   }
@@ -824,7 +826,7 @@ export function fight(cfg) {
       if (o === 'win') {
         for (const a of B.actors) if (a.team === 1) { const f = a.def_; if (a.dead || a.yielded) { ex += f.exp; si += f.silver; } }
         ex = Math.round(ex * (cfg.expMul ?? 1)); si = Math.round(si * (cfg.expMul ?? 1));
-        si = Math.round(si * (1 + (G.party?.fx().silver || 0) / 100)); up = gainExp(ex); G.S.silver += si;
+        si = Math.round(si * (1 + (G.party?.fx().silver || 0) / 100)); up = gainExp(ex); awardStudy(G.S,ex/2); G.S.silver += si;
         const sparExp=B.actors.filter(a=>a.team===1 && !a.dummy && (a.dead || a.yielded))
           .reduce((sum,a)=>sum+(a.def_.exp || 0),0);
         study=finishStudy(G.S,B.studyFocus,Math.round(sparExp*(cfg.expMul ?? 1)),B.usedTypes);

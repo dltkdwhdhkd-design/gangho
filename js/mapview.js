@@ -1,3 +1,4 @@
+import { FINDS, discoverySpots, findCount } from './finds.js';
 // 미니맵과 전체 지도 (M)
 import { G, Input, Sound, $, $$, el, esc, TS } from './core.js';
 import { Keys } from './core.js';
@@ -78,6 +79,10 @@ function drawArea(cv, r, f) {
     const name = open(q) ? (destination || '다음 지역') : '막힌 길', arrow = q.x < 2 * TS ? ['← ', ''] : q.x + q.w > (m.w - 2) * TS ? ['', ' →'] : q.y < 2 * TS ? ['↑ ', ''] : ['↓ ', ''];
     text(arrow[0] + name + arrow[1], X(cx), q.y <= 0 ? Y(cy) + 24 : Y(cy) + (q.y + q.h >= m.h * TS ? -8 : 6), open(q) ? '#ffe9a8' : '#b9aa92');
   }
+  for (const s of discoverySpots(m,G.S)) {
+    if (s.kind==='find' && s.done) dot(s.px,s.py,6,'#d8b678');
+    if (s.kind==='leap' && !s.back && G.S.leapSeen?.[s.key]) text('발자국',X(s.px),Y(s.py),G.S.crossings?.[s.key]?'#e9c988':'#aaa');
+  }
   if (m === f.m) { for (const a of foesOf(f)) dot(a.x, a.y, 6, '#e8503a'); for (const n of marks(f)) { dot(n.x, n.y - 4, 10, '#ffd23c'); text('!', X(n.x), Y(n.y - 4) + 6, '#000', 15); } }
   dot(r.pos.x * TS, r.pos.y * TS, 12, '#7fe0ff'); text(inside ? `나 · ${f.m.name}` : '나', X(r.pos.x * TS), Y(r.pos.y * TS) - 12, '#fff');
 }
@@ -93,7 +98,7 @@ export function openMap() {
   const close = () => { G.menuOpen = false; M.classList.remove('on'); M.innerHTML = ''; Input.clear(); document.removeEventListener('keydown', k); };
   const draw = () => {
     if (!r) view = 'world';
-    M.innerHTML = `<div class="menu"><div class="pane" style="height:auto"><div class="tabs">${r ? `<button data-v="area" class="${view === 'area' ? 'on' : ''}">${esc(r.m.name)}</button>` : ''}<button data-v="world" class="${view === 'world' ? 'on' : ''}">강호 전도</button><button class="x">닫기 (${Keys.label('map')})</button></div><div class="body" style="padding:10px 12px 8px"><canvas id="mapc" width="1152" height="540" style="display:block;width:1152px;height:540px"></canvas><p class="hint" style="margin:6px 0 0">${view === 'area' ? '파란 칸이 나, 노란 칸이 할 일, 붉은 칸이 적입니다.' : ''} Tab으로 지도를 바꿉니다.${G.S.goal ? ` · 목표: ${G.S.goal}` : ''}</p></div></div></div>`;
+    M.innerHTML = `<div class="menu"><div class="pane" style="height:auto"><div class="tabs">${r ? `<button data-v="area" class="${view === 'area' ? 'on' : ''}">${esc(r.m.name)}${FINDS[r.m.id]?' · 찾은 것 '+findCount(G.S,r.m.id)+'/'+FINDS[r.m.id].length:''}</button>` : ''}<button data-v="world" class="${view === 'world' ? 'on' : ''}">강호 전도</button><button class="x">닫기 (${Keys.label('map')})</button></div><div class="body" style="padding:10px 12px 8px"><canvas id="mapc" width="1152" height="540" style="display:block;width:1152px;height:540px"></canvas><p class="hint" style="margin:6px 0 0">${view === 'area' ? '파란 칸이 나, 노란 칸이 할 일, 붉은 칸이 적입니다.' : ''} Tab으로 지도를 바꿉니다.${G.S.goal ? ` · 목표: ${G.S.goal}` : ''}</p></div></div></div>`;
     $$('[data-v]', M).forEach(b => b.onclick = () => { view = b.dataset.v; Sound.sfx('tick'); draw(); });
     $('.x', M).onclick = close;
     const cv = $('#mapc', M); if (view === 'area') drawArea(cv, r, f); else drawWorld(cv, r ? r.m.id : null);
