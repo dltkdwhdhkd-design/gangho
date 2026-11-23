@@ -1,3 +1,5 @@
+import { ferryRain } from './cheongha-scenery.js';
+import { makeDiscoveries } from './hd2d/discoveries.js';
 // 새 화면(HD-2D 시제품): 필드를 WebGL로 비춘다.
 // 지도 자료, 걸음, 충돌, 문, 사람 자리는 평면도 좌표 그대로 두고 그리기만 바꾼다(쿼터뷰 모드가 하던 방식).
 // 평면도 (x, y) → 세상 (X = x, Y = 높이, Z = y × ZS). 카메라는 남쪽 위에서 북쪽을 PITCH만큼 내려다보고 좌우로는 돌지 않는다.
@@ -1033,10 +1035,10 @@ function fieldWalker(n, row, time, identity) {
         ink.dispose();
       };
     }
-    actor(facing.texture,(cel&3)*cell,(cel>>2)*cell,cell,cell,false,n.x,n.y,height);
+    actor(facing.texture,(cel&3)*cell,(cel>>2)*cell,cell,cell,false,n.x,n.y,height,n.leapHeight || 0);
   } else {
     const lift = n.hopT > 0 ? Math.sin(n.hopT / .4 * Math.PI) * 2.5 : 0;
-    actor(texture,n.dir*cell,(slot[1]*4+(row%4))*cell,cell,cell,false,n.x,n.y,height,lift);
+    actor(texture,n.dir*cell,(slot[1]*4+(row%4))*cell,cell,cell,false,n.x,n.y,height,lift+(n.leapHeight || 0));
   }
   blob(n.x, n.y, 1);
   return true;
@@ -1052,8 +1054,8 @@ function syncActors(F) {
   const modelAnimals=syncWildlife(actG,art()&&MODELS.river_land,F.animals||[],(x,y)=>hAt(curMap,x,y),HS,ZS);
   for (const a of F.animals || []) { if (a.gone||modelAnimals.has(a)) continue; const im = IMG[a.spr]; if (!im) continue; const t = sheetTex(a.spr); actor(t, (Math.floor(a.walk) % 2) * 16, 0, 16, 16, a.vx < 0, a.x, a.y - 1, 16); blob(a.x, a.y, .8); }
   const me = S.look === 'BlueSamurai' && previewTex('me');  // 맛보기: 칸 56점, 사람 키 48점 → 사람 키가 CHAR가 되게 판을 키운다
-  if (F.hideMe || fieldWalker({ ...p, me: true, spr: S.look }, Math.floor(p.walk) % 4, F.t, 'type_' + S.look)) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48); blob(p.x, p.y, 1); }
-  else put('chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined });
+  if (F.hideMe || fieldWalker({ ...p, me: true, spr: S.look }, Math.floor(p.walk) % 4, F.t, 'type_' + S.look)) { } else if (me) { actor(me, p.dir * 56, (Math.floor(p.walk) % 4) * 56, 56, 56, false, p.x, p.y, CHAR * 56 / 48,p.leapHeight || 0); blob(p.x, p.y, 1); }
+  else put('chars/' + S.look, p.dir, Math.floor(p.walk) % 4, p.x, p.y, { diag: p.walk ? p.diag : undefined, lift:p.leapHeight });
   for (let i = used; i < pool.length; i++) pool[i].visible = false; for (let i = usedB; i < blobs.length; i++) blobs[i].visible = false;
   for (const o of bboard) o.mesh.visible = false;  // 전투 때 쓴 인물 판(주인공·적)을 마을에서 숨긴다. 안 숨겨서 전투가 끝난 자리에 주인공 닮은 사람이 덩그러니 서 있었다
 }
@@ -1232,7 +1234,7 @@ function light() {
   PALU.uAmb.value = curMap?.room && timeOf() === 'night' ? .12 : .22;  // 조각이 스스로 내는 빛: 밤의 방에서는 줄인다(벽만 훤해 보인다)
   for (const m of GLOW) m.emissiveIntensity = m.userData.paper && curMap?.room ? (timeOf() === 'night' ? .1 : .8) : (L.lamp || 0) * .9;  // 밤에는 창에서 빛이 샌다. 방 안에서 보는 창호지(조각의 win_paper)는 거꾸로 낮에 바깥 빛으로 밝다
   if (waterM) { WU.uRay.value.set(...L.sun).normalize();WU.uRayColor.value.set(L.sunC);WU.uGlint.value=wild?(timeOf()==='night'?.34:1):0; WU.uT.value = performance.now() / 1000; WU.uSky.value.set(L.skyT); WU.uDeep.value.set(L.lamp ? '#0e2430' : '#1f4a52'); }
-  sun.color.set(L.sunC); sun.intensity = L.sunI; hemi.color.set(L.sky); hemi.groundColor.set(L.gnd); hemi.intensity = L.hemI;
+  sun.color.set(L.sunC); sun.intensity = L.sunI * (!inBattle && ferryRain(curMap,G.S) ? .65 : 1); hemi.color.set(L.sky); hemi.groundColor.set(L.gnd); hemi.intensity = L.hemI;
   { const d = L.sun; fill.position.set(camT.x - d[0] * 800, 500, camT.z + 600); fill.target.position.set(camT.x, 0, camT.z); fill.intensity = L.sunI * (L.fill ?? .2); fill.color.set(L.fillC || '#c8c0b8'); }
   scene.fog.color.set(L.fog); scene.fog.near=dist*(wild?.97:3);scene.fog.far=dist*(wild?(curMap.id==='world'?2.48:2.95):13); backdrop(L);
   const sz = fxNow() === 'high' ? 4096 : fxNow() === 'low' ? 1024 : 2048; if (sun.shadow.mapSize.x !== sz) { sun.shadow.mapSize.set(sz, sz); sun.shadow.map?.dispose(); sun.shadow.map = null; }
@@ -1336,12 +1338,16 @@ function winOf(F) {
   winM = Object.assign(Object.create(W), { src: W, cx: Math.round(tx), cy: Math.round(ty), win: { x0, y0, x1, y1 }, stamps, portals: (W.portals || []).filter(q => q.x > X0 && q.x < X1 && q.y > Y0 && q.y < Y1), models: null });
   return winM;
 }
+let discoveries;
 function render(F) {
   if(HD.contextLost)return;
   inBattle = false; battleSpace=null; lastF = F; const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';
   if (cam.view?.enabled) cam.clearViewOffset();
-  resize(); setMap(F.m.live ? winOf(F) : F.m); placeCam(F, dt); foreground(); syncActors(F); fades(F, dt); light();
+  resize(); setMap(F.m.live ? winOf(F) : F.m); placeCam(F, dt); foreground();
+  if (!discoveries) { discoveries=makeDiscoveries(T);scene.add(discoveries.root); }
+  discoveries.update(F.spots,(x,y)=>hAt(curMap,x,y),ZS);
+  syncActors(F); fades(F, dt); light();
   { const [x, y] = proj(F.p.x, F.p.y, 8), k = post.h / H, v = V().set(F.p.x, 8 * HS + hAt(curMap, F.p.x, F.p.y), (F.p.y + 1) * ZS).applyMatrix4(cam.matrixWorldInverse);  // 구멍: 화면의 주인공 가슴 자리, 주인공 키의 0.9배 반지름
     if (!HOLE.uHole.value) HOLE.uHole.value = new T.Vector3(); HOLE.uHole.value.set(x * post.w / W, (H - y) * k, (F.m.id==='world'?Math.abs(proj(F.p.x,F.p.y,15)[1]-proj(F.p.x,F.p.y)[1])*.62:HD.pxPerUnit()*CHAR*.9)*k); HOLE.uHoleZ.value = -v.z - 2; }
   shadowTick(); R.setRenderTarget(post.scene); R.render(scene, cam); postFx(F);
@@ -1410,6 +1416,7 @@ function placeCamBattle(B, dt) {
 }
 function renderBattle(B) {
   if(HD.contextLost)return;
+  if (discoveries) discoveries.root.visible=false;
   inBattle = true;
   const now = performance.now(), dt = Math.min(.1, lastT ? (now - lastT) / 1000 : .016); lastT = now;
   if (cv.style.display === 'none') cv.style.display = 'block';

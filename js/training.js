@@ -1,3 +1,4 @@
+import { rankOfArt } from './martial-study.js';
 import { SKILLS, WEAPONS } from './data.js';
 
 const thresholds = [0, 5, 15, 32, 60];
@@ -18,6 +19,7 @@ export function masteryLevel(uses = 0) {
 
 export function practiceOf(s, id) {
   const uses = Math.max(0, Number(s.mastery?.[id]) || 0);
+  if (s.study) return {uses,rank:rankOfArt(s,id),next:thresholds.find(n=>n>uses) ?? null};
   const rank = masteryLevel(uses);
   return {uses, rank, next:thresholds[rank] ?? null};
 }
@@ -25,7 +27,7 @@ export function practiceOf(s, id) {
 export function disciplineOf(s, type) {
   const scores = new Array(5).fill(0);
   for (const id of new Set(s.skills || [])) {
-    if (SKILLS[id]?.w === type) scores[practiceOf(s,id).rank-1]++;
+    if (SKILLS[id]?.w === type) scores[Math.min(5,practiceOf(s,id).rank)-1]++;
   }
   let points = 0, room = 3;
   for (let score=4; score>0 && room>0; score--) {
@@ -56,13 +58,13 @@ export function finishStudy(s,id,experience,usedTypes) {
 }
 
 export function skillCost(skill,rank,bonuses) {
-  return Math.max(0, skill.mp * Math.max(.35,1+(bonuses.mpCost || 0)/100) * (1-(rank-1)*.02));
+  return Math.max(0, skill.mp * Math.max(.35,1+(bonuses.mpCost || 0)/100) * (bonuses.studied ? (rank>=3 ? .9 : 1) : 1-(rank-1)*.02));
 }
 export function skillCooldown(skill,rank,stats) {
-  return skill.cd * stats.cdMul * (rank>=5 ? .85 : 1);
+  return skill.cd * stats.cdMul * (stats.studied ? (rank>=7 ? .9 : 1) : (rank>=5?.85:1));
 }
 export function skillPower(skill,rank,stats,bonuses) {
-  return stats.power * (1+(rank-1)*.07) * (1+((bonuses.skill || 0)+(skill.ult ? bonuses.ult || 0 : 0))/100);
+  return stats.power * (1+(rank-1)*(stats.studied ? .06 : .07)) * (1+((bonuses.skill || 0)+(skill.ult ? bonuses.ult || 0 : 0))/100);
 }
 
 export const parryWindow = bonuses => .17+(bonuses.parry || 0);

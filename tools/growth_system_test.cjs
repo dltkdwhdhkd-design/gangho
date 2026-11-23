@@ -16,7 +16,9 @@ async function inspectGrowth() {
   const choose=(key,id)=>node('[data-'+key+'="'+id+'"]').click();
   const styles={검:'iron_sword',도:'iron_blade',창:'iron_spear',권:'fist_wrap'};
   const learned=Object.keys(SKILLS);
-  const s=G.S=newState('수련생','BlueSamurai','m','normal');
+  const oldSave=newState('수련생','BlueSamurai','m','normal');
+  delete oldSave.study; // This suite covers the use-based rules of pre-study saves.
+  const s=G.S=await readSaveFile(new File([JSON.stringify(oldSave)],'v5.json'));
   G.manual=G.noSave=true;G.auto=false;G.scene='field';G.battle=null;
   G.field.load('cheongha',22,25);
   s.weapons.push(...Object.values(styles),'blue_sword');

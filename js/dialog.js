@@ -104,3 +104,4 @@ export function tickDialog(dt) {
   return true;
 }
 function hl(c) { Sound.sfx('tick'); c.btns.forEach((b, i) => b.classList.toggle('on', i === c.sel)); }
+export { faceCanvas };

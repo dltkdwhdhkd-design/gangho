@@ -1,3 +1,4 @@
+import { heartStrength } from './martial-study.js';
 import { bonus, stats } from './state.js';
 import { WEAPONS, HEARTS } from './data.js';
 import { ARMORS, accPut, wearPut, pairOf, setsOf } from './gear.js';
@@ -12,7 +13,10 @@ export function changeGear(s,kind,id,slot) {
   if (kind==='weapon') return equipWeapon(s,id);
   if (kind==='armor') wearPut(s,id);
   if (kind==='acc') accPut(s,id,slot);
-  if (kind==='heart') s.heart=id;
+  if (kind==='heart') {
+    s.heart=id;
+    if (s.study?.supports?.includes(id)) s.study={...s.study,supports:s.study.supports.filter(k=>k!==id)};
+  }
   return true;
 }
 
@@ -42,8 +46,8 @@ export function gearRatings(s) {
     basic:100+(b.basic || 0),basicSpeed:100+(b.basicSpeed || 0),reach:100+(b.reach || 0),
     poise:100+(b.poiseDmg || 0),mpHit:basicMpReturn(b),parry:parryWindow(b),
     critDmg:160+(b.critDmg || 0),ult:b.ult || 0,potion:35*(1+(b.potion || 0)/100),
-    lifeHit:b.lifeHit || 0,incoming:s.heart==='iron_shirt'?90:100,fury:s.heart==='fury'?125:100,
-    mercy:s.heart==='mercy'?5:0,moon:s.heart==='moon_heart'?2:0,killHeal:b.killHeal || 0,
+    lifeHit:b.lifeHit || 0,incoming:100-10*heartStrength(s,'iron_shirt'),fury:100+25*heartStrength(s,'fury'),
+    mercy:5*heartStrength(s,'mercy'),moon:2*heartStrength(s,'moon_heart'),killHeal:b.killHeal || 0,
   };
 }
 

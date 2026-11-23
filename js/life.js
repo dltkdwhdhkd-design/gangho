@@ -354,12 +354,13 @@ export function giveLoot(id) {
   else if (ACCS[id]) { (s.accs = s.accs || []).push(id); } else give(id, DB[id].kind === '재료' ? 3 : 1);
   Sound.sfx('bonus'); toast(`${josa(nameOf(id), '을/를')} 가져왔다`, 2.6);
 }
-export function lootPick(name, ids) {
+export function lootPick(name, ids, onPick) {
+  const claim=id=>{giveLoot(id);onPick?.(id);return id;};
   ids = ids.filter((v, i, a) => a.indexOf(v) === i);
-  if (G.auto) { giveLoot(ids[0]); return Promise.resolve(ids[0]); }
+  if (G.auto) { return Promise.resolve(claim(ids[0])); }
   return panel(`${name}의 소지품 · 하나를 고른다`, (B, r, close) => {
     B.innerHTML = '<p class="hint">이긴 사람이 상대 물건 하나를 가져가는 것이 비무의 예법입니다.</p>'; const w = el('div', 'loots');
-    for (const id of ids) { const b = el('button', 'loot', `<img src="${iconUrl(id)}" alt=""><b>${nameOf(id)}</b><small>${descOf(id)}</small>`); b.onclick = () => { giveLoot(id); close(id); }; w.appendChild(b); }
+    for (const id of ids) { const b = el('button', 'loot', `<img src="${iconUrl(id)}" alt=""><b>${nameOf(id)}</b><small>${descOf(id)}</small>`); b.onclick = () => { close(claim(id)); }; w.appendChild(b); }
     B.appendChild(w);
   }, 860);
 }

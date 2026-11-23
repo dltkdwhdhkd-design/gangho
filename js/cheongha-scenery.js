@@ -60,6 +60,11 @@ export function dressCheongha(map) {
     ['v_cart', 16.4, 26.65, .90], ['p_sacks', 14.35, 26.15, .76],
     ['v_crates', 30.6, 26.5, .83], ['p_barrels', 32.5, 26.8, .75],
     ['v_lamppost', 27.65, 26.35, .73],
+    ['p_lanterns', 4.8, 14.0, .66], ['v_lamppost', 41.8, 13.8, .72],
+    ['v_jars', 7.1, 21.2, .63], ['p_sacks', 39.8, 21.6, .60],
+    ['v_lamppost', 18.1, 11.15, .64], ['v_crates', 15.8, 10.45, .50],
+    ['pot', 15.2, 10.7, .60], ['fern1', 24.9, 9.45, .73],
+    ['v_wood', 29.9, 9.6, .60], ['p_barrels', 4.7, 25.7, .64],
   ]);
   placeAll(map, Object.values(villageFixtures));
   travelBoard(map, 20.05, 25.8);
@@ -141,4 +146,22 @@ export function cheonghaOnWorldMap(map, x, y) {
     ['v_cart', -7.0, -.65, .85], ['v_crates', -7.65, -1.75, .70],
   ];
   for (const [name, dx, dy, sc] of pieces) place(map, name, x+dx, y+dy, sc);
+}
+
+// A saved day always has the same weather around the ferry.
+export function ferryRain(map,s) {
+  return map?.id==='cheongha' && [2,5,8].includes((s?.day || 1)%10);
+}
+export function drawFerryRain(c,w,h,t) {
+  c.save();
+  c.fillStyle='rgba(56,74,91,.12)';c.fillRect(0,0,w,h);
+  c.strokeStyle='rgba(184,204,215,.45)';c.lineWidth=Math.max(.6,w/1100);
+  const count=Math.ceil(w*.47);
+  c.beginPath();
+  for (let i=0;i<count;i++) {
+    const speed=210+(i%7)*15, y=(i*179.3+t*speed)%(h+12)-10;
+    const x=((i*113.7-y*.17)%(w+12)+w+12)%(w+12)-4;
+    c.moveTo(x,y);c.lineTo(x-1.4,y+6+i%4);
+  }
+  c.stroke();c.restore();
 }
